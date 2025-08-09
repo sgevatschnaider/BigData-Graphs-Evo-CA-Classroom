@@ -1,11 +1,10 @@
-import numpy as np
+import random
 from classroom.evo.ga_tsp import solve
 
-
 def test_ga_tsp_runs():
-    # Genera puntos y corre 20 generaciones para abreviar
-    rng = np.random.default_rng(0)
-    points = rng.random((10, 2))
-    route, length = solve(points, pop=30, gens=20, pm=0.1, seed=0)
-    assert len(route) == 10
+    rng = random.Random(0)
+    points = [(rng.random(), rng.random()) for _ in range(20)]
+    route, length = solve(points, pop=80, gens=60, pm=0.03, elite=2, seed=0)
+    assert len(route) == len(points)
     assert length > 0
+    assert sorted(route) == list(range(len(points)))

@@ -1,17 +1,15 @@
 import numpy as np
-from classroom.ca.elementary import evolve_1d
-from classroom.ca.game_of_life import step
+from classroom.ca.game_of_life import step as life_step
+from classroom.ca.elementary import step_1d
 
+def test_game_of_life_blinker():
+    B = np.zeros((5, 5), dtype=np.uint8)
+    B[2, 1:4] = 1
+    B1 = life_step(B)
+    B2 = life_step(B1)
+    assert np.array_equal(B2, B)
 
-def test_elementary_ca():
-    initial = np.array([0, 1, 0, 1, 0])
-    grid = evolve_1d(initial, rule=30, steps=2)
-    assert grid.shape == (3, 5)
-
-
-def test_game_of_life_step():
-    board = np.zeros((5, 5), dtype=int)
-    board[2, 1:4] = 1  # una línea horizontal de 3
-    next_board = step(board)
-    # debería rotar a línea vertical según reglas del juego de la vida
-    assert next_board[1:4, 2].sum() == 3
+def test_elementary_rule_90():
+    s = np.array([0, 0, 1, 0, 0], dtype=np.uint8)
+    s1 = step_1d(s, 90)
+    assert s1.sum() >= 1
