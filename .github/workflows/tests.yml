@@ -12,9 +12,9 @@ jobs:
           python-version: '3.10'
       - run: pip install -r requirements.txt
       - run: pip install -e .
-      # Unit tests (solo archivos de tests, sin notebooks)
+      # Unit tests (sólo los 3 archivos, evitamos duplicar notebooks)
       - name: Unit tests
-        run: pytest -q tests/test_*.py -k "not notebooks"
+        run: pytest -q tests/test_ca.py tests/test_evo.py tests/test_graphs.py
       # Notebooks con nbmake (ejecución controlada)
       - name: Notebooks (nbmake)
         run: |
