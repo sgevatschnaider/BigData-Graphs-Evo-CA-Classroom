@@ -11,7 +11,7 @@ Material docente reproducible para Big Data, Teoría de Grafos, Algoritmos Evolu
 - **Tests** (incluye ejecución de notebooks con nbmake)
 - **Docs** con MkDocs Material (syllabus y cronograma)
 
-## 🚀 Inicio rápido
+##  Inicio rápido
 
 ```bash
 pip install -r requirements.txt
