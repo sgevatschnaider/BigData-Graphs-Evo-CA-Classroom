@@ -1,10 +1,8 @@
 <div align="center">
-  <h1>Big Data · Graphs · Evolutionary · Cellular Automata — Classroom</h1>
+  <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/">
+    <img src="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/banner.svg" alt="Project Banner: Big Data, Graphs, Evolutionary Algorithms, Cellular Automata">
+  </a>
 </div>
-
-<p align="center">
-  <i>Materiales didácticos interactivos y reproducibles para la enseñanza de conceptos avanzados en computación.</i>
-</p>
 
 <p align="center">
   <a href="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml"><img alt="CI" src="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg?branch=main"></a>
@@ -113,11 +111,11 @@ BigData-Graphs-Evo-CA-Classroom/
 ├── pyproject.toml        # Metadatos del paquete y configuración de herramientas
 ├── requirements.txt      # Dependencias básicas para el usuario final
 ├── .github/              # Workflows de CI/CD (tests, docs) y plantillas
-├── docs/                 # Ficheros fuente para el sitio web con MkDocs
+├── docs/                 # Ficheros fuente para el sitio web (incluye assets)
 ├── src/classroom/        # Código fuente modular de la librería
 ├── notebooks/            # Lecciones interactivas en formato Jupyter
 ├── datasets/             # Conjuntos de datos ligeros para los ejemplos
-└── tests/                # Pruebas unitarias y de integración para asegurar la calidad
+└── tests/                # Pruebas unitarias y de integración
 ```
 </details>
 
@@ -154,3 +152,5 @@ Si utilizas este material en tu investigación, clases o cualquier trabajo acad�
 }
 ```
 *(Nota: El DOI de Zenodo se puede generar creando un archivo del repositorio en la plataforma Zenodo para obtener un identificador persistente).*
+```
+
