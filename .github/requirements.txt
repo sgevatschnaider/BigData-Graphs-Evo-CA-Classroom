@@ -1,0 +1,19 @@
+numpy
+scipy
+pandas
+matplotlib
+networkx>=3.0
+scikit-learn
+ipykernel
+
+# tests y ejecución de notebooks
+pytest
+nbmake
+
+# documentación
+mkdocs
+mkdocs-material
+# opcionales
+pyspark
+torch
+torch_geometric
