@@ -17,3 +17,5 @@ jobs:
         run: |
           pytest --nbmake notebooks/01_BigData_Intro.ipynb
           pytest --nbmake notebooks/02_Graphs_Fundamentals.ipynb
+          pytest
+
