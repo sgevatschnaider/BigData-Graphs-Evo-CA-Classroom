@@ -7,15 +7,15 @@ Esta es una colección de materiales didácticos para un curso introductorio a B
 ⚠️ Este repositorio es un esqueleto inicial. Los badges a continuación son ejemplos; debes actualizar `<usuario>` y `<repo>` con tu usuario de GitHub una vez lo publiques.
 
 | Badge | Descripción |
-|------|-------------|
-[![Tests](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml)
-[![Docs](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml)
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fsgevatschnaider.github.io%2FBigData-Graphs-Evo-CA-Classroom%2F)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![Python](https://img.shields.io/badge/python-3.10|3.11-blue.svg)](https://www.python.org/)
-| ![MIT](https://img.shields.io/badge/license-MIT-blue.svg) | Licencia abierta para reutilizar el contenido. |
+|---|---|
+| [![CI](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml) | Tests + nbmake |
+| [![Docs](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml) | MkDocs → Pages |
+| [![Website](https://img.shields.io/website?url=https%3A%2F%2Fsgevatschnaider.github.io%2FBigData-Graphs-Evo-CA-Classroom%2F)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/) | Sitio del curso |
+| [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue)](https://www.python.org/) | Versiones soportadas |
+| [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) | Formato de código |
+| [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) | Hooks activos |
+| [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) | Licencia |
+
 
 ## Cómo empezar
 
