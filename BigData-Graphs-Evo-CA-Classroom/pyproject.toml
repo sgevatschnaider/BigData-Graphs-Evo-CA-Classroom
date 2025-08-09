@@ -1,0 +1,33 @@
+[project]
+name = "classroom"
+version = "0.1.0"
+description = "Teaching-ready code for Big Data, Graphs, Evolutionary Algorithms & Cellular Automata"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "matplotlib",
+  "networkx>=3.0",
+  "scikit-learn",
+  "numba",
+  "ipykernel",
+  "jupyterlab",
+  "nbmake",
+]
+
+[project.optional-dependencies]
+spark = ["pyspark"]
+gnn = ["torch", "torch_geometric"]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+select = ["E","F","I","UP"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
