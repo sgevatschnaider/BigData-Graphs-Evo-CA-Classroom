@@ -19,6 +19,18 @@ Este repositorio contiene una colección de materiales didácticos para un curso
 
 El objetivo es ofrecer notebooks reproducibles, datasets ligeros y módulos de código reutilizables para facilitar la enseñanza y el aprendizaje. Este repositorio se complementa con [GraphAI‑Data‑Science‑ML](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML), que contiene demos exploratorias y material de investigación.
 
+
+<div align="center">
+  <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/">
+    <img
+      src="https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/88fa2f36409fbef3bda9de2b7241cf2c2bbf1443/docs/assets/hipercubo.gif"
+      alt="Hipercubo 4D Animado"
+      width="800"
+    />
+  </a>
+</div>
+
+
 ## 📋 Tabla de Contenidos
 *   [✨ ¿Por qué este curso?](#-por-qué-este-curso)
 *   [🎯 Público Objetivo y Requisitos](#-público-objetivo-y-requisitos)
