@@ -1,8 +1,3 @@
-¡Genial! Tomé ideas del repo de blockchain y armé un **README principal** pulido para tu curso (sin incluir código de ejemplo: eso va en cada README de tema). Incluye referencias explícitas a tu repo base **GraphAI-Data-Science-ML** y al repo hermano de **Blockchain & DeFi**, además del **árbol de estructura** para orientar contribuciones.
-
-Pega esto como `README.md` en **BigData-Graphs-Evo-CA-Classroom**:
-
-````markdown
 # Big Data · Graphs · Evolutionary · Cellular Automata — Classroom
 
 [![Tests](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml)
