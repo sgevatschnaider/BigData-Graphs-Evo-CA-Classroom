@@ -2,15 +2,13 @@
   <h1>📘 Graph — README</h1>
   <p>Teoría y práctica aplicada de <b>Teoría de Grafos</b> para docencia y desarrollo.</p>
 
- ## **Ejemplos Visuales**  
+## Recurso visual — Hipercubo 4D (Tesseracto)
 
-### **Animación de Dodecaedro y BFS**  
+Esta animación ilustra la **proyección y rotación** de un hipercubo 4D.  
+Es útil para conectar el grafo hipercubo \(Q_n\) con **distancia de Hamming**, capas de **BFS** y propiedades de **regularidad**.
 
-Esta animación muestra el recorrido en un **dodecaedro** usando **BFS (Búsqueda en Anchura)**.  
+![Animación de Hipercubo 4D](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/3d633951f2fb4ad9860c9de3be9bf62800192b4e/src/classroom/graphs/recursos/hipercubo.gif?raw=1)
 
-![Animación de Dodecaedro y BFS](dfs_dodecaedro_rotacion_lenta.gif)  
-
----
 
   <p>
     <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10%20|%203.11-blue"></a>
