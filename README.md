@@ -13,11 +13,6 @@ Material docente reproducible para Big Data, Teoria de Grafos, Algoritmos Evolut
 
 Incluye: notebooks, modulos en `src/`, tests (nbmake) y docs (MkDocs Material con syllabus y cronograma).
 
-<div align="center">
-  <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/">
-    <img src="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/banner.svg" alt="Project Banner: Big Data, Graphs, Evolutionary Algorithms, Cellular Automata">
-  </a>
-</div>
 
 <p align="center">
    <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/"><img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fsgevatschnaider.github.io%2FBigData-Graphs-Evo-CA-Classroom%2F"></a>
