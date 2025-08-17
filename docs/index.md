@@ -1,8 +1,8 @@
-﻿# Big Data Â· Graphs Â· Evolutionary Â· Cellular Automata â€” Classroom
+# Big Data · Graphs · Evolutionary · Cellular Automata — Classroom
 
-Bienvenidos/as al sitio del curso. AquÃ­ encontrarÃ¡s el **syllabus**, el **cronograma**, y las **guÃ­as** de cada mÃ³dulo.
+Bienvenidos/as al sitio del curso. Aquí encontrarás el **syllabus**, el **cronograma** y las **guías** de cada módulo.
 
 - [Syllabus](syllabus.md)
 - [Cronograma](schedule.md)
-- MÃ³dulos: [Big Data](modules/01-bigdata.md) Â· [Graphs](modules/02-graphs.md) Â· [Evolutionary](modules/03-evolutionary.md) Â· [Cellular Automata](modules/04-cellular-automata.md)
+- Módulos: [Big Data](modules/01-bigdata.md) · [Graphs](modules/02-graphs.md) · [Evolutionary](modules/03-evolutionary.md) · [Cellular Automata](modules/04-cellular-automata.md)
 
