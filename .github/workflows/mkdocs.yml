@@ -1,12 +1,15 @@
-﻿site_name: BigData Â· Graphs Â· Evolutionary Â· Cellular Automata â€” Classroom
-site_url: https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/
-repo_url: https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom
+site_name: "Big Data · Graphs · Evolutionary · Cellular Automata — Classroom"
+site_url: "https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/"
+repo_url: "https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom"
+
 theme:
   name: material
+  language: es
   features:
     - navigation.sections
     - content.code.copy
     - toc.integrate
+
 nav:
   - Home: index.md
   - Syllabus: syllabus.md
@@ -16,4 +19,7 @@ nav:
       - Graphs: modules/02-graphs.md
       - Evolutionary: modules/03-evolutionary.md
       - Cellular Automata: modules/04-cellular-automata.md
+
+plugins:
+  - search
 
