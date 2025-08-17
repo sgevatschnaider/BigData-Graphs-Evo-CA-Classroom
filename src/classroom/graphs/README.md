@@ -2,12 +2,15 @@
   <h1>📘 Graph — README</h1>
   <p>Teoría y práctica aplicada de <b>Teoría de Grafos</b> para docencia y desarrollo.</p>
 
-  <!-- Enlaza al sitio general si lo usas -->
-  <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/">
-    <img src="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/banner.svg"
-         alt="Banner del proyecto: Big Data, Graphs, Evolutionary Algorithms, Cellular Automata"
-         width="820">
-  </a>
+ ## **Ejemplos Visuales**  
+
+### **Animación de Dodecaedro y BFS**  
+
+Esta animación muestra el recorrido en un **dodecaedro** usando **BFS (Búsqueda en Anchura)**.  
+
+![Animación de Dodecaedro y BFS](dfs_dodecaedro_rotacion_lenta.gif)  
+
+---
 
   <p>
     <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10%20|%203.11-blue"></a>
