@@ -1,5 +1,5 @@
-site_name: Big Data · Graphs · Evolutionary · Cellular Automata — Classroom
-site_description: Material educativo sobre Big Data, Teoría de Grafos, Algoritmos Evolutivos y Autómatas Celulares
+﻿site_name: Big Data Â· Graphs Â· Evolutionary Â· Cellular Automata â€” Classroom
+site_description: Material educativo sobre Big Data, TeorÃ­a de Grafos, Algoritmos Evolutivos y AutÃ³matas Celulares
 site_author: Sergio Gevatschnaider
 site_url: https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/
 repo_url: https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom
@@ -30,10 +30,10 @@ nav:
       - Evolutionary: modules/03-evolutionary.md
       - Cellular Automata: modules/04-cellular-automata.md
   - Notebooks:
-      - Introducción a Big Data: notebooks/01_BigData_Intro.html
+      - IntroducciÃ³n a Big Data: notebooks/01_BigData_Intro.html
       - Fundamentos de Grafos: notebooks/02_Graphs_Fundamentals.html
       - Algoritmos Evolutivos: notebooks/03_Evolutionary_Algorithms.html
-      - Autómatas Celulares: notebooks/04_Cellular_Automata.html
+      - AutÃ³matas Celulares: notebooks/04_Cellular_Automata.html
 
 plugins:
   - search
@@ -43,3 +43,4 @@ markdown_extensions:
   - codehilite
   - toc:
       permalink: true
+

@@ -1,4 +1,5 @@
-# Módulo 2 — Graphs
+﻿# MÃ³dulo 2 â€” Graphs
 
 - Notebook: [02_Graphs_Fundamentals.ipynb](../notebooks/02_Graphs_Fundamentals.ipynb)
-- Tópicos: BFS/DFS, λ₂ (Fiedler), PageRank, link prediction.
+- TÃ³picos: BFS/DFS, Î»â‚‚ (Fiedler), PageRank, link prediction.
+

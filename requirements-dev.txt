@@ -1,7 +1,8 @@
-pytest>=8
+﻿pytest>=8
 nbmake>=1.5
 pre-commit>=3.7
 mkdocs>=1.6
 mkdocs-material>=9.5
 jupyter>=1.0
 nbconvert>=7.16
+

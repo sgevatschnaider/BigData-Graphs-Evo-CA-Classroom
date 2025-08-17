@@ -1,4 +1,4 @@
-numpy
+﻿numpy
 scipy
 pandas
 matplotlib
@@ -6,14 +6,15 @@ networkx>=3.0
 scikit-learn
 ipykernel
 
-# tests y ejecución de notebooks
+# tests y ejecuciÃ³n de notebooks
 pytest
 nbmake
 
-# documentación
+# documentaciÃ³n
 mkdocs
 mkdocs-material
 # opcionales
 pyspark
 torch
 torch_geometric
+

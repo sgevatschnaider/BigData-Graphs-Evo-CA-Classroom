@@ -1,4 +1,4 @@
-[project]
+﻿[project]
 name = "classroom"
 version = "0.1.0"
 description = "Teaching-ready code for Big Data, Graphs, Evolutionary Algorithms & Cellular Automata"
@@ -37,3 +37,4 @@ line-length = 100
 [tool.ruff]
 line-length = 100
 select = ["E", "F", "I", "UP"]
+

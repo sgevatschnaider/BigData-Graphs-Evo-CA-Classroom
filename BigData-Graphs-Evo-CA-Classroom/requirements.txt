@@ -1,4 +1,4 @@
-numpy
+﻿numpy
 scipy
 pandas
 matplotlib
@@ -7,3 +7,4 @@ scikit-learn
 numba
 ipykernel
 nbmake
+

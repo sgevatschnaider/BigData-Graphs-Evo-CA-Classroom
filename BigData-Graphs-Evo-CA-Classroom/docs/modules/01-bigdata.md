@@ -1,9 +1,10 @@
-# Módulo 01: Big Data
+﻿# MÃ³dulo 01: Big Data
 
-En este módulo aprenderás:
+En este mÃ³dulo aprenderÃ¡s:
 
-- Definición y dimensiones de Big Data (3V/5V).
-- Técnicas de muestreo y submuestreo de datos masivos.
-- Sketching y sparsificación para reducir la complejidad.
+- DefiniciÃ³n y dimensiones de Big Data (3V/5V).
+- TÃ©cnicas de muestreo y submuestreo de datos masivos.
+- Sketching y sparsificaciÃ³n para reducir la complejidad.
 
 Los notebooks correspondientes son: [01_BigData_Intro.ipynb](../../notebooks/01_BigData_Intro.ipynb).
+

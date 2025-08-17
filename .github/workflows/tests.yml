@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 on:
   push:
   pull_request:
@@ -28,3 +28,4 @@ jobs:
         run: |
           pytest --nbmake -q notebooks/01_BigData_Intro.ipynb
           pytest --nbmake -q notebooks/02_Graphs_Fundamentals.ipynb
+

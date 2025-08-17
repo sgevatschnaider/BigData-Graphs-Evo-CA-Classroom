@@ -1,4 +1,4 @@
-[project]
+﻿[project]
 name = "classroom"
 version = "0.1.0"
 description = "Teaching-ready code for Big Data, Graphs, Evolutionary Algorithms & Cellular Automata"
@@ -31,3 +31,4 @@ select = ["E","F","I","UP"]
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
+
