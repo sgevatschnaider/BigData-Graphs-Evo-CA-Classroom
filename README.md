@@ -1,21 +1,17 @@
 # Big Data · Graphs · Evolutionary · Cellular Automata — Classroom
 
-[![Tests](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml)
-[![Docs](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/)
-[![Markdown Links](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/link-check.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/link-check.yml)
-[![Slides (Marp)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/slides.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/slides.yml)
+[![CI](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml)
+[![Deploy to GitHub Pages](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml)
 [![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Material docente **reproducible** para **Big Data**, **Teoría de Grafos**, **Algoritmos Evolutivos** y **Autómatas Celulares**: notebooks con **Open in Colab**, módulos en `src/`, **tests** (incluye ejecución de notebooks con `nbmake`) y **docs** (MkDocs Material: syllabus + cronograma).
 
-> **Inspiración y elementos tomados de:**
+> **Ver también:**
 > - **GraphAI · Data Science · ML** → https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main  
-> - **Dominando Blockchain & DeFi** → https://github.com/sgevatschnaider/blockchain-finanzas-descentralizadas
-
 ---
 
-## 🚀 Inicio rápido
+## 📚 Inicio rápido
 
 1) Instalar dependencias y paquete editable  
 2) Ejecutar tests unitarios y de notebooks (nbmake)  
