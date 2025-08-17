@@ -1,5 +1,6 @@
-﻿# MÃ³dulo 3 â€” Evolutionary Algorithms
+﻿# Módulo 3 — Evolutionary Algorithms
 
 - Demo: `classroom.evo.ga_tsp.solve`
-- TÃ³picos: representaciÃ³n, selecciÃ³n (torneo), crossover OX, mutaciÃ³n swap, elitismo.
+- Tópicos: representación, selección (torneo), crossover OX, mutación swap, elitismo.
+
 
