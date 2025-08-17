@@ -100,28 +100,6 @@ Ejecuta los notebooks en la nube con un clic (badges en la sección siguiente).
 
 Entorno “cero instalación” en tu navegador, si tu cuenta lo permite.
 
----
-
-## 📚 Módulos y Notebooks
-
-| Módulo                        | Descripción                                     | Notebook                           | Colab                                                                                                                                                                                                               |
-| ----------------------------- | ----------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **01. Big Data**              | Paradigma Big Data y técnicas de muestreo.      | `01_BigData_Intro.ipynb`           | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/01_BigData_Intro.ipynb)           |
-| **02. Grafos**                | Fundamentos, BFS/DFS y propiedades espectrales. | `02_Graphs_Fundamentals.ipynb`     | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/02_Graphs_Fundamentals.ipynb)     |
-| **03. Algoritmos Evolutivos** | Algoritmo Genético aplicado al TSP.             | `03_Evolutionary_Algorithms.ipynb` | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/03_Evolutionary_Algorithms.ipynb) |
-| **04. Autómatas Celulares**   | Reglas 1D y Juego de la Vida.                   | `04_Cellular_Automata.ipynb`       | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/04_Cellular_Automata.ipynb)       |
-
----
-
-## 🗺️ Roadmap del Proyecto
-
-* [ ] **Módulo 5: Redes Complejas** (centralidad, modelos de mundo pequeño).
-* [ ] **Ejercicios Propuestos** en cada notebook.
-* [ ] **Versión en Inglés** para mayor alcance.
-* [ ] **Documentación avanzada con MkDocs** y galería de ejemplos.
-
----
-
 ## 📂 Estructura del Repositorio
 
 <details>
