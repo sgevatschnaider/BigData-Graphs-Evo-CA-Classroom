@@ -1,4 +1,4 @@
-﻿[build-system]
+[build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "bigdata-graphs-evo-ca-classroom"
 version = "0.1.0"
 description = "Teaching material for Big Data, Graphs, Evolutionary Algorithms, and Cellular Automata."
-readme = { file = "README.md", content-type = "text/markdown" }
+readme = { file = "README.md", "content-type" = "text/markdown" }
 requires-python = ">=3.10"
 authors = [{ name = "Sergio Gevatschnaider" }]
 license = { file = "LICENSE" }
@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
