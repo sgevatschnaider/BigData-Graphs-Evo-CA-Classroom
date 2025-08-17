@@ -1,123 +1,92 @@
 # Big Data · Graphs · Evolutionary · Cellular Automata — Classroom
 
 [![CI](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/tests.yml)
-[![Deploy to GitHub Pages](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml)
+[![Deploy to GitHub Pages](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/actions/workflows/pages.yml/badge.svg)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/)
 [![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Material docente **reproducible** para **Big Data**, **Teoría de Grafos**, **Algoritmos Evolutivos** y **Autómatas Celulares**: notebooks con **Open in Colab**, módulos en `src/`, **tests** (incluye ejecución de notebooks con `nbmake`) y **docs** (MkDocs Material: syllabus + cronograma).
+Material docente **reproducible** para **Big Data**, **Teoría de Grafos**, **Algoritmos Evolutivos** y **Autómatas Celulares**.  
 
-> **Ver también:**
-> - **GraphAI · Data Science · ML** → https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main  
+Incluye: notebooks, módulos en `src/`, **tests** (nbmake), y **docs** (MkDocs Material con syllabus + cronograma).  
+
 ---
 
 ## 📚 Inicio rápido
 
-1) Instalar dependencias y paquete editable  
-2) Ejecutar tests unitarios y de notebooks (nbmake)  
-3) Abrir los notebooks en Colab (ver abajo)
-
-> Requisitos sugeridos en `requirements.txt`. Para entorno conda, ver `environment.yml` (opcional).
+[![Requisitos (requirements.txt)](https://img.shields.io/badge/Ver-requirements.txt-orange?logo=python)](requirements.txt)  
+[![Entorno Conda (environment.yml)](https://img.shields.io/badge/Ver-environment.yml-teal?logo=anaconda)](environment.yml)
 
 ---
 
-## 📓 Notebooks (abrir en Colab)
+## 🧭 Temas principales
 
-- **01 · Big Data Intro** – _Open in Colab_  
-- **02 · Graphs Fundamentals** – _Open in Colab_  
-- **03 · Evolutionary Algorithms (GA–TSP, operadores)** – _Open in Colab_  
-- **04 · Cellular Automata (1D/2D, Game of Life)** – _Open in Colab_
+- [![Grafos](https://img.shields.io/badge/01%20·%20Grafos-Entrar-blue?logo=networkx)](topics/graphs/README.md)  
+- [![Algoritmos Evolutivos](https://img.shields.io/badge/02%20·%20Algoritmos%20Evolutivos-Entrar-green?logo=python)](topics/evolutionary/README.md)  
+- [![Autómatas Celulares](https://img.shields.io/badge/03%20·%20Autómatas%20Celulares-Entrar-yellow?logo=github)](topics/cellular-automata/README.md)  
 
-> Los enlaces se activan al subir cada notebook a `main`. Mantén nombres estables (`01_*.ipynb`, `02_*.ipynb`, etc.).
+> Cada sección tiene su propio **README** con: objetivos, temario, bibliografía y enlaces a los notebooks.
 
 ---
 
 ## 📚 Documentación
 
-- **Sitio (MkDocs Material):** https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/  
-- Contiene: **syllabus**, **cronograma**, guías rápidas y referencias.
+[![Docs (MkDocs Material)](https://img.shields.io/badge/Ver%20Sitio-Docs%20(MkDocs%20Material)-blue?logo=readthedocs)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/)  
 
----
-
-## 🧭 Índice por temas (cada uno con su propio README)
-
-- **Grafos** → [`topics/graphs/README.md`](topics/graphs/README.md)  
-  Conceptos, datasets, prácticas (comunidades, espectral, PageRank, predicción de enlaces).  
-- **Algoritmos Evolutivos** → [`topics/evolutionary/README.md`](topics/evolutionary/README.md)  
-  Representaciones, selección/cruza/mutación, GA–TSP y benchmarks.  
-- **Autómatas Celulares** → [`topics/cellular-automata/README.md`](topics/cellular-automata/README.md)  
-  Reglas 1D, Game of Life 2D, relaciones con cómputo universal.
-
-> Cada README de tema incluye: objetivos, temario, enlaces a Colab, bibliografía y ejercicios. El **código** ejemplo vive en los notebooks y en `src/`.
+Incluye: **syllabus**, **cronograma**, guías rápidas y referencias.
 
 ---
 
 ## 🔧 Estructura del repositorio
-
-> Referencia cruzada al repo base:  
-> https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main
 
 ```text
 .
 ├── README.md
 ├── LICENSE
 ├── requirements.txt
-├── environment.yml                 # (opcional)
-├── .pre-commit-config.yaml
-├── pyproject.toml / setup.cfg      # estilo, lint, nbmake
-├── .github/
-│   └── workflows/
-│       ├── tests.yml               # unit + nbmake
-│       ├── pages.yml               # MkDocs → GitHub Pages
-│       ├── link-check.yml          # verificación de enlaces
-│       └── slides.yml              # Marp: slides HTML/PDF
+├── environment.yml
+├── .github/workflows/
+│   ├── tests.yml
+│   ├── pages.yml
+│   ├── link-check.yml
+│   └── slides.yml
 ├── docs/
-│   ├── index.md
-│   ├── syllabus.md
-│   ├── cronograma.md
-│   └── mkdocs.yml
 ├── notebooks/
 │   ├── 01_BigData_Intro.ipynb
 │   ├── 02_Graphs_Fundamentals.ipynb
 │   ├── 03_Evolutionary_Algorithms.ipynb
 │   └── 04_Cellular_Automata.ipynb
-├── src/
-│   └── classroom/
-│       ├── graphs/                 # utilidades de grafos
-│       ├── evolutionary/           # operadores GA
-│       └── automata/               # CA 1D/2D, helpers
+├── src/classroom/
+│   ├── graphs/
+│   ├── evolutionary/
+│   └── automata/
 ├── topics/
 │   ├── graphs/README.md
 │   ├── evolutionary/README.md
 │   └── cellular-automata/README.md
 └── tests/
-    ├── test_graphs.py
-    ├── test_evolutionary.py
-    └── test_automata.py
 ````
 
 ---
 
 ## 🤝 Colaboración
 
-* Issues y PRs bienvenidos.
-* Estilo: **Black** + **Ruff** (ver `pyproject.toml`/`setup.cfg`).
-* CI: tests unitarios + ejecución de notebooks (`nbmake`).
-* Para contribuciones, ver `CONTRIBUTING.md` y `CODE_OF_CONDUCT.md`.
+[![Contributing](https://img.shields.io/badge/Guía-Contribuciones-purple?logo=github)](CONTRIBUTING.md)
+[![Código de Conducta](https://img.shields.io/badge/Código-de%20Conducta-red?logo=github)](CODE_OF_CONDUCT.md)
 
 ---
 
-## 🔗 Repos relacionados
+## 🔗 Repo relacionado
 
-* **GraphAI · Data Science · ML** (base):
-  [https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main)
-* **Blockchain & DeFi — Classroom** (hermano):
-  [https://github.com/sgevatschnaider/blockchain-finanzas-descentralizadas](https://github.com/sgevatschnaider/blockchain-finanzas-descentralizadas)
+[![GraphAI · Data Science · ML](https://img.shields.io/badge/GraphAI-Data%20Science%20·%20ML-blue?logo=github)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/tree/main)
 
 ---
 
 ## 📄 Licencia
 
-MIT — ver [`LICENSE`](LICENSE).
+[![MIT License](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](LICENSE)
+
+
+
+
 
 
