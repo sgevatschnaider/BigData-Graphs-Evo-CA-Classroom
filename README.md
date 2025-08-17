@@ -21,6 +21,18 @@ pytest --nbmake notebooks/01_BigData_Intro.ipynb
 pytest --nbmake notebooks/02_Graphs_Fundamentals.ipynb
 ```
 
+### Pruebas de notebooks
+
+El conjunto de tests incluye la ejecución automática de los notebooks del
+proyecto.  Las notebooks consideradas pesadas se omiten por defecto para
+agilizar la suite.  Para ejecutarlas todas puede utilizarse la variable de
+entorno `RUN_ALL_NOTEBOOKS`:
+
+```bash
+pytest tests/test_notebooks.py          # solo notebooks livianas
+RUN_ALL_NOTEBOOKS=1 pytest tests/test_notebooks.py  # incluye las pesadas
+```
+
 ## 📓 Notebooks (abrir en Colab)
 - 01 Big Data Intro – [Open in Colab](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/01_BigData_Intro.ipynb)
 - 02 Graphs Fundamentals – [Open in Colab](https://colab.research.google.com/github/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/notebooks/02_Graphs_Fundamentals.ipynb)
