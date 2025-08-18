@@ -1,3 +1,66 @@
+  <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
+  <p>Un repositorio dedicado a la teoría y práctica de <b>Algoritmos Evolutivos (EA)</b>, diseñado para docencia, investigación y desarrollo.</p>
+
+  <!-- Badges -->
+  <p>
+    <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10 | 3.11-3776AB?logo=python"></a>
+    <a href="../LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+    <a href="https://pre-commit.com/"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white"></a>
+    <a href="https://colab.research.google.com/"><img alt="Colab" src="https://img.shields.io/badge/Colab-ready-F9AB00?logo=googlecolab"></a>
+  </p>
+
+  <!-- Navigation -->
+  <p>
+    <a href="./notebooks/"><img alt="Notebooks" src="https://img.shields.io/badge/📓%20Notebooks-EA-orange"></a>
+    <a href="./src/"><img alt="Source Code" src="https://img.shields.io/badge/📦%20Source-Core-purple"></a>
+    <a href="./data/"><img alt="Data" src="https://img.shields.io/badge/🗂️%20Data-Benchmarks-lightgrey"></a>
+    <a href="./references/"><img alt="References" src="https://img.shields.io/badge/📚%20References-Papers-lightgrey"></a>
+  </p>
+</div>
+
+---
+
+## 🎯 Visión General
+
+¡Ups! Tienes toda la razón, pido disculpas. El error en el diagrama de Mermaid se debe a que los caracteres especiales como `{` y `}` confunden al procesador si no se encierran entre comillas.
+
+Aquí está el **código corregido para el diagrama Mermaid** que sí funcionará correctamente:
+
+```mermaid
+graph TD
+    subgraph "Generación t"
+        A["Población de Padres P_t"]
+    end
+
+    subgraph "Creación de Hijos"
+        B("Selección, Cruce y Mutación")
+        C["Población de Hijos Q_t"]
+    end
+
+    subgraph "Selección Ambiental (Elitismo)"
+        D["Unión R_t = P_t ∪ Q_t"]
+        E["1. Ordenar por Frentes no Dominados"]
+        F["2. Seleccionar P_{t+1} basado en Frentes y Crowding Distance"]
+    end
+
+    subgraph "Generación t+1"
+        G["Nueva Población P_{t+1}"]
+    end
+
+    A -- Aplica operadores --> B -- Genera --> C
+    A -- Se combina con --> D
+    C -- Se combina con --> D
+    D -- Procesa --> E
+    E -- Procesa --> F
+    F -- Genera --> G
+```
+
+He integrado esta corrección en el `README.md` completo para que lo tengas todo en un solo lugar y listo para usar.
+
+---
+
+### Versión Completa y Corregida del README
+
 <div align="center">
   <img src="https://raw.githubusercontent.com/gist/carlos-gg/f9a8ad155a3b6d2e4f0c4cf1171dd368/raw/b1f9f23793f1f7e346b026601438b97d10c71c4c/evo-algo-logo.svg" alt="EvoAlgo Logo" width="150"/>
   <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
@@ -155,22 +218,22 @@ El objetivo es encontrar un conjunto de soluciones que representen el mejor comp
 ```mermaid
 graph TD
     subgraph "Generación t"
-        A[Población de Padres P_t]
+        A["Población de Padres P_t"]
     end
 
     subgraph "Creación de Hijos"
-        B(Selección, Cruce y Mutación)
-        C[Población de Hijos Q_t]
+        B("Selección, Cruce y Mutación")
+        C["Población de Hijos Q_t"]
     end
 
     subgraph "Selección Ambiental (Elitismo)"
-        D[Unión R_t = P_t ∪ Q_t]
-        E[1. Ordenar por Frentes no Dominados]
-        F[2. Seleccionar P_{t+1} basado en Frentes y Crowding Distance]
+        D["Unión R_t = P_t ∪ Q_t"]
+        E["1. Ordenar por Frentes no Dominados"]
+        F["2. Seleccionar P_{t+1} basado en Frentes y Crowding Distance"]
     end
 
     subgraph "Generación t+1"
-        G[Nueva Población P_{t+1}]
+        G["Nueva Población P_{t+1}"]
     end
 
     A -- Aplica operadores --> B -- Genera --> C
@@ -178,7 +241,8 @@ graph TD
     C -- Se combina con --> D
     D -- Procesa --> E
     E -- Procesa --> F
-    F -- Genera --> G```
+    F -- Genera --> G
+```
 
 ---
 
