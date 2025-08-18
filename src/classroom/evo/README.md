@@ -366,8 +366,6 @@ PSO(f, N, c1, c2):
 - …
 ```
 
----
 
-si querés, lo adapto con tus nombres de carpetas/notebooks y te genero un **scaffold inicial** (árbol + `requirements.txt` + notebooks vacíos) listo para clonar.
 
 
