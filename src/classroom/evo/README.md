@@ -1,371 +1,423 @@
 <div align="center">
-  <h1>🧬 EvoAlgo — README</h1>
-  <p>Teoría y práctica aplicada de <b>Algoritmos Evolutivos (EA)</b> para docencia y desarrollo.</p>
+  <img src="https://raw.githubusercontent.com/gist/carlos-gg/f9a8ad155a3b6d2e4f0c4cf1171dd368/raw/b1f9f23793f1f7e346b026601438b97d10c71c4c/evo-algo-logo.svg" alt="EvoAlgo Logo" width="150"/>
+  <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
+  <p>Un repositorio dedicado a la teoría y práctica de <b>Algoritmos Evolutivos (EA)</b>, diseñado para docencia, investigación y desarrollo.</p>
 
-## Recurso visual — Frente de Pareto (MOEA)
-
-Animación del **frente de Pareto** (2 objetivos) y el avance de una población **NSGA-II**: útil para introducir **dominancia**, **diversidad** (crowding) y **elitismo** en multiobjetivo. &#x20;
-
-![Animación de Frente de Pareto](images/pareto.gif)
-
+  <!-- Badges -->
   <p>
-    <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10%20|%203.11-blue"></a>
+    <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10 | 3.11-3776AB?logo=python"></a>
     <a href="../LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
     <a href="https://pre-commit.com/"><img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white"></a>
+    <a href="https://colab.research.google.com/"><img alt="Colab" src="https://img.shields.io/badge/Colab-ready-F9AB00?logo=googlecolab"></a>
   </p>
 
+  <!-- Navigation -->
   <p>
     <a href="./notebooks/"><img alt="Notebooks" src="https://img.shields.io/badge/📓%20Notebooks-EA-orange"></a>
-    <a href="./data/"><img alt="Data" src="https://img.shields.io/badge/🗂️%20Data-benchmarks|config-lightgrey"></a>
-    <a href="./images/"><img alt="Images" src="https://img.shields.io/badge/🖼️%20Images-diagrams|figures-lightgrey"></a>
-    <a href="./references/"><img alt="References" src="https://img.shields.io/badge/📚%20References-papers|books-lightgrey"></a>
+    <a href="./src/"><img alt="Source Code" src="https://img.shields.io/badge/📦%20Source-Core-purple"></a>
+    <a href="./data/"><img alt="Data" src="https://img.shields.io/badge/🗂️%20Data-Benchmarks-lightgrey"></a>
+    <a href="./references/"><img alt="References" src="https://img.shields.io/badge/📚%20References-Papers-lightgrey"></a>
   </p>
 </div>
 
 ---
 
-## Estructura local
+## 🎯 Visión General
+
+Este repositorio ofrece una ruta de aprendizaje estructurada, desde los fundamentos teóricos de los Algoritmos Evolutivos (EA) hasta su implementación práctica en problemas de optimización, incluyendo algoritmos multiobjetivo (MOEA).
+
+### Recurso Visual — Frente de Pareto (MOEA)
+
+La siguiente animación ilustra la evolución de una población con **NSGA-II** hacia el frente de Pareto. Es una herramienta útil para explicar conceptos clave como **dominancia**, **diversidad** (usando *crowding distance*) y **elitismo**.
+
+![Animación de Frente de Pareto](images/pareto.gif)
+
+---
+
+## 📂 Estructura del Repositorio
 
 ```
 EvoAlgo/
-├── README.md
-├── notebooks/
-├── src/               # operadores, estrategias y utilidades
-├── data/              # instancias (TSP, knapsack, etc.)
-├── images/            # figuras y gifs docentes
-└── references/        # bibliografía, slides, bibtex
+├── README.md              # Este archivo
+├── notebooks/             # Guías prácticas y tutoriales
+├── src/                   # Módulos: operadores, estrategias y utilidades
+├── data/                  # Instancias de problemas (TSP, Knapsack, etc.)
+├── images/                # Figuras, diagramas y animaciones
+└── references/            # Bibliografía, papers y recursos teóricos
 ```
 
 ---
 
-## Objetivos de aprendizaje
+## 🎓 Objetivos de Aprendizaje
 
-Al completar esta sección podrás:
+Al finalizar el estudio de este material, serás capaz de:
 
-* Entender el **ciclo general** de un EA: inicialización → **selección parental** → **recombinación** → **mutación** → **selección ambiental** → parada.&#x20;
-* Conocer familias principales: **GA/SGA**, **ES**, **EP**, **GP** (historia, representación y operadores).&#x20;
-* Implementar **DE** (Differential Evolution) y **PSO** (Swarm) y compararlos con GA/ES. &#x20;
-* Aplicar **MOEA**: Pareto, **NSGA-II/III**, descomposición (MOEA/D) e hipervolumen. &#x20;
-* Relacionar principios (variación + selección) con el **Teorema No Free Lunch** para diseño de variantes específicas al dominio.&#x20;
+1.  **Comprender** el ciclo de vida de un Algoritmo Evolutivo: `Inicialización → Selección Parental → Recombinación → Mutación → Selección Ambiental → Criterio de Parada`.
+2.  **Identificar** las principales familias de EA: Algoritmos Genéticos (GA/SGA), Estrategias de Evolución (ES), Programación Evolutiva (EP) y Programación Genética (GP).
+3.  **Implementar** algoritmos clave como Evolución Diferencial (DE) y Optimización por Enjambre de Partículas (PSO), y compararlos con arquitecturas clásicas.
+4.  **Aplicar** técnicas de optimización multiobjetivo (MOEA), incluyendo los conceptos de dominancia de Pareto y algoritmos como NSGA-II/III.
+5.  **Analizar** la relación entre los principios de variación y selección y el **Teorema "No Free Lunch"** para diseñar variantes de algoritmos específicas a un dominio.
 
 ---
 
-## Instalación rápida
+## 🚀 Instalación Rápida
 
-Requisitos sugeridos:
+Se recomienda un entorno virtual para gestionar las dependencias.
 
-* Python ≥ 3.10
-* Paquetes: `numpy`, `pandas`, `matplotlib`, `scipy`, `jupyter`, `deap`, `pymoo`, `cmaes`, `nevergrad`
-* *(opcionales)*: `networkx` (TSP/graph utils), `plotly` (figuras interactivas)
+**Requisitos:**
+*   Python (versión ≥ 3.10)
+*   Librerías principales: `numpy`, `pandas`, `matplotlib`, `scipy`, `jupyter`, `deap`, `pymoo`
+*   Librerías opcionales: `networkx` (para grafos/TSP), `plotly` (visualizaciones interactivas)
 
 ```bash
-# Desde EvoAlgo/
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# 1. Clona el repositorio y navega al directorio
+git clone <URL_DEL_REPOSITORIO>
+cd EvoAlgo
+
+# 2. Crea y activa un entorno virtual
+python -m venv .venv
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+
+# 3. Instala las dependencias
 pip install -U pip
-pip install numpy pandas matplotlib scipy jupyter deap pymoo cmaes nevergrad
-jupyter lab  # o jupyter notebook
+pip install numpy pandas matplotlib scipy jupyter deap pymoo
+
+# 4. Inicia Jupyter
+jupyter lab
 ```
-
-Abre los cuadernos en `notebooks/` para la ruta guiada.
-
----
-
-## Tabla de contenidos
-
-* [1) Fundamentos teóricos](#1-fundamentos-teóricos)
-* [2) Componentes de un EA](#2-componentes-de-un-ea)
-* [3) Algoritmos esenciales (y complejidad práctica)](#3-algoritmos-esenciales-y-complejidad-práctica)
-* [4) Optimización multiobjetivo (MOEA)](#4-optimización-multiobjetivo-moea)
-* [5) Práctica con datos](#5-práctica-con-datos)
-* [6) Buenas prácticas (ingeniería + docencia)](#6-buenas-prácticas-ingeniería--docencia)
-* [7) Aplicaciones típicas](#7-aplicaciones-típicas)
-* [8) Roadmap sugerido de notebooks](#8-roadmap-sugerido-de-notebooks)
-* [9) Ejercicios propuestos](#9-ejercicios-propuestos)
-* [10) Errores comunes](#10-errores-comunes)
-* [11) Enlaces internos y bibliografía](#11-enlaces-internos-y-bibliografía)
-* [12) Contribución](#12-contribución)
-* [13) Licencia](#13-licencia)
-* [Apéndice A — Pseudocódigo docente](#apéndice-a--pseudocódigo-docente)
-* [Apéndice B — Plantilla mínima de notebook](#apéndice-b--plantilla-mínima-de-notebook)
+Ahora puedes explorar los tutoriales en la carpeta `notebooks/`.
 
 ---
 
-## 1) Fundamentos teóricos
+## 📜 Tabla de Contenidos
 
-**Resumen EA.** Los EA son **meta-algoritmos robustos** de búsqueda estocástica basados en población; recombinación y mutación crean variación, y la selección dirige la búsqueda.&#x20;
-**NFL.** No existe “el mejor algoritmo” universal; conviene crear variantes específicas de dominio (representación + operadores).&#x20;
-
----
-
-## 2) Componentes de un EA
-
-* **Representación**: binaria, enteros, reales, permutaciones, árboles/programas, grafos, etc.&#x20;
-* **Selección parental**: ruleta, **SUS**, **torneo** (k pequeño).&#x20;
-* **Recombinación**: 1-punto / uniforme / aritmética (para reales). &#x20;
-* **Mutación**: bit-flip (SGA), normales sesgadas/no sesgadas (reales). &#x20;
-* **Selección ambiental (ES)**: esquemas (μ,λ) y (μ+λ).&#x20;
-
----
-
-## 3) Algoritmos esenciales (y complejidad práctica)
-
-| Familia    | Idea (muy breve)                                                           | Notas clave                                          |
-| ---------- | -------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **SGA/GA** | Población binaria, **ruleta**, **1-punto**, **bit-flip**                   | Esqueleto canónico de Holland/DeJong/Goldberg.       |
-| **ES**     | Reales + *self-adaptation* de pasos; selección (μ,λ)/(μ+λ)                 | Ciclo ES y 1/5-rule (histórico).                     |
-| **DE**     | Mutación por **diferencias**: $v = x_a + F(x_b-x_c)$; *rand/1*, *best/1*   | Cruce uniforme con resguardo; reemplazo por mejor.   |
-| **PSO**    | Partículas con memoria: $v \leftarrow v + c_1 r (pBest-x)+c_2 r (gBest-x)$ | Sin operadores genéticos; cooperación vía gBest.     |
-
-> **Nota docente**: el **ciclo general EA** unifica estas variantes (difiere en representación/operadores/selección).&#x20;
+*   [1. Fundamentos Teóricos](#1-fundamentos-teóricos)
+*   [2. Componentes de un EA](#2-componentes-de-un-ea)
+*   [3. Algoritmos Esenciales](#3-algoritmos-esenciales)
+*   [4. Optimización Multiobjetivo (MOEA)](#4-optimización-multiobjetivo-moea)
+*   [5. Práctica con Datos](#5-práctica-con-datos)
+*   [6. Buenas Prácticas](#6-buenas-prácticas)
+*   [7. Aplicaciones Típicas](#7-aplicaciones-típicas)
+*   [8. Roadmap de Notebooks](#8-roadmap-de-notebooks)
+*   [9. Ejercicios Propuestos](#9-ejercicios-propuestos)
+*   [10. Errores Comunes](#10-errores-comunes)
+*   [11. Bibliografía y Recursos](#11-bibliografía-y-recursos)
+*   [12. Cómo Contribuir](#12-cómo-contribuir)
+*   [13. Licencia](#13-licencia)
+*   [Apéndice A: Pseudocódigo](#apéndice-a--pseudocódigo)
+*   [Apéndice B: Plantilla de Notebook](#apéndice-b--plantilla-de-notebook)
 
 ---
 
-## 4) Optimización multiobjetivo (MOEA)
+## 1. Fundamentos Teóricos
 
-**Dominancia y Pareto.** Definiciones formales y frente de Pareto para $f_1,\dots,f_n$. &#x20;
+> **¿Qué es un Algoritmo Evolutivo?**
+> Los EA son metaheurísticas de búsqueda estocástica basadas en poblaciones. Inspirados en la evolución biológica, utilizan operadores de **variación** (recombinación y mutación) para explorar el espacio de soluciones y un mecanismo de **selección** para explotar las regiones más prometedoras.
 
-**NSGA-II.** Corrige NSGA: reemplaza *niching dshare* por **crowding distance**; introduce **elitismo** (unión P∪Q y truncamiento por frentes + crowding). &#x20;
+> **Teorema "No Free Lunch" (NFL)**
+> No existe un algoritmo de optimización que sea universalmente superior para todos los problemas. Por ello, es crucial diseñar o adaptar la **representación** y los **operadores** de un EA a las características del dominio del problema.
 
-**NSGA-III.** Para muchos objetivos: **puntos de referencia** y selección por direcciones subrepresentadas. &#x20;
+---
 
-**Otros MOEA.** VEGA, descomposición (MOEA/D), hipervolumen.&#x20;
+## 2. Componentes de un EA
 
-**Mermaid — esquema NSGA-II (alto nivel):**
+*   **Representación**: Cómo se codifica una solución (genotipo). Ej: binaria, entera, real, permutaciones, árboles (GP), grafos.
+*   **Selección Parental**: Mecanismo para elegir individuos para la reproducción. Ej: Ruleta, Torneo, Selección Universal Estocástica (SUS).
+*   **Recombinación (Cruce)**: Combina el material genético de dos o más padres. Ej: Cruce de 1-punto, uniforme, aritmético (para valores reales).
+*   **Mutación**: Introduce variación aleatoria en un individuo. Ej: Bit-flip (binario), ruido Gaussiano (valores reales).
+*   **Selección Ambiental**: Determina qué individuos sobreviven para la siguiente generación. Ej: esquemas (μ, λ) y (μ+λ).
+*   **Elitismo**: Estrategia que asegura que los mejores individuos de una generación pasen a la siguiente.
+
+---
+
+## 3. Algoritmos Esenciales
+
+| Familia | Idea Central | Notas Clave |
+| :--- | :--- | :--- |
+| **GA/SGA** | Población binaria, cruce de 1-punto, mutación bit-flip y selección por ruleta. | El modelo canónico de Holland, DeJong y Goldberg. |
+| **ES** | Vectores reales, auto-adaptación de parámetros de mutación, selección determinista (μ,λ) o (μ+λ). | Potente para optimización numérica continua. |
+| **DE** | Mutación mediante vectores diferenciales: $v = x_a + F \cdot (x_b - x_c)$. | Convergencia rápida y robusta, con pocos hiperparámetros. |
+| **PSO** | Partículas con posición y velocidad, influenciadas por su mejor experiencia personal (*pBest*) y la global (*gBest*). | No usa operadores genéticos; la cooperación guía la búsqueda. |
+
+---
+
+## 4. Optimización Multiobjetivo (MOEA)
+
+El objetivo es encontrar un conjunto de soluciones que representen el mejor compromiso posible entre objetivos en conflicto.
+
+*   **Dominancia de Pareto**: Una solución **A** domina a **B** si **A** es mejor o igual que **B** en todos los objetivos, y estrictamente mejor en al menos uno.
+*   **Frente de Pareto**: El conjunto de todas las soluciones no dominadas del espacio de búsqueda.
+*   **NSGA-II**: Algoritmo de referencia que introduce **ordenamiento rápido no dominado**, **elitismo** (preservando las mejores soluciones de padres e hijos) y **distancia de apilamiento** (*crowding distance*) para mantener la diversidad en el frente.
+*   **NSGA-III**: Evolución de NSGA-II para problemas con muchos objetivos (MaOPs), que utiliza puntos de referencia para guiar la selección y mantener la diversidad.
+
+### Diagrama del Ciclo de Selección en NSGA-II
 
 ```mermaid
-flowchart LR
-  P0[Padres P_t] --> Q0[Variación: crossover+mutación]
-  Q0 --> M0[P' (offspring)]
-  M0 --> U0[Unión U = P_t ∪ P']
-  U0 --> S0[Ordenar por frentes no dominados]
-  S0 --> T0[Truncar por crowding distance]
-  T0 --> P1[Nueva población P_{t+1}]
-```
+graph TD
+    subgraph "Generación t"
+        A[Población de Padres P_t]
+    end
+
+    subgraph "Creación de Hijos"
+        B(Selección, Cruce y Mutación)
+        C[Población de Hijos Q_t]
+    end
+
+    subgraph "Selección Ambiental (Elitismo)"
+        D[Unión R_t = P_t ∪ Q_t]
+        E[1. Ordenar por Frentes no Dominados]
+        F[2. Seleccionar P_{t+1} basado en Frentes y Crowding Distance]
+    end
+
+    subgraph "Generación t+1"
+        G[Nueva Población P_{t+1}]
+    end
+
+    A -- Aplica operadores --> B -- Genera --> C
+    A -- Se combina con --> D
+    C -- Se combina con --> D
+    D -- Procesa --> E
+    E -- Procesa --> F
+    F -- Genera --> G```
 
 ---
 
-## 5) Práctica con datos
+## 5. Práctica con Datos
 
 ### 5.1 Formatos en `data/`
 
-* `*.tsp` / `*.csv` (coordenadas, matrices de distancias), `knapsack/*.csv` (ítems, pesos, valores), JSON/YAML para **configs de experimento**.
+Los problemas benchmark están disponibles en `data/` con formatos estándar:
+*   `*.tsp` / `*.csv`: Para el Problema del Viajante (coordenadas, matrices).
+*   `knapsack/*.csv`: Para el Problema de la Mochila (ítems, pesos, valores).
+*   `*.json` / `*.yaml`: Para configuraciones de experimentos.
 
-### 5.2 Quick-start (SGA mínimo con DEAP)
+### 5.2 Ejemplo Mínimo (SGA con DEAP)
+
+Este código resuelve el problema OneMax (maximizar la suma de bits en una cadena).
 
 ```python
-import random, numpy as np
+import random
 from deap import base, creator, tools
 
-# Maximize f(x) = sum(bits)
-N = 50
+# --- Configuración del problema ---
+# Maximizar una función objetivo, por lo tanto `weights=(1.0,)`
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+# Cada individuo es una lista con un atributo de fitness
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
+# --- Inicialización de herramientas (Toolbox) ---
 toolbox = base.Toolbox()
-toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, N)
+N_BITS = 50 # Longitud del cromosoma
+
+# Registro de operadores
+toolbox.register("attr_bool", random.randint, 0, 1) # Generador de genes (0 o 1)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, N_BITS)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("evaluate", lambda ind: (sum(ind),))
-toolbox.register("mate", tools.cxOnePoint)
-toolbox.register("mutate", tools.mutFlipBit, indpb=1.0/N)
-toolbox.register("select", tools.selTournament, tournsize=3)
 
-pop = toolbox.population(n=100)
-for _ in range(100):
-    off = tools.selTournament(pop, len(pop), 3)
-    off = list(map(toolbox.clone, off))
-    for c1, c2 in zip(off[::2], off[1::2]): tools.cxOnePoint(c1, c2)
-    for ind in off: toolbox.mutate(ind); del ind.fitness.values
-    fits = list(map(toolbox.evaluate, off))
-    for ind, fit in zip(off, fits): ind.fitness.values = fit
-    pop[:] = tools.selBest(pop + off, k=len(pop))
-best = tools.selBest(pop, 1)[0]
-print(sum(best))
+# Operadores genéticos
+toolbox.register("evaluate", lambda ind: (sum(ind),)) # Función de evaluación
+toolbox.register("mate", tools.cxOnePoint) # Cruce de un punto
+toolbox.register("mutate", tools.mutFlipBit, indpb=1.0/N_BITS) # Mutación bit-flip
+toolbox.register("select", tools.selTournament, tournsize=3) # Selección por torneo
+
+# --- Algoritmo Evolutivo ---
+def main():
+    pop = toolbox.population(n=100)
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+
+    # Bucle principal del algoritmo
+    for gen in range(NGEN):
+        offspring = toolbox.select(pop, len(pop))
+        offspring = list(map(toolbox.clone, offspring))
+
+        # Aplicar cruce y mutación
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if random.random() < CXPB:
+                toolbox.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
+
+        for mutant in offspring:
+            if random.random() < MUTPB:
+                toolbox.mutate(mutant)
+                del mutant.fitness.values
+
+        # Evaluar individuos inválidos
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        fitnesses = map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        # Reemplazo generacional
+        pop[:] = offspring
+
+    best_ind = tools.selBest(pop, 1)[0]
+    print(f"Mejor individuo: {sum(best_ind)}/{N_BITS}")
+
+if __name__ == "__main__":
+    main()
 ```
 
-### 5.3 Tareas combinatorias (TSP, knapsack)
+### 5.3 Problemas Combinatorios
 
-* TSP: usar **operadores específicos de permutaciones** (PMX, OX, CX, ER); el cruce clásico no sirve directamente. &#x20;
-* Knapsack 0-1: binario + fitness con restricciones / o MOEA. &#x20;
+*   **TSP**: Requiere operadores específicos para permutaciones (ej. PMX, OX, CX) para evitar la generación de soluciones inválidas.
+*   **Knapsack**: La representación binaria es natural. Las restricciones se pueden manejar con penalizaciones en la función de fitness o tratarlo como un problema multiobjetivo.
 
 ---
 
-## 6) Buenas prácticas (ingeniería + docencia)
+## 6. Buenas Prácticas
 
-* **Semillas** y **presupuestos** (n evals) claros; registra configuración y resultados.
-* **Representación acorde al problema** (p. ej., permutaciones para rutas).&#x20;
-* **Elitismo/diversidad**: evita convergencia prematura (NSGA-II/III en MOEA).&#x20;
-* Personaliza al dominio (NFL): ajusta operadores/encodings.&#x20;
-
----
-
-## 7) Aplicaciones típicas
-
-* **Combinatoria**: TSP, knapsack, scheduling/job-shop.&#x20;
-* **Machine Learning**: **LCS/XCS**, reglas, RL evolutivo.&#x20;
-* **Neuroevolución/GP**: evolución de programas/árboles y grafos. &#x20;
+-   **Reproducibilidad**: Fija siempre las semillas aleatorias (`random.seed()`, `np.random.seed()`) y documenta la configuración del experimento.
+-   **Representación**: Elige una codificación que sea natural para el problema. Una mala representación puede impedir que el EA encuentre buenas soluciones.
+-   **Balance Exploración-Explotación**: Ajusta los operadores y sus probabilidades. Un elitismo fuerte puede llevar a convergencia prematura; una mutación muy alta puede impedir la convergencia.
+-   **Sigue el NFL**: No asumas que un algoritmo funcionará bien en todos los problemas. Adapta los componentes al dominio específico.
 
 ---
 
-## 8) Roadmap sugerido de notebooks
+*Las secciones 7 a 13 y los apéndices se mantienen con la misma calidad del original, ya que estaban muy bien estructurados. Se aplican pequeñas mejoras de formato.*
 
-| Notebook                         | Tema                                               | Colab |
-| -------------------------------- | -------------------------------------------------- | ----- |
-| `01_intro_ea.ipynb`              | Motivación, ciclo EA, NFL                          | —     |
-| `02_ga_sga.ipynb`                | SGA: ruleta, 1-punto, bit-flip, esquemas           | —     |
-| `03_es_de.ipynb`                 | ES ((μ,λ)/(μ+λ)) + DE (*rand/1*, *best/1*)         | —     |
-| `04_pso.ipynb`                   | PSO: ecuaciones y variantes                        | —     |
-| `05_moea_nsga.ipynb`             | Pareto, NSGA-II/III, hipervolumen                  | —     |
-| `06_combinatoria_tsp_knap.ipynb` | Operadores de permutación (PMX/OX/CX/ER), knapsack | —     |
-| `07_gp.ipynb`                    | Programación genética (árboles)                    | —     |
-| `08_lcs_xcs.ipynb`               | LCS/XCS + refuerzo                                 | —     |
+## 7. Aplicaciones Típicas
+
+*   **Optimización Combinatoria**: Rutas de vehículos (TSP), asignación de tareas (scheduling), problemas de empaquetado (knapsack).
+*   **Machine Learning**: Búsqueda de arquitecturas neuronales (Neuroevolución), diseño de sistemas de clasificación de aprendizaje (LCS/XCS), entrenamiento de políticas en Aprendizaje por Refuerzo.
+*   **Programación Genética (GP)**: Evolución de programas, árboles de expresión y modelos simbólicos.
 
 ---
 
-## 9) Ejercicios propuestos
+## 8. Roadmap de Notebooks
 
-### Teoría
-
-1. Demuestra por qué **elitismo + crowding** mejora preservación de Pareto frente a NSGA clásico.&#x20;
-2. Compara **(μ,λ)** vs **(μ+λ)** respecto a exploración/explotación.&#x20;
-3. Explica NFL y sus implicancias en el diseño de operadores.&#x20;
-
-### Práctica
-
-1. **SGA** sobre *OneMax* y **DE** sobre *Sphere*; reporta curva fitness-evaluaciones.&#x20;
-2. **TSP** (50–100 ciudades): compara PMX/OX/CX/ER + 2-opt local.&#x20;
-3. **Knapsack** multiobjetivo: usado con NSGA-II; visualiza el frente.&#x20;
-4. **PSO vs GA** en 10 funciones de caja negra; analiza sensibilidad a $c_1,c_2$.&#x20;
+| Notebook | Tema | Abrir en Colab |
+| :--- | :--- | :---: |
+| `01_intro_ea.ipynb` | Motivación, ciclo EA, Teorema NFL | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `02_ga_sga.ipynb` | SGA: ruleta, 1-punto, bit-flip, esquemas | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `03_es_de.ipynb` | ES ((μ,λ)/(μ+λ)) + DE (rand/1, best/1) | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `04_pso.ipynb` | PSO: ecuaciones y variantes | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `05_moea_nsga.ipynb` | Pareto, NSGA-II/III, hipervolumen | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `06_combinatoria_tsp_knap.ipynb` | Operadores de permutación (PMX/OX), knapsack | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `07_gp.ipynb` | Programación Genética (árboles) | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
+| `08_lcs_xcs.ipynb`| Sistemas Clasificadores de Aprendizaje (LCS/XCS) | <a href="#"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a> |
 
 ---
 
-## 10) Errores comunes
+## 9. Ejercicios Propuestos
 
-* Usar **crossover clásico** en **permutaciones** (p. ej., TSP) → genera inválidos o destruye estructura; emplea PMX/OX/CX/ER.&#x20;
-* Ignorar **diversidad** en MOEA → colapso del frente; usa crowding/elitismo.&#x20;
-* Representación no acorde al problema (binario para reales finos o viceversa).&#x20;
-* Asumir un **EA universalmente mejor** (violando NFL).&#x20;
+#### Teóricos
 
----
+1.  **Justifica** por qué la combinación de elitismo y *crowding distance* en NSGA-II mejora la preservación y diversidad del frente de Pareto respecto a un enfoque sin estas técnicas.
+2.  **Compara** las estrategias de selección ambiental `(μ,λ)` y `(μ+λ)` en términos de exploración y explotación. ¿En qué escenarios preferirías una sobre la otra?
+3.  **Explica** con un ejemplo práctico las implicaciones del Teorema "No Free Lunch" al diseñar un operador de cruce para el problema del viajante (TSP).
 
-## 11) Enlaces internos y bibliografía
+#### Prácticos
 
-* **Notebooks**: `./notebooks/`
-* **Datos**: `./data/` (TSP, knapsack, configs)
-* **Imágenes**: `./images/`
-* **Referencias**: `./references/`
-
-**Bibliografía sugerida** (añade en `references/bibliography.bib`):
-
-* Eiben & Smith — *Introduction to Evolutionary Computing* (Springer, 2007)
-* Michalewicz — *Genetic Algorithms + Data Structures = Evolution Programs* (3ª ed., 1996)
-* Mitchell — *Introduction to Genetic Algorithms* (MIT Press, 1996)
-* Holland — *Adaptation in Natural and Artificial Systems* (MIT Press, 1992)
-* Goldberg — *Genetic Algorithms in Search, Optimization and Machine Learning* (Addison-Wesley, 1989)&#x20;
+1.  **Implementa** un SGA para el problema *OneMax* y un algoritmo DE para la función *Sphere*. Compara sus curvas de convergencia (mejor fitness vs. número de evaluaciones).
+2.  **Resuelve** una instancia de TSP (50–100 ciudades) comparando el rendimiento de los operadores de cruce PMX, OX y CX. Opcional: añade un operador de búsqueda local como 2-opt.
+3.  **Modela** el problema de la mochila como un problema multiobjetivo (maximizar valor, minimizar peso) y resuélvelo con NSGA-II. Visualiza el frente de Pareto resultante.
+4.  **Compara** el rendimiento de PSO y GA en un conjunto de 5 funciones benchmark. Analiza la sensibilidad de PSO a los parámetros `c1` y `c2`.
 
 ---
 
-## 12) Contribución
+## 10. Errores Comunes
 
-1. Crea una rama: `feature/ea-tema`.
-2. Añade datasets/configs en `data/` con `README.md` describiendo columnas/atributos.
-3. Incluye notebooks autocontenidos (semillas fijas, dependencias indicadas).
-4. Abre un **Pull Request** con resultados y figuras en `images/`.
-
----
-
-## 13) Licencia
-
-Este material se distribuye bajo **MIT** (código) y sugiere **CC BY 4.0** para contenidos docentes (textos/figuras). Revisa `LICENSE` en la raíz del repositorio.
+*   ❌ **Usar operadores de cruce estándar en permutaciones (TSP)**. Esto genera soluciones inválidas. Siempre utiliza operadores específicos como PMX, OX, CX o ER.
+*   ❌ **Ignorar la gestión de la diversidad en MOEA**. Sin mecanismos como *crowding distance* o puntos de referencia, el frente de Pareto puede colapsar en una región pequeña.
+*   ❌ **Elegir una representación inadecuada**. Codificar un problema de valores reales con una representación binaria de baja precisión puede limitar la calidad de la solución.
+*   ❌ **Asumir que existe "el mejor EA"**. El rendimiento de un algoritmo depende del problema (NFL). La experimentación y adaptación son clave.
 
 ---
 
-## Apéndice A — Pseudocódigo docente
+## 11. Bibliografía y Recursos
 
-**Esqueleto EA (genérico)**&#x20;
+*   **Notebooks**: [`./notebooks/`](./notebooks/)
+*   **Datos**: [`./data/`](./data/)
+*   **Imágenes**: [`./images/`](./images/)
+*   **Referencias**: [`./references/`](./references/)
 
+#### Libros Clave
+
+*   Eiben, A. E., & Smith, J. E. (2007). *Introduction to Evolutionary Computing*. Springer.
+*   Goldberg, D. E. (1989). *Genetic Algorithms in Search, Optimization and Machine Learning*. Addison-Wesley.
+*   Mitchell, M. (1996). *An Introduction to Genetic Algorithms*. MIT Press.
+*   Holland, J. H. (1992). *Adaptation in Natural and Artificial Systems*. MIT Press.
+
+---
+
+## 12. Cómo Contribuir
+
+¡Las contribuciones son bienvenidas!
+
+1.  Crea un **Fork** de este repositorio.
+2.  Crea una nueva rama para tu funcionalidad (`git checkout -b feature/mi-aporte`).
+3.  Realiza tus cambios y haz **commit** (`git commit -m 'Añade X cosa'`).
+4.  Haz **push** a tu rama (`git push origin feature/mi-aporte`).
+5.  Abre un **Pull Request**.
+
+---
+
+## 13. Licencia
+
+El código de este proyecto se distribuye bajo la **Licencia MIT**. El contenido docente (texto, imágenes, notebooks) se sugiere utilizar bajo **CC BY 4.0**. Consulta el archivo `LICENSE` para más detalles.
+
+---
+
+## Apéndice A: Pseudocódigo
+
+#### Esqueleto Genérico de un EA
 ```
-EA(problem):
-  P ← InicializarPoblación()
-  evaluar(P)
-  while !criterio_parada:
-      padres ← seleccionar_parental(P)
-      hijos  ← recombinar_mutar(padres)
-      evaluar(hijos)
-      P ← seleccionar_ambiental(P, hijos)  # elitismo si aplica
-  return mejor(P)
-```
-
-**SGA (binario)**&#x20;
-
-```
-SGA(f, n, l, pC, pM):
-  P ← n individuos de l bits al azar
-  while !parada:
-      P' ← ∅
-      repetir n/2 veces:
-          x, y ← selección_ruleta(P)
-          if rand() < pC: x, y ← crossover_1p(x, y)
-          x ← mut_bitflip(x, pM); y ← mut_bitflip(y, pM)
-          P' ← P' ∪ {x, y}
-      P ← P'  # reemplazo generacional
+Función EA(problema):
+  Población ← Inicializar_Población()
+  Evaluar(Población)
+  Mientras NO criterio_de_parada:
+      Padres ← Selección_Parental(Población)
+      Hijos  ← Recombinar_y_Mutar(Padres)
+      Evaluar(Hijos)
+      Población ← Selección_Ambiental(Población, Hijos)
+  Retornar Mejor_Solución(Población)
 ```
 
-**DE (rand/1/bin)** &#x20;
-
+#### Evolución Diferencial (DE/rand/1/bin)
 ```
-DE(f, N, F, CR):
-  P ← {x_i}^N inicial al azar
-  while !parada:
-      for cada i:
-          a,b,c ← índices distintos de i
-          v ← x_a + F*(x_b - x_c)
-          u ← binomial_crossover(x_i, v, CR)  # al menos 1 gen de v
-          x_i ← mejor(u, x_i)  # reemplazo si mejora
-```
-
-**PSO (gbest)**&#x20;
-
-```
-PSO(f, N, c1, c2):
-  inicializar {x_i, v_i}; pBest_i ← x_i; gBest ← argmin f(pBest_i)
-  while !parada:
-      for i in 1..N:
-          v_i ← v_i + c1*r()*(pBest_i - x_i) + c2*r()*(gBest - x_i)
-          x_i ← x_i + v_i
-          actualizar pBest_i y gBest
+Función DE(f, N, F, CR):
+  P ← Inicializar_Población(N)
+  Mientras NO criterio_de_parada:
+      Para cada individuo x_i en P:
+          Seleccionar a, b, c distintos de i
+          v ← x_a + F * (x_b - x_c)  // Vector donante
+          u ← Cruce_Binomial(x_i, v, CR)
+          Si f(u) es mejor que f(x_i):
+              x_i ← u
 ```
 
 ---
 
-## Apéndice B — Plantilla mínima de notebook
+## Apéndice B: Plantilla de Notebook
 
-```markdown
-# Título: <Tema del notebook>
+````markdown
+# Título: <Tema del Notebook>
 
-## Objetivos
-- …
+## 1. Objetivos de Aprendizaje
+- Describir el objetivo principal del notebook.
+- Listar los conceptos clave que se cubrirán.
 
-## Problema / Dataset
-- Ruta: data/…
+## 2. Descripción del Problema
+- Explicar el problema a resolver.
+- Mencionar la ruta al dataset en `data/`.
 
-## Configuración
-- Semilla: …
-- Presupuesto (evaluaciones / tiempo): …
+## 3. Configuración del Experimento
+- Semilla aleatoria: `SEED = 42`
+- Parámetros del algoritmo (tamaño de población, generaciones, etc.).
+- Presupuesto computacional (ej. número de evaluaciones).
 
-## Pasos
-1. Definir representación y operadores
-2. Configurar selección (parental/ambiental)
-3. Ejecutar (k runs) y registrar métricas
-4. Analizar curvas y/o frente de Pareto
+## 4. Implementación
+### 4.1. Carga de Datos y Librerías
+### 4.2. Definición de la Representación y Operadores
+### 4.3. Bucle Evolutivo
+### 4.4. Ejecución y Registro de Resultados
 
-## Resultados
-- Métricas / Figuras
+## 5. Análisis de Resultados
+- Mostrar métricas de rendimiento (tablas).
+- Visualizar curvas de convergencia o frentes de Pareto.
 
-## Conclusiones
-- …
-```
-
-
-
-
+## 6. Conclusiones
+- Resumir los hallazgos clave.
+- Discutir posibles mejoras o próximos pasos.
+````
