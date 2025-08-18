@@ -1,4 +1,4 @@
-[build-system]
+[[build-system]
 requires = ["setuptools>=65", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -8,17 +8,31 @@ version = "0.1.0"
 description = "Material y paquetes: classroom.evo, classroom.graphs, classroom.bigdata, classroom.ca"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["numpy", "pandas", "matplotlib", "scipy"]
+dependencies = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "scipy",
+]
 
 [project.optional-dependencies]
+# extras instalables con: pip install -e .[evo]
 evo = ["deap", "pymoo", "cmaes"]
+# extras de desarrollo: pip install -e .[dev]
 dev = ["pytest", "pre-commit"]
 
 [project.scripts]
-# si tienes main() en GA TSP
+# habilita el CLI 'evo-tsp' si classroom/evo/ga_tsp.py define def main()
 evo-tsp = "classroom.evo.ga_tsp:main"
 
 [tool.setuptools.packages.find]
+# Descubre paquetes bajo src/
 where = ["src"]
 include = ["classroom*"]
 
+# --- Configuración de pytest (para que mire 'tests/' en la raíz) ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*", "*Tests"]
+python_functions = ["test_*"]
