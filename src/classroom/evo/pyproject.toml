@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evo"
+version = "0.1.0"
+description = "Algoritmos Evolutivos en Python (GA/operadores/TSP)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "matplotlib", "scipy"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pre-commit"]
+
+[project.scripts]
+# Requiere que evo/ga_tsp.py tenga def main()
+evo-tsp = "evo.ga_tsp:main"
+
+[tool.setuptools]
+packages = ["evo"]  # porque tu paquete ya es la carpeta evo/ en la raíz
