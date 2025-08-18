@@ -1,4 +1,4 @@
-[[build-system]
+[build-system]
 requires = ["setuptools>=65", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -16,22 +16,22 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# extras instalables con: pip install -e .[evo]
+# extras: pip install -e .[evo]
 evo = ["deap", "pymoo", "cmaes"]
-# extras de desarrollo: pip install -e .[dev]
+# desarrollo: pip install -e .[dev]
 dev = ["pytest", "pre-commit"]
 
 [project.scripts]
-# habilita el CLI 'evo-tsp' si classroom/evo/ga_tsp.py define def main()
+# requiere def main() en src/classroom/evo/ga_tsp.py
 evo-tsp = "classroom.evo.ga_tsp:main"
 
 [tool.setuptools.packages.find]
-# Descubre paquetes bajo src/
+# descubre paquetes bajo src/
 where = ["src"]
 include = ["classroom*"]
 
-# --- Configuración de pytest (para que mire 'tests/' en la raíz) ---
 [tool.pytest.ini_options]
+# para que pytest mire tests/ en la raíz
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*", "*Tests"]
