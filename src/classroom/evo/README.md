@@ -1,4 +1,4 @@
-  <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
+   <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
   <p>Un repositorio dedicado a la teoría y práctica de <b>Algoritmos Evolutivos (EA)</b>, diseñado para docencia, investigación y desarrollo.</p>
   <!-- Badges -->
   <p>
