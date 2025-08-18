@@ -3,19 +3,22 @@ requires = ["setuptools>=65", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "evo"
+name = "classroom"
 version = "0.1.0"
-description = "Algoritmos Evolutivos en Python (GA/operadores/TSP)"
+description = "Material y paquetes: classroom.evo, classroom.graphs, classroom.bigdata, classroom.ca"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy", "pandas", "matplotlib", "scipy"]
 
 [project.optional-dependencies]
+evo = ["deap", "pymoo", "cmaes"]
 dev = ["pytest", "pre-commit"]
 
 [project.scripts]
-# Requiere que evo/ga_tsp.py tenga def main()
-evo-tsp = "evo.ga_tsp:main"
+# si tienes main() en GA TSP
+evo-tsp = "classroom.evo.ga_tsp:main"
 
-[tool.setuptools]
-packages = ["evo"]  # porque tu paquete ya es la carpeta evo/ en la raíz
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["classroom*"]
+
