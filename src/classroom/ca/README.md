@@ -1,5 +1,3 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/gist/carlos-gg/a23251c37a7b82f053535e064972fddc/raw/d4f0b4352a1a1b183424d8689c1ca65a0b77e8ac/autocell-logo.svg" alt="AutoCell Logo" width="150"/>
   <h1>🦠 AutoCell — Autómatas Celulares</h1>
   <p>Repositorio integral para el estudio e implementación de <b>Autómatas Celulares (AC)</b>: desde fundamentos teóricos y simulación de reglas clásicas (Conway, Wolfram) hasta variantes reversibles, estocásticas, multi-estado, en grafos y aceleradas por GPU.</p>
 
