@@ -1,8 +1,5 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/gist/carlos-gg/f9a8ad155a3b6d2e4f0c4cf1171dd368/raw/b1f9f23793f1f7e346b026601438b97d10c71c4c/evo-algo-logo.svg" alt="EvoAlgo Logo" width="150"/>
   <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
   <p>Un repositorio dedicado a la teoría y práctica de <b>Algoritmos Evolutivos (EA)</b>, diseñado para docencia, investigación y desarrollo.</p>
-
   <!-- Badges -->
   <p>
     <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10 | 3.11-3776AB?logo=python"></a>
