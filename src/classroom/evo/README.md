@@ -18,13 +18,6 @@
   </p>
 </div>
 
----
-
-## 🎯 Visión General
-
-¡Ups! Tienes toda la razón, pido disculpas. El error en el diagrama de Mermaid se debe a que los caracteres especiales como `{` y `}` confunden al procesador si no se encierran entre comillas.
-
-Aquí está el **código corregido para el diagrama Mermaid** que sí funcionará correctamente:
 
 ```mermaid
 graph TD
