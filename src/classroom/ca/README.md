@@ -106,14 +106,15 @@ from autocell.core import step_life
 from autocell.viz import animate_gif
 
 grid = np.zeros((100, 100), dtype=np.uint8)
-grid[50, 49:52] = 1; grid = 1; grid = 1  # glider
+# Ejemplo de patrón inicial (blinker)
+grid[50, 49:52] = 1
 
 frames = []
 for _ in range(200):
     frames.append(grid.copy())
     grid = step_life(grid, bc="periodic")  # Moore 8-neighbors
 
-animate_gif(frames, "images/glider.gif", fps=10, cmap="binary")
+animate_gif(frames, "images/blinker.gif", fps=10, cmap="binary")
 ```
 
 ---
@@ -187,7 +188,9 @@ def step_life(grid: np.ndarray, bc="periodic") -> np.ndarray:
         s = sum(np.roll(np.roll(a, dx, 0), dy, 1)
                 for dx in (-1,0,1) for dy in (-1,0,1) if (dx,dy)!=(0,0))
         return s
-    n = neigh_sum(grid) if bc=="periodic" else neigh_sum(_pad(grid, bc))
+    
+    # Esta es una versión simplificada, una implementación real manejaría los BC de otra forma
+    n = neigh_sum(grid)
     return ((n==3) | ((grid==1) & (n==2))).astype(grid.dtype)
 ```
 
@@ -343,15 +346,15 @@ Código bajo **MIT**. Contenido docente (texto/notebooks/figuras) bajo **CC BY 4
 
 ```mermaid
 flowchart TD
-  S([Inicio]) --> Cfg[Definir tamaño, estados, vecindad, BC, seed]
-  Cfg --> Init[Inicializar patrón (aleatorio/RLE/custom)]
-  Init --> Loop["¿t < T?"]
-  Loop -- Sí --> Neigh[Calcular vecindarios / conteos]
-  Neigh --> Rule[Aplicar regla local f]
-  Rule --> State[Actualizar estado (buffer doble)]
-  State --> Rec[Registrar métricas/frames]
+  S([Inicio]) --> Cfg["Definir tamaño, estados, vecindad, BC, seed"]
+  Cfg --> Init["Inicializar patrón (aleatorio/RLE/custom)"]
+  Init --> Loop{"¿t < T?"}
+  Loop -- Sí --> Neigh["Calcular vecindarios / conteos"]
+  Neigh --> Rule["Aplicar regla local f"]
+  Rule --> State["Actualizar estado (buffer doble)"]
+  State --> Rec["Registrar métricas/frames"]
   Rec --> Loop
-  Loop -- No --> Viz[Visualizar/guardar GIF/CSV]
+  Loop -- No --> Viz["Visualizar/guardar GIF/CSV"]
   Viz --> End([Fin])
 ```
 
@@ -359,7 +362,7 @@ flowchart TD
 
 ```mermaid
 graph LR
-  A[Conteo de 8 vecinos] --> B{"n == 3?"}
+  A["Conteo de 8 vecinos (n)"] --> B{"n == 3?"}
   B -- Sí --> Alive["Viva (1)"]
   B -- No --> C{"(n == 2) y (celda == 1)?"}
   C -- Sí --> Alive
