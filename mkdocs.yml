@@ -1,0 +1,44 @@
+site_name: Big Data · Graphs · Evo · CA — Classroom
+site_url: https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/
+repo_url: https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom
+theme:
+  name: material
+  language: es
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - content.code.copy
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: lime
+    - scheme: slate
+      primary: indigo
+      accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Modo oscuro
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - scripts/gen_html_gallery.py
+  - section-index
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.tabbed
+
+nav:
+  - Inicio: index.md
+  - Demos HTML: gallery/index.md
