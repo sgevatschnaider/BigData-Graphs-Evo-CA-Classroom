@@ -1,0 +1,155 @@
+<svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradientes -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f7fa;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Filtros para efectos -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo con gradiente -->
+  <rect width="800" height="200" fill="url(#bgGradient)" rx="15"/>
+  
+  <!-- Partículas de fondo animadas (Big Data) -->
+  <g opacity="0.2">
+    <circle cx="100" cy="50" r="2" fill="#ffffff">
+      <animate attributeName="cy" values="50;30;50" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="80" r="1.5" fill="#ffffff">
+      <animate attributeName="cy" values="80;60;80" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="40" r="1" fill="#ffffff">
+      <animate attributeName="cy" values="40;20;40" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Nodos y conexiones de grafo (módulo Grafos) -->
+  <g opacity="0.3" stroke="#ffffff" stroke-width="1" fill="none">
+    <!-- Conexiones -->
+    <line x1="680" y1="60" x2="720" y2="40">
+      <animate attributeName="stroke-opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+    </line>
+    <line x1="680" y1="60" x2="720" y2="80">
+      <animate attributeName="stroke-opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="720" y1="40" x2="750" y2="60">
+      <animate attributeName="stroke-opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+    </line>
+    <line x1="720" y1="80" x2="750" y2="60">
+      <animate attributeName="stroke-opacity" values="0.3;0.8;0.3" dur="1.8s" repeatCount="indefinite"/>
+    </line>
+    
+    <!-- Nodos -->
+    <circle cx="680" cy="60" r="4" fill="#ffffff" opacity="0.6">
+      <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="720" cy="40" r="3" fill="#ffffff" opacity="0.5">
+      <animate attributeName="r" values="3;5;3" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="720" y1="80" r="3" fill="#ffffff" opacity="0.5">
+      <animate attributeName="r" values="3;5;3" dur="1.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="750" cy="60" r="4" fill="#ffffff" opacity="0.6">
+      <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Grid de Autómata Celular -->
+  <g opacity="0.4">
+    <g id="cellular-grid">
+      <rect x="50" y="140" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="60" y="140" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="70" y="140" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="80" y="140" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="50" y="150" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="60" y="150" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.7s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="70" y="150" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="80" y="150" width="8" height="8" fill="#ffffff">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="2.3s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+  
+  <!-- Elementos evolutivos (DNA/cromosomas) -->
+  <g opacity="0.3">
+    <path d="M650 140 Q660 130 670 140 T690 140" stroke="#ffffff" stroke-width="2" fill="none">
+      <animate attributeName="d" values="M650 140 Q660 130 670 140 T690 140;M650 140 Q660 150 670 140 T690 140;M650 140 Q660 130 670 140 T690 140" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M650 150 Q660 160 670 150 T690 150" stroke="#ffffff" stroke-width="2" fill="none">
+      <animate attributeName="d" values="M650 150 Q660 160 670 150 T690 150;M650 150 Q660 140 670 150 T690 150;M650 150 Q660 160 670 150 T690 150" dur="3s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Título principal -->
+  <text x="400" y="70" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="url(#textGradient)" filter="url(#shadow)">
+    Big Data · Graphs · Evolutionary · CA
+  </text>
+  
+  <!-- Subtítulo -->
+  <text x="400" y="95" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#ffffff" opacity="0.9">
+    Interactive Educational Materials
+  </text>
+  
+  <!-- Línea decorativa animada -->
+  <line x1="200" y1="110" x2="600" y2="110" stroke="#ffffff" stroke-width="2" opacity="0.5">
+    <animate attributeName="stroke-dasharray" values="0 400;200 200;400 0;0 400" dur="4s" repeatCount="indefinite"/>
+  </line>
+  
+  <!-- Badges informativos -->
+  <g transform="translate(320, 130)">
+    <rect width="160" height="25" rx="12" fill="#ffffff" opacity="0.2"/>
+    <text x="80" y="17" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#ffffff" opacity="0.8">
+      🐍 Python  📊 Jupyter  🔬 Open Source
+    </text>
+  </g>
+  
+  <!-- Efecto de pulso en el fondo -->
+  <circle cx="400" cy="100" r="300" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.1">
+    <animate attributeName="r" values="250;350;250" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.1;0.03;0.1" dur="6s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Elementos decorativos de código -->
+  <g opacity="0.2" font-family="monospace" font-size="10" fill="#ffffff">
+    <text x="20" y="30">def evolve():</text>
+    <text x="20" y="45">  population.mutate()</text>
+    <text x="750" y="170">while True:</text>
+    <text x="750" y="185">  step()</text>
+  </g>
+</svg>
