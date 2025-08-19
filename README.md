@@ -141,6 +141,13 @@ Puedes abrir y ejecutar los notebooks en Google Colab directamente desde aquí:
 | **Preguntas Big Data** | [![📄 Descargar PDF](https://img.shields.io/badge/📄%20Descargar-Preguntas%20Big%20Data-red?style=for-the-badge)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/9b93a3f622c3d4a544fe593d8ede12f4f1de2f14/Preguntas_Big_Data.pdf) |
 | **Preguntas y Respuestas sobre Sistemas de Recomendación** | [![📄 Descargar PDF](https://img.shields.io/badge/📄%20Descargar-Preguntas%20y%20Respuestas%20sobre%20Sistemas%20de%20Recomendación-red?style=for-the-badge)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/ed7eb3145a0f91d14dd5e450886e9f876d626ab2/Preguntas%20y%20Respuestas%20sobre%20Sistemas%20de%20Recomendaci%C3%B3n.pdf) |
 
+## 📝 Sharding y sistemas distribuidos
+
+| 📄 **Recurso** | 📥 **Acceso** |
+|---------------|---------------|
+| **Big data clase 2025** | [![📄 Descargar PDF](https://img.shields.io/badge/📄%20Descargar-Big%20data%20clase%202025-red?style=for-the-badge)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/865757a0e290dd3a8692fbc8db8734a24da10964/Big%20data%20clase%202025.pdf) |
+| **Sharding y el Teorema CAP en Sistemas Distribuidos** | [![🔍 Ver en GitHub](https://img.shields.io/badge/🔍%20Ver%20en-GitHub-blue?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/865757a0e290dd3a8692fbc8db8734a24da10964/notebooks/%20Clase_2_Sharding_y_el_Teorema_CAP_en_Sistemas_Distribuidos_pynb.ipynb) |
+
 
 ## 📝 Fundamentos de la Teoría de Grafos
 
