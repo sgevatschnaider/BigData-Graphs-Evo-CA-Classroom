@@ -27,7 +27,7 @@ jobs:
           pip install -r requirements.txt
       - name: Sanity check: asset exists
         run: |
-          test -f docs/assets/modelo-erdos-renyi.html|| { echo "Falta docs/assets/modelo-erdos-renyi.htm"; exit 1; }
+          test -f docs/assets/modelo-erdos-renyi.html || { echo "Falta docs/assets/modelo-erdos-renyi.html"; exit 1; }
       - name: Build MkDocs
         run: mkdocs build --strict --site-dir site
       - name: Configure Pages
