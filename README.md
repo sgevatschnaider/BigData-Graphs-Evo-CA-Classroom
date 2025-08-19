@@ -158,6 +158,10 @@ Puedes abrir y ejecutar los notebooks en Google Colab directamente desde aquí:
 |---|---|
 | **Modelo Erdős–Rényi — Visualización Interactiva (HTML)** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Demo en HTML/JS del modelo aleatorio <strong>G(n, p)</strong>…</p></details> | [![🧪 Abrir demo (GitHub Pages)](https://img.shields.io/badge/🧪%20Abrir%20demo-GitHub%20Pages-2ea043?style=for-the-badge&logo=github)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/docs/assets/modelo-erdos-renyi.htm) [![Ver archivo en GitHub](https://img.shields.io/badge/Ver%20archivo-en%20GitHub-blue?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/docs/assets/modelo-erdos-renyi.htm) |
 
+[![🧪 Abrir demo (GitHub Pages)](https://img.shields.io/badge/🧪%20Abrir%20demo-GitHub%20Pages-2ea043?style=for-the-badge&logo=github)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/modelo-erdos-renyi.htm)
+[![Ver archivo en GitHub](https://img.shields.io/badge/Ver%20archivo-en%20GitHub-blue?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/docs/assets/modelo-erdos-renyi.htm)
+
+
 
 
 ## 🤝 Cómo Contribuir
