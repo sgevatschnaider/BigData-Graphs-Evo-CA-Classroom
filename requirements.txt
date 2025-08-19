@@ -3,7 +3,10 @@ pandas
 matplotlib
 scipy
 pytest
+
+mkdocs>=1.5
 mkdocs-material>=9.5
 mkdocs-gen-files>=0.5
 mkdocs-section-index>=0.3
 pymdown-extensions>=10.8
+
