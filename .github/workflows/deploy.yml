@@ -1,4 +1,4 @@
-name: Deploy MkDocs
+name: Deploy site (MkDocs → GitHub Pages)
 
 on:
   push:
@@ -6,7 +6,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -15,6 +21,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: mkdocs gh-deploy --force
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+      - name: Sanity check: asset exists
+        run: |
+          test -f docs/assets/modelo-erdos-renyi.htm || { echo "Falta docs/assets/modelo-erdos-renyi.htm"; exit 1; }
+      - name: Build MkDocs
+        run: mkdocs build --strict --site-dir site
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
