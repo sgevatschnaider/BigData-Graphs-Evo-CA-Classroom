@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>⚙️ DataGraphX — Big Data + IA/ML + Grafos + Blockchain + Algoritmos Evolutivos</h1>
+    <h1>⚙️ Big Data </h1>
   <p>Plataforma integral para diseñar, ejecutar y gobernar <b>pipelines de datos a escala</b>, entrenar y desplegar <b>modelos de IA/ML</b>, realizar <b>analítica en grafos</b>, asegurar <b>trazabilidad y pruebas de integridad en blockchain</b> y optimizar con <b>algoritmos evolutivos</b>.</p>
 
   <!-- Badges -->
