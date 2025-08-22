@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>📘 Graph — README</h1>
+  <h1>📘 Teoría de los grafos — README</h1>
   <p>Teoría y práctica aplicada de <b>Teoría de Grafos</b> para docencia y desarrollo.</p>
 
 ## Recurso visual — Hipercubo 4D (Tesseracto)
