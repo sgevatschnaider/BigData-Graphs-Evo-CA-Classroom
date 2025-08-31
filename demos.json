@@ -1,20 +1,23 @@
 [
   {
-    "title": "VIRALIDAD",
+    "title": "Dashboard de Viralidad — Grafo • Evolutivo • Autómata",
     "path": "/src/classroom/graphs/recursos/VIRALIDAD.html",
     "tag": "Redes",
-    "desc": "Propagación y métricas."
+    "desc": "",
+    "mtime": "2025-08-31T18:15:55-03:00"
   },
   {
-    "title": "Puentes de Königsberg",
+    "title": "Königsberg — Grafo Equivalente (Interactivo)",
     "path": "/src/classroom/graphs/recursos/konigsberg.html",
     "tag": "Grafos",
-    "desc": "Clásico de Euler."
+    "desc": "",
+    "mtime": "2025-08-24T17:15:48-03:00"
   },
   {
-    "title": "HIPERCOMPUTADORA",
+    "title": "Máquina de Zeno + Máquina de Turing (δ) — Visualizador Pro",
     "path": "/src/classroom/graphs/recursos/HIPERCOMPUTADORA.html",
     "tag": "Comp. teórica",
-    "desc": "Demo de hipercomputación."
+    "desc": "",
+    "mtime": "2025-08-31T19:27:24-03:00"
   }
 ]
