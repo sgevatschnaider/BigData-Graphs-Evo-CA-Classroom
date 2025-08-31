@@ -6,7 +6,19 @@
 [![src/classroom/ca](https://img.shields.io/badge/src-ca-0366d6)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/tree/main/src/classroom/ca)
 
 
-**Live docs:** https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/
+<p align="center">
+  <a href="https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/" target="_blank" rel="noopener">
+    <img alt="Live docs — GitHub Pages"
+         src="https://img.shields.io/badge/Live%20docs-GitHub%20Pages-2b3137?style=for-the-badge&logo=github" />
+  </a>
+  &nbsp;
+  <a href="https://clinquant-meringue-3930c2.netlify.app/" target="_blank" rel="noopener">
+    <img alt="Live demos — Netlify"
+         src="https://img.shields.io/badge/Live%20demos-Netlify-00c7b7?style=for-the-badge&logo=netlify" />
+  </a>
+</p>
+
+Material docente reproducible para Big Data, Teoría de Grafos, Algoritmos Evolutivos y Autómatas Celulares. Incluye notebooks, módulos en src/, tests (nbmake/pytest) y docs (MkDocs Material con syllabus y cronograma).
 
 
 Material docente reproducible para Big Data, Teoria de Grafos, Algoritmos Evolutivos y Automatas Celulares.
