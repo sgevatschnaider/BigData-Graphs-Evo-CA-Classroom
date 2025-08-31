@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Takuzu 6×6 — Grafo de Factores Mejorado</title>
+<link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet">
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  :root{
+    --bg: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%);
+    --panel: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    --panel-border: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --accent: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --accent2: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    --ok: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --warn: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --err: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --chip: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    --glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    --glow-accent: 0 0 30px rgba(6, 182, 212, 0.4);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--ink); background: var(--bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh; position: relative; overflow-x: auto;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    background:
+      radial-gradient(circle at 20% 80%, rgba(120,119,198,.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255,119,198,.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120,219,255,.05) 0%, transparent 50%);
+  }
+  header {
+    padding: 24px 32px; display:flex; gap:20px; align-items:center; position:sticky; top:0; z-index:100;
+    background: rgba(15,15,35,.9); border-bottom:1px solid rgba(255,255,255,.1);
+    backdrop-filter: blur(20px) saturate(180%); box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  }
+  header h1 {
+    margin:0; font-size:24px; font-weight:600; letter-spacing:-.025em;
+    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header .hint { color: var(--muted); font-size:14px; font-weight:400; opacity:.8; }
+  main {
+    display:grid; grid-template-columns:minmax(400px,520px) 1fr; gap:24px; padding:24px 32px;
+    max-width:1800px; margin:0 auto;
+  }
+  .card {
+    background: var(--panel); border:1px solid; border-image: var(--panel-border) 1;
+    border-radius:24px; overflow:hidden; box-shadow: var(--shadow-xl); backdrop-filter: blur(10px); position:relative;
+  }
+  .card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.2) 50%, transparent 100%); }
+  .card > header {
+    position:static; background: rgba(30,41,59,.5); border-bottom:1px solid rgba(255,255,255,.1);
+    padding:20px 24px; backdrop-filter: blur(10px);
+  }
+  .card > header h2 { margin:0; font-size:18px; font-weight:600; letter-spacing:-.025em; }
+  .board { padding:24px; display:flex; flex-direction:column; gap:20px; }
+  .grid {
+    width:100%; aspect-ratio:1/1; background: var(--chip); border-radius:20px; padding:16px;
+    display:grid; grid-template-columns:repeat(6,1fr); grid-template-rows:repeat(6,1fr);
+    gap:12px; border:1px solid rgba(255,255,255,.1);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.4); position:relative;
+  }
+  .grid::before {
+    content:''; position:absolute; top:1px; left:1px; right:1px; height:50%;
+    background: linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 100%);
+    border-radius:19px 19px 0 0; pointer-events:none;
+  }
+  .cell {
+    border-radius:16px; background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer;
+    border:1px solid rgba(255,255,255,.1); position:relative; transition: all .3s cubic-bezier(.4,0,.2,1);
+    overflow:hidden;
+  }
+  .cell::before {
+    content:''; position:absolute; inset:0; background: linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 50%);
+    opacity:0; transition: opacity .3s ease;
+  }
+  .cell:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,.4), var(--glow);
+    border-color: rgba(59,130,246,.5); }
+  .cell:hover::before { opacity:1; }
+  .cell.given {
+    cursor:not-allowed; background: linear-gradient(145deg, #451a03 0%, #292524 100%); border:2px solid transparent;
+    background-clip: padding-box; position:relative;
+  }
+  .cell.given::after {
+    content:''; position:absolute; inset:-2px; padding:2px; background: var(--warn); border-radius:18px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor; -webkit-mask-composite: xor;
+  }
+  .cell.given:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 10px 25px rgba(245,158,11,.3); }
+  .cell .tag { position:absolute; top:8px; left:10px; font-size:10px; color: rgba(255,255,255,.6); font-weight:500; font-family:'Fira Code', monospace; }
+  .cell .val { filter: drop-shadow(0 2px 8px rgba(0,0,0,.3)); transition: all .3s ease; }
+  .cell:hover .val { transform: scale(1.1); }
+  .bad {
+    background: linear-gradient(145deg, #7f1d1d 0%, #450a0a 100%) !important; border-color:#ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239,68,68,.5) inset, 0 0 20px rgba(239,68,68,.4) !important;
+    animation: shake .5s ease-in-out;
+  }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-2px);} 75%{transform:translateX(2px);} }
+  .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .pill {
+    padding:12px 18px; border-radius:12px; background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    border:1px solid rgba(255,255,255,.2); color:var(--ink); font-size:13px; font-weight:500;
+    cursor:pointer; transition:all .3s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden;
+  }
+  .pill::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent); transition:left .5s ease; }
+  .pill:hover { border-color: rgba(59,130,246,.6); box-shadow: var(--glow); transform: translateY(-1px); }
+  .pill:hover::before { left:100%; }
+  .pill:active { transform: translateY(0); }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:14px; font-weight:500; }
+  .dot,.box,.diamond { display:inline-block; margin-right:8px; vertical-align:middle; }
+  .dot { width:14px; height:14px; border-radius:50%; background: var(--ok); box-shadow:0 2px 8px rgba(16,185,129,.3); }
+  .box { width:14px; height:14px; background: var(--accent); border-radius:3px; box-shadow:0 2px 8px rgba(59,130,246,.3); }
+  .diamond { width:12px; height:12px; transform:rotate(45deg); background: var(--accent2); border-radius:2px; box-shadow:0 2px 8px rgba(6,182,212,.3); }
+  #network {
+    height:720px; width:100%;
+    background:
+      radial-gradient(circle at 30% 70%, rgba(59,130,246,.05) 0%, transparent 50%),
+      radial-gradient(circle at 70% 30%, rgba(6,182,212,.05) 0%, transparent 50%),
+      linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    border-radius:16px; position:relative; overflow:hidden;
+  }
+  #network::before {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(0deg, rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:40px 40px; pointer-events:none;
+  }
+  .footer {
+    color:var(--muted); font-size:13px; padding:16px 24px; border-top:1px solid rgba(255,255,255,.1);
+    display:flex; justify-content:space-between; align-items:center; background: rgba(15,23,42,.5); backdrop-filter: blur(10px);
+  }
+  a { color:#93c5fd; text-decoration:none; transition: color .3s ease; }
+  a:hover { color:#ddd6fe; text-decoration:underline; }
+  input[type="checkbox"] {
+    appearance:none; width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-radius:4px; margin-right:8px;
+    position:relative; cursor:pointer; transition:all .3s ease; vertical-align:middle;
+  }
+  input[type="checkbox"]:checked { background: var(--accent2); border-color:#06b6d4; }
+  input[type="checkbox"]:checked::after { content:'✓'; position:absolute; top:-2px; left:2px; color:white; font-size:12px; font-weight:bold; }
+  @media (max-width:1200px) { main{grid-template-columns:1fr; gap:20px; padding:20px} .card{border-radius:20px} #network{height:600px} }
+  @media (max-width:768px) {
+    header{padding:20px; flex-direction:column; text-align:center; gap:12px}
+    header h1{font-size:20px} .controls{justify-content:center} .legend{justify-content:center}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>✨ Takuzu 6×6 — Visualización con Grafo de Factores</h1>
+  <div class="hint">🔵 Círculos = variables • 🟦 Cuadrados = restricciones fila/columna • 🔷 Rombos = ventanas de 3</div>
+</header>
+
+<main>
+  <!-- Panel: tablero -->
+  <section class="card">
+    <header><h2>🎯 Tablero Interactivo</h2></header>
+    <div class="board">
+      <div class="grid" id="grid"></div>
+      <div class="controls">
+        <label style="font-size:14px;color:var(--muted);display:flex;align-items:center;cursor:pointer">
+          <input type="checkbox" id="toggleWindows"> Mostrar <b>ventanas de 3</b>
+        </label>
+        <button class="pill" id="checkBtn">🔍 Comprobar reglas</button>
+        <button class="pill" id="resetBtn">🔄 Reiniciar</button>
+        <button class="pill" id="solveBtn">💡 Mostrar solución</button>
+        <button class="pill" id="centerBtn">🎯 Centrar grafo</button>
+      </div>
+      <div class="legend">
+        <span><span class="dot"></span> Variable</span>
+        <span><span class="box"></span> Restricción fila/columna</span>
+        <span><span class="diamond"></span> Ventana 3-en-línea</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel: grafo -->
+  <section class="card">
+    <header><h2>🕸️ Grafo de Factores</h2></header>
+    <div id="network"></div>
+    <div class="footer">
+      <div><strong>R<sub>r</sub></strong> = fila (3 unos) • <strong>C<sub>c</sub></strong> = columna (3 unos) • <strong>TR/TC</strong> prohíben 000/111</div>
+      <div style="opacity:.8">Powered by <a href="https://visjs.github.io/vis-network/docs/network/" target="_blank">vis-network</a></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ========  Datos del puzzle 6×6  ======== */
+const N = 6;
+/* Pistas (editables): */
+const given = {
+  x11:0, x13:1, x15:1,
+  x22:0, x24:1, x26:1,
+  x31:1, x34:0, x36:0,
+  x42:1, x45:1,
+  x51:1, x53:1, x56:0,
+  x62:1, x64:1
+};
+/* Solución (editas si cambias el puzzle): */
+const solution = {
+  x11:0,x12:0,x13:1,x14:0,x15:1,x16:1,
+  x21:0,x22:0,x23:1,x24:1,x25:0,x26:1,
+  x31:1,x32:1,x33:0,x34:0,x35:1,x36:0,
+  x41:0,x42:1,x43:0,x44:0,x45:1,x46:1,
+  x51:1,x52:0,x53:1,x54:1,x55:0,x56:0,
+  x61:1,x62:1,x63:0,x64:1,x65:0,x66:0
+};
+
+/* ========  Render del tablero mejorado  ======== */
+const gridEl = document.getElementById('grid');
+const toEmoji = v => v===1 ? "☀️" : v===0 ? "🌙" : "";
+const cells = {};
+let cellIndex = 0;
+
+for(let r=1;r<=N;r++){
+  for(let c=1;c<=N;c++){
+    const id = `x${r}${c}`;
+    const div = document.createElement('div');
+    div.className = 'cell';
+    if(given[id]!==undefined) div.classList.add('given');
+    div.dataset.id = id;
+    div.innerHTML = `<span class="tag">${id}</span><span class="val">${toEmoji(given[id])}</span>`;
+    // animación de entrada
+    div.style.opacity = '0';
+    div.style.transform = 'translateY(20px) scale(0.8)';
+    setTimeout(() => {
+      div.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      div.style.opacity = '1';
+      div.style.transform = 'translateY(0) scale(1)';
+    }, cellIndex * 50);
+    div.addEventListener('mouseenter', ()=>highlightNeighborhood(id,true));
+    div.addEventListener('mouseleave', ()=>highlightNeighborhood(id,false));
+    div.addEventListener('click', ()=>{
+      if(div.classList.contains('given')) return;
+      const span = div.querySelector('.val');
+      const cur = span.textContent.trim()==="☀️" ? 1 : span.textContent.trim()==="🌙" ? 0 : null;
+      const next = (cur===null) ? 1 : (cur===1 ? 0 : null);
+      // animación cambio
+      span.style.transform = 'scale(0)';
+      setTimeout(() => {
+        span.textContent = toEmoji(next);
+        span.style.transform = 'scale(1.2)';
+        setTimeout(() => { span.style.transform = 'scale(1)'; }, 150);
+      }, 150);
+      selectNode(id);
+    });
+    gridEl.appendChild(div);
+    cells[id] = div;
+    cellIndex++;
+  }
+}
+
+/* ========  Construcción del grafo mejorado  ======== */
+const nodes = new vis.DataSet();
+const edges = new vis.DataSet();
+const nodesWin = new vis.DataSet();
+const edgesWin = new vis.DataSet();
+
+/* posiciones paramétricas mejoradas */
+const xVarsStart = 220, xStep = 140;
+const yVarsStart = 100, yStep = 110;
+const xR = xVarsStart - 130;
+const xC = xVarsStart + (N-1)*xStep + 130;
+
+// Fila (Rr)
+for(let r=1;r<=N;r++){
+  nodes.add({ 
+    id:`R${r}`, label:`R${r}\n(3 ☀️)`, shape:'box',
+    color:{
+      background:'rgba(59,130,246,.15)', border:'#3b82f6',
+      highlight:{background:'rgba(59,130,246,.25)', border:'#1d4ed8'},
+      hover:{background:'rgba(59,130,246,.2)', border:'#2563eb'}
+    },
+    font:{color:'#cbd5e1', size:13, face:'Inter'},
+    borderWidth:2, shadow:{enabled:true, color:'rgba(59,130,246,.3)', size:8},
+    x:xR, y:yVarsStart+(r-1)*yStep, fixed:true
+  });
+}
+// Columna (Cc)
+for(let c=1;c<=N;c++){
+  nodes.add({ 
+    id:`C${c}`, label:`C${c}\n(3 ☀️)`, shape:'box',
+    color:{
+      background:'rgba(59,130,246,.15)', border:'#3b82f6',
+      highlight:{background:'rgba(59,130,246,.25)', border:'#1d4ed8'},
+      hover:{background:'rgba(59,130,246,.2)', border:'#2563eb'}
+    },
+    font:{color:'#cbd5e1', size:13, face:'Inter'},
+    borderWidth:2, shadow:{enabled:true, color:'rgba(59,130,246,.3)', size:8},
+    x:xC, y:yVarsStart+(c-1)*yStep, fixed:true
+  });
+}
+// Variables (x_rc)
+for(let r=1;r<=N;r++){
+  for(let c=1;c<=N;c++){
+    const id=`x${r}${c}`, isGiven = given[id]!==undefined;
+    nodes.add({
+      id, label:id, shape:'circle', size: isGiven ? 25 : 22,
+      color:{
+        background: isGiven ? 'rgba(245,158,11,.2)' : 'rgba(16,185,129,.15)',
+        border: isGiven ? '#f59e0b' : '#10b981',
+        highlight:{background: isGiven ? 'rgba(245,158,11,.3)' : 'rgba(16,185,129,.25)', border: isGiven ? '#d97706' : '#059669'},
+        hover:{background: isGiven ? 'rgba(245,158,11,.25)' : 'rgba(16,185,129,.2)', border: isGiven ? '#f59e0b' : '#10b981'}
+      },
+      font:{color:'#e5e7eb', size:12, face:'Fira Code'},
+      borderWidth: isGiven ? 3 : 2,
+      shadow:{enabled:true, color: isGiven ? 'rgba(245,158,11,.4)' : 'rgba(16,185,129,.3)', size: isGiven ? 10 : 8},
+      x:xVarsStart+(c-1)*xStep, y:yVarsStart+(r-1)*yStep, fixed:true
+    });
+    edges.add({from:`R${r}`, to:id, color:{color:'rgba(45,212,191,.4)'}, width:2, smooth:{type:'continuous', roundness:.2}});
+    edges.add({from:id, to:`C${c}`, color:{color:'rgba(45,212,191,.4)'}, width:2, smooth:{type:'continuous', roundness:.2}});
+  }
+}
+
+/* Ventanas 3-en-línea mejoradas (TR horizontales) */
+for(let r=1;r<=N;r++){
+  for(let c=1;c<=N-2;c++){
+    const id=`TR_${r}_${c}`;
+    const x0=xVarsStart+(c-1)*xStep, x2=xVarsStart+(c+1)*xStep;
+    const y=yVarsStart+(r-1)*yStep - 45;
+    nodesWin.add({
+      id, label:`TR\n${r},${c}`, shape:'diamond', size:18,
+      color:{
+        background:'rgba(6,182,212,.2)', border:'#06b6d4',
+        highlight:{background:'rgba(6,182,212,.3)', border:'#0891b2'},
+        hover:{background:'rgba(6,182,212,.25)', border:'#06b6d4'}
+      },
+      font:{color:'#cbd5e1', size:10, face:'Inter'},
+      borderWidth:2, shadow:{enabled:true, color:'rgba(6,182,212,.4)', size:6},
+      x:(x0+x2)/2, y, hidden:true, fixed:true
+    });
+    edgesWin.add({from:id, to:`x${r}${c}`,   color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+    edgesWin.add({from:id, to:`x${r}${c+1}`, color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+    edgesWin.add({from:id, to:`x${r}${c+2}`, color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+  }
+}
+
+/* Ventanas 3-en-línea mejoradas (TC verticales) — COMPLETADO */
+for(let c=1;c<=N;c++){
+  for(let r=1;r<=N-2;r++){
+    const id=`TC_${c}_${r}`;
+    const y0 = yVarsStart+(r-1)*yStep, y2 = yVarsStart+(r+1)*yStep;
+    const x  = xVarsStart+(c-1)*xStep + 45;
+    nodesWin.add({
+      id, label:`TC\n${c},${r}`, shape:'diamond', size:18,
+      color:{
+        background:'rgba(6,182,212,.2)', border:'#06b6d4',
+        highlight:{background:'rgba(6,182,212,.3)', border:'#0891b2'},
+        hover:{background:'rgba(6,182,212,.25)', border:'#06b6d4'}
+      },
+      font:{color:'#cbd5e1', size:10, face:'Inter'},
+      borderWidth:2, shadow:{enabled:true, color:'rgba(6,182,212,.4)', size:6},
+      x, y:(y0+y2)/2, hidden:true, fixed:true
+    });
+    edgesWin.add({from:id, to:`x${r}${c}`,     color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+    edgesWin.add({from:id, to:`x${r+1}${c}`,   color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+    edgesWin.add({from:id, to:`x${r+2}${c}`,   color:{color:'rgba(34,211,238,.4)'}, width:1.5, hidden:true});
+  }
+}
+
+/* ========  Crear la red  ======== */
+const container = document.getElementById('network');
+const allNodesDS = new vis.DataSet([...nodes.get(), ...nodesWin.get()]);
+const allEdgesDS = new vis.DataSet([...edges.get(), ...edgesWin.get()]);
+const data = { nodes: allNodesDS, edges: allEdgesDS };
+
+const network = new vis.Network(container, data, {
+  physics:false,
+  interaction:{ hover:true, tooltipDelay:80, hoverConnectedEdges:true, multiselect:true },
+  edges:{ width:2, smooth:{type:'continuous'} },
+  nodes:{ scaling:{min:12, max:24} }
+});
+
+/* ========  Utilidades  ======== */
+function highlightNeighborhood(nodeId,on=true){
+  if(on){ network.selectNodes([nodeId], false); }
+  else { network.unselectAll(); }
+}
+function selectNode(id){
+  network.selectNodes([id], true);
+  setTimeout(()=>network.unselectAll(), 500);
+}
+network.on("hoverNode", p=>highlightNeighborhood(p.node,true));
+network.on("blurNode", p=>highlightNeighborhood(p.node,false));
+network.on("click", p=>{
+  if(p.nodes.length){
+    const id=p.nodes[0];
+    if(id.startsWith('x')){ cells[id]?.scrollIntoView({behavior:'smooth',block:'center',inline:'center'}); }
+  }
+});
+
+/* ========  Comprobación de reglas  ======== */
+const valOf = id=>{
+  const t = cells[id].querySelector('.val').textContent.trim();
+  return t==="☀️"?1:t==="🌙"?0:null;
+};
+const noTriples = arr=>{
+  for(let i=0;i<arr.length-2;i++){
+    if(arr[i]!==null && arr[i]===arr[i+1] && arr[i+1]===arr[i+2]) return false;
+  }
+  return true;
+};
+function checkBoard(){
+  // limpia marcas
+  Object.values(cells).forEach(el=>el.classList.remove('bad'));
+  // filas
+  for(let r=1;r<=N;r++){
+    const row = Array.from({length:N},(_,c)=>valOf(`x${r}${c+1}`));
+    if(!noTriples(row)) for(let c=1;c<=N;c++) cells[`x${r}${c}`].classList.add('bad');
+    const ones = row.filter(v=>v===1).length, zeros = row.filter(v=>v===0).length;
+    if(ones>3||zeros>3) for(let c=1;c<=N;c++) cells[`x${r}${c}`].classList.add('bad');
+  }
+  // columnas
+  for(let c=1;c<=N;c++){
+    const col = Array.from({length:N},(_,r)=>valOf(`x${r+1}${c}`));
+    if(!noTriples(col)) for(let r=1;r<=N;r++) cells[`x${r}${c}`].classList.add('bad');
+    const ones = col.filter(v=>v===1).length, zeros = col.filter(v=>v===0).length;
+    if(ones>3||zeros>3) for(let r=1;r<=N;r++) cells[`x${r}${c}`].classList.add('bad');
+  }
+}
+
+/* ========  Controles  ======== */
+document.getElementById('toggleWindows').addEventListener('change', e=>{
+  const show = e.target.checked;
+  nodesWin.forEach(n=> data.nodes.update({id:n.id, hidden:!show}));
+  edgesWin.forEach(ed=> data.edges.update({id:ed.id, hidden:!show}));
+});
+document.getElementById('centerBtn').addEventListener('click', ()=>network.fit({animation:true}));
+document.getElementById('solveBtn').addEventListener('click', ()=>{
+  Object.entries(solution).forEach(([id,v])=>{
+    const el=cells[id]; if(!el) return; el.querySelector('.val').textContent=toEmoji(v);
+  });
+  checkBoard();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  Object.entries(cells).forEach(([id,el])=>{
+    el.classList.remove('bad');
+    el.querySelector('.val').textContent = toEmoji(given[id]);
+  });
+});
+document.getElementById('checkBtn').addEventListener('click', checkBoard);
+</script>
+</body>
+</html>
