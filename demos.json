@@ -19,5 +19,12 @@
     "tag": "Comp. teórica",
     "desc": "",
     "mtime": "2025-08-31T19:27:24-03:00"
+  },
+  {
+    "title": "Takuzu 6×6 — Grafo de Factores Mejorado",
+    "path": "/src/classroom/graphs/recursos/takuzu.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-08-31T20:36:15-03:00"
   }
 ]
