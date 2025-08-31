@@ -1,0 +1,20 @@
+[
+  {
+    "title": "VIRALIDAD",
+    "path": "/src/classroom/graphs/recursos/VIRALIDAD.html",
+    "tag": "Redes",
+    "desc": "Propagación y métricas."
+  },
+  {
+    "title": "Puentes de Königsberg",
+    "path": "/src/classroom/graphs/recursos/konigsberg.html",
+    "tag": "Grafos",
+    "desc": "Clásico de Euler."
+  },
+  {
+    "title": "HIPERCOMPUTADORA",
+    "path": "/src/classroom/graphs/recursos/HIPERCOMPUTADORA.html",
+    "tag": "Comp. teórica",
+    "desc": "Demo de hipercomputación."
+  }
+]
