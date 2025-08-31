@@ -3,37 +3,95 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Galería</title>
+  <title>Galería de Demos</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto; margin:0; padding:32px; background:#0f172a; color:#e5e7eb}
-    h1{margin:0 0 12px}
-    p{margin:0 0 24px; color:#94a3b8}
-    ul{list-style:none; padding:0; margin:0; display:grid; gap:12px}
-    a{display:block; padding:14px 16px; background:#111827; border:1px solid #1f2937; border-radius:12px; text-decoration:none; color:inherit}
-    a:hover{transform:translateY(-1px); box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    small{color:#94a3b8}
+    :root{ --bg:#0f172a; --paper:#0b1220; --ink:#e5e7eb; --muted:#94a3b8; --card:#111827; --border:#1f2937; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto;background:linear-gradient(135deg,#0b1020,#0f172a 40%,#171a2f);color:var(--ink)}
+    header{max-width:1100px;margin:48px auto 16px;padding:0 20px}
+    h1{font-size:clamp(24px,2.8vw,36px);margin:0 0 8px}
+    p{color:var(--muted);margin:0 0 16px}
+    .toolbar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    input[type="search"]{flex:1;min-width:220px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:var(--ink)}
+    .grid{max-width:1100px;margin:12px auto 64px;padding:0 20px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+    .card{background:linear-gradient(145deg,#0f172a,#0b1220);border:1px solid var(--border);border-radius:16px;padding:18px;text-decoration:none;color:inherit;transition:.2s transform,.2s box-shadow}
+    .card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .tag{display:inline-block;font-size:12px;color:#0ea5b7;background:#06232a;border:1px solid #113c44;padding:2px 8px;border-radius:999px;margin-bottom:10px}
+    .title{font-weight:700;font-size:18px;margin:6px 0 6px}
+    .desc{color:var(--muted);font-size:14px;line-height:1.35;min-height:38px}
+    .meta{color:#9aa4b5;font-size:12px;margin-top:8px}
+    footer{max-width:1100px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:13px}
+    .empty{max-width:1100px;margin:24px auto;padding:0 20px;color:var(--muted)}
   </style>
 </head>
 <body>
-  <h1>Galería de demos</h1>
-  <p>Elegí una página:</p>
-  <ul>
-    <li>
-      <a href="/src/classroom/graphs/recursos/VIRALIDAD.html">
-        VIRALIDAD <br><small>/src/classroom/graphs/recursos/VIRALIDAD.html</small>
-      </a>
-    </li>
-    <li>
-      <a href="/src/classroom/graphs/recursos/konigsberg.html">
-        Puentes de Königsberg <br><small>/src/classroom/graphs/recursos/konigsberg.html</small>
-      </a>
-    </li>
-    <li>
-  <a href="/src/classroom/graphs/recursos/HIPERCOMPUTADORA.html">
-    HIPERCOMPUTADORA
-    <br><small>/src/classroom/graphs/recursos/HIPERCOMPUTADORA.html</small>
-  </a>
-</li>
-  </ul>
+  <header>
+    <h1>Galería de demos</h1>
+    <p>Se llena sola leyendo <code>demos.json</code>. Subí un .html → se agrega al manifiesto → aparece acá.</p>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Buscar por título, etiqueta o descripción…" aria-label="Buscar demos" />
+    </div>
+  </header>
+
+  <main id="grid" class="grid" aria-live="polite"></main>
+  <div id="empty" class="empty" hidden>No hay resultados para tu búsqueda o no se pudo cargar <code>demos.json</code>.</div>
+
+  <footer>Hecho con ❤️ en Netlify</footer>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const q = document.getElementById('q');
+    let items = [], filtered = [];
+
+    function escapeHtml(s){return String(s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+    function fmtDate(iso){try{return new Date(iso).toLocaleDateString('es-AR')}catch{return ''}}
+
+    function card(it){
+      const a = document.createElement('a'); a.className='card'; a.href = it.path;
+      a.innerHTML = `
+        <span class="tag">${escapeHtml(it.tag||'Demo')}</span>
+        <div class="title">${escapeHtml(it.title||'Sin título')}</div>
+        <div class="desc">${escapeHtml(it.desc||'')}</div>
+        ${it.mtime ? `<div class="meta">Última act.: ${fmtDate(it.mtime)}</div>` : ''}
+      `;
+      return a;
+    }
+
+    function render(list){
+      grid.innerHTML = '';
+      if(!list.length){ empty.hidden = false; return; }
+      empty.hidden = true;
+      for(const it of list) grid.appendChild(card(it));
+    }
+
+    function applyFilter(){
+      const t = q.value.trim().toLowerCase();
+      filtered = !t ? items.slice()
+        : items.filter(it => (`${it.title} ${it.tag} ${it.desc}`||'').toLowerCase().includes(t));
+      render(filtered);
+    }
+
+    (async function load(){
+      try{
+        const res = await fetch('/demos.json', {cache:'no-store'});
+        const data = await res.json();
+        items = (Array.isArray(data)?data:[]).map(x=>({
+          title: x.title?.toString().trim() || 'Sin título',
+          path:  x.path?.toString().trim()  || '#',
+          tag:   x.tag?.toString().trim()   || 'Demo',
+          desc:  x.desc?.toString().trim()  || '',
+          mtime: x.mtime?.toString().trim() || ''
+        })).sort((a,b)=>a.title.localeCompare(b.title,'es'));
+        applyFilter();
+      }catch(e){
+        console.error(e); empty.hidden=false;
+        empty.textContent='No pude cargar demos.json (¿está en la raíz del deploy?)';
+      }
+    })();
+
+    q.addEventListener('input', applyFilter);
+  </script>
 </body>
 </html>
+
