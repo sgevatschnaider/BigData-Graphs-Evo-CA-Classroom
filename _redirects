@@ -1,0 +1,11 @@
+# Home y galería
+/           /index.html                                    200
+/galeria    /index.html                                    200
+
+# Alias cortos (URLs limpias)
+/viralidad          /src/classroom/graphs/recursos/VIRALIDAD.html        200
+/konigsberg         /src/classroom/graphs/recursos/konigsberg.html       200
+/hipercomputadora   /src/classroom/graphs/recursos/HIPERCOMPUTADORA.html 200
+
+# (Opcional) alias para el GIF del hipercubo
+/hipercubo          /src/classroom/graphs/recursos/hipercubo.gif         200
