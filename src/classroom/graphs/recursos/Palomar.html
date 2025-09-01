@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Principio del Palomar y su Poder en la Demostración</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: linear-gradient(135deg, #6190e8 0%, #a7bfe8 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-primary: #4f46e5;
+            --accent-secondary: #7c3aed;
+            --accent-highlight: #f59e0b;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.3s ease-in-out;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+            --bg-secondary: rgba(17, 24, 39, 0.9);
+            --text-primary: #d1d5db;
+            --text-secondary: #9ca3af;
+            --accent-primary: #818cf8;
+            --accent-secondary: #a78bfa;
+            --accent-highlight: #fcd34d;
+            --card-bg: rgba(31, 41, 55, 0.75);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.7;
+            transition: var(--transition);
+        }
+
+        /* --- BURBUJAS DE FONDO --- */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -150px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: rise 25s infinite ease-in;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* --- LAYOUT Y CONTENEDORES --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            color: white; /* Fallback */
+        }
+        
+        [data-theme="light"] .main-title { color: var(--text-primary); }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .card:hover { transform: translateY(-5px); }
+        
+        h2 {
+            font-size: 2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        h3 {
+             font-size: 1.5rem;
+             color: var(--text-primary);
+             margin: 2rem 0 1rem;
+        }
+
+        /* --- FORMATO DE TEXTO Y BLOQUES ESPECIALES --- */
+        .formula {
+            background: rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1rem; margin: 1rem 0;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            overflow-x: auto;
+        }
+        [data-theme="dark"] .formula { background: rgba(0, 0, 0, 0.2); }
+        
+        code {
+            background-color: rgba(124, 58, 237, 0.1);
+            color: var(--accent-secondary);
+            padding: 0.2em 0.4em; border-radius: 5px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        strong { color: var(--accent-primary); }
+
+        .key-concept {
+            border: 2px solid var(--accent-highlight);
+            border-radius: 15px; padding: 1.5rem;
+            margin-top: 2rem;
+            background: rgba(245, 158, 11, 0.05);
+        }
+        .key-concept h3 {
+            margin-top: 0;
+            color: var(--accent-highlight);
+            display: flex;
+            align-items: center;
+        }
+        .key-concept h3::before {
+            content: '💡';
+            margin-right: 0.75rem;
+            font-size: 1.8rem;
+        }
+
+        /* --- SIMULADOR INTERACTIVO --- */
+        .simulator { text-align: center; }
+        
+        #simulator-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            background: rgba(0,0,0,0.05);
+            border-radius: 15px;
+            margin: 1rem auto;
+            border: 1px solid var(--border-color);
+        }
+        [data-theme="dark"] #simulator-canvas { background: rgba(0,0,0,0.2); }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 1rem auto;
+            text-align: left;
+        }
+        @media (max-width: 600px) { .controls { grid-template-columns: 1fr; } }
+        
+        .slider {
+            -webkit-appearance: none;
+            width: 100%; height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            outline: none; border-radius: 5px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 22px; height: 22px;
+            background: var(--accent-primary);
+            cursor: pointer; border-radius: 50%;
+        }
+        
+        .info-display {
+            margin-top: 1rem; font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+        .info-display.highlight { color: var(--accent-highlight); }
+
+        /* --- OTROS --- */
+        .theme-toggle {
+            position: fixed; top: 1.5rem; right: 1.5rem;
+            width: 50px; height: 50px;
+            border-radius: 50%; background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--accent-primary);
+            transition: var(--transition); z-index: 1000;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(360deg);
+            box-shadow: var(--shadow);
+        }
+
+        footer {
+            text-align: center; padding: 2rem; margin-top: 2rem;
+            color: rgba(255,255,255,0.8);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="bubbles" id="bubbles-container"></div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Cambiar tema">🌙</button>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">El Principio del Palomar</h1>
+            <p class="subtitle">Una de las herramientas más simples y potentes del razonamiento matemático, que transforma el sentido común en un método de demostración riguroso.</p>
+        </header>
+
+        <section class="card">
+            <h2>¿Qué es el Principio del Palomar?</h2>
+            <p>También conocido como <strong>Principio de las Cajas de Dirichlet</strong>, establece una verdad innegable sobre el acto de repartir objetos en contenedores.</p>
+            <h3>Versión Básica</h3>
+            <p>Si se colocan <code>k</code> objetos en <code>m</code> cajas y <strong>el número de objetos es mayor que el de cajas (<code>k > m</code>)</strong>, entonces es inevitable que al menos una caja contenga como mínimo dos objetos.</p>
+            <h3>Versión Generalizada</h3>
+            <p>Si se reparten <code>k</code> objetos en <code>m</code> cajas, entonces al menos una caja debe contener como mínimo <code>⌈k/m⌉</code> objetos, donde <code>⌈ ⌉</code> es la función techo (redondear hacia arriba).</p>
+        </section>
+
+        <section class="card simulator">
+            <h2>Simulador Interactivo del Principio</h2>
+            <p>Usa los deslizadores para cambiar el número de palomas (objetos) y palomares (cajas) y observa el principio en acción.</p>
+            <canvas id="simulator-canvas" width="600" height="300"></canvas>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="pigeons-slider">🕊️ Palomas (Objetos): <span id="pigeons-value">6</span></label>
+                    <input type="range" min="1" max="20" value="6" class="slider" id="pigeons-slider">
+                </div>
+                <div class="control-group">
+                    <label for="holes-slider">🏠 Palomares (Cajas): <span id="holes-value">5</span></label>
+                    <input type="range" min="1" max="10" value="5" class="slider" id="holes-slider">
+                </div>
+            </div>
+            <div class="info-display" id="simulator-status">¡Principio Cumplido! k > m</div>
+        </section>
+
+        <section class="card">
+            <h2>Aplicación a Grafos: El Caso Irregular</h2>
+            <p>Una de sus aplicaciones más elegantes es demostrar por qué no puede existir un grafo simple "completamente irregular" (con todos sus grados distintos).</p>
+            <div class="formula"><strong>Teorema:</strong> No existe un grafo simple con n ≥ 2 vértices donde todos los grados sean distintos.</div>
+            <ul>
+                <li><strong>Objetos (Palomas):</strong> Los <code>n</code> vértices del grafo.</li>
+                <li><strong>Cajas (Palomares):</strong> Los posibles valores de grado que pueden tomar.</li>
+            </ul>
+            <p>La <strong>observación clave</strong> es que en un grafo simple de orden <code>n</code>, no pueden coexistir un vértice de grado <code>0</code> (aislado) y uno de grado <code>n-1</code> (conectado a todos). Esto limita el número de "cajas" de grados a un máximo de <code>n-1</code>.</p>
+            <p>Al tener <code>n</code> vértices para "asignar" a un máximo de <code>n-1</code> grados posibles, el Principio del Palomar garantiza que al menos dos vértices deben compartir el mismo grado.</p>
+            <h3>Comparación con el Argumento de Paridad</h3>
+            <p>El argumento de paridad (la suma de grados debe ser par) solo descarta la mitad de los casos para <code>n</code>. El Principio del Palomar es superior aquí porque descarta la existencia del grafo para <strong>todos los <code>n ≥ 2</code></strong> de una sola vez, siendo un argumento de conteo más general y potente.</p>
+        </section>
+
+        <section class="card">
+            <h2>Otras Aplicaciones Clásicas</h2>
+            <p>El poder del principio se manifiesta en su increíble versatilidad para resolver problemas en distintos campos:</p>
+            <ul>
+                <li><strong>Teoría de Números:</strong> Dados <code>n+1</code> enteros, al menos dos tendrán el mismo residuo al dividirlos por <code>n</code>.</li>
+                <li><strong>Geometría:</strong> Si se colocan 5 puntos en un cuadrado de lado 1, al menos dos estarán a una distancia no mayor de <code>√2/2</code>.</li>
+                <li><strong>Relaciones Sociales:</strong> En una reunión de <code>n</code> personas, al menos dos tienen el mismo número de conocidos (el problema de los grados de un grafo).</li>
+                <li><strong>Informática (Hashing):</strong> Si el número de claves supera el de "cubetas" en una tabla hash, al menos una colisión es inevitable.</li>
+                <li><strong>Calendario:</strong> En un grupo de 367 personas, es seguro que al menos dos comparten cumpleaños.</li>
+            </ul>
+        </section>
+        
+        <section class="card">
+             <div class="key-concept">
+                <h3>Concepto Clave</h3>
+                <p>La esencia del principio es un argumento de conteo puro. Si tienes más elementos a distribuir que contenedores disponibles, una asignación única (uno a uno) es imposible, forzando la repetición.</p>
+                <p><strong>En grafos:</strong> <code>n</code> vértices (objetos) y solo <code>n-1</code> grados posibles (cajas) ⇒ <strong>repetición de grado garantizada.</strong></p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MÓDULO 1: UI (TEMA Y BURBUJAS) ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const set_theme = (theme) => {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+        themeToggleBtn.addEventListener('click', () => {
+            const new_theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            set_theme(new_theme);
+        });
+        if (bubblesContainer) {
+            setInterval(() => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                bubblesContainer.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 25000);
+            }, 500);
+        }
+        set_theme(localStorage.getItem('theme') || 'dark');
+
+        // --- MÓDULO 2: CLASE DEL SIMULADOR ---
+        class PigeonholeSimulator {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.animationFrameId = null;
+            }
+
+            _getThemeColors() {
+                return {
+                    pigeon: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    hole: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    highlight: getComputedStyle(document.documentElement).getPropertyValue('--accent-highlight').trim(),
+                    text: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                };
+            }
+
+            draw(pigeonsCount, holesCount) {
+                if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+                
+                const colors = this._getThemeColors();
+                const { width, height } = this.canvas;
+                this.ctx.clearRect(0, 0, width, height);
+
+                const holeRadius = Math.min(width / (holesCount * 2.5), 25);
+                const holePositions = [];
+                for (let i = 0; i < holesCount; i++) {
+                    holePositions.push({
+                        x: width * (i + 1) / (holesCount + 1),
+                        y: height / 2,
+                    });
+                }
+                
+                const pigeons = [];
+                const holeContents = Array(holesCount).fill(0).map(() => []);
+                for(let i = 0; i < pigeonsCount; i++) {
+                    const holeIndex = i % holesCount;
+                    holeContents[holeIndex].push(i);
+                    pigeons.push({
+                        x: Math.random() * width, y: 0, // start at top
+                        targetHole: holeIndex,
+                    });
+                }
+
+                let startTime = null;
+                const duration = 1000;
+
+                const animate = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    this.ctx.clearRect(0, 0, width, height);
+                    
+                    // Draw holes
+                    holePositions.forEach((pos, i) => {
+                        this.ctx.beginPath();
+                        this.ctx.arc(pos.x, pos.y, holeRadius, 0, 2 * Math.PI);
+                        this.ctx.strokeStyle = (pigeonsCount > holesCount && holeContents[i].length > 1) ? colors.highlight : colors.hole;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.stroke();
+                        
+                        // Draw pigeon counter inside hole
+                        this.ctx.fillStyle = (pigeonsCount > holesCount && holeContents[i].length > 1) ? colors.highlight : colors.text;
+                        this.ctx.font = `bold ${holeRadius}px Arial`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+                        this.ctx.fillText(holeContents[i].length, pos.x, pos.y);
+                    });
+
+                    // Draw pigeons
+                    pigeons.forEach((p, i) => {
+                        const targetPos = holePositions[p.targetHole];
+                        const offsetIndex = holeContents[p.targetHole].indexOf(i);
+                        const finalY = targetPos.y;
+                        const finalX = targetPos.x + (offsetIndex - (holeContents[p.targetHole].length - 1) / 2) * 5;
+
+                        const currentX = p.x + (finalX - p.x) * progress;
+                        const currentY = p.y + (finalY - p.y) * progress;
+
+                        this.ctx.beginPath();
+                        this.ctx.arc(currentX, currentY, 5, 0, 2 * Math.PI);
+                        this.ctx.fillStyle = (pigeonsCount > holesCount && holeContents[p.targetHole].length > 1) ? colors.highlight : colors.pigeon;
+                        this.ctx.fill();
+                    });
+
+                    if (progress < 1) {
+                        this.animationFrameId = requestAnimationFrame(animate);
+                    }
+                };
+
+                this.animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+
+        // --- MÓDULO 3: CONTROLADOR DE LA DEMO ---
+        const simulator = new PigeonholeSimulator('simulator-canvas');
+        const pigeonsSlider = document.getElementById('pigeons-slider');
+        const holesSlider = document.getElementById('holes-slider');
+        const pigeonsValue = document.getElementById('pigeons-value');
+        const holesValue = document.getElementById('holes-value');
+        const statusDisplay = document.getElementById('simulator-status');
+        
+        const updateDemo = () => {
+            const k = parseInt(pigeonsSlider.value);
+            const m = parseInt(holesSlider.value);
+            
+            pigeonsValue.textContent = k;
+            holesValue.textContent = m;
+            
+            if (k > m) {
+                statusDisplay.textContent = `¡Principio Cumplido! ${k} > ${m}`;
+                statusDisplay.classList.add('highlight');
+            } else {
+                statusDisplay.textContent = `Principio no aplica: ${k} ≤ ${m}`;
+                statusDisplay.classList.remove('highlight');
+            }
+            simulator.draw(k, m);
+        };
+
+        pigeonsSlider.addEventListener('input', updateDemo);
+        holesSlider.addEventListener('input', updateDemo);
+        
+        const themeObserver = new MutationObserver(() => updateDemo());
+        themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+        updateDemo(); // Initial draw
+    });
+    </script>
+</body>
+</html>

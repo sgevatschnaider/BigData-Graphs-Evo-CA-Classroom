@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realización de Secuencias de Grados: De los Números al Grafo</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #373B44 0%, #4286f4 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #6b7280;
+            --accent-success: #16a34a;
+            --accent-failure: #dc2626;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.3s ease-in-out;
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #09090b 0%, #1e293b 100%);
+            --bg-secondary: rgba(15, 23, 42, 0.9);
+            --text-primary: #d1d5db;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #9ca3af;
+            --accent-success: #4ade80;
+            --accent-failure: #f87171;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden; position: relative;
+            line-height: 1.7; transition: var(--transition);
+        }
+
+        /* --- BURBUJAS DE FONDO --- */
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .bubble { position: absolute; bottom: -150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; animation: rise 40s infinite ease-in; }
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* --- LAYOUT Y CONTENEDORES --- */
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--text-primary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 1rem; color: white;
+        }
+        [data-theme="dark"] .main-title { background: linear-gradient(135deg, var(--accent-primary), var(--text-primary)); -webkit-background-clip: text; }
+        .subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem;
+            margin-bottom: 2.5rem; box-shadow: var(--shadow); transition: var(--transition);
+        }
+        .card:hover { transform: translateY(-5px); }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; }
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+        h4 { font-size: 1.2rem; color: var(--accent-secondary); margin: 1.5rem 0 0.5rem; }
+
+        /* --- FORMATO DE TEXTO Y BLOQUES ESPECIALES --- */
+        .formula {
+            background: rgba(0, 0, 0, 0.05); border-left: 4px solid var(--accent-secondary);
+            padding: 1rem; margin: 1rem 0; border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; overflow-x: auto;
+        }
+        [data-theme="dark"] .formula { background: rgba(0, 0, 0, 0.2); }
+        code {
+            background-color: rgba(59, 130, 246, 0.1); color: var(--accent-primary);
+            padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        strong { color: var(--accent-primary); }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9em; }
+        th, td { padding: 0.5rem; border: 1px solid var(--border-color); text-align: center; }
+        
+        /* --- LABORATORIO INTERACTIVO HH --- */
+        .lab { text-align: center; }
+        #sequence-input {
+            width: 100%; padding: 0.75rem; font-size: 1.1rem; border-radius: 8px;
+            border: 1px solid var(--border-color); background-color: rgba(0,0,0,0.05);
+            color: var(--text-primary); font-family: 'SF Mono', monospace;
+        }
+        [data-theme="dark"] #sequence-input { background-color: rgba(0,0,0,0.2); }
+        .lab-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; justify-content: center; }
+        .lab-buttons button {
+            padding: 0.6rem 1rem; font-size: 1rem; border: 1px solid var(--border-color);
+            border-radius: 8px; background-color: var(--card-bg); color: var(--text-primary);
+            cursor: pointer; transition: var(--transition);
+        }
+        .lab-buttons button.main-btn { background-color: var(--accent-primary); color: white; }
+        .lab-buttons button:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+        #hh-steps { margin-top: 1.5rem; text-align: left; font-family: 'SF Mono', monospace; }
+        .hh-step {
+            background: rgba(0,0,0,0.05); border-radius: 8px; padding: 0.75rem;
+            margin-bottom: 0.5rem; transition: opacity 0.5s;
+        }
+        .highlight-d1 { background-color: var(--accent-secondary); color: white; padding: 2px 4px; border-radius: 4px; }
+        .highlight-subtract { text-decoration: underline; text-decoration-color: var(--accent-primary); }
+        .step-comment { color: var(--text-secondary); font-style: italic; margin-left: 1em; }
+
+        #hh-result { font-weight: bold; font-size: 1.2rem; padding: 1rem; border-radius: 8px; margin-top: 1rem;}
+        #hh-result.success { background-color: rgba(22, 163, 74, 0.1); color: var(--accent-success); }
+        #hh-result.failure { background-color: rgba(220, 38, 38, 0.1); color: var(--accent-failure); }
+
+        /* --- OTROS --- */
+        .theme-toggle {
+            position: fixed; top: 1.5rem; right: 1.5rem; width: 50px; height: 50px;
+            border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border-color);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000;
+        }
+        .theme-toggle:hover { transform: scale(1.1) rotate(360deg); box-shadow: var(--shadow); }
+        footer { text-align: center; padding: 2rem; margin-top: 2rem; color: rgba(255,255,255,0.8); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="bubbles" id="bubbles-container"></div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Cambiar tema">🌙</button>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Realización de Secuencias de Grados</h1>
+            <p class="subtitle">Dada una lista de números, ¿puede ser esta la secuencia de grados de un grafo simple? Exploramos las herramientas algorítmicas y teóricas para responder a esta pregunta fundamental.</p>
+        </header>
+
+        <section class="card">
+            <h2>Criterios Clásicos para la Realización</h2>
+            
+            <h3>a) Algoritmo de Havel–Hakimi (HH) — Procedimiento Constructivo</h3>
+            <p>Es un método iterativo que se basa en la idea de "satisfacer al más demandante". La lógica es que si un grafo realizable existe, entonces debe existir uno donde el vértice con el grado más alto esté conectado a los vértices con los siguientes grados más altos.</p>
+            <h4>Ejemplo de Ejecución Manual: d = (3, 3, 2, 2)</h4>
+            <ol>
+                <li><strong>Secuencia inicial:</strong> <code>(3, 3, 2, 2)</code>. La suma es 10 (par).</li>
+                <li><strong>Paso 1:</strong> Tomamos <code>d₁=3</code>. Lo eliminamos y restamos 1 a los siguientes 3 términos.
+                    <br><code>(3, 2, 2)</code> → <code>(2, 1, 1)</code>. Reordenamos: <code>(2, 1, 1)</code>.</li>
+                <li><strong>Paso 2:</strong> Tomamos <code>d₁=2</code>. Lo eliminamos y restamos 1 a los siguientes 2 términos.
+                    <br><code>(1, 1)</code> → <code>(0, 0)</code>. Reordenamos: <code>(0, 0)</code>.</li>
+                <li><strong>Paso 3:</strong> La secuencia es de ceros. El algoritmo termina con <strong>éxito</strong>. La secuencia es gráfica.</li>
+            </ol>
+
+            <h3>b) Teorema de Erdős–Gallai (EG) — Condiciones Matemáticas</h3>
+            <p>Este teorema ofrece una caracterización completa mediante una condición de paridad y un conjunto de desigualdades. Para una secuencia <code>d₁ ≥ d₂ ≥ ... ≥ dₙ</code>, la suma de los grados debe ser par, y para cada <code>k</code> de 1 a <code>n</code>, debe cumplirse:</p>
+            <div class="formula">∑ (i=1 a k) dᵢ &nbsp; ≤ &nbsp; k(k-1) + ∑ (i=k+1 a n) min{dᵢ, k}</div>
+            <h4>Desglose de la Desigualdad:</h4>
+            <ul>
+                <li><code>∑ (i=1 a k) dᵢ</code>: La <strong>demanda total de aristas</strong> de los <code>k</code> vértices con mayor grado.</li>
+                <li><code>k(k-1)</code>: El número máximo de "puntos de conexión" <strong>entre</strong> esos <code>k</code> vértices. (Cada una de las k(k-1)/2 posibles aristas contribuye con 2 a la suma de grados).</li>
+                <li><code>∑ (i=k+1 a n) min{dᵢ, k}</code>: La oferta máxima de aristas desde los <code>n-k</code> vértices restantes <strong>hacia</strong> los primeros <code>k</code>. Cada vértice <code>vᵢ</code> puede ofrecer como máximo su propio grado <code>dᵢ</code>, o <code>k</code> si su grado es muy alto.</li>
+            </ul>
+        </section>
+
+        <section class="card lab">
+            <h2>Laboratorio Interactivo Havel-Hakimi</h2>
+            <p>Ingresa una secuencia de grados (separada por comas) y observa el algoritmo en acción. O usa los ejemplos de grafos casi irregulares y otros casos.</p>
+            <input type="text" id="sequence-input" placeholder="Ej: 5, 4, 3, 3, 2, 1">
+            <div class="lab-buttons">
+                <button class="main-btn" id="verify-btn">Verificar Secuencia</button>
+                <button class="preset-btn" data-sequence="3,2,2,1,0">Casi Irregular n=5 (con 0)</button>
+                <button class="preset-btn" data-sequence="4,3,2,2,1">Casi Irregular n=5 (sin 0)</button>
+                <button class="preset-btn" data-sequence="5,4,3,3,2,1">Casi Irregular n=6</button>
+                <button class="preset-btn" data-sequence="6,5,5,2,1,1">Ejemplo que Falla</button>
+            </div>
+            <div id="hh-steps"></div>
+            <div id="hh-result" style="display: none;"></div>
+        </section>
+
+        <section class="card">
+            <h2>Teorema 2.3 y Aplicaciones a "Casi Irregulares"</h2>
+            <h3>Realizar Cualquier Conjunto de Grados Positivos</h3>
+            <p>Este poderoso teorema demuestra la gran flexibilidad en la construcción de grafos.</p>
+             <div class="formula"><strong>Teorema 2.3:</strong> Sea S ⊆ {1, 2, ..., n} un conjunto no vacío de enteros positivos tal que max(S) = n. Entonces, <strong>existe un grafo simple de orden n+1</strong> cuyo conjunto de grados distintos es exactamente S.</div>
+            <p>La idea constructiva es que siempre podemos encontrar una forma de repetir algunos grados de <code>S</code> para formar una secuencia de longitud <code>n+1</code> que satisfaga la condición de suma par y pase la prueba de Havel-Hakimi. Por ejemplo, para realizar <code>S={1,3}</code> con <code>n=3</code>, buscamos un grafo de orden 4 con grados 1 y 3. La secuencia <code>(3,3,1,1)</code> tiene suma par y es gráfica.</p>
+            
+            <h3>Verificación de Secuencias Casi Irregulares</h3>
+            <p>Las dos únicas secuencias de grado para un grafo casi irregular de orden <code>n</code> son siempre realizables. Estas secuencias se construyen duplicando un grado específico:</p>
+            <ul>
+                <li><strong>Familia con 0:</strong> Grados <code>{0, 1, ..., n-2}</code> con <code>⌊(n-1)/2⌋</code> duplicado.</li>
+                <li><strong>Familia sin 0:</strong> Grados <code>{1, 2, ..., n-1}</code> con <code>⌊n/2⌋</code> duplicado.</li>
+            </ul>
+            <h4>Secuencias Canónicas (n=5 a 9)</h4>
+            <table>
+                <thead><tr><th>Orden (n)</th><th>Familia con 0 (Grado repetido)</th><th>Familia sin 0 (Grado repetido)</th></tr></thead>
+                <tbody>
+                    <tr><td>5</td><td>(3,2,2,1,0) - repite 2</td><td>(4,3,2,2,1) - repite 2</td></tr>
+                    <tr><td>6</td><td>(4,3,2,2,1,0) - repite 2</td><td>(5,4,3,3,2,1) - repite 3</td></tr>
+                    <tr><td>7</td><td>(5,4,3,3,2,1,0) - repite 3</td><td>(6,5,4,3,3,2,1) - repite 3</td></tr>
+                    <tr><td>8</td><td>(6,5,4,3,3,2,1,0) - repite 3</td><td>(7,6,5,4,4,3,2,1) - repite 4</td></tr>
+                    <tr><td>9</td><td>(7,6,5,4,4,3,2,1,0) - repite 4</td><td>(8,7,6,5,4,4,3,2,1) - repite 4</td></tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <footer>
+            <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MÓDULO 1: UI ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const set_theme = (theme) => {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+        themeToggleBtn.addEventListener('click', () => {
+            const new_theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            set_theme(new_theme);
+        });
+        if (bubblesContainer) {
+            setInterval(() => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 20 + 20}s`;
+                bubblesContainer.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 40000);
+            }, 500);
+        }
+        set_theme(localStorage.getItem('theme') || 'dark');
+
+        // --- MÓDULO 2: CLASE DEL VISUALIZADOR HH ---
+        class HavelHakimiVisualizer {
+            constructor(stepsContainerId, resultContainerId) {
+                this.stepsContainer = document.getElementById(stepsContainerId);
+                this.resultContainer = document.getElementById(resultContainerId);
+                this.delay = 500;
+            }
+
+            _parseSequence(input) {
+                if (!input.trim()) return [];
+                return input.split(/[\s,]+/).filter(s => s !== '').map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+            }
+            
+            _renderStep(sequence, { d1_val, sub_indices, comment } = {}) {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'hh-step';
+                let html = '<strong>[</strong> ';
+                sequence.forEach((val, i) => {
+                    let classes = [];
+                    if (i === 0 && d1_val !== undefined) classes.push('highlight-d1');
+                    if (sub_indices && sub_indices.includes(i)) classes.push('highlight-subtract');
+                    html += `<span class="${classes.join(' ')}">${val}</span>` + (i < sequence.length - 1 ? ', ' : '');
+                });
+                html += ' <strong>]</strong>';
+                if (comment) html += `<span class="step-comment">// ${comment}</span>`;
+                stepDiv.innerHTML = html;
+                this.stepsContainer.appendChild(stepDiv);
+                stepDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+
+            _showResult(success, message) {
+                this.resultContainer.style.display = 'block';
+                this.resultContainer.className = success ? 'success' : 'failure';
+                this.resultContainer.innerHTML = message;
+                this.resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            async run(inputString) {
+                this.stepsContainer.innerHTML = '';
+                this.resultContainer.style.display = 'none';
+
+                let sequence = this._parseSequence(inputString);
+                
+                const sum = sequence.reduce((a, b) => a + b, 0);
+                if (sum % 2 !== 0) {
+                    this._renderStep(sequence, { comment: 'Secuencia inicial.'});
+                    this._showResult(false, `FALLO: La suma de los grados (${sum}) debe ser par.`);
+                    return;
+                }
+                
+                sequence.sort((a, b) => b - a);
+
+                let initialRender = true;
+                while (true) {
+                    this._renderStep(sequence, { comment: initialRender ? 'Secuencia ordenada.' : 'Reordenar.'});
+                    initialRender = false;
+                    await new Promise(res => setTimeout(res, this.delay));
+
+                    if (sequence.every(d => d === 0)) {
+                        this._showResult(true, 'ÉXITO: La secuencia se redujo a ceros. Es gráfica.');
+                        return;
+                    }
+
+                    const d1 = sequence[0];
+                    if (d1 < 0) { // Should not happen with prior checks, but good practice
+                         this._showResult(false, 'FALLO: Se encontró un grado negativo.');
+                         return;
+                    }
+                    if (d1 >= sequence.length) {
+                         this._showResult(false, `FALLO: El grado más alto (${d1}) es mayor o igual que el número de vértices restantes (${sequence.length-1}).`);
+                        return;
+                    }
+                    
+                    const sub_indices = Array.from({length: d1}, (_,i) => i+1);
+                    this._renderStep(sequence, {d1_val: d1, sub_indices: sub_indices.slice(0, d1), comment: `Tomar d₁=${d1} y restar 1 de los ${d1} siguientes.`});
+                    await new Promise(res => setTimeout(res, this.delay));
+                    
+                    sequence.shift();
+                    for (let i = 0; i < d1; i++) {
+                        sequence[i]--;
+                        if (sequence[i] < 0) {
+                             this._renderStep(sequence, {comment: 'Secuencia después de restar.'});
+                             this._showResult(false, 'FALLO: Se encontró un grado negativo durante la reducción.');
+                             return;
+                        }
+                    }
+                    sequence.sort((a, b) => b - a);
+                }
+            }
+        }
+
+        // --- MÓDULO 3: CONTROLADOR ---
+        const visualizer = new HavelHakimiVisualizer('hh-steps', 'hh-result');
+        const inputEl = document.getElementById('sequence-input');
+        const verifyBtn = document.getElementById('verify-btn');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+        
+        verifyBtn.addEventListener('click', () => {
+            visualizer.run(inputEl.value);
+        });
+        
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                verifyBtn.click();
+            }
+        });
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                inputEl.value = btn.dataset.sequence;
+                verifyBtn.click();
+            });
+        });
+        
+    });
+    </script>
+</body>
+</html>

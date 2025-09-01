@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Interactivo de Teoría de Grafos</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        :root {
+            --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-primary-light: #1c1e21;
+            --text-secondary-light: #4A5568;
+            --bg-secondary-light: rgba(255, 255, 255, 0.7);
+            --border-light: #d1d9e6;
+            --accent-light: #2b6cb0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+
+            --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --bg-secondary-dark: rgba(30, 41, 59, 0.7);
+            --border-dark: #334155;
+            --accent-dark: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        body.light-theme { background: var(--bg-primary-light); color: var(--text-primary-light); }
+        body.dark-theme { background: var(--bg-primary-dark); color: var(--text-primary-dark); }
+        
+        .container {
+            max-width: 1000px;
+            margin: 1rem auto;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 16px 40px var(--shadow-color);
+            border: 1px solid;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: background-color 0.4s, border-color 0.4s;
+        }
+        body.light-theme .container { background-color: var(--bg-secondary-light); border-color: rgba(255, 255, 255, 0.5); }
+        body.dark-theme .container { background-color: var(--bg-secondary-dark); border-color: rgba(255, 255, 255, 0.1); }
+
+        h1 {
+            text-align: center; margin-bottom: 1rem; font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-light), #3182ce);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        body.dark-theme h1 { background: linear-gradient(45deg, var(--accent-dark), #93c5fd); -webkit-background-clip: text; }
+        .subtitle {
+            text-align: center; font-size: 1.1rem; margin-bottom: 2.5rem;
+            color: var(--text-secondary-light);
+        }
+        body.dark-theme .subtitle { color: var(--text-secondary-dark); }
+
+        /* --- CONTROLES Y PROGRESO --- */
+        .controls-container {
+            display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+            justify-content: center; align-items: center; padding: 1rem;
+        }
+        .search-box {
+            padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--border-light);
+            background-color: var(--bg-secondary-light); transition: all 0.3s ease; min-width: 300px;
+            font-size: 1rem;
+        }
+        body.dark-theme .search-box { background-color: var(--bg-secondary-dark); color: var(--text-primary-dark); border-color: var(--border-dark); }
+        .search-box:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 12px rgba(43, 108, 176, 0.3); }
+        body.dark-theme .search-box:focus { border-color: var(--accent-dark); }
+        
+        .progress-container {
+            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        body.dark-theme .progress-container { background-color: rgba(255, 255, 255, 0.05); }
+        .progress-bar { width: 100%; height: 10px; background-color: rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; }
+        body.dark-theme .progress-bar { background-color: rgba(255,255,255,0.1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-light), #63b3ed); width: 0%; transition: width 0.5s ease-in-out; }
+        body.dark-theme .progress-fill { background: linear-gradient(90deg, var(--accent-dark), #bee3f8); }
+        .progress-text { margin-top: 0.5rem; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary-light); }
+        body.dark-theme .progress-text { color: var(--text-secondary-dark); }
+
+        /* --- ACORDEÓN DE PREGUNTAS Y RESPUESTAS --- */
+        .qa-item { margin-bottom: 1rem; border-radius: 12px; transition: all 0.3s ease; }
+        .qa-item.mastered { border-left: 5px solid #48bb78; } /* Verde para dominado */
+        
+        .question {
+            background-color: transparent; cursor: pointer; padding: 1.2rem 1.5rem;
+            width: 100%; border: none; text-align: left; outline: none;
+            font-size: 1.1rem; transition: background-color 0.4s; border-radius: 12px;
+            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+        }
+        body.dark-theme .question { color: var(--text-primary-dark); }
+        .question:hover { background-color: rgba(0, 0, 0, 0.05); }
+        body.dark-theme .question:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        .question-icon { font-size: 1.5rem; font-weight: bold; transition: transform 0.3s ease-out; color: var(--accent-light); }
+        body.dark-theme .question-icon { color: var(--accent-dark); }
+        .question.active .question-icon { transform: rotate(45deg); }
+        
+        .answer {
+            padding: 0 1.5rem; max-height: 0; overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            border-top: 1px solid transparent;
+        }
+        .answer.active { padding: 1.5rem; border-top-color: var(--border-light); }
+        body.dark-theme .answer.active { border-top-color: var(--border-dark); }
+
+        code {
+            background-color: rgba(43, 108, 176, 0.1); color: var(--accent-light);
+            padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        body.dark-theme code { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-dark); }
+        strong { color: var(--accent-light); font-weight: 600; }
+        body.dark-theme strong { color: var(--accent-dark); }
+        ul, ol { padding-left: 20px; }
+
+        .mastery-button {
+            display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem;
+            border-radius: 20px; border: 1px solid #48bb78; color: #48bb78;
+            background: transparent; cursor: pointer; transition: all 0.3s; font-weight: 500;
+        }
+        .mastery-button:hover, .mastery-button.mastered { background-color: #48bb78; color: white; }
+
+        /* --- BOTONES DE ACCIÓN Y FOOTER --- */
+        .action-button {
+            padding: 0.8rem 1.8rem; border-radius: 25px; border: none;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--shadow-color); }
+        
+        body.light-theme .theme-button { background: linear-gradient(135deg, #333, #555); color: white; }
+        body.dark-theme .theme-button { background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; }
+
+        body.light-theme .random-button { background: linear-gradient(135deg, #2b6cb0, #3182ce); color: white; }
+        body.dark-theme .random-button { background: linear-gradient(135deg, #60a5fa, #93c5fd); color: black; }
+
+        footer { text-align: center; margin-top: 3rem; font-size: 0.9rem; color: #888; padding: 2rem 0; }
+        body.dark-theme footer { color: var(--text-secondary-dark); }
+
+        /* --- BURBUJAS AUTOMÁTICAS --- */
+        .bubble {
+            position: fixed; bottom: -150px; border-radius: 50%;
+            pointer-events: none; z-index: -10; opacity: 0;
+            animation: rise 25s infinite ease-in-out;
+        }
+        body.light-theme .bubble { background-color: rgba(43, 108, 176, 0.1); }
+        body.dark-theme .bubble { background-color: rgba(96, 165, 250, 0.08); }
+        
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translateY(-50vh) scale(1.2); }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <div class="container">
+        <h1>Examen Interactivo de Grafos</h1>
+        <p class="subtitle">Pon a prueba tus conocimientos con estas preguntas exhaustivas, diseñadas para una preparación de nivel experto.</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">Dominio: 0% - 0/30 preguntas dominadas</div>
+        </div>
+        
+        <div class="controls-container">
+            <div class="controls">
+                <button class="action-button theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+                <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar pregunta o concepto...">
+                <button class="action-button random-button" id="random-question-btn">🎲 Pregunta Aleatoria</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="qa-container">
+        <!-- Las preguntas se insertarán aquí dinámicamente -->
+    </div>
+
+    <footer>
+        <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const questionsAndAnswers = [
+                // Preliminares y Notación
+                {
+                    question: "1. ¿Cuál es la diferencia fundamental entre un grafo simple, un multigrafo y un pseudografo?",
+                    answer: `
+                        <p>Estas tres categorías se diferencian por las restricciones que imponen sobre sus aristas:</p>
+                        <ul>
+                            <li><strong>Grafo Simple:</strong> Es el tipo más restrictivo y común. No permite <strong>lazos</strong> (una arista que conecta un vértice consigo mismo) ni <strong>aristas múltiples</strong> (más de una arista conectando el mismo par de vértices). Cada par de vértices puede estar conectado por, como máximo, una arista.</li>
+                            <li><strong>Multigrafo:</strong> Relaja una de las restricciones. Permite <strong>aristas múltiples</strong>, pero sigue sin permitir <strong>lazos</strong>. Es útil para modelar escenarios con múltiples conexiones directas, como diferentes rutas de vuelo entre dos ciudades.</li>
+                            <li><strong>Pseudografo:</strong> Es el tipo más general. Permite tanto <strong>lazos</strong> como <strong>aristas múltiples</strong>. Es el modelo más flexible, aunque menos común en problemas algorítmicos básicos.</li>
+                        </ul>
+                    `
+                },
+                {
+                    question: "2. Explique el Lema del Apretón de Manos y su consecuencia más importante sobre los grados de un grafo.",
+                    answer: `
+                        <p>El <strong>Lema del Apretón de Manos</strong> (o Teorema de la Suma de Grados) es un resultado fundamental que establece que, en cualquier grafo, la suma de los grados de todos sus vértices es igual al doble del número de aristas.</p>
+                        <p>Fórmula: <code>&Sigma; deg(v) = 2|E|</code></p>
+                        <p><strong>Razonamiento:</strong> Cada arista tiene dos extremos. Al sumar los grados de todos los vértices, estamos contando cada arista exactamente dos veces, una por cada vértice en sus extremos. Por lo tanto, la suma total debe ser un número par.</p>
+                        <p><strong>Consecuencia más importante:</strong> El número de vértices con grado <strong>impar</strong> en cualquier grafo debe ser <strong>par</strong>. Si hubiera un número impar de vértices de grado impar, la suma total de los grados sería la suma de un número impar de números impares (que es impar) más la suma de los grados pares (que es par), resultando en un número impar. Esto contradiría el lema, que exige que la suma total sea par.</p>
+                    `
+                },
+                {
+                    question: "3. ¿Qué es una secuencia de grados y cuál es la primera condición trivial que debe cumplir para ser potencialmente gráfica?",
+                    answer: `
+                        <p>Una <strong>secuencia de grados</strong> de un grafo es una lista de los grados de todos sus vértices, comúnmente ordenada en orden no creciente (de mayor a menor).</p>
+                        <p>Por ejemplo, para un grafo con vértices A, B, C, D con grados <code>deg(A)=3, deg(B)=2, deg(C)=2, deg(D)=1</code>, la secuencia de grados es <code>(3, 2, 2, 1)</code>.</p>
+                        <p>La primera y más fundamental condición que una secuencia <code>(d₁, d₂, ..., dₙ)</code> debe cumplir para ser <strong>potencialmente gráfica</strong> (es decir, que podría existir un grafo simple con esa secuencia) se deriva directamente del Lema del Apretón de Manos:</p>
+                        <p><strong>La suma de todos los grados en la secuencia debe ser un número par.</strong></p>
+                        <p>Si la suma <code>&Sigma; dᵢ</code> fuera impar, violaría el lema y sería imposible construir un grafo. Sin embargo, cumplir esta condición <strong>no garantiza</strong> que la secuencia sea gráfica; es una condición necesaria pero no suficiente. Por ejemplo, la secuencia <code>(3, 3, 3, 1)</code> suma 10 (par), pero no es gráfica para un grafo simple de 4 vértices.</p>
+                    `
+                },
+                // Grafos Regulares
+                {
+                    question: "4. Defina un grafo k-regular y derive la fórmula para su número de aristas. ¿Qué condición deben cumplir n y k?",
+                    answer: `
+                        <p>Un grafo es <strong>k-regular</strong> si todos sus vértices tienen exactamente el mismo grado, igual a <code>k</code>.</p>
+                        <p>Para derivar la fórmula de su número de aristas (<code>m</code>), usamos el Lema del Apretón de Manos. Si tenemos <code>n</code> vértices y cada uno tiene grado <code>k</code>, la suma de los grados es:</p>
+                        <p><code>&Sigma; deg(v) = n * k</code></p>
+                        <p>Según el lema, esto debe ser igual a <code>2m</code>:</p>
+                        <p><code>n * k = 2m  =>  m = (n * k) / 2</code></p>
+                        <p><strong>Condición fundamental:</strong> De esta fórmula se deduce que el producto <code>n * k</code> debe ser un número <strong>par</strong>. Esto implica que: </p>
+                        <ul>
+                            <li>Si <code>k</code> (el grado) es par, <code>n</code> (el número de vértices) puede ser cualquier entero.</li>
+                            <li>Si <code>k</code> (el grado) es impar, <code>n</code> (el número de vértices) debe ser necesariamente <strong>par</strong>.</li>
+                        </ul>
+                    `
+                },
+                {
+                    question: "5. ¿El complemento de un grafo k-regular es siempre regular? Justifique su respuesta.",
+                    answer: `
+                        <p><strong>Sí, el complemento de un grafo k-regular es siempre regular.</strong></p>
+                        <p><strong>Justificación:</strong> Sea <code>G</code> un grafo k-regular de orden <code>n</code>. Por definición, para cada vértice <code>v</code> en <code>G</code>, <code>deg_G(v) = k</code>.</p>
+                        <p>La fórmula que relaciona el grado de un vértice en un grafo con su grado en el complemento <code>G̅</code> es:</p>
+                        <p><code>deg_G̅(v) = (n - 1) - deg_G(v)</code></p>
+                        <p>Sustituyendo el valor del grado en <code>G</code> (que es constante para todos los vértices), obtenemos el grado de cualquier vértice <code>v</code> en <code>G̅</code>:</p>
+                        <p><code>deg_G̅(v) = (n - 1) - k</code></p>
+                        <p>Dado que <code>n</code> y <code>k</code> son constantes, el valor <code>(n - 1) - k</code> también es una constante. Como todos los vértices en <code>G̅</code> tienen este mismo grado, el grafo <code>G̅</code> es <strong>(n-1-k)-regular</strong> por definición.</p>
+                    `
+                },
+                // Grafos Irregulares y Principio del Palomar
+                {
+                    question: "6. Usando el Principio del Palomar, demuestre exhaustivamente por qué no puede existir un grafo simple completamente irregular de orden n ≥ 2.",
+                    answer: `
+                        <p>Un <strong>grafo completamente irregular</strong> es aquel donde todos sus vértices tienen grados distintos. La demostración de su imposibilidad es una aplicación clásica del Principio del Palomar y el razonamiento por contradicción.</p>
+                        <p><strong>Pasos de la Demostración:</strong></p>
+                        <ol>
+                            <li><strong>Definir Palomas y Palomares:</strong>
+                                <ul>
+                                    <li><strong>Palomas (Objetos):</strong> Los <code>n</code> vértices del grafo.</li>
+                                    <li><strong>Palomares (Cajas):</strong> Los posibles valores de grado que un vértice puede tomar.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Determinar los Grados Posibles:</strong> En un grafo simple de orden <code>n</code>, el grado de cualquier vértice <code>v</code>, <code>deg(v)</code>, está acotado. Un vértice no puede tener grado negativo y no puede estar conectado a más de los otros <code>n-1</code> vértices. Por lo tanto, el conjunto de todos los valores de grado posibles es <code>S = {0, 1, 2, ..., n-1}</code>. Este conjunto tiene exactamente <code>n</code> valores distintos.</li>
+                            <li><strong>Aplicar la Hipótesis de Irregularidad:</strong> Supongamos, para llegar a una contradicción, que <strong>sí existe</strong> un grafo simple completamente irregular de orden <code>n</code>. Por definición, sus <code>n</code> vértices deben tener grados distintos. Como solo hay <code>n</code> valores de grado posibles en el conjunto <code>S</code>, la única manera de que los <code>n</code> vértices tengan grados distintos es que el conjunto de grados del grafo sea precisamente el conjunto <code>S</code>. Es decir, <code>{deg(v₁,), ..., deg(vₙ)} = {0, 1, 2, ..., n-1}</code>.</li>
+                            <li><strong>Encontrar la Contradicción Fundamental:</strong> Si el conjunto de grados del grafo es <code>{0, 1, ..., n-1}</code>, entonces deben existir simultáneamente en el grafo:
+                                <ul>
+                                    <li>Un vértice <code>x</code> con <code>deg(x) = n-1</code>. Este vértice debe estar conectado a <strong>todos</strong> los demás <code>n-1</code> vértices del grafo.</li>
+                                    <li>Un vértice <code>y</code> con <code>deg(y) = 0</code>. Este vértice es aislado y no está conectado a <strong>ningún</strong> otro vértice.</li>
+                                </ul>
+                                Aquí reside la contradicción lógica: El vértice <code>x</code> debe estar conectado a todos los demás, incluyendo a <code>y</code>. Sin embargo, el vértice <code>y</code> no puede estar conectado a ningún otro, incluyendo a <code>x</code>. Estas dos condiciones son mutuamente excluyentes y no pueden ser ciertas al mismo tiempo.
+                            </li>
+                            <li><strong>Conclusión:</strong> La suposición inicial de que existe un grafo simple completamente irregular nos ha llevado a una contradicción irresoluble. Por lo tanto, la suposición debe ser falsa. <strong>No existe ningún grafo simple completamente irregular de orden n ≥ 2.</strong></li>
+                        </ol>
+                    `
+                },
+                // Y así sucesivamente para las 30 preguntas...
+                { question: "7. ¿Por qué el argumento de imposibilidad de grafos completamente irregulares no aplica a los multigrafos?", answer: "<p>El argumento falla porque en un multigrafo, el grado máximo de un vértice no está acotado por <code>n-1</code>. Al permitir aristas paralelas, un vértice puede tener un grado arbitrariamente alto. Esto rompe el paso 2 de la demostración: el conjunto de 'palomares' (grados posibles) ya no es un conjunto finito de tamaño <code>n</code>, por lo que el Principio del Palomar no puede aplicarse de la misma manera.</p>" },
+                { question: "8. ¿Qué es un grafo casi irregular y por qué representa el límite de la irregularidad en grafos simples?", answer: "<p>Un <strong>grafo casi irregular</strong> (o cuasi-irregular) es un grafo simple en el que todos los vértices tienen grados distintos, a excepción de un único par de vértices que comparten el mismo grado. Representa el 'más cerca' que podemos llegar a la irregularidad total, ya que hemos demostrado que la irregularidad completa (cero repeticiones de grado) es imposible. Minimiza el número de colisiones de grado al mínimo posible, que es una.</p>" },
+                { question: "9. Enuncie el teorema fundamental sobre la existencia y unicidad de los grafos casi irregulares.", answer: "<p>El teorema establece: <strong>Para cada entero n ≥ 2, existen exactamente dos grafos casi irregulares de orden n, y estos dos grafos son complementarios entre sí.</strong> Esto significa que para cualquier número de vértices, no solo sabemos que estos grafos existen, sino que también conocemos su cantidad exacta (siempre dos) y la relación estructural que los une (uno es el complemento del otro).</p>" },
+                { question: "10. Explique por qué el complemento de un grafo casi irregular es también casi irregular.", answer: "<p>La transformación de grado al tomar el complemento es <code>deg_G̅(v) = (n-1) - deg_G(v)</code>. Esta es una función inyectiva (uno a uno) sobre el conjunto de grados. Si dos vértices <code>u</code> y <code>v</code> tienen grados distintos en <code>G</code>, entonces <code>(n-1) - deg_G(u) ≠ (n-1) - deg_G(v)</code>, por lo que tendrán grados distintos en <code>G̅</code>. Si tienen el mismo grado en <code>G</code>, tendrán el mismo grado en <code>G̅</code>. Por lo tanto, la operación de complemento preserva el número de colisiones de grado. Si <code>G</code> tenía exactamente una colisión (un par de vértices con el mismo grado), <code>G̅</code> también la tendrá, siendo por tanto casi irregular.</p>" },
+                { question: "11. Describa el proceso de construcción incremental que genera la única pareja de grafos casi irregulares para un orden n.", answer: "<p>El proceso es recursivo y se basa en la pareja de grafos de orden <code>n-1</code>. Sea <code>(G'_{n-1}, G̅'_{n-1})</code> la pareja para el orden <code>n-1</code>, donde <code>G'_{n-1}</code> es el que contiene el vértice de grado 0. La construcción para el orden <code>n</code> es:</p><ol><li><strong>Paso 1: Construir el primer grafo (Gₙ):</strong> Se toma el grafo <code>G̅'_{n-1}</code> (el que no tiene grado 0) y se le añade un nuevo vértice aislado (de grado 0). El grafo resultante es el primer grafo casi irregular de orden <code>n</code>, <code>Gₙ</code>.</li><li><strong>Paso 2: Construir el segundo grafo (G̅ₙ):</strong> Simplemente se toma el complemento del grafo recién creado: <code>G̅ₙ = complemento(Gₙ)</code>.</li></ol><p>Este proceso de <strong>'tomar el complemento del anterior y añadir un aislado'</strong> genera de forma única toda la secuencia de parejas de grafos casi irregulares.</p>" },
+                { question: "12. Describa el algoritmo de Havel-Hakimi para determinar si una secuencia de grados es gráfica.", answer: "<p>El algoritmo de Havel-Hakimi es un procedimiento recursivo que se basa en la idea de satisfacer al vértice más 'exigente'. Los pasos son:</p><ol><li><strong>Ordenar:</strong> Se ordena la secuencia de grados en orden no creciente: <code>d₁ ≥ d₂ ≥ ... ≥ dₙ</code>.</li><li><strong>Reducir:</strong> Se elimina el primer grado <code>d₁</code> de la secuencia. Luego, se resta 1 a los siguientes <code>d₁</code> grados de la lista.</li><li><strong>Verificar:</strong> Si en algún momento un grado se vuelve negativo, el algoritmo termina y la secuencia no es gráfica.</li><li><strong>Repetir:</strong> Se repiten los pasos 1 y 2 con la nueva secuencia reducida.</li><li><strong>Condición de Éxito:</strong> Si el proceso puede continuarse hasta que todos los grados de la secuencia son 0, la secuencia original es <strong>gráfica</strong>.</li></ol><p>La lógica es que si existe una realización del grafo, debe existir una donde el vértice de mayor grado está conectado a los vértices con los siguientes grados más altos.</p>" },
+                { question: "13. ¿Cuál es la diferencia conceptual entre el enfoque de Havel-Hakimi y el del Teorema de Erdős-Gallai?", answer: "<p>La diferencia es que Havel-Hakimi es un <strong>algoritmo constructivo/destructivo</strong>, mientras que Erdős-Gallai es una <strong>caracterización existencial</strong>.</p><ul><li><strong>Havel-Hakimi</strong> proporciona un procedimiento paso a paso para intentar construir (o deconstruir) el grafo. Su resultado es un 'sí' o un 'no' basado en el éxito del procedimiento. Es un enfoque algorítmico.</li><li><strong>Erdős-Gallai</strong> no construye nada. Proporciona un conjunto de condiciones matemáticas (una suma par y una serie de desigualdades) que, si se cumplen todas, garantizan la existencia de al menos un grafo con esa secuencia de grados. Es un enfoque teórico basado en propiedades estructurales.</li></ul>" },
+                { question: "14. ¿Qué es un Grafo de Cayley y cuáles son sus dos 'ingredientes' algebraicos?", answer: "<p>Un <strong>Grafo de Cayley</strong> es una representación visual de la estructura de un grupo algebraico. Proporciona un puente profundo entre el álgebra abstracta y la teoría de grafos. Sus dos ingredientes son:</p><ol><li><strong>Un grupo finito (G):</strong> Un conjunto con una operación binaria que cumple ciertas propiedades (cierre, asociatividad, elemento neutro, inverso). Los elementos de <code>G</code> se convierten en los <strong>vértices</strong> del grafo.</li><li><strong>Un conjunto de generadores (X):</strong> Un subconjunto de <code>G</code> que es simétrico (si <code>x</code> está en <code>X</code>, su inverso <code>x⁻¹</code> también) y no contiene al elemento neutro. Las <strong>aristas</strong> del grafo conectan vértices <code>g</code> y <code>h</code> si <code>h = g * x</code> para algún generador <code>x</code> en <code>X</code>.</li></ol>" },
+                { question: "15. ¿Por qué todo Grafo de Cayley es regular? ¿Cuál es su regularidad?", answer: "<p>Todo grafo de Cayley <code>Cay(G, X)</code> es regular por su propia construcción. Para cualquier vértice <code>g</code> del grafo, sus vecinos son todos los elementos de la forma <code>g * x</code>, donde <code>x</code> es un generador en <code>X</code>. Como el conjunto de generadores <code>X</code> no contiene al elemento neutro y todos sus elementos son distintos, cada generador <code>x</code> produce un vecino único <code>g * x</code>. Por lo tanto, cada vértice <code>g</code> tiene exactamente <code>|X|</code> vecinos. Como esto es cierto para todos los vértices, el grafo es <strong>|X|-regular</strong>.</p>" },
+                { question: "16. Defina la propiedad de vértice-transitividad y explique por qué es una característica clave de los Grafos de Cayley.", answer: "<p>Un grafo es <strong>vértice-transitivo</strong> si para cualquier par de vértices <code>u</code> y <code>v</code>, existe una simetría del grafo (un automorfismo) que transforma <code>u</code> en <code>v</code>. Intuitivamente, esto significa que el grafo 'se ve exactamente igual' desde la perspectiva de cualquier vértice; no hay vértices 'especiales'.</p><p>Esta es una propiedad fundamental de los Grafos de Cayley porque refleja directamente una propiedad de los grupos: la capacidad de mapear cualquier elemento a otro mediante la operación del grupo (ej. <code>v = u * (u⁻¹ * v)</code>). La operación de 'multiplicar por un elemento' en el grupo se traduce en una simetría en el grafo, garantizando la vértice-transitividad. Esto los hace ideales para topologías de red, donde se desea un comportamiento homogéneo y predecible desde cualquier nodo.</p>" },
+                { question: "17. ¿Cómo se puede construir un ciclo Cₙ y un hipercubo Qₙ como Grafos de Cayley?", answer: "<ul><li><strong>Ciclo Cₙ:</strong> Se construye usando el grupo cíclico de enteros módulo <code>n</code>, <code>(ℤₙ, +)</code>. Los vértices son {0, 1, ..., n-1}. El conjunto de generadores es <code>X = {+1, -1}</code>. Conectar cada vértice <code>i</code> con <code>i+1 (mod n)</code> y <code>i-1 (mod n)</code> forma precisamente el ciclo <code>Cₙ</code>.</li><li><strong>Hipercubo Qₙ:</strong> Se construye usando el grupo de cadenas binarias de longitud <code>n</code> con la operación XOR, <code>((ℤ₂)ⁿ, ⊕)</code>. Los vértices son todas las 2ⁿ cadenas binarias. El conjunto de generadores <code>X</code> son los <code>n</code> vectores unitarios (ej. para n=3, X = {100, 010, 001}). Conectar dos vértices si su XOR es un generador significa que están conectados si y solo si difieren en un único bit, que es la definición del hipercubo.</li></ul>" },
+                { question: "18. ¿Cuál es el principal desafío al procesar algoritmos de grafos en arquitecturas de GPU?", answer: "<p>El principal desafío es el <strong>desequilibrio de carga a nivel de warp</strong>, causado por la naturaleza inherentemente irregular de los grafos. La arquitectura SIMT (Single Instruction, Multiple Thread) de una GPU es extremadamente eficiente cuando todos los hilos de un warp realizan la misma cantidad de trabajo. Sin embargo, en un grafo, los grados de los vértices varían enormemente. Si un hilo de un warp procesa un vértice de grado 2 mientras otro procesa uno de grado 1000, el primer hilo terminará rápidamente y quedará inactivo, esperando a que el hilo sobrecargado termine. Esta <strong>inactividad forzada</strong> es la principal fuente de ineficiencia y subutilización de los recursos masivamente paralelos de la GPU.</p>" },
+                { question: "19. Explique el concepto de 'divergencia de hilos' en el contexto de un BFS en un grafo.", answer: "<p>La <strong>divergencia de hilos</strong> ocurre cuando hilos dentro de un mismo warp deben tomar caminos diferentes en el código. En una Búsqueda en Amplitud (BFS), un paso común del algoritmo es que cada hilo asignado a un vértice itere sobre sus vecinos. Si un hilo procesa un vértice de grado 0 (sin vecinos), no entrará en el bucle de iteración. Si otro hilo en el mismo warp procesa un vértice de grado alto, entrará en el bucle. Esto crea una divergencia. La GPU la maneja serializando la ejecución: primero ejecuta el código para los hilos que entran al bucle (mientras los otros esperan inactivos), y luego ejecuta el código para los que no entraron (mientras los primeros esperan). Esta serialización y espera destruyen el paralelismo y degradan severamente el rendimiento.</p>" },
+                { question: "20. ¿Qué es el acceso a memoria coalescente y por qué es difícil de lograr con grafos?", answer: "<p>El <strong>acceso a memoria coalescente</strong> es el patrón de acceso a memoria ideal en una GPU. Ocurre cuando los 32 hilos de un warp acceden a una región de 128 bytes contigua y alineada en la memoria global en una sola transacción. Esto utiliza el ancho de banda de la memoria de manera óptima.</p><p>Es difícil de lograr con grafos porque la representación de adyacencia de vértices no garantiza contigüidad. Por ejemplo, en una lista de adyacencia, los vecinos del vértice 5 y los vecinos del vértice 6 (que podrían ser procesados por hilos contiguos) pueden estar almacenados en ubicaciones de memoria completamente diferentes y dispersas. Cuando los hilos del warp intentan leer las listas de vecinos de sus respectivos vértices, realizan accesos dispersos (no coalescentes), lo que obliga al hardware a emitir múltiples transacciones de memoria en lugar de una sola, desperdiciando ancho de banda y aumentando la latencia.</p>" },
+                { question: "21. ¿Qué es un Grafo Bipartito Completo Kₘ,ₙ?", answer: "<p>Un <strong>Grafo Bipartito Completo Kₘ,ₙ</strong> es un grafo cuyos vértices se pueden dividir en dos conjuntos disjuntos, V₁ con <code>m</code> vértices y V₂ con <code>n</code> vértices, tal que cada vértice en V₁ está conectado a <strong>todos</strong> los vértices en V₂. No hay aristas dentro del mismo conjunto (ni en V₁ ni en V₂). El número total de aristas es <code>m * n</code>.</p>" },
+                { question: "22. ¿Bajo qué condiciones un Grafo Bipartito Completo Kₘ,ₙ es regular?", answer: "<p>Un grafo Kₘ,ₙ es regular si y solo si todos sus vértices tienen el mismo grado. Los vértices en la partición V₁ tienen todos grado <code>n</code> (ya que se conectan a todos los <code>n</code> vértices de V₂). Los vértices en la partición V₂ tienen todos grado <code>m</code>. Para que el grafo sea regular, se debe cumplir que <code>m = n</code>. En este caso, el grafo Kₙ,ₙ es <strong>n-regular</strong>.</p>" },
+                { question: "23. Compare el argumento de paridad con el del Principio del Palomar para probar la inexistencia de grafos completamente irregulares. ¿Cuál es más potente y por qué?", answer: "<p>Ambos argumentos pueden usarse para descartar ciertas secuencias, pero el Principio del Palomar es mucho más potente y general para este problema en particular.</p><ul><li><strong>Argumento de Paridad:</strong> Se basa en que la suma de grados (y por tanto el número de vértices de grado impar) debe ser par. Este argumento solo funciona para la mitad de los casos. Por ejemplo, para n=6, los grados serían {0,1,2,3,4,5}, que tiene 3 grados impares (1,3,5), lo cual es imposible. Pero para n=5, los grados {0,1,2,3,4} tienen 2 grados impares (1,3), lo cual es par y no viola la condición. Por lo tanto, el argumento de paridad no puede descartar el caso n=5.</li><li><strong>Principio del Palomar:</strong> Como se demostró, este argumento encuentra una contradicción fundamental entre la existencia de un vértice de grado 0 y uno de grado n-1, que deben coexistir si todos los grados son distintos. Esta contradicción es válida para <strong>todos los n ≥ 2</strong>, sin importar la paridad.</li></ul><p>Por lo tanto, el <strong>Principio del Palomar es más potente</strong> porque proporciona una prueba universal que cubre todos los casos, mientras que el argumento de paridad solo descarta la mitad de ellos.</p>" },
+                { question: "24. ¿Puede un grafo ser autocomplementario y casi irregular a la vez? Justifique.", answer: "<p>No, un grafo casi irregular no puede ser autocomplementario (isomorfo a su complemento).</p><p><strong>Justificación:</strong> Un grafo casi irregular de orden <code>n</code> debe tener una secuencia de grados que o bien incluye el grado 0 (y excluye el n-1) o incluye el n-1 (y excluye el 0). Supongamos que <code>G</code> es casi irregular y tiene un vértice de grado 0. Su complemento <code>G̅</code> tendrá entonces un vértice de grado <code>(n-1) - 0 = n-1</code>. Un grafo no puede tener simultáneamente un vértice de grado 0 y uno de grado n-1. Como <code>G</code> tiene un vértice de grado 0 y <code>G̅</code> tiene uno de grado n-1, sus secuencias de grados son diferentes, y por lo tanto no pueden ser isomorfos. El mismo razonamiento aplica si <code>G</code> tiene un vértice de grado n-1. Por lo tanto, <code>G ≇ G̅</code>.</p>" },
+                { question: "25. En el contexto de GPU, ¿qué estrategia podría ser más eficiente que asignar 'un vértice por hilo' para grafos con alta variabilidad de grado?", answer: "<p>Una estrategia superior es la <strong>distribución a nivel de arista</strong> o la <strong>agrupación de tareas por grado</strong>.</p><ul><li><strong>Distribución a nivel de arista:</strong> En lugar de asignar un vértice a cada hilo, se asigna un conjunto de aristas. Esto distribuye el trabajo de manera más uniforme. Un vértice de grado 1000 simplemente contribuye con 1000 tareas (aristas) a una cola global, que luego son procesadas por muchos hilos, en lugar de sobrecargar a un solo hilo.</li><li><strong>Agrupación por grado (Binning):</strong> Se pueden agrupar los vértices en 'bins' o cubetas según su grado (ej. grados 1-8, 9-32, etc.). Los hilos de un mismo warp procesan vértices del mismo bin, asegurando que todos tengan una cantidad de trabajo similar. Esto reduce drásticamente la inactividad y la divergencia de hilos.</li></ul>" },
+                { question: "26. ¿Qué es el orden y el tamaño de un grafo?", answer: "<p>El <strong>orden</strong> de un grafo <code>G=(V,E)</code> es el número de sus vértices, comúnmente denotado como <code>|V|</code> o <code>n</code>. El <strong>tamaño</strong> de un grafo es el número de sus aristas, denotado como <code>|E|</code> o <code>m</code>. Estos son los dos parámetros más fundamentales para describir la escala de un grafo.</p>" },
+                { question: "27. ¿Es el grafo completo K₅ un Grafo de Cayley? Si es así, ¿sobre qué grupo y generadores?", answer: "<p><strong>Sí</strong>, el grafo completo K₅ es un Grafo de Cayley. Se puede construir sobre el grupo cíclico <code>(ℤ₅, +)</code>. Los vértices son {0, 1, 2, 3, 4}. Para que cada vértice se conecte con todos los demás, el conjunto de generadores debe incluir a todos los demás elementos no nulos del grupo. Por lo tanto, los generadores son <code>X = {1, 2, 3, 4}</code> (o {±1, ±2}). Como <code>|X| = 4</code>, el grafo resultante es 4-regular, que es la regularidad de K₅.</p>" },
+                { question: "28. Un grafo tiene la secuencia de grados (5, 5, 4, 3, 2, 1). ¿Es posible? ¿Por qué?", answer: "<p>No, no es posible. La suma de los grados es 5+5+4+3+2+1 = 20, que es par, por lo que no viola la primera condición. Sin embargo, en un grafo de orden 6 (ya que hay 6 entradas en la secuencia), el grado máximo no puede exceder <code>n-1 = 5</code>. La secuencia tiene dos vértices de grado 5. Si un vértice tiene grado 5, debe estar conectado a todos los otros 5 vértices. Si un segundo vértice también tiene grado 5, también debe estar conectado a todos los demás. Esto incluye al primer vértice de grado 5 y al vértice de grado 1. Pero si el vértice de grado 1 está conectado a ambos vértices de grado 5, su grado sería al menos 2, lo cual es una contradicción. Aplicando Havel-Hakimi: <code>(5,5,4,3,2,1) -> (4,3,2,1,0)</code>. Ahora, tomamos el 4: <code>(2,1,0,-1)</code>. Aparece un grado negativo, por lo que la secuencia <strong>no es gráfica</strong>.</p>" },
+                { question: "29. ¿Cuál es la relación entre el Grupo Diedral Dₙ y los grafos bipartitos regulares?", answer: "<p>El Grupo Diedral Dₙ es el grupo de simetrías de un polígono regular de <code>n</code> lados. Tiene <code>2n</code> elementos: <code>n</code> rotaciones y <code>n</code> reflexiones. Se puede usar para construir un grafo bipartito <code>n</code>-regular. Se define el grafo de Cayley <code>Cay(Dₙ, X)</code> donde los vértices son los <code>2n</code> elementos de Dₙ y el conjunto de generadores <code>X</code> son las <code>n</code> reflexiones. En este grafo, no hay aristas entre rotaciones ni entre reflexiones; las aristas solo conectan rotaciones con reflexiones. Esto divide los vértices en dos particiones (rotaciones y reflexiones), formando un grafo bipartito. Como <code>|X|=n</code>, el grafo es <strong>n-regular</strong>.</p>" },
+                { question: "30. ¿Qué representa la desigualdad del Teorema de Erdős-Gallai en términos de 'oferta y demanda' de aristas?", answer: "<p>La desigualdad <code>&Sigma; (i=1 a k) dᵢ ≤ k(k-1) + &Sigma; (i=k+1 a n) min{dᵢ, k}</code> representa un balance entre la 'demanda' de conexiones de los <code>k</code> vértices más grandes y la 'oferta' de conexiones disponibles.</p><ul><li><strong>Lado Izquierdo (Demanda):</strong> <code>&Sigma; (i=1 a k) dᵢ</code> es la suma de los grados de los <code>k</code> vértices más 'exigentes'. Representa el número total de 'puntos de conexión' que estos <code>k</code> vértices necesitan satisfacer.</li><li><strong>Lado Derecho (Oferta):</strong> Está compuesto por dos partes:</li><ul><li><code>k(k-1)</code>: El número máximo de puntos de conexión que pueden ser satisfechos <strong>entre</strong> los propios <code>k</code> vértices. (Cada una de las k(k-1)/2 posibles aristas internas aporta 2 a la suma de grados).</li><li><code>&Sigma; (i=k+1 a n) min{dᵢ, k}</code>: La oferta máxima de conexiones desde los <code>n-k</code> vértices restantes <strong>hacia</strong> los primeros <code>k</code>. Cada vértice 'pequeño' <code>vᵢ</code> puede ofrecer como máximo <code>k</code> aristas hacia el grupo grande, pero no más que su propio grado <code>dᵢ</code>.</li></ul><p>El teorema afirma que para que la secuencia sea gráfica, la demanda de cualquier subconjunto de los <code>k</code> vértices más grandes nunca puede exceder la oferta máxima de conexiones disponibles para ellos.</p>" }
+            ];
+
+            const qaContainer = document.getElementById('qa-container');
+            const searchInput = document.getElementById('search-input');
+            const themeToggle = document.getElementById('theme-toggle');
+            const randomBtn = document.getElementById('random-question-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const body = document.body;
+
+            const completedQuestions = new Set();
+            
+            function renderQuestions() {
+                qaContainer.innerHTML = '';
+                questionsAndAnswers.forEach((qa, index) => {
+                    const qaItem = document.createElement('div');
+                    qaItem.className = 'qa-item';
+                    qaItem.innerHTML = `
+                        <button class="question">
+                            <span>${qa.question}</span>
+                            <span class="question-icon">+</span>
+                        </button>
+                        <div class="answer">
+                            ${qa.answer}
+                            <button class="mastery-button" data-index="${index}">Marcar como Dominado</button>
+                        </div>
+                    `;
+                    qaContainer.appendChild(qaItem);
+                });
+                addEventListeners();
+            }
+
+            function addEventListeners() {
+                document.querySelectorAll('.question').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const answer = button.nextElementSibling;
+                        button.classList.toggle('active');
+                        answer.classList.toggle('active');
+                        button.querySelector('.question-icon').textContent = button.classList.contains('active') ? '−' : '+';
+                        answer.style.maxHeight = answer.classList.contains('active') ? answer.scrollHeight + "px" : null;
+                    });
+                });
+
+                document.querySelectorAll('.mastery-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const index = e.target.dataset.index;
+                        const qaItem = e.target.closest('.qa-item');
+                        
+                        if (completedQuestions.has(index)) {
+                            completedQuestions.delete(index);
+                            e.target.textContent = 'Marcar como Dominado';
+                            e.target.classList.remove('mastered');
+                            qaItem.classList.remove('mastered');
+                        } else {
+                            completedQuestions.add(index);
+                            e.target.textContent = '¡Dominado!';
+                            e.target.classList.add('mastered');
+                            qaItem.classList.add('mastered');
+                        }
+                        updateProgress();
+                    });
+                });
+            }
+            
+            function updateProgress() {
+                const completedCount = completedQuestions.size;
+                const totalCount = questionsAndAnswers.length;
+                const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = `Dominio: ${percentage}% - ${completedCount}/${totalCount} preguntas dominadas`;
+            }
+
+            function filterQuestions() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                document.querySelectorAll('.qa-item').forEach((item, index) => {
+                    const qa = questionsAndAnswers[index];
+                    const content = (qa.question + qa.answer).toLowerCase();
+                    if (content.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            function showRandomQuestion() {
+                const visibleItems = Array.from(document.querySelectorAll('.qa-item')).filter(item => item.style.display !== 'none');
+                if (visibleItems.length === 0) return;
+
+                const randomItem = visibleItems[Math.floor(Math.random() * visibleItems.length)];
+                
+                randomItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Abrir la respuesta si está cerrada
+                const questionBtn = randomItem.querySelector('.question');
+                if (!questionBtn.classList.contains('active')) {
+                    questionBtn.click();
+                }
+            }
+            
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 25000);
+            }
+            
+            // --- INICIALIZACIÓN ---
+            renderQuestions();
+            setInterval(createBubble, 500);
+            searchInput.addEventListener('input', filterQuestions);
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.innerHTML = isDark ? '☀️ Cambiar a Tema Claro' : '🌙 Cambiar a Tema Oscuro';
+            });
+            randomBtn.addEventListener('click', showRandomQuestion);
+        });
+    </script>
+</body>
+</html>

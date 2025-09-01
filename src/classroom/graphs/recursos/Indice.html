@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice Interactivo de Temas de Grafos</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        :root {
+            --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-primary-light: #1c1e21;
+            --bg-secondary-light: rgba(255, 255, 255, 0.7);
+            --border-light: #d1d9e6;
+            --accent-light: #0056b3;
+            --text-secondary-light: #555;
+
+            --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary-dark: #e2e8f0;
+            --bg-secondary-dark: rgba(30, 41, 59, 0.7);
+            --border-dark: #334155;
+            --accent-dark: #38bdf8;
+            --text-secondary-dark: #94a3b8;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
+        }
+
+        body.light-theme {
+            background: var(--bg-primary-light);
+            color: var(--text-primary-light);
+        }
+
+        body.dark-theme {
+            background: var(--bg-primary-dark);
+            color: var(--text-primary-dark);
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 1rem auto;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: background-color 0.4s, border 0.4s;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid transparent;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        body.light-theme .container {
+            background-color: var(--bg-secondary-light);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.dark-theme .container {
+            background-color: var(--bg-secondary-dark);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, var(--accent-light), #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        body.dark-theme h1 {
+            background: linear-gradient(45deg, var(--accent-dark), #00d4ff);
+            -webkit-background-clip: text;
+        }
+
+        /* --- ESTADÍSTICAS Y PROGRESO --- */
+        .progress-container {
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.03);
+            margin-top: 1.5rem;
+        }
+        body.dark-theme .progress-container { background-color: rgba(255, 255, 255, 0.05); }
+
+        .progress-bar {
+            width: 100%; height: 8px;
+            background-color: rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden;
+        }
+        body.dark-theme .progress-bar { background-color: rgba(255,255,255,0.1); }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-light), #00aaff);
+            width: 0%; transition: width 0.4s ease;
+        }
+        body.dark-theme .progress-fill { background: linear-gradient(90deg, var(--accent-dark), #00d4ff); }
+        .progress-text { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary-light); }
+        body.dark-theme .progress-text { color: var(--text-secondary-dark); }
+        
+        .stats-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .stat-card {
+            padding: 1.5rem; border-radius: 12px; text-align: center;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+        body.light-theme .stat-card { background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 1px solid var(--border-light); }
+        body.dark-theme .stat-card { background: linear-gradient(135deg, #2c3e50, #34495e); border: 1px solid var(--border-dark); }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+
+        .stat-number { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--accent-light); }
+        body.dark-theme .stat-number { color: var(--accent-dark); }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary-light); }
+        body.dark-theme .stat-label { color: var(--text-secondary-dark); }
+
+        /* --- FILTROS Y CONTROLES --- */
+        .controls {
+            display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+            justify-content: center; align-items: center; padding: 1.5rem 0;
+        }
+        .search-box {
+            padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--border-light);
+            background-color: var(--bg-secondary-light); transition: all 0.3s ease; min-width: 250px;
+        }
+        body.dark-theme .search-box { background-color: var(--bg-secondary-dark); color: var(--text-primary-dark); border-color: var(--border-dark); }
+        .search-box:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 12px rgba(0, 102, 204, 0.3); }
+        body.dark-theme .search-box:focus { border-color: var(--accent-dark); }
+        
+        .difficulty-filter { display: flex; gap: 0.5rem; background-color: rgba(0,0,0,0.05); padding: 5px; border-radius: 25px; }
+        body.dark-theme .difficulty-filter { background-color: rgba(255,255,255,0.08); }
+        .difficulty-btn {
+            padding: 0.5rem 1rem; border: none; background: transparent;
+            border-radius: 20px; cursor: pointer; transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        body.light-theme .difficulty-btn { color: #555; }
+        body.dark-theme .difficulty-btn { color: #aaa; }
+        .difficulty-btn.active { background-color: var(--accent-light); color: white !important; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        body.dark-theme .difficulty-btn.active { background-color: var(--accent-dark); }
+
+        /* --- ESTILOS DEL ACORDEÓN --- */
+        .topic { margin-bottom: 1rem; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+        
+        .accordion {
+            background-color: transparent; cursor: pointer; padding: 15px 20px;
+            width: 100%; border: none; text-align: left; outline: none;
+            font-size: 1.1rem; transition: background-color 0.4s; border-radius: 12px;
+            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+        }
+        /* CORRECCIÓN: Asegurar visibilidad del título en modo oscuro */
+        body.dark-theme .accordion {
+            color: var(--text-primary-dark);
+        }
+        .accordion:hover { background-color: rgba(0, 0, 0, 0.05); }
+        body.dark-theme .accordion:hover { background-color: rgba(255, 255, 255, 0.05); }
+        
+        .accordion-icon {
+            font-size: 1.5rem; font-weight: bold; transition: transform 0.3s ease-out;
+            color: var(--accent-light);
+        }
+        body.dark-theme .accordion-icon { color: var(--accent-dark); }
+        .accordion.active .accordion-icon { transform: rotate(45deg); }
+
+        .topic-preview {
+            width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; flex-shrink: 0;
+            background: var(--bg-primary-light);
+        }
+        body.dark-theme .topic-preview { background: var(--bg-primary-dark); }
+        
+        .panel {
+            padding: 0 20px; background-color: transparent; max-height: 0;
+            overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease;
+        }
+        .panel.active { padding: 10px 20px 20px; }
+        .panel ul { list-style-type: none; padding-left: 10px; margin: 0; }
+        .panel li {
+            padding: 12px 20px;
+            /* MEJORA VISUAL: Estilo de línea vertical */
+            border-left: 3px solid var(--accent-light); 
+            margin-bottom: 8px;
+            border-radius: 0 8px 8px 0; 
+            transition: all 0.3s ease; cursor: pointer;
+            background-color: rgba(0,0,0,0.02);
+        }
+        body.dark-theme .panel li { 
+            border-color: var(--accent-dark); 
+            background-color: rgba(255,255,255,0.03);
+        }
+        .panel li:hover { 
+            transform: translateX(5px); 
+            border-left-width: 6px; 
+            background-color: rgba(0,0,0,0.04);
+        }
+        body.dark-theme .panel li:hover { background-color: rgba(255,255,255,0.06); }
+        .panel li.completed { text-decoration: line-through; opacity: 0.6; }
+
+        /* --- BOTÓN DE TEMA Y FOOTER --- */
+        .theme-button {
+            padding: 0.7rem 1.5rem; border-radius: 25px; border: none;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .theme-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        body.light-theme .theme-button { background: linear-gradient(135deg, #333, #555); color: white; }
+        body.dark-theme .theme-button { background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; }
+
+        footer { text-align: center; margin-top: 3rem; font-size: 0.9rem; color: #888; padding: 2rem 0; }
+        body.dark-theme footer { color: var(--text-secondary-dark); }
+
+        /* --- BURBUJAS AUTOMÁTICAS --- */
+        .bubble {
+            position: fixed;
+            bottom: -150px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -10;
+            opacity: 0;
+            animation: rise 25s infinite ease-in-out;
+        }
+        /* CORRECCIÓN: Colores de burbuja visibles y sutiles */
+        body.light-theme .bubble { background-color: rgba(0, 86, 179, 0.1); }
+        body.dark-theme .bubble { background-color: rgba(56, 189, 248, 0.08); }
+        
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-110vh); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="dark-theme"> <!-- Inicia en modo oscuro por defecto -->
+    <div class="container">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="total-topics">9</div>
+                <div class="stat-label">Temas Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-topics">0</div>
+                <div class="stat-label">Completados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="advanced-topics">3</div>
+                <div class="stat-label">Nivel Avanzado</div>
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">Progreso: 0% - ¡Comienza tu viaje por la teoría de grafos!</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+        <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar temas...">
+        <div class="difficulty-filter">
+            <button class="difficulty-btn active" data-difficulty="todos">Todos</button>
+            <button class="difficulty-btn" data-difficulty="básico">Básico</button>
+            <button class="difficulty-btn" data-difficulty="intermedio">Intermedio</button>
+            <button class="difficulty-btn" data-difficulty="avanzado">Avanzado</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>🕸️ Índice Interactivo de Teoría de Grafos</h1>
+
+        <div class="topic" data-difficulty="básico" data-keywords="preliminares notación fundamental simple multigrafo ponderado grado secuencia apretón manos regularidad irregularidad">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">📚</div><span>1. Preliminares y Notación</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">1.1. Tipos Fundamentales de Grafos</li>
+                <li onclick="markAsRead(this)">1.2. Grado y Secuencia de Grados</li>
+                <li onclick="markAsRead(this)">1.3. Lema del Apretón de Manos</li>
+                <li onclick="markAsRead(this)">1.4. Regularidad e Irregularidad</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="básico" data-keywords="regulares propiedades ejemplos canónicos ciclos completos hipercubos bipartitos">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">⚖️</div><span>2. Grafos Regulares</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">2.1. Definición y Propiedades Fundamentales</li>
+                <li onclick="markAsRead(this)">2.2. Ejemplos Canónicos</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="intermedio" data-keywords="irregulares teorema imposibilidad completo palomar">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">🚫</div><span>3. Grafos Irregulares</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">3.1. Definición de Grafos Completamente Irregulares</li>
+                <li onclick="markAsRead(this)">3.2. Teorema: La Imposibilidad de su Existencia</li>
+                <li onclick="markAsRead(this)">3.3. Análisis de la Prueba (Principio del Palomar)</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="intermedio" data-keywords="casi irregulares pareja complementaria único constructor incremental">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">✨</div><span>4. Grafos Casi Irregulares</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">4.1. Teorema: La Pareja Complementaria Única</li>
+                <li onclick="markAsRead(this)">4.2. Constructor Interactivo</li>
+                <li onclick="markAsRead(this)">4.3. La Construcción Incremental</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="básico" data-keywords="complemento propiedades relación grados aristas">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">🔄</div><span>5. El Complemento de un Grafo</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">5.1. Definición y Propiedades</li>
+                <li onclick="markAsRead(this)">5.2. Relación de Grados y Aristas</li>
+                <li onclick="markAsRead(this)">5.3. Aplicación a Grafos Casi Irregulares</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="avanzado" data-keywords="realización secuencias grados algoritmo havel hakimi teorema erdos gallai">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">🧮</div><span>6. Realización de Secuencias de Grados</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">6.1. Algoritmo de Havel—Hakimi</li>
+                <li onclick="markAsRead(this)">6.2. Teorema de Erdős—Gallai</li>
+                <li onclick="markAsRead(this)">6.3. Aplicaciones a Casi Irregulares</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="intermedio" data-keywords="principio palomar dirichlet cajas aplicación existencia">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">🕊️</div><span>7. El Principio del Palomar</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">7.1. Versión Básica y Generalizada</li>
+                <li onclick="markAsRead(this)">7.2. Aplicación a la Inexistencia de Grafos Irregulares</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="avanzado" data-keywords="algebraica cayley construcción propiedades regularidad vértice transitividad ejemplos diedrales">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">🔗</div><span>8. Perspectiva Algebraica: Grafos de Cayley</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">8.1. Construcción de un Grafo de Cayley</li>
+                <li onclick="markAsRead(this)">8.2. Propiedades Clave</li>
+                <li onclick="markAsRead(this)">8.3. Ejemplos Notables</li>
+            </ul></div>
+        </div>
+        <div class="topic" data-difficulty="avanzado" data-keywords="gpu rendimiento simulación bfs búsqueda amplitud warp divergencia coalescencia memoria">
+            <button class="accordion"><div style="display: flex; align-items: center;"><div class="topic-preview">⚡</div><span>9. Análisis de Rendimiento en GPU con Grafos</span></div><div class="accordion-icon">+</div></button>
+            <div class="panel"><ul>
+                <li onclick="markAsRead(this)">9.1. El Desafío de los Grafos en GPUs</li>
+                <li onclick="markAsRead(this)">9.2. Simulación de Rendimiento BFS</li>
+                <li onclick="markAsRead(this)">9.3. Análisis del Perfil de Rendimiento</li>
+            </ul></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const searchInput = document.getElementById('search-input');
+            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const accordions = document.querySelectorAll('.accordion');
+            const allTopics = document.querySelectorAll('.topic');
+            
+            const completedItems = new Set();
+            const totalItems = document.querySelectorAll('.panel li').length;
+
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.innerHTML = isDark ? '☀️ Cambiar a Tema Claro' : '🌙 Cambiar a Tema Oscuro';
+            });
+            
+            accordions.forEach(acc => {
+                // Solo añadir evento a los que tienen un panel de subtítulos
+                const panel = acc.nextElementSibling;
+                if (panel && panel.classList.contains('panel')) {
+                    acc.addEventListener("click", function() {
+                        this.classList.toggle("active");
+                        const icon = this.querySelector('.accordion-icon');
+                        if (icon) icon.textContent = this.classList.contains('active') ? '−' : '+';
+                        
+                        panel.classList.toggle('active');
+                        panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
+                    });
+                } else {
+                    // Si no tiene subtítulos, no hacemos que sea un acordeón
+                    acc.style.cursor = 'default';
+                    const icon = acc.querySelector('.accordion-icon');
+                    if(icon) icon.style.display = 'none';
+                }
+            });
+
+            window.markAsRead = function(element) {
+                element.classList.toggle('completed');
+                const itemText = element.textContent;
+                if (completedItems.has(itemText)) {
+                    completedItems.delete(itemText);
+                } else {
+                    completedItems.add(itemText);
+                }
+                updateProgress();
+            };
+
+            function updateProgress() {
+                const completedCount = completedItems.size;
+                const percentage = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+                
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = `Progreso: ${percentage}% - ${completedCount}/${totalItems} subtemas completados`;
+                document.getElementById('completed-topics').textContent = completedCount;
+            }
+
+            function filterAndSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const activeDifficulty = document.querySelector('.difficulty-btn.active').dataset.difficulty;
+
+                allTopics.forEach(topic => {
+                    const keywords = topic.dataset.keywords.toLowerCase();
+                    const difficulty = topic.dataset.difficulty;
+                    const title = topic.querySelector('span').textContent.toLowerCase();
+
+                    const matchesSearch = searchTerm === '' || keywords.includes(searchTerm) || title.includes(searchTerm);
+                    const matchesDifficulty = activeDifficulty === 'todos' || difficulty === activeDifficulty;
+
+                    topic.style.display = (matchesSearch && matchesDifficulty) ? 'block' : 'none';
+                });
+            }
+
+            searchInput.addEventListener('input', filterAndSearch);
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterAndSearch();
+                });
+            });
+
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                
+                body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 25000);
+            }
+            setInterval(createBubble, 500);
+        });
+    </script>
+</body>
+</html>
