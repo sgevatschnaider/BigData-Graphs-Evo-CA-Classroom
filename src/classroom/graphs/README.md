@@ -119,18 +119,19 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 
 ---
 
-## 🧭 Herramientas de Navegación y Estudio
+¡Claro! He adaptado el nuevo fragmento con los enlaces corregidos para que se abran directamente como páginas web interactivas.
 
-| 📄 Recurso | 📥 Acceso |
-|---|---|
-| **Indice.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Punto de partida y centro de navegación para todo el curso. Este índice interactivo no es solo una lista, sino una herramienta de estudio completa. Permite a los usuarios seguir su progreso, filtrar temas por dificultad (básico, intermedio, avanzado) y buscar conceptos específicos en tiempo real. Incluye un panel de estadísticas y una barra de progreso para una experiencia de aprendizaje gamificada y organizada.</p></details> | [![Acceder al Índice](https://img.shields.io/badge/Acceder%20al-Índice-green?style=for-the-badge&logo=trello)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/Indice.html) |
-| **Cuestionario.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Una herramienta de autoevaluación con 30 preguntas de nivel experto, diseñadas para preparar un examen. Cada pregunta es un acordeón desplegable que revela una respuesta exhaustiva y detallada. La interfaz incluye una barra de progreso para seguir los temas dominados, un buscador para encontrar conceptos específicos y una función de 'pregunta aleatoria' para simulacros de examen. Es el recurso ideal para consolidar y poner a prueba los conocimientos adquiridos.</p></details> | [![Iniciar Cuestionario](https://img.shields.io/badge/Iniciar-Cuestionario-blue?style=for-the-badge&logo=quora)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/Cuestionario.html) |
+Aquí tienes el código listo para usar:
 
 ---
 
+## 🧭Introducción a Grafos Regulares e Irregulares
 
-## 📖 Grafos Irregulares e Irregulares
-
+| 📄 Recurso | 📥 Acceso |
+|---|---|
+| **Indice.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Punto de partida y centro de navegación para todo el curso. Este índice interactivo no es solo una lista, sino una herramienta de estudio completa. Permite a los usuarios seguir su progreso, filtrar temas por dificultad (básico, intermedio, avanzado) y buscar conceptos específicos en tiempo real. Incluye un panel de estadísticas y una barra de progreso para una experiencia de aprendizaje gamificada y organizada.</p></details> | [![Acceder al Índice](https://img.shields.io/badge/Acceder%20al-Índice-green?style=for-the-badge&logo=trello)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/Indice.html) |
+| **Cuestionario.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Una herramienta de autoevaluación con 30 preguntas de nivel experto, diseñadas para preparar un examen. Cada pregunta es un acordeón desplegable que revela una respuesta exhaustiva y detallada. La interfaz incluye una barra de progreso para seguir los temas dominados, un buscador para encontrar conceptos específicos y una función de 'pregunta aleatoria' para simulacros de examen. Es el recurso ideal para consolidar y poner a prueba los conocimientos adquiridos.</p></details> | [![Iniciar Cuestionario](https://img.shields.io/badge/Iniciar-Cuestionario-blue?style=for-the-badge&logo=quora)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/Cuestionario.html) |
+---
 
 ### 1. Preliminares y Conceptos Fundamentales
 | 📄 Recurso | 📥 Acceso |
