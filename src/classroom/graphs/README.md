@@ -119,13 +119,7 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 
 ---
 
-¡Claro! He adaptado el nuevo fragmento con los enlaces corregidos para que se abran directamente como páginas web interactivas.
-
-Aquí tienes el código listo para usar:
-
----
-
-## 🧭Introducción a Grafos Regulares e Irregulares
+## 🧭Indice y Cuestionario
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
@@ -178,12 +172,11 @@ Aquí tienes el código listo para usar:
 |---|---|
 | **Análisis de Rendimiento en GPU con Grafos_irregulares.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso avanzado sirve como un caso de estudio sobre los desafíos de procesar grafos en arquitecturas paralelas como las GPUs. Utiliza grafos casi irregulares para exacerbar y analizar cuellos de botella. La página incluye un panel de simulación de rendimiento que visualiza y compara métricas clave como la divergencia de warp (actividad de hilos), el tamaño de la frontera de una Búsqueda en Amplitud (BFS) y la coalescencia de memoria. Además, contiene un glosario detallado con conceptos de computación en GPU (SIMT, Warp, etc.), ofreciendo una visión práctica de los problemas de balanceo de carga en HPC.</p></details> | [![Ver Simulación de Rendimiento](https://img.shields.io/badge/Ver%20Simulación-de%20Rendimiento-red?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/An%C3%A1lisis%20de%20Rendimiento%20en%20GPU%20con%20Grafos_irregulares.html) |
 
-
 ## 📕 Material de Referencia
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
-| **glosario.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Una guía de referencia completa con definiciones expertas de todos los conceptos clave del curso. La interfaz está diseñada para una consulta rápida y eficiente, con una barra de navegación alfabética que permite saltar a secciones específicas y un buscador dinámico que filtra los términos en tiempo real. Cada definición es concisa, precisa y está contextualizada dentro del material de estudio, convirtiéndola en una herramienta indispensable para el aprendizaje.</p></details> | [![Consultar Glosario](https://img.shields.io/badge/Consultar-Glosario-indigo?style=for-the-badge&logo=read-the-docs)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/glosario.html) |
+| **glosario.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Una guía de referencia completa con definiciones expertas de todos los conceptos clave del curso. La interfaz está diseñada para una consulta rápida y eficiente, con una barra de navegación alfabética que permite saltar a secciones específicas y un buscador dinámico que filtra los términos en tiempo real. Cada definición es concisa, precisa y está contextualizada dentro del material de estudio, convirtiéndola en una herramienta indispensable para el aprendizaje.</p></details> | [![Consultar Glosario](https://img.shields.io/badge/Consultar-Glosario-indigo?style=for-the-badge&logo=read-the-docs)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/glosario.html) |
 
 ## 1) Fundamentos teóricos
 
