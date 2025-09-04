@@ -178,6 +178,12 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 |---|---|
 | **glosario.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Una guía de referencia completa con definiciones expertas de todos los conceptos clave del curso. La interfaz está diseñada para una consulta rápida y eficiente, con una barra de navegación alfabética que permite saltar a secciones específicas y un buscador dinámico que filtra los términos en tiempo real. Cada definición es concisa, precisa y está contextualizada dentro del material de estudio, convirtiéndola en una herramienta indispensable para el aprendizaje.</p></details> | [![Consultar Glosario](https://img.shields.io/badge/Consultar-Glosario-indigo?style=for-the-badge&logo=read-the-docs)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/e847caa13e2682aff7a380202b22eb2672b8c250/src/classroom/graphs/recursos/glosario.html) |
 
+
+📕 Teorema Teorema de Erdős–Gallai
+📄 Recurso	📥 Acceso
+Teorema de Erdős–Gallai (EG).html <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso interactivo explora el Teorema de Erdős–Gallai, que define si una secuencia de números puede ser la secuencia de grados de un grafo simple. La página explica las dos condiciones clave (suma de grados par y la desigualdad de 'demanda vs. oferta') e incluye un laboratorio práctico. En él, se puede ingresar una secuencia para ver una validación paso a paso de las desigualdades, recibir un veredicto final, y si la secuencia es gráfica, observar una construcción del grafo resultante mediante el algoritmo de Havel-Hakimi.</p></details>	
+Aplicaciones prácticas.html <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso demuestra el valor del Teorema de Erdős–Gallai como un verificador de factibilidad. Explora cómo el teorema se aplica en dominios reales como el diseño de redes, la generación de redes sintéticas para simulaciones, la comprobación de estructuras químicas y la anonimización de datos. La página incluye un estudio de caso interactivo para verificar la factibilidad de un plan de red propuesto, conectando la teoría directamente con un problema práctico.</p></details>	
+
 ## 1) Fundamentos teóricos
 
 ### 1.1 Definiciones
