@@ -7,6 +7,13 @@
     "mtime": "2025-09-01T11:04:03-03:00"
   },
   {
+    "title": "Aplicaciones Prácticas del Teorema de Erdős–Gallai",
+    "path": "/src/classroom/graphs/recursos/Aplicaciones prácticas.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-09-04T15:51:49-03:00"
+  },
+  {
     "title": "Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)",
     "path": "/src/classroom/graphs/recursos/Gossip_english.html",
     "tag": "Demo",
@@ -117,6 +124,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-08-31T20:36:15-03:00"
+  },
+  {
+    "title": "Teorema de Erdős–Gallai: Un Intérprete Interactivo",
+    "path": "/src/classroom/graphs/recursos/Teorema de Erdős–Gallai (EG).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-09-04T15:51:49-03:00"
   },
   {
     "title": "Teoría de Grafos - Visualización Interactiva",
