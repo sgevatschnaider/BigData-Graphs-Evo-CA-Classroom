@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teorema de Erdős–Gallai: Un Intérprete Interactivo</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --accent-primary: #6d28d9;
+            --accent-secondary: #1e40af;
+            --accent-highlight: #f59e0b;
+            --success-color: #166534;
+            --error-color: #991b1b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.3s ease-in-out;
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --bg-secondary: rgba(15, 23, 42, 0.9);
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #a78bfa;
+            --accent-secondary: #60a5fa;
+            --accent-highlight: #fcd34d;
+            --success-color: #22c55e;
+            --error-color: #f87171;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden; line-height: 1.7; position: relative;
+        }
+
+        /* --- BURBUJAS DE FONDO --- */
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .bubble {
+            position: absolute; bottom: -150px; background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%; animation: rise 40s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* --- LAYOUT Y CONTENEDORES --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 1rem; color: white;
+        }
+        [data-theme="light"] .main-title { color: var(--text-primary); }
+        .subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem;
+            margin-bottom: 2.5rem; box-shadow: var(--shadow); transition: var(--transition);
+        }
+        .card:hover { transform: translateY(-5px); }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;}
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+
+        /* --- FORMATO DE TEXTO Y BLOQUES ESPECIALES --- */
+        .formula {
+            background: rgba(0, 0, 0, 0.05); border-left: 4px solid var(--accent-secondary);
+            padding: 1.5rem; margin: 1rem 0; border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; overflow-x: auto;
+            font-size: 1.1em;
+        }
+        [data-theme="dark"] .formula { background: rgba(0, 0, 0, 0.2); }
+        code {
+            background-color: rgba(109, 40, 217, 0.1); color: var(--accent-primary);
+            padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        strong { color: var(--accent-primary); }
+
+        /* --- DIAGRAMA DEMANDA/OFERTA --- */
+        .demand-supply-diagram {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem; align-items: center; text-align: center; margin-top: 2rem;
+        }
+        .diagram-box {
+            padding: 1.5rem; border-radius: 15px; background: rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] .diagram-box { background: rgba(0,0,0,0.2); }
+        .diagram-box h4 { font-size: 1.2rem; color: var(--accent-secondary); margin-bottom: 0.5rem;}
+        .operator { font-size: 2.5rem; font-weight: bold; color: var(--accent-primary); }
+
+        /* --- LABORATORIO INTERACTIVO --- */
+        .lab-container { display: flex; flex-direction: column; gap: 1.5rem; }
+        .lab-input-area { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .lab-input-area input {
+            flex-grow: 1; padding: 0.8rem 1rem; font-size: 1.1rem; border-radius: 8px;
+            border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-primary);
+            font-family: 'SF Mono', monospace;
+        }
+        .lab-input-area button {
+            padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 8px;
+            background-color: var(--accent-primary); color: white;
+            cursor: pointer; transition: var(--transition); font-weight: bold;
+        }
+        .lab-input-area button:hover { background-color: var(--accent-secondary); transform: scale(1.05); }
+        .example-links a { color: var(--accent-secondary); cursor: pointer; text-decoration: underline; margin-right: 1rem; }
+
+        #results-container { margin-top: 2rem; }
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 900px) { .results-grid { grid-template-columns: 1fr; } }
+        
+        .result-box {
+            padding: 1.5rem; border-radius: 15px; background: rgba(0,0,0,0.05); min-height: 100px;
+        }
+        [data-theme="dark"] .result-box { background: rgba(0,0,0,0.2); }
+        
+        .result-box h3 { margin-top: 0; }
+        .result-box .status { font-weight: bold; padding: 0.2rem 0.5rem; border-radius: 5px; }
+        .status.pass { color: var(--success-color); background-color: rgba(22, 101, 52, 0.1); }
+        .status.fail { color: var(--error-color); background-color: rgba(153, 27, 27, 0.1); }
+
+        .eg-table-container { max-height: 400px; overflow-y: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; font-family: 'SF Mono', monospace; }
+        th, td { padding: 0.75rem; text-align: center; border-bottom: 1px solid var(--border-color); }
+        th { background-color: rgba(0,0,0,0.05); }
+        [data-theme="dark"] th { background-color: rgba(0,0,0,0.2); }
+        tr.fail-row { background-color: rgba(153, 27, 27, 0.1); color: var(--error-color); font-weight: bold;}
+        
+        #havel-hakimi-steps { font-family: 'SF Mono', monospace; white-space: pre-wrap; }
+        
+        #graph-canvas { width: 100%; height: auto; border-radius: 10px; background: rgba(0,0,0,0.05); }
+        [data-theme="dark"] #graph-canvas { background: rgba(0,0,0,0.2); }
+
+        /* --- OTROS --- */
+        .theme-toggle {
+            position: fixed; top: 1.5rem; right: 1.5rem; width: 50px; height: 50px;
+            border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border-color);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000;
+        }
+        .theme-toggle:hover { transform: scale(1.1) rotate(360deg); }
+        footer { text-align: center; padding: 2rem; margin-top: 2rem; color: rgba(255,255,255,0.8); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="bubbles" id="bubbles-container"></div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Cambiar tema">🌙</button>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Teorema de Erdős–Gallai</h1>
+            <p class="subtitle">La caracterización completa de las secuencias gráficas. Descubre si una lista de números puede representar los grados de un grafo simple.</p>
+        </header>
+
+        <section class="card">
+            <h2>¿Qué es una Secuencia Gráfica?</h2>
+            <p>En teoría de grafos, una secuencia de enteros no negativos <code>d = (d₁, d₂, ..., dₙ)</code> se denomina <strong>gráfica</strong> si existe un grafo <strong>simple</strong> (sin bucles ni aristas múltiples) con <code>n</code> vértices cuyos grados son exactamente los números de la secuencia.</p>
+            <p>El Teorema de Erdős–Gallai nos da un criterio exacto y comprobable para determinar si una secuencia es gráfica sin necesidad de intentar construir el grafo.</p>
+        </section>
+
+        <section class="card">
+            <h2>El Enunciado del Teorema</h2>
+            <p>Una secuencia de enteros no negativos, ordenada de mayor a menor <code>d₁ ≥ d₂ ≥ ... ≥ dₙ</code>, es gráfica <strong>si y solo si</strong> se cumplen dos condiciones:</p>
+            <h3>1. Condición de Paridad</h3>
+            <p>La suma de todos los grados debe ser un número par. Esto se deriva del Lema del Apretón de Manos (Handshaking Lemma), que establece que cada arista contribuye con 2 a la suma total de grados.</p>
+            <div class="formula">∑ᵢ₌₁ⁿ dᵢ es par</div>
+            
+            <h3>2. Desigualdades de Erdős–Gallai</h3>
+            <p>Para <strong>cada</strong> entero <code>k</code> desde 1 hasta <code>n</code>, la siguiente desigualdad debe ser cierta:</p>
+            <div class="formula">∑ᵢ₌₁ᵏ dᵢ  ≤  k(k-1) + ∑ᵢ₌ₖ₊₁ⁿ min(dᵢ, k)</div>
+        </section>
+        
+        <section class="card">
+            <h2>Intuición: Demanda vs. Oferta</h2>
+            <p>La desigualdad de Erdős-Gallai puede parecer compleja, pero tiene una intuición muy clara de "recursos". Para cualquier subconjunto de los <code>k</code> vértices más "exigentes" (los de mayor grado), su demanda de conexiones no puede superar la oferta total disponible.</p>
+            <div class="demand-supply-diagram">
+                <div class="diagram-box">
+                    <h4>Demanda</h4>
+                    <p>Suma de grados de los <code>k</code> vértices más grandes.</p>
+                    <div class="formula">∑ᵢ₌₁ᵏ dᵢ</div>
+                </div>
+                <div class="operator">≤</div>
+                <div class="diagram-box">
+                    <h4>Oferta Interna</h4>
+                    <p>Máximas conexiones posibles <strong>entre</strong> esos <code>k</code> vértices (un clique Kₖ).</p>
+                    <div class="formula">k(k-1)</div>
+                </div>
+                <div class="operator">+</div>
+                <div class="diagram-box">
+                    <h4>Oferta Externa</h4>
+                    <p>Máximas conexiones desde los <code>n-k</code> vértices restantes <strong>hacia</strong> el grupo de <code>k</code>.</p>
+                    <div class="formula">∑ᵢ₌ₖ₊₁ⁿ min(dᵢ, k)</div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem;">La condición <code>min(dᵢ, k)</code> significa que un vértice externo no puede ofrecer más conexiones que su propio grado (<code>dᵢ</code>), ni puede conectarse más de <code>k</code> veces al grupo (ya que solo hay <code>k</code> vértices en él).</p>
+        </section>
+
+        <section class="card">
+            <h2>Intérprete Interactivo de Erdős–Gallai</h2>
+            <div class="lab-container">
+                <div class="lab-input-area">
+                    <input type="text" id="degree-sequence-input" placeholder="Ej: 3, 3, 2, 2, 2">
+                    <button id="verify-btn">Verificar y Construir</button>
+                </div>
+                 <div class="example-links">
+                    <span>Probar ejemplos:</span>
+                    <a data-sequence="3,3,2,2,2">Gráfica (3,3,2,2,2)</a>
+                    <a data-sequence="4,4,1,1,1">No Gráfica (4,4,1,1,1)</a>
+                    <a data-sequence="6, 5, 5, 4, 3, 3, 2">Gráfica Compleja</a>
+                </div>
+                <div id="results-container"></div>
+            </div>
+        </section>
+        
+        <section class="card">
+            <h2>Suficiencia y Construcción: Algoritmo de Havel-Hakimi</h2>
+            <p>La parte más profunda del teorema es que estas condiciones no solo son <strong>necesarias</strong>, sino también <strong>suficientes</strong>. Si se cumplen, se garantiza que un grafo existe.</p>
+            <p>Una forma de construir dicho grafo es mediante un proceso algorítmico similar al de <strong>Havel-Hakimi</strong>:</p>
+            <ol>
+                <li>Toma el vértice con el mayor grado restante (<code>d₁</code>).</li>
+                <li>Conéctalo a los siguientes <code>d₁</code> vértices de mayor grado.</li>
+                <li>Actualiza los grados de los vértices involucrados y elimina el vértice ya satisfecho.</li>
+                <li>Reordena la secuencia y repite el proceso.</li>
+            </ol>
+            <p>El teorema de Erdős-Gallai garantiza que este proceso nunca se quedará "atascado" si las condiciones se cumplen desde el principio. Nuestro intérprete interactivo utiliza este método para construir una posible realización del grafo.</p>
+        </section>
+
+        <footer>
+            <p>Una herramienta interactiva para explorar el Teorema de Erdős–Gallai. Material elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MÓDULO 1: UI Y CONTROLADORES ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const degreeInput = document.getElementById('degree-sequence-input');
+        const verifyBtn = document.getElementById('verify-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const bubblesContainer = document.getElementById('bubbles-container');
+
+        const setTheme = (theme) => {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+
+        // --- Generador de Burbujas ---
+        if (bubblesContainer) {
+            const createBubble = () => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDuration = `${Math.random() * 20 + 20}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubblesContainer.appendChild(bubble);
+
+                setTimeout(() => bubble.remove(), 40000);
+            };
+            for (let i = 0; i < 25; i++) {
+                createBubble();
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+            if (degreeInput.value.trim() !== '') {
+                verifyAndConstruct();
+            }
+        });
+        
+        setTheme(localStorage.getItem('theme') || 'dark');
+
+        verifyBtn.addEventListener('click', verifyAndConstruct);
+        degreeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyAndConstruct();
+        });
+        
+        document.querySelectorAll('.example-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                degreeInput.value = e.target.dataset.sequence;
+                verifyAndConstruct();
+            });
+        });
+
+        // --- MÓDULO 2: LÓGICA DEL TEOREMA ---
+
+        function verifyAndConstruct() {
+            const inputText = degreeInput.value.trim();
+            if (!inputText) {
+                resultsContainer.innerHTML = `<div class="result-box"><p class="status fail">Por favor, introduce una secuencia de grados.</p></div>`;
+                return;
+            }
+            
+            let sequence;
+            try {
+                sequence = inputText.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s !== '')
+                    .map(Number);
+                if (sequence.some(isNaN)) throw new Error("Secuencia inválida.");
+            } catch (e) {
+                resultsContainer.innerHTML = `<div class="result-box"><p class="status fail">Error: La secuencia contiene caracteres no numéricos.</p></div>`;
+                return;
+            }
+            
+            sequence.sort((a, b) => b - a);
+
+            const n = sequence.length;
+            if (n === 0) {
+                 resultsContainer.innerHTML = `<div class="result-box"><p class="status fail">La secuencia está vacía.</p></div>`;
+                return;
+            }
+
+            // 1. Parity Check
+            const sum = sequence.reduce((acc, val) => acc + val, 0);
+            const isEven = sum % 2 === 0;
+
+            // 2. Erdős–Gallai Check
+            const egResults = [];
+            let allEgPass = true;
+            const prefixSums = [0];
+            for(let i=0; i<n; ++i) prefixSums.push(prefixSums[i] + sequence[i]);
+
+            for (let k = 1; k <= n; k++) {
+                const lhs = prefixSums[k];
+                let rhsExternal = 0;
+                for (let i = k; i < n; i++) {
+                    rhsExternal += Math.min(sequence[i], k);
+                }
+                const rhs = k * (k - 1) + rhsExternal;
+                const passes = lhs <= rhs;
+                if (!passes) allEgPass = false;
+                egResults.push({ k, lhs, rhs, passes });
+            }
+
+            const isGraphical = isEven && allEgPass;
+            
+            // 3. Havel-Hakimi Construction
+            let edges = [];
+            let hhSteps = [];
+            if (isGraphical) {
+                let hhSequence = sequence.map((d, i) => ({ degree: d, originalIndex: i }));
+                
+                while (hhSequence.length > 0 && hhSequence.some(v => v.degree > 0)) {
+                     hhSequence.sort((a, b) => b.degree - a.degree);
+                     
+                     let currentVertex = hhSequence.shift();
+                     if(currentVertex.degree > hhSequence.length) {
+                         console.error("Havel-Hakimi failed unexpectedly.");
+                         break;
+                     }
+                     
+                     let step = `Conectar V${currentVertex.originalIndex + 1} (grado ${currentVertex.degree}) con `;
+                     let targets = [];
+                     
+                     for(let j=0; j<currentVertex.degree; ++j){
+                         hhSequence[j].degree--;
+                         const u = currentVertex.originalIndex;
+                         const v = hhSequence[j].originalIndex;
+                         edges.push([Math.min(u, v), Math.max(u, v)]);
+                         targets.push(`V${v+1}`);
+                     }
+                     step += targets.join(', ');
+                     hhSteps.push(step);
+                }
+                edges = [...new Set(edges.map(e => `${e[0]}-${e[1]}`))].map(s => s.split('-').map(Number));
+            }
+            
+            renderResults(sequence, sum, isEven, egResults, isGraphical, edges, hhSteps);
+        }
+
+        // --- MÓDULO 3: RENDERIZADO ---
+        
+        function renderResults(sequence, sum, isEven, egResults, isGraphical, edges, hhSteps) {
+            const parityHtml = `
+                <div class="result-box">
+                    <h3>1. Chequeo de Paridad</h3>
+                    <p>Suma de grados: ${sequence.join(' + ')} = <strong>${sum}</strong></p>
+                    <p>Resultado: <span class="status ${isEven ? 'pass' : 'fail'}">${isEven ? 'Pasa (Suma Par)' : 'Falla (Suma Impar)'}</span></p>
+                </div>
+            `;
+            
+            const egTableRows = egResults.map(r => `
+                <tr class="${!r.passes ? 'fail-row' : ''}">
+                    <td>${r.k}</td>
+                    <td>${r.lhs}</td>
+                    <td>${r.rhs}</td>
+                    <td>${r.passes ? '✓' : '✗'}</td>
+                </tr>
+            `).join('');
+
+            const egHtml = `
+                <div class="result-box">
+                    <h3>2. Desigualdades de Erdős–Gallai</h3>
+                    <p>Resultado: <span class="status ${isEven && egResults.every(r=>r.passes) ? 'pass' : 'fail'}">${isEven && egResults.every(r=>r.passes) ? 'Pasa' : 'Falla'}</span></p>
+                    <div class="eg-table-container">
+                        <table>
+                            <thead><tr><th>k</th><th>LHS (Demanda)</th><th>RHS (Oferta)</th><th>Pasa?</th></tr></thead>
+                            <tbody>${egTableRows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            let constructionHtml = '';
+            if(isGraphical){
+                constructionHtml = `
+                <div class="results-grid" style="margin-top: 2rem;">
+                     <div class="result-box">
+                        <h3>3. Construcción (Havel-Hakimi)</h3>
+                        <p>Una posible realización del grafo:</p>
+                        <div id="havel-hakimi-steps">
+                            ${hhSteps.map(s => `• ${s}`).join('\n')}
+                        </div>
+                     </div>
+                     <div class="result-box">
+                        <h3>Visualización del Grafo</h3>
+                        <canvas id="graph-canvas" width="500" height="500"></canvas>
+                     </div>
+                </div>
+                `;
+            }
+
+            const finalVerdict = `<h2 style="text-align:center; margin-top:2rem;">Veredicto Final: La secuencia (${sequence.join(', ')}) <span class="status ${isGraphical ? 'pass' : 'fail'}">${isGraphical ? 'SÍ es gráfica' : 'NO es gráfica'}</span></h2>`;
+
+            resultsContainer.innerHTML = `${finalVerdict}<div class="results-grid">${parityHtml}${egHtml}</div>${constructionHtml}`;
+            
+            if (isGraphical) {
+                drawGraph(sequence.length, edges);
+            }
+        }
+
+        function drawGraph(n, edges) {
+            const canvas = document.getElementById('graph-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.width;
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.8;
+            const nodeRadius = Math.max(15, canvas.width / (n * 2.5));
+
+            const colors = {
+                node: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                edge: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                label: getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim()
+            };
+
+            const nodes = [];
+            for (let i = 0; i < n; i++) {
+                nodes.push({
+                    x: centerX + radius * Math.cos(2 * Math.PI * i / n - Math.PI / 2),
+                    y: centerY + radius * Math.sin(2 * Math.PI * i / n - Math.PI / 2)
+                });
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = colors.edge;
+            ctx.lineWidth = 2.5;
+            edges.forEach(([u, v]) => {
+                ctx.beginPath();
+                ctx.moveTo(nodes[u].x, nodes[u].y);
+                ctx.lineTo(nodes[v].x, nodes[v].y);
+                ctx.stroke();
+            });
+
+            nodes.forEach((node, i) => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = colors.node;
+                ctx.fill();
+
+                ctx.fillStyle = colors.label;
+                ctx.font = `bold ${nodeRadius * 0.8}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i + 1, node.x, node.y);
+            });
+        }
+    });
+    </script>
+</body>
+</html>
