@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construcción del Grafo de Cayley Cay(Z_4, {±1})</title>
+
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --accent: #4299e1;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            --bg-secondary: rgba(45, 55, 72, 0.95);
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --accent: #63b3ed;
+            --card-bg: rgba(45, 55, 72, 0.9);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        /* --- ESTILOS DE LAS BURBUJAS --- */
+        .bubbles { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            z-index: -1; 
+        }
+        .bubble { 
+            position: absolute; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 50%; 
+            opacity: 0.6; 
+            animation: float 15s infinite linear; 
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+        .header { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--bg-secondary); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 1rem 2rem; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .theme-toggle { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+        .theme-toggle:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(66, 153, 225, 0.4); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 100px 2rem 2rem; position: relative; z-index: 1; }
+        .hero { text-align: center; margin-bottom: 3rem; background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 20px; padding: 3rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; background: linear-gradient(45deg, var(--accent), #9f7aea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+        .section { margin-bottom: 2.5rem; background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 20px; padding: 2.5rem; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.3s ease; }
+        .section:hover { transform: translateY(-5px); }
+        .section h2 { color: var(--accent); margin-bottom: 1.5rem; font-size: 2rem; display: flex; align-items: center; gap: 10px; }
+        .section-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .formula { background: rgba(66, 153, 225, 0.1); border-left: 4px solid var(--accent); padding: 1.5rem; margin: 1.5rem 0; border-radius: 5px; font-size: 1.2rem; overflow-x: auto; }
+        .highlight { background: linear-gradient(120deg, rgba(66, 153, 225, 0.3) 0%, rgba(66, 153, 225, 0.1) 100%); padding: 0.2rem 0.5rem; border-radius: 5px; font-weight: bold; }
+        .graph-visualization { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2rem; background: rgba(0,0,0,0.05); padding: 2rem; border-radius: 15px; margin: 2rem 0; }
+        [data-theme="dark"] .graph-visualization { background: rgba(0,0,0,0.2); }
+        .graph-canvas { max-width: 350px; width: 100%; height: 350px; }
+        .stat-card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .stat-card { background: var(--card-bg); padding: 1rem; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .stat-number { font-size: 2rem; font-weight: bold; color: var(--accent); }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary); }
+        .adjacency-matrix { margin: 2rem auto; font-family: 'Courier New', monospace; font-size: 1.5rem; text-align: center; }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; } .hero p { font-size: 1.1rem; } .container { padding: 80px 1rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">🕸️ Grafo de Cayley</div>
+            <button class="theme-toggle" id="theme-toggle">🌙 Tema Oscuro</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="hero fade-in">
+            <h1>Construcción del Grafo de Cayley: $C_4 = \mathrm{Cay}(\mathbb{Z}_4, \{\pm1\})$</h1>
+            <p>Exploramos paso a paso cómo la estructura algebraica del grupo cíclico $\mathbb{Z}_4$ da lugar a una estructura geométrica familiar: el ciclo de 4 vértices o cuadrado ($C_4$).</p>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">1</span>Definiciones y Notación</h2>
+            <p>Comenzamos con el grupo cíclico aditivo $\mathbb{Z}_4 = \{0, 1, 2, 3\}$, donde la operación es la suma módulo 4.</p>
+            <p>Para construir el grafo de Cayley, necesitamos un <span class="highlight">conjunto generador simétrico</span> $X \subseteq \mathbb{Z}_4$. Esto significa que si $x \in X$, entonces $-x \in X$, y además, el elemento neutro $0 \notin X$ (para evitar lazos).</p>
+            <div class="formula">
+                Tomamos el conjunto $X = \{1, 3\}$.
+                <ul>
+                    <li>Es simétrico porque $-1 \equiv 3 \pmod 4$. Por lo tanto, $X = \{-X\}$.</li>
+                    <li>No contiene al neutro: $0 \notin X$.</li>
+                </ul>
+            </div>
+            <p>El grafo de Cayley $\mathrm{Cay}(\mathbb{Z}_4, X)$ tendrá como vértices los elementos de $\mathbb{Z}_4$, y existirá una arista entre dos vértices $g$ y $h$ si $h = g + x$ para algún $x \in X$.</p>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">2</span>Vértices y Vecindades</h2>
+            <p>Los vértices del grafo son $\{0, 1, 2, 3\}$. Los vecinos de un vértice $g$ se calculan como $g \pm 1$ (o $g+1$ y $g+3$) módulo 4. Esto nos da las siguientes vecindades:</p>
+            <div class="formula">
+                $N(0) = \{0+1, 0+3\} = \{1, 3\}$ <br>
+                $N(1) = \{1+1, 1+3\} = \{2, 0\}$ <br>
+                $N(2) = \{2+1, 2+3\} = \{3, 1\}$ <br>
+                $N(3) = \{3+1, 3+3\} = \{0, 2\}$
+            </div>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">3</span>El Grafo Resultante: $C_4$</h2>
+            <p>Como el conjunto generador $X$ es simétrico, el grafo es <span class="highlight">no dirigido</span>. Esto significa que si existe una arista de $g$ a $h$, también existe una de $h$ a $g$. Las aristas únicas son:</p>
+            <div class="formula" style="text-align: center; font-size: 1.5rem;">
+                $\{0,1\}, \{1,2\}, \{2,3\}, \{3,0\}$
+            </div>
+            <p>Estas aristas forman un ciclo cerrado. Al visualizar los vértices y sus conexiones, obtenemos la forma inconfundible de un cuadrado.</p>
+            <div class="graph-visualization">
+                <canvas class="graph-canvas" id="cayleyGraph"></canvas>
+                <div style="flex-basis: 350px;">
+                    <h3>Propiedades Clave</h3>
+                    <div class="stat-card-container">
+                        <div class="stat-card"><div class="stat-number">2</div><div class="stat-label">Grafo 2-Regular</div></div>
+                        <div class="stat-card"><div class="stat-number">4</div><div class="stat-label">Vértices</div></div>
+                        <div class="stat-card"><div class="stat-number">4</div><div class="stat-label">Aristas</div></div>
+                        <div class="stat-card"><div class="stat-number">Sí</div><div class="stat-label">Conexo</div></div>
+                    </div>
+                     <p style="margin-top: 1rem; font-size: 1rem;">El número de aristas se confirma con la fórmula: $|E| = \frac{|\mathbb{Z}_4| \cdot |X|}{2} = \frac{4 \cdot 2}{2} = 4$.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">4</span>Matriz de Adyacencia</h2>
+            <p>La estructura del grafo también puede representarse mediante su matriz de adyacencia $A$, ordenando los vértices como $(0, 1, 2, 3)$. Un '1' en la posición $(i, j)$ indica una arista entre el vértice $i$ y el vértice $j$.</p>
+             <div class="formula adjacency-matrix">
+                $$ A = \begin{pmatrix}
+                0 & 1 & 0 & 1 \\
+                1 & 0 & 1 & 0 \\
+                0 & 1 & 0 & 1 \\
+                1 & 0 & 1 & 0
+                \end{pmatrix} $$
+            </div>
+            <p>Observaciones de la matriz:</p>
+            <ul>
+                <li>La diagonal principal es cero, confirmando la <span class="highlight">ausencia de lazos</span>.</li>
+                <li>Cada fila y columna suma 2, lo que demuestra que el grafo es <span class="highlight">2-regular</span>.</li>
+                <li>La matriz es simétrica ($A = A^T$), lo que corresponde a un grafo <span class="highlight">no dirigido</span>.</li>
+            </ul>
+        </section>
+        
+        <section class="section fade-in">
+            <h2><span class="section-icon">5</span>Conclusión y Concepto Clave</h2>
+            <p>Hemos demostrado que la construcción $\mathrm{Cay}(\mathbb{Z}_4, \{\pm1\})$ produce un grafo 2-regular, conexo y sin lazos con 4 vértices y 4 aristas. La única estructura que cumple estas propiedades es el <span class="highlight">ciclo de longitud 4 ($C_4$)</span>, también conocido como el grafo cuadrado.</p>
+            <div class="formula">
+                <h4>Concepto Clave: Grafo de Cayley Aditivo</h4>
+                <p>Para un grupo cíclico $\mathbb{Z}_n$ y un conjunto generador simétrico $X$, el grafo de Cayley $\mathrm{Cay}(\mathbb{Z}_n, X)$ describe las conexiones aditivas del grupo. Si $X=\{\pm1\}$, el grafo resultante siempre será el ciclo $C_n$, ya que cada vértice $g$ se conecta únicamente con sus "vecinos" inmediatos, $g-1$ y $g+1$.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- INICIAR BURBUJAS ---
+        createBubbles();
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙 Tema Oscuro';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Tema Claro';
+            }
+            drawCayleyGraph(); 
+        });
+
+        const scrollElements = document.querySelectorAll('.fade-in');
+        const handleScrollAnimations = () => {
+            scrollElements.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                    el.classList.add('visible');
+                }
+            });
+        };
+        window.addEventListener('scroll', handleScrollAnimations);
+        handleScrollAnimations();
+
+        drawCayleyGraph();
+    });
+
+    // --- FUNCIÓN PARA CREAR BURBUJAS ---
+    function createBubbles() {
+        const bubblesContainer = document.getElementById('bubbles');
+        if(!bubblesContainer) return;
+        setInterval(() => {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            const size = Math.random() * 60 + 20;
+            const posX = Math.random() * window.innerWidth;
+            const duration = Math.random() * 10 + 15;
+            bubble.style.width = `${size}px`; bubble.style.height = `${size}px`;
+            bubble.style.left = `${posX}px`; bubble.style.animationDuration = `${duration}s`;
+            bubblesContainer.appendChild(bubble);
+            setTimeout(() => bubble.remove(), duration * 1000);
+        }, 350);
+    }
+
+    function drawCayleyGraph() {
+        const canvas = document.getElementById('cayleyGraph');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
+        const nodeColor = '#4299e1';
+        const edgeColor = isDarkMode ? '#a0aec0' : '#718096';
+        const nodeLabelColor = 'white';
+        const nodeStrokeColor = isDarkMode ? '#1a202c' : '#ffffff';
+
+        const nodes = [
+            { x: w * 0.2, y: h * 0.2, label: '0' },
+            { x: w * 0.8, y: h * 0.2, label: '1' },
+            { x: w * 0.8, y: h * 0.8, label: '2' },
+            { x: w * 0.2, y: h * 0.8, label: '3' },
+        ];
+        const edges = [ [0, 1], [1, 2], [2, 3], [3, 0] ];
+        const nodeRadius = 30;
+
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 4;
+        edges.forEach(edge => {
+            const fromNode = nodes[edge[0]];
+            const toNode = nodes[edge[1]];
+            ctx.beginPath();
+            ctx.moveTo(fromNode.x, fromNode.y);
+            ctx.lineTo(toNode.x, toNode.y);
+            ctx.stroke();
+        });
+
+        nodes.forEach(node => {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = nodeColor;
+            ctx.fill();
+            ctx.strokeStyle = nodeStrokeColor;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            ctx.fillStyle = nodeLabelColor;
+            ctx.font = `bold ${nodeRadius * 0.8}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.label, node.x, node.y);
+        });
+    }
+    </script>
+</body>
+</html>
