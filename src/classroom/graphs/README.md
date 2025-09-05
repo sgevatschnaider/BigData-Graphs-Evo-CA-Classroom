@@ -174,7 +174,16 @@ Aquí tienes el código Markdown corregido y listo para usar.
 
 ¡Por supuesto! Entendido, quieres la tabla final consolidada, asegurándote de que los enlaces apunten a la versión **renderizada** y funcional de las páginas.
 
-Aquí tienes el código Markdown corregido y listo para usar.
+
+¡Ah, comprendo perfectamente! El problema no es tu código ni los enlaces, sino **dónde estás pegando el código Markdown**.
+
+La mayoría de las plataformas de chat o foros tienen un intérprete de Markdown muy simple y, por seguridad, **bloquean etiquetas HTML complejas como `<details>` y `<summary>`**. Por eso, en lugar de ver un bonito resumen desplegable, ves el código HTML en texto plano.
+
+La solución es usar un formato más simple que sea compatible con casi cualquier sistema.
+
+Aquí te doy dos versiones. La primera es la "completa" (que solo funciona en sitios como GitHub) y la segunda es la "compatible" que debería funcionar en casi cualquier lugar.
+
+---
 
 ### **Análisis de la Serie de Lecciones sobre Grafos de Cayley**
 
@@ -184,6 +193,9 @@ Aquí tienes el código Markdown corregido y listo para usar.
 | **cubo.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta lección generaliza la idea del Grafo de Cayley al grupo $(\mathbb{Z}_2)^3$, el conjunto de todas las cadenas de 3 bits con la operación XOR. Explica cómo este grupo, con los generadores de la base canónica, define la estructura del cubo tridimensional ($Q_3$). La página se enfoca en las propiedades estructurales que emergen de esta construcción, como la 3-regularidad, el número de aristas y la bipartición del grafo.</p></details> | [![Ver Lección Estática](https://img.shields.io/badge/Ver%20Lección-Estática-blue?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/1ae18af271e4d20c0b19f8c189a9097f1518c831/src/classroom/graphs/recursos/cubo.html) |
 | **teseracto.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta página extiende la construcción al hipercubo de 4 dimensiones, el Teseracto ($Q_4$), definiéndolo como el Grafo de Cayley de $(\mathbb{Z}_2)^4$. La lección profundiza en las propiedades del hipercubo, introduciendo el conteo de "caras" de diferentes dimensiones (vértices, aristas, cuadrados, cubos) y el concepto del espectro del grafo (sus autovalores). Además, resalta la conexión fundamental entre la distancia en el grafo y la distancia de Hamming.</p></details> | [![Ver Lección Estática](https://img.shields.io/badge/Ver%20Lección-Estática-purple?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/1ae18af271e4d20c0b19f8c189a9097f1518c831/src/classroom/graphs/recursos/teseracto.html) |
 | **hammigs.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta lección es la más teórica y fundamental de la serie sobre hipercubos. Se centra en probar y explorar la consecuencia principal de definir el hipercubo $Q_d$ como un Grafo de Cayley: la distancia geodésica (camino más corto en el grafo) entre dos vértices es exactamente igual a su distancia de Hamming. La página articula la prueba de manera clara y luego deriva consecuencias importantes como el diámetro del hipercubo, las esferas de Hamming y el número de caminos mínimos, finalizando con un resumen de sus aplicaciones en el mundo real.</p></details> | [![Ver Lección Teórica](https://img.shields.io/badge/Ver%20Lección-Teórica-green?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/1ae18af271e4d20c0b19f8c189a9097f1518c831/src/classroom/graphs/recursos/hammigs.html) |
+```
+
+
 
 ### 9. Análisis de Rendimiento en GPU con Grafos
 | 📄 Recurso | 📥 Acceso |
