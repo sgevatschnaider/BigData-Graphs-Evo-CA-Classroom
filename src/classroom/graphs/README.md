@@ -168,6 +168,10 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 | **Grafo_Cayley.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta lección explora la profunda conexión entre el álgebra abstracta y la teoría de grafos. Define la construcción de un Grafo de Cayley a partir de un grupo finito y un conjunto de generadores. Explica propiedades clave como la regularidad garantizada y la vértice-transitividad. Incluye un explorador interactivo que permite generar y visualizar diferentes tipos de Grafos de Cayley, como ciclos (sobre ℤₙ), hipercubos (sobre (ℤ₂)ᵈ), grafos completos e incluso grafos bipartitos regulares (sobre el grupo Diedral), demostrando la versatilidad de esta construcción.</p></details> | [![Explorar Grafos Algebraicos](https://img.shields.io/badge/Explorar-Grafos%20Algebraicos-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/Grafo_Cayley.html) |
 Claro, aquí tienes el resumen consolidado de todos los archivos en el formato solicitado.
 
+¡Por supuesto! Entendido, quieres la tabla final consolidada, asegurándote de que los enlaces apunten a la versión **renderizada** y funcional de las páginas.
+
+Aquí tienes el código Markdown corregido y listo para usar.
+
 ### **Análisis de la Serie de Lecciones sobre Grafos de Cayley**
 
 | 📄 Recurso | 📥 Acceso |
