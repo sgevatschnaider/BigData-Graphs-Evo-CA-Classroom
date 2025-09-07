@@ -35,6 +35,13 @@
     "mtime": "2025-09-05T17:43:01-03:00"
   },
   {
+    "title": "Cuestionario Experto: Grafos de Cayley y Redes P2P",
+    "path": "/src/classroom/graphs/recursos/Cuestionario_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-09-07T18:27:43-03:00"
+  },
+  {
     "title": "Cultural Virality Dashboard — Graph • Evolutionary • Automaton",
     "path": "/src/classroom/graphs/recursos/Virality.html",
     "tag": "Demo",
@@ -96,6 +103,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-09-01T11:04:03-03:00"
+  },
+  {
+    "title": "Glosario Experto: Grafos de Cayley y Redes P2P",
+    "path": "/src/classroom/graphs/recursos/Glosario_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-09-07T18:27:43-03:00"
   },
   {
     "title": "Glosario Interactivo de Teoría de Grafos",
