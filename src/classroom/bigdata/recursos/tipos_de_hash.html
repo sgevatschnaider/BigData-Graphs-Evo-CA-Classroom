@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>De la Rigidez a la Elasticidad — Sharding vs Hashing Consistente y Gossip</title>
+<style>
+  :root{
+    --bg: #0b1020;
+    --panel: #0f1630;
+    --ink: #e8ecf3;
+    --muted:#a5b0c2;
+    --accent:#7dd3fc;
+    --accent2:#c084fc;
+    --ok:#34d399;
+    --warn:#fbbf24;
+    --bad:#f87171;
+    --edge:#9ca3af55;
+    --edge-strong:#9ca3afcc;
+    --chip:#1f2937;
+    --glass:#0c132cdd;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans";
+    background: radial-gradient(1200px 600px at 70% -10%, #1b2a5a 0%, var(--bg) 60%);
+    color:var(--ink);
+  }
+  header{
+    padding:24px 20px 12px 20px; border-bottom:1px solid #ffffff14;
+    background: linear-gradient(180deg, #0d1430aa, #0d143000);
+  }
+  h1{margin:0; font-size:28px; letter-spacing:.2px}
+  h2{margin:0; font-size:16px; font-weight:600; color:var(--muted)}
+  main{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap:14px; padding:14px; min-height: calc(100vh - 120px);
+  }
+  @media (max-width:1100px){ main{grid-template-columns:1fr} }
+  .panel{
+    background: linear-gradient(180deg, var(--panel), #0b1228);
+    border:1px solid #ffffff14; border-radius:14px; padding:14px;
+    box-shadow: 0 10px 30px #00000060, inset 0 1px 0 #ffffff06;
+  }
+  .controls{display:grid; gap:12px}
+  .row{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center}
+  .row > label{font-size:13px; color:var(--muted)}
+  .row .value{font-size:12px; color:var(--ink); opacity:.9}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  .switch, input[type="number"], input[type="range"], button{
+    width:100%; background:#0c132c; color:var(--ink); border:1px solid #ffffff1f; border-radius:10px;
+    padding:10px 12px; font-size:14px; outline:none;
+  }
+  input[type="range"]{padding:0; height:36px; accent-color: var(--accent)}
+  .switch{display:flex; gap:8px; padding:6px}
+  .switch button{
+    background:transparent; border:0; padding:8px 10px; border-radius:8px; font-weight:600; font-size:13px; opacity:.8
+  }
+  .switch button.active{background:#1b2552; opacity:1; outline:1px solid #ffffff2a}
+  .btn{
+    background:linear-gradient(180deg,#233066,#1a2350); border:1px solid #ffffff2a; font-weight:700; letter-spacing:.2px;
+  }
+  .btn.ghost{background:#0c132c; font-weight:600}
+  .metrics{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top:6px;
+  }
+  .metric{ background: #0c132c; border:1px solid #ffffff12; border-radius:12px; padding:10px; }
+  .metric .k{ font-size:20px; font-weight:800}
+  .metric .t{ font-size:12px; color:var(--muted)}
+  .legend{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .chip{background:var(--chip); border:1px solid #ffffff14; border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted)}
+  .scene{position:relative; overflow:hidden}
+  .toolbar{display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-bottom:8px}
+  .tag{font-size:12px; padding:6px 8px; border-radius:8px; border:1px solid #ffffff1a; background:#0c132c; color:var(--muted)}
+  svg{
+    width:100%;
+    height:calc(100vh - 340px); /* cuando la explicación está visible */
+    min-height:420px; display:block;
+    background: radial-gradient(600px 300px at 40% -10%, #24316566 0%, #10183500 60%);
+    border:1px solid #ffffff14; border-radius:14px
+  }
+  .node{filter: drop-shadow(0 2px 2px #000000AA)}
+  .node text{font-size:12px; fill:#eaf1ff; text-shadow: 0 1px 0 #000}
+  .data-dot{opacity:.9}
+  .edge{stroke: var(--edge); stroke-width:1.2}
+  .edge.strong{stroke: var(--edge-strong); stroke-width:1.6}
+  .edge.comm{stroke: #79ffe188; stroke-dasharray: 6 4}
+  .edge.rep{opacity:.4}
+  .halo{fill:none; stroke:#ffffff20; stroke-width:12}
+
+  /* ====== Caja de explicación dinámica ====== */
+  .explainBox{
+    position:absolute; left:12px; right:12px; bottom:12px;
+    background: var(--glass);
+    border:1px solid #ffffff1f; border-radius:14px; padding:12px 14px;
+    box-shadow: 0 8px 30px #00000060, inset 0 1px 0 #ffffff08;
+    max-height: 280px; overflow:auto;
+  }
+  .explainBox h3{margin:4px 0 8px 0; font-size:15px}
+  .explainBox p{margin:6px 0; line-height:1.55}
+  .explainBox .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .explainBox .badge{
+    display:inline-block; font-size:11px; padding:3px 8px; border-radius:999px;
+    border:1px solid #ffffff22; background:#0c132c; color:#cfe3ff; margin-right:6px
+  }
+  .explainBox .kbd{background:#111827; border:1px solid #ffffff22; padding:2px 6px; border-radius:6px; font-size:12px}
+  .explainBox .muted{color:#a5b0c2}
+  .explainBox .ok{color:var(--ok)} .explainBox .bad{color:var(--bad)} .explainBox .warn{color:var(--warn)}
+  .explainToggle{position:absolute; right:24px; top:-12px}
+  .explainToggle button{
+    background:#0c132c; border:1px solid #ffffff2a; color:#cfe3ff; border-radius:999px; padding:6px 10px; font-size:12px
+  }
+  /* FAB para mostrar explicación cuando está oculta */
+  .fab{
+    position:fixed; right:24px; bottom:24px; z-index:10;
+    background:#0c132c; border:1px solid #ffffff2a; color:#cfe3ff; border-radius:999px;
+    padding:10px 14px; font-size:13px; display:none;
+    box-shadow: 0 10px 30px #00000080;
+  }
+
+  footer{
+    padding:12px 16px; color:#aab6d6; border-top:1px solid #ffffff14; text-align:center; font-size:13px;
+    background: linear-gradient(180deg, #0b1228, #090f20);
+  }
+  .credit{margin-top:6px; font-weight:700; color:#e8ecf3}
+</style>
+</head>
+<body>
+<header>
+  <h1>De la Rigidez a la Elasticidad</h1>
+  <h2>Sharding Modular vs Hashing Consistente · Difusión <em>Gossip</em> · Replicación &amp; VNodes</h2>
+</header>
+
+<main>
+  <!-- PANEL IZQUIERDO -->
+  <section class="panel">
+    <div class="controls">
+      <div class="row">
+        <label>Algoritmo de distribución</label>
+        <div class="switch" role="tablist" aria-label="Modo">
+          <button id="btnMod" class="active" aria-selected="true">Sharding Modular</button>
+          <button id="btnCons">Hashing Consistente</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Nodos en el clúster <span class="value" id="nodesVal">3</span></label>
+        <input id="nodesRange" type="range" min="1" max="10" step="1" value="3" aria-label="Número de nodos"/>
+      </div>
+
+      <div class="row">
+        <label>Cantidad de claves <span class="value" id="keysVal">120</span></label>
+        <input id="keysRange" type="range" min="12" max="600" step="12" value="120" aria-label="Número de claves"/>
+      </div>
+
+      <div class="grid2">
+        <div class="row">
+          <label>Replicación (RF)</label>
+          <input id="rfInput" type="number" value="1" min="1" max="5"/>
+        </div>
+        <div class="row">
+          <label>VNodes por nodo</label>
+          <input id="vnodesInput" type="number" value="1" min="1" max="128"/>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <button id="btnReset" class="btn">Reiniciar claves</button>
+        <button id="btnGossip" class="btn">Iniciar Gossip</button>
+        <button id="btnStopGossip" class="btn ghost">Detener Gossip</button>
+      </div>
+
+      <div class="grid3">
+        <button id="btnAuto" class="btn">Auto Comparar</button>
+        <button id="btnStopAuto" class="btn ghost">Detener Auto</button>
+        <span></span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="k" id="mMoved">—</div>
+          <div class="t">Claves movidas (primarias)</div>
+        </div>
+        <div class="metric">
+          <div class="k" id="mPct">—</div>
+          <div class="t">% movido al cambiar N</div>
+        </div>
+        <div class="metric">
+          <div class="k" id="mIdeal">—</div>
+          <div class="t">Ideal teórico</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="chip">Nodo: círculo grande</div>
+        <div class="chip">Token (VNode): marca en anillo</div>
+        <div class="chip">Clave → Nodo: línea</div>
+        <div class="chip">Gossip: línea punteada</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL DERECHO -->
+  <section class="panel scene">
+    <div class="toolbar">
+      <span class="tag" id="modeTag">Modo: Modular</span>
+      <span class="tag" id="summaryTag">Listo.</span>
+    </div>
+    <svg id="viz" viewBox="0 0 1200 800" aria-label="Visualización de anillo y mapeos">
+      <defs>
+        <radialGradient id="gNode" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#c7d2fe"/>
+        </radialGradient>
+      </defs>
+    </svg>
+
+    <!-- EXPLICACIÓN DINÁMICA -->
+    <div class="explainBox" id="explainBox">
+      <div class="explainToggle"><button id="toggleExplain" aria-expanded="true">⇳ Ocultar</button></div>
+      <h3 id="expTitle">Explicación</h3>
+      <div class="grid">
+        <div>
+          <p id="expMain"></p>
+          <p id="expMath" class="muted"></p>
+          <p id="expMove"></p>
+          <p id="expObserve" class="muted"></p>
+        </div>
+        <div>
+          <p><span class="badge">Nodos: disposición circular y grafo completo</span></p>
+          <p id="expCircle"></p>
+          <p><span class="badge">Gossip: por qué y cómo</span></p>
+          <p id="expGossip"></p>
+          <p id="expTips" class="muted"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAB para recuperar la explicación al ocultarla -->
+    <button id="showExplainFab" class="fab" aria-expanded="false">Mostrar explicación</button>
+  </section>
+</main>
+
+<footer>
+  <div>Demostración educativa — sharding modular, hashing consistente, vnodes, replicación y gossip.</div>
+  <div class="credit">elaborado por el profesor Sergio Gevatschnaider</div>
+</footer>
+
+<script>
+/* ===================== Utils ===================== */
+function fnv1a32(str){ let h = 0x811c9dc5|0; for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193);} return (h>>>0); }
+function hashUnit(str){ return fnv1a32(str) / 2**32; }
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+
+/* ===================== Paleta ===================== */
+const palette = ["#60a5fa","#34d399","#f472b6","#f59e0b","#a78bfa","#22d3ee","#f87171","#10b981","#fb7185","#eab308","#06b6d4","#c084fc","#2dd4bf","#f97316","#38bdf8","#84cc16","#f43f5e","#14b8a6"];
+
+/* ===================== Estado ===================== */
+let state = {
+  mode: "modular", N: 3, RF: 1, V: 1,
+  keys: [], nodes: [], tokens: [],
+  prevOwners: new Map(), moved: 0, movedPct: 0, ideal: "—",
+  gossipTimer: null, phaseLabel: "", seed: randInt(0, 1e9),
+  autoTimer: null, autoRunning: false
+};
+
+/* ===================== Claves ===================== */
+function regenerateKeys(K){
+  const keys=[]; const a=29,b=7,M=9973;
+  for(let i=0;i<K;i++){
+    const raw = (a*i + b + state.seed) % M;
+    const id = `k${raw}`, hv=fnv1a32(id), unit=hv/2**32, angle=unit*2*Math.PI;
+    keys.push({id,hv,unit,angle,owners:[]});
+  }
+  state.keys = keys;
+}
+
+/* ===================== Cluster ===================== */
+function buildCluster(){
+  const { N, V, mode } = state;
+  state.nodes = Array.from({length:N},(_,i)=>({id:`n${i}`,label:`N${i}`,color:palette[i%palette.length]}));
+  const tokens=[];
+  if(mode==="modular"){
+    for(let i=0;i<N;i++){ tokens.push({angle:(i/N)*2*Math.PI, owner:i, isDisplay:true}); }
+  }else{
+    for(let i=0;i<N;i++){
+      for(let t=0;t<V;t++){ tokens.push({angle:hashUnit(`n${i}#${t}`)*2*Math.PI, owner:i}); }
+    }
+  }
+  tokens.sort((a,b)=>a.angle-b.angle);
+  state.tokens = tokens;
+}
+
+/* ===================== Asignación ===================== */
+function lowerBoundToken(angle){ const arr=state.tokens; let lo=0,hi=arr.length; while(lo<hi){ const m=(lo+hi)>>1; if(arr[m].angle<angle) lo=m+1; else hi=m;} return lo; }
+function assignKeys(){
+  const { mode, N, RF, tokens } = state; const rf=Math.max(1,Math.min(RF,N));
+  const newOwners=new Map();
+  for(const k of state.keys){
+    const owners=[];
+    if(mode==="modular"){
+      const p = k.hv % N; owners.push(p); for(let r=1;r<rf;r++) owners.push((p+r)%N);
+    }else{
+      let idx=lowerBoundToken(k.angle); if(idx===tokens.length) idx=0;
+      const used=new Set(); while(owners.length<rf){ const o=tokens[idx].owner; if(!used.has(o)){owners.push(o); used.add(o);} idx=(idx+1)%tokens.length; }
+    }
+    k.owners=owners; newOwners.set(k.id, owners[0]);
+  }
+  let moved=0; if(state.prevOwners.size){ for(const k of state.keys){ if(state.prevOwners.get(k.id)!==k.owners[0]) moved++; } }
+  state.moved=moved; state.movedPct = state.keys.length ? moved/state.keys.length*100 : 0;
+  state.prevOwners = newOwners;
+  state.ideal = (state.mode==="consistent") ? `≈ ${(100/Math.max(2, state.N)).toFixed(1)}%` : "—";
+}
+
+/* ===================== Render ===================== */
+const svg = document.getElementById("viz"); const NS="http://www.w3.org/2000/svg";
+function clearSVG(){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+function render(){
+  clearSVG();
+  const W=1200,H=800,cx=W*0.50,cy=H*0.52,R=Math.min(W,H)*0.36,Rin=R-64,Rout=R;
+
+  const halo=document.createElementNS(NS,'circle'); halo.setAttribute('cx',cx); halo.setAttribute('cy',cy); halo.setAttribute('r',R+8); halo.setAttribute('class','halo'); svg.appendChild(halo);
+  const ring=document.createElementNS(NS,'circle'); ring.setAttribute('cx',cx); ring.setAttribute('cy',cy); ring.setAttribute('r',R); ring.setAttribute('fill','none'); ring.setAttribute('stroke','#3b82f622'); ring.setAttribute('stroke-width','6'); svg.appendChild(ring);
+
+  for(const t of state.tokens){
+    const x=cx+Math.cos(t.angle)*R, y=cy+Math.sin(t.angle)*R;
+    const x2=cx+Math.cos(t.angle)*(R-16), y2=cy+Math.sin(t.angle)*(R-16);
+    const mark=document.createElementNS(NS,'line'); mark.setAttribute('x1',x); mark.setAttribute('y1',y); mark.setAttribute('x2',x2); mark.setAttribute('y2',y2);
+    mark.setAttribute('class','edge'); mark.setAttribute('stroke',state.mode==='modular'?'#9ca3af55':'#c084fc55'); svg.appendChild(mark);
+  }
+
+  const nodeGeom=[];
+  if(state.mode==='modular'){
+    for(let i=0;i<state.N;i++){ nodeGeom.push({id:i, angle:(i/state.N)*2*Math.PI}); }
+  }else{
+    for(let i=0;i<state.N;i++){ const a = (state.tokens.find(t=>t.owner===i)||{angle:(i/state.N)*2*Math.PI}).angle; nodeGeom.push({id:i, angle:a}); }
+  }
+
+  for(const k of state.keys){
+    const kd={x:cx+Math.cos(k.angle)*Rin, y:cy+Math.sin(k.angle)*Rin};
+    k.owners.forEach((owner,j)=>{
+      const ng=nodeGeom.find(n=>n.id===owner); const np={x:cx+Math.cos(ng.angle)*Rout, y:cy+Math.sin(ng.angle)*Rout};
+      const line=document.createElementNS(NS,'line'); line.setAttribute('x1',kd.x); line.setAttribute('y1',kd.y); line.setAttribute('x2',np.x); line.setAttribute('y2',np.y);
+      line.setAttribute('class',`edge ${j===0?'strong':''} ${j>0?'rep':''}`); line.setAttribute('stroke', j===0? '#9ca3afcc':'#9ca3af55'); svg.appendChild(line);
+    });
+    const dot=document.createElementNS(NS,'circle'); dot.setAttribute('cx',kd.x); dot.setAttribute('cy',kd.y); dot.setAttribute('r',3.2); dot.setAttribute('class','data-dot'); dot.setAttribute('fill','#7dd3fc'); svg.appendChild(dot);
+  }
+
+  for(let i=0;i<state.N;i++){
+    const ng=nodeGeom[i]; const x=cx+Math.cos(ng.angle)*Rout, y=cy+Math.sin(ng.angle)*Rout;
+    const g=document.createElementNS(NS,'g'); g.setAttribute('class','node');
+    const c=document.createElementNS(NS,'circle'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',16); c.setAttribute('fill',state.nodes[i].color); c.setAttribute('opacity','0.95'); g.appendChild(c);
+    const txt=document.createElementNS(NS,'text'); txt.setAttribute('x',x+20); txt.setAttribute('y',y+4); txt.textContent=state.nodes[i].label; g.appendChild(txt);
+    svg.appendChild(g);
+  }
+
+  if(gossipEdges.length){
+    for(const e of gossipEdges){
+      const a=nodeGeom.find(n=>n.id===e.a), b=nodeGeom.find(n=>n.id===e.b);
+      const p1={x:cx+Math.cos(a.angle)*Rout, y:cy+Math.sin(a.angle)*Rout}, p2={x:cx+Math.cos(b.angle)*Rout, y:cy+Math.sin(b.angle)*Rout};
+      const line=document.createElementNS(NS,'line'); line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y); line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y); line.setAttribute('class','edge comm'); svg.appendChild(line);
+    }
+  }
+
+  document.getElementById('mMoved').textContent = state.prevOwners.size ? state.moved : '—';
+  document.getElementById('mPct').textContent   = state.prevOwners.size ? `${state.movedPct.toFixed(1)}%` : '—';
+  document.getElementById('mIdeal').textContent = state.ideal;
+  document.getElementById('modeTag').textContent = `Modo: ${state.mode==='modular'?'Modular':'Consistente'}`;
+  const info = `N=${state.N} • claves=${state.keys.length} • RF=${state.RF} • VNodes=${state.mode==='consistent'?state.V:'—'}`;
+  document.getElementById('summaryTag').textContent = (state.phaseLabel?`${state.phaseLabel} • `:'') + info;
+
+  updateExplanation();
+}
+
+/* ===================== Gossip ===================== */
+let gossipEdges=[];
+function startGossip(){ stopGossip(); state.gossipTimer=setInterval(()=>{ gossipEdges=[]; const M=Math.min(6,state.N*(state.N-1)/2); for(let t=0;t<M;t++){ const a=randInt(0,state.N-1); let b=a; while(b===a) b=randInt(0,state.N-1); gossipEdges.push({a,b}); } render(); },800); }
+function stopGossip(){ if(state.gossipTimer){ clearInterval(state.gossipTimer); state.gossipTimer=null; } gossipEdges=[]; render(); }
+
+/* ===================== EXPLICACIÓN DINÁMICA ===================== */
+const expTitle=document.getElementById('expTitle');
+const expMain=document.getElementById('expMain');
+const expMath=document.getElementById('expMath');
+const expMove=document.getElementById('expMove');
+const expObserve=document.getElementById('expObserve');
+const expCircle=document.getElementById('expCircle');
+const expGossip=document.getElementById('expGossip');
+const expTips=document.getElementById('expTips');
+
+const explainBox=document.getElementById('explainBox');
+const toggleExplainBtn=document.getElementById('toggleExplain');
+const showExplainFab=document.getElementById('showExplainFab');
+const svgEl=document.getElementById('viz');
+
+let explainVisible=true;
+function hideExplain(){
+  explainVisible=false;
+  explainBox.style.display='none';
+  svgEl.style.height='calc(100vh - 220px)'; // más alto, “todo el grafo”
+  showExplainFab.style.display='inline-flex';
+  toggleExplainBtn.setAttribute('aria-expanded','false');
+  showExplainFab.setAttribute('aria-expanded','true');
+}
+function showExplain(){
+  explainVisible=true;
+  explainBox.style.display='block';
+  svgEl.style.height='calc(100vh - 340px)'; // vuelve al alto original con explicación
+  showExplainFab.style.display='none';
+  toggleExplainBtn.setAttribute('aria-expanded','true');
+  showExplainFab.setAttribute('aria-expanded','false');
+  updateExplanation();
+}
+toggleExplainBtn.addEventListener('click', ()=>{ explainVisible ? hideExplain() : showExplain(); });
+showExplainFab.addEventListener('click', showExplain);
+
+function updateExplanation(){
+  const {mode,N,RF,V,phaseLabel}=state;
+
+  // Sección izquierda: visión general + fórmulas + movimientos
+  if(mode==='modular'){
+    expTitle.textContent = 'Sharding Modular (hash(key) % N)';
+    expMain.innerHTML = `
+      <strong>Visión general.</strong> Dividimos el espacio de claves en <em>N</em> cubetas iguales y asignamos
+      cada clave con <span class="kbd">owner = H(key) % N</span>. Es simple y rápido, pero al cambiar <span class="kbd">N</span>
+      la división cambia y <span class="bad">muchas claves se reubican</span> (alto <em>churn</em>), lo que implica
+      copias de datos y cache misses.
+      <ul>
+        <li><strong>Ventaja:</strong> implementación trivial, latencia mínima.</li>
+        <li><strong>Desventaja:</strong> <em>acoplamiento</em> a N: escalar rompe afinidades y provoca grandes movimientos.</li>
+      </ul>`;
+    expMath.innerHTML = `Regla: <span class="kbd">f(k)=H(k) mod N</span>. Si aumentas de 3→4 nodos,
+      típicamente se moverá ~<span class="bad">75–80%</span> de claves (según la distribución de hashes).`;
+    expMove.innerHTML = state.prevOwners.size
+      ? `Movidas en esta transición: <strong>${state.moved}</strong> claves (<strong>${state.movedPct.toFixed(1)}%</strong>).`
+      : `Mueve el deslizador de nodos para observar el rebarajado.`;
+    expObserve.innerHTML = `Observa que las líneas de asignación cambian de color/destino para la mayoría de puntos.`;
+  }else{
+    expTitle.textContent = 'Hashing Consistente (anillo con posiciones estables)';
+    expMain.innerHTML = `
+      <strong>Visión general.</strong> Representamos el espacio hash sobre un <em>anillo</em>.
+      Cada nodo tiene una o varias <em>posiciones estables</em> (tokens) dadas por
+      <span class="kbd">angle(ni#t)=H("ni#t")·2π</span>. Una clave se asigna al <em>primer token en sentido horario</em>.
+      Al <strong>aumentar</strong> el número de nodos a N, solo ~<span class="ok">1/N</span> de las claves cambian de dueño
+      (aprox. 1/(N+1) para el salto exacto), preservando afinidades.
+      <ul>
+        <li><strong>VNodes:</strong> varios tokens por nodo (<span class="kbd">V</span>) suavizan la distribución y reparten mejor el rebalanceo.</li>
+        <li><strong>Replicación RF:</strong> además del primario, los siguientes <span class="kbd">RF-1</span> sucesores actúan como réplicas.</li>
+      </ul>`;
+    expMath.innerHTML = `Asignación: <span class="kbd">owner(k)=siguiente_token(H(k))</span>.
+      Ideal de movimiento al añadir un nodo: ~<span class="ok">1/N</span> (referencia mostrada: ${state.ideal}).`;
+    expMove.innerHTML = state.prevOwners.size
+      ? `Movidas en esta transición: <strong>${state.moved}</strong> claves (<strong>${state.movedPct.toFixed(1)}%</strong>).`
+      : `Añade un nodo (N→N+1) para ver que solo se mueve una fracción de claves.`;
+    expObserve.innerHTML = `Observa que aparece una nueva <em>frontera</em> local cerca del nuevo token; el resto del anillo permanece estable.`;
+  }
+
+  // Sección derecha: grafo circular y completo + gossip
+  expCircle.innerHTML = `
+    Los <strong>nodos</strong> se dibujan sobre un <em>círculo</em> para visualizar el espacio hash como un anillo.
+    Conceptualmente, su interconexión física o lógica suele aproximarse a un <strong>grafo completo</strong>
+    K<sub>N</sub>: cualquier nodo puede comunicarse con cualquier otro (directa o indirectamente).
+    <ul>
+      <li>En <strong>modular</strong>, “un cliente” suele saber a qué nodo ir (por %N), pero cambios en N rompen esa ruta.</li>
+      <li>En <strong>consistente</strong>, cualquier nodo puede servir de <em>frontal</em>: calcula el dueño en el anillo y reenvía,
+          o el cliente lo calcula y va directo. El anillo es <em>lógico</em>; el grafo completo describe la <em>posibilidad de comunicación</em>.</li>
+    </ul>
+  `;
+
+  expGossip.innerHTML = `
+    <strong>¿Por qué gossip?</strong> Para que todos conozcan el mismo <em>estado de membresía</em> (quién está/entra/sale)
+    sin un coordinador único. <br/>
+    <strong>Cómo:</strong> periódicamente, cada nodo elige al azar uno o varios pares y
+    <em>intercambia resúmenes</em> (digests) con versiones/epochs. Convergencia por <em>anti-entropy</em>.
+    <ul>
+      <li>Las <strong>nuevas fichas/tokens</strong> (join) se difunden vía gossip; al estabilizar, el enrutamiento del anillo se actualiza.</li>
+      <li>En fallos (leave), los sucesores toman el rango y gossip propaga el cambio.</li>
+      <li>En la visual, verás <em>aristas punteadas</em> aleatorias que representan contactos por ronda.</li>
+    </ul>
+  `;
+
+  expTips.innerHTML = `
+    <strong>Qué observar en la demo:</strong>
+    <ol>
+      <li><span class="kbd">Modular 3→4</span>: gran % de claves movidas.</li>
+      <li><span class="kbd">Consistente 3→4</span>: movimiento ≈ <em>1/(N+1)</em>.</li>
+      <li><span class="kbd">VNodes=32</span>: mejor equilibrio por nodo.</li>
+      <li><span class="kbd">RF=3</span>: verás líneas finas adicionales hacia réplicas sucesoras.</li>
+      <li><span class="kbd">Gossip ON</span>: aparecen contactos aleatorios; al ocultar la explicación tendrás el grafo “limpio”.</li>
+    </ol>
+    Consejo: pulsa <strong>Ocultar</strong> para ver el grafo completo y luego inicia <strong>Auto Comparar</strong>.
+  `;
+
+  if(phaseLabel){ expTitle.textContent += ` — ${phaseLabel}`; }
+}
+
+/* ===================== Demo automática ===================== */
+const demoSteps = [
+  { label:'Modular — N=3 (baseline)', apply(){ stopGossip(); state.mode='modular'; toggleModeButtons(); setN(3); setRF(1); setV(1,false); rebuild(); } },
+  { label:'Modular — N=4 (rebalanceo alto)', apply(){ setN(4); rebuild(); } },
+  { label:'Consistente — N=3', apply(){ state.mode='consistent'; toggleModeButtons(); setN(3); setV(1,true); rebuild(); } },
+  { label:'Consistente — N=4 (≈ 1/(N+1))', apply(){ setN(4); rebuild(); } },
+  { label:'Consistente — VNodes=32', apply(){ setV(32,true); rebuild(); } },
+  { label:'Consistente — RF=3', apply(){ setRF(3); assignKeys(); render(); } },
+  { label:'Gossip — ON', apply(){ startGossip(); } },
+  { label:'Gossip — OFF', apply(){ stopGossip(); } }
+];
+
+function startAuto(){
+  stopAuto();
+  state.autoRunning=true; state.prevOwners=new Map();
+  state.seed=randInt(0,1e9); regenerateKeys(state.keys.length||120);
+  let idx=0; const stepTime=1800;
+  const run=()=>{ if(!state.autoRunning) return; const step=demoSteps[idx]; state.phaseLabel=step.label; step.apply(); idx=(idx+1)%demoSteps.length; state.autoTimer=setTimeout(run,stepTime); };
+  run();
+}
+function stopAuto(){ state.autoRunning=false; if(state.autoTimer){ clearTimeout(state.autoTimer); state.autoTimer=null; } state.phaseLabel=""; updateExplanation(); }
+
+/* ===================== UI Helpers ===================== */
+const nodesRange=document.getElementById('nodesRange'), keysRange=document.getElementById('keysRange');
+document.getElementById('nodesVal').textContent=nodesRange.value; document.getElementById('keysVal').textContent=keysRange.value;
+function toggleModeButtons(){ if(state.mode==='modular'){ document.getElementById('btnMod').classList.add('active'); document.getElementById('btnCons').classList.remove('active'); } else { document.getElementById('btnCons').classList.add('active'); document.getElementById('btnMod').classList.remove('active'); } }
+function setN(n){ state.N=n; nodesRange.value=n; document.getElementById('nodesVal').textContent=n; }
+function setRF(rf){ state.RF=Math.max(1,Math.min(rf,state.N)); document.getElementById('rfInput').value=state.RF; }
+function setV(v,onlyCons){ state.V=Math.max(1,Math.min(v,512)); document.getElementById('vnodesInput').value=state.V; if(onlyCons && state.mode!=='consistent'){ state.mode='consistent'; toggleModeButtons(); } }
+function rebuild(){ buildCluster(); assignKeys(); render(); }
+
+/* ===================== Listeners ===================== */
+document.getElementById('btnMod').addEventListener('click', ()=>{ stopAuto(); state.mode='modular'; toggleModeButtons(); rebuild(); });
+document.getElementById('btnCons').addEventListener('click', ()=>{ stopAuto(); state.mode='consistent'; toggleModeButtons(); rebuild(); });
+
+nodesRange.addEventListener('input',(e)=>{ stopAuto(); setN(parseInt(e.target.value,10)); rebuild(); });
+keysRange.addEventListener('input',(e)=>{ stopAuto(); const K=parseInt(e.target.value,10); document.getElementById('keysVal').textContent=K; regenerateKeys(K); assignKeys(); render(); });
+document.getElementById('rfInput').addEventListener('change',(e)=>{ stopAuto(); setRF(parseInt(e.target.value,10)||1); assignKeys(); render(); });
+document.getElementById('vnodesInput').addEventListener('change',(e)=>{ stopAuto(); setV(parseInt(e.target.value,10)||1,false); if(state.mode==='consistent'){ rebuild(); } });
+
+document.getElementById('btnReset').addEventListener('click', ()=>{ stopAuto(); state.prevOwners=new Map(); state.seed=randInt(0,1e9); regenerateKeys(state.keys.length); assignKeys(); render(); });
+document.getElementById('btnGossip').addEventListener('click', ()=>{ stopAuto(); startGossip(); });
+document.getElementById('btnStopGossip').addEventListener('click', ()=>{ stopAuto(); stopGossip(); });
+document.getElementById('btnAuto').addEventListener('click', startAuto);
+document.getElementById('btnStopAuto').addEventListener('click', stopAuto);
+
+/* ===================== Init ===================== */
+(function init(){
+  state.N=parseInt(nodesRange.value,10);
+  state.RF=parseInt(document.getElementById('rfInput').value,10);
+  state.V =parseInt(document.getElementById('vnodesInput').value,10);
+  regenerateKeys(parseInt(keysRange.value,10));
+  buildCluster(); assignKeys(); render();
+})();
+</script>
+</body>
+</html>

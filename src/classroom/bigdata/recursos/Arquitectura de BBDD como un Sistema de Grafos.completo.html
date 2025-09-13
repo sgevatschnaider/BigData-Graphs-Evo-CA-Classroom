@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Arquitectura de BBDD como Grafos</title>
+    <style>
+        /* --- ESTILOS ADAPTADOS DEL EJEMPLO EG --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+            --text-primary: #111827;
+            --accent-primary: #6d28d9;
+            --accent-secondary: #1e40af;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; line-height: 1.7;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; color: #fff; }
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .subtitle { font-size: 1.2rem; max-width: 800px; margin: 0 auto; opacity: 0.9; }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem;
+            margin-bottom: 2.5rem; box-shadow: var(--shadow);
+        }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;}
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+        p { margin-bottom: 1rem; }
+        strong { color: var(--accent-primary); }
+
+        /* --- ESTILOS PARA LA VISUALIZACIÓN DE GRAFOS --- */
+        .graph-container {
+            position: relative;
+            width: 100%;
+            min-height: 450px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 15px;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .graph-svg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+        .graph-svg .node { transition: var(--transition); cursor: pointer; }
+        .graph-svg .node:hover .node-circle { transform: scale(1.2); filter: brightness(1.2); }
+        .graph-svg .edge { stroke: #374151; stroke-width: 2.5; stroke-opacity: 0.6; transition: var(--transition); }
+        .graph-svg .node-circle { transition: var(--transition); }
+        .graph-svg .node-label { fill: white; font-size: 12px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+        
+        .controls { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 8px;
+            background-color: var(--accent-primary); color: white;
+            cursor: pointer; transition: var(--transition); font-weight: bold;
+        }
+        .btn:hover { background-color: var(--accent-secondary); transform: scale(1.05); }
+        .btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        .legend { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-color { width: 20px; height: 20px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Arquitectura de BBDD como un Sistema de Grafos</h1>
+            <p class="subtitle">Una deconstrucción visual e interactiva del Sharding, Partitioning y Replicación usando los principios de la Teoría de Grafos, tal como lo describiste.</p>
+        </header>
+
+        <section class="card">
+            <h2>El Grafo Monolítico: Un Punto Central de Fallo</h2>
+            <p>Comenzamos con una base de datos tradicional, no distribuida. En teoría de grafos, esto se asemeja a un <strong>grafo de estrella</strong>. Todas las consultas (nodos de datos) deben pasar por un único servidor central. Este servidor es un <strong>cuello de botella</strong> y un <strong>vértice de corte</strong>: si falla, todo el sistema se desconecta.</p>
+            <p>Presiona los botones en orden para transformar la arquitectura paso a paso.</p>
+            
+            <div class="graph-container">
+                <svg id="main-graph" class="graph-svg"></svg>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="btn-reset">1. Estado Inicial (Monolítico)</button>
+                <button class="btn" id="btn-shard" disabled>2. Aplicar Sharding</button>
+                <button class="btn" id="btn-partition" disabled>3. Particionar Verticalmente</button>
+                <button class="btn" id="btn-replicate" disabled>4. Introducir Replicación</button>
+            </div>
+            
+             <div class="legend" id="legend-container" style="display: none;">
+                <div class="legend-item"><span class="legend-color" style="background: #2563eb;"></span> Capital Chars</div>
+                <div class="legend-item"><span class="legend-color" style="background: #f59e0b;"></span> Small Chars</div>
+                <div class="legend-item"><span class="legend-color" style="background: #16a34a;"></span> Numbers</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Sharding: La Partición del Grafo</h2>
+            <p>El <strong>Sharding</strong> es una partición horizontal del grafo. Dividimos el conjunto de vértices (datos) en subconjuntos disjuntos (<code>V₁, V₂</code>) basados en una <em>Shard Key</em> (ej. A-M y N-Z). El grafo monolítico se descompone en dos <strong>subgrafos componentes</strong>, eliminando el punto único de fallo y permitiendo la <strong>escalabilidad horizontal</strong>.</p>
+        </section>
+        
+        <section class="card">
+            <h2>Vertical Partitioning: Subgrafos Inducidos</h2>
+            <p>La <strong>Partición Vertical</strong> divide por atributos (columnas). Esto crea <strong>subgrafos inducidos</strong> temáticos dentro de cada shard. Al seleccionar un subconjunto de nodos basado en un atributo (ej. "Numbers"), conservamos solo esos nodos y las aristas entre ellos, optimizando consultas que solo acceden a ciertos tipos de datos.</p>
+        </section>
+        
+        <section class="card">
+            <h2>Replicación: Árboles para la Resiliencia</h2>
+            <p>Finalmente, la <strong>Replicación</strong> crea copias de cada shard. Esta topología forma un <strong>árbol enraizado</strong>, donde el nodo <em>Master</em> es la raíz y las <em>Réplicas</em> son las hojas. Esto aumenta drásticamente la <strong>conectividad del grafo</strong>. Para que un shard quede inaccesible, no solo debe fallar el Master, sino todas sus réplicas, transformando un sistema frágil en uno robusto y con alta disponibilidad.</p>
+        </section>
+    </div>
+
+    <!-- === LEYENDA FINAL SOLICITADA === -->
+    <footer style="text-align:center; color:#ffffff; padding: 16px 0; font-weight:700;">
+        Elaborado por el profesor Sergio Gevatschnaider
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const svg = document.getElementById('main-graph');
+        const legend = document.getElementById('legend-container');
+        const width = svg.parentElement.clientWidth;
+        const height = 450;
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+        const btnReset = document.getElementById('btn-reset');
+        const btnShard = document.getElementById('btn-shard');
+        const btnPartition = document.getElementById('btn-partition');
+        const btnReplicate = document.getElementById('btn-replicate');
+        
+        let nodes = [];
+        let edges = [];
+
+        const COLORS = {
+            CAPITAL: '#2563eb',
+            SMALL: '#f59e0b',
+            NUMBER: '#16a34a',
+            MASTER: '#991b1b',
+            REPLICA: '#1e40af',
+            DEFAULT: '#374151'
+        };
+
+        // --- MÓDULO DE RENDERIZADO DEL GRAFO ---
+        function renderGraph() {
+            svg.innerHTML = ''; // Limpiar SVG
+            
+            // Renderizar aristas primero (para que estén debajo de los nodos)
+            const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            edges.forEach(edge => {
+                const sourceNode = nodes.find(n => n.id === edge.source);
+                const targetNode = nodes.find(n => n.id === edge.target);
+                if (!sourceNode || !targetNode) return;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', sourceNode.x);
+                line.setAttribute('y1', sourceNode.y);
+                line.setAttribute('x2', targetNode.x);
+                line.setAttribute('y2', targetNode.y);
+                line.classList.add('edge');
+                if(edge.isReplication) {
+                    line.style.stroke = COLORS.REPLICA;
+                    line.style.strokeDasharray = "5,5";
+                }
+                edgeGroup.appendChild(line);
+            });
+            svg.appendChild(edgeGroup);
+
+            // Renderizar nodos
+            const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            nodes.forEach(node => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.classList.add('node');
+                g.setAttribute('transform', `translate(${node.x},${node.y})`);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.classList.add('node-circle');
+                circle.setAttribute('r', node.radius);
+                circle.setAttribute('fill', node.color || COLORS.DEFAULT);
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.classList.add('node-label');
+                text.textContent = node.label;
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                nodeGroup.appendChild(g);
+            });
+            svg.appendChild(nodeGroup);
+        }
+
+        // --- LÓGICA DE LOS ESTADOS DE LA ARQUITECTURA ---
+
+        function generateMonolithicState() {
+            nodes = [];
+            edges = [];
+            legend.style.display = 'none';
+
+            const center = { x: width / 2, y: height / 2 };
+            const numDataNodes = 20;
+            const radius = Math.min(width, height) / 3;
+
+            // Nodo central (Servidor)
+            nodes.push({ id: 'master', x: center.x, y: center.y, radius: 30, label: 'BBDD', color: COLORS.MASTER });
+
+            // Nodos de datos
+            for (let i = 0; i < numDataNodes; i++) {
+                const angle = (i / numDataNodes) * 2 * Math.PI;
+                const type = i % 3 === 0 ? 'CAPITAL' : (i % 3 === 1 ? 'SMALL' : 'NUMBER');
+                nodes.push({
+                    id: `d${i}`,
+                    x: center.x + radius * Math.cos(angle),
+                    y: center.y + radius * Math.sin(angle),
+                    radius: 12,
+                    label: `d${i}`,
+                    type: type,
+                    shard: (i < numDataNodes/2) ? 1 : 2 // Pre-asignar shard para después
+                });
+                edges.push({ source: 'master', target: `d${i}` });
+            }
+            renderGraph();
+            
+            btnShard.disabled = false;
+            btnPartition.disabled = true;
+            btnReplicate.disabled = true;
+        }
+
+        function generateShardedState() {
+            const center1 = { x: width / 4, y: height / 2 };
+            const center2 = { x: (width / 4) * 3, y: height / 2 };
+            const radius = Math.min(width, height) / 5;
+
+            // Eliminar nodo central y aristas
+            nodes = nodes.filter(n => n.id !== 'master');
+            edges = [];
+            
+            nodes.forEach(node => {
+                const center = node.shard === 1 ? center1 : center2;
+                const angle = Math.random() * 2 * Math.PI; // Posición aleatoria alrededor del nuevo centro
+                node.x = center.x + (radius * Math.random());
+                node.y = center.y + (radius * Math.random());
+            });
+            
+            renderGraph();
+            btnShard.disabled = true;
+            btnPartition.disabled = false;
+        }
+        
+        function applyVerticalPartitioning() {
+            nodes.forEach(node => {
+                node.color = COLORS[node.type];
+            });
+            legend.style.display = 'flex';
+            renderGraph();
+            btnPartition.disabled = true;
+            btnReplicate.disabled = false;
+        }
+
+        function applyReplication() {
+            const shard1Nodes = nodes.filter(n => n.shard === 1);
+            const shard2Nodes = nodes.filter(n => n.shard === 2);
+            
+            const center1 = { x: width / 4, y: height / 2 };
+            const center2 = { x: (width / 4) * 3, y: height / 2 };
+
+            // Añadir Master y Replicas
+            const master1 = { id: 'm1', x: center1.x, y: center1.y - 120, radius: 25, label: 'M1', color: COLORS.MASTER, shard: 1};
+            const master2 = { id: 'm2', x: center2.x, y: center2.y - 120, radius: 25, label: 'M2', color: COLORS.MASTER, shard: 2};
+            const replica1a = { id: 'r1a', x: center1.x - 60, y: center1.y + 120, radius: 20, label: 'R1a', color: COLORS.REPLICA, shard: 1};
+            const replica1b = { id: 'r1b', x: center1.x + 60, y: center1.y + 120, radius: 20, label: 'R1b', color: COLORS.REPLICA, shard: 1};
+            const replica2a = { id: 'r2a', x: center2.x - 60, y: center2.y + 120, radius: 20, label: 'R2a', color: COLORS.REPLICA, shard: 2};
+            const replica2b = { id: 'r2b', x: center2.x + 60, y: center2.y + 120, radius: 20, label: 'R2b', color: COLORS.REPLICA, shard: 2};
+
+            nodes = [master1, master2, replica1a, replica1b, replica2a, replica2b, ...nodes];
+            
+            // Nuevas aristas de replicación
+            edges = [
+                { source: 'm1', target: 'r1a', isReplication: true },
+                { source: 'm1', target: 'r1b', isReplication: true },
+                { source: 'm2', target: 'r2a', isReplication: true },
+                { source: 'm2', target: 'r2b', isReplication: true },
+            ];
+
+            // Conectar datos a sus nuevos dueños (simplificado)
+            shard1Nodes.forEach(n => {
+                n.x = master1.x + (Math.random() - 0.5) * 150;
+                n.y = master1.y + 70 + (Math.random() - 0.5) * 80;
+                edges.push({source: 'm1', target: n.id});
+            });
+            shard2Nodes.forEach(n => {
+                n.x = master2.x + (Math.random() - 0.5) * 150;
+                n.y = master2.y + 70 + (Math.random() - 0.5) * 80;
+                edges.push({source: 'm2', target: n.id});
+            });
+            
+            renderGraph();
+            btnReplicate.disabled = true;
+        }
+
+        // --- CONTROLADORES DE EVENTOS ---
+        btnReset.addEventListener('click', generateMonolithicState);
+        btnShard.addEventListener('click', generateShardedState);
+        btnPartition.addEventListener('click', applyVerticalPartitioning);
+        btnReplicate.addEventListener('click', applyReplication);
+
+        // Iniciar en el estado monolítico
+        generateMonolithicState();
+        
+        // Redibujar en caso de redimensionar la ventana
+        window.addEventListener('resize', () => {
+             svg.setAttribute('viewBox', `0 0 ${svg.parentElement.clientWidth} ${height}`);
+             // La lógica de reposicionamiento podría ser más compleja,
+             // pero para este ejemplo, un reinicio es suficiente.
+             generateMonolithicState();
+        });
+    });
+    </script>
+</body>
+</html>
