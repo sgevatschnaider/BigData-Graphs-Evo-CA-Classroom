@@ -64,10 +64,10 @@
   },
   {
     "title": "De la Rigidez a la Elasticidad — Sharding vs Hashing Consistente y Gossip",
-    "path": "/src/classroom/graphs/recursos/tipos_de_hash.html",
+    "path": "/src/classroom/graphs/recursos/sharding.html",
     "tag": "Demo",
     "desc": "",
-    "mtime": "2025-09-13T19:47:12-03:00"
+    "mtime": "2025-09-13T20:32:36-03:00"
   },
   {
     "title": "De una Secuencia a una Red Viva: Havel–Hakimi y Blockchain",
