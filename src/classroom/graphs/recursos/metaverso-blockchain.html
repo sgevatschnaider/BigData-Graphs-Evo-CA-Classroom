@@ -1,0 +1,1288 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clase: Metaverso y Blockchain - Edición Premium</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  :root {
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --secondary: #06b6d4;
+    --accent: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --success: #22c55e;
+    
+    --bg-primary: #0f0f23;
+    --bg-secondary: #1a1b3e;
+    --bg-tertiary: #2d2f5f;
+    --surface: #1e1f42;
+    --surface-elevated: #252653;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-inverse: #1e293b;
+    
+    --border: #334155;
+    --border-light: #475569;
+    
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    --glow: 0 0 20px rgba(99, 102, 241, 0.3);
+    --glow-secondary: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(15, 15, 35, 0.85);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    transition: all 0.3s ease;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0.6;
+  }
+
+  .header-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .tab:hover::before {
+    left: 100%;
+  }
+
+  .tab:hover {
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
+  .tab[aria-current="page"] {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    box-shadow: var(--glow);
+    transform: translateY(-1px);
+  }
+
+  /* Main content */
+  main {
+    max-width: 1400px;
+    margin: 32px auto;
+    padding: 0 24px 60px;
+  }
+
+  .shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  kbd {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: 'SF Mono', Monaco, monospace;
+    box-shadow: 0 1px 0 var(--border-light);
+  }
+
+  /* Grid layouts */
+  .grid {
+    display: grid;
+    gap: 24px;
+  }
+
+  .two-col {
+    grid-template-columns: 1.3fr 0.7fr;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+    opacity: 0.3;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-light);
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Concept Map Enhanced */
+  #map-container {
+    position: relative;
+    height: 600px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  #concept-map {
+    width: 100%;
+    height: 100%;
+  }
+
+  .node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .node circle {
+    fill: var(--surface);
+    stroke: var(--border);
+    stroke-width: 2;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    transition: all 0.3s ease;
+  }
+
+  .node:hover circle {
+    fill: var(--surface-elevated);
+    stroke: var(--primary-light);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
+  }
+
+  .node.active circle {
+    fill: var(--primary);
+    stroke: var(--primary-light);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.6));
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { stroke-width: 3; }
+    50% { stroke-width: 4; }
+  }
+
+  .node text {
+    fill: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  .node.active text {
+    fill: white;
+    font-weight: 700;
+  }
+
+  .edge {
+    stroke: var(--border-light);
+    stroke-width: 2;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+  }
+
+  .edge.active {
+    stroke: var(--primary-light);
+    stroke-width: 3;
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+  }
+
+  .map-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .control-badge {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .control-badge::before {
+    content: '•';
+    color: var(--primary);
+  }
+
+  /* Info panel */
+  .info-panel {
+    min-height: 200px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .info-panel h3 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: var(--primary);
+  }
+
+  .info-panel p {
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+  }
+
+  .relations-list {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .relations-list h4 {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+
+  .relations-list ul {
+    list-style: none;
+  }
+
+  .relations-list li {
+    padding: 4px 0;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .relations-list li::before {
+    content: '→';
+    color: var(--secondary);
+    font-weight: bold;
+  }
+
+  /* Timeline Enhanced */
+  .timeline-container {
+    position: relative;
+    overflow-x: auto;
+    padding: 20px 0;
+  }
+
+  .timeline {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    min-width: max-content;
+  }
+
+  .timeline-item {
+    min-width: 280px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .timeline-item:hover::before {
+    opacity: 0.1;
+  }
+
+  .timeline-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .timeline-year {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .timeline-item h4 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+
+  .timeline-item p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Cases Enhanced */
+  .filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .filter-pill {
+    padding: 10px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .filter-pill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .filter-pill:hover::before {
+    left: 100%;
+  }
+
+  .filter-pill:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    color: var(--text-primary);
+  }
+
+  .filter-pill.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--glow);
+  }
+
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .case-card {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .case-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .case-card:hover::after {
+    opacity: 1;
+  }
+
+  .case-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+  }
+
+  .case-category {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .case-card h4 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+
+  .case-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Risk Matrix Enhanced */
+  .risk-matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+  }
+
+  .risk-card {
+    border-radius: 16px;
+    padding: 24px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .risk-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .risk-card[data-severity="alta"]::before {
+    background: var(--error);
+  }
+
+  .risk-card[data-severity="media"]::before {
+    background: var(--warning);
+  }
+
+  .risk-card[data-severity="baja"]::before {
+    background: var(--success);
+  }
+
+  .risk-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .risk-severity {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+
+  .risk-severity[data-level="alta"] {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .risk-severity[data-level="media"] {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .risk-severity[data-level="baja"] {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+  }
+
+  .risk-card h4 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+
+  .risk-description {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .risk-mitigation {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .risk-mitigation strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+    
+    #map-container {
+      height: 480px;
+    }
+    
+    .header-bar {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+    }
+    
+    .nav-tabs {
+      margin-left: 0;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 0 16px 40px;
+    }
+    
+    .card {
+      padding: 20px;
+    }
+    
+    .section-title {
+      font-size: 24px;
+    }
+    
+    .shortcuts {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .filters {
+      justify-content: flex-start;
+    }
+    
+    .cases-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .risk-matrix {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Loading animation */
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(99, 102, 241, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Utility classes */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--text-muted); }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <div class="logo">Metaverso + Blockchain</div>
+      <nav class="nav-tabs" role="tablist" aria-label="Secciones principales">
+        <button class="tab" data-target="mapa" role="tab" aria-current="page">Mapa Conceptual</button>
+        <button class="tab" data-target="timeline" role="tab">Cronología</button>
+        <button class="tab" data-target="casos" role="tab">Casos de Uso</button>
+        <button class="tab" data-target="riesgos" role="tab">Riesgos</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="shortcuts">
+      <span>Atajos de teclado:</span>
+      <span><kbd>1</kbd> Mapa Conceptual</span>
+      <span><kbd>2</kbd> Cronología</span>
+      <span><kbd>3</kbd> Casos de Uso</span>
+      <span><kbd>4</kbd> Riesgos</span>
+    </div>
+
+    <!-- MAPA CONCEPTUAL -->
+    <section id="mapa" class="grid two-col">
+      <div class="card">
+        <h2 class="section-title">Ecosistema Metaverso-Blockchain</h2>
+        <div id="map-container">
+          <svg id="concept-map" viewBox="0 0 900 600" role="img" aria-describedby="mapa-desc">
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge> 
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.6" />
+                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.6" />
+              </linearGradient>
+            </defs>
+            <desc id="mapa-desc">Mapa conceptual interactivo mostrando las conexiones entre tecnologías del metaverso y blockchain.</desc>
+            <g id="edges"></g>
+            <g id="nodes"></g>
+          </svg>
+        </div>
+        <div class="map-controls">
+          <div class="control-badge">Clic para explorar</div>
+          <div class="control-badge">Arrastrar para mover</div>
+          <div class="control-badge">Doble clic para centrar</div>
+        </div>
+      </div>
+      
+      <aside class="card info-panel" id="info-panel" aria-live="polite">
+        <h3>Explora el Ecosistema</h3>
+        <p>Selecciona cualquier nodo del mapa para descubrir cómo las tecnologías blockchain potencian las experiencias del metaverso.</p>
+        <div class="relations-list">
+          <h4>Conceptos Clave</h4>
+          <ul>
+            <li>Propiedad digital verificable</li>
+            <li>Identidades descentralizadas</li>
+            <li>Economías programables</li>
+            <li>Interoperabilidad entre mundos</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <!-- CRONOLOGÍA -->
+    <section id="timeline" class="card hidden">
+      <h2 class="section-title">Evolución: De la Ficción a la Realidad</h2>
+      <div class="timeline-container">
+        <div class="timeline" id="timeline-items"></div>
+      </div>
+    </section>
+
+    <!-- CASOS DE USO -->
+    <section id="casos" class="card hidden">
+      <h2 class="section-title">Casos de Uso y Aplicaciones</h2>
+      <div class="filters" id="case-filters" role="tablist">
+        <button class="filter-pill active" data-filter="all" role="tab" aria-selected="true">Todos</button>
+        <button class="filter-pill" data-filter="eventos" role="tab">Eventos</button>
+        <button class="filter-pill" data-filter="moda" role="tab">Moda Digital</button>
+        <button class="filter-pill" data-filter="juegos" role="tab">Gaming</button>
+        <button class="filter-pill" data-filter="educacion" role="tab">Educación</button>
+        <button class="filter-pill" data-filter="inmobiliario" role="tab">Inmuebles Virtuales</button>
+      </div>
+      <div class="cases-grid" id="cases-container"></div>
+    </section>
+
+    <!-- RIESGOS -->
+    <section id="riesgos" class="card hidden">
+      <h2 class="section-title">Gestión de Riesgos y Mitigaciones</h2>
+      <div class="risk-matrix" id="risk-matrix"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="text-muted">
+      Material elaborado por el profesor Sergio Gevatschnaider
+    </p>
+  </footer>
+
+  <script>
+    // Utility functions
+    const $ = (selector, element = document) => element.querySelector(selector);
+    const $$ = (selector, element = document) => Array.from(element.querySelectorAll(selector));
+
+    // Enhanced concept map data
+    const conceptNodes = [
+      {
+        id: 'metaverso',
+        label: 'Metaverso',
+        x: 450, y: 300,
+        radius: 60,
+        info: 'Espacios virtuales persistentes donde millones de usuarios puedeninteractuar, comerciar y crear experiencias inmersivas.',
+        relations: ['nfts', 'realidad-virtual', 'avatares', 'economia-virtual']
+      },
+      {
+        id: 'blockchain',
+        label: 'Blockchain',
+        x: 200, y: 150,
+        radius: 55,
+        info: 'Tecnología de ledger distribuido que garantiza transparencia, inmutabilidad y descentralización en las transacciones digitales.',
+        relations: ['smart-contracts', 'nfts', 'tokenizacion', 'dao']
+      },
+      {
+        id: 'nfts',
+        label: 'NFTs',
+        x: 350, y: 200,
+        radius: 50,
+        info: 'Tokens no fungibles que representan la propiedad única de activos digitales como arte, coleccionables, y elementos del metaverso.',
+        relations: ['metaverso', 'blockchain', 'tokenizacion', 'propiedad-digital']
+      },
+      {
+        id: 'smart-contracts',
+        label: 'Smart Contracts',
+        x: 150, y: 300,
+        radius: 45,
+        info: 'Contratos autoejecutables con términos escritos directamente en código, facilitando transacciones automáticas y confiables.',
+        relations: ['blockchain', 'dao', 'economia-virtual']
+      },
+      {
+        id: 'realidad-virtual',
+        label: 'Realidad Virtual',
+        x: 600, y: 180,
+        radius: 50,
+        info: 'Tecnología que crea entornos completamente inmersivos donde los usuarios pueden interactuar naturalmente.',
+        relations: ['metaverso', 'avatares', 'experiencias-inmersivas']
+      },
+      {
+        id: 'avatares',
+        label: 'Avatares',
+        x: 550, y: 350,
+        radius: 40,
+        info: 'Representaciones digitales personalizables de los usuarios en espacios virtuales.',
+        relations: ['metaverso', 'realidad-virtual', 'identidad-digital']
+      },
+      {
+        id: 'dao',
+        label: 'DAOs',
+        x: 100, y: 450,
+        radius: 45,
+        info: 'Organizaciones Autónomas Descentralizadas que permiten gobernanza comunitaria transparente.',
+        relations: ['blockchain', 'smart-contracts', 'gobernanza']
+      },
+      {
+        id: 'tokenizacion',
+        label: 'Tokenización',
+        x: 300, y: 100,
+        radius: 48,
+        info: 'Proceso de convertir activos del mundo real en tokens digitales verificables en blockchain.',
+        relations: ['blockchain', 'nfts', 'economia-digital']
+      },
+      {
+        id: 'economia-virtual',
+        label: 'Economía Virtual',
+        x: 400, y: 450,
+        radius: 52,
+        info: 'Sistemas económicos completos dentro del metaverso con monedas, comercio y creación de valor.',
+        relations: ['metaverso', 'smart-contracts', 'tokenizacion']
+      },
+      {
+        id: 'web3',
+        label: 'Web3',
+        x: 700, y: 300,
+        radius: 46,
+        info: 'Nueva generación de internet descentralizada basada en blockchain y propiedad de datos por usuarios.',
+        relations: ['blockchain', 'descentralizacion', 'identidad-digital']
+      }
+    ];
+
+    const timelineData = [
+      {
+        year: '1992',
+        title: 'Acuñación del Término',
+        description: 'Neal Stephenson introduce el concepto "metaverso" en su novela "Snow Crash", describiendo un espacio virtual 3D persistente.'
+      },
+      {
+        year: '2008',
+        title: 'Nacimiento de Bitcoin',
+        description: 'Satoshi Nakamoto publica el whitepaper de Bitcoin, estableciendo las bases de la tecnología blockchain.'
+      },
+      {
+        year: '2015',
+        title: 'Ethereum y Smart Contracts',
+        description: 'Ethereum introduce contratos inteligentes, permitiendo aplicaciones descentralizadas complejas.'
+      },
+      {
+        year: '2017',
+        title: 'Boom de los NFTs',
+        description: 'CryptoPunks y CryptoKitties demuestran el potencial de los activos digitales únicos.'
+      },
+      {
+        year: '2020',
+        title: 'Adopción Masiva',
+        description: 'La pandemia acelera la adopción de espacios virtuales. Platforms como Decentraland y Sandbox ganan tracción.'
+      },
+      {
+        year: '2021',
+        title: 'Meta y el Metaverso',
+        description: 'Facebook se rebrandea como Meta, invirtiendo billones en tecnologías del metaverso.'
+      },
+      {
+        year: '2024',
+        title: 'Integración Blockchain',
+        description: 'Interoperabilidad entre cadenas de bloques permite economías del metaverso más robustas.'
+      },
+      {
+        year: '2025',
+        title: 'Era de la Adopción',
+        description: 'Infraestructura madura permite experiencias del metaverso accesibles para usuarios mainstream.'
+      }
+    ];
+
+    const casesData = [
+      {
+        id: 'decentraland-eventos',
+        category: 'eventos',
+        title: 'Conciertos en Decentraland',
+        description: 'Artistas como Deadmau5 realizan conciertos virtuales para audiencias globales, vendiendo NFTs exclusivos.'
+      },
+      {
+        id: 'nike-nikeland',
+        category: 'moda',
+        title: 'Nike en Roblox',
+        description: 'Nikeland permite a usuarios personalizar avatares con productos Nike virtuales, conectando física y digital.'
+      },
+      {
+        id: 'axie-infinity',
+        category: 'juegos',
+        title: 'Axie Infinity',
+        description: 'Juego play-to-earn donde jugadores crían, batallan y comercian criaturas NFT, generando ingresos reales.'
+      },
+      {
+        id: 'metaversity',
+        category: 'educacion',
+        title: 'Universidades Virtuales',
+        description: 'Instituciones educativas crean campus virtuales para clases inmersivas y colaboración global.'
+      },
+      {
+        id: 'sandbox-land',
+        category: 'inmobiliario',
+        title: 'Bienes Raíces en The Sandbox',
+        description: 'Inversores compran terrenos virtuales como NFTs, desarrollando experiencias y generando ingresos por rentas.'
+      },
+      {
+        id: 'gucci-garden',
+        category: 'moda',
+        title: 'Gucci Garden',
+        description: 'Gucci crea espacios virtuales exclusivos vendiendo bolsos digitales más caros que los físicos.'
+      },
+      {
+        id: 'horizon-workrooms',
+        category: 'eventos',
+        title: 'Reuniones Corporativas VR',
+        description: 'Empresas utilizan espacios virtuales para reuniones inmersivas y colaboración de equipos remotos.'
+      },
+      {
+        id: 'pokemon-go-ar',
+        category: 'juegos',
+        title: 'Pokémon GO AR',
+        description: 'Integración de blockchain para comercio seguro de Pokémon raros entre jugadores globales.'
+      }
+    ];
+
+    const riskData = [
+      {
+        severity: 'alta',
+        title: 'Privacidad y Vigilancia',
+        description: 'Recolección masiva de datos biométricos y comportamentales en entornos inmersivos.',
+        mitigation: 'Implementar protocolos de privacidad diferencial y dar control total al usuario sobre sus datos.'
+      },
+      {
+        severity: 'alta',
+        title: 'Monopolización de Plataformas',
+        description: 'Grandes corporaciones podrían controlar infraestructuras críticas del metaverso.',
+        mitigation: 'Promover estándares abiertos, interoperabilidad y alternativas descentralizadas.'
+      },
+      {
+        severity: 'media',
+        title: 'Volatilidad Económica',
+        description: 'Fluctuaciones extremas en valores de activos virtuales pueden causar pérdidas significativas.',
+        mitigation: 'Educar sobre gestión de riesgos, diversificación y establecer marcos regulatorios claros.'
+      },
+      {
+        severity: 'media',
+        title: 'Adicción y Salud Mental',
+        description: 'Experiencias hiper-inmersivas pueden generar dependencia y aislamiento social.',
+        mitigation: 'Diseñar pausas obligatorias, límites de tiempo y promover interacciones sociales saludables.'
+      },
+      {
+        severity: 'baja',
+        title: 'Brecha Digital',
+        description: 'Acceso limitado a tecnologías avanzadas puede crear desigualdades socioeconómicas.',
+        mitigation: 'Desarrollar versiones accesibles, subsidios tecnológicos y programas de inclusión digital.'
+      },
+      {
+        severity: 'baja',
+        title: 'Impacto Ambiental',
+        description: 'Alto consumo energético de blockchain y renderizado 3D complejo.',
+        mitigation: 'Adoptar consensus mechanisms eficientes, optimizar gráficos y usar energías renovables.'
+      }
+    ];
+
+    // State management
+    let activeNode = null;
+    let currentTab = 'mapa';
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeApp();
+    });
+
+    function initializeApp() {
+      setupEventListeners();
+      renderConceptMap();
+      renderTimeline();
+      renderCases();
+      renderRisks();
+      setupKeyboardShortcuts();
+    }
+
+    function setupEventListeners() {
+      $$('.tab').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.target));
+      });
+
+      $$('.filter-pill').forEach(filter => {
+        filter.addEventListener('click', () => filterCases(filter.dataset.filter));
+      });
+    }
+
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) return;
+        
+        switch(e.key) {
+          case '1': switchTab('mapa'); break;
+          case '2': switchTab('timeline'); break;
+          case '3': switchTab('casos'); break;
+          case '4': switchTab('riesgos'); break;
+        }
+      });
+    }
+
+    function switchTab(targetTab) {
+      currentTab = targetTab;
+
+      $$('.tab').forEach(tab => {
+        const isCurrent = tab.dataset.target === targetTab;
+        tab.setAttribute('aria-current', isCurrent ? 'page' : 'false');
+      });
+
+      $$('main > section[id]').forEach(section => {
+        section.classList.add('hidden');
+      });
+
+      const activeSection = $(`#${targetTab}`);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+    }
+
+    function renderConceptMap() {
+      const svg = $('#concept-map');
+      const nodesContainer = $('#nodes');
+      const edgesContainer = $('#edges');
+
+      nodesContainer.innerHTML = '';
+      edgesContainer.innerHTML = '';
+
+      conceptNodes.forEach(node => {
+        node.relations?.forEach(relationId => {
+          const relatedNode = conceptNodes.find(n => n.id === relationId);
+          if (relatedNode) {
+            const edge = createSVGElement('line', {
+              class: 'edge',
+              x1: node.x, y1: node.y,
+              x2: relatedNode.x, y2: relatedNode.y,
+              stroke: 'url(#edgeGradient)'
+            });
+            edgesContainer.appendChild(edge);
+          }
+        });
+      });
+
+      conceptNodes.forEach(node => {
+        const nodeGroup = createSVGElement('g', {
+          class: 'node',
+          'data-id': node.id,
+          transform: `translate(${node.x}, ${node.y})`
+        });
+
+        const circle = createSVGElement('circle', { r: node.radius, filter: 'url(#glow)' });
+        const text = createSVGElement('text', { dy: '0.35em' });
+        text.textContent = node.label;
+
+        nodeGroup.append(circle, text);
+        nodesContainer.appendChild(nodeGroup);
+
+        nodeGroup.addEventListener('click', () => selectNode(node));
+      });
+    }
+
+    function selectNode(node) {
+      activeNode = node;
+
+      $$('.node').forEach(n => n.classList.remove('active'));
+      $$('.edge').forEach(e => e.classList.remove('active'));
+      
+      const nodeElement = $(`.node[data-id="${node.id}"]`);
+      nodeElement.classList.add('active');
+
+      node.relations?.forEach(relationId => {
+        const relatedNode = conceptNodes.find(n => n.id === relationId);
+        if (relatedNode) {
+          $$('.edge').forEach(edge => {
+            const x1 = +edge.getAttribute('x1'), y1 = +edge.getAttribute('y1');
+            const x2 = +edge.getAttribute('x2'), y2 = +edge.getAttribute('y2');
+            if ((x1 === node.x && y1 === node.y && x2 === relatedNode.x && y2 === relatedNode.y) ||
+                (x1 === relatedNode.x && y1 === relatedNode.y && x2 === node.x && y2 === node.y)) {
+              edge.classList.add('active');
+            }
+          });
+        }
+      });
+
+      updateInfoPanel(node);
+    }
+
+    function updateInfoPanel(node) {
+      const panel = $('#info-panel');
+      const relationsHtml = node.relations?.map(id => {
+        const relatedNode = conceptNodes.find(n => n.id === id);
+        return relatedNode ? `<li>${relatedNode.label}</li>` : '';
+      }).join('');
+
+      panel.innerHTML = `
+        <h3>${node.label}</h3>
+        <p>${node.info}</p>
+        <div class="relations-list">
+          <h4>Conexiones</h4>
+          <ul>${relationsHtml}</ul>
+        </div>
+      `;
+    }
+
+    function renderTimeline() {
+      const container = $('#timeline-items');
+      container.innerHTML = timelineData.map(item => `
+        <div class="timeline-item">
+          <div class="timeline-year">${item.year}</div>
+          <h4>${item.title}</h4>
+          <p>${item.description}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderCases(filter = 'all') {
+      const container = $('#cases-container');
+      const filteredCases = filter === 'all' 
+        ? casesData 
+        : casesData.filter(c => c.category === filter);
+
+      container.innerHTML = filteredCases.map(caseItem => `
+        <div class="case-card">
+          <div class="case-category">${caseItem.category}</div>
+          <h4>${caseItem.title}</h4>
+          <p>${caseItem.description}</p>
+        </div>
+      `).join('');
+    }
+
+    function filterCases(filter) {
+      $$('.filter-pill').forEach(pill => {
+        const isSelected = pill.dataset.filter === filter;
+        pill.classList.toggle('active', isSelected);
+        pill.setAttribute('aria-selected', isSelected);
+      });
+      renderCases(filter);
+    }
+
+    function renderRisks() {
+      const container = $('#risk-matrix');
+      container.innerHTML = riskData.map(risk => `
+        <div class="risk-card" data-severity="${risk.severity}">
+          <div class="risk-severity" data-level="${risk.severity}">${risk.severity.toUpperCase()}</div>
+          <h4>${risk.title}</h4>
+          <p class="risk-description">${risk.description}</p>
+          <div class="risk-mitigation">
+            <strong>Mitigación:</strong> ${risk.mitigation}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function createElement(tag, attributes = {}) {
+      const element = document.createElement(tag);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      return element;
+    }
+
+    function createSVGElement(tag, attributes = {}) {
+      const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      return element;
+    }
+
+  </script>
+</body>
+</html>
