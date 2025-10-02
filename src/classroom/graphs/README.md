@@ -229,6 +229,11 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 | **Animación: Flujo de un ZK-Rollup** <br><br>![Animación ZK-Rollup](https://raw.githubusercontent.com/sgevatschnaider/blockchain-finanzas-descentralizadas/main/unidades/u04-algoritmos-criptografia-defi-dijkstra-lightning-zkp-zkrollups/recursos/simulacion.gif) | [![Ver GIF](https://img.shields.io/badge/Ver_Animación-GIF-lightgrey?style=for-the-badge&logo=html5)](https://raw.githubusercontent.com/sgevatschnaider/blockchain-finanzas-descentralizadas/main/unidades/u04-algoritmos-criptografia-defi-dijkstra-lightning-zkp-zkrollups/recursos/simulacion.gif) |
 
 ---
+## 📝 Camino y Ciclo Hamiltoneano
+
+| 📄 Recurso | 📥 Acceso |
+| ---------- | -------- |
+| **Camino y Ciclo Hamiltoniano** | [![Ver en GitHub](https://img.shields.io/badge/Ver%20en-GitHub-blue?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/78624a61be52f4180f30ca5691e5196f2ae3fde9/notebooks/Camino%2C_ciclo_hamiltoneano.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sgevatschnaider/GraphAI-Data-Science-ML/blob/78624a61be52f4180f30ca5691e5196f2ae3fde9/notebooks/Camino%2C_ciclo_hamiltoneano.ipynb) |
 
 
 ## 1) Fundamentos teóricos
