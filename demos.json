@@ -28,6 +28,13 @@
     "mtime": "2025-09-03T18:29:21-03:00"
   },
   {
+    "title": "Capital Robótico y Data Flywheel — Demostración Interactiva",
+    "path": "/src/classroom/graphs/recursos/Capital Robótico vs Capital Común — Efecto del Data Flywheel.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-07T21:17:49-03:00"
+  },
+  {
     "title": "Clase: Metaverso y Blockchain - Edición Premium",
     "path": "/src/classroom/graphs/recursos/metaverso-blockchain.html",
     "tag": "Demo",
@@ -68,6 +75,20 @@
     "tag": "Redes",
     "desc": "",
     "mtime": "2025-09-06T23:05:43-03:00"
+  },
+  {
+    "title": "Data Flywheel",
+    "path": "/src/classroom/graphs/recursos/Simulacion_dataflywheel.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-07T21:17:49-03:00"
+  },
+  {
+    "title": "Data Flywheel Robótico — USA vs China",
+    "path": "/src/classroom/graphs/recursos/Data Flywheel (U→D→Q→U).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-07T21:17:49-03:00"
   },
   {
     "title": "De la Rigidez a la Elasticidad — Sharding vs Hashing Consistente y Gossip",
@@ -187,6 +208,13 @@
     "tag": "Comp. teórica",
     "desc": "",
     "mtime": "2025-08-31T19:27:24-03:00"
+  },
+  {
+    "title": "Modelo Data Flywheel – Real + Sintético",
+    "path": "/src/classroom/graphs/recursos/Robot_datos_sinteticos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-07T21:17:49-03:00"
   },
   {
     "title": "Perspectiva Algebraica: Grafos de Cayley",
