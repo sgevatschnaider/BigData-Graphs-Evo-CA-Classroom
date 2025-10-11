@@ -105,6 +105,13 @@
     "mtime": "2025-09-03T18:37:45-03:00"
   },
   {
+    "title": "Demostración Interactiva: La Intratabilidad del TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_La Explosión Combinatoria del Problema del Viajante (TSP).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
+  },
+  {
     "title": "El Complemento de un Grafo: Invirtiendo las Conexiones",
     "path": "/src/classroom/graphs/recursos/El Complemento de un Grafo-irregular.html",
     "tag": "Demo",
@@ -182,6 +189,20 @@
     "mtime": "2025-09-01T11:04:03-03:00"
   },
   {
+    "title": "Guía de Estudio: El Algoritmo de Held-Karp",
+    "path": "/src/classroom/graphs/recursos/Hamilton_El Algoritmo de Held-Karp.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
+  },
+  {
+    "title": "Guía Detallada: Fuerza Bruta para el TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Algoritmo de Fuerza Bruta para el TSP.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
+  },
+  {
     "title": "Hipercubo y Distancia de Hamming",
     "path": "/src/classroom/graphs/recursos/hammigs.html",
     "tag": "Demo",
@@ -194,6 +215,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-09-01T11:04:03-03:00"
+  },
+  {
+    "title": "Intratabilidad en TSP: exacto vs heurístico (interactivo)",
+    "path": "/src/classroom/graphs/recursos/Hamilton_visualizacionhardduro.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
   },
   {
     "title": "Königsberg — Grafo Equivalente (Interactivo)",
@@ -217,6 +245,13 @@
     "mtime": "2025-10-07T21:17:49-03:00"
   },
   {
+    "title": "n! vs 2^n — visualización interactiva (con animación)",
+    "path": "/src/classroom/graphs/recursos/Hamilton_crecimiento_factorial_exponencial.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
+  },
+  {
     "title": "Perspectiva Algebraica: Grafos de Cayley",
     "path": "/src/classroom/graphs/recursos/Grafo_Cayley.html",
     "tag": "Demo",
@@ -229,6 +264,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-09-01T11:04:03-03:00"
+  },
+  {
+    "title": "Reducción Visual: Ciclo Hamiltoniano a TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Reducción Polinómica Ciclo Hamiltoniano → TSP (Decisión).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
   },
   {
     "title": "Takuzu 6×6 — Grafo de Factores Mejorado",
@@ -250,6 +292,20 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-09-01T11:04:03-03:00"
+  },
+  {
+    "title": "Teoría de Grafos: Guía Visual de Caminos y Ciclos",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Teoría de Grafos Caminos y Ciclos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
+  },
+  {
+    "title": "Teoría de la Complejidad: Guía Visual Interactiva",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Teoría de la Complejidad Computacional.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T20:56:25-03:00"
   },
   {
     "title": "Visualizador de Arquitectura de BBDD como Grafos",
