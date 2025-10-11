@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teoría de Grafos: Guía Visual de Caminos y Ciclos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content p:last-child { margin-bottom: 0; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 0.75rem; }
+
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 80px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; font-family: 'Inter', sans-serif; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; margin-top: -1rem; display: block;}
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Teoría de Grafos: Caminos y Ciclos</h1>
+      <p class="subtitle">Una Guía Visual de Conceptos Fundamentales</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">Introducción</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En la teoría de grafos, el estudio de los "caminos" es fundamental para comprender la estructura y conectividad de las redes. Desde simples secuencias de vértices hasta recorridos que abarcan la totalidad del grafo, cada tipo de camino revela propiedades únicas y tiene aplicaciones prácticas en diversos campos como la logística, la bioinformática y la planificación de proyectos. A continuación, se detallan y desarrollan los conceptos clave.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">1. ¿Qué es un Camino en un Grafo?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un <strong>camino</strong> en un grafo se define como una secuencia de vértices donde cada vértice adyacente en la secuencia está conectado por una arista. Es un recorrido que se puede trazar a través del grafo siguiendo sus conexiones. Una característica importante de un camino general es que tanto los <strong>vértices como las aristas pueden repetirse</strong>.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Ejemplo: Camino General (A → B → C → A → C → D)</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>A</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>B</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>C</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box" style="border-color: var(--accent-primary);"><strong>A</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box" style="border-color: var(--accent-primary);"><strong>C</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>D</strong></div>
+                    </div>
+                </div>
+                <p>En este recorrido, se puede observar que los vértices A y C (resaltados) se repiten.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. La Distinción Clave: Camino Simple</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un <strong>camino simple</strong> es una variante más restrictiva: es un camino en el que <strong>no se repite ningún vértice</strong>. Como consecuencia directa, las aristas tampoco se repiten. Esta condición es crucial en muchos algoritmos y problemas prácticos.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Ejemplo: Camino Simple (A → B → C → D)</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>A</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>B</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>C</strong></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>D</strong></div>
+                    </div>
+                </div>
+                 <p>En este caso, cada vértice es visitado una sola vez.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. El Desafío: Camino Hamiltoniano</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un <strong>camino hamiltoniano</strong> es un camino simple que visita <strong>todos los vértices del grafo exactamente una vez</strong>. Encontrar un camino de este tipo es un problema computacionalmente complejo (NP-completo), conocido como el problema del camino hamiltoniano, y tiene profundas implicaciones en la optimización de rutas y la secuenciación de tareas.</p>
+                 <p><strong>Ejemplo:</strong> En un grafo completo con vértices A, B, C y D, un camino hamiltoniano podría ser: B → D → A → C.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.1. ¿Es posible tener un camino pero no un camino simple?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><strong>No, esto no es posible.</strong> Cualquier grafo que contenga al menos una arista (y por lo tanto un camino) contendrá también un camino simple. De hecho, el camino más corto entre dos vértices siempre será un camino simple. La existencia de caminos con repetición no excluye la existencia de caminos simples en el mismo grafo.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.2. ¿Puede un grafo tener un camino simple pero no uno hamiltoniano?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><strong>Sí, y es un escenario muy común.</strong> Un grafo puede tener numerosos caminos simples sin que ninguno de ellos logre visitar todos los vértices. Esto ocurre cuando la estructura del grafo no permite un recorrido completo sin repetir vértices.</p>
+                <p>Un ejemplo clásico es un grafo en forma de estrella, donde un vértice central está conectado a varios vértices "hoja". Es posible crear caminos simples entre las hojas pasando por el centro, pero es imposible visitar todas las hojas sin repetir el vértice central.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.3. ¿Es cierto que todo grafo conexo tiene un camino hamiltoniano?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><strong>No, esto es falso.</strong> Un grafo conexo es aquel en el que existe un camino entre cualquier par de vértices. Sin embargo, esta condición no garantiza la existencia de un camino hamiltoniano. El mismo ejemplo del grafo en forma de estrella sirve como contraejemplo: es un grafo conexo, pero no posee un camino hamiltoniano.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.4. ¿Qué condiciones garantizan un camino hamiltoniano?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>No existe una condición necesaria y suficiente simple, pero varios teoremas ofrecen condiciones suficientes. Dos de los más conocidos son:</p>
+                <ul>
+                    <li><strong>Teorema de Dirac (1952):</strong> Si un grafo simple con n ≥ 3 vértices tiene un grado mínimo de al menos n/2 para cada vértice, entonces el grafo es hamiltoniano.</li>
+                    <li><strong>Teorema de Ore (1960):</strong> Si en un grafo simple con n ≥ 3 vértices, la suma de los grados de cada par de vértices no adyacentes es ≥ n, entonces el grafo es hamiltoniano.</li>
+                </ul>
+                <p>En general, una <strong>alta densidad de aristas</strong> y una <strong>alta conectividad</strong> aumentan la probabilidad de que un grafo contenga un camino hamiltoniano.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.5. ¿Cuántos caminos hamiltonianos existen en un grafo completo K_n?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un grafo completo K_n es aquel en el que cada par de vértices está conectado por una arista. En este tipo de grafo, cualquier permutación de sus n vértices define un camino hamiltoniano.</p>
+                <p>El número de permutaciones de n elementos es <strong>n! (n factorial)</strong>.</p>
+                <p>Dado que un camino puede ser recorrido en dos direcciones (de principio a fin o de fin a principio) y se consideran el mismo, el número total de caminos hamiltonianos distintos en K_n es <strong>n! / 2</strong>.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4.6. Diferencia: Camino Hamiltoniano vs. Camino Euleriano</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La diferencia fundamental radica en el objeto que se recorre sin repetir. Un grafo puede tener un tipo de camino y no el otro, ambos, o ninguno.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Hamilton vs. Euler: El Foco del Recorrido</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong>Camino Hamiltoniano</strong>
+                            <span>Foco: <strong>Vértices</strong><br/>Regla: Visitar CADA VÉRTICE exactamente una vez.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong>Camino Euleriano</strong>
+                            <span>Foco: <strong>Aristas</strong><br/>Regla: Recorrer CADA ARISTA exactamente una vez.</span>
+                        </div>
+                    </div>
+                </div>
+                <p>La existencia de un camino euleriano está directamente relacionada con el grado de los vértices: un grafo conexo tiene un camino euleriano si y solo si tiene exactamente cero o dos vértices de grado impar.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. El Concepto de "Linealización"</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La existencia de un camino hamiltoniano implica que la estructura, a menudo compleja y no lineal de un grafo, puede ser <strong>"aplanada" o "linealizada"</strong>. Esto significa que sus vértices pueden ser dispuestos en una secuencia lineal, donde cada vértice está conectado al siguiente.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">De Grafo a Secuencia Lineal</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Grafo<br/>(Red Compleja)</strong></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Camino Hamiltoniano</span></div>
+                        <div class="diagram-box"><strong>Secuencia Lineal<br/>(Vértices ordenados)</strong></div>
+                    </div>
+                </div>
+                <p>Esta propiedad es de suma importancia en problemas de secuenciación, como encontrar un orden de ejecución válido para un conjunto de tareas con dependencias.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Ciclos y Grafos Recubridores</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><strong>Ciclo Hamiltoniano:</strong> Es un camino hamiltoniano que es cerrado (existe una arista que conecta el último vértice con el primero). También se le llama ciclo generador o recubridor porque "cubre" todos los vértices.</p>
+                <p><strong>Grafo Recubridor (Spanning Subgraph):</strong> Es un subgrafo que contiene todos los vértices del grafo original. Un "árbol recubridor", por ejemplo, es fundamental en el diseño de redes eficientes.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Relación: Grafo Trazable vs. Grafo Hamiltoniano</div>
+                    <div class="diagram-box" style="padding: 2rem;">
+                        <strong>Grafos Trazables</strong>
+                        <span>(Contienen al menos un camino Hamiltoniano)</span>
+                        <div class="diagram-box" style="margin-top: 1rem; background-color: rgba(0,0,0,0.1);">
+                            <strong>Grafos Hamiltonianos</strong>
+                            <span>(Contienen al menos un ciclo Hamiltoniano)</span>
+                        </div>
+                    </div>
+                </div>
+                 <p>Este diagrama muestra que <strong>todo grafo hamiltoniano es también trazable</strong>, pero no a la inversa. El término "hamiltoniano" proviene del matemático Sir William Rowan Hamilton y su "Juego Icosiano" de 1857, que consistía en encontrar un ciclo hamiltoniano en el grafo de un dodecaedro.</p>
+                 <p>Es importante no confundir "grafo hamiltoniano" (la propiedad del grafo) con "ciclo hamiltoniano" (el recorrido específico).</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
