@@ -205,8 +205,8 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 
 ### 12.Algoritmo_de_Dijkstra
  📄 Recurso | 📥 Acceso |
-|---|---|
 | **Big_Data_Algoritmo_de_Dijkstra_y_el_BiG_Data_Teoría y aplicaciones.ipynb** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este notebook de Colab es un material de estudio detallado sobre la optimización de grafos en Big Data. Explica los fundamentos del algoritmo de Dijkstra, sus limitaciones de escalabilidad en entornos masivos, y cómo se adapta utilizando frameworks de procesamiento distribuido como Pregel y Apache Giraph. El contenido, presentado en secciones interactivas, cubre desde el modelo 'vertex-centric' y los 'superpasos' hasta aplicaciones prácticas en logística, redes sociales y transporte.</p></details> | [![Abrir en Colab](https://img.shields.io/badge/Abrir%20en-Colab-blue?style=for-the-badge&logo=googlecolab)](https://colab.research.google.com/drive/1szmP01igAa6P6C1eFd4Wf_VelqlYbDIw?usp=sharing) |
+| **12.Algoritmo_de_Dijkstra.ipynb** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este notebook introduce el algoritmo de Dijkstra, uno de los métodos más conocidos para encontrar el camino más corto en un grafo con pesos no negativos en sus aristas. A través de ejemplos prácticos y código, se detalla su funcionamiento paso a paso, el uso de estructuras de datos como colas de prioridad para optimizar su rendimiento y sus aplicaciones fundamentales en problemas de enrutamiento y redes.</p></details> | [![Abrir en Colab](https://img.shields.io/badge/Abrir%20en-Colab-blue?style=for-the-badge&logo=googlecolab)](https://colab.research.google.com/drive/1CtCIZqi-R5PN4VeL2h-9dFsUEjnc1wp2?usp=sharing) |
 
 ## 🗺️ Blockchain y teoría de los grafos: El caso de Lightning Network y ZPK
 
