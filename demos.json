@@ -1,5 +1,40 @@
 [
   {
+    "title": "Análisis de Rendimiento en GPU: Un Caso de Estudio con Grafos",
+    "path": "/src/classroom/graphs/recursos/Análisis de Rendimiento en GPU con Grafos_irregulares.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)",
+    "path": "/src/classroom/graphs/recursos/GOSSIP2.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)",
+    "path": "/src/classroom/graphs/recursos/Gossip_english.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Blockchain Gossip + Havel–Hakimi (enhanced)",
+    "path": "/src/classroom/graphs/recursos/gossip_1.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Blockchain Gossip + Havel–Hakimi (Versión Final)",
+    "path": "/src/classroom/graphs/recursos/blockchain.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "Cayley del Cubo — Rotaciones (S₄)",
     "path": "/src/classroom/graphs/recursos/cubo.html",
     "tag": "Demo",
@@ -28,6 +63,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "De una Secuencia a una Red Viva: Havel–Hakimi y Blockchain",
+    "path": "/src/classroom/graphs/recursos/HH.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "Demostración Interactiva: La Intratabilidad del TSP",
     "path": "/src/classroom/graphs/recursos/Hamilton_La Explosión Combinatoria del Problema del Viajante (TSP).html",
     "tag": "Demo",
@@ -35,11 +77,32 @@
     "mtime": "2025-10-11T23:20:08-03:00"
   },
   {
+    "title": "El Complemento de un Grafo: Invirtiendo las Conexiones",
+    "path": "/src/classroom/graphs/recursos/El Complemento de un Grafo-irregular.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "El Principio del Palomar y su Poder en la Demostración",
+    "path": "/src/classroom/graphs/recursos/Palomar.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "El Teseracto (Q4) como Grafo de Cayley",
     "path": "/src/classroom/graphs/recursos/teseracto.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Examen Interactivo de Teoría de Grafos",
+    "path": "/src/classroom/graphs/recursos/Cuestionario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "Figure 9 — Cayley graphs (order 32)",
@@ -70,11 +133,46 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Glosario Interactivo de Teoría de Grafos",
+    "path": "/src/classroom/graphs/recursos/glosario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "Gráfica de Cayley S₄ - Cubo Truncado Interactivo 3D",
     "path": "/src/classroom/graphs/recursos/cubo3.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Grafo de Cayley - Cubo (Z₂ × Z₂ × Z₂)",
+    "path": "/src/classroom/graphs/recursos/cubo -cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Grafo de Cayley C4",
+    "path": "/src/classroom/graphs/recursos/CUADRADO CAYLEY.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Grafos Casi Irregulares: Lo Más Cerca de la Irregularidad Total",
+    "path": "/src/classroom/graphs/recursos/Grafos_cuasiirregulares.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Grafos Completamente Irregulares: La Búsqueda de la Diversidad Total",
+    "path": "/src/classroom/graphs/recursos/3.Grafos_ Irregulares.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "Grafos de Cayley - Fusión Experta",
@@ -89,6 +187,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Grafos Regulares: Simetría en la Conectividad",
+    "path": "/src/classroom/graphs/recursos/2.Grafos_regulares.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "Guía de Estudio: Arquitectura Modular de Blockchain",
@@ -154,11 +259,25 @@
     "mtime": "2025-10-11T23:20:08-03:00"
   },
   {
+    "title": "Havel–Hakimi, Gossip y Blockchain",
+    "path": "/src/classroom/graphs/recursos/blog_HH.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "Hipercubo y Distancia de Hamming",
     "path": "/src/classroom/graphs/recursos/hammigs.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Índice Interactivo de Temas de Grafos",
+    "path": "/src/classroom/graphs/recursos/Indice.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "Intratabilidad en TSP: exacto vs heurístico (interactivo)",
@@ -175,11 +294,32 @@
     "mtime": "2025-10-11T23:20:08-03:00"
   },
   {
+    "title": "Perspectiva Algebraica: Grafos de Cayley",
+    "path": "/src/classroom/graphs/recursos/Grafo_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Realización de Secuencias de Grados: De los Números al Grafo",
+    "path": "/src/classroom/graphs/recursos/Realización de secuencias de grados y “casi irregularidad”.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
     "title": "Reducción Visual: Ciclo Hamiltoniano a TSP",
     "path": "/src/classroom/graphs/recursos/Hamilton_Reducción Polinómica Ciclo Hamiltoniano → TSP (Decisión).html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Teoría de Grafos - Visualización Interactiva",
+    "path": "/src/classroom/graphs/recursos/Preliminares.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "Teoría de Grafos: Guía Visual de Caminos y Ciclos",
@@ -194,6 +334,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Visualizador Havel–Hakimi (HH) Corregido",
+    "path": "/src/classroom/graphs/recursos/graficos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
     "title": "ZK-Rollups — Simulación Visual Interactiva",
