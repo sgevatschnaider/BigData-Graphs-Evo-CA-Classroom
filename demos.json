@@ -35,6 +35,13 @@
     "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
+    "title": "Capital Robótico y Data Flywheel — Demostración Interactiva",
+    "path": "/src/classroom/graphs/recursos/Capital Robótico vs Capital Común — Efecto del Data Flywheel.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-12T11:10:43-03:00"
+  },
+  {
     "title": "Cayley del Cubo — Rotaciones (S₄)",
     "path": "/src/classroom/graphs/recursos/cubo.html",
     "tag": "Demo",
@@ -61,6 +68,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Data Flywheel Robótico — USA vs China",
+    "path": "/src/classroom/graphs/recursos/Data Flywheel (U→D→Q→U).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-12T11:10:43-03:00"
   },
   {
     "title": "De una Secuencia a una Red Viva: Havel–Hakimi y Blockchain",
