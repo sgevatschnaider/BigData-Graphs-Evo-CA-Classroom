@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Estudio: ZKML (Inteligencia Verificable)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #4ca1af;
+      --accent-secondary: #2c3e50;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #4dd0e1;
+      --accent-secondary: #80deea;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content h4:first-child { margin-top: 0; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    .topic-content a { color: var(--accent-primary); text-decoration: none; font-weight: 500; }
+    .topic-content a:hover { text-decoration: underline; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'Inter', sans-serif; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Inteligencia Verificable</h1>
+      <p class="subtitle">Un Análisis Experto sobre ZKML (Zero-Knowledge Machine Learning)</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. El Fundamento de ZKML: La Génesis de la Inteligencia Verificable</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En la intersección de la IA y la criptografía, emerge ZKML (Zero-Knowledge Machine Learning). Responde a un dilema fundamental: los modelos de IA son opacos y sus datos sensibles. ZKML resuelve esta tensión mediante una prueba criptográfica (ZKP) que actúa como una atestación irrefutable de la integridad computacional de la inferencia, sin revelar datos ni el modelo.</p>
+                <p>Específicamente, esta prueba certifica tres puntos cruciales:</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Lo que una Prueba ZKML Certifica</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Integridad del Modelo</strong><span>Se utilizó un modelo de ML específico y predefinido, sin manipulaciones.</span></div>
+                        <div class="diagram-box"><strong>Validez de la Entrada</strong><span>La entrada, aunque privada, cumple con los criterios requeridos.</span></div>
+                        <div class="diagram-box"><strong>Corrección de la Inferencia</strong><span>El resultado es matemáticamente correcto de aplicar dicho modelo a dicha entrada.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Casos de Uso Estratégicos: De la Privacidad a la Ejecución On-Chain</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>a) Privacidad y Propiedad Intelectual en IA</h4>
+                <p>En sectores como la salud, ZKML permite utilizar un modelo de IA para diagnóstico sobre datos de pacientes sin compartirlos. Una prueba ZK puede ser enviada a un auditor, verificando que se usó el modelo oficial sin violar la privacidad (HIPAA) ni exponer el modelo propietario.</p>
+
+                <h4>b) Inferencia de Modelos de IA On-Chain</h4>
+                <p>Ejecutar una red neuronal en la EVM es inviable por los costos de gas. ZKML actúa como un <strong>puente de compresión computacional</strong>: la inferencia se ejecuta off-chain y solo la prueba ZK, pequeña y barata de verificar, se envía a un contrato inteligente. Esto habilita dApps complejas en juegos y DeFi, permitiendo que la blockchain se beneficie de cómputos complejos sin tener que ejecutarlos.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Flujo de Inferencia Verificable On-Chain</div>
+                    <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Off-chain (Capa de Ejecución)</div>
+                            <div class="diagram-box"><strong>Ejecución de Inferencia</strong><span>Un modelo de IA procesa datos privados.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Generación de Prueba ZK</strong><span>Se crea una prueba criptográfica que valida la ejecución.</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Publicación</div></div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">On-chain (Capa de Seguridad)</div>
+                             <div class="diagram-box"><strong>Verificación en Contrato Inteligente</strong><span>El contrato verifica la prueba de forma rápida y barata, y actúa sobre el resultado verificado.</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>c) Auditoría, Cumplimiento y RegTech</h4>
+                <p>En finanzas, un banco puede usar ZKML para demostrar a los reguladores que sus modelos de scoring crediticio cumplen con las normativas sin discriminar, todo ello sin exponer el modelo (secreto comercial) ni los datos del solicitante.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Desafíos Técnicos y Fronteras de la Investigación</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>A pesar de su potencial, la implementación práctica de ZKML enfrenta importantes obstáculos:</p>
+                <ul>
+                    <li><strong>Costo Computacional:</strong> La generación de pruebas para operaciones complejas (multiplicaciones de matrices, funciones de activación no lineales) es costosa. Actualmente es más viable para modelos pequeños; escalar a Transformers es una frontera activa.</li>
+                    <li><strong>Fragmentación y Estanderización:</strong> El ecosistema ZK es diverso (Halo2, STARKs, PLONK). La falta de una "Representación Intermedia (IR)" estándar para ZKML dificulta la portabilidad entre frameworks.</li>
+                    <li><strong>Trade-off Privacidad-Verificabilidad:</strong> Se debe decidir qué información se hace pública (ej. arquitectura del modelo) y qué se mantiene privado (pesos, datos). Esta decisión afecta la confianza y utilidad del sistema.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Ecosistema en Acción: Proyectos Pioneros</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Varios proyectos ya están liderando el desarrollo y la aplicación de esta tecnología:</p>
+                <ul>
+                    <li><strong><a href="https://www.moduluslabs.xyz/" target="_blank" rel="noopener noreferrer">Modulus Labs</a>:</strong> Pioneros en aplicar ZKML a casos de uso con incentivos económicos claros, como gaming on-chain y DeFi, buscando hacer la IA verificable rentable.</li>
+                    <li><strong><a href="https://www.gizatech.xyz/" target="_blank" rel="noopener noreferrer">Giza</a>:</strong> Una plataforma de infraestructura que busca abstraer la complejidad de las ZKP, permitiendo a los desarrolladores desplegar modelos de IA verificables en Web3 de manera más sencilla.</li>
+                    <li><strong><a href="https://github.com/zkonduit/ezkl" target="_blank" rel="noopener noreferrer">EZKL</a>:</strong> Una librería de Rust de código abierto que se ha convertido en una herramienta fundamental para prototipado rápido, compilando modelos de frameworks como PyTorch a circuitos ZK.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. El Horizonte Futuro: La Evolución de la Infraestructura</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La trayectoria de ZKML se perfila en tres etapas claras:</p>
+                <ul>
+                    <li><strong>Corto Plazo:</strong> Aplicación en modelos pequeños y optimizados para nichos de alto valor (DeFi, anti-trampas en juegos, cumplimiento normativo básico).</li>
+                    <li><strong>Mediano Plazo:</strong> Avances en la co-optimización de hardware (ASICs/FPGAs para ZKP) y software (zkVMs optimizadas), permitiendo modelos más complejos como CNNs.</li>
+                    <li><strong>Largo Plazo:</strong> ZKML se consolidará como una capa de infraestructura estándar e invisible para garantizar la confianza en sistemas de IA críticos (salud, finanzas, judicial).</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Conclusión: El Puente hacia una IA Confiable y Descentralizada</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En resumen, ZKML representa la convergencia entre la capacidad predictiva de la IA y la garantía de integridad de la criptografía. Resuelve la paradoja de cómo confiar en sistemas opacos. Al permitir la verificación de cómputos sin revelar datos ni propiedad intelectual, ZKML no solo abre la puerta a una IA más privada y auditable, sino que también la hace compatible con el ethos descentralizado y transparente de la Web3. Es la tecnología que habilita la <strong>confianza verificable</strong> en la era de la inteligencia artificial.</p>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

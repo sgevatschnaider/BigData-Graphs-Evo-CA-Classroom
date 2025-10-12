@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glosario de Pruebas de Conocimiento Cero (ZKP)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #3a6186 0%, #89253e 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #5e72e4;
+      --accent-secondary: #8965e0;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #8e44ad;
+      --accent-secondary: #3498db;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; /* Increased max-height */ padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content h4:first-child { margin-top: 0; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'Inter', sans-serif; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Glosario de Pruebas de Conocimiento Cero (ZKP)</h1>
+      <p class="subtitle">Términos Clave, Conceptos Fundamentales y Arquitecturas</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Fundamentos y Propiedades</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Prueba de Conocimiento Cero (ZKP)</h4>
+                <p>Un protocolo criptográfico que permite a una parte (el "probador") demostrar a otra (el "verificador") la veracidad de una afirmación matemática sin revelar ninguna información subyacente más allá del hecho de que la afirmación es verdadera. Se cimienta en tres propiedades innegociables: completitud, solidez y cero conocimiento.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Los 3 Pilares de una ZKP</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Completitud</strong><span>Una prueba honesta siempre convencerá al verificador.</span></div>
+                        <div class="diagram-box"><strong>Solidez</strong><span>Es imposible para un probador deshonesto falsificar una prueba.</span></div>
+                        <div class="diagram-box"><strong>Cero Conocimiento</strong><span>El verificador no aprende nada sobre el secreto, solo que la afirmación es cierta.</span></div>
+                    </div>
+                </div>
+
+                <h4>Completitud</h4>
+                <p>Garantiza la fiabilidad del sistema para afirmaciones verdaderas. Formalmente, si un probador actúa honestamente y posee el conocimiento que respalda su afirmación, el protocolo asegura que el verificador aceptará la prueba. En la analogía de la "Cueva de Alí Babá", el probador que conoce la palabra secreta siempre puede salir por el camino que el verificador le solicita.</p>
+                
+                <h4>Solidez (Soundness)</h4>
+                <p>El pilar de seguridad que protege contra la falsificación. Dicta que si la afirmación es falsa, la probabilidad de engañar al verificador es probabilísticamente despreciable. Tras k rondas, la probabilidad de engañar se reduce exponencialmente a (1/2)<sup>k</sup>.</p>
+
+                <h4>Cero Conocimiento</h4>
+                <p>La propiedad de privacidad que asegura que la interacción no filtra información adicional sobre el secreto. El verificador aprende que el probador sabe algo, pero no aprende qué es ese algo.</p>
+
+                <h4>NIZK (Non-Interactive Zero-Knowledge)</h4>
+                <p>Una evolución que elimina la necesidad de un diálogo entre probador y verificador. El probador genera una única "prueba" que puede ser verificada por cualquiera, en cualquier momento. Es fundamental para sistemas asíncronos como las blockchains y los ZK-rollups.</p>
+                
+                <h4>Heurística de Fiat-Shamir</h4>
+                <p>Una técnica que transforma un protocolo interactivo en uno no interactivo (NIZK) reemplazando los desafíos del verificador con el resultado de una función de hash criptográfica, permitiendo pruebas "fire-and-forget".</p>
+                
+                <h4>Argumento Sucinto (la "S" de SNARK)</h4>
+                <p>Se refiere a que la prueba es muy pequeña en tamaño y extremadamente rápida de verificar. Esta brevedad es fundamental para la escalabilidad en blockchain, permitiendo que una L1 verifique rápidamente la integridad de un lote masivo de transacciones de una L2.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Sistemas y Primitivas Criptográficas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>SNARK (Succinct Non-Interactive Argument of Knowledge)</h4>
+                <p>Familia de sistemas ZK con pruebas muy pequeñas y verificación rápida (ej. Groth16, PLONK). Son la columna vertebral de muchos ZK-rollups, aunque a menudo requieren un "trusted setup".</p>
+                
+                <h4>STARK (Scalable Transparent ARguments of Knowledge)</h4>
+                <p>Un sistema "transparente" que no requiere trusted setup. Son altamente escalables, resistentes a la computación cuántica, pero sus pruebas suelen ser de mayor tamaño.</p>
+
+                <h4>PLONK / UltraPLONK</h4>
+                <p>Una variante de SNARK con un setup "universal y actualizable", lo que significa que una única ceremonia inicial sirve para muchos programas diferentes, haciéndolo muy flexible.</p>
+
+                <h4>Groth16</h4>
+                <p>Un esquema SNARK pionero con el tamaño de prueba más pequeño y la verificación más rápida. Su desventaja es que requiere un trusted setup específico para cada circuito.</p>
+
+                <h4>Halo2 / Bulletproofs</h4>
+                <p>Sistemas de prueba que no requieren un trusted setup. Son eficientes para pruebas de rango y conocidos por su capacidad de agregación y recursión de pruebas.</p>
+
+                <h4>R1CS / Arithmetización</h4>
+                <p>El proceso de traducir un programa computacional en un sistema de ecuaciones algebraicas (restricciones) que una ZKP puede entender. Es un paso de compilación esencial para generar una prueba.</p>
+                
+                <h4>Trusted Setup</h4>
+                <p>Una ceremonia criptográfica para generar parámetros públicos (CRS) necesarios para algunos SNARKs. La seguridad depende de que los datos secretos intermedios ("residuo tóxico") se destruyan. Alternativas como las ceremonias multipartitas (MPC) o esquemas transparentes (STARKs, Halo2) mitigan este riesgo.</p>
+
+                <h4>Compromiso (Commitment), Pruebas de Rango y Pertenencia</h4>
+                <p>Primitivas criptográficas clave: <strong>Compromiso</strong> para "sellar" un valor; <strong>Pruebas de Rango</strong> para demostrar que un valor está en un intervalo sin revelarlo; y <strong>Pruebas de Pertenencia</strong> para demostrar que un elemento está en un conjunto sin revelar cuál es.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Componentes de un ZK-Rollup</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>L1 (Capa 1) y L2 (Capa 2)</h4>
+                <p>La <strong>L1</strong> (ej. Ethereum) es la capa de seguridad y consenso. La <strong>L2</strong> es la capa de ejecución de alto rendimiento donde operan los ZK-rollups. La L2 hereda la seguridad de la L1.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Arquitectura de un ZK-Rollup</div>
+                    <div class="diagram-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="diagram-box"><strong>L2 (Capa de Ejecución)</strong><span>Recibe transacciones de usuarios, las ordena (Secuenciador) y ejecuta. Genera una prueba de validez (Prover).</span></div>
+                        <div class="diagram-box"><strong>L1 (Capa de Seguridad)</strong><span>Almacena el contrato Verificador, recibe las pruebas y los datos de L2, y finaliza el estado. Actúa como juez.</span></div>
+                    </div>
+                </div>
+
+                <h4>Secuenciador (Sequencer)</h4>
+                <p>El componente de la L2 que recibe, ordena y empaqueta las transacciones en lotes. La descentralización de este rol es un objetivo clave para la resistencia a la censura.</p>
+
+                <h4>Prover (Generador de pruebas)</h4>
+                <p>Un servicio computacionalmente intensivo que toma un lote de transacciones y genera la ZK-proof correspondiente. Su costo se amortiza entre todas las transacciones del lote.</p>
+
+                <h4>Verificador On-chain (Verifier)</h4>
+                <p>Un contrato inteligente en la L1 diseñado para una tarea: verificar la validez de las pruebas ZK. Si es válida, actualiza la raíz de estado del rollup.</p>
+                
+                <h4>Disponibilidad de Datos (Data Availability, DA)</h4>
+                <p>La garantía de que los datos para reconstruir el estado de la L2 están públicos. Hay dos modelos:</p>
+                <ul>
+                    <li><strong>ZK-Rollup (DA on-chain):</strong> Los datos se publican en L1. Máxima seguridad y autocustodia.</li>
+                    <li><strong>Validium (DA off-chain):</strong> Los datos se mantienen fuera de L1. Más barato y escalable, pero con un supuesto de confianza adicional en un Comité (DAC).</li>
+                </ul>
+
+                <h4>Puente (Bridge) L1↔L2</h4>
+                <p>El conjunto de contratos que gestiona el depósito y retiro seguro de activos entre la L1 y la L2. Los retiros en ZK-rollups son rápidos y no requieren períodos de disputa.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Flujo Operativo y Métricas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Lote (Batch)</h4>
+                <p>Un conjunto de transacciones de L2 que se agrupan, ejecutan y prueban juntas. El procesamiento por lotes es la clave de la eficiencia de los rollups.</p>
+
+                <h4>Finalidad (Finality) del Lote</h4>
+                <p>El tiempo que transcurre desde que un usuario envía una transacción hasta que es criptográficamente finalizada en la L1. Es significativamente más rápido que en los optimistic rollups.</p>
+
+                <h4>TPS Efectivo y Fee Amortizado</h4>
+                <p><strong>TPS (Transacciones por Segundo)</strong> es la medida del rendimiento. El <strong>Fee Amortizado</strong> es el costo real para el usuario, calculado dividiendo el costo total del lote en L1 por el número de transacciones.</p>
+                
+                <h4>Latencia vs. Throughput (Trade-off)</h4>
+                <p>Un compromiso de diseño: lotes más grandes aumentan el throughput (TPS) y reducen el fee, pero pueden aumentar la latencia si la red tiene poco tráfico, ya que se debe esperar a que el lote se llene.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Diseño, Riesgos y Buenas Prácticas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                
+                <h4>Comparación con Optimistic Rollups</h4>
+                <p>Los Optimistic Rollups asumen validez y usan "pruebas de fraude" con un período de disputa (retiros lentos). Los ZK-rollups usan "pruebas de validez", ofreciendo finalidad rápida y seguridad matemática.</p>
+
+                <div class="diagram-container">
+                    <div class="diagram-title">Rollups: Pruebas de Validez vs. Pruebas de Fraude</div>
+                    <div class="diagram-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="diagram-box"><strong>ZK-Rollups (Prueba de Validez)</strong><span>Proactivamente prueban que cada transición de estado es correcta. Rápidos y seguros por criptografía.</span></div>
+                        <div class="diagram-box"><strong>Optimistic Rollups (Prueba de Fraude)</strong><span>Asumen que las transiciones son correctas a menos que se demuestre lo contrario. Requieren un período de disputa (ej. 7 días).</span></div>
+                    </div>
+                </div>
+
+                <h4>Compatibilidad EVM / zkEVM</h4>
+                <p>Un rollup que replica el entorno de ejecución de Ethereum (EVM) dentro de un circuito ZK, permitiendo portar dApps y herramientas de Ethereum a la L2 con mínimos cambios.</p>
+
+                <h4>zk-ID / PoR / Anti-trampa</h4>
+                <p>Aplicaciones avanzadas: <strong>zk-ID</strong> para probar atributos personales sin revelar datos; <strong>Proof of Reserves (PoR)</strong> para que entidades centralizadas demuestren solvencia; y sistemas <strong>Anti-trampa</strong> en juegos para verificar acciones sin revelar la lógica interna.</p>
+
+                <h4>Riesgo de Setup / Upgrades</h4>
+                <p>En SNARKs con trusted setup, un fallo en la ceremonia inicial podría comprometer la seguridad. Además, las actualizaciones de los contratos deben ser manejadas con extrema cautela a través de una gobernanza robusta.</p>
+
+                <h4>Disponibilidad de Datos (Riesgo Clave)</h4>
+                <p>El principal riesgo de los sistemas Validium. Si el comité encargado de los datos se vuelve malicioso o falla, los usuarios podrían ser incapaces de acceder a sus fondos.</p>
+                
+                <h4>Auditoría y Monitoreo</h4>
+                <p>Debido a su complejidad, todos los componentes de un sistema ZK deben ser sometidos a rigurosas auditorías y monitoreo continuo para proteger el sistema contra posibles ataques.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Herramientas y Stack (Referencia Rápida)</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Lenguajes de Circuitos</h4>
+                <p>Lenguajes especializados como <strong>Circom, Noir, o Cairo</strong> que permiten escribir la lógica computacional a probar y compilarla al formato que los sistemas ZKP entienden.</p>
+
+                <h4>Librerías/Frameworks</h4>
+                <p>Bibliotecas como <strong>snarkjs</strong> y los SDKs de plataformas como <strong>zkSync, Polygon zkEVM y Starknet</strong>, que facilitan la construcción de aplicaciones sobre estas L2.</p>
+                
+                <h4>Hashes ZK-Friendly</h4>
+                <p>Funciones de hash como <strong>Poseidon o Rescue</strong>, diseñadas para ser representadas de manera muy eficiente dentro de un circuito ZK, minimizando el costo de generar una prueba.</p>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

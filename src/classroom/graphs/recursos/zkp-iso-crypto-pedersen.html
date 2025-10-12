@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZKP Isomorfismo — SHA-256 / Pedersen (Ristretto255, sin sesgos)</title>
+<style>
+  :root { --bg:#0f1220; --fg:#e8ecf1; --muted:#9aa3b2; --acc:#50e3c2; --warn:#ffad5a; --err:#ff6b6b; --ok:#8be28b; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--fg); }
+  header { padding:16px 20px; border-bottom:1px solid #1b2036; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:18px; margin:0; }
+  .wrap { display:grid; grid-template-columns: 360px 1fr; gap:16px; padding:16px; }
+  .panel { background:#121733; border:1px solid #1b2036; border-radius:12px; padding:12px; }
+  .panel h2 { font-size:14px; margin:0 0 8px 0; color:#cbd5e1; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  button, select, input[type="number"] { background:#0b1026; color:#e8ecf1; border:1px solid #1b2036; padding:8px 10px; border-radius:10px; }
+  button:hover { filter:brightness(1.1); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .accent { background:var(--acc); color:#072a2a; border-color:#3ac7ac; }
+  .warn { background:var(--warn); color:#2a1400; border-color:#e38c2d; }
+  .ok { background:var(--ok); color:#062406; border-color:#63bf63; }
+  .err { background:var(--err); color:#2b0000; border-color:#cc5252; }
+  .small { font-size:12px; color:var(--muted); }
+  .grid { display:grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap:12px; }
+  svg { width:100%; height:280px; min-width:260px; background:#0b1026; border:1px solid #1b2036; border-radius:10px; }
+  .node { fill:#83a1ff; stroke:#19224b; stroke-width:1.5; }
+  .node.h { fill:#50e3c2; }
+  .edge { stroke:#5a6aa5; stroke-width:2; opacity:.9; }
+  .label { fill:#dbe4ff; font-size:11px; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
+  .stat { background:#101635; border:1px dashed #2a3470; border-radius:10px; padding:8px; margin-top:8px; }
+  code, .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+  .mono { word-break:break-all; }
+  .hint { margin-top:6px; color:#ffd166; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ZKP Isomorfismo de Grafos — Compromisos SHA-256 / Pedersen (Ristretto255)</h1>
+  <span class="small">Escalares uniformes, hash-to-scalar correcto, y fallback robusto.</span>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Parámetros</h2>
+    <div class="row">
+      <label>Nodos:
+        <input id="nNodes" type="number" min="5" max="10" value="7" style="width:64px; margin-left:6px">
+      </label>
+      <label style="margin-left:8px">Densidad p:
+        <input id="density" type="number" min="0.1" max="0.9" step="0.05" value="0.35" style="width:64px; margin-left:6px">
+      </label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button id="newInst" class="accent">Nueva instancia (G₁,G₂, π secreta)</button>
+      <button id="resetRounds">Reiniciar rondas</button>
+    </div>
+
+    <h2>Modo</h2>
+    <div class="row small">
+      <label>Compromiso:
+        <select id="commitType" style="margin-left:6px">
+          <option value="sha256">SHA-256 (hash+nonce)</option>
+          <option value="pedersen">Pedersen (Ristretto255)</option>
+        </select>
+      </label>
+      <label style="margin-left:12px"><input id="fsMode" type="checkbox"> Fiat–Shamir (NIZK)</label>
+    </div>
+    <div id="pedersenWarn" class="hint hidden">Pedersen no disponible (falló la librería). Usando SHA-256.</div>
+
+    <h2>Ronda</h2>
+    <ol class="small" style="margin-top:0; line-height:1.6">
+      <li><b>Compromiso:</b> <span id="commitDesc">com = SHA256( serialize(H) || nonce )</span></li>
+      <li><b>Desafío:</b> interactivo <code>c∈{1,2}</code> o Fiat–Shamir <code>c = H(transcript) mod 2 + 1</code></li>
+      <li><b>Respuesta:</b> revelar <code>H</code> y <span id="openDesc">nonce</span> + <code>f</code> tal que <code>f(G_c)=H</code></li>
+    </ol>
+    <div class="row" style="margin:6px 0">
+      <button id="commitBtn">1) Comprometer</button>
+      <button id="ch1" disabled>2) c = 1</button>
+      <button id="ch2" disabled>2) c = 2</button>
+      <button id="respondBtn" class="warn" disabled>3) Responder</button>
+    </div>
+    <div class="row" style="margin:6px 0">
+      <button id="autoRound" disabled>Auto-ronda</button>
+      <button id="autoMany" disabled>Auto-10 rondas</button>
+    </div>
+
+    <div class="stat" id="statusBox">Estado: prepara una instancia nueva.</div>
+
+    <h2>Valores</h2>
+    <div class="small">π (secreta, fija) mapea G₁→G₂. σ (aleatoria por ronda) mapea G₁→H.</div>
+    <div class="mono" id="piMap">π: —</div>
+    <div class="mono" id="sigmaMap">σ: —</div>
+    <div class="mono" id="nonceBox">nonce: —</div>
+    <div class="mono" id="pedersenRBox">r (Pedersen): —</div>
+    <div class="mono" id="commitBox">commit / C: —</div>
+    <div class="mono" id="challengeBox">c: —</div>
+    <div class="mono" id="fMap">f: —</div>
+
+    <h2>Seguridad</h2>
+    <div class="stat" id="securityBox">Rondas: 0 · Prob. engañar: 1</div>
+  </div>
+
+  <div class="panel">
+    <h2>Visualización</h2>
+    <div class="grid">
+      <div>
+        <div class="small">G₁ (público)</div>
+        <svg id="g1"></svg>
+      </div>
+      <div>
+        <div class="small">G₂ = π(G₁) (público)</div>
+        <svg id="g2"></svg>
+      </div>
+      <div>
+        <div class="small">H (se revela al responder)</div>
+        <svg id="h"></svg>
+      </div>
+    </div>
+    <div class="small" style="margin-top:6px">
+      Colores: <span style="color:#83a1ff">G₁/G₂</span>, <span style="color:#50e3c2">H</span>.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====== Utilidades base ====== */
+const el = id => document.getElementById(id);
+const range = n => [...Array(n).keys()];
+function srnd(n){ const b=new Uint32Array(1); crypto.getRandomValues(b); return Number(b[0]%n); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=srnd(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function compose(p,q){ const n=p.length, r=new Array(n); for(let i=0;i<n;i++) r[i]=p[q[i]]; return r; }
+function invert(p){ const n=p.length, inv=new Array(n); for(let i=0;i<n;i++) inv[p[i]]=i; return inv; }
+
+function randomGraph(n,p){ const E=[]; for(let i=0;i<n;i++){ for(let j=i+1;j<n;j++){ if(Math.random()<p) E.push([i,j]); } } if(E.length===0) E.push([0,1]); return {n,edges:E}; }
+function permuteGraph(G,p){ const E=new Set(); for(const [u,v] of G.edges){ const a=p[u],b=p[v],lo=Math.min(a,b),hi=Math.max(a,b); E.add(lo+"-"+hi); } return {n:G.n, edges:[...E].map(s=>s.split("-").map(Number))}; }
+function checkIso(G,H,f){ if(G.n!==H.n||f.length!==G.n) return false; const map=new Set(H.edges.map(([a,b])=>`${Math.min(a,b)}-${Math.max(a,b)}`)); for(const [u,v] of G.edges){ const a=f[u],b=f[v]; if(!map.has(`${Math.min(a,b)}-${Math.max(a,b)}`)) return false; } return true; }
+
+/* Serialización determinista */
+function canonEdges(E){ return E.map(([u,v])=>[Math.min(u,v),Math.max(u,v)]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]); }
+function serializeGraph(G){ const E=canonEdges(G.edges); const buf=new ArrayBuffer(8+8*E.length); const dv=new DataView(buf); let o=0; dv.setUint32(o,G.n); o+=4; dv.setUint32(o,E.length); o+=4; for(const [u,v] of E){ dv.setUint32(o,u); o+=4; dv.setUint32(o,v); o+=4; } return new Uint8Array(buf); }
+function serializePerm(p){ const buf=new ArrayBuffer(4+4*p.length); const dv=new DataView(buf); dv.setUint32(0,p.length); let o=4; for(let i=0;i<p.length;i++){ dv.setUint32(o,p[i]); o+=4; } return new Uint8Array(buf); }
+function concatBytes(...arrs){ const n=arrs.reduce((s,a)=>s+a.length,0); const out=new Uint8Array(n); let o=0; for(const a of arrs){ out.set(a,o); o+=a.length; } return out; }
+
+/* Cripto SHA-256 */
+async function sha256(bytes){ const h=await crypto.subtle.digest('SHA-256',bytes); return new Uint8Array(h); }
+async function sha512(bytes){ const h=await crypto.subtle.digest('SHA-512',bytes); return new Uint8Array(h); }
+function hex(u8){ return [...u8].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function randBytes(n){ const b=new Uint8Array(n); crypto.getRandomValues(b); return b; }
+
+/* ====== Render ====== */
+function svgSize(svg){ const r=svg.getBoundingClientRect(); const w=(r.width&&r.width>0)?r.width:(svg.clientWidth||320); const h=(r.height&&r.height>0)?r.height:(svg.clientHeight||280); return {w,h}; }
+function polygonPositions(n,w,h,rPad=28){ const cx=w/2, cy=h/2, r=Math.min(w,h)/2 - rPad; const pos=[]; for(let k=0;k<n;k++){ const ang=-Math.PI/2+2*Math.PI*k/n; pos.push({x:cx+r*Math.cos(ang), y:cy+r*Math.sin(ang)}); } return pos; }
+function drawGraph(svg,G,opts={}){ const ns="http://www.w3.org/2000/svg"; while(svg.firstChild) svg.removeChild(svg.firstChild); if(!G) return;
+  const {w,h}=svgSize(svg); svg.setAttribute("viewBox",`0 0 ${w} ${h}`);
+  const pos=polygonPositions(G.n,w,h);
+  for(const [u,v] of G.edges){ const e=document.createElementNS(ns,"line"); e.setAttribute("x1",pos[u].x); e.setAttribute("y1",pos[u].y); e.setAttribute("x2",pos[v].x); e.setAttribute("y2",pos[v].y); e.setAttribute("class","edge"); svg.appendChild(e); }
+  for(let i=0;i<G.n;i++){ const g=document.createElementNS(ns,"g"); const c=document.createElementNS(ns,"circle"); c.setAttribute("cx",pos[i].x); c.setAttribute("cy",pos[i].y); c.setAttribute("r",16); c.setAttribute("class",opts.classNode||"node"); g.appendChild(c); const t=document.createElementNS(ns,"text"); t.setAttribute("x",pos[i].x); t.setAttribute("y",pos[i].y); t.setAttribute("class","label"); t.textContent=(opts.labels?opts.labels[i]:i); g.appendChild(t); svg.appendChild(g); }
+}
+
+/* ====== Estado ====== */
+const state = {
+  G1:null, G2:null, H:null,
+  pi:null, sigma:null, f:null,
+  rounds:0, committed:false, challenged:null, responded:false,
+  // SHA
+  nonce:null, commitHash:null,
+  // Pedersen
+  pedersenAvailable:false, ped:{ C_bytes:null, r:null, api:null }
+};
+
+/* ====== UI ====== */
+function setStatus(msg,cls=""){ const box=el("statusBox"); box.textContent="Estado: "+msg; box.className="stat "+cls; }
+function setSecurity(){ const prob=Math.pow(0.5,state.rounds); el("securityBox").textContent=`Rondas: ${state.rounds} · Prob. engañar: ${prob.toLocaleString(undefined,{maximumFractionDigits:6})}`; }
+function showMaps(){
+  el("piMap").textContent = "π: " + (state.pi? state.pi.join(" "): "—");
+  el("sigmaMap").textContent = "σ: " + (state.sigma? state.sigma.join(" "): "—");
+  el("fMap").textContent = "f: " + (state.f? state.f.join(" "): "—");
+  el("nonceBox").textContent = "nonce: " + (state.nonce? hex(state.nonce): "—");
+  el("pedersenRBox").textContent = "r (Pedersen): " + (state.ped.r? "0x"+state.ped.r.toString(16): "—");
+  const ct = effectiveCommitType();
+  el("commitBox").textContent = (ct==="sha256")
+    ? ("commit: " + (state.commitHash? hex(state.commitHash): "—"))
+    : ("C (Ristretto255): " + (state.ped.C_bytes? hex(state.ped.C_bytes): "—"));
+  el("challengeBox").textContent = "c: " + (state.challenged ?? "—");
+}
+function setButtons(){
+  const fs = el("fsMode").checked;
+  el("commitBtn").disabled = !(state.G1 && !state.committed);
+  el("ch1").disabled = !state.committed || state.challenged!==null || fs;
+  el("ch2").disabled = !state.committed || state.challenged!==null || fs;
+  el("respondBtn").disabled = !(state.committed && state.challenged!==null && !state.responded);
+  el("autoRound").disabled = !state.G1 || state.responded;
+  el("autoMany").disabled = !state.G1;
+}
+function updateCommitDescriptions(){
+  const ct = effectiveCommitType();
+  if (ct==="sha256"){
+    el("commitDesc").innerHTML = `com = SHA256( serialize(H) || nonce )`;
+    el("openDesc").innerHTML = `nonce`;
+  } else {
+    el("commitDesc").innerHTML = `C = r·G + m·H, con <code>m = HashToScalar( serialize(H) )</code>`;
+    el("openDesc").innerHTML = `r (m se recalcula a partir de H)`;
+  }
+}
+function effectiveCommitType(){
+  const sel = el("commitType").value;
+  return (sel==="pedersen" && state.pedersenAvailable) ? "pedersen" : "sha256";
+}
+
+/* ====== Protocolo ====== */
+function newInstance(){
+  const n = parseInt(el("nNodes").value,10), p = parseFloat(el("density").value);
+  state.G1 = randomGraph(n,p);
+  state.pi = shuffle(range(n));
+  state.G2 = permuteGraph(state.G1, state.pi);
+  state.H=null; state.sigma=null; state.f=null;
+  state.rounds=0; state.committed=false; state.challenged=null; state.responded=false;
+  state.nonce=null; state.commitHash=null; state.ped.C_bytes=null; state.ped.r=null;
+  drawGraph(el("g1"), state.G1, {labels:range(n)});
+  drawGraph(el("g2"), state.G2, {labels:range(n)});
+  drawGraph(el("h"), null, {});
+  showMaps(); setButtons(); setSecurity(); updateCommitDescriptions();
+  setStatus("Instancia creada. Pulsa «Comprometer».","");
+}
+async function commitPhase(){
+  // σ y H
+  state.sigma = shuffle(range(state.G1.n));
+  state.H = permuteGraph(state.G1, state.sigma);
+  state.f=null; state.challenged=null; state.responded=false;
+  state.nonce=null; state.commitHash=null; state.ped.C_bytes=null; state.ped.r=null;
+
+  const serH = serializeGraph(state.H);
+  const ct = effectiveCommitType();
+
+  if (ct==="sha256"){
+    state.nonce = randBytes(16);
+    state.commitHash = await sha256(concatBytes(serH, state.nonce));
+    setStatus("Compromiso (SHA-256) enviado. Esperando desafío.");
+  } else {
+    const { C_bytes, r } = state.ped.api.commit(serH);
+    state.ped.C_bytes = C_bytes; state.ped.r = r;
+    setStatus("Compromiso Pedersen enviado. Esperando desafío.");
+  }
+  state.committed=true; showMaps(); setButtons();
+
+  if (el("fsMode").checked){
+    const parts=[new TextEncoder().encode('ZK-ISO v1'), serializeGraph(state.G1), serializeGraph(state.G2), serializePerm(state.pi)];
+    parts.push(ct==="sha256" ? state.commitHash : state.ped.C_bytes);
+    const h = await sha256(concatBytes(...parts));
+    state.challenged = (h[h.length-1] & 1) ? 2 : 1;
+    showMaps(); setButtons();
+    setStatus(`Fiat–Shamir: desafío derivado c = ${state.challenged}. Pulsa «Responder».`);
+  }
+}
+function challenge(c){ state.challenged=c; showMaps(); setButtons(); setStatus(`Desafío elegido: c=${c}. Pulsa «Responder».`); }
+
+async function respond(){
+  if (state.challenged!==1 && state.challenged!==2){ setStatus("Desafío inválido.","err"); return; }
+  state.f = (state.challenged===1) ? state.sigma.slice() : compose(state.sigma, invert(state.pi));
+  drawGraph(el("h"), state.H, {labels:range(state.H.n), classNode:"node h"});
+  state.responded=true; showMaps(); setButtons();
+
+  const serH = serializeGraph(state.H);
+  const ct = effectiveCommitType();
+  let bindOK=false;
+  if (ct==="sha256"){
+    const recom = await sha256(concatBytes(serH, state.nonce));
+    bindOK = hex(recom) === hex(state.commitHash);
+  } else {
+    bindOK = state.ped.api.verify(state.ped.C_bytes, serH, state.ped.r);
+  }
+  const isoOK = (state.challenged===1) ? checkIso(state.G1, state.H, state.f) : checkIso(state.G2, state.H, state.f);
+  if (bindOK && isoOK){ state.rounds++; setSecurity(); setStatus("Verificación: ✅ compromiso válido y f(G_c)=H.","ok"); }
+  else { setStatus("Verificación: ❌ "+(!bindOK?"compromiso inválido ":"") + (!isoOK?"isomorfismo incorrecto":""), "err"); }
+}
+
+/* ====== Pedersen opcional (Ristretto255, sin sesgos) ====== */
+async function initPedersen(){
+  try {
+    const mod = await import("https://esm.sh/@noble/curves@1.4.0/ed25519");
+    const ristretto255 = mod.ristretto255;
+
+    // utilidades LE y escalares uniformes
+    const ORDER = BigInt(ristretto255.CURVE.n);
+
+    const leBytesToBigint = (u8) => { // little-endian → bigint
+      let x=0n; for (let i=0;i<u8.length;i++) x += BigInt(u8[i]) << (8n*BigInt(i));
+      return x;
+    };
+
+    function randomScalar(){ // rechazo uniforme en [1, ORDER-1]
+      while (true){
+        const b = randBytes(32);
+        const k = leBytesToBigint(b);
+        if (k>0n && k<ORDER) return k;
+      }
+    }
+
+    async function hashToScalar(msg){ // SHA-512 + ctr con rechazo LE
+      let ctr = 0;
+      while (true){
+        const data = concatBytes(msg, new Uint8Array([ctr & 0xff]));
+        const h = await sha512(data);        // 64 bytes
+        const k = leBytesToBigint(h.slice(0,32));
+        if (k>0n && k<ORDER) return k;
+        ctr = (ctr+1) & 0xff;
+      }
+    }
+
+    const G = ristretto255.Point.BASE;
+    const H = ristretto255.hashToCurve(new TextEncoder().encode("zkp-demo/H"));
+
+    const api = {
+      commit: (msgBytes)=>{
+        const r = randomScalar();
+        // hashToScalar es async; para simplificar el flujo del UI lo resolvemos sync con atomics,
+        // pero aquí lo hacemos “bloqueando” con deasync: no disponible en browser.
+        // Solución: precomputar m sincrónicamente con SHA-512 sin WebCrypto: NO.
+        // Mejor: devolver promesa y adaptar commitPhase.
+        throw new Error("commit() debe ser async"); // reemplazado abajo
+      },
+      verify: (C_bytes, msgBytes, r)=>{
+        // async también
+        throw new Error("verify() debe ser async"); // reemplazado abajo
+      }
+    };
+
+    // Versiones async reales:
+    api.commitAsync = async (msgBytes)=>{
+      const r = randomScalar();
+      const m = await hashToScalar(msgBytes);
+      const C = G.multiply(r).add(H.multiply(m));
+      return { C_bytes: C.toRawBytes(), r };
+    };
+    api.verifyAsync = async (C_bytes, msgBytes, r)=>{
+      try{
+        const C = ristretto255.Point.fromBytes(C_bytes);
+        const m = await hashToScalar(msgBytes);
+        const rhs = G.multiply(r).add(H.multiply(m));
+        return C.equals(rhs);
+      }catch(e){ return false; }
+    };
+
+    state.pedersenAvailable = true;
+    state.ped.api = api;
+    el("pedersenWarn").classList.add("hidden");
+  } catch (e){
+    state.pedersenAvailable = false;
+    el("commitType").value = "sha256";
+    el("pedersenWarn").classList.remove("hidden");
+    console.warn("Pedersen deshabilitado:", e);
+  }
+  updateCommitDescriptions();
+}
+
+/* ====== Eventos ====== */
+function bindEvents(){
+  el("newInst").onclick = newInstance;
+  el("resetRounds").onclick = ()=>{ state.rounds=0; setSecurity(); setStatus("Rondas reiniciadas."); };
+  el("commitBtn").onclick = async ()=>{
+    // si Pedersen está activo, usar API async
+    if (effectiveCommitType()==="pedersen"){
+      // σ y H
+      state.sigma = shuffle(range(state.G1.n));
+      state.H = permuteGraph(state.G1, state.sigma);
+      state.f=null; state.challenged=null; state.responded=false;
+      state.nonce=null; state.commitHash=null; state.ped.C_bytes=null; state.ped.r=null;
+
+      const serH = serializeGraph(state.H);
+      const { C_bytes, r } = await state.ped.api.commitAsync(serH);
+      state.ped.C_bytes = C_bytes; state.ped.r = r;
+      state.committed = true;
+      setStatus("Compromiso Pedersen enviado. Esperando desafío.");
+      showMaps(); setButtons();
+      if (el("fsMode").checked){
+        const parts=[new TextEncoder().encode('ZK-ISO v1'), serializeGraph(state.G1), serializeGraph(state.G2), serializePerm(state.pi), state.ped.C_bytes];
+        const h = await sha256(concatBytes(...parts));
+        state.challenged = (h[h.length-1] & 1) ? 2 : 1;
+        showMaps(); setButtons();
+        setStatus(`Fiat–Shamir: desafío derivado c = ${state.challenged}. Pulsa «Responder».`);
+      }
+    } else {
+      // SHA-256 (camino sin cambios)
+      commitPhase();
+    }
+  };
+  el("ch1").onclick = ()=>challenge(1);
+  el("ch2").onclick = ()=>challenge(2);
+  el("respondBtn").onclick = async ()=>{
+    if (effectiveCommitType()==="pedersen"){
+      if (state.challenged!==1 && state.challenged!==2){ setStatus("Desafío inválido.","err"); return; }
+      state.f = (state.challenged===1) ? state.sigma.slice() : compose(state.sigma, invert(state.pi));
+      drawGraph(el("h"), state.H, {labels:range(state.H.n), classNode:"node h"});
+      state.responded=true; showMaps(); setButtons();
+      const serH = serializeGraph(state.H);
+      const bindOK = await state.ped.api.verifyAsync(state.ped.C_bytes, serH, state.ped.r);
+      const isoOK = (state.challenged===1) ? checkIso(state.G1, state.H, state.f) : checkIso(state.G2, state.H, state.f);
+      if (bindOK && isoOK){ state.rounds++; setSecurity(); setStatus("Verificación: ✅ compromiso válido y f(G_c)=H.","ok"); }
+      else { setStatus("Verificación: ❌ "+(!bindOK?"compromiso inválido ":"") + (!isoOK?"isomorfismo incorrecto":""), "err"); }
+    } else {
+      await respond(); // camino SHA
+    }
+  };
+  el("autoRound").onclick = async ()=>{
+    if (effectiveCommitType()==="pedersen"){
+      await el("commitBtn").onclick();
+      if (!el("fsMode").checked && state.challenged===null) challenge( srnd(2)?2:1 );
+      await el("respondBtn").onclick();
+    } else {
+      commitPhase().then(()=>{
+        if(!el("fsMode").checked && state.challenged===null) challenge( srnd(2)?2:1 );
+        respond();
+      });
+    }
+  };
+  el("autoMany").onclick = async ()=>{
+    for(let i=0;i<10;i++){
+      await el("autoRound").onclick();
+    }
+  };
+  el("fsMode").onchange = setButtons;
+  el("commitType").onchange = updateCommitDescriptions;
+}
+
+/* ====== Init ====== */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  bindEvents();
+  await initPedersen();   // si falla, sigue SHA-256
+  newInstance();
+});
+window.addEventListener('resize', ()=>{
+  if (state.G1){ drawGraph(el("g1"), state.G1, {labels:range(state.G1.n)}); }
+  if (state.G2){ drawGraph(el("g2"), state.G2, {labels:range(state.G2.n)}); }
+  if (state.H){ drawGraph(el("h"), state.H, {labels:range(state.H.n), classNode:"node h"}); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Estudio: Escalado con ZK-Rollups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #6a11cb;
+      --accent-secondary: #2575fc;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #8e44ad;
+      --accent-secondary: #3498db;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Escalado de Blockchain con ZK-Rollups</h1>
+      <p class="subtitle">La Arquitectura de la Eficiencia y la Seguridad</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Definición Esencial: La Idea en una Frase</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Los ZK-rollups agrupan (roll-up) miles de transacciones fuera de la cadena principal (L1), ejecutan su lógica “off-chain” y publican en L1 un resumen de datos comprimido junto a una <strong>prueba criptográfica irrefutable de validez (ZKP)</strong>. Esto permite que la L1 herede su seguridad con un rendimiento masivo y un coste por transacción drásticamente inferior, ya que solo verifica la prueba en lugar de re-ejecutar cada cálculo.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. La Necesidad del Escalado: ¿Por Qué Existen?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Las cadenas de bloques de capa 1 (L1), como Ethereum, están diseñadas para maximizar la <strong>seguridad y la descentralización</strong>. Este diseño impone severas limitaciones en su capacidad de procesamiento y eleva los costes (tasas de gas) durante períodos de alta demanda. El desafío, conocido como el "trilema de la blockchain", es escalar sin sacrificar estas propiedades.</p>
+                <p>Los ZK-rollups surgen como una solución de capa 2 (L2) que mueve la ejecución computacional intensiva fuera de la cadena y utiliza la L1 exclusivamente para lo que es mejor: actuar como una capa de consenso global y un tribunal de verdad criptográfica.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Anatomía de un ZK-Rollup: Mecanismo Detallado</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El proceso operativo de un ZK-rollup se puede desglosar en una secuencia lógica y eficiente de cinco pasos clave que conectan la actividad de la Capa 2 con la seguridad de la Capa 1.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Ciclo de Vida de un Lote en un ZK-Rollup</div>
+                    <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Capa 2 (Off-chain)</div>
+                            <div class="diagram-box"><strong>1. Secuenciación</strong><span>Usuarios envían Txs al Secuenciador, que las ordena y ejecuta.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>2. Actualización de Estado L2</strong><span>Los saldos y datos de contratos en la L2 se actualizan.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>3. Generación de Prueba ZK</strong><span>Un Prover crea una prueba matemática que valida todo el lote.</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Publicación</div></div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">Capa 1 (On-chain)</div>
+                             <div class="diagram-box"><strong>4. Publicación en L1</strong><span>La prueba ZK y los datos comprimidos se envían a un contrato en L1.</span></div>
+                             <div class="diagram-arrow down"></div>
+                             <div class="diagram-box"><strong>5. Verificación en L1</strong><span>El contrato L1 verifica la prueba (rápido y barato) y finaliza el estado.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Los Pilares de la Infraestructura: Componentes Clave</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El ecosistema de un ZK-rollup se apoya en cuatro componentes fundamentales que trabajan en conjunto para proporcionar escalabilidad y seguridad.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Componentes Fundamentales de un ZK-Rollup</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Secuenciador</strong><span>Recibe, ordena y ejecuta las transacciones en L2.</span></div>
+                        <div class="diagram-box"><strong>Prover</strong><span>El motor computacional que genera las pruebas ZKP para los lotes de transacciones.</span></div>
+                        <div class="diagram-box"><strong>Contrato Verificador (L1)</strong><span>El ancla de seguridad en L1 que verifica las pruebas ZKP y actualiza el estado.</span></div>
+                        <div class="diagram-box"><strong>Bridge L1↔L2</strong><span>El puente que permite a los usuarios depositar y retirar activos entre capas.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Fundamentos de Confianza: Seguridad y Finalidad</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La robustez de los ZK-rollups se basa en garantías criptográficas, no en confianza. Su principal ventaja es el uso de <strong>pruebas de validez (validity proofs)</strong>: la L1 no necesita confiar en que el operador de la L2 sea honesto, ya que la validez de cada lote está matemáticamente demostrada por la ZKP. Esto conduce a una <strong>finalidad rápida</strong>: una vez que la prueba se verifica en L1, el estado se considera final.</p>
+                <p>Un matiz importante es la <strong>disponibilidad de datos (Data Availability)</strong>. Un ZK-rollup estricto publica los datos en L1, asegurando que cualquiera pueda reconstruir el estado. Un <strong>Validium</strong> mantiene los datos fuera de L1 para reducir costes, pero introduce un supuesto de confianza adicional.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Impacto Directo: Beneficios Prácticos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <ul>
+                    <li><strong>Mayor Rendimiento (TPS) y Tasas Bajas:</strong> Reemplazar la ejecución costosa por una verificación barata multiplica las transacciones por segundo y reduce las comisiones en órdenes de magnitud.</li>
+                    <li><strong>Privacidad Opcional:</strong> La naturaleza de las ZKP permite diseñar aplicaciones que prueben condiciones sin exponer datos subyacentes.</li>
+                    <li><strong>Compatibilidad EVM:</strong> Muchos ZK-rollups son compatibles con la Ethereum Virtual Machine, facilitando la migración de dApps existentes.</li>
+                    <li><strong>Reducción de MEV y Latencia:</strong> La secuenciación controlada puede mitigar ciertas formas de Valor Máximo Extraíble (MEV) y acelerar las transacciones.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Análisis de Compromisos: Costes y Trade-offs</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>A pesar de sus beneficios, los ZK-rollups presentan desafíos técnicos y económicos:</p>
+                <ul>
+                    <li><strong>Coste de Generación de Pruebas:</strong> La creación de ZKP es computacionalmente intensiva y requiere hardware potente, aunque este coste está disminuyendo rápidamente.</li>
+                    <li><strong>Centralización del Secuenciador:</strong> La descentralización del secuenciador es un desafío técnico crucial para la madurez del ecosistema y la resistencia a la censura.</li>
+                    <li><strong>Coste de Disponibilidad de Datos:</strong> Publicar datos en la L1 sigue teniendo un coste. Soluciones como EIP-4844 (Proto-Danksharding) buscan abaratar este componente.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">8. Rediseñando la Interacción: Futuro de las dApps</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La arquitectura de los ZK-rollups redefine lo que es posible en aplicaciones descentralizadas, habilitando casos de uso que antes eran inviables en L1:</p>
+                <ul>
+                    <li><strong>DeFi/DEX:</strong> Permite swaps casi instantáneos y estrategias de alta frecuencia.</li>
+                    <li><strong>Pagos y Micropagos:</strong> Facilita transacciones de bajo valor a escala global.</li>
+                    <li><strong>Juegos y Metaverso:</strong> Soporta la alta frecuencia de interacciones necesarias en mundos virtuales.</li>
+                    <li><strong>Identidad y Pruebas de Reservas:</strong> Permite sistemas de credenciales verificables que protegen la privacidad.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">9. Síntesis Conceptual: Un Mapa Mental</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Para entender la dinámica, podemos simplificar la relación entre las capas y el usuario final con el siguiente mapa mental.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Relación de Capas en el Ecosistema Rollup</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Usuario</strong><span>Experimenta una red rápida y barata.</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Interactúa con</div></div>
+                        <div class="diagram-box"><strong>L2 (ZK-Rollup)</strong><span>Capa de ejecución de alto rendimiento. Procesa Txs y genera pruebas.</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Anclada en</div></div>
+                        <div class="diagram-box"><strong>L1 (Blockchain Principal)</strong><span>Capa de seguridad y consenso. Actúa como juez final verificando las pruebas.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
