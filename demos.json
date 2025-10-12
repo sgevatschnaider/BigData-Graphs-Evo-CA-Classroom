@@ -1,10 +1,87 @@
 [
   {
+    "title": "Cayley del Cubo — Rotaciones (S₄)",
+    "path": "/src/classroom/graphs/recursos/cubo.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Cayley del Cubo — S₄ (Cubo Truncado)",
+    "path": "/src/classroom/graphs/recursos/cubo2.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Construcción del Grafo de Cayley Cay(Z_4, {±1})",
+    "path": "/src/classroom/graphs/recursos/cayley-cuadrado.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Cuestionario Experto: Grafos de Cayley y Redes P2P",
+    "path": "/src/classroom/graphs/recursos/Cuestionario_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
     "title": "Demostración Interactiva: La Intratabilidad del TSP",
     "path": "/src/classroom/graphs/recursos/Hamilton_La Explosión Combinatoria del Problema del Viajante (TSP).html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "El Teseracto (Q4) como Grafo de Cayley",
+    "path": "/src/classroom/graphs/recursos/teseracto.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Figure 9 — Cayley graphs (order 32)",
+    "path": "/src/classroom/graphs/recursos/D16.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Figure 9 — Cayley graphs (order 32)",
+    "path": "/src/classroom/graphs/recursos/D162.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Glosario Experto: Grafos de Cayley y Redes P2P",
+    "path": "/src/classroom/graphs/recursos/Glosario_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Gráfica de Cayley S₄ - Cubo Truncado Interactivo 3D",
+    "path": "/src/classroom/graphs/recursos/cubo3.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Grafos de Cayley - Fusión Experta",
+    "path": "/src/classroom/graphs/recursos/D163.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Grafos de Cayley: La Geometría de los Grupos",
+    "path": "/src/classroom/graphs/recursos/Grafos_Cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
     "title": "Guía de Estudio: El Algoritmo de Held-Karp",
@@ -19,6 +96,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Hipercubo y Distancia de Hamming",
+    "path": "/src/classroom/graphs/recursos/hammigs.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
     "title": "Intratabilidad en TSP: exacto vs heurístico (interactivo)",
