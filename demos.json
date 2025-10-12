@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "title": "Demostración Interactiva: La Intratabilidad del TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_La Explosión Combinatoria del Problema del Viajante (TSP).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Guía de Estudio: El Algoritmo de Held-Karp",
+    "path": "/src/classroom/graphs/recursos/Hamilton_El Algoritmo de Held-Karp.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Guía Detallada: Fuerza Bruta para el TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Algoritmo de Fuerza Bruta para el TSP.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Intratabilidad en TSP: exacto vs heurístico (interactivo)",
+    "path": "/src/classroom/graphs/recursos/Hamilton_visualizacionhardduro.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "n! vs 2^n — visualización interactiva (con animación)",
+    "path": "/src/classroom/graphs/recursos/Hamilton_crecimiento_factorial_exponencial.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Reducción Visual: Ciclo Hamiltoniano a TSP",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Reducción Polinómica Ciclo Hamiltoniano → TSP (Decisión).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Teoría de Grafos: Guía Visual de Caminos y Ciclos",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Teoría de Grafos Caminos y Ciclos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Teoría de la Complejidad: Guía Visual Interactiva",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Teoría de la Complejidad Computacional.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:20:08-03:00"
+  }
+]
