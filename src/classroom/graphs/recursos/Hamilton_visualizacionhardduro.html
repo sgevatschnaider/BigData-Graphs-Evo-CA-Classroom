@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Intratabilidad en TSP: exacto vs heurístico (interactivo)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  :root { --bg:#0f1220; --fg:#e6e6f0; --muted:#a9a9c7; --accent:#7dd3fc; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--fg); }
+  header { padding:16px 20px; border-bottom:1px solid #1c2138; }
+  h1 { margin:0 0 4px; font-size:20px; }
+  p.sub { margin:0; color:var(--muted); }
+  .wrap { display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px; }
+  .panel { background:#121630; border:1px solid #1c2138; border-radius:12px; padding:14px; }
+  .panel h2 { margin:0 0 8px; font-size:16px; color:#c9d6ff; }
+  .row { display:flex; gap:10px; align-items:center; margin:8px 0; flex-wrap:wrap; }
+  label { font-size:14px; color:#cbd5e1; }
+  input[type="number"], input[type="range"] { width:110px; }
+  button { background:#1f2a4a; border:1px solid #32406a; color:var(--fg); padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
+  button:hover { filter:brightness(1.1); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #2a335a; color:#b4c3ff; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  canvas { width:100%; height:360px; background:#0c0f1f; border:1px solid #1c2138; border-radius:10px; }
+  .stat { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; }
+  .pill { padding:4px 8px; border-radius:8px; }
+  .ok { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.4); color:#86efac; }
+  .warn { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.4); color:#fde68a; }
+  .bad { background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.4); color:#fecaca; }
+  .meter { height:10px; background:#161a31; border:1px solid #232a4d; border-radius:999px; overflow:hidden; }
+  .meter > div { height:100%; background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444); width:0%; }
+  .note { color:#a9a9c7; font-size:12px; }
+  .code { background:#0b0e1d; border:1px solid #1c2138; padding:8px; border-radius:8px; font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; color:#ccd5ff; }
+  footer { padding:12px 16px; color:#8c93bb; font-size:12px; border-top:1px solid #1c2138;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Intratabilidad en TSP (optimización): Exacto vs Heurístico</h1>
+  <p class="sub">Explora cómo el coste de encontrar el óptimo crece casi exponencialmente, mientras los heurísticos escalan mejor pero comprometen optimalidad.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="panel">
+    <h2>1) Instancia</h2>
+    <div class="row">
+      <label>n (ciudades):</label>
+      <input id="n" type="range" min="5" max="22" value="12" oninput="syncN(this.value)"/>
+      <input id="nNum" type="number" min="5" max="22" value="12" oninput="syncN(this.value)"/>
+      <span class="badge" id="hardBadge">zona: —</span>
+    </div>
+    <div class="row">
+      <label>Semilla:</label>
+      <input id="seed" type="number" value="1234"/>
+      <button onclick="regen()">Generar puntos</button>
+    </div>
+    <div class="row">
+      <button id="btnHeu" onclick="solveHeuristic()">Heurístico (Vecino+2-opt)</button>
+      <button id="btnExact" onclick="solveExact()">Exacto Held-Karp</button>
+      <button onclick="resetView()">Limpiar rutas</button>
+    </div>
+    <div class="row">
+      <div class="meter" style="flex:1"><div id="meterFill"></div></div>
+    </div>
+    <div class="row">
+      <span class="note">Aguja de complejidad (estimada) para el método exacto con este n.</span>
+    </div>
+
+    <h2 style="margin-top:14px;">2) Resultados</h2>
+    <div class="grid2">
+      <div>
+        <div class="stat">Coste heurístico: <span id="costHeu">—</span></div>
+        <div class="stat">Tiempo heurístico: <span id="timeHeu">—</span> ms</div>
+        <div class="stat">Mejoras 2-opt: <span id="improvHeu">—</span></div>
+      </div>
+      <div>
+        <div class="stat">Coste exacto: <span id="costExact">—</span></div>
+        <div class="stat">Tiempo exacto: <span id="timeExact">—</span> ms</div>
+        <div class="stat">Brecha (heurístico vs óptimo): <span id="gap">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Visualizaciones</h2>
+    <div class="grid2">
+      <div>
+        <canvas id="canvas" width="600" height="360"></canvas>
+        <div class="note">Puntos = ciudades. Líneas: ruta heurística (blanca) y exacta (si disponible, más gruesa).</div>
+      </div>
+      <div>
+        <canvas id="chart" width="600" height="360"></canvas>
+        <div class="note">Escalas comparadas (ficticias/normalizadas): n!, 2ⁿ y n³. El Held-Karp crece ~n²·2ⁿ.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>¿Qué estás viendo? (intuición rápida)</h2>
+    <div class="code">
+• “Paisaje de rutas”: Imagina todas las permutaciones como montañas (coste alto) y valles (coste bajo).
+  El exacto explora sistemáticamente hasta hallar el valle más profundo (óptimo), pero el terreno crece como n!/2.
+  El DP de Held-Karp ahorra camino (n²·2ⁿ), pero igual escala explosivo.
+• El heurístico (vecino+2-opt) se comporta como un excursionista pragmático: ve el punto más cercano, arma algo
+  razonable y luego hace pequeños intercambios (2-opt) para “bajar” al valle cercano. Llega rápido, pero no garantiza
+  el valle más profundo. La brecha cuantifica esa renuncia.
+• La “aguja de complejidad” pinta cuándo la solución exacta pasa de factible a impracticable en tu máquina.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  © Demo educativa. Exacto: Held-Karp para n pequeños; Heurístico: Vecino+2-opt. No se usan librerías.
+</footer>
+
+<script>
+// ---------- Utilidades ----------
+let state = { n:12, pts:[], seed:1234, tourHeu:null, tourOpt:null, costHeu:null, costOpt:null };
+
+function syncN(v){ v=+v; state.n=v; document.getElementById('n').value=v; document.getElementById('nNum').value=v; drawChart(); updateHardnessMeter(); }
+function sfc32(a,b,c,d){return function(){a|=0;b|=0;c|=0;d|=0;var t=(a+b|0)+d|0;d=d+1|0;a=b^b>>>9;b=c+(c<<3)|0;c=(c<<21|0)|(c>>>11);c=c+t|0;return (t>>>0)/4294967296;}}
+function xmur3(str){for(var i=0,h=1779033703^str.length;i<str.length;i++)h=Math.imul(h^str.charCodeAt(i),3432918353),h=h<<13|h>>>19;return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^h>>>16)>>>0}}
+function rngFromSeed(seed){const h=xmur3(String(seed)); return sfc32(h(),h(),h(),h()); }
+
+function regen(){
+  state.seed = +document.getElementById('seed').value;
+  const rand = rngFromSeed(state.seed);
+  const W=600,H=360, pad=24;
+  state.pts = Array.from({length:state.n}, _=>({x: pad+rand()*(W-2*pad), y: pad+rand()*(H-2*pad)}));
+  state.tourHeu = null; state.tourOpt=null; state.costHeu=null; state.costOpt=null;
+  document.getElementById('costHeu').textContent='—';
+  document.getElementById('timeHeu').textContent='—';
+  document.getElementById('improvHeu').textContent='—';
+  document.getElementById('costExact').textContent='—';
+  document.getElementById('timeExact').textContent='—';
+  document.getElementById('gap').textContent='—';
+  drawCanvas(); drawChart(); updateHardnessMeter();
+}
+function dist(i,j){ const a=state.pts[i], b=state.pts[j]; const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
+function tourLength(t){ let s=0; for(let i=0;i<t.length;i++){ s+=dist(t[i], t[(i+1)%t.length]); } return s; }
+function drawCanvas(){
+  const cv=document.getElementById('canvas'), g=cv.getContext('2d');
+  g.clearRect(0,0,cv.width,cv.height);
+  // grid
+  g.globalAlpha=0.35; g.beginPath();
+  for(let x=0;x<=cv.width;x+=60){ g.moveTo(x,0); g.lineTo(x,cv.height); }
+  for(let y=0;y<=cv.height;y+=60){ g.moveTo(0,y); g.lineTo(cv.width,y); }
+  g.strokeStyle='#17203f'; g.lineWidth=1; g.stroke(); g.globalAlpha=1;
+
+  // tours
+  if(state.tourHeu){
+    g.save(); g.lineWidth=2; g.strokeStyle='#ffffff'; g.beginPath();
+    const t=state.tourHeu;
+    g.moveTo(state.pts[t[0]].x, state.pts[t[0]].y);
+    for(let i=1;i<t.length;i++) g.lineTo(state.pts[t[i]].x, state.pts[t[i]].y);
+    g.closePath(); g.stroke(); g.restore();
+  }
+  if(state.tourOpt){
+    g.save(); g.lineWidth=4; g.strokeStyle='#7dd3fc'; g.globalAlpha=0.9; g.beginPath();
+    const t=state.tourOpt;
+    g.moveTo(state.pts[t[0]].x, state.pts[t[0]].y);
+    for(let i=1;i<t.length;i++) g.lineTo(state.pts[t[i]].x, state.pts[t[i]].y);
+    g.closePath(); g.stroke(); g.restore();
+  }
+
+  // points
+  for(let i=0;i<state.pts.length;i++){
+    const p=state.pts[i];
+    g.beginPath(); g.arc(p.x,p.y,4,0,Math.PI*2);
+    g.fillStyle='#cbd5e1'; g.fill();
+    // labels
+    g.fillStyle='#9aa4c7'; g.font='12px ui-monospace';
+    g.fillText(String(i), p.x+6, p.y-6);
+  }
+}
+
+function drawChart(){
+  const cv=document.getElementById('chart'), g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height);
+  // axes
+  g.strokeStyle='#1e2a52'; g.lineWidth=1; g.beginPath();
+  g.moveTo(40,10); g.lineTo(40,330); g.lineTo(580,330); g.stroke();
+  g.font='12px system-ui'; g.fillStyle='#a9a9c7';
+  g.fillText('Tiempo relativo (log)', 44, 20);
+  g.fillText('n', 560, 348);
+
+  // map n (5..22) along x
+  function xOf(n){ return 40 + (n-5) * ((540)/(22-5)); }
+  function yOf(val){ // log scale
+    const log = Math.log10(val+1);
+    const maxLog = Math.log10(1e8);
+    const y = 330 - (log/maxLog) * 300;
+    return Math.min(330, Math.max(30,y));
+  }
+  // helpers
+  function plot(series, compute, label){
+    g.beginPath();
+    for(let n=5;n<=22;n++){
+      const x=xOf(n);
+      const y=yOf(compute(n));
+      if(n===5) g.moveTo(x,y); else g.lineTo(x,y);
+    }
+    g.stroke();
+    g.fillText(label, xOf(22)-70, yOf(compute(22))-6);
+  }
+  g.lineWidth=2;
+
+  // n^3
+  g.strokeStyle='#9ca3af'; plot(null, n=>n*n*n, 'n³ (polinómico)');
+  // 2^n
+  g.strokeStyle='#f59e0b'; plot(null, n=>Math.pow(2,n), '2ⁿ (expo)');
+  // n!
+  function fact(n){ let f=1; for(let i=2;i<=n;i++) f*=i; return f; }
+  g.strokeStyle='#ef4444'; plot(null, fact, 'n! (permutaciones)');
+
+  // Held-Karp ~ n²·2ⁿ
+  g.strokeStyle='#7dd3fc'; plot(null, n=> (n*n)*Math.pow(2,n), 'Held-Karp ~ n²·2ⁿ');
+
+  // pointer at current n
+  g.strokeStyle='#7dd3fc'; g.setLineDash([4,4]); g.beginPath(); g.moveTo(xOf(state.n),30); g.lineTo(xOf(state.n),330); g.stroke(); g.setLineDash([]);
+}
+
+function updateHardnessMeter(){
+  const n = state.n;
+  // escala empírica para desktop medio; ajusta a ojo para demo
+  //  <= 11: OK, 12-14: ALERTA, >=15: ROJO para exacto
+  let pct=0, cls='ok', label='factible (exacto)';
+  if(n<=11){ pct=30; cls='ok'; label='factible (exacto)'; }
+  else if(n<=14){ pct=65; cls='warn'; label='difícil (exacto)'; }
+  else { pct=95; cls='bad'; label='intratable (exacto)'; }
+  const fill=document.getElementById('meterFill');
+  fill.style.width=pct+'%';
+  const badge=document.getElementById('hardBadge');
+  badge.className='badge pill '+(cls==='ok'?'ok':cls==='warn'?'warn':'bad');
+  badge.textContent='zona: '+label;
+  document.getElementById('btnExact').disabled = (n>14);
+}
+
+// ---------- Heurística: Vecino más cercano + 2-opt ----------
+function nearestNeighborTour(){
+  const n=state.n; const unvis=new Set(Array.from({length:n},(_,i)=>i));
+  let cur=0; unvis.delete(cur);
+  const tour=[cur];
+  while(unvis.size){
+    let best=null, bestD=Infinity;
+    for(const j of unvis){ const d=dist(cur,j); if(d<bestD){bestD=d; best=j;} }
+    cur=best; unvis.delete(cur); tour.push(cur);
+  }
+  return tour;
+}
+function twoOpt(tour){
+  let improved=0; const n=tour.length;
+  function segLen(i,j){ const a=tour[i], b=tour[(i+1)%n], c=tour[j], d=tour[(j+1)%n]; return dist(a,b)+dist(c,d); }
+  function segLenSwap(i,j){ const a=tour[i], b=tour[(i+1)%n], c=tour[j], d=tour[(j+1)%n]; return dist(a,c)+dist(b,d); }
+  let improvedFlag=true;
+  while(improvedFlag){
+    improvedFlag=false;
+    for(let i=0;i<n-1;i++){
+      for(let j=i+2;j<n-(i==0?1:0);j++){
+        const before=segLen(i,j), after=segLenSwap(i,j);
+        if(after + 1e-9 < before){
+          // reverse segment (i+1 .. j)
+          let a=i+1, b=j;
+          while(a<b){ [tour[a], tour[b]] = [tour[b], tour[a]]; a++; b--; }
+          improved++; improvedFlag=true;
+        }
+      }
+    }
+  }
+  return improved;
+}
+function solveHeuristic(){
+  const t0=performance.now();
+  let tour=nearestNeighborTour();
+  const k=twoOpt(tour);
+  const cost=tourLength(tour);
+  const t1=performance.now();
+  state.tourHeu=tour; state.costHeu=cost;
+  document.getElementById('costHeu').textContent=cost.toFixed(2);
+  document.getElementById('timeHeu').textContent=(t1-t0).toFixed(1);
+  document.getElementById('improvHeu').textContent=k;
+  if(state.costOpt) document.getElementById('gap').textContent=((cost/state.costOpt-1)*100).toFixed(2)+'%';
+  drawCanvas();
+}
+
+// ---------- Exacto: Held-Karp DP ----------
+function solveExact(){
+  const n=state.n;
+  if(n>14){ alert('Para la demo, el exacto está limitado a n ≤ 14.'); return; }
+  // precompute distances
+  const D=Array.from({length:n},()=>Array(n).fill(0));
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++) D[i][j]=(i===j?0:dist(i,j));
+
+  const t0=performance.now();
+  // dp[mask][j]: coste mínimo para visitar subconjunto mask y terminar en j (empezando en 0)
+  const size=1<<n;
+  const INF=1e100;
+  const dp = Array.from({length:size}, ()=>new Float64Array(n).fill(INF));
+  const parent = Array.from({length:size}, ()=>new Int16Array(n).fill(-1));
+  dp[1][0]=0; // start at 0
+
+  for(let mask=1; mask<size; mask++){
+    if(!(mask&1)) continue; // must include start
+    for(let j=0;j<n;j++){
+      if(!(mask&(1<<j))) continue;
+      const prevMask = mask ^ (1<<j);
+      if(prevMask===0){ if(j===0) dp[mask][j]=0; continue; }
+      if(prevMask & 1){
+        // transition: i -> j
+        for(let i=0;i<n;i++){
+          if(!(prevMask&(1<<i))) continue;
+          const cand = dp[prevMask][i] + D[i][j];
+          if(cand < dp[mask][j]){
+            dp[mask][j]=cand; parent[mask][j]=i;
+          }
+        }
+      }
+    }
+  }
+  // close tour to 0
+  let best=INF, last=-1, full=size-1;
+  for(let j=1;j<n;j++){
+    const cand = dp[full][j] + D[j][0];
+    if(cand<best){ best=cand; last=j; }
+  }
+
+  // reconstruct
+  let mask=full, j=last; const order=[0];
+  const rev=[j];
+  while(j!==0){
+    const i=parent[mask][j];
+    mask ^= (1<<j); j=i; if(j!==0) rev.push(j);
+  }
+  rev.reverse();
+  const tour = order.concat(rev);
+
+  const t1=performance.now();
+  state.tourOpt=tour; state.costOpt=best;
+  document.getElementById('costExact').textContent=best.toFixed(2);
+  document.getElementById('timeExact').textContent=(t1-t0).toFixed(1);
+  if(state.costHeu) document.getElementById('gap').textContent=((state.costHeu/state.costOpt-1)*100).toFixed(2)+'%';
+  drawCanvas();
+}
+
+// ---------- Reset & init ----------
+function resetView(){ state.tourHeu=null; state.tourOpt=null; state.costHeu=null; state.costOpt=null; drawCanvas();
+  document.getElementById('costHeu').textContent='—';
+  document.getElementById('timeHeu').textContent='—';
+  document.getElementById('improvHeu').textContent='—';
+  document.getElementById('costExact').textContent='—';
+  document.getElementById('timeExact').textContent='—';
+  document.getElementById('gap').textContent='—';
+}
+window.addEventListener('load', ()=>{ regen(); });
+</script>
+</body>
+</html>
