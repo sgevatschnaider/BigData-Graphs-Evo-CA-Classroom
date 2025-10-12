@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafos Casi Irregulares: Lo Más Cerca de la Irregularidad Total</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: linear-gradient(135deg, #0f766e 0%, #a21caf 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-primary: #0d9488;
+            --accent-secondary: #a21caf;
+            --accent-highlight: #f59e0b;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.3s ease-in-out;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #042f2e 0%, #4a044e 100%);
+            --bg-secondary: rgba(15, 23, 42, 0.9);
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #2dd4bf;
+            --accent-secondary: #f0abfc;
+            --accent-highlight: #fcd34d;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.7;
+            transition: var(--transition);
+        }
+
+        /* --- BURBUJAS DE FONDO --- */
+        .bubbles {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: -1;
+        }
+        .bubble {
+            position: absolute; bottom: -150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            animation: rise 35s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* --- LAYOUT Y CONTENEDORES --- */
+        .container {
+            max-width: 1200px; margin: 0 auto;
+            padding: 2rem; position: relative; z-index: 1;
+        }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 1rem; color: white;
+        }
+        [data-theme="light"] .main-title { color: var(--text-primary); }
+        .subtitle {
+            font-size: 1.2rem; color: var(--text-secondary);
+            max-width: 800px; margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 2.5rem;
+            margin-bottom: 2.5rem; box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .card:hover { transform: translateY(-5px); }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; }
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+
+        /* --- FORMATO DE TEXTO Y BLOQUES ESPECIALES --- */
+        .formula {
+            background: rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1rem; margin: 1rem 0; border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            overflow-x: auto;
+        }
+        [data-theme="dark"] .formula { background: rgba(0, 0, 0, 0.2); }
+        code {
+            background-color: rgba(162, 28, 175, 0.1); color: var(--accent-secondary);
+            padding: 0.2em 0.4em; border-radius: 5px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        strong { color: var(--accent-primary); }
+
+        .key-concept {
+            border: 2px solid var(--accent-highlight);
+            border-radius: 15px; padding: 1.5rem;
+            margin-top: 2rem; background: rgba(245, 158, 11, 0.05);
+        }
+        .key-concept h3 { margin-top: 0; color: var(--accent-highlight); }
+
+        /* --- CONSTRUCTOR INTERACTIVO --- */
+        .constructor { text-align: center; }
+        .graph-display {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 2rem; align-items: center;
+        }
+        .graph-container {
+            border: 1px solid var(--border-color); border-radius: 15px;
+            padding: 1rem; background: rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] .graph-container { background: rgba(0,0,0,0.2); }
+        .graph-canvas { width: 100%; height: auto; }
+        @media (max-width: 800px) { .graph-display { grid-template-columns: 1fr; } }
+        
+        .degree-sequence {
+            font-family: 'SF Mono', monospace; font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        /* --- OTROS --- */
+        .theme-toggle {
+            position: fixed; top: 1.5rem; right: 1.5rem;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--accent-primary);
+            transition: var(--transition); z-index: 1000;
+        }
+        .theme-toggle:hover { transform: scale(1.1) rotate(360deg); box-shadow: var(--shadow); }
+        footer { text-align: center; padding: 2rem; margin-top: 2rem; color: rgba(255,255,255,0.8); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="bubbles" id="bubbles-container"></div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Cambiar tema">🌙</button>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Grafos Casi Irregulares</h1>
+            <p class="subtitle">Tras establecer que la irregularidad total es imposible, exploramos lo más cerca que podemos llegar: grafos donde solo un par de vértices comparten el mismo grado.</p>
+        </header>
+
+        <section class="card">
+            <h2>Teorema Central: La Pareja Complementaria Única</h2>
+            <p>El resultado principal sobre estos grafos es sorprendentemente preciso y elegante.</p>
+            <div class="formula"><strong>Teorema 2.2.</strong> Para cada entero n ≥ 2, existen <strong>exactamente dos</strong> grafos casi irregulares de orden n, y son <strong>complementarios</strong> entre sí.</div>
+            <h3>¿Por qué el Complemento Preserva la "Casi Irregularidad"?</h3>
+            <p>La operación complemento transforma el grado de un vértice <code>v</code> según la fórmula <code>deg_G̅(v) = (n-1) - deg_G(v)</code>. Esto implica que dos vértices tienen el mismo grado en <code>G</code> si y solo si tienen el mismo grado en <code>G̅</code>. Por lo tanto, si un grafo es casi irregular (con un único par de grados repetidos), su complemento también lo será.</p>
+        </section>
+
+        <section class="card constructor">
+            <h2>Constructor Interactivo de Grafos Casi Irregulares</h2>
+            <p>Usa el deslizador para seleccionar el orden <code>n</code>. La visualización muestra la única pareja de grafos casi irregulares que existe para ese orden, resaltando los vértices con el grado repetido.</p>
+            <div class="controls" style="max-width: 500px; margin: 1rem auto; text-align: left;">
+                <label for="n-slider">Orden del Grafo (n): <span id="n-value">5</span></label>
+                <input type="range" min="2" max="12" value="5" class="slider" id="n-slider" style="width: 100%;">
+            </div>
+            <div class="graph-display">
+                <div class="graph-container">
+                    <h4>Grafo G</h4>
+                    <canvas class="graph-canvas" id="graph-g-canvas" width="500" height="500"></canvas>
+                    <p class="degree-sequence"><strong>Grados (G):</strong> <span id="g-degrees"></span></p>
+                </div>
+                <div class="graph-container">
+                    <h4>Complemento G̅</h4>
+                    <canvas class="graph-canvas" id="graph-gbar-canvas" width="500" height="500"></canvas>
+                    <p class="degree-sequence"><strong>Grados (G̅):</strong> <span id="gbar-degrees"></span></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>¿Por qué son Exactamente Dos? La Construcción Incremental</h2>
+            <p>La unicidad de esta pareja se demuestra mediante un proceso constructivo. La clave es que un grafo de orden <code>n</code> no puede tener a la vez un vértice de grado 0 y uno de <code>n-1</code>. Esto fuerza a cualquier secuencia de grados casi irregular a pertenecer a una de dos "familias":</p>
+            <ul>
+                <li><strong>Familia 1 (Sin grado n-1):</strong> Los grados se eligen del conjunto <code>{0, 1, ..., n-2}</code>, con un valor repetido.</li>
+                <li><strong>Familia 2 (Sin grado 0):</strong> Los grados se eligen del conjunto <code>{1, 2, ..., n-1}</code>, con un valor repetido.</li>
+            </ul>
+            <p>El teorema demuestra que existe una única estructura de grafo para cada familia, y se pueden generar de forma incremental.</p>
+            <h3>El Patrón Incremental</h3>
+            <ol>
+                <li><strong>Paso 1: Añadir un Vértice Aislado.</strong> Se toma el grafo casi irregular de orden <code>n-1</code> de la "Familia 2" y se le añade un nuevo vértice aislado (grado 0). El resultado es el único grafo de orden <code>n</code> de la "Familia 1".</li>
+                <li><strong>Paso 2: Tomar el Complemento.</strong> Al tomar el complemento del grafo recién creado, se obtiene el segundo grafo, que pertenece a la "Familia 2".</li>
+            </ol>
+            <p>Este proceso de <strong>"añadir aislado y luego complementar"</strong> genera de forma única toda la secuencia de parejas de grafos casi irregulares.</p>
+        </section>
+
+        <section class="card">
+            <div class="key-concept">
+                <h3>Concepto Clave: Pareja Complementaria Única</h3>
+                <p>La imposibilidad de tener simultáneamente grados 0 y <code>n-1</code> limita las secuencias de grado posibles a dos familias. El método constructivo de "añadir aislado y complementar" produce exactamente un grafo para cada una de estas familias, demostrando que para cualquier orden <code>n</code>, solo puede existir una única pareja <code>(G, G̅)</code> de grafos casi irregulares.</p>
+            </div>
+        </section>
+        
+        <footer>
+            <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MÓDULO 1: UI (TEMA Y BURBUJAS) ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const set_theme = (theme) => {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+        themeToggleBtn.addEventListener('click', () => {
+            const new_theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            set_theme(new_theme);
+        });
+        if (bubblesContainer) {
+            setInterval(() => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 20 + 15}s`;
+                bubblesContainer.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 35000);
+            }, 500);
+        }
+        set_theme(localStorage.getItem('theme') || 'dark');
+
+        // --- MÓDULO 2: CLASE DEL VISUALIZADOR ---
+        class NearlyIrregularVisualizer {
+            constructor(canvasGId, canvasGBarId) {
+                this.canvasG = document.getElementById(canvasGId);
+                this.ctxG = this.canvasG.getContext('2d');
+                this.canvasGBar = document.getElementById(canvasGBarId);
+                this.ctxGBar = this.canvasGBar.getContext('2d');
+            }
+
+            _getThemeColors() {
+                return {
+                    node: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    edge: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                    label: getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim(),
+                    highlight: getComputedStyle(document.documentElement).getPropertyValue('--accent-highlight').trim()
+                };
+            }
+
+            _computeComplement(n, edges) {
+                const complementEdges = [];
+                const edgeSet = new Set(edges.map(e => `${Math.min(e[0], e[1])}-${Math.max(e[0], e[1])}`));
+                for (let i = 0; i < n; i++) {
+                    for (let j = i + 1; j < n; j++) {
+                        if (!edgeSet.has(`${i}-${j}`)) {
+                            complementEdges.push([i, j]);
+                        }
+                    }
+                }
+                return complementEdges;
+            }
+
+            generateGraphs(n) {
+                let g = { nodes: [], edges: [] };
+                let g_bar = { nodes: [], edges: [] };
+
+                if (n === 2) {
+                    g = { nodes: [{ id: 0 }, { id: 1 }], edges: [] };
+                    g_bar = { nodes: [{ id: 0 }, { id: 1 }], edges: [[0, 1]] };
+                    return { g, g_bar };
+                }
+
+                // Recurse to get the n-1 graphs
+                const prev = this.generateGraphs(n - 1);
+                
+                // G is prev_g_bar + isolated vertex
+                g.nodes = prev.g_bar.nodes.map(node => ({ ...node })).concat({ id: n - 1 });
+                g.edges = prev.g_bar.edges.map(edge => [...edge]);
+
+                // G_bar is the complement of G
+                g_bar.nodes = g.nodes.map(node => ({ ...node }));
+                g_bar.edges = this._computeComplement(n, g.edges);
+                
+                return { g, g_bar };
+            }
+            
+            _drawGraph(ctx, n, graphData, title) {
+                const colors = this._getThemeColors();
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                
+                const centerX = ctx.canvas.width / 2;
+                const centerY = ctx.canvas.height / 2;
+                const radius = Math.min(centerX, centerY) * 0.8;
+                const nodeRadius = Math.max(8, 25 - n * 1.2);
+
+                const nodes = graphData.nodes.map((node, i) => ({
+                    ...node,
+                    x: centerX + radius * Math.cos(2 * Math.PI * i / n - Math.PI / 2),
+                    y: centerY + radius * Math.sin(2 * Math.PI * i / n - Math.PI / 2)
+                }));
+                
+                // Calculate degrees and find the repeated one
+                const degrees = Array(n).fill(0);
+                graphData.edges.forEach(([u, v]) => { degrees[u]++; degrees[v]++; });
+                const degreeCounts = {};
+                degrees.forEach(d => degreeCounts[d] = (degreeCounts[d] || 0) + 1);
+                let repeatedDegree = -1;
+                for (const d in degreeCounts) { if (degreeCounts[d] > 1) repeatedDegree = parseInt(d); }
+                
+                // Draw edges
+                ctx.strokeStyle = colors.edge;
+                ctx.lineWidth = 2;
+                graphData.edges.forEach(([u, v]) => {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[u].x, nodes[u].y);
+                    ctx.lineTo(nodes[v].x, nodes[v].y);
+                    ctx.stroke();
+                });
+
+                // Draw nodes and labels
+                nodes.forEach((node, i) => {
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = (degrees[i] === repeatedDegree) ? colors.highlight : colors.node;
+                    ctx.fill();
+                    
+                    ctx.fillStyle = colors.label;
+                    ctx.font = `bold ${nodeRadius * 0.9}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(degrees[i], node.x, node.y);
+                });
+                
+                return degrees;
+            }
+
+            draw(n) {
+                const { g, g_bar } = this.generateGraphs(n);
+                const g_degrees = this._drawGraph(this.ctxG, n, g, 'G');
+                const gbar_degrees = this._drawGraph(this.ctxGBar, n, g_bar, 'G_bar');
+                
+                document.getElementById('g-degrees').textContent = g_degrees.sort((a,b)=>a-b).join(', ');
+                document.getElementById('gbar-degrees').textContent = gbar_degrees.sort((a,b)=>a-b).join(', ');
+            }
+        }
+
+        // --- MÓDULO 3: CONTROLADOR ---
+        const visualizer = new NearlyIrregularVisualizer('graph-g-canvas', 'graph-gbar-canvas');
+        const nSlider = document.getElementById('n-slider');
+        const nValueSpan = document.getElementById('n-value');
+
+        function update() {
+            const n = parseInt(nSlider.value);
+            nValueSpan.textContent = n;
+            visualizer.draw(n);
+        }
+
+        nSlider.addEventListener('input', update);
+        const themeObserver = new MutationObserver(update);
+        themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+        update(); // Initial draw
+    });
+    </script>
+</body>
+</html>

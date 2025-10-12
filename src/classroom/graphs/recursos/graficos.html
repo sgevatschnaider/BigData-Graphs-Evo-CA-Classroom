@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Visualizador Havel–Hakimi (HH) Corregido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-start: #1d2b64;
+    --bg-end: #0f1223;
+    --panel: rgba(22, 26, 51, 0.7);
+    --backdrop-blur: 10px;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --ink: #e7ecff;
+    --muted: #a9b0d6;
+    --accent: #7c9cff;
+    --ok: #49d17b;
+    --warn: #ffd166;
+    --err: #ff6b6b;
+    --chip: #243063;
+    --edge: #cfd5ff;
+    --shadow-color: rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+    background: radial-gradient(1200px 800px at 10% -10%, var(--bg-start) 0%, var(--bg-end) 60%) fixed;
+    color: var(--ink);
+  }
+
+  header{
+    padding: 24px 20px 10px;
+    text-align: center;
+  }
+  header h1{
+    margin:0 0 6px; font-size: clamp(22px, 3vw, 30px); letter-spacing:.2px; font-weight: 700;
+  }
+  header p{margin:0; color:var(--muted); font-size:14px; max-width: 600px; margin: auto;}
+
+  .app{
+    display:grid;
+    gap: 16px;
+    grid-template-columns: 380px 1fr;
+    padding: 10px 20px 24px;
+    max-width: 1400px;
+    margin: auto;
+  }
+  @media (max-width: 1024px){
+    .app{grid-template-columns:1fr; grid-template-rows:auto auto auto}
+  }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    backdrop-filter: blur(var(--backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  }
+  .card h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    letter-spacing: .3px;
+    color: #cfd6ff;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+  }
+
+  .controls .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom: 12px;}
+  input[type="text"]{
+    flex:1;
+    background:#0f132a; border:1px solid #26306d; color:var(--ink);
+    padding:10px 14px; border-radius:10px; outline:none; font-family: inherit;
+    transition: all .2s ease;
+  }
+  input[type="text"]::placeholder{color:#8390cf}
+  input[type="text"]:focus{border-color: var(--accent); box-shadow: 0 0 10px rgba(124,156,255,.2);}
+  button{
+    background: linear-gradient(180deg, #8aa1ff, #5b7cff);
+    border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600;
+    box-shadow: 0 6px 14px rgba(124,156,255,.35);
+    transition: all .2s ease;
+    display: flex; align-items: center; gap: 6px;
+  }
+  button:hover:not(:disabled){transform: translateY(-2px); box-shadow: 0 8px 18px rgba(124,156,255,.45);}
+  button.ghost{
+    background: none; border:1px solid #4253a3; color:#cdd6ff; box-shadow:none;
+  }
+  button.ghost:hover:not(:disabled){background: rgba(255,255,255,0.05);}
+  button.download{ background: linear-gradient(180deg, #49d17b, #2a9d47); box-shadow: 0 6px 14px rgba(73,209,123,.3);}
+
+  button:disabled{opacity:.5; cursor:not-allowed}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+  .chip{
+    background:var(--chip); color:#d5dcff; padding:6px 10px; border-radius:999px; font-size:12px; cursor:pointer;
+    border:1px solid #33407a;
+    transition: background .2s ease;
+  }
+  .chip:hover{background: #33407a;}
+  .status{
+    display:flex; gap:8px; align-items:center; margin-top:14px; font-size:13px; color:var(--muted)
+  }
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .ok{background:var(--ok)} .warnc{background:var(--warn)} .errc{background:var(--err)}
+  .seq{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:8px
+  }
+  .badge{
+    background:#0f132a; border:1px solid #2b3774; color:#bfc7ff; padding:4px 8px; border-radius:8px; font-weight:600;
+  }
+
+  #graphWrap{position:relative; min-height:440px;}
+  #graph{width:100%; height:100%; display:block; background:
+    radial-gradient(700px 500px at 70% -50%, rgba(255,255,255,.04), transparent 60%);
+    border-radius:12px;
+  }
+  svg text{user-select:none; font-family: 'Poppins', sans-serif;}
+  .edge{stroke:var(--edge); stroke-width:2.5; stroke-linecap:round; opacity:.9}
+  .edge.new{
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: draw 900ms ease forwards;
+  }
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  .node circle{
+    r:20; fill:#0f132a; stroke:#6b86ff; stroke-width:2;
+    filter: drop-shadow(0 4px 10px rgba(124,156,255,.25));
+    transition: all .2s ease;
+  }
+  .node text.label{ font-weight:700; font-size:13px; fill:#eaf0ff }
+  .node text.deg{ font-weight:500; font-size:11px; fill:#aab4ee }
+  .node.processed circle{ opacity:.7; stroke:#34407c; fill: #161a33 }
+  .node.activeTarget circle{ transform: scale(1.07); stroke:var(--ok); }
+  .node.activeU circle{ transform: scale(1.12); stroke:var(--warn); }
+
+  .log{
+    max-height: 220px; overflow:auto; padding-right:4px;
+    font-size:13px; line-height:1.5; color:#dbe2ff;
+  }
+  .log p{margin:.35rem 0}
+  .log .fail{ color: var(--err) }
+  .log .ok{ color: var(--ok) }
+  .muted{ color: var(--muted) }
+
+  table.matrix{
+    width:100%; border-collapse: collapse; font-size:12px; color:#dfe6ff;
+  }
+  .matrix th, .matrix td{ border:1px solid #2a3264; padding:4px 6px; text-align:center }
+  .matrix th{ background:#12163b; position:sticky; top:0 }
+  .matrix td.idx{ background:#12163b; font-weight: 600; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Visualizador Interactivo del Algoritmo de Havel–Hakimi</h1>
+    <p>Introduce una secuencia de grados y mira cómo el algoritmo construye (o descarta) el grafo paso a paso.</p>
+  </header>
+
+  <div class="app">
+    <div class="card" style="grid-row: span 2;">
+        <h3>Controles</h3>
+        <div class="row">
+          <input id="seqInput" type="text" placeholder="Ej: 3,3,2,2" />
+          <button id="startBtn">Iniciar</button>
+        </div>
+        <div class="row">
+          <button id="stepBtn" class="ghost" disabled>Paso ⏭️</button>
+          <button id="autoBtn" class="ghost" disabled>Auto ▶</button>
+          <button id="pauseBtn" class="ghost" disabled>Pausa ⏸️</button>
+          <button id="resetBtn" class="ghost" disabled>Reiniciar 🔄</button>
+        </div>
+        <div class="chips">
+          <span class="chip" data-example="3,3,2,2">3,3,2,2</span>
+          <span class="chip" data-example="4,3,3,2,2,1">4,3,3,2,2,1</span>
+          <span class="chip" data-example="3,3,3,1">3,3,3,1 (no gráfica)</span>
+          <span class="chip" data-example="5,4,3,2,1,1">5,4,3,2,1,1</span>
+          <span class="chip" data-example="4,4,3,2,1,0">4,4,3,2,1,0</span>
+        </div>
+        <div class="status" id="status">
+          <div class="dot warnc"></div>
+          <span>Esperando una secuencia…</span>
+        </div>
+        <div id="seqView" class="seq"></div>
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+        <h3>Exportar Resultados</h3>
+        <div class="row">
+            <button id="downloadSvgBtn" class="download" disabled>Descargar SVG 🖼️</button>
+            <button id="downloadCsvBtn" class="download" disabled>Descargar CSV 📊</button>
+        </div>
+    </div>
+
+
+    <div class="card panel" id="graphWrap">
+      <h3>Construcción del Grafo</h3>
+      <svg id="graph" viewBox="0 0 800 520" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="card panel">
+      <h3>Registro de Pasos</h3>
+      <div id="log" class="log"></div>
+    </div>
+
+
+    <div class="card panel" style="grid-column: 1 / -1;">
+      <h3>Matriz de Adyacencia</h3>
+      <div style="overflow:auto; max-height: 300px;">
+        <table id="matrix" class="matrix"></table>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const seqInput = $('#seqInput');
+  const startBtn = $('#startBtn');
+  const stepBtn = $('#stepBtn');
+  const autoBtn = $('#autoBtn');
+  const pauseBtn = $('#pauseBtn');
+  const resetBtn = $('#resetBtn');
+  const downloadSvgBtn = $('#downloadSvgBtn');
+  const downloadCsvBtn = $('#downloadCsvBtn');
+  const statusBox = $('#status');
+  const seqView = $('#seqView');
+  const logBox = $('#log');
+  const svg = $('#graph');
+  const matrixTable = $('#matrix');
+
+  const state = {
+    nodes: [],      // {id, name, degInit, degRem, x, y, active}
+    active: [],     // array de referencias a nodes no procesados
+    edges: [],      // {aId, bId, key}
+    n: 0,
+    step: 0,
+    running: false,
+    timer: null,
+    lastU: null,
+    lastTargets: [],
+    finished: false,
+    failed: false
+  };
+
+  // ========= Utilidades =========
+  function parseSequence(str){
+    const vals = str.split(/[\s,;]+/)
+      .map(s=>s.trim())
+      .filter(s=>s.length>0)
+      .map(Number);
+    if(vals.some(v=>!Number.isInteger(v) || v<0)) throw new Error('Todos los términos deben ser enteros ≥ 0.');
+    if(vals.length===0) throw new Error('Ingresa al menos un número.');
+    return vals;
+  }
+  function setStatus(kind, msg){
+    const dot = statusBox.querySelector('.dot');
+    const text = statusBox.querySelector('span');
+    dot.className = 'dot';
+    if(kind==='ok') dot.classList.add('ok');
+    else if(kind==='warn') dot.classList.add('warnc');
+    else if(kind==='err') dot.classList.add('errc');
+    text.textContent = msg;
+  }
+  function clearLog(){ logBox.innerHTML=''; }
+  function log(msg, cls=''){ const p=document.createElement('p'); if(cls) p.classList.add(cls); p.innerHTML=msg; logBox.appendChild(p); logBox.scrollTop=logBox.scrollHeight; }
+
+  // ========= Inicialización =========
+  function initFromSeq(seq){
+    Object.assign(state, {
+        nodes: [], active: [], edges: [], n: seq.length, step: 0, running: false,
+        timer: null, lastU: null, lastTargets: [], finished: false, failed: false
+    });
+    if (state.timer) clearInterval(state.timer);
+
+    for(let i=0; i<state.n; i++){
+      const node = {
+        id: i, name: 'v'+(i+1), degInit: seq[i], degRem: seq[i],
+        x:0, y:0, active: true
+      };
+      state.nodes.push(node);
+      state.active.push(node);
+    }
+    layoutCircle();
+    renderAll();
+  }
+
+  // ========= Layout (círculo) =========
+  function layoutCircle(){
+    const vb = svg.viewBox.baseVal;
+    const W = vb.width, H = vb.height;
+    const cx = W/2, cy = H/2 + 10;
+    const R = Math.min(W,H)*0.36 + Math.max(0, 10*(state.n-8));
+    for(let i=0;i<state.n;i++){
+      const ang = (i/state.n)*2*Math.PI - Math.PI/2;
+      state.nodes[i].x = cx + R*Math.cos(ang);
+      state.nodes[i].y = cy + R*Math.sin(ang);
+    }
+  }
+
+  // ========= Dibujo =========
+  function renderAll(newEdgesKeys=[]){
+    renderSeq();
+    renderGraph(newEdgesKeys);
+    renderMatrix();
+  }
+
+  function renderSeq(){
+    seqView.innerHTML = '';
+    const sorted = [...state.active].sort((a,b)=> b.degRem - a.degRem || a.id - b.id);
+    for(const n of sorted){
+      const span = document.createElement('span');
+      span.className = 'badge';
+      span.textContent = n.degRem;
+      seqView.appendChild(span);
+    }
+    if(sorted.length===0 && !state.failed){
+      const z = document.createElement('span');
+      z.className = 'badge';
+      z.textContent = '0, 0, ... ✔️';
+      seqView.appendChild(z);
+    }
+  }
+
+  function ensureEdge(aId,bId){
+    const [A,B] = aId<bId ? [aId,bId] : [bId,aId];
+    const key = A+'-'+B;
+    if(state.edges.some(e=>e.key===key)) return null;
+    state.edges.push({aId:A,bId:B,key});
+    return key;
+  }
+
+  function renderGraph(newEdgesKeys=[]){
+    svg.innerHTML = ''; // Clear SVG
+    for(const e of state.edges){
+      const a = state.nodes[e.aId], b = state.nodes[e.bId];
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+      line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+      line.setAttribute('class', 'edge' + (newEdgesKeys.includes(e.key) ? ' new' : ''));
+      svg.appendChild(line);
+    }
+
+    for(const n of state.nodes){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class', 'node' +
+        (state.lastU && state.lastU.id===n.id ? ' activeU':'') +
+        (state.lastTargets.some(t=>t.id===n.id) ? ' activeTarget':'') +
+        (!n.active ? ' processed' : '')
+      );
+      g.setAttribute('transform', `translate(${n.x},${n.y})`);
+
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('class','label');
+      label.setAttribute('text-anchor','middle');
+      label.setAttribute('dominant-baseline','central');
+      label.setAttribute('y', -4);
+      label.textContent = n.name;
+
+      const deg = document.createElementNS('http://www.w3.org/2000/svg','text');
+      deg.setAttribute('class','deg');
+      deg.setAttribute('text-anchor','middle');
+      deg.setAttribute('dominant-baseline','hanging');
+      deg.setAttribute('y', 10);
+      deg.textContent = `${n.degRem} / ${n.degInit}`;
+
+      g.appendChild(c);
+      g.appendChild(label);
+      g.appendChild(deg);
+      svg.appendChild(g);
+    }
+  }
+
+  function getAdjacencyMatrix(){
+    const M = Array.from({length:state.n},()=>Array(state.n).fill(0));
+    for(const e of state.edges){
+      M[e.aId][e.bId]=1; M[e.bId][e.aId]=1;
+    }
+    return M;
+  }
+
+  function renderMatrix(){
+    const M = getAdjacencyMatrix();
+    let html = '<thead><tr><th></th>';
+    for(let j=0;j<state.n;j++) html += `<th>v${j+1}</th>`;
+    html += '</tr></thead><tbody>';
+    for(let i=0;i<state.n;i++){
+      html += `<tr><td class="idx">v${i+1}</td>`;
+      for(let j=0;j<state.n;j++){
+        html += `<td>${M[i][j]}</td>`;
+      }
+      html += '</tr>';
+    }
+    html += '</tbody>';
+    matrixTable.innerHTML = html;
+  }
+
+  // ========= Paso HH =========
+  function stepHH(){
+    if(state.finished || state.failed) return;
+    state.step++;
+    state.active.sort((a,b)=> b.degRem - a.degRem || a.id - b.id);
+
+    if(state.active.length===0 || state.active[0].degRem === 0){
+      state.finished = true;
+      const allZeros = state.nodes.every(n => n.degRem === 0);
+      if (allZeros) {
+        setStatus('ok', 'Éxito: La secuencia es gráfica.');
+        log(`<b>Fin</b>: Todos los grados han sido satisfechos.`, 'ok');
+      } else {
+        state.failed = true;
+        setStatus('err', 'Error: El proceso terminó pero no todos los grados son cero.');
+        log('<b>Fallo</b>: Proceso terminado con grados residuales.', 'fail');
+      }
+      renderAll();
+      updateButtonsOnFinish();
+      return;
+    }
+
+    const u = state.active[0];
+    const k = u.degRem;
+    if(k > state.active.length-1){
+      state.failed = true;
+      setStatus('err', `Fallo: Grado ${k} es mayor que los ${state.active.length-1} vértices disponibles.`);
+      log(`<b>Fallo</b>: Demanda imposible para <b>${u.name}</b> (quiere ${k}, hay ${state.active.length-1}).`, 'fail');
+      renderAll();
+      updateButtonsOnFinish();
+      return;
+    }
+
+    const targets = state.active.slice(1, 1+k);
+    const newEdgeKeys = [];
+    for(const t of targets){
+      const key = ensureEdge(u.id, t.id);
+      if(key) newEdgeKeys.push(key);
+      t.degRem -= 1;
+    }
+    u.degRem = 0;
+    u.active = false;
+    state.active = state.active.slice(1);
+
+    state.lastU = u;
+    state.lastTargets = targets;
+
+    if (targets.some(t => t.degRem < 0)) {
+        state.failed = true;
+        setStatus('err', 'Fallo: Se produjo un grado negativo.');
+        log(`<b>Fallo</b>: Al satisfacer a ${u.name} apareció un grado negativo.`, 'fail');
+        renderAll(newEdgeKeys);
+        updateButtonsOnFinish();
+        return;
+    }
+    log(`<b>Paso ${state.step}</b>: Proceso <b>${u.name}</b> (grado ${k}). Conecto con ${targets.map(t=>`<b>${t.name}</b>`).join(', ')}.`);
+    renderAll(newEdgeKeys);
+  }
+
+  // ========= Controles =========
+  function updateButtonsOnStart(){
+    stepBtn.disabled = false; autoBtn.disabled = false;
+    pauseBtn.disabled = true; resetBtn.disabled = false;
+    downloadSvgBtn.disabled = true; downloadCsvBtn.disabled = true;
+  }
+  function updateButtonsOnFinish(){
+    stepBtn.disabled = true; autoBtn.disabled = true;
+    pauseBtn.disabled = true;
+    if(state.timer) clearInterval(state.timer);
+    if(state.finished && !state.failed) {
+        downloadSvgBtn.disabled = false;
+        downloadCsvBtn.disabled = false;
+    }
+  }
+
+  startBtn.addEventListener('click', ()=>{
+    try{
+      clearLog();
+      if(state.timer) clearInterval(state.timer);
+      const seq = parseSequence(seqInput.value);
+
+      const sum = seq.reduce((a,b)=>a+b,0);
+      if(sum % 2 !== 0) log(`<span class="fail"><b>Advertencia:</b> la suma de grados (${sum}) es impar. La secuencia no puede ser gráfica.</span>`);
+      if(seq.some(d => d >= seq.length)) log(`<span class="fail"><b>Advertencia:</b> un grado es ≥ n. La secuencia no puede ser gráfica.</span>`);
+
+      setStatus('warn','Secuencia preparada. Usa "Paso" o "Auto".');
+      initFromSeq(seq);
+      updateButtonsOnStart();
+    }catch(err){
+      setStatus('err', err.message);
+      log(`<span class="fail">${err.message}</span>`);
+    }
+  });
+
+  stepBtn.addEventListener('click', stepHH);
+
+  autoBtn.addEventListener('click', ()=>{
+    stepBtn.disabled = true; autoBtn.disabled = true; pauseBtn.disabled = false;
+    state.running = true;
+    stepHH(); // Ejecuta un paso inmediatamente
+    state.timer = setInterval(()=>{
+      if(state.finished || state.failed){
+        clearInterval(state.timer);
+        updateButtonsOnFinish();
+        return;
+      }
+      stepHH();
+    }, 1000);
+  });
+
+  pauseBtn.addEventListener('click', ()=>{
+    state.running = false;
+    clearInterval(state.timer);
+    stepBtn.disabled = false; autoBtn.disabled = false; pauseBtn.disabled = true;
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    if(state.timer) clearInterval(state.timer);
+    seqInput.value = '';
+    seqView.innerHTML = '';
+    setStatus('warn','Esperando una secuencia…');
+    initFromSeq([]);
+    svg.innerHTML = ''; matrixTable.innerHTML = '';
+    clearLog();
+    log('<span class="muted">Consejo:</span> ingresa una secuencia y pulsa <b>Iniciar</b>.');
+    stepBtn.disabled = true; autoBtn.disabled = true;
+    pauseBtn.disabled = true; resetBtn.disabled = true;
+    downloadSvgBtn.disabled = true; downloadCsvBtn.disabled = true;
+  });
+
+  document.querySelectorAll('.chip').forEach(ch=>{
+    ch.addEventListener('click', ()=>{
+      seqInput.value = ch.dataset.example.split(' ')[0];
+      startBtn.click();
+    });
+  });
+
+  window.addEventListener('resize', ()=>{
+    if(state.n>0){ layoutCircle(); renderAll(); }
+  });
+
+  // ========= Funciones de Descarga =========
+  function downloadSVG(){
+    const svgEl = $('#graph');
+    const svgStyles = `
+        .edge{stroke: #cfd5ff; stroke-width:2.5; stroke-linecap:round; opacity:.9}
+        .node circle{ r:20; fill:#0f132a; stroke:#6b86ff; stroke-width:2; }
+        .node text{ font-family: 'Poppins', sans-serif; }
+        .node text.label{ font-weight:700; font-size:13px; fill:#eaf0ff; text-anchor:middle; dominant-baseline:central; transform: translateY(-4px); }
+        .node text.deg{ font-weight:500; font-size:11px; fill:#aab4ee; text-anchor:middle; dominant-baseline:hanging; transform: translateY(10px); }
+        .node.processed circle{ opacity:.7; stroke:#34407c; fill: #161a33 }
+    `;
+    const svgClone = svgEl.cloneNode(true);
+    const styleEl = document.createElement('style');
+    styleEl.textContent = svgStyles;
+    svgClone.prepend(styleEl);
+
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svgClone);
+
+    if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+
+    const blob = new Blob([source], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `grafo_havel-hakimi.svg`; // CORRECCIÓN AQUÍ
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadMatrixCSV() {
+    const M = getAdjacencyMatrix();
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const headers = [''].concat(state.nodes.map(n => n.name));
+    csvContent += headers.join(',') + '\r\n';
+    M.forEach((row, i) => {
+        const rowData = [`v${i+1}`].concat(row); // CORRECCIÓN AQUÍ
+        csvContent += rowData.join(',') + '\r\n';
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const a = document.createElement('a');
+    a.href = encodedUri;
+    a.download = "matriz_adyacencia.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  downloadSvgBtn.addEventListener('click', downloadSVG);
+  downloadCsvBtn.addEventListener('click', downloadMatrixCSV);
+
+
+  log('<span class="muted">Consejo:</span> ingresa una secuencia (p. ej. <b>3,3,2,2</b>) y pulsa <b>Iniciar</b>.');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Havel–Hakimi, Gossip y Blockchain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <style>
+        /* === VARIABLES DE ESTILO === */
+        :root {
+            --bg: #f6f8fb; --card: #ffffff; --card-alt: #fcfdfe; --ink: #1f2937; --muted: #667085;
+            --accent: #16a34a; --accent-2: #06b6d4; --border: #e5e7eb; --ring: rgba(6, 182, 212, .35);
+            --shadow: 0 10px 28px rgba(2, 8, 20, .05); --shadow-lg: 0 14px 40px rgba(2, 8, 20, .08);
+            --radius: 16px; --radius-sm: 10px;
+            --trans: .25s cubic-bezier(.2, .8, .2, 1);
+            --kw-bg: linear-gradient(transparent 62%, rgba(6, 182, 212, .28) 0);
+        }
+        body[data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --card-alt: #192333; --ink: #e5e7eb; --muted: #a3aed0;
+            --accent: #22c55e; --accent-2: #22d3ee; --border: #334155; --ring: rgba(34, 197, 94, .3);
+            --shadow: 0 12px 36px rgba(0, 0, 0, .25); --shadow-lg: 0 16px 45px rgba(0, 0, 0, .35);
+            --kw-bg: linear-gradient(transparent 62%, rgba(34, 211, 238, .25) 0);
+        }
+        
+        /* === ESTILOS BASE === */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto;
+            color: var(--ink);
+            background: radial-gradient(1200px 600px at 80% -10%, rgba(6,182,212,.08) 0, transparent 60%),
+                        radial-gradient(900px 500px at -10% 110%, rgba(22,163,74,.07) 0, transparent 60%),
+                        var(--bg);
+            transition: background var(--trans), color var(--trans);
+        }
+        .wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+        .topbar { position: sticky; top: 12px; z-index: 10; display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-bottom: 2rem; }
+        
+        /* === CONTROLES: IDIOMA Y TEMA === */
+        .segmented {
+            display: inline-flex; background: var(--card); border: 1px solid var(--border);
+            border-radius: 999px; padding: 4px; box-shadow: var(--shadow);
+        }
+        .segmented button {
+            appearance: none; border: 0; background: transparent; cursor: pointer;
+            padding: 8px 16px; font-weight: 700; color: var(--muted); border-radius: 999px;
+            transition: color var(--trans);
+        }
+        .segmented button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+        .segmented button.active { color: #fff; }
+
+        .theme-switch {
+            display: flex; align-items: center; justify-content: center;
+            width: 44px; height: 44px; font-size: 1.1rem;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 50%; color: var(--muted); cursor: pointer;
+            box-shadow: var(--shadow); transition: all var(--trans);
+        }
+        .theme-switch:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); color: var(--accent); }
+
+        /* === TIPOGRAFÍA Y CONTENIDO === */
+        h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); text-align: center; margin: 0 0 .5rem; letter-spacing: -1px; }
+        .subtitle { display: block; text-align: center; font-weight: 600; font-size: 1.1rem; color: var(--accent); margin-bottom: 2.5rem; }
+        p { line-height: 1.8; margin: .5rem 0; text-align: justify; color: var(--muted); }
+        ul { margin: 1rem 0; padding-left: 20px; color: var(--muted); }
+        li { line-height: 1.75; padding-left: .5rem; margin-bottom: .5rem; }
+        .kw { background: var(--kw-bg); font-weight: 700; color: var(--ink); padding: 0 .15em; border-radius: .2em; }
+        .callout {
+            background: var(--card-alt); border-left: 3px solid var(--accent-2);
+            padding: 1rem 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin: 1.5rem 0; color: var(--ink);
+        }
+
+        /* === ESTRUCTURA DE ACORDEÓN === */
+        .lesson-container { display: flex; flex-direction: column; gap: 1rem; }
+        .topic-card, .content-block {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: var(--shadow);
+            overflow: hidden; transition: all var(--trans);
+        }
+        .topic-header {
+            cursor: pointer; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        .topic-title { font-size: 1.15rem; font-weight: 600; color: var(--ink); }
+        .expand-icon { font-size: 1.1rem; color: var(--muted); transition: var(--trans); }
+        .topic-card.open .expand-icon { transform: rotate(180deg); color: var(--accent); }
+        .topic-content {
+            max-height: 0; overflow: hidden; background: var(--card-alt);
+            transition: max-height 0.6s ease-in-out, padding 0.6s ease-in-out;
+        }
+        .topic-card.open .topic-content {
+            max-height: 2000px; padding: 1.5rem 1.75rem; border-top: 1px solid var(--border);
+        }
+        .content-block { padding: 1.5rem 1.75rem; margin-top: 2rem; }
+        
+        /* === BOTÓN DE ACCIÓN (CTA) === */
+        .cta-container { text-align: center; }
+        .cta {
+            display: inline-flex; align-items: center; gap: 12px;
+            border: 0; border-radius: 12px; padding: 14px 24px; cursor: pointer;
+            color: #fff; font-weight: 700; font-size: 1rem;
+            transition: transform var(--trans), box-shadow var(--trans), background-position .5s ease;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, .15);
+            background-image: linear-gradient(120deg, var(--accent) 0, var(--accent-2) 100%);
+            background-size: 200% 100%; background-position: 0% 50%;
+        }
+        .cta:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(15, 23, 42, .22); background-position: 100% 50%; }
+        .cta:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+
+        footer { color: var(--muted); text-align: center; margin-top: 3rem; font-size: 0.9rem; opacity: 0.8; }
+        .lang-content { display: none; }
+        .lang-content.visible { display: block; }
+
+        /* === Diagramas Mermaid === */
+        .diagram {
+            margin: 1rem 0 1.25rem;
+            padding: .75rem;
+            background: var(--card);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        .diagram .mermaid, .diagram.mermaid { display: block; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <div class="segmented" id="langCtl">
+                <button data-lang="es">ES</button>
+                <button data-lang="en">EN</button>
+            </div>
+            <button class="theme-switch" id="themeBtn" title="Cambiar tema"></button>
+        </div>
+
+        <header>
+            <h1 id="main-title"></h1>
+            <p id="main-subtitle" class="subtitle"></p>
+        </header>
+
+        <!-- ======== CONTENIDO EN ESPAÑOL ======== -->
+        <div id="content-es" class="lang-content">
+            <div class="lesson-container">
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">Punto de partida: Blockchain y P2P</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <!-- Diagrama bajo el título -->
+                        <div class="diagram">
+<div class="mmd">
+graph LR
+  subgraph Blockchain
+    A[Bloque #1] --> B[Bloque #2]
+    B --> C[Bloque #3]
+  end
+  subgraph Red_P2P
+    N1((Nodo A)) --- N2((Nodo B))
+    N2 --- N3((Nodo C))
+    N3 --- N4((Nodo D))
+    N1 --- N4
+  end
+  A -.propagación.-> N1
+  C -.propagación.-> N3
+  classDef default fill:#fff,stroke:#94a3b8,color:#0f172a;
+</div>
+                        </div>
+                        <p>Una <span class="kw">blockchain</span> es un libro contable digital, distribuido y seguro. En vez de una entidad central, los datos se agrupan en bloques enlazados y replicados en múltiples computadoras. La criptografía asegura su integridad, haciendo los registros inalterables.</p>
+                        <p>Este sistema se sostiene en redes <span class="kw">P2P (peer-to-peer)</span>, donde cada “nodo” se conecta directamente con otros sin un servidor central. Todos los participantes envían y reciben datos, logrando descentralización y resiliencia.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">El desafío: ¿Cómo mejorar estas redes?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  L[Latencia] --> O(((Optimizar P2P)))
+  B[Ancho de banda] --> O
+  S[Ataques] --> O
+  O --> E[Evaluar topologías]
+  O --> P[Protocolos de difusión]
+  O --> R[Resiliencia]
+</div>
+                        </div>
+                        <p>El diseño de estas mallas distribuidas enfrenta retos: latencia en la propagación de bloques, sobrecarga de ancho de banda y vulnerabilidad a ataques. La pregunta clave es: ¿cómo podemos estudiar y optimizar las redes <span class="kw">P2P</span> para que sean rápidas, eficientes y seguras?</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">De números a redes: El algoritmo Havel–Hakimi</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  S[Secuencia: 3,3,2,2] --> O1[Ordenar]
+  O1 --> C1[Conectar vértice mayor a 3 siguientes]
+  C1 --> R1[Reducir grados]
+  R1 --> D{¿Todos 0?}
+  D -- Sí --> V[(Secuencia realizable \n Overlay construido)]
+  D -- No --> O1
+</div>
+                        </div>
+                        <p>Aquí es donde entra la teoría de grafos. Una secuencia de grados (p. ej., “3,3,2,2”) plantea una pregunta: ¿existe un grafo simple que represente estas conexiones?</p>
+                        <p>El algoritmo de <span class="kw">Havel–Hakimi (HH)</span> nos da una respuesta constructiva. Ordena la secuencia, conecta el vértice más "exigente" con los siguientes y reduce los grados. Si el proceso termina en ceros, la secuencia es válida y hemos construido una red lógica (<span class="kw">overlay</span>) que define quién se comunica con quién.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">El protocolo Gossip: La red cobra vida</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  Seed[Nodo fuente] -->|Ronda 1: fanout k| R1[Vecinos informados]
+  R1 -->|Ronda 2| R2[Más nodos informados]
+  R2 -->|Ronda 3| R3[Cobertura ~100%]
+</div>
+                        </div>
+                        <p>Una vez construida la red, simulamos cómo se propaga la información con <span class="kw">gossip</span>. Cada nodo informado reenvía el mensaje a un número de vecinos (<span class="kw">fanout</span>) en cada ronda. Así, la información se difunde de forma descentralizada, como un rumor.</p>
+                        <div class="callout"><strong>Protocolo Gossip:</strong> un nodo informado "chismorrea" a <em>k</em> vecinos aleatorios en cada ronda. El valor de <em>k</em> es el <span class="kw">fanout</span>.</div>
+                        <p>La simulación nos permite medir la cobertura, las rondas necesarias y el costo. Analizar distintos diseños de red (anillo, estrella, etc.) revela cuellos de botella y puntos débiles.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">Aplicaciones Prácticas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+mindmap
+  root((Aplicaciones))
+    Blockchain
+      Latencia
+      Resiliencia
+    "Redes distribuidas"
+      "Recursos limitados"
+      "Optimización de malla"
+    Ciberseguridad
+      "Ataques dirigidos"
+      "Tolerancia a fallas"
+    Docencia
+      "Laboratorio visual"
+      "Aprendizaje activo"
+</div>
+                        </div>
+                        <ul>
+                            <li><strong>Blockchain:</strong> Comparar topologías <span class="kw">P2P</span> para reducir latencia y aumentar la resiliencia.</li>
+                            <li><strong>Redes distribuidas:</strong> Diseñar mallas eficientes con recursos limitados.</li>
+                            <li><strong>Ciberseguridad:</strong> Simular ataques para encontrar vulnerabilidades estructurales.</li>
+                            <li><strong>Docencia:</strong> Un laboratorio visual para enseñar sobre conectividad y difusión de información.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- === CIERRE (ES) === -->
+                <div class="content-block conclusion">
+                    <h2 style="margin-top:0">Cierre</h2>
+                    <p>No alcanza con “tener una red”: importa qué red se construye. Con Havel–Hakimi una especificación local de grados se convierte en overlay concreto; con gossip se observa, ronda a ronda, cómo circula la información sobre esa geometría. Ese ciclo —diseño, simulación, ajuste— es la base de redes P2P mejor pensadas: rápidas, frugales y resistentes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======== CONTENT IN ENGLISH ======== -->
+        <div id="content-en" class="lang-content">
+            <div class="lesson-container">
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">Starting Point: Blockchain & P2P</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+graph LR
+  subgraph Blockchain
+    A[Block #1] --> B[Block #2]
+    B --> C[Block #3]
+  end
+  subgraph P2P_Network
+    N1((Node A)) --- N2((Node B))
+    N2 --- N3((Node C))
+    N3 --- N4((Node D))
+    N1 --- N4
+  end
+  A -.propagation.-> N1
+  C -.propagation.-> N3
+  classDef default fill:#fff,stroke:#94a3b8,color:#0f172a;
+</div>
+                        </div>
+                        <p>A <span class="kw">blockchain</span> is a digital, distributed, and secure ledger. Instead of a central entity, data is grouped into linked blocks and replicated across multiple computers. Cryptography ensures its integrity, making records immutable.</p>
+                        <p>This system relies on <span class="kw">P2P (peer-to-peer)</span> networks, where each "node" connects directly to others without a central server. All participants send and receive data, achieving decentralization and resilience.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">The Challenge: How to Improve These Networks?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  L[Latency] --> O(((Optimize P2P)))
+  B[Bandwidth Overhead] --> O
+  S[Attacks] --> O
+  O --> E[Evaluate Topologies]
+  O --> P[Dissemination Protocols]
+  O --> R[Resilience]
+</div>
+                        </div>
+                        <p>Designing these distributed meshes faces challenges: block propagation latency, bandwidth overhead, and vulnerability to attacks. The key question is: how can we study and optimize <span class="kw">P2P</span> networks to be fast, efficient, and secure?</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">From Numbers to Networks: The Havel–Hakimi Algorithm</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  S[Degree sequence: 3,3,2,2] --> O1[Sort]
+  O1 --> C1[Connect top vertex to next 3]
+  C1 --> R1[Decrease degrees]
+  R1 --> D{All zeros?}
+  D -- Yes --> V[(Graphic sequence \n Overlay built)]
+  D -- No --> O1
+</div>
+                        </div>
+                        <p>This is where graph theory comes in. A degree sequence (e.g., "3,3,2,2") poses a question: does a simple graph exist that represents these connections?</p>
+                        <p>The <span class="kw">Havel–Hakimi (HH)</span> algorithm provides a constructive answer. It sorts the sequence, connects the most "demanding" vertex to the next ones, and reduces their degrees. If the process ends with all zeros, the sequence is valid, and we have built a logical network (<span class="kw">overlay</span>) that defines who communicates with whom.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">The Gossip Protocol: The Network Comes Alive</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+flowchart LR
+  Seed[Source node] -->|Round 1: fanout k| R1[Informed neighbors]
+  R1 -->|Round 2| R2[More informed nodes]
+  R2 -->|Round 3| R3[~100% coverage]
+</div>
+                        </div>
+                        <p>Once the network is built, we simulate how information spreads using <span class="kw">gossip</span>. Each informed node forwards the message to a number of neighbors (<span class="kw">fanout</span>) in each round. Thus, information disseminates in a decentralized manner, like a rumor.</p>
+                        <div class="callout"><strong>Gossip Protocol:</strong> An informed node "gossips" to <em>k</em> random neighbors each round. The value of <em>k</em> is the <span class="kw">fanout</span>.</div>
+                        <p>The simulation allows us to measure coverage, required rounds, and cost. Analyzing different network designs (ring, star, etc.) reveals bottlenecks and weak points.</p>
+                    </div>
+                </div>
+
+                <div class="topic-card">
+                    <div class="topic-header"><span class="topic-title">Practical Applications</span><i class="fas fa-chevron-down expand-icon"></i></div>
+                    <div class="topic-content">
+                        <div class="diagram">
+<div class="mmd">
+mindmap
+  root((Applications))
+    Blockchain
+      Latency
+      Resilience
+    "Distributed Systems"
+      "Limited resources"
+      "Mesh optimization"
+    Cybersecurity
+      "Targeted attacks"
+      "Fault tolerance"
+    Education
+      "Visual lab"
+      "Active learning"
+</div>
+                        </div>
+                        <ul>
+                            <li><strong>Blockchain:</strong> Compare <span class="kw">P2P</span> topologies to reduce latency and increase resilience.</li>
+                            <li><strong>Distributed Systems:</strong> Design efficient meshes with limited resources.</li>
+                            <li><strong>Cybersecurity:</strong> Simulate attacks to find structural vulnerabilities.</li>
+                            <li><strong>Education:</strong> A visual lab for teaching about connectivity and information diffusion.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- === CLOSING (EN) === -->
+                <div class="content-block conclusion">
+                    <h2 style="margin-top:0">Closing</h2>
+                    <p>It's not enough to “have a network”: what matters is which network you build. With Havel–Hakimi a local degree specification becomes a concrete overlay; with gossip you observe, round by round, how information flows over that geometry. That cycle—design, simulation, tuning—is the foundation of better-designed P2P networks: fast, frugal, and resilient.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-block">
+            <div class="cta-container">
+                <button class="cta" id="launchSimBtn">
+                    <i class="fas fa-rocket"></i>
+                    <span id="launchSimBtnText"></span>
+                </button>
+            </div>
+        </div>
+
+        <footer id="footer-text"></footer>
+    </div>
+
+    <script>
+        (function() {
+            // === CONFIGURACIÓN Y REFERENCIAS ===
+            const AppState = { theme: 'light', lang: 'es' };
+
+            const I18N = {
+                es: {
+                    title: "De Secuencias a Redes: Havel-Hakimi, Gossip y Blockchain",
+                    subtitle: "Construyendo y Simulando Redes P2P",
+                    simButton: "Abrir Simulador Interactivo",
+                    footer: "Material interactivo elaborado por Sergio Gevatschnaider",
+                    themeToggle: "Cambiar tema"
+                },
+                en: {
+                    title: "From Sequences to Networks: Havel-Hakimi, Gossip & Blockchain",
+                    subtitle: "Building and Simulating P2P Networks",
+                    simButton: "Open Interactive Simulator",
+                    footer: "Interactive material developed by Sergio Gevatschnaider",
+                    themeToggle: "Toggle theme"
+                }
+            };
+            
+            const SIM_URLS = {
+                es: 'https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/gossip2',
+                en: 'https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/gossip_english'
+            };
+
+            const langCtl = document.getElementById('langCtl');
+            const themeBtn = document.getElementById('themeBtn');
+            const launchSimBtn = document.getElementById('launchSimBtn');
+
+            // === Render Mermaid (con soporte de re-render) ===
+            function renderMermaid() {
+                const theme = AppState.theme === 'dark' ? 'dark' : 'default';
+                // Preparar nodos: guardar código original y limpiar estado previo
+                document.querySelectorAll('.mmd').forEach(el => {
+                    if (!el.dataset.code) {
+                        el.dataset.code = (el.textContent || '').trim();
+                    }
+                    el.classList.add('mermaid');
+                    el.removeAttribute('data-processed');
+                    el.textContent = el.dataset.code;
+                });
+                // Inicializar y renderizar
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme,
+                    securityLevel: 'strict',
+                    fontFamily: 'Inter, system-ui, Segoe UI, Roboto, sans-serif',
+                    flowchart: { curve: 'basis' }
+                });
+                mermaid.run({
+                    querySelector: '.mermaid'
+                });
+            }
+
+            // === FUNCIONES PRINCIPALES ===
+            function setTheme(mode) {
+                document.body.setAttribute('data-theme', mode);
+                themeBtn.innerHTML = mode === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                localStorage.setItem('theme', mode);
+                AppState.theme = mode;
+                updateUIText();
+                renderMermaid(); // re-render para adaptar el tema
+            }
+
+            function setLanguage(lang) {
+                document.documentElement.lang = lang;
+                
+                // Botones de idioma
+                [...langCtl.querySelectorAll('button')].forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                    btn.style.background = btn.dataset.lang === lang ? 'linear-gradient(120deg, var(--accent), var(--accent-2))' : 'transparent';
+                });
+
+                // Contenido visible
+                document.getElementById('content-es').classList.toggle('visible', lang === 'es');
+                document.getElementById('content-en').classList.toggle('visible', lang === 'en');
+                
+                localStorage.setItem('lang', lang);
+                AppState.lang = lang;
+                updateUIText();
+                renderMermaid(); // asegurar que se renderiza lo visible también
+            }
+            
+            function updateUIText() {
+                const texts = I18N[AppState.lang];
+                document.getElementById('main-title').textContent = texts.title;
+                document.getElementById('main-subtitle').textContent = texts.subtitle;
+                document.getElementById('launchSimBtnText').textContent = texts.simButton;
+                document.getElementById('footer-text').textContent = texts.footer;
+                themeBtn.title = texts.themeToggle;
+            }
+            
+            function openSimulator() {
+                window.open(SIM_URLS[AppState.lang], '_blank', 'noopener,noreferrer,width=1400,height=900');
+            }
+
+            // === EVENT LISTENERS ===
+            themeBtn.addEventListener('click', () => {
+                setTheme(AppState.theme === 'dark' ? 'light' : 'dark');
+            });
+
+            langCtl.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    setLanguage(e.target.dataset.lang);
+                }
+            });
+            
+            document.querySelectorAll('.topic-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('open');
+                });
+            });
+
+            launchSimBtn.addEventListener('click', openSimulator);
+
+            // === INICIALIZACIÓN ===
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const savedLang = localStorage.getItem('lang') || (navigator.language || 'es').slice(0, 2);
+            
+            setTheme(savedTheme);
+            setLanguage(['es', 'en'].includes(savedLang) ? savedLang : 'es');
+
+            // Abrir la primera tarjeta por defecto
+            const firstCard = document.querySelector(`#content-${AppState.lang} .topic-card`);
+            if (firstCard) {
+                firstCard.classList.add('open');
+            }
+
+            // Render inicial de Mermaid
+            renderMermaid();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glosario Interactivo de Teoría de Grafos</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        :root {
+            --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-primary-light: #1c1e21;
+            --text-secondary-light: #555;
+            --bg-secondary-light: rgba(255, 255, 255, 0.7);
+            --border-light: #d1d9e6;
+            --accent-light: #0056b3;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+
+            --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --bg-secondary-dark: rgba(30, 41, 59, 0.7);
+            --border-dark: #334155;
+            --accent-dark: #38bdf8;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        body.light-theme {
+            background: var(--bg-primary-light);
+            color: var(--text-primary-light);
+        }
+
+        body.dark-theme {
+            background: var(--bg-primary-dark);
+            color: var(--text-primary-dark);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 1rem auto;
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: background-color 0.4s, border 0.4s;
+            box-shadow: 0 16px 40px var(--shadow-color);
+            border: 1px solid;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        body.light-theme .container {
+            background-color: var(--bg-secondary-light);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.dark-theme .container {
+            background-color: var(--bg-secondary-dark);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-light), #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        body.dark-theme h1 {
+            background: linear-gradient(45deg, var(--accent-dark), #00d4ff);
+            -webkit-background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            color: var(--text-secondary-light);
+        }
+        body.dark-theme .subtitle {
+            color: var(--text-secondary-dark);
+        }
+
+        /* --- CONTROLES Y NAVEGACIÓN --- */
+        .controls-nav-container {
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        #alpha-nav {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 25px;
+            margin-bottom: 1.5rem;
+        }
+        body.light-theme #alpha-nav { background-color: rgba(0,0,0,0.05); }
+        body.dark-theme #alpha-nav { background-color: rgba(255,255,255,0.08); }
+        #alpha-nav a {
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.5rem 0.8rem;
+            transition: color 0.3s;
+        }
+        body.light-theme #alpha-nav a { color: var(--text-secondary-light); }
+        body.dark-theme #alpha-nav a { color: var(--text-secondary-dark); }
+        #alpha-nav a:hover { color: var(--accent-light); }
+        body.dark-theme #alpha-nav a:hover { color: var(--accent-dark); }
+
+
+        .search-box {
+            padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--border-light);
+            background-color: var(--bg-secondary-light); transition: all 0.3s ease; min-width: 250px;
+        }
+        body.dark-theme .search-box { background-color: var(--bg-secondary-dark); color: var(--text-primary-dark); border-color: var(--border-dark); }
+        .search-box:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 12px rgba(0, 102, 204, 0.3); }
+        body.dark-theme .search-box:focus { border-color: var(--accent-dark); }
+
+        /* --- GLOSARIO --- */
+        .glossary-section { margin-bottom: 2rem; }
+        .glossary-section h2 {
+            font-size: 2rem;
+            color: var(--accent-light);
+            border-bottom: 2px solid;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        body.dark-theme .glossary-section h2 { color: var(--accent-dark); }
+        
+        .glossary-entry {
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid transparent;
+            transition: border-left-color 0.3s;
+        }
+        .glossary-entry:hover {
+            border-left-color: var(--accent-light);
+        }
+        body.dark-theme .glossary-entry:hover {
+            border-left-color: var(--accent-dark);
+        }
+        
+        dt { /* El término */
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary-light);
+        }
+        body.dark-theme dt { color: var(--text-primary-dark); }
+        
+        dd { /* La definición */
+            margin-left: 0;
+            color: var(--text-secondary-light);
+        }
+        body.dark-theme dd { color: var(--text-secondary-dark); }
+
+        code {
+            background-color: rgba(0, 86, 179, 0.1);
+            color: var(--accent-light);
+            padding: 0.2em 0.4em;
+            border-radius: 5px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        body.dark-theme code {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: var(--accent-dark);
+        }
+        
+        /* --- BOTÓN DE TEMA Y FOOTER --- */
+        .theme-button {
+            padding: 0.7rem 1.5rem; border-radius: 25px; border: none;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .theme-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--shadow-color); }
+        body.light-theme .theme-button { background: linear-gradient(135deg, #333, #555); color: white; }
+        body.dark-theme .theme-button { background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; }
+
+        footer { text-align: center; margin-top: 3rem; font-size: 0.9rem; color: #888; padding: 2rem 0; }
+        body.dark-theme footer { color: var(--text-secondary-dark); }
+
+        /* --- BURBUJAS AUTOMÁTICAS --- */
+        .bubble {
+            position: fixed;
+            bottom: -150px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -10;
+            opacity: 0;
+            animation: rise 25s infinite ease-in-out;
+        }
+        body.light-theme .bubble { background-color: rgba(0, 86, 179, 0.1); }
+        body.dark-theme .bubble { background-color: rgba(56, 189, 248, 0.08); }
+        
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            50% { transform: translateY(-50vh) scale(1.2); }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <h1>Glosario de Teoría de Grafos</h1>
+        <p class="subtitle">Una guía de referencia completa con los conceptos clave, desde los fundamentos hasta temas avanzados.</p>
+
+        <div class="controls-nav-container">
+            <div class="container">
+                <div class="controls">
+                    <button class="theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+                    <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar un término...">
+                </div>
+                <nav id="alpha-nav">
+                    <a href="#letter-a">A</a>
+                    <a href="#letter-c">C</a>
+                    <a href="#letter-d">D</a>
+                    <a href="#letter-g">G</a>
+                    <a href="#letter-h">H</a>
+                    <a href="#letter-l">L</a>
+                    <a href="#letter-m">M</a>
+                    <a href="#letter-p">P</a>
+                    <a href="#letter-r">R</a>
+                    <a href="#letter-s">S</a>
+                    <a href="#letter-t">T</a>
+                    <a href="#letter-v">V</a>
+                    <a href="#letter-w">W</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="glossary-content">
+        
+        <section id="letter-a" class="glossary-section">
+            <h2>A</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Acceso Coalescente</dt><dd>En computación GPU, es el patrón de acceso a memoria más eficiente. Ocurre cuando todos los hilos de un warp acceden a una región de memoria contigua en una única transacción, maximizando el ancho de banda.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-c" class="glossary-section">
+            <h2>C</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Complemento de un Grafo (G̅)</dt><dd>Para un grafo simple <code>G</code>, su complemento <code>G̅</code> es un grafo con el mismo conjunto de vértices, donde dos vértices son adyacentes si y solo si no lo eran en <code>G</code>. Invierte la relación de adyacencia.</dd></div>
+            </dl>
+        </section>
+        
+        <section id="letter-d" class="glossary-section">
+            <h2>D</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Divergencia de Hilos</dt><dd>Fenómeno en la arquitectura de GPUs que ocurre cuando hilos dentro del mismo warp toman diferentes caminos de ejecución (ej. un <code>if-else</code>). Esto reduce la eficiencia, ya que la GPU debe ejecutar ambas ramas secuencialmente, desactivando los hilos que no corresponden a la rama activa.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-g" class="glossary-section">
+            <h2>G</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Grado de un Vértice (deg(v))</dt><dd>Es el número de aristas que inciden en un vértice. En grafos con lazos, cada lazo contribuye con 2 al grado del vértice.</dd></div>
+                <div class="glossary-entry"><dt>Grafo</dt><dd>Una estructura matemática compuesta por un conjunto de vértices (o nodos) y un conjunto de aristas (o arcos) que conectan pares de estos vértices. Se usa para modelar relaciones entre objetos.</dd></div>
+                <div class="glossary-entry"><dt>Grafo Casi Irregular</dt><dd>Un grafo en el que todos los vértices tienen grados distintos, excepto por un único par de vértices que comparten el mismo grado. Representa la máxima irregularidad posible en un grafo simple.</dd></div>
+                <div class="glossary-entry"><dt>Grafo Completo (Kₙ)</dt><dd>Un grafo simple donde cada par de vértices distintos está conectado por una arista. Un grafo <code>Kₙ</code> es (n-1)-regular y tiene <code>n(n-1)/2</code> aristas.</dd></div>
+                <div class="glossary-entry"><dt>Grafo de Cayley</dt><dd>Un grafo que representa la estructura de un grupo algebraico. Sus vértices son los elementos del grupo y sus aristas se definen por un conjunto de generadores. Son siempre vértice-transitivos y regulares.</dd></div>
+                <div class="glossary-entry"><dt>Grafo Ponderado</dt><dd>Un grafo en el que a cada arista se le asigna un valor numérico o "peso", que puede representar costo, distancia, capacidad, etc.</dd></div>
+                <div class="glossary-entry"><dt>Grafo Regular (k-regular)</dt><dd>Un grafo en el que todos sus vértices tienen el mismo grado <code>k</code>. Muestra una perfecta simetría en su conectividad local.</dd></div>
+                <div class="glossary-entry"><dt>Grafo Simple</dt><dd>Un grafo no dirigido que no tiene lazos (aristas de un vértice a sí mismo) ni aristas múltiples (más de una arista entre el mismo par de vértices).</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-h" class="glossary-section">
+            <h2>H</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Hipercubo (Qd)</dt><dd>Un grafo d-regular cuyos vértices pueden ser representados por cadenas binarias de longitud <code>d</code>. Dos vértices son adyacentes si sus cadenas difieren en exactamente una posición. Es un caso especial de Grafo de Cayley.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-l" class="glossary-section">
+            <h2>L</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Lema del Apretón de Manos</dt><dd>Un teorema fundamental que establece que la suma de los grados de todos los vértices en un grafo es igual al doble del número de aristas (Σ deg(v) = 2|E|). Una consecuencia es que el número de vértices de grado impar debe ser par.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-m" class="glossary-section">
+            <h2>M</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Multigrafo</dt><dd>Un grafo que permite la existencia de aristas múltiples (o paralelas) entre el mismo par de vértices.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-p" class="glossary-section">
+            <h2>P</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Principio del Palomar</dt><dd>Un principio de conteo que establece que si se colocan <code>k</code> objetos en <code>m</code> contenedores y <code>k > m</code>, entonces al menos un contenedor debe tener más de un objeto. Es crucial para demostrar la imposibilidad de los grafos completamente irregulares.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-r" class="glossary-section">
+            <h2>R</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Realización de Secuencia de Grados</dt><dd>El problema de determinar si una secuencia de números dada puede ser la secuencia de grados de un grafo simple. Algoritmos como Havel-Hakimi o el Teorema de Erdős-Gallai resuelven este problema.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-s" class="glossary-section">
+            <h2>S</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Secuencia de Grados</dt><dd>Una lista de los grados de todos los vértices de un grafo, usualmente ordenada de forma no creciente.</dd></div>
+                <div class="glossary-entry"><dt>SIMT (Single Instruction, Multiple Thread)</dt><dd>El modelo de ejecución de las GPUs modernas. Una sola instrucción es despachada a un grupo de hilos (como un warp), y cada hilo la ejecuta sobre su propio dato. Es ideal para tareas masivamente paralelas.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-t" class="glossary-section">
+            <h2>T</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Teorema de Erdős-Gallai</dt><dd>Un teorema que provee una condición necesaria y suficiente para que una secuencia de grados sea realizable como un grafo simple. Involucra la suma de grados y una serie de desigualdades.</dd></div>
+            </dl>
+        </section>
+
+        <section id="letter-v" class="glossary-section">
+            <h2>V</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Vértice-Transitivo</dt><dd>Una propiedad de alta simetría de un grafo. Significa que para cualquier par de vértices <code>u</code> y <code>v</code>, existe un automorfismo (una simetría del grafo) que mapea <code>u</code> a <code>v</code>. El grafo "se ve igual" desde cualquier vértice. Todos los grafos de Cayley son vértice-transitivos.</dd></div>
+            </dl>
+        </section>
+        
+        <section id="letter-w" class="glossary-section">
+            <h2>W</h2>
+            <dl>
+                <div class="glossary-entry"><dt>Warp</dt><dd>La unidad fundamental de planificación en una GPU NVIDIA, típicamente compuesta por 32 hilos que ejecutan la misma instrucción al mismo tiempo. La eficiencia de los algoritmos en GPU depende en gran medida de cómo se comportan los hilos dentro de un warp.</dd></div>
+            </dl>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MÓDULO 1: INICIALIZACIÓN Y SELECTORES ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const searchInput = document.getElementById('search-input');
+            const glossaryEntries = document.querySelectorAll('.glossary-entry');
+            const glossarySections = document.querySelectorAll('.glossary-section');
+
+            // --- MÓDULO 2: LÓGICA DE LA INTERFAZ ---
+
+            // 2.1. Cambio de Tema
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.innerHTML = isDark ? '☀️ Cambiar a Tema Claro' : '🌙 Cambiar a Tema Oscuro';
+            });
+            
+            // 2.2. Búsqueda y Filtro Dinámico
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+
+                glossaryEntries.forEach(entry => {
+                    const term = entry.querySelector('dt').textContent.toLowerCase();
+                    const definition = entry.querySelector('dd').textContent.toLowerCase();
+                    
+                    if (term.includes(searchTerm) || definition.includes(searchTerm)) {
+                        entry.style.display = 'block';
+                    } else {
+                        entry.style.display = 'none';
+                    }
+                });
+
+                // Ocultar secciones (letras) si no tienen entradas visibles
+                glossarySections.forEach(section => {
+                    const visibleEntries = section.querySelectorAll('.glossary-entry[style="display: block;"]');
+                    if (visibleEntries.length === 0) {
+                        section.style.display = 'none';
+                    } else {
+                        section.style.display = 'block';
+                    }
+                });
+            });
+
+            // --- MÓDULO 3: EFECTOS VISUALES ---
+
+            // 3.1. Generación Automática de Burbujas
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20; // Tamaño entre 20px y 100px
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 15}s`; // Duración entre 15s y 25s
+                
+                body.appendChild(bubble);
+
+                // Limpiar la burbuja del DOM después de que termine la animación
+                setTimeout(() => {
+                    bubble.remove();
+                }, 25000); 
+            }
+            setInterval(createBubble, 500); // Genera una nueva burbuja cada medio segundo
+        });
+    </script>
+</body>
+</html>```

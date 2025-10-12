@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)</title>
+<style>
+:root{
+  --bg:#0e1324; --panel:#161a33; --ink:#eaf0ff; --muted:#a9b0d6; --accent:#7c9cff;
+  --ok:#49d17b; --warn:#ffd166; --err:#ff6b6b; --chip:#243063; --edge:#cfd5ff;
+  --sus:#38406f; --inf:#49d17b; --src:#ffd166; --cur:#8aa1ff;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background: radial-gradient(1200px 800px at 10% -10%, #18204a 0%, #0e1324 60%) fixed;
+  color:var(--ink); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+}
+header{padding:22px 16px 8px; text-align:center;}
+header h1{margin:0 0 6px; font-size: clamp(20px,3vw,28px)}
+header p{margin:0 auto; color:var(--muted); font-size:14px; max-width:820px;}
+.app{ display:grid; gap:14px; padding:10px 16px 20px; grid-template-columns: 440px 1fr; max-width: 1580px; margin:auto; }
+@media (max-width: 1100px){ .app{ grid-template-columns:1fr; } }
+.card{ background: var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+h3{margin:4px 0 10px; font-size:14px; letter-spacing:.3px; color:#cfd6ff; text-transform:uppercase}
+.controls .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+input[type="text"], input[type="number"], select{ background:#0f132a; border:1px solid #26306d; color:var(--ink); padding:9px 10px; border-radius:10px; outline:none; font-family:inherit; }
+input[type="text"]{flex:1}
+button{ background: linear-gradient(180deg, #8aa1ff, #5b7cff); border:none; color:white; padding:9px 12px; border-radius:10px; cursor:pointer; font-weight:600; box-shadow: 0 6px 14px rgba(124,156,255,.35); transition: all .2s ease; }
+button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(124,156,255,.4); }
+button.ghost{ background:none; border:1px solid #4253a3; color:#cdd6ff; box-shadow:none }
+button.warn{ background: linear-gradient(180deg, #ffd166, #ffb200); color:#111 }
+button:disabled{opacity:.55; cursor:not-allowed}
+.chips{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+.chip{ background:var(--chip); color:#d5dcff; padding:6px 10px; border-radius:999px; font-size:12px; cursor:pointer; border:1px solid #33407a }
+.status{display:flex; gap:8px; align-items:center; margin-top:8px; font-size:13px; color:var(--muted)}
+.dot{width:9px; height:9px; border-radius:50%}
+.ok{background:var(--ok)} .warnc{background:var(--warn)} .errc{background:var(--err)}
+.seq{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.badge{ background:#0f132a; border:1px solid #2b3774; color:#bfc7ff; padding:4px 8px; border-radius:8px; font-weight:600 }
+.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px }
+@media(max-width: 520px) { .grid2 {grid-template-columns: 1fr;} }
+#graphWrap{position:relative; min-height:560px}
+#graph{ width:100%; aspect-ratio: 16/10; display:block; background: radial-gradient(700px 500px at 70% -50%, rgba(255,255,255,.05), transparent 60%); border-radius:12px; }
+.edge{ stroke:var(--edge); stroke-width:2.2; stroke-linecap:round; opacity:.88 }
+.edge.use{ stroke: #ffd166; stroke-width:3.4; filter: drop-shadow(0 0 6px rgba(255,209,102,.9)); stroke-dasharray: 180; animation: dash 900ms ease forwards }
+@keyframes dash{ 0%{stroke-dashoffset:180} 100%{stroke-dashoffset:0} }
+.node circle{ fill:#0f132a; stroke:#6b86ff; stroke-width:2; filter: drop-shadow(0 4px 10px rgba(124,156,255,.25)); transition: transform .25s ease; }
+.node.sus circle{ stroke:#3a457c; fill:#10163a }
+.node.inf circle{ stroke:var(--inf); transform: scale(1.05); }
+.node.src circle{ stroke:var(--src); transform: scale(1.08); }
+.node.cur circle{ stroke:var(--cur); transform: scale(1.08); }
+.node text.label{ font-weight:700; font-size:12px; fill:#eaf0ff }
+.node text.deg{ font-weight:500; font-size:11px; fill:#aab4ee }
+.node .halo{ fill:none; stroke:#8aa1ff; stroke-width:4; opacity:0; transform-box: fill-box; transform-origin:center; }
+.node.src .halo{ stroke:var(--src); opacity:.55; animation: halo 1.6s ease-out infinite; }
+.node.inf .halo{ stroke:var(--inf); opacity:.45; animation: halo 1.6s ease-out infinite; }
+@keyframes halo{ from{ transform:scale(1); opacity:.5 } to{ transform:scale(1.8); opacity:0 } }
+.log{ max-height:230px; overflow:auto; padding-right:4px; font-size:13px; line-height:1.4; color:#dbe2ff }
+.log p{margin:.35rem 0}
+.log .fail{ color: var(--err) } .log .ok{ color: var(--ok) } .muted{ color: var(--muted) }
+table.matrix{ width:100%; border-collapse: collapse; font-size:12px; color:#dfe6ff }
+.matrix th, .matrix td{ border:1px solid #2a3264; padding:4px 6px; text-align:center }
+.matrix th{ background:#12163b; position:sticky; top:0 } .matrix td.idx{ background:#12163b }
+.stats{ display:flex; gap:12px; flex-wrap:wrap; font-size:13px; color:#d9e1ff }
+.stat{ background:#0f132a; border:1px solid #2a346c; border-radius:10px; padding:6px 8px }
+.small{font-size:12px; color:var(--muted)}
+.testlog{ font-size:12px; opacity:.85 }
+.tip{ font-size:12px; color:#a9b0d6 }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gossip Blockchain sobre overlay construido con Havel–Hakimi</h1>
+  <p>Construye una malla P2P con HH desde una secuencia de grados y simula la difusión (gossip). Agregué <b>layouts simétricos</b> para que el grafo se vea más ordenado: anillo, radial por grado, cuadrícula y sunflower.</p>
+</header>
+
+<div class="app">
+  <div class="card controls" style="grid-column: 1 / 2;">
+    <h3>Overlay (Havel–Hakimi)</h3>
+    <div class="row">
+      <input id="seqInput" type="text" placeholder="Ej: 3,3,2,2"/>
+      <button id="startHHBtn">Iniciar</button>
+      <button id="resetHHBtn" class="ghost" disabled>Reiniciar</button>
+    </div>
+    <div class="row">
+      <button id="stepHHBtn" class="ghost" disabled>Paso HH</button>
+      <button id="autoHHBtn" class="ghost" disabled>Auto HH ▶</button>
+      <button id="pauseHHBtn" class="ghost" disabled>Pausa</button>
+    </div>
+    <div class="chips">
+      <span class="chip" data-example="3,3,2,2">3,3,2,2</span>
+      <span class="chip" data-example="4,4,3,3,2,2,2,2">Balanceado</span>
+      <span class="chip" data-example="3,3,3,1">No Gráfica</span>
+      <span class="chip" data-regular-n="20" data-regular-k="4">20 nodos k=4</span>
+      <span class="chip" data-regular-n="40" data-regular-k="6">40 nodos k=6</span>
+      <span class="chip" data-rand-n="28" data-rand-kmax="6">Rand gráfica ~28</span>
+    </div>
+
+    <div class="row" style="gap:6px; margin-top:6px">
+      <span class="small">Generar k-regular:</span>
+      <input type="number" id="genN" value="20" min="3" max="160" style="width:70px"/>
+      <span class="small">k</span>
+      <input type="number" id="genK" value="4" min="1" max="159" style="width:58px"/>
+      <button id="genRegularBtn" class="ghost">Generar</button>
+    </div>
+    <div class="row" style="gap:6px; margin-top:6px">
+      <span class="small">Generar aleatoria (gráfica):</span>
+      <input type="number" id="genN2" value="26" min="3" max="160" style="width:70px"/>
+      <span class="small">k≤</span>
+      <input type="number" id="genKmax" value="6" min="1" max="159" style="width:58px"/>
+      <button id="genRandomBtn" class="ghost">Generar</button>
+    </div>
+    <p class="tip">Consejo: usa <b>20 nodos k=4</b> o <b>40 nodos k=6</b> + layout radial.</p>
+
+    <div class="status" id="statusHH" style="margin-top:6px">
+      <div class="dot warnc"></div><span>Esperando secuencia…</span>
+    </div>
+    <div id="seqView" class="seq"></div>
+  </div>
+
+  <div class="card controls" style="grid-column: 2 / 3; grid-row: 1 / 2;">
+    <h3>Gossip (difusión de bloque)</h3>
+    <div class="grid2">
+        <div class="row">
+          <label class="small">Fanout:</label>
+          <input type="number" id="fanout" value="3" min="1" step="1" style="width:70px"/>
+          <label class="small" style="margin-left:8px">Origen:</label>
+          <select id="originSelect" style="flex:1;"><option value="random">Aleatorio</option></select>
+        </div>
+        <div class="row">
+          <button id="startGossipBtn" class="warn" disabled>Iniciar Gossip</button>
+          <button id="resetGossipBtn" class="ghost" disabled>Reiniciar</button>
+        </div>
+    </div>
+    <div class="row">
+        <button id="stepGossipBtn" class="ghost" disabled>Paso Gossip</button>
+        <button id="autoGossipBtn" class="ghost" disabled>Auto Gossip ▶</button>
+        <button id="pauseGossipBtn" class="ghost" disabled>Pausa</button>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <label class="small">Layout:</label>
+      <select id="layoutSel">
+        <option value="auto" selected>Auto (Sunflower/Anillo)</option>
+        <option value="ring">Anillo</option>
+        <option value="radial">Radial por grado (simétrico)</option>
+        <option value="grid">Cuadrícula</option>
+      </select>
+      <button id="reshuffleBtn" class="ghost" title="Re-ordenar/rotar">Reordenar</button>
+    </div>
+
+    <div class="stats" id="gstats" style="margin-top:8px">
+      <div class="stat">Ronda: <b id="round">0</b></div>
+      <div class="stat">Alcanzados: <b id="reached">0</b>/<b id="totalN">0</b> (<b id="pct">0%</b>)</div>
+      <div class="stat">Aristas (ronda): <b id="edgesUsed">0</b></div>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column:1 / -1">
+    <h3>Registro</h3>
+    <div id="log" class="log"></div>
+    <div id="testlog" class="testlog"></div>
+  </div>
+
+  <div class="card" id="graphWrap" style="grid-column:1 / -1">
+    <h3>Visualización del Grafo y Difusión</h3>
+    <svg id="graph" width="1180" height="740" viewBox="0 0 1180 740" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="card" style="grid-column:1 / -1">
+    <h3>Matriz de Adyacencia</h3>
+    <div style="overflow:auto; max-height:320px">
+      <table id="matrix" class="matrix"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------------- HH -----------------
+  class HavelHakimi {
+    constructor(onUpdate, onFinish) { this.onUpdate = onUpdate; this.onFinish = onFinish; this.reset(); }
+    reset(){ this.nodes=[]; this.edges=[]; this.activeNodes=[]; this.stepCount=0; this.isFinished=false; this.hasFailed=false; this.lastU=null; this.lastTargets=[]; }
+    initialize(sequence){
+      this.reset();
+      if(sequence.some(v=>!Number.isInteger(v)||v<0)) throw new Error('La secuencia debe contener enteros no negativos.');
+      if(sequence.length===0) throw new Error('La secuencia no puede estar vacía.');
+      const n=sequence.length; const seq=sequence.map(v=> Math.min(v, n-1));
+      const sum = seq.reduce((a,b)=>a+b,0); if(sum%2!==0) { this.hasFailed=true; this.onUpdate({type:'fail', reason:'Suma impar → no es gráfica'}); this.onFinish(this); return; }
+      seq.forEach((deg,i)=>{ this.nodes.push({ id:i, name:`v${i+1}`, degInit:deg, degRem:deg }); });
+      this.activeNodes=[...this.nodes];
+      this.onUpdate({type:'init'});
+    }
+    step(){
+      if(this.isFinished||this.hasFailed) return; this.stepCount++;
+      this.activeNodes.sort((a,b)=> b.degRem - a.degRem || a.id - b.id);
+      if(this.activeNodes.length===0 || this.activeNodes[0].degRem===0){ this.isFinished=true; this.onUpdate({type:'finish', success:true}); this.onFinish(this); return; }
+      const u=this.activeNodes[0]; const k=u.degRem;
+      if(k>this.activeNodes.length-1){ this.hasFailed=true; this.onUpdate({type:'fail', reason:`Grado ${k} > nodos disponibles (${this.activeNodes.length-1})`}); this.onFinish(this); return; }
+      const targets=this.activeNodes.slice(1,1+k);
+      u.degRem=0; this.activeNodes.shift();
+      for(const t of targets){ this.ensureEdge(u.id,t.id); t.degRem-=1; if(t.degRem<0) this.hasFailed=true; }
+      this.lastU=u; this.lastTargets=targets;
+      if(this.hasFailed){ this.onUpdate({type:'fail', reason:'Se generó un grado negativo.'}); this.onFinish(this); }
+      else { this.onUpdate({type:'step', u, targets});
+        if(this.activeNodes.length===0 || this.activeNodes.every(n=>n.degRem===0)){
+          this.isFinished=true; this.onUpdate({type:'finish', success:true}); this.onFinish(this);
+        }
+      }
+    }
+    ensureEdge(aId,bId){ const [A,B]= aId<bId?[aId,bId]:[bId,aId]; const key=`${A}-${B}`; if(!this.edges.some(e=>e.key===key)) this.edges.push({aId:A,bId:B,key}); }
+  }
+
+  // --------------- Gossip ----------------
+  class GossipSimulator {
+    constructor(nodes, edges, onUpdate){ this.nodes=nodes; this.edges=edges; this.onUpdate=onUpdate; this.adjacencyList=this.buildAdjacencyList(); this.reset(); }
+    buildAdjacencyList(){ const adj=Array.from({length:this.nodes.length},()=>[]); for(const e of this.edges){ adj[e.aId].push(e.bId); adj[e.bId].push(e.aId); } return adj; }
+    reset(){ this.round=0; this.informed=new Set(); this.frontier=new Set(); this.nodes.forEach(n=>n.gState='sus'); this.onUpdate({type:'reset'}); }
+    start(originId, fanout){ this.reset(); this.fanout=Math.max(1, fanout|0);
+      this.nodes[originId].gState='src'; this.informed.add(originId); this.frontier.add(originId);
+      this.onUpdate({type:'start', originId});
+    }
+    step(){ if(this.frontier.size===0) return false; this.round++; const newFrontier=new Set(); const usedEdgeKeys=new Set();
+      for(const u of this.frontier){ const candidates=this.adjacencyList[u].filter(v=>!this.informed.has(v)); shuffle(candidates); const recipients=candidates.slice(0,this.fanout); for(const v of recipients){ this.informed.add(v); newFrontier.add(v); const [A,B]= u<v?[u,v]:[v,u]; usedEdgeKeys.add(`${A}-${B}`); } }
+      newFrontier.forEach(id=>{ if(this.nodes[id].gState!=='src') this.nodes[id].gState='inf'; });
+      this.frontier=newFrontier; this.onUpdate({type:'step', round:this.round, newFrontier, usedEdgeKeys});
+      if(this.frontier.size===0){ this.onUpdate({type:'finish'}); return false; } return true;
+    }
+  }
+  function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+  // ------------- App Controller --------------
+  class AppController {
+    constructor(){ this.dom=this.getDOMElements(); this.hh=new HavelHakimi(this.updateHHUI.bind(this), this.onHHFinish.bind(this)); this.gossip=null; this.timers={hh:null,gossip:null}; this.angleOffset=0; this.bindEvents(); this.log('<span class="muted">1) Ingresa una secuencia y pulsa <b>Iniciar</b>.</span>'); runSelfTests((m)=>this.testlog(m)); }
+    getDOMElements(){ const ids=['seqInput','startHHBtn','resetHHBtn','stepHHBtn','autoHHBtn','pauseHHBtn','statusHH','seqView','log','graph','matrix','fanout','originSelect','startGossipBtn','resetGossipBtn','stepGossipBtn','autoGossipBtn','pauseGossipBtn','round','reached','totalN','pct','edgesUsed','genN','genK','genRegularBtn','genN2','genKmax','genRandomBtn','layoutSel','reshuffleBtn']; const el={}; ids.forEach(id=> el[id]=document.getElementById(id)); el.chips=document.querySelectorAll('.chip'); el.testlog=document.getElementById('testlog'); return el; }
+    bindEvents(){
+      this.dom.startHHBtn.addEventListener('click', ()=> this.startHavelHakimi());
+      this.dom.resetHHBtn.addEventListener('click', ()=> this.resetAll());
+      this.dom.stepHHBtn.addEventListener('click', ()=> this.hh.step());
+      this.dom.autoHHBtn.addEventListener('click', ()=> this.runAuto('hh'));
+      this.dom.pauseHHBtn.addEventListener('click', ()=> this.pauseAuto('hh'));
+
+      this.dom.startGossipBtn.addEventListener('click', ()=> this.startGossip());
+      this.dom.resetGossipBtn.addEventListener('click', ()=> { if(this.gossip) this.gossip.reset(); });
+      this.dom.stepGossipBtn.addEventListener('click', ()=> { if(this.gossip) this.gossip.step(); });
+      this.dom.autoGossipBtn.addEventListener('click', ()=> this.runAuto('gossip'));
+      this.dom.pauseGossipBtn.addEventListener('click', ()=> this.pauseAuto('gossip'));
+
+      // layout controls
+      this.dom.layoutSel.addEventListener('change', ()=> this.render());
+      this.dom.reshuffleBtn.addEventListener('click', ()=>{ this.angleOffset += Math.PI * (3 - Math.sqrt(5)); this.render(); });
+
+      // chips
+      this.dom.chips.forEach(chip=> chip.addEventListener('click', e=>{
+        const t = e.currentTarget;
+        if(t.dataset.example){ this.dom.seqInput.value=t.dataset.example; this.startHavelHakimi(); return; }
+        if(t.dataset.regularN){ const n=parseInt(t.dataset.regularN,10); const k=parseInt(t.dataset.regularK,10); this.dom.seqInput.value = genRegularSequence(n,k).join(','); this.startHavelHakimi(); return; }
+        if(t.dataset.randN){ const n=parseInt(t.dataset.randN,10); const kmax=parseInt(t.dataset.randKmax,10); const seq = randomGraphicalSequence(n,kmax); if(seq) { this.dom.seqInput.value=seq.join(','); this.startHavelHakimi(); } else { this.log('<span class="fail">No pude generar una secuencia gráfica en pocos intentos.</span>'); } }
+      }));
+
+      // generadores
+      this.dom.genRegularBtn.addEventListener('click', ()=>{ const n=parseInt(this.dom.genN.value,10); const k=parseInt(this.dom.genK.value,10); const seq = genRegularSequence(n,k); this.dom.seqInput.value=seq.join(','); this.startHavelHakimi(); });
+      this.dom.genRandomBtn.addEventListener('click', ()=>{ const n=parseInt(this.dom.genN2.value,10); const kmax=parseInt(this.dom.genKmax.value,10); const seq = randomGraphicalSequence(n,kmax); if(seq){ this.dom.seqInput.value=seq.join(','); this.startHavelHakimi(); } else { this.log('<span class="fail">No pude generar una secuencia gráfica en pocos intentos.</span>'); } });
+
+      window.addEventListener('resize', ()=> this.render());
+    }
+    log(msg){ const p=document.createElement('p'); p.innerHTML=msg; this.dom.log.appendChild(p); this.dom.log.scrollTop=this.dom.log.scrollHeight; }
+    testlog(msg){ const p=document.createElement('p'); p.className='muted'; p.textContent=msg; this.dom.testlog.appendChild(p); }
+
+    startHavelHakimi(){ this.resetAll(false); try{ const seq=this.dom.seqInput.value.split(/[\s,;]+/).map(s=>s.trim()).filter(Boolean).map(Number); this.hh.initialize(seq); if(this.hh.hasFailed){ this.updateButtonsState('hh_fail'); return; }
+        this.setHHStatus('warn','Secuencia cargada. Listo para ejecutar HH.'); this.updateButtonsState('hh_ready'); this.fillOriginSelect(this.hh.nodes);
+      }catch(e){ this.setHHStatus('err', e.message); this.log(`<span class="fail">${e.message}</span>`); }
+    }
+    onHHFinish(hhInstance){ this.pauseAuto('hh'); if(hhInstance.isFinished && !hhInstance.hasFailed){ this.updateButtonsState('hh_success'); this.gossip=new GossipSimulator(hhInstance.nodes, hhInstance.edges, this.updateGossipUI.bind(this)); }
+      else{ this.updateButtonsState('hh_fail'); }
+    }
+
+    startGossip(){ if(!this.gossip){ return; }
+      if(this.hh.edges.length===0){ this.log('<span class="fail">No hay aristas: completa HH antes de iniciar Gossip.</span>'); return; }
+      const fanout=Math.max(1, parseInt(this.dom.fanout.value,10) || 1);
+      let originId;
+      if(this.dom.originSelect.value==='random'){
+        const degs = this.gossip.adjacencyList.map(ns=>ns.length);
+        const candidates = degs.map((d,i)=>({i,d})).filter(x=>x.d>0).map(x=>x.i);
+        const pool = candidates.length? candidates : this.hh.nodes.map(n=>n.id);
+        originId = pool[Math.floor(Math.random()*pool.length)];
+      } else { originId=parseInt(this.dom.originSelect.value,10); }
+      this.gossip.start(originId, fanout);
+    }
+
+    updateHHUI(event){
+      switch(event.type){
+        case 'init': this.log('Havel-Hakimi inicializado.'); break;
+        case 'step': this.log(`<b>HH Paso ${this.hh.stepCount}</b>: Procesando <b>${event.u.name}</b> (grado ${event.targets.length}).`); break;
+        case 'finish': this.log(event.success? '<b class="ok">HH completado con éxito.</b>' : '<b class="fail">HH falló.</b>'); this.setHHStatus(event.success? 'ok':'err', event.success? 'Grafo construido.':'La secuencia no es gráfica.'); break;
+        case 'fail': this.log(`<b class="fail">HH Falló:</b> ${event.reason}`); this.setHHStatus('err',`Fallo: ${event.reason}`); break;
+      }
+      this.render();
+    }
+
+    updateGossipUI(event){
+      switch(event.type){
+        case 'reset': this.log('<span class="muted">Gossip reiniciado.</span>'); this.updateButtonsState('gossip_ready'); break;
+        case 'start': this.log(`<b>Gossip iniciado</b>. Origen: <b>${this.hh.nodes[event.originId].name}</b>, Fanout: <b>${this.gossip.fanout}</b>`); this.updateButtonsState('gossip_running'); break;
+        case 'step': this.log(`<b>Gossip Ronda ${event.round}</b>: ${event.newFrontier.size} nodos nuevos informados.`); break;
+        case 'finish': this.log(`<b class="ok">Gossip finalizado.</b> Cobertura: ${this.gossip.informed.size}/${this.hh.nodes.length}.`); this.pauseAuto('gossip'); this.updateButtonsState('gossip_finished'); break;
+      }
+      this.render(event.usedEdgeKeys);
+    }
+
+    runAuto(mode){ this.pauseAuto(mode);
+      if(mode==='hh'){
+        this.timers.hh = setInterval(()=>{ if(this.hh.isFinished||this.hh.hasFailed){ this.pauseAuto('hh'); return; } this.hh.step(); }, 420);
+        this.updateButtonsState('hh_auto'); return;
+      }
+      if(mode==='gossip'){
+        if(!this.gossip) return;
+        this.timers.gossip = setInterval(()=>{ const alive=this.gossip.step(); if(!alive) this.pauseAuto('gossip'); }, 880);
+        this.updateButtonsState('gossip_auto');
+      }
+    }
+    pauseAuto(mode){ if(this.timers[mode]){ clearInterval(this.timers[mode]); this.timers[mode]=null; if(mode==='gossip' && this.gossip?.frontier.size>0){ this.updateButtonsState('gossip_running'); } else if(mode==='hh' && !this.hh.isFinished && !this.hh.hasFailed){ this.updateButtonsState('hh_ready'); } } }
+
+    resetAll(fullReset=true){ this.pauseAuto('hh'); this.pauseAuto('gossip'); this.hh.reset(); this.gossip=null; if(fullReset) this.dom.seqInput.value=''; this.dom.log.innerHTML=''; this.dom.testlog.innerHTML=''; this.log('<span class="muted">1) Ingresa una secuencia y pulsa <b>Iniciar</b>.</span>'); this.updateButtonsState('initial'); this.setHHStatus('warn','Esperando secuencia...'); this.fillOriginSelect([]); this.render(); }
+
+    updateButtonsState(state){
+      const buttons={ hh:[this.dom.stepHHBtn,this.dom.autoHHBtn,this.dom.pauseHHBtn,this.dom.resetHHBtn], gossip:[this.dom.startGossipBtn,this.dom.stepGossipBtn,this.dom.autoGossipBtn,this.dom.pauseGossipBtn,this.dom.resetGossipBtn] };
+      const S={
+        initial:        { hh:[true,true,true,true],     gossip:[true,true,true,true,true] },
+        hh_ready:       { hh:[false,false,true,false],  gossip:[true,true,true,true,true] },
+        hh_auto:        { hh:[true,true,false,false],   gossip:[true,true,true,true,true] },
+        hh_success:     { hh:[true,true,true,false],    gossip:[false,true,true,true,false] },
+        hh_fail:        { hh:[true,true,true,false],    gossip:[true,true,true,true,false] },
+        gossip_ready:   { hh:[true,true,true,false],    gossip:[false,true,true,true,false] },
+        gossip_running: { hh:[true,true,true,false],    gossip:[true,false,false,true,false] },
+        gossip_auto:    { hh:[true,true,true,false],    gossip:[true,true,true,false,false] },
+        gossip_finished:{ hh:[true,true,true,false],    gossip:[true,true,true,true,false] }
+      }[state];
+      if(!S) return; buttons.hh.forEach((btn,i)=> btn.disabled=S.hh[i]); buttons.gossip.forEach((btn,i)=> btn.disabled=S.gossip[i]);
+    }
+
+    fillOriginSelect(nodes){ this.dom.originSelect.innerHTML='<option value="random">Aleatorio</option>'; nodes.forEach(n=>{ const opt=document.createElement('option'); opt.value=n.id; opt.textContent=n.name; this.dom.originSelect.appendChild(opt); }); }
+
+    setHHStatus(kind,msg){ const dot=this.dom.statusHH.querySelector('.dot'); const span=this.dom.statusHH.querySelector('span'); dot.className=`dot ${kind==='ok'?'ok':(kind==='warn'?'warnc':'errc')}`; span.textContent=msg; }
+
+    render(usedEdgeKeys=new Set()){ this.renderGraph(usedEdgeKeys); this.renderMatrix(); this.renderHHSeq(); this.renderGossipStats(usedEdgeKeys.size); }
+
+    renderGraph(usedEdgeKeys){ const svg=this.dom.graph; svg.innerHTML=''; const nodes=this.hh.nodes; if(nodes.length===0) return; const vb=svg.viewBox.baseVal; const n=nodes.length; const mode=this.dom.layoutSel.value; const rNode = Math.max(6, 20 - Math.floor(n/4));
+      let positions;
+      if(mode==='ring') positions = layoutRing(n, vb, this.angleOffset);
+      else if(mode==='radial') positions = layoutRadialByDegree(this.hh.nodes, vb, this.angleOffset);
+      else if(mode==='grid') positions = layoutGrid(n, vb);
+      else positions = (n<=10)? layoutRing(n, vb, this.angleOffset) : layoutSunflower(n, vb, this.angleOffset);
+      nodes.forEach((node,i)=>{ node.x=positions[i].x; node.y=positions[i].y; });
+      // edges
+      this.hh.edges.forEach(e=>{ const a=nodes[e.aId], b=nodes[e.bId]; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',a.x); line.setAttribute('y1',a.y); line.setAttribute('x2',b.x); line.setAttribute('y2',b.y); const cls=`edge ${usedEdgeKeys.has(e.key)?'use':''}`; line.setAttribute('class', cls); svg.appendChild(line); });
+      // nodes
+      nodes.forEach(n=>{ const g=document.createElementNS('http://www.w3.org/2000/svg','g'); let cls=`node ${n.gState||'sus'}`; if(this.hh.lastU?.id===n.id || this.hh.lastTargets?.some(t=>t.id===n.id)) cls+=' cur'; g.setAttribute('class',cls); g.setAttribute('transform',`translate(${n.x},${n.y})`);
+        const halo=document.createElementNS('http://www.w3.org/2000/svg','circle'); halo.setAttribute('class','halo'); halo.setAttribute('r', String(rNode+2));
+        const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('r', String(rNode));
+        const label=document.createElementNS('http://www.w3.org/2000/svg','text'); label.setAttribute('class','label'); label.setAttribute('text-anchor','middle'); label.setAttribute('dominant-baseline','central'); label.setAttribute('y',-2); label.textContent=n.name;
+        const deg=document.createElementNS('http://www.w3.org/2000/svg','text'); deg.setAttribute('class','deg'); deg.setAttribute('text-anchor','middle'); deg.setAttribute('dominant-baseline','hanging'); deg.setAttribute('y', Math.max(12, rNode-4)); deg.textContent=`${n.degRem} / ${n.degInit}`;
+        g.append(halo,c,label,deg); svg.appendChild(g); });
+    }
+
+    renderMatrix(){ const table=this.dom.matrix; const n=this.hh.nodes.length; if(n===0){ table.innerHTML=''; return; } const M=Array.from({length:n},()=>Array(n).fill(0)); this.hh.edges.forEach(e=>{ M[e.aId][e.bId]=1; M[e.bId][e.aId]=1; }); let html='<thead><tr><th></th>'+Array.from({length:n},(_,j)=>`<th>v${j+1}</th>`).join('')+'</tr></thead><tbody>'; for(let i=0;i<n;i++){ html+=`<tr><td class="idx">v${i+1}</td>`; for(let j=0;j<n;j++){ html+=`<td>${(i===j)?'—':M[i][j]}</td>`; } html+='</tr>'; } html+='</tbody>'; table.innerHTML=html; }
+
+    renderHHSeq(){ const view=this.dom.seqView; if(this.hh.nodes.length===0){ view.innerHTML=''; return; } if(this.hh.activeNodes.length===0 && this.hh.isFinished){ view.innerHTML='<span class="badge">Completado ✔️</span>'; return; } const sorted=[...this.hh.activeNodes].sort((a,b)=> b.degRem - a.degRem || a.id-b.id); view.innerHTML=sorted.map(n=>`<span class="badge">${n.degRem}</span>`).join(''); }
+
+    renderGossipStats(edgesUsed=0){ const n=this.hh.nodes.length; const informed=this.gossip? this.gossip.informed.size:0; const round=this.gossip? this.gossip.round:0; this.dom.round.textContent=round; this.dom.reached.textContent=informed; this.dom.totalN.textContent=n; this.dom.pct.textContent= n? `${((informed/n)*100).toFixed(0)}%`:'0%'; this.dom.edgesUsed.textContent=edgesUsed; }
+  }
+
+  new AppController();
+
+  // -------- layouts ---------
+  function layoutRing(n, vb, offset=0){ const R = Math.min(vb.width, vb.height) * 0.42; const cx=vb.width/2, cy=vb.height/2; const pts=[]; for(let i=0;i<n;i++){ const ang=(i/n)*2*Math.PI - Math.PI/2 + offset; pts.push({x: cx + R*Math.cos(ang), y: cy + R*Math.sin(ang)}); } return pts; }
+  function layoutSunflower(n, vb, offset=0){ const cx=vb.width/2, cy=vb.height/2; const maxR=Math.min(vb.width, vb.height)*0.46; const ga=2.399963229728653; const pts=[]; for(let i=0;i<n;i++){ const t=(i+0.5)/n; const r=Math.sqrt(t)*maxR; const ang=i*ga + offset; pts.push({x: cx + r*Math.cos(ang), y: cy + r*Math.sin(ang)}); } return pts; }
+  function layoutRadialByDegree(nodes, vb, offset=0){ const cx=vb.width/2, cy=vb.height/2; const groups = [...new Set(nodes.map(n=>n.degInit))].sort((a,b)=>b-a); const rings = groups.length; const maxR=Math.min(vb.width, vb.height)*0.46; const step = rings>1 ? (maxR*0.85)/(rings-1) : 0; const byDeg = new Map(groups.map(g=>[g, []])); nodes.forEach(n=> byDeg.get(n.degInit).push(n)); const pts=[]; let idx=0; groups.forEach((g,gi)=>{ const arr = byDeg.get(g).sort((a,b)=>a.id-b.id); const r = Math.min(40 + gi*step, maxR); const m = arr.length; for(let k=0;k<m;k++){ const ang = ((k/m)*2*Math.PI) - Math.PI/2 + offset*(gi+1)*0.7; pts[idx++] = {x: cx + r*Math.cos(ang), y: cy + r*Math.sin(ang)}; } }); return pts; }
+  function layoutGrid(n, vb){ const cx=vb.width/2, cy=vb.height/2; const cols = Math.ceil(Math.sqrt(n)); const rows = Math.ceil(n/cols); const cell = Math.min(vb.width/(cols+1), vb.height/(rows+1)); const startX = cx - (cols-1)*cell/2; const startY = cy - (rows-1)*cell/2; const pts=[]; for(let i=0;i<n;i++){ const r=Math.floor(i/cols); const c=i%cols; pts.push({x: startX + c*cell, y: startY + r*cell}); } return pts; }
+
+  // --------- generators ----------
+  function genRegularSequence(n,k){ k = Math.max(0, Math.min(k, n-1)); const seq = Array(n).fill(k); if((n*k)%2===1){ if(k+1 < n){ seq[0]=k+1; } else { seq[0]=k-1; } } return seq; }
+  function randomGraphicalSequence(n, kmax){ const MAX=220; for(let t=0;t<MAX;t++){ const seq=Array.from({length:n},()=> Math.max(0, Math.min(kmax, Math.floor(Math.random()*(kmax+1)))) ); if(seq.every(v=>v===0)) continue; for(let i=0;i<n;i++){ if(seq[i]>=n) seq[i]=n-1; } let s=seq.reduce((a,b)=>a+b,0); if(s%2===1){ const idx = Math.floor(Math.random()*n); seq[idx] = Math.min(n-1, seq[idx]+1); } const hh=new HavelHakimi(()=>{},()=>{}); hh.initialize(seq); let guard=0; while(!hh.isFinished && !hh.hasFailed && guard++<n*5){ hh.step(); } if(hh.isFinished && !hh.hasFailed) return seq; } return null; }
+
+  // ------------------- SELF TESTS -------------------
+  function runSelfTests(log){
+    try{
+      // Test 1: HH con secuencia gráfica 3,3,2,2 → 5 aristas
+      const hh1 = new HavelHakimi(()=>{}, ()=>{}); hh1.initialize([3,3,2,2]); let g1=0; while(!hh1.isFinished && !hh1.hasFailed && g1++<50){ hh1.step(); } const edgesOK = hh1.edges.length===5 && hh1.isFinished && !hh1.hasFailed; log(`Test#1 HH gráfica 3,3,2,2 ⇒ aristas=${hh1.edges.length} → ${edgesOK?'OK':'FAIL'}`);
+      // Test 2: HH no gráfica 3,3,3,1 debe fallar
+      const hh2 = new HavelHakimi(()=>{}, ()=>{}); hh2.initialize([3,3,3,1]); let g2=0; while(!hh2.isFinished && !hh2.hasFailed && g2++<50){ hh2.step(); } const failOK = hh2.hasFailed===true; log(`Test#2 HH no gráfica 3,3,3,1 ⇒ hasFailed=${hh2.hasFailed} → ${failOK?'OK':'FAIL'}`);
+      // Test 3: SVG class set vía setAttribute
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); const ln = document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('class','edge'); svg.appendChild(ln); log('Test#3 SVG setAttribute("class", …) → OK');
+    }catch(err){ log('SelfTests ERROR: '+ err.message); }
+  }
+});
+</script>
+</body>
+</html>

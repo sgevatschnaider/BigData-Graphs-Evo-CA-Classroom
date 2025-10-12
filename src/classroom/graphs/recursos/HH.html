@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De una Secuencia a una Red Viva: Havel–Hakimi y Blockchain</title>
+    <style>
+        :root {
+            --bg-primary: radial-gradient(1200px 800px at 10% -10%, #18204a 0%, #0e1324 60%);
+            --panel-bg: rgba(22, 26, 51, 0.75);
+            --text-primary: #eaf0ff;
+            --text-secondary: #a9b0d6;
+            --accent-primary: #8aa1ff;
+            --accent-secondary: #49d17b;
+            --accent-warn: #ffd166;
+            --border-color: rgba(140, 160, 255, 0.15);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease-in-out;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary) fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .bubble { position: absolute; bottom: -150px; background: rgba(124, 156, 255, 0.05); border-radius: 50%; animation: rise 30s infinite ease-in; }
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; } 10% { opacity: 0.1; } 90% { opacity: 0.1; } 100% { transform: translateY(-100vh); opacity: 0; }
+        }
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; background: linear-gradient(135deg, var(--accent-primary), #eaf0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; }
+        .subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 1.5rem; }
+        .cta-container { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .cta-button { display: inline-block; text-decoration: none; background: linear-gradient(180deg, #8aa1ff, #5b7cff); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 6px 14px rgba(124, 156, 255, 0.35); transition: var(--transition); }
+        .cta-button:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 18px rgba(124, 156, 255, 0.4); }
+        .cta-button.secondary { background: linear-gradient(180deg, #4a5588, #3b446e); }
+        .card { background: var(--panel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem; margin-bottom: 2.5rem; box-shadow: var(--shadow); transition: var(--transition); opacity: 0; transform: translateY(20px); }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+        code { background-color: rgba(124, 156, 255, 0.1); color: var(--accent-warn); padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.9em; }
+        strong { color: var(--accent-secondary); font-weight: 600; }
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-left: 1.5rem; margin-bottom: 0.5rem; color: var(--text-secondary); }
+        
+        /* --- VISUALIZACIONES MEJORADAS --- */
+        .viz-container { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 15px; padding: 1.5rem; margin: 2rem 0; text-align: center; }
+        .viz-container h4 { color: var(--accent-primary); margin-bottom: 1rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .split-viz { display: flex; justify-content: space-around; align-items: center; gap: 2rem; }
+        .split-viz .label { font-family: 'SF Mono', monospace; font-size: 1.2rem; }
+        .split-viz .arrow { font-size: 2.5rem; color: var(--accent-secondary); }
+        .graph-viz svg { width: 150px; height: 120px; }
+        .graph-viz .node { fill: var(--accent-primary); stroke: var(--text-primary); stroke-width: 2px; }
+        .graph-viz .edge { stroke: var(--text-secondary); stroke-width: 2px; }
+
+        .code-block { background: #0c0f1d; border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-top: 1.5rem; text-align: left; }
+        .code-block pre { white-space: pre-wrap; word-wrap: break-word; color: var(--text-secondary); font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.9em; }
+        .code-block .comment { color: #6c7aa8; }
+        .code-block .keyword { color: #c792ea; }
+        .code-block .function { color: #82aaff; }
+        .code-block .variable { color: #ffcb6b; }
+        
+        .rules-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .rule-card { background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; }
+        .rule-card svg { width: 40px; height: 40px; flex-shrink: 0; color: var(--accent-warn); }
+        .rule-card h5 { color: var(--text-primary); margin-bottom: 0.25rem; }
+
+        /* --- DIAGRAMA OVERLAY --- */
+        .overlay-diagram { position: relative; height: 200px; background: rgba(0,0,0,0.2); border-radius: 15px; margin-top: 2rem; border: 1px solid var(--border-color); overflow: hidden; }
+        .overlay-physical { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+        .overlay-physical span { font-size: 2rem; font-weight: bold; color: rgba(255,255,255,0.1); letter-spacing: 5px; }
+        .overlay-logical { position: relative; width: 100%; height: 100%; }
+        .overlay-logical svg { position: absolute; width: 100%; height: 100%; }
+        .overlay-logical .node { position: absolute; width: 20px; height: 20px; background: var(--accent-primary); border-radius: 50%; box-shadow: 0 0 10px var(--accent-primary); }
+        
+        /* --- GRID DE APLICACIONES --- */
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .app-item { background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 15px; border: 1px solid var(--border-color); text-align: center; }
+        .app-item svg { width: 48px; height: 48px; margin-bottom: 1rem; color: var(--accent-secondary); }
+        .app-item h4 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+
+        footer { text-align: center; padding: 2rem; margin-top: 2rem; color: var(--text-secondary); opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <div class="bubbles"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">De una Secuencia a una Red Viva</h1>
+            <p class="subtitle">Havel–Hakimi y la Tecnología Blockchain: Un análisis interactivo desde los fundamentos algorítmicos hasta sus aplicaciones prácticas en redes distribuidas.</p>
+            <div class="cta-container">
+                <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/hh" target="_blank" rel="noopener noreferrer" class="cta-button">
+                  ▶ Acceder al Laboratorio
+                </a>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>Introducción: El Enigma de una Secuencia</h2>
+            <p>El punto de partida es una pregunta fundamental en la teoría de grafos: dada una secuencia de números enteros no negativos, como <code>[3, 3, 2, 2]</code>, ¿es posible dibujar una red (un grafo simple) donde cada nodo tenga un número de conexiones (grado) que corresponda exactamente a uno de los números de la secuencia?</p>
+            <p>Este "enigma" es el problema de la <strong>realizabilidad de una secuencia de grados</strong>. Un laboratorio interactivo que utilice el algoritmo de Havel-Hakimi transforma este acertijo abstracto en un proceso visual y constructivo. La lista de números se convierte en un <strong>overlay de red</strong>: una topología lógica sobre la cual se pueden simular procesos como la difusión de información.</p>
+            
+            <div class="viz-container">
+                <h4>Visualización: De Secuencia a Grafo</h4>
+                <div class="split-viz">
+                    <div class="label"><strong>Antes:</strong><br>[3, 3, 2, 2]</div>
+                    <div class="arrow">→</div>
+                    <div class="graph-viz">
+                        <svg viewBox="0 0 100 80">
+                            <line class="edge" x1="20" y1="20" x2="80" y2="20" />
+                            <line class="edge" x1="20" y1="60" x2="80" y2="60" />
+                            <line class="edge" x1="20" y1="20" x2="20" y2="60" />
+                            <line class="edge" x1="80" y1="20" x2="80" y2="60" />
+                            <line class="edge" x1="20" y1="20" x2="80" y2="60" />
+                            <circle class="node" cx="20" cy="20" r="8"><title>Grado: 3</title></circle>
+                            <circle class="node" cx="80" cy="20" r="8"><title>Grado: 2</title></circle>
+                            <circle class="node" cx="20" cy="60" r="8"><title>Grado: 2</title></circle>
+                            <circle class="node" cx="80" cy="60" r="8"><title>Grado: 3</title></circle>
+                        </svg>
+                    </div>
+                    <div class="label"><strong>Después:</strong><br>Grafo Construido</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="card">
+            <h2>La Abstracción: de Números a Red</h2>
+            <p>La genialidad de la teoría de grafos reside en su capacidad de <strong>abstracción</strong>. Al igual que Euler ignoró la geografía de Königsberg para centrarse en su esencia (nodos y conexiones), el algoritmo de <strong>Havel–Hakimi (HH)</strong> se enfoca exclusivamente en la estructura de conexión. Es un algoritmo <strong>voraz y determinista</strong> que sigue un bucle de pasos lógicos para intentar construir la red.</p>
+            
+            <div class="code-block">
+                <pre><span class="keyword">mientras</span> la secuencia <span class="variable">S</span> no esté vacía:
+    <span class="comment"># 1. Ordenar de mayor a menor</span>
+    <span class="function">ordenar</span>(<span class="variable">S</span>)
+    
+    <span class="comment"># 2. Tomar y remover el mayor grado k</span>
+    <span class="variable">k</span> = <span class="variable">S</span>.<span class="function">pop</span>(0)
+    
+    <span class="comment"># Si k > len(S), es imposible. Falla.</span>
+    <span class="keyword">si</span> <span class="variable">k</span> > <span class="function">longitud</span>(<span class="variable">S</span>): <span class="keyword">retornar</span> FALSO
+    
+    <span class="comment"># 3 y 4. Conectar y reducir grados</span>
+    <span class="keyword">para</span> i <span class="keyword">en</span> <span class="function">rango</span>(<span class="variable">k</span>):
+        <span class="variable">S</span>[i] = <span class="variable">S</span>[i] - 1
+        <span class="comment"># Si algún grado se vuelve negativo, falla.</span>
+        <span class="keyword">si</span> <span class="variable">S</span>[i] < 0: <span class="keyword">retornar</span> FALSO
+
+<span class="comment"># Si el bucle termina, es realizable.</span>
+<span class="keyword">retornar</span> VERDADERO</pre>
+            </div>
+            
+            <p style="margin-top: 1.5rem;">Si el proceso completa todas las iteraciones y la secuencia final se compone únicamente de ceros, ¡éxito! La secuencia original era <strong>realizable</strong>. La visualización de este proceso paso a paso es increíblemente poderosa, pues muestra cómo una regla matemática simple puede generar una estructura de red compleja.</p>
+        </section>
+
+        <section class="card">
+            <h2>Fundamentos y Compañeros Teóricos</h2>
+            <p>El algoritmo de Havel-Hakimi no opera en el vacío. Se basa en principios matemáticos sólidos que actúan como "reglas del juego", validando la secuencia antes de empezar la construcción.</p>
+            <h3>Reglas del Juego</h3>
+            <div class="rules-container">
+                <div class="rule-card">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-1.928 14.681L4.897 12l1.414-1.414 4.76 4.76 7.07-7.071 1.415 1.415-8.485 8.486z"></path></svg>
+                    <div>
+                        <h5>Paridad (Lema del Apretón de Manos)</h5>
+                        <p>La suma de todos los grados debe ser <strong>par</strong>, ya que cada conexión añade +1 a dos nodos (un total de 2 a la suma).</p>
+                    </div>
+                </div>
+                <div class="rule-card">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M13 7h-2v6h2V7zm-1 9.75c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"></path></svg>
+                    <div>
+                        <h5>Límite de Vértice</h5>
+                        <p>Ningún grado puede ser mayor o igual al número de nodos (<code>n-1</code>), pues un nodo no puede conectarse a más nodos de los que existen.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>El Teorema Compañero: Erdős–Gallai</h3>
+            <p>Mientras que Havel-Hakimi es el <strong>constructor</strong>, el teorema de Erdős–Gallai es el <strong>auditor</strong>. Este teorema ofrece una condición matemática que puede certificar si una secuencia es realizable <strong>sin necesidad de construir el grafo</strong>.</p>
+            <div class="viz-container">
+                 <div class="split-viz">
+                    <div>
+                        <h4>Havel-Hakimi (El Constructor)</h4>
+                        <p>Responde: "¿Cómo construyo esta red?"</p>
+                    </div>
+                     <div class="arrow">vs</div>
+                    <div>
+                        <h4>Erdős–Gallai (El Auditor)</h4>
+                        <p>Responde: "¿Es posible construir esta red?"</p>
+                    </div>
+                </div>
+            </div>
+            <p>Son dos puertas a la misma casa: una te entrega la red lista para experimentar, la otra simplemente certifica que la construcción es posible.</p>
+        </section>
+
+        <section class="card">
+            <h2>Del Papel al Código: Cómo HH Levanta el Overlay</h2>
+            <p>Un <strong>overlay</strong> es una red lógica construida sobre una infraestructura física subyacente. Internet (cables, routers) es la red física; el overlay decide qué nodos hablan directamente entre sí, formando una topología a medida para una aplicación P2P como Blockchain.</p>
+            <div class="overlay-diagram">
+                <div class="overlay-physical"><span>RED FÍSICA (INTERNET)</span></div>
+                <div class="overlay-logical">
+                    <svg>
+                        <line x1="15%" y1="50%" x2="40%" y2="25%" stroke="var(--accent-primary)" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="15%" y1="50%" x2="45%" y2="80%" stroke="var(--accent-primary)" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="40%" y1="25%" x2="65%" y2="40%" stroke="var(--accent-primary)" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="65%" y1="40%" x2="85%" y2="60%" stroke="var(--accent-primary)" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="45%" y1="80%" x2="85%" y2="60%" stroke="var(--accent-primary)" stroke-width="2" stroke-dasharray="4"/>
+                    </svg>
+                    <div class="node" style="left: calc(15% - 10px); top: calc(50% - 10px);"></div>
+                    <div class="node" style="left: calc(40% - 10px); top: calc(25% - 10px);"></div>
+                    <div class="node" style="left: calc(45% - 10px); top: calc(80% - 10px);"></div>
+                    <div class="node" style="left: calc(65% - 10px); top: calc(40% - 10px);"></div>
+                    <div class="node" style="left: calc(85% - 10px); top: calc(60% - 10px);"></div>
+                </div>
+            </div>
+            <p style="text-align:center; color:var(--text-secondary); margin-top:0.5rem;">Diagrama: Red Lógica P2P (Overlay) sobre la infraestructura física.</p>
+            
+            <h3>Ejecutando el Protocolo Gossip</h3>
+            <p>Sobre esta malla lógica, se ejecuta un protocolo de difusión como <strong>Gossip</strong>. Funciona como un rumor: un nodo informado contacta a un número de vecinos (<code>fanout</code>) en cada ronda para reenviar el mensaje, logrando una propagación eficiente y descentralizada.</p>
+            <div class="viz-container">
+                <h4>Visualización del Protocolo Gossip (Fanout = 2)</h4>
+                <svg width="80%" height="150" viewBox="0 0 300 100">
+                    <circle cx="50" cy="50" r="10" fill="var(--accent-secondary)"><title>Nodo Origen</title></circle>
+                    <circle cx="150" cy="25" r="8" fill="var(--accent-primary)"><title>Vecino 1</title></circle>
+                    <circle cx="150" cy="75" r="8" fill="var(--accent-primary)"><title>Vecino 2</title></circle>
+                    <circle cx="120" cy="50" r="8" fill="var(--text-secondary)" opacity="0.5"><title>Vecino no contactado</title></circle>
+                    <circle cx="250" cy="25" r="8" fill="var(--text-secondary)" opacity="0.5"></circle>
+                    <circle cx="250" cy="75" r="8" fill="var(--text-secondary)" opacity="0.5"></circle>
+
+                    <line x1="50" y1="50" x2="150" y2="25" stroke="var(--accent-secondary)" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="50" y1="50" x2="150" y2="75" stroke="var(--accent-secondary)" stroke-width="2" stroke-dasharray="5,5"/>
+                    <line x1="50" y1="50" x2="120" y2="50" stroke="var(--border-color)" stroke-width="1"/>
+                    <line x1="150" y1="25" x2="250" y2="25" stroke="var(--border-color)" stroke-width="1"/>
+                    <line x1="150" y1="75" x2="250" y2="75" stroke="var(--border-color)" stroke-width="1"/>
+                    
+                    <text x="55" y="40" font-size="10" fill="white">Origen</text>
+                    <text x="135" y="15" font-size="10" fill="white">Contacto 1</text>
+                    <text x="135" y="92" font-size="10" fill="white">Contacto 2</text>
+                </svg>
+                <p>El nodo origen (verde) reenvía el mensaje a 2 vecinos (azul), su `fanout` configurado.</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Aplicaciones Directas</h2>
+            <p>Este modelo, que va de una secuencia numérica a una red P2P con un protocolo de difusión, no es solo un ejercicio académico. Tiene aplicaciones directas y cruciales en sistemas distribuidos.</p>
+            <div class="apps-grid">
+                <div class="app-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15 2H9v5h6V2zm-2 2h-2V4h2v1zm6 6v6h-5v5H8v-5H3v-6h5V9h6v1h5z"></path></svg>
+                    <h4>Blockchain</h4>
+                    <p>Explorar cómo distintas mallas P2P afectan la latencia de propagación de bloques, el costo de ancho de banda y la robustez de la red.</p>
+                </div>
+                <div class="app-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM19.5 12a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0zM4.5 12a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0zm7.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm0-11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm14 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"></path></svg>
+                    <h4>Redes Distribuidas</h4>
+                    <p>Diseñar topologías que sostengan buen desempeño con recursos limitados, ajustando fanout y conectividad según la carga.</p>
+                </div>
+                <div class="app-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L2 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-10-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"></path></svg>
+                    <h4>Ciberseguridad</h4>
+                    <p>Ensayar escenarios de ataque y contingencia sobre la estructura misma de la red para evaluar su resiliencia y puntos débiles.</p>
+                </div>
+            </div>
+            <h3 style="text-align: center; margin-top: 3rem;">No alcanza con tener una red; importa qué red construimos.</h3>
+        </section>
+
+        <footer>
+            <p>Material elaborado por el profesor Sergio Gevatschnaider.</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Animación de burbujas de fondo ---
+        const bubblesContainer = document.querySelector('.bubbles');
+        if (bubblesContainer) {
+            for(let i=0; i < 20; i++) {
+                 createBubble();
+            }
+        }
+        function createBubble(){
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            const size = Math.random() * 60 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}vw`;
+            bubble.style.animationDuration = `${Math.random() * 15 + 20}s`;
+            bubble.style.animationDelay = `${Math.random() * 5}s`;
+            bubblesContainer.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 35000);
+        }
+
+        // --- Animación de aparición de tarjetas ---
+        const cards = document.querySelectorAll('.card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        cards.forEach(card => { observer.observe(card); });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Grafo de Cayley - Cubo (Z₂ × Z₂ × Z₂)</title>
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style type="text/css">
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      color: white;
+    }
+    #mynetwork {
+      width: 90%;
+      height: 600px;
+      margin: auto;
+      border: 2px solid white;
+      border-radius: 10px;
+      background-color: #1e272e;
+    }
+  </style>
+</head>
+<body>
+  <h2>🌐 Grafo de Cayley del Cubo (Z₂ × Z₂ × Z₂)</h2>
+  <p>Los vértices son los elementos de Z₂ × Z₂ × Z₂. Los generadores son (1,0,0), (0,1,0), (0,0,1).</p>
+  <div id="mynetwork"></div>
+
+  <script type="text/javascript">
+    // --------------------------
+    // 1. Definir nodos (elementos del grupo Z2^3)
+    // --------------------------
+    var nodes = new vis.DataSet([
+      { id: "000", label: "(0,0,0)", color: "#f1c40f" },
+      { id: "100", label: "(1,0,0)", color: "#e67e22" },
+      { id: "010", label: "(0,1,0)", color: "#e67e22" },
+      { id: "001", label: "(0,0,1)", color: "#e67e22" },
+      { id: "110", label: "(1,1,0)", color: "#2ecc71" },
+      { id: "101", label: "(1,0,1)", color: "#2ecc71" },
+      { id: "011", label: "(0,1,1)", color: "#2ecc71" },
+      { id: "111", label: "(1,1,1)", color: "#9b59b6" }
+    ]);
+
+    // --------------------------
+    // 2. Definir aristas (diferencia en exactamente una coordenada)
+    // --------------------------
+    var edges = new vis.DataSet([
+      { from: "000", to: "100" },
+      { from: "000", to: "010" },
+      { from: "000", to: "001" },
+      { from: "100", to: "110" },
+      { from: "100", to: "101" },
+      { from: "010", to: "110" },
+      { from: "010", to: "011" },
+      { from: "001", to: "101" },
+      { from: "001", to: "011" },
+      { from: "110", to: "111" },
+      { from: "101", to: "111" },
+      { from: "011", to: "111" }
+    ]);
+
+    // --------------------------
+    // 3. Configuración de red
+    // --------------------------
+    var container = document.getElementById("mynetwork");
+    var data = { nodes: nodes, edges: edges };
+    var options = {
+      nodes: {
+        shape: "circle",
+        size: 25,
+        font: { size: 16, color: "white", bold: true },
+        borderWidth: 2
+      },
+      edges: {
+        color: { color: "#ecf0f1" },
+        width: 2,
+        smooth: false
+      },
+      physics: {
+        enabled: true,
+        barnesHut: {
+          gravitationalConstant: -8000,
+          centralGravity: 0.3,
+          springLength: 150,
+          springConstant: 0.05
+        },
+        stabilization: { iterations: 2500 }
+      },
+      interaction: {
+        dragNodes: true,
+        zoomView: true,
+        dragView: true
+      }
+    };
+
+    // --------------------------
+    // 4. Crear red
+    // --------------------------
+    var network = new vis.Network(container, data, options);
+  </script>
+</body>
+</html>
