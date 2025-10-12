@@ -56,6 +56,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Glosario de Pruebas de Conocimiento Cero (ZKP)",
+    "path": "/src/classroom/graphs/recursos/ZPK_Glosario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
     "title": "Glosario Experto: Grafos de Cayley y Redes P2P",
     "path": "/src/classroom/graphs/recursos/Glosario_Cayley.html",
     "tag": "Demo",
@@ -84,11 +91,60 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Guía de Estudio: Arquitectura Modular de Blockchain",
+    "path": "/src/classroom/graphs/recursos/ZPK-Un Análisis de Capa 1, Capa 2 y ZK-Rollups.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía de Estudio: Complejidad Computacional y ZKP",
+    "path": "/src/classroom/graphs/recursos/ZPK_Complejidad Computacional y Criptografía.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
     "title": "Guía de Estudio: El Algoritmo de Held-Karp",
     "path": "/src/classroom/graphs/recursos/Hamilton_El Algoritmo de Held-Karp.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Guía de Estudio: Escalado con ZK-Rollups",
+    "path": "/src/classroom/graphs/recursos/ZPK_Rollups.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía de Estudio: Isomorfismo de Grafos",
+    "path": "/src/classroom/graphs/recursos/ZPK-Grafos Isomorfos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía de Estudio: Pruebas de Conocimiento Cero (ZKP)",
+    "path": "/src/classroom/graphs/recursos/ZPK_TEORIA.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía de Estudio: ZKML (Inteligencia Verificable)",
+    "path": "/src/classroom/graphs/recursos/ZPK-Machine learning.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía de Estudio: ZKP para Isomorfismo de Grafos",
+    "path": "/src/classroom/graphs/recursos/ZPK,Anatomía de una Prueba de Conocimiento Cero.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
   },
   {
     "title": "Guía Detallada: Fuerza Bruta para el TSP",
@@ -140,6 +196,13 @@
     "mtime": "2025-10-11T23:20:08-03:00"
   },
   {
+    "title": "ZK-Rollups — Simulación Visual Interactiva",
+    "path": "/src/classroom/graphs/recursos/ZPK_ROLLUP_SIMULADOR.HTML",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
     "title": "ZKP Demos — Ali Baba's Cave + Hash Commitment",
     "path": "/src/classroom/graphs/recursos/Simulator_ZPK.html",
     "tag": "Demo",
@@ -152,5 +215,33 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:33:17-03:00"
+  },
+  {
+    "title": "ZKP Demos — Cueva de Alí Babá + Compromiso Hash",
+    "path": "/src/classroom/graphs/recursos/ZPK_ Simulador_hash.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "ZKP Isomorfismo — SHA-256 / Pedersen (Ristretto255, sin sesgos)",
+    "path": "/src/classroom/graphs/recursos/zkp-iso-crypto-pedersen.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "ZKP Isomorfismo de Grafos — Demo con compromisos y Fiat–Shamir",
+    "path": "/src/classroom/graphs/recursos/zkp-iso-crypto.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "ZKP: Isomorfismo de Grafos (demo interactiva)",
+    "path": "/src/classroom/graphs/recursos/ZPK_Grafos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:48:15-03:00"
   }
 ]
