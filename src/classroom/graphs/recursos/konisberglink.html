@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Paseo de Euler: Teoría de Grafos</title>
+    <!-- FUENTES Y LIBRERÍAS EXTERNAS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+      window.MathJax = { tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] }, svg: { fontCache: 'global' } };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+
+<!-- ESTILOS ENCAPSULADOS -->
+<style>
+  /* Variables de Color */
+  :root {
+    --bg-primary: #f4f7f9; --bg-secondary: #ffffff; --bg-tertiary: #f8fafd;
+    --text-primary: #2c3e50; --text-secondary: #576574;
+    --accent-primary: #16a34a; --accent-secondary: #1abc9c;
+    --border-color: #e8ecf1; --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.1); --border-radius: 16px;
+    --transition-fast: all 0.25s ease-out; --transition-slow: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  body[data-theme="dark"] {
+    --bg-primary: #191a21; --bg-secondary: #22232e; --bg-tertiary: #2a2c3a;
+    --text-primary: #f0f2f5; --text-secondary: #a0aec0;
+    --accent-primary: #1abc9c; --accent-secondary: #16a34a;
+    --border-color: #333644; --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  #konigsberg-container {
+    font-family: 'Inter', sans-serif; line-height: 1.75;
+    background: var(--bg-primary); color: var(--text-primary);
+    transition: var(--transition-fast); padding: 3rem 2rem;
+    margin: 0 auto; max-width: 900px; position: relative; z-index: 1;
+  }
+  
+  #konigsberg-container * { box-sizing: border-box; }
+
+  #konigsberg-container #bubbles-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: -1; overflow: hidden;
+  }
+  #konigsberg-container .bubble {
+    position: absolute; bottom: -150px; border-radius: 50%;
+    background: var(--accent-primary); animation: bubbleUp 25s linear infinite;
+  }
+  body[data-theme="dark"] #konigsberg-container .bubble { opacity: 0.2; }
+  @keyframes bubbleUp { 0% { transform: translateY(0); } 100% { transform: translateY(-120vh) scale(1.2); } }
+
+  #konigsberg-container .controls-header {
+    display: flex; justify-content: flex-end; align-items: center; gap: 1rem;
+    margin-bottom: 2rem; position: sticky; top: 1rem; z-index: 1000; padding: 0.5rem;
+  }
+  #konigsberg-container .control-btn {
+    background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary);
+    padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700;
+    transition: var(--transition-fast); box-shadow: var(--shadow-light);
+  }
+  #konigsberg-container .control-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+  #konigsberg-container .control-btn.active, #konigsberg-container .control-btn:hover {
+    background: var(--accent-secondary); color: #fff; border-color: var(--accent-secondary);
+  }
+  #konigsberg-container #theme-toggle-btn {
+    width: 44px; height: 44px; min-width: 44px; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  #konigsberg-container #theme-toggle-btn i { font-size: 1.1rem; }
+
+  #konigsberg-container .header { text-align: center; margin-bottom: 3rem; }
+  #konigsberg-container .main-title { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+  #konigsberg-container .main-subtitle { font-size: 1.1rem; color: var(--accent-primary); font-weight: 500; }
+  #konigsberg-container .lesson-container { display: flex; flex-direction: column; gap: 1.25rem; }
+  #konigsberg-container .topic-card, #konigsberg-container .content-block {
+    background: var(--bg-secondary); border-radius: var(--border-radius); box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color); overflow: hidden; transition: var(--transition-slow);
+  }
+  #konigsberg-container .topic-header { cursor: pointer; padding: 1.25rem 1.75rem; display: flex; justify-content: space-between; align-items: center; }
+  #konigsberg-container .topic-title { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); }
+  #konigsberg-container .expand-icon { font-size: 1.1rem; color: var(--text-secondary); transition: var(--transition-fast); }
+  #konigsberg-container .topic-card.open .expand-icon { transform: rotate(180deg); color: var(--accent-primary); }
+  #konigsberg-container .topic-content { max-height: 0; overflow: hidden; transition: max-height 0.7s ease-in-out, padding 0.7s ease-in-out; background: var(--bg-tertiary); }
+  #konigsberg-container .topic-card.open .topic-content { max-height: 3500px; padding: 1.5rem 1.75rem; border-top: 1px solid var(--border-color); }
+  #konigsberg-container .content-block { padding: 2rem; margin-top: 2rem; }
+  #konigsberg-container .content-block h2, #konigsberg-container .topic-content h4 { color: var(--text-primary); margin-bottom: 1rem; border-left: 3px solid var(--accent-primary); padding-left: 1rem; }
+  #konigsberg-container .topic-content h4 { font-size: 1.1rem; margin-top: 1.5rem; }
+  #konigsberg-container .topic-content h4:first-child { margin-top: 0; }
+  #konigsberg-container .topic-content p, #konigsberg-container .topic-content li, #konigsberg-container .content-block p, #konigsberg-container .content-block li { color: var(--text-secondary); line-height: 1.8; text-align: justify; }
+  #konigsberg-container .topic-content ul, #konigsberg-container .topic-content ol, #konigsberg-container .content-block ul { padding-left: 25px; margin-bottom: 1rem; }
+  #konigsberg-container .topic-content strong, #konigsberg-container .content-block strong { color: var(--accent-primary); font-weight: 600; }
+  #konigsberg-container .topic-content blockquote, #konigsberg-container .content-block blockquote { border-left: 4px solid var(--accent-primary); padding: 1rem 1.5rem; margin: 1.5rem 0; font-style: italic; color: var(--text-secondary); background: var(--bg-primary); border-radius: 0 8px 8px 0; }
+  
+  #konigsberg-container .styled-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+  #konigsberg-container .styled-table th, #konigsberg-container .styled-table td { border: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
+  #konigsberg-container .styled-table th { background-color: rgba(127, 140, 141, 0.1); font-weight: 600; color: var(--text-primary); }
+  #konigsberg-container .styled-table tr:nth-of-type(even) { background-color: rgba(127, 140, 141, 0.05); }
+  #konigsberg-container .highlight-ok { color: #16a34a; font-weight: 700; }
+  #konigsberg-container .highlight-warn { color: #f59e0b; font-weight: 700; }
+  #konigsberg-container .route-path { font-family: 'JetBrains Mono', monospace; background-color: rgba(127, 140, 141, 0.1); padding: 10px 12px; border-radius: 8px; line-height: 1.6; font-size: 0.95em; word-break: break-all; }
+  
+  #konigsberg-container .scenarios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  #konigsberg-container .scenario-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; text-align: center; transition: var(--transition-fast); }
+  #konigsberg-container .scenario-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-medium); }
+  #konigsberg-container .scenario-item h5 { margin: 0 0 0.5rem 0; font-size: 1rem; }
+  
+  /* === ESTILOS PARA LA GALERÍA DINÁMICA === */
+  #konigsberg-container .graph-container {
+      width: 100%;
+      height: 140px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+  }
+  
+  #konigsberg-container .scenario-item p { font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); text-align: center; }
+  #konigsberg-container .dfs-showcase { text-align: center; padding: 1.5rem 0; }
+
+  #konigsberg-container footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+  #konigsberg-container footer p { color: var(--text-secondary); font-size: 0.9rem; opacity: 0.8; }
+  #konigsberg-container .lang-content { display: none; opacity: 0; transition: opacity 0.6s ease-in-out; }
+  #konigsberg-container .lang-content.visible { display: block; opacity: 1; }
+
+  @media (max-width: 768px) {
+    #konigsberg-container { padding: 2rem 1rem; }
+    #konigsberg-container .topic-header, #konigsberg-container .topic-card.open .topic-content, #konigsberg-container .content-block { padding: 1rem 1.25rem; }
+  }
+</style>
+
+<!-- CONTENIDO HTML -->
+<div id="konigsberg-container">
+  <div id="bubbles-bg"></div>
+  
+  <div class="controls-header">
+    <div><button id="btn-es" class="control-btn">ES</button><button id="btn-en" class="control-btn">EN</button></div>
+    <button id="theme-toggle-btn" class="control-btn" title="Toggle theme"></button>
+  </div>
+
+  <header class="header" id="main-header"></header>
+
+  <!-- ======================= -->
+  <!-- CONTENIDO EN ESPAÑOL    -->
+  <!-- ======================= -->
+  <div id="content-es" class="lang-content">
+    <div class="lesson-container">
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">1. Introducción: El Enigma de una Ciudad</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>1.1. Contexto histórico</h4><p>Königsberg, una ciudad prusiana del siglo XVIII, estaba atravesada por el río Pregel, que creaba dos grandes islas. Siete puentes conectaban estas islas y las riberas, dando lugar a un popular rompecabezas urbano:</p><blockquote>¿Es posible dar un paseo cruzando cada puente exactamente una vez y volver al punto de partida?</blockquote><h4>1.2. La pregunta popular y la solución de Euler</h4><p>Nadie pudo encontrar una ruta. El problema llegó a Leonhard Euler, quien demostró que era imposible. Para hacerlo, ignoró la geografía y reformuló el problema usando un nuevo lenguaje abstracto, dando origen a la <strong>teoría de grafos</strong> en 1736.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">2. La Abstracción Genial de Euler</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>2.1. Del mapa al modelo matemático</h4><p>Euler se dio cuenta de que la forma de la ciudad era irrelevante. Lo único importante era cuántas masas de tierra existían y cómo estaban conectadas por puentes. Creó un modelo abstracto:</p><ul><li><strong>Vértices (nodos)</strong> para las masas de tierra (4).</li><li><strong>Aristas</strong> para los puentes (7).</li></ul><h4>2.2. Recorrido Euleriano</h4><p>La pregunta se tradujo a: ¿Existe un <strong>recorrido euleriano</strong> en este grafo? Es decir, un camino que recorra cada arista exactamente una vez. Si empieza y termina en el mismo vértice, se llama <strong>ciclo euleriano</strong>.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">3. Fundamentos Teóricos Clave</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>3.1. Grado de un vértice</h4><p>El concepto clave de Euler fue el <strong>grado de un vértice</strong>: el número de aristas que se conectan a él. Si una isla tiene 3 puentes, su vértice tiene grado 3.</p><h4>3.2. Lema del Apretón de Manos</h4><p>Este lema establece que la suma de los grados de todos los vértices es igual al doble del número de aristas: $$ \sum_{v \in V} \deg(v) = 2|E| $$</p><p>Una consecuencia clave es que el número de vértices con grado impar en cualquier grafo siempre debe ser par.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">4. El Teorema de Euler</h4><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>4.1. Enunciado del teorema</h4><p>Para un grafo conexo:</p><ol><li>Tiene un <strong>ciclo euleriano</strong> si y solo si todos sus vértices tienen grado par.</li><li>Tiene un <strong>camino euleriano</strong> (inicio/fin distintos) si y solo si tiene exactamente dos vértices de grado impar.</li><li>Si hay más de dos vértices de grado impar, <strong>no existe</strong> un recorrido euleriano.</li></ol><h4>4.2. Interpretación</h4><p>Los vértices de grado impar son "desequilibrados". Se necesita un punto de partida y uno de llegada (2 impares) o un circuito perfectamente balanceado (0 impares). Más de dos desequilibrios hacen imposible el recorrido.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">5. Aplicación al Problema de Königsberg</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>5.1. Cálculo de grados</h4><p>En el grafo de Königsberg, los grados de los cuatro vértices son: 3, 5, 3 y 3.</p><h4>5.2. Conclusión final</h4><p>El grafo tiene cuatro vértices de grado impar. Según el teorema, al tener más de dos, no cumple ninguna condición para un recorrido euleriano.</p><blockquote>Por lo tanto, es matemáticamente imposible realizar el paseo de Königsberg.</blockquote></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">6. Impacto y Legado</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>6.1. Nacimiento de la Teoría de Grafos</h4><p>La solución de Euler es considerada el nacimiento de la teoría de grafos y la topología, al estudiar propiedades de las formas basadas en su estructura y conexión, no en sus medidas.</p><h4>6.2. Relevancia Actual</h4><p>Hoy, la teoría de grafos es fundamental en GPS, redes de internet, logística y análisis de redes sociales.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">7. Ciclo Euleriano: La Libertad de Empezar en Cualquier Lugar</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>La Propiedad del Balance Perfecto</h4><p>Cuando un grafo tiene un <strong>Ciclo Euleriano</strong>, todos sus vértices tienen grado par. Esta condición de "balance perfecto" tiene una consecuencia maravillosa:</p><blockquote><strong>Puedes empezar tu recorrido en CUALQUIER vértice que elijas.</strong> Sin excepción.</blockquote><p>La intuición es simple: si cada vértice tiene un número par de "puertas" (aristas), por cada puerta que usas para entrar, siempre te quedará una para salir. Nunca te quedas atrapado y siempre regresarás al inicio.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">8. Camino Euleriano: Inicio y Fin Obligatorios</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>La Ruta Definida por el Desequilibrio</h4><p>Un <strong>Camino Euleriano</strong> existe cuando hay exactamente dos vértices de grado impar. Estos dos vértices dictan las reglas:</p><blockquote>La ruta <strong>SIEMPRE</strong> debe empezar en uno de los dos vértices impares y <strong>SIEMPRE</strong> terminará en el otro.</blockquote><p>Los dos vértices impares son los puntos de "desequilibrio" natural del grafo: uno es el punto de partida natural (con una "salida" extra) y el otro es la llegada inevitable (con una "entrada" extra).</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">9. Tabla Comparativa: La Diferencia Clave</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Un Resumen Visual</h4><p>La decisión de dónde empezar tu recorrido se reduce a una simple pregunta: ¿cuántos vértices de grado impar tiene el grafo?</p><table class="styled-table"><thead><tr><th>Característica</th><th class="highlight-ok">Ciclo Euleriano</th><th class="highlight-warn">Camino Euleriano</th></tr></thead><tbody><tr><td>Condición de Grados</td><td><strong>Cero</strong> vértices impares</td><td><strong>Exactamente dos</strong> vértices impares</td></tr><tr><td>Punto de Inicio</td><td class="highlight-ok"><em>CUALQUIERA</em> de los vértices</td><td class="highlight-warn"><em>OBLIGATORIAMENTE</em> uno de los dos impares</td></tr><tr><td>Punto Final</td><td class="highlight-ok">El <em>MISMO</em> que el de inicio</td><td class="highlight-warn">El <em>OTRO</em> vértice impar</td></tr></tbody></table></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">10. Ejemplos de Rutas (Soluciones)</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Aplicando la Teoría</h4><p>Aunque existen múltiples secuencias correctas, aquí se muestra un ejemplo de una solución completa para cada caso.</p><table class="styled-table"><thead><tr><th class="highlight-warn">Solución: Camino Euleriano</th><th class="highlight-ok">Solución: Ciclo Euleriano</th></tr></thead><tbody><tr><td><p><strong>Puentes:</strong> 6<br><strong>Nodos Impares:</strong> B y C</p><p>Ruta válida <strong>(desde B)</strong>:</p><div class="route-path">B → A → C → D → B → A → C</div></td><td><p><strong>Puentes:</strong> 9<br><strong>Nodos Impares:</strong> Ninguno</p><p>Ruta válida <strong>(desde A)</strong>:</p><div class="route-path">A→B→D→C→A→C→B→D→A</div></td></tr></tbody></table></div></div>
+        
+        <!-- === GALERÍA DE ESCENARIOS (ESPAÑOL) === -->
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">11. Galería de Escenarios</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Visualizando las Transformaciones del Grafo</h4><p>La clave para resolver el problema de Königsberg es modificar el grafo para que cumpla las condiciones del Teorema de Euler. Aquí puedes ver visualmente los tres estados principales:</p>
+            <div class="scenarios-grid">
+                <div class="scenario-item">
+                    <h5>🔴 Königsberg Original (Imposible)</h5>
+                    <div class="graph-container" id="graph-original-es"></div>
+                    <p><strong>4 vértices impares.</strong> El problema en su estado histórico, matemáticamente irresoluble.</p>
+                </div>
+                <div class="scenario-item">
+                    <h5>🟡 Camino Euleriano (Posible)</h5>
+                    <div class="graph-container" id="graph-path-es"></div>
+                    <p><strong>2 vértices impares.</strong> Al quitar un puente, creamos un punto de inicio y fin obligatorios.</p>
+                </div>
+                <div class="scenario-item">
+                    <h5>🟢 Ciclo Euleriano (Posible)</h5>
+                    <div class="graph-container" id="graph-cycle-es"></div>
+                    <p><strong>0 vértices impares.</strong> Al añadir puentes, equilibramos el grafo, permitiendo un circuito cerrado.</p>
+                </div>
+            </div>
+        </div></div>
+
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">12. Simulación Interactiva: Explora el Problema</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>¡Pon a Prueba la Teoría!</h4><p>La mejor forma de entender la teoría de grafos es experimentando. El siguiente simulador te permite:</p><ul><li>Intentar resolver el problema original y ver por qué es imposible.</li><li>Modificar el grafo para crear caminos y ciclos eulerianos.</li><li>Visualizar cómo un algoritmo (DFS) busca sistemáticamente todas las soluciones posibles.</li></ul><div class="dfs-showcase"><button class="control-btn" id="launch-dfs-demo-es">🎯 Abrir Simulador Interactivo</button></div></div></div>
+    </div>
+    <div class="content-block"><h2>En Resumen: La Regla de Oro del Recorrido</h2><p>La estructura del grafo, específicamente el número de vértices con grado impar, dicta por completo la naturaleza del recorrido. La regla es simple y poderosa:</p><ul><li><strong>Cero (0) vértices impares</strong> → Es un <strong>Ciclo Euleriano</strong> → Tienes libertad total, puedes empezar en cualquier vértice y siempre volverás a él.</li><li><strong>Dos (2) vértices impares</strong> → Es un <strong>Camino Euleriano</strong> → La ruta está definida, debes empezar en un impar y obligatoriamente terminarás en el otro.</li></ul></div>
+    <div class="content-block"><h2>Más Allá de los Puentes: La Belleza de la Abstracción</h2><p>La verdadera magia del problema de Königsberg no está en la solución en sí, sino en el salto mental que Euler nos enseñó a dar: ignorar lo irrelevante (distancias, formas) y enfocarnos en la estructura pura (conexiones).</p><p>Este poder de la abstracción es la esencia de las matemáticas y la informática. Al transformar un caótico mapa físico en un limpio esquema de puntos y líneas, no solo resolvimos un acertijo local, sino que descubrimos una ley universal aplicable a cualquier red imaginable.</p><blockquote>La esencia de las matemáticas no es hacer las cosas simples complicadas, sino hacer las cosas complicadas simples.</blockquote><p>Finalmente, hay una profunda estética en la teoría de grafos. Que un problema aparentemente complejo pueda reducirse a una regla tan elegante como "contar los vértices impares" revela una belleza estructural en el universo del razonamiento lógico. Es la prueba de que, a menudo, las soluciones más poderosas son también las más simples y bellas.</p></div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- CONTENIDO EN INGLÉS     -->
+  <!-- ======================= -->
+  <div id="content-en" class="lang-content">
+    <div class="lesson-container">
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">1. Introduction: The Enigma of a City</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>1.1. Historical Context</h4><p>Königsberg, an 18th-century Prussian city, was bisected by the Pregel River, creating two large islands. Seven bridges connected these islands and the riverbanks, leading to a popular urban puzzle:</p><blockquote>Is it possible to take a walk that crosses every bridge exactly once and returns to the starting point?</blockquote><h4>1.2. The Popular Question and Euler's Solution</h4><p>No one could find such a route. The problem reached Leonhard Euler, who proved it was impossible. To do so, he ignored geography and reformulated the problem using a new, abstract language, giving birth to <strong>graph theory</strong> in 1736.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">2. Euler's Brilliant Abstraction</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>2.1. From Map to Mathematical Model</h4><p>Euler realized the city's layout was irrelevant. The only crucial information was how many landmasses existed and how they were connected. He created an abstract model:</p><ul><li><strong>Vertices (nodes)</strong> for the landmasses (4).</li><li><strong>Edges</strong> for the bridges (7).</li></ul><h4>2.2. Eulerian Path</h4><p>The question was translated to: Does an <strong>Eulerian path</strong> exist in this graph? That is, a path that traverses every edge exactly once. If it starts and ends at the same vertex, it is an <strong>Eulerian circuit</strong>.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">3. Key Theoretical Foundations</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>3.1. Degree of a Vertex</h4><p>Euler's key concept was the <strong>degree of a vertex</strong>: the number of edges connected to it. If an island has 3 bridges, its vertex has a degree of 3.</p><h4>3.2. Handshaking Lemma</h4><p>This lemma states that the sum of the degrees of all vertices is equal to twice the number of edges: $$ \sum_{v \in V} \deg(v) = 2|E| $$</p><p>A key consequence is that the number of vertices with an odd degree in any graph must always be even.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">4. Euler's Theorem</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>4.1. Statement of the Theorem</h4><p>For a connected graph:</p><ol><li>It has an <strong>Eulerian circuit</strong> if and only if all its vertices have an even degree.</li><li>It has an <strong>Eulerian path</strong> (different start/end) if and only if it has exactly two vertices of odd degree.</li><li>If there are more than two vertices of odd degree, no Eulerian path <strong>exists</strong>.</li></ol><h4>4.2. Interpretation</h4><p>Odd-degree vertices are "unbalanced." A path requires a starting point and an ending point (2 odd vertices) or a perfectly balanced circuit (0 odd vertices). More than two unbalanced points make the journey impossible.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">5. Application to the Königsberg Problem</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>5.1. Degree Calculation</h4><p>In the Königsberg graph, the degrees of the four vertices are: 3, 5, 3, and 3.</p><h4>5.2. Final Conclusion</h4><p>The graph has four odd-degree vertices. According to the theorem, having more than two means no Eulerian path is possible.</p><blockquote>Therefore, it is mathematically impossible to complete the Königsberg walk.</blockquote></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">6. Impact and Legacy</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>6.1. The Birth of Graph Theory</h4><p>Euler's solution is considered the birth of graph theory and topology, studying properties of shapes based on structure and connection, not measurements.</p><h4>6.2. Modern Relevance</h4><p>Today, graph theory is fundamental for GPS, internet routing, logistics, and social network analysis.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">7. Eulerian Circuit: The Freedom to Start Anywhere</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>The Property of Perfect Balance</h4><p>When a graph has an <strong>Eulerian Circuit</strong>, all its vertices have an even degree. This "perfect balance" condition has a wonderful consequence:</p><blockquote><strong>You can start your tour at ANY vertex you choose.</strong> No exceptions.</blockquote><p>The intuition is simple: if every vertex has an even number of "doors" (edges), for every door you use to enter, there will always be an unused door to exit. You never get stuck, and you will always return to your starting point.</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">8. Eulerian Path: A Mandatory Start and End</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>The Path Defined by Imbalance</h4><p>An <strong>Eulerian Path</strong> exists when there are exactly two vertices of odd degree. These two vertices set the rules:</p><blockquote>The path <strong>MUST</strong> start at one of the two odd-degree vertices and will <strong>ALWAYS</strong> end at the other.</blockquote><p>The two odd vertices are the graph's natural "imbalance" points: one is the natural starting point (with an extra "exit"), and the other is the inevitable destination (with an extra "entry").</p></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">9. Comparison Table: The Key Difference</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>A Visual Summary</h4><p>The decision of where to start your tour comes down to a simple question: how many odd-degree vertices does the graph have?</p><table class="styled-table"><thead><tr><th>Characteristic</th><th class="highlight-ok">Eulerian Circuit</th><th class="highlight-warn">Eulerian Path</th></tr></thead><tbody><tr><td>Degree Condition</td><td><strong>Zero</strong> odd vertices</td><td><strong>Exactly two</strong> odd vertices</td></tr><tr><td>Starting Point</td><td class="highlight-ok"><em>ANY</em> of the vertices</td><td class="highlight-warn"><em>MUST BE</em> one of the two odd ones</td></tr><tr><td>Ending Point</td><td class="highlight-ok">The <em>SAME</em> as the starting point</td><td class="highlight-warn">The <em>OTHER</em> odd vertex</td></tr></tbody></table></div></div>
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">10. Route Examples (Solutions)</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Applying the Theory</h4><p>Although multiple correct sequences exist for each case, here is one example of a complete solution for each scenario.</p><table class="styled-table"><thead><tr><th class="highlight-warn">Solution: Eulerian Path</th><th class="highlight-ok">Solution: Eulerian Circuit</th></tr></thead><tbody><tr><td><p><strong>Bridges:</strong> 6<br><strong>Odd Nodes:</strong> B & C</p><p>Valid route <strong>(from B)</strong>:</p><div class="route-path">B → A → C → D → B → A → C</div></td><td><p><strong>Bridges:</strong> 9<br><strong>Odd Nodes:</strong> None</p><p>Valid route <strong>(from A)</strong>:</p><div class="route-path">A→B→D→C→A→C→B→D→A</div></td></tr></tbody></table></div></div>
+        
+        <!-- === GALERÍA DE ESCENARIOS (INGLÉS) === -->
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">11. Scenario Gallery</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Visualizing the Graph's Transformations</h4><p>The key to solving the Königsberg problem is modifying the graph to meet the conditions of Euler's Theorem. Here you can visually see the three main states:</p>
+            <div class="scenarios-grid">
+                <div class="scenario-item">
+                    <h5>🔴 Original Königsberg (Impossible)</h5>
+                    <div class="graph-container" id="graph-original-en"></div>
+                    <p><strong>4 odd vertices.</strong> The problem in its historical, mathematically unsolvable state.</p>
+                </div>
+                <div class="scenario-item">
+                    <h5>🟡 Eulerian Path (Possible)</h5>
+                    <div class="graph-container" id="graph-path-en"></div>
+                    <p><strong>2 odd vertices.</strong> By removing a bridge, we create a mandatory start and end point.</p>
+                </div>
+                <div class="scenario-item">
+                    <h5>🟢 Eulerian Circuit (Possible)</h5>
+                    <div class="graph-container" id="graph-cycle-en"></div>
+                    <p><strong>0 odd vertices.</strong> By adding bridges, we balance the graph, allowing for a closed loop.</p>
+                </div>
+            </div>
+        </div></div>
+
+        <div class="topic-card"><div class="topic-header"><span class="topic-title">12. Interactive Simulation: Explore the Problem</span><i class="fas fa-chevron-down expand-icon"></i></div><div class="topic-content"><h4>Put the Theory to the Test!</h4><p>The best way to understand graph theory is by experimenting. The following simulator allows you to:</p><ul><li>Try to solve the original problem and see why it's impossible.</li><li>Modify the graph to create Eulerian paths and circuits.</li><li>Visualize how an algorithm (DFS) systematically searches for all possible solutions.</li></ul><div class="dfs-showcase"><button class="control-btn" id="launch-dfs-demo-en">🎯 Open Interactive Simulator</button></div></div></div>
+    </div>
+    <div class="content-block"><h2>In Summary: The Golden Rule of Traversal</h2><p>The graph's structure, specifically the number of odd-degree vertices, completely dictates the nature of the traversal. The rule is simple and powerful:</p><ul><li><strong>Zero (0) odd vertices</strong> → It's an <strong>Eulerian Circuit</strong> → You have total freedom; you can start at any vertex and you will always return to it.</li><li><strong>Two (2) odd vertices</strong> → It's an <strong>Eulerian Path</strong> → The route is fixed; you must start at one odd vertex and you will inevitably end at the other.</li></ul></div>
+    <div class="content-block"><h2>Beyond the Bridges: The Beauty of Abstraction</h2><p>The true magic of the Königsberg problem lies not in the solution itself, but in the mental leap Euler taught us to make: ignore the irrelevant (distances, shapes) and focus on the pure structure (connections).</p><p>This power of abstraction is the essence of mathematics and computer science. By transforming a chaotic physical map into a clean diagram of dots and lines, we not only solved a local riddle but also uncovered a universal law applicable to any network imaginable.</p><blockquote>The essence of mathematics is not to make simple things complicated, but to make complicated things simple.</blockquote><p>Finally, there is a profound aesthetic in graph theory. The fact that a seemingly complex problem can be reduced to a rule as elegant as "count the odd vertices" reveals a structural beauty in the universe of logical reasoning. It is proof that, often, the most powerful solutions are also the most simple and beautiful.</p></div>
+  </div>
+
+  <footer id="main-footer"></footer>
+  
+</div>
+
+<!-- SCRIPT DE FUNCIONALIDAD -->
+<script>
+  (function() {
+    const container = document.getElementById('konigsberg-container');
+    if (!container) return;
+
+    // --- DATOS DEL GRAFO PARA LA GALERÍA ---
+    const G_LAYOUT = { A:{x:120,y:260}, B:{x:120,y:430}, C:{x:120,y:90}, D:{x:680,y:260} };
+    const BASE_EDGES = [ {id:"AC1", u:"A", v:"C", n:2, k:0}, {id:"AC2", u:"A", v:"C", n:2, k:1}, {id:"AB1", u:"A", v:"B", n:2, k:0}, {id:"AB2", u:"A", v:"B", n:2, k:1}, {id:"AD",  u:"A", v:"D", n:1, k:0}, {id:"CD",  u:"C", v:"D", n:1, k:0}, {id:"BD",  u:"B", v:"D", n:1, k:0} ];
+
+    // === URLs DEL SIMULADOR CORREGIDAS ===
+    const SIMULATOR_URLS = {
+        es: 'https://sgevatschnaider.github.io/#notas',
+        en: 'https://sgevatschnaider.github.io/#notas'
+    };
+
+    const AppState = { theme: 'dark', lang: 'es' };
+    const I18N = {
+        es: {
+            title: "El Paseo de Euler: Cómo un Acertijo Urbano Creó la Teoría de Grafos",
+            subtitle: "Un Viaje a la Belleza de la Abstracción",
+            footer: "Material interactivo elaborado por Sergio Gevatschnaider",
+            toggleTheme: "Cambiar tema"
+        },
+        en: {
+            title: "Euler's Walk: How a City Puzzle Created Graph Theory",
+            subtitle: "A Journey into the Beauty of Abstraction",
+            footer: "Interactive material developed by Sergio Gevatschnaider",
+            toggleTheme: "Toggle theme"
+        }
+    };
+
+    const themeToggleButton = container.querySelector('#theme-toggle-btn');
+    const btnEs = container.querySelector('#btn-es');
+    const btnEn = container.querySelector('#btn-en');
+    const header = container.querySelector('#main-header');
+    const footer = container.querySelector('#main-footer');
+    const contentEs = container.querySelector('#content-es');
+    const contentEn = container.querySelector('#content-en');
+    const openModalBtnEs = container.querySelector('#launch-dfs-demo-es');
+    const openModalBtnEn = container.querySelector('#launch-dfs-demo-en');
+
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        if (themeToggleButton) {
+            themeToggleButton.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            themeToggleButton.setAttribute('title', I18N[AppState.lang].toggleTheme);
+        }
+        localStorage.setItem('user-theme', theme);
+        AppState.theme = theme;
+        generateScenarioImages();
+    }
+
+    function setLanguage(lang) {
+        if (!['es', 'en'].includes(lang)) return;
+        if(header) header.innerHTML = `<h1 class="main-title">${I18N[lang].title}</h1><p class="main-subtitle">${I18N[lang].subtitle}</p>`;
+        if(footer) footer.innerHTML = `<p>${I18N[lang].footer}</p>`;
+        if(contentEs) contentEs.classList.toggle('visible', lang === 'es');
+        if(contentEn) contentEn.classList.toggle('visible', lang === 'en');
+        if(btnEs) btnEs.classList.toggle('active', lang === 'es');
+        if(btnEn) btnEn.classList.toggle('active', lang === 'en');
+        localStorage.setItem('user-lang', lang);
+        AppState.lang = lang;
+        if (themeToggleButton) themeToggleButton.setAttribute('title', I18N[lang].toggleTheme);
+        generateScenarioImages();
+    }
+
+    function openSimulatorModal() {
+        const url = SIMULATOR_URLS[AppState.lang];
+        window.open(url, '_blank', 'width=1400,height=900,scrollbars=yes,resizable=yes');
+    }
+    
+    function createMiniGraph(edges) {
+      const degrees = Object.fromEntries(Object.keys(G_LAYOUT).map(k=>[k,0]));
+      edges.forEach(e => { degrees[e.u]++; degrees[e.v]++; });
+      const oddVertices = Object.keys(degrees).filter(k => degrees[k] % 2 === 1);
+
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      const colors = {
+          ink: isDark ? '#f0f2f5' : '#2c3e50',
+          muted: isDark ? '#a0aec0' : '#576574',
+          paper: isDark ? '#22232e' : '#ffffff',
+          ok: isDark ? '#1abc9c' : '#16a34a',
+          warn: '#f59e0b',
+          impossible: '#ef4444'
+      };
+
+      const getNodeColor = (vertex) => {
+        if (oddVertices.length === 0) return colors.ok;
+        if (oddVertices.length === 2 && oddVertices.includes(vertex)) return colors.warn;
+        if (oddVertices.length === 2 && !oddVertices.includes(vertex)) return colors.ok;
+        return colors.impossible;
+      };
+
+      const miniLayout = { A: {x: 40, y: 70}, B: {x: 40, y: 110}, C: {x: 40, y: 30}, D: {x: 160, y: 70} };
+
+      function miniPathFor(u, v, k, n) {
+        const p = miniLayout[u], q = miniLayout[v];
+        const dx = q.x-p.x, dy = q.y-p.y, len = Math.hypot(dx,dy)||1;
+        const nx=dx/len, ny=dy/len, px=-ny, py=nx;
+        const offset = (n===1) ? 0 : (k%2===0) ? 12 : -12;
+        const c1x=p.x+dx*0.25+px*offset, c1y=p.y+dy*0.25+py*offset;
+        const c2x=p.x+dx*0.75+px*offset, c2y=p.y+dy*0.75+py*offset;
+        return `M ${p.x} ${p.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${q.x} ${q.y}`;
+      }
+
+      let svg = `<svg viewBox="0 0 200 140" style="width:100%;height:100%;">`;
+      svg += '<g>';
+      edges.forEach(e => {
+        svg += `<path d="${miniPathFor(e.u, e.v, e.k, e.n)}" fill="none" stroke="${colors.muted}" stroke-width="1.5" opacity="0.8"/>`;
+      });
+      svg += '</g><g>';
+      Object.entries(miniLayout).forEach(([vertex, pos]) => {
+        svg += `<circle cx="${pos.x}" cy="${pos.y}" r="6" fill="${getNodeColor(vertex)}" stroke="${colors.paper}" stroke-width="2"/>`;
+        svg += `<text x="${pos.x}" y="${pos.y-10}" text-anchor="middle" font-size="10" font-weight="bold" fill="${colors.ink}">${vertex}</text>`;
+        svg += `<text x="${pos.x}" y="${pos.y+18}" text-anchor="middle" font-size="9" fill="${colors.muted}">(${degrees[vertex]})</text>`;
+      });
+      svg += '</g>';
+      
+      const status = {
+          es: oddVertices.length === 0 ? 'Ciclo Posible' : oddVertices.length === 2 ? 'Camino Posible' : 'Imposible',
+          en: oddVertices.length === 0 ? 'Circuit Possible' : oddVertices.length === 2 ? 'Path Possible' : 'Impossible'
+      };
+      svg += `<text x="100" y="130" text-anchor="middle" font-size="10" font-weight="bold" fill="${colors.muted}">${edges.length} ${AppState.lang === 'es' ? 'puentes' : 'bridges'} • ${status[AppState.lang]}</text>`;
+      svg += '</svg>';
+      return svg;
+    }
+
+    function generateScenarioImages() {
+      const lang = AppState.lang;
+      
+      const originalEdges = BASE_EDGES;
+      const pathEdges = BASE_EDGES.filter(e => e.id !== "AD");
+      const cycleEdges = [ ...BASE_EDGES.map(e => e.id === "AD" ? { ...e, n: 2 } : e), {id:"AD-extra", u:"A", v:"D", n:2, k:1}, {id:"BC-extra", u:"B", v:"C", n:1, k:0} ];
+
+      const originalContainer = document.getElementById(`graph-original-${lang}`);
+      const pathContainer = document.getElementById(`graph-path-${lang}`);
+      const cycleContainer = document.getElementById(`graph-cycle-${lang}`);
+
+      if(originalContainer) originalContainer.innerHTML = createMiniGraph(originalEdges);
+      if(pathContainer) pathContainer.innerHTML = createMiniGraph(pathEdges);
+      if(cycleContainer) cycleContainer.innerHTML = createMiniGraph(cycleEdges);
+    }
+    
+    // --- EVENT LISTENERS ---
+
+    container.querySelectorAll('.topic-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const card = header.parentElement;
+            card.classList.toggle('open');
+            if (window.MathJax) { window.MathJax.typesetPromise([card]); }
+        });
+    });
+
+    if (themeToggleButton) themeToggleButton.addEventListener('click', () => setTheme(AppState.theme === 'dark' ? 'light' : 'dark'));
+    if (btnEs) btnEs.addEventListener('click', () => setLanguage('es'));
+    if (btnEn) btnEn.addEventListener('click', () => setLanguage('en'));
+    if (openModalBtnEs) openModalBtnEs.addEventListener('click', openSimulatorModal);
+    if (openModalBtnEn) openModalBtnEn.addEventListener('click', openSimulatorModal);
+    
+    // --- INICIALIZACIÓN ---
+    
+    const savedTheme = localStorage.getItem('user-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const savedLang = localStorage.getItem('user-lang') || (navigator.language || 'es').slice(0, 2);
+    
+    setTheme(savedTheme);
+    setLanguage(savedLang === 'en' ? 'en' : 'es');
+
+    // Abrir la primera tarjeta
+    const firstCard = container.querySelector(`#content-${AppState.lang} .topic-card`);
+    if(firstCard) {
+        firstCard.classList.add('open');
+        if (window.MathJax) { window.MathJax.typesetPromise([firstCard]); }
+    }
+  })();
+</script>
+
+</body>
+</html>

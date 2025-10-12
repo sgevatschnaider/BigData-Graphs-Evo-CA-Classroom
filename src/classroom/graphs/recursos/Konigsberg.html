@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Puentes de Königsberg — Grafo equivalente (interactivo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f8fafc; --paper:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --edge:#0f172a; --edge-hi:#16a34a; --edge-used:#94a3b8;
+    --node:#ef4444; --accent:#2563eb; --warn:#f59e0b; --shadow:0 10px 30px rgba(2,6,23,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--ink)}
+  header{position:sticky;top:0;background:var(--paper);border-bottom:1px solid #e2e8f0;box-shadow:var(--shadow);z-index:5}
+  .wrap{max-width:1000px;margin:0 auto;padding:14px 18px}
+  h1{font-size:clamp(20px,3.2vw,28px);margin:.2rem 0}
+  .sub{color:var(--muted);font-size:.95rem;margin-top:2px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  button{border:none;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;
+    background:#fff; box-shadow:var(--shadow); transition:.18s transform,.18s box-shadow}
+  button:hover{transform:translateY(-1px)}
+  .primary{background:var(--accent);color:#fff}
+  .warn{background:var(--warn);color:#fff}
+  .panel{background:var(--paper);border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin:16px 0}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px,1fr));gap:10px}
+  .stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:2px 6px}
+  .board{background:var(--paper);border:1px solid #e2e8f0;border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  svg{display:block;width:100%;height:auto;background:linear-gradient(180deg,#eef2ff 0,#e0f2fe 100%)}
+  /* edges */
+  .edge{fill:none;stroke:var(--edge);stroke-width:2.5;cursor:pointer;transition:.18s stroke,.18s opacity}
+  .edge:hover{stroke-width:3.5}
+  .edge.available{stroke:var(--edge-hi); filter:drop-shadow(0 0 6px rgba(22,163,74,.45))}
+  .edge.used{stroke:var(--edge-used); opacity:.7; cursor:not-allowed}
+  .hit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+  /* nodes */
+  .node{fill:var(--node);stroke:#fff;stroke-width:3;cursor:pointer}
+  .label{font: 700 14px/1 Inter, system-ui, sans-serif; fill:var(--ink)}
+  .big{font:800 16px/1 Inter, system-ui, sans-serif}
+  /* toast */
+  .toast{position:fixed;right:14px;top:14px;background:#0f172a;color:#fff;padding:10px 12px;border-radius:10px;
+         transform:translateX(120%);transition:.25s transform;box-shadow:var(--shadow);z-index:9}
+  .toast.show{transform:none}
+  @media (max-width:760px){ .big{font-size:14px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Grafo de los 7 Puentes de Königsberg</h1>
+    <div class="sub">Versión equivalente al dibujo de la <b>derecha</b> (multigrafo: AB×2, AC×2, AD, BD, CD). Haz clic en un vértice para empezar; luego en aristas adyacentes.</div>
+    <div class="controls" role="toolbar" aria-label="Controles">
+      <button id="btn-euler" class="primary">🔍 Analizar grados</button>
+      <button id="btn-hint">💡 Pista</button>
+      <button id="btn-reset" class="warn">🔄 Reiniciar</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="panel">
+    <div class="stats">
+      <div class="stat"><b>Posición:</b> <span id="pos" class="mono">—</span></div>
+      <div class="stat"><b>Puentes usados:</b> <span id="count" class="mono">0</span> / 7</div>
+      <div class="stat"><b>Ruta:</b> <span id="path" class="mono">—</span></div>
+      <div class="stat"><b>Grados (Nodos A,B,C,D):</b> <span class="mono">5, 3, 3, 3</span></div>
+    </div>
+  </div>
+
+  <div class="board">
+    <!-- Layout: C, A, B a la izquierda; D a la derecha -->
+    <svg viewBox="0 0 800 520" aria-label="Grafo equivalente de Königsberg">
+      <!-- edges (dibujadas por JS) -->
+      <g id="edges"></g>
+
+      <!-- nodes -->
+      <g id="nodes">
+        <!-- C -->
+        <circle class="node" id="node-C" cx="120" cy="90" r="9" tabindex="0" />
+        <text class="label big" x="120" y="70" text-anchor="middle">C</text>
+
+        <!-- A -->
+        <circle class="node" id="node-A" cx="120" cy="260" r="9" tabindex="0" />
+        <text class="label big" x="120" y="240" text-anchor="middle">A</text>
+
+        <!-- B -->
+        <circle class="node" id="node-B" cx="120" cy="430" r="9" tabindex="0" />
+        <text class="label big" x="120" y="450" text-anchor="middle">B</text>
+
+        <!-- D -->
+        <circle class="node" id="node-D" cx="680" cy="260" r="9" tabindex="0" />
+        <text class="label big" x="680" y="240" text-anchor="middle">D</text>
+      </g>
+    </svg>
+  </div>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ======== Modelo del multigrafo (equivalente al NB) ======== */
+const nodes = {
+  A:{x:120,y:260,name:"A"}, B:{x:120,y:430,name:"B"},
+  C:{x:120,y:90,name:"C"},  D:{x:680,y:260,name:"D"}
+};
+// Aristas: ABx2, ACx2, AD, BD, CD
+const edges = [
+  {id:"AB1", u:"A", v:"B", n:2, k:0},
+  {id:"AB2", u:"A", v:"B", n:2, k:1},
+  {id:"AC1", u:"A", v:"C", n:2, k:0},
+  {id:"AC2", u:"A", v:"C", n:2, k:1},
+  {id:"AD",  u:"A", v:"D", n:1, k:0},
+  {id:"BD",  u:"B", v:"D", n:1, k:0},
+  {id:"CD",  u:"C", v:"D", n:1, k:0},
+];
+
+let current = null;
+const used = new Set();
+const pathSeq = [];
+
+const $edges = document.getElementById("edges");
+const $pos   = document.getElementById("pos");
+const $count = document.getElementById("count");
+const $path  = document.getElementById("path");
+const $toast = document.getElementById("toast");
+
+/* ======== Dibujo de aristas (curvas paralelas) ======== */
+function pathFor(u,v,k,n){
+  const p = nodes[u], q = nodes[v];
+  const dx = q.x - p.x, dy = q.y - p.y;
+  const len = Math.hypot(dx,dy) || 1;
+  const nx = dx/len, ny = dy/len;
+  // perpendicular
+  const px = -ny, py = nx;
+  // offset (positivo o negativo para paralelas)
+  const sign = (k % 2 === 0) ? 1 : -1;
+  const mag = (n===1 ? 0 : 38); // separación de paralelas
+  const ox = px * mag * sign, oy = py * mag * sign;
+
+  // puntos de control cúbicos (cerca de extremos, desplazados)
+  const c1x = p.x + dx*0.25 + ox, c1y = p.y + dy*0.25 + oy;
+  const c2x = p.x + dx*0.75 + ox, c2y = p.y + dy*0.75 + oy;
+
+  return `M ${p.x} ${p.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${q.x} ${q.y}`;
+}
+
+function renderEdges(){
+  $edges.innerHTML = "";
+  edges.forEach(e=>{
+    const d = pathFor(e.u,e.v,e.k,e.n);
+    const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d", d);
+    p.setAttribute("id", e.id);
+    p.setAttribute("class", "edge");
+    p.addEventListener("click", ()=> tryCross(e));
+    // zona de clic (más gruesa)
+    const hit = document.createElementNS("http://www.w3.org/2000/svg","path");
+    hit.setAttribute("d", d);
+    hit.setAttribute("class","hit");
+    hit.addEventListener("click", ()=> tryCross(e));
+    $edges.appendChild(p);
+    $edges.appendChild(hit);
+  });
+}
+
+function toast(msg, ms=1800){
+  $toast.textContent = msg;
+  $toast.classList.add("show");
+  clearTimeout(window._t);
+  window._t = setTimeout(()=> $toast.classList.remove("show"), ms);
+}
+
+function setPosition(v){
+  current = v;
+  $pos.textContent = v ? v : "—";
+  if(v && pathSeq.length===0) pathSeq.push(v);
+  updateUI();
+}
+
+function otherEnd(e, at){ return e.u===at ? e.v : e.u; }
+
+function available(from){
+  return edges.filter(e => !used.has(e.id) && (e.u===from || e.v===from));
+}
+
+function tryCross(e){
+  if(used.has(e.id)) { toast("Esa arista ya fue usada.", 1200); return; }
+  if(!current){ toast("Elige un vértice inicial (A, B, C o D).", 1600); return; }
+  if(e.u!==current && e.v!==current){ toast("Debe ser adyacente a tu posición.", 1400); return; }
+
+  used.add(e.id);
+  const next = otherEnd(e,current);
+  setPosition(next);
+  pathSeq.push(next);
+  $count.textContent = used.size;
+  $path.textContent = pathSeq.join(" → ");
+
+  if(used.size===edges.length){
+    toast("Has usado las 7 aristas (no euleriano).", 1900);
+  }else if(available(next).length===0){
+    toast(`Te quedaste sin movimientos en ${next}.`, 1800);
+  }
+  updateUI();
+}
+
+function updateUI(){
+  // estados de aristas
+  edges.forEach(e=>{
+    const el = document.getElementById(e.id);
+    el.classList.toggle("used", used.has(e.id));
+    const can = current && (e.u===current || e.v===current) && !used.has(e.id);
+    el.classList.toggle("available", Boolean(can));
+  });
+}
+
+function analyzeEuler(){
+  const deg = {A:0,B:0,C:0,D:0};
+  edges.forEach(e=>{deg[e.u]++; deg[e.v]++;});
+  const odd = Object.keys(deg).filter(v=>deg[v]%2===1);
+  const msg = (odd.length===0) ? "Todos pares ⇒ circuito euleriano."
+            : (odd.length===2) ? `2 impares (${odd.join(", ")}) ⇒ camino euleriano.`
+            : `${odd.length} impares (${odd.join(", ")}) ⇒ no euleriano.`;
+  toast(msg, 2400);
+}
+
+function hint(){
+  if(!current){
+    toast("Sugerencia: comienza en un vértice de grado impar (A,B,C o D; aquí todos son impares).", 2600);
+  }else{
+    const opts = available(current).map(e=>`${current}–${otherEnd(e,current)}`);
+    toast(opts.length? `Disponibles desde ${current}: ${opts.join(", ")}` : "Sin opciones desde aquí.", 2200);
+  }
+}
+
+function resetAll(){
+  used.clear(); current=null; pathSeq.length=0;
+  $pos.textContent="—"; $count.textContent="0"; $path.textContent="—";
+  updateUI(); toast("Reiniciado.", 1000);
+}
+
+/* ======== Interacción con nodos ======== */
+["A","B","C","D"].forEach(v=>{
+  document.getElementById(`node-${v}`).addEventListener("click", ()=> {
+    if(used.size>0 && current){ toast("Ya iniciaste una ruta. Usa Reiniciar.", 1400); return; }
+    setPosition(v); toast(`Inicio en ${v}`,1000);
+  });
+});
+
+/* ======== Botones ======== */
+document.getElementById("btn-euler").addEventListener("click", analyzeEuler);
+document.getElementById("btn-hint").addEventListener("click", hint);
+document.getElementById("btn-reset").addEventListener("click", resetAll);
+
+/* ======== Render inicial ======== */
+renderEdges();
+updateUI();
+</script>
+</body>
+</html>
