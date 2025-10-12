@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Königsberg — Ciudad ↔ Grafo (interactivo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc; --paper:#ffffff; --ink:#0f172a; --muted:#64748b;
+  --river1:#0ea5e9; --river2:#3b82f6;
+  --land:#84cc16; --land-edge:#4d7c0f;
+  --bridge:#b45309; --bridge-hover:#f59e0b; --used:#94a3b8;
+  --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --accent:#2563eb;
+  --shadow:0 12px 28px rgba(2,6,23,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;background:var(--paper);border-bottom:1px solid #e2e8f0;box-shadow:var(--shadow);z-index:10}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
+h1{margin:.1rem 0;font-size:clamp(20px,3.2vw,28px)}
+.sub{color:var(--muted);font-size:.95rem}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{border:none;border-radius:10px;padding:9px 13px;font-weight:700;background:#fff;box-shadow:var(--shadow);cursor:pointer;transition:.18s transform,.18s box-shadow,.18s background}
+button:hover{transform:translateY(-1px)}
+.primary{background:var(--accent);color:#fff}
+.warn{background:var(--warn);color:#fff}
+.ghost{background:#eef2ff}
+.main{max-width:1100px;margin:14px auto;padding:0 18px}
+.panel{background:var(--paper);border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.stat{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:1px 6px}
+.flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.small{font-size:.85rem;color:var(--muted)}
+.board{position:relative;background:var(--paper);border:1px solid #e2e8f0;border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.views{position:relative}
+.view{position:absolute;inset:0;opacity:0;pointer-events:none;transition:.35s opacity}
+.view.active{opacity:1;pointer-events:auto}
+svg{display:block;width:100%;height:auto;background:linear-gradient(135deg,#e0f2fe,#dbeafe)}
+/* Ciudad */
+.river{fill:url(#rg)}
+.land{fill:var(--land);stroke:var(--land-edge);stroke-width:2}
+.bridge-arch{fill:var(--bridge);filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));cursor:pointer;transition:.2s transform,.2s fill}
+.bridge-arch:hover{fill:var(--bridge-hover);transform:scale(1.02)}
+.bridge-arch.used{fill:var(--used);opacity:.75;cursor:not-allowed}
+/* Grafo */
+.edge{fill:none;stroke:#0f172a;stroke-width:2.6;cursor:pointer;transition:.18s stroke,.18s opacity}
+.edge:hover{stroke:var(--bridge-hover);stroke-width:3.2}
+.edge.available{stroke:var(--ok);filter:drop-shadow(0 0 6px rgba(22,163,74,.45))}
+.edge.used{stroke:var(--used);opacity:.7;cursor:not-allowed}
+.node{fill:#ef4444;stroke:#fff;stroke-width:3;cursor:pointer}
+.label{font:700 14px/1 Inter,system-ui,sans-serif; fill:var(--ink)}
+.big{font:800 16px/1 Inter,system-ui,sans-serif}
+/* Walker & efectos */
+#walker{fill:#111827; stroke:#fff; stroke-width:2}
+.ripple{position:absolute;border:2px solid rgba(59,130,246,.65);border-radius:50%;transform:translate(-50%,-50%);animation:ripple .9s ease-out forwards}
+@keyframes ripple{from{opacity:1; width:0;height:0}to{opacity:0; width:70px;height:70px}}
+.shake{animation:shake .4s}
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+/* Toast */
+.toast{position:fixed;right:14px;top:14px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;transform:translateX(125%);transition:.25s transform;box-shadow:var(--shadow);z-index:20}
+.toast.show{transform:none}
+/* Tutorial */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:30}
+.overlay.show{display:grid}
+.modal{background:#fff;border-radius:14px;max-width:720px;max-height:82vh;overflow:auto;border:1px solid #e2e8f0;box-shadow:var(--shadow);padding:16px 16px 12px}
+.modal h3{margin:6px 0 8px}
+.modal p{margin:.4rem 0}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.badge{display:inline-block;padding:0 8px;border-radius:999px;background:#eef2ff;color:#1e40af;font-weight:700;font-size:.8rem}
+/* What-if */
+#whatif{display:none;margin-top:10px}
+#whatif.show{display:block}
+.toggle{display:flex;align-items:center;gap:8px}
+.toggle input{transform:scale(1.2)}
+/* mini map img */
+.mini{display:flex;gap:10px;align-items:center}
+.mini img{width:110px;height:auto;border-radius:8px;border:1px solid #e5e7eb}
+@media (max-width:780px){ .mini{flex-direction:column;align-items:flex-start} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Los 7 Puentes de Königsberg — <span class="badge">Ciudad ↔ Grafo</span></h1>
+    <div class="sub">Explora el mapa histórico y su grafo equivalente. Elige un vértice y cruza puentes; observa por qué <b>no existe</b> un recorrido euleriano.</div>
+    <div class="controls" role="toolbar" aria-label="Controles">
+      <button id="btn-toggle" class="primary">🔄 Cambiar vista (Ciudad)</button>
+      <button id="btn-euler">🔍 Analizar grados</button>
+      <button id="btn-demo" class="ghost">🤖 Auto-demostración</button>
+      <button id="btn-tutorial" class="ghost">🎓 Tutorial</button>
+      <button id="btn-whatif" class="ghost">🧪 ¿Qué pasaría si…?</button>
+      <button id="btn-reset" class="warn">♻️ Reiniciar</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="panel">
+    <div class="stats">
+      <div class="stat"><b>Posición:</b> <span id="pos" class="mono">—</span></div>
+      <div class="stat"><b>Puentes usados:</b> <span id="count" class="mono">0</span> / <span id="total" class="mono">7</span></div>
+      <div class="stat"><b>Ruta:</b> <span id="path" class="mono">—</span></div>
+      <div class="stat"><b>Grados (A,B,C,D):</b> <span id="deg" class="mono">5, 3, 3, 3</span></div>
+      <div class="stat"><b>Intentos:</b> <span id="tries" class="mono">0</span></div>
+      <div class="stat mini">
+        <img alt="Mini mapa de Königsberg" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Konigsberg_bridges.png/320px-Konigsberg_bridges.png">
+        <div class="small">Mini-mapa de referencia (puedes sustituir por la imagen local o <i>Britannica</i>).<br>Vista actual: <span id="which" class="mono">Grafo</span></div>
+      </div>
+    </div>
+    <!-- What-if -->
+    <div id="whatif" class="panel">
+      <div class="flex">
+        <div class="toggle"><input type="checkbox" id="t_bc"><label for="t_bc">Añadir puente <b>B–C</b></label></div>
+        <div class="toggle"><input type="checkbox" id="t_ad"><label for="t_ad">Añadir un segundo <b>A–D</b></label></div>
+        <div class="toggle"><input type="checkbox" id="t_rm_ac"><label for="t_rm_ac">Quitar una copia de <b>A–C</b></label></div>
+      </div>
+      <div class="small">La lista de grados y el resultado euleriano se actualizan en tiempo real.</div>
+    </div>
+  </div>
+
+  <div id="board" class="board">
+    <div class="views" style="aspect-ratio: 16/9">
+      <!-- ======== Vista: Ciudad ======== -->
+      <div id="city" class="view">
+        <svg viewBox="0 0 1000 560" aria-label="Ciudad de Königsberg (estilizada)">
+          <defs>
+            <linearGradient id="rg" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="var(--river1)"/><stop offset="1" stop-color="var(--river2)"/>
+            </linearGradient>
+          </defs>
+          <!-- Río (dos brazos) -->
+          <path class="river" d="M0,160 C240,90 640,180 1000,120 L1000,280 C720,360 280,260 0,320 Z"/>
+          <path class="river" d="M0,340 C240,410 640,320 1000,380 L1000,560 L0,560 Z"/>
+          <!-- Islas A (Kneiphof) y B (sur) y C (norte) simplificadas -->
+          <ellipse class="land" cx="520" cy="260" rx="120" ry="70"/>
+          <ellipse class="land" cx="300" cy="300" rx="90" ry="55"/>
+          <ellipse class="land" cx="820" cy="200" rx="80" ry="50"/>
+          <!-- Puentes (arcos anchos; data-id igual al grafo) -->
+          <!-- A–B  (dos) -->
+          <path id="arch-AB1" data-edge="AB1" class="bridge-arch" d="M430,310 Q460,265 480,235 Q500,205 510,180 L530,190 Q520,210 500,240 Q480,270 450,320 Z"/>
+          <path id="arch-AB2" data-edge="AB2" class="bridge-arch" d="M420,345 Q455,300 475,270 Q495,240 510,215 L535,225 Q520,250 505,280 Q485,315 445,360 Z"/>
+          <!-- A–C (dos) -->
+          <path id="arch-AC1" data-edge="AC1" class="bridge-arch" d="M600,220 Q650,200 720,195 L720,215 Q660,220 610,240 Z"/>
+          <path id="arch-AC2" data-edge="AC2" class="bridge-arch" d="M600,260 Q660,245 730,240 L730,260 Q660,265 610,280 Z"/>
+          <!-- A–D (D es la orilla derecha en esta estilización) -->
+          <path id="arch-AD" data-edge="AD" class="bridge-arch" d="M620,300 Q730,310 880,290 L880,315 Q740,330 630,320 Z"/>
+          <!-- B–D -->
+          <path id="arch-BD" data-edge="BD" class="bridge-arch" d="M360,360 Q520,400 740,380 L740,405 Q520,425 350,385 Z"/>
+          <!-- C–D -->
+          <path id="arch-CD" data-edge="CD" class="bridge-arch" d="M860,220 Q900,250 960,260 L960,235 Q905,230 870,205 Z"/>
+
+          <!-- Etiquetas -->
+          <text x="520" y="260" class="label big" text-anchor="middle">A</text>
+          <text x="300" y="300" class="label big" text-anchor="middle">B</text>
+          <text x="820" y="200" class="label big" text-anchor="middle">C</text>
+          <text x="965" y="300" class="label big" text-anchor="end">D (orilla)</text>
+
+          <!-- Walker -->
+          <circle id="walker-city" r="7" cx="520" cy="260" style="display:none"/>
+        </svg>
+      </div>
+
+      <!-- ======== Vista: Grafo ======== -->
+      <div id="graph" class="view active">
+        <svg viewBox="0 0 800 520" aria-label="Grafo equivalente">
+          <!-- edges -->
+          <g id="edges"></g>
+          <!-- nodes -->
+          <g id="nodes">
+            <!-- C, A, B a la izquierda; D a la derecha -->
+            <circle class="node" id="node-C" cx="120" cy="90" r="9" tabindex="0" />
+            <text class="label big" x="120" y="70" text-anchor="middle">C</text>
+
+            <circle class="node" id="node-A" cx="120" cy="260" r="9" tabindex="0" />
+            <text class="label big" x="120" y="240" text-anchor="middle">A</text>
+
+            <circle class="node" id="node-B" cx="120" cy="430" r="9" tabindex="0" />
+            <text class="label big" x="120" y="450" text-anchor="middle">B</text>
+
+            <circle class="node" id="node-D" cx="680" cy="260" r="9" tabindex="0" />
+            <text class="label big" x="680" y="240" text-anchor="middle">D</text>
+          </g>
+          <!-- Walker -->
+          <circle id="walker-graph" r="7" cx="120" cy="260" style="display:none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Tutorial -->
+<div id="ov" class="overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Tutorial">
+    <h3>🎓 Tutorial rápido</h3>
+    <p><b>1)</b> Un <b>grafo</b> tiene <em>vértices</em> (regiones) y <em>aristas</em> (puentes). Aquí: AB×2, AC×2, AD, BD, CD.</p>
+    <p><b>2)</b> Los <b>grados</b> son los puentes que tocan cada vértice. A:5, B:3, C:3, D:3 (todos impares).</p>
+    <p><b>3)</b> <b>Teorema de Euler:</b> camino euleriano ⇔ hay 0 o 2 vértices impares. Con 4 impares, no se puede.</p>
+    <p><b>4)</b> Prueba cruzar puentes; mira cómo se resaltan los disponibles. Activa “¿Qué pasaría si…?” para modificar el grafo y ver cuándo <i>sí</i> aparece un camino euleriano.</p>
+    <div class="actions">
+      <button id="tut-close">Cerrar</button>
+      <button id="tut-next" class="primary">Mostrar ejemplo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========= Datos base (multigrafo) ========= */
+const G_LAYOUT = { // posiciones del grafo
+  A:{x:120,y:260}, B:{x:120,y:430}, C:{x:120,y:90}, D:{x:680,y:260}
+};
+// Edges originales
+const BASE_EDGES = [
+  {id:"AB1", u:"A", v:"B", n:2, k:0},
+  {id:"AB2", u:"A", v:"B", n:2, k:1},
+  {id:"AC1", u:"A", v:"C", n:2, k:0},
+  {id:"AC2", u:"A", v:"C", n:2, k:1},
+  {id:"AD",  u:"A", v:"D", n:1, k:0},
+  {id:"BD",  u:"B", v:"D", n:1, k:0},
+  {id:"CD",  u:"C", v:"D", n:1, k:0},
+];
+
+let tries = 0;
+let current = null;
+let used = new Set();
+let seq = [];
+let edges = structuredClone(BASE_EDGES); // activo (modificado por what-if)
+
+const $edges = document.getElementById("edges");
+const $pos   = document.getElementById("pos");
+const $count = document.getElementById("count");
+const $total = document.getElementById("total");
+const $path  = document.getElementById("path");
+const $deg   = document.getElementById("deg");
+const $which = document.getElementById("which");
+const $tries = document.getElementById("tries");
+const $toast = document.getElementById("toast");
+const $board = document.getElementById("board");
+const viewCity  = document.getElementById("city");
+const viewGraph = document.getElementById("graph");
+const walkerG = document.getElementById("walker-graph");
+const walkerC = document.getElementById("walker-city");
+
+/* ========= Utilidades ========= */
+function toast(msg, ms=1800){ $toast.textContent=msg; $toast.classList.add("show"); clearTimeout(window._tt); window._tt=setTimeout(()=> $toast.classList.remove("show"), ms); }
+function setPos(v){ current=v; $pos.textContent = v || "—"; if(v && seq.length===0) seq.push(v); updateUI(); }
+function otherEnd(e,at){ return e.u===at?e.v:e.u; }
+function available(from){ return edges.filter(e=>!used.has(e.id)&&(e.u===from||e.v===from)); }
+function degs(){
+  const d = {A:0,B:0,C:0,D:0};
+  edges.forEach(e=>{d[e.u]++; d[e.v]++;});
+  return d;
+}
+function eulerMsg(){
+  const d = degs(); const odd = Object.keys(d).filter(k=>d[k]%2===1);
+  return {d, odd, text: odd.length===0 ? "Todos pares ⇒ circuito euleriano."
+       : odd.length===2 ? `2 impares (${odd.join(", ")}) ⇒ camino euleriano.`
+       : `${odd.length} impares (${odd.join(", ")}) ⇒ no euleriano.`};
+}
+function reset(hard=false){
+  used.clear(); seq=[]; setPos(null); $count.textContent="0"; $path.textContent="—"; walkerG.style.display="none"; walkerC.style.display="none";
+  if(hard){ tries++; $tries.textContent=String(tries); }
+  renderEdges(); updateUI();
+}
+function confetti(){
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.style.position='fixed'; s.style.left=(Math.random()*100)+'vw'; s.style.top='-10px';
+    s.style.width=s.style.height=(6+Math.random()*6)+'px';
+    s.style.background=`hsl(${Math.random()*360} 90% 50%)`;
+    s.style.borderRadius='2px'; s.style.zIndex=25; s.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(s);
+    const dur=1500+Math.random()*1200, dx=(Math.random()*2-1)*60;
+    s.animate([{transform:`translate(0,0) rotate(0deg)`},{transform:`translate(${dx}px, 100vh) rotate(360deg)`}],{duration:dur,easing:'cubic-bezier(.3,.7,.3,1)'});
+    setTimeout(()=>s.remove(), dur+50);
+  }
+}
+
+/* ========= Dibujo Grafo ========= */
+function pathFor(u,v,k,n){
+  const p=G_LAYOUT[u], q=G_LAYOUT[v]; const dx=q.x-p.x, dy=q.y-p.y; const len=Math.hypot(dx,dy)||1;
+  const nx=dx/len, ny=dy/len, px=-ny, py=nx; const sign=(k%2===0)?1:-1; const mag=(n===1?0:38);
+  const ox=px*mag*sign, oy=py*mag*sign;
+  const c1x=p.x+dx*0.25+ox, c1y=p.y+dy*0.25+oy, c2x=p.x+dx*0.75+ox, c2y=p.y+dy*0.75+oy;
+  return `M ${p.x} ${p.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${q.x} ${q.y}`;
+}
+function renderEdges(){
+  $edges.innerHTML="";
+  edges.forEach(e=>{
+    const d=pathFor(e.u,e.v,e.k,e.n);
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d", d); p.setAttribute("id", e.id); p.setAttribute("class","edge");
+    p.addEventListener("click", ()=>tryCross(e,true));
+    $edges.appendChild(p);
+  });
+  $total.textContent = String(edges.length);
+}
+function updateUI(){
+  $which.textContent = viewGraph.classList.contains('active') ? "Grafo" : "Ciudad";
+  edges.forEach(e=>{
+    const el=document.getElementById(e.id); if(!el) return;
+    const isUsed=used.has(e.id); el.classList.toggle('used', isUsed);
+    const can=current && !isUsed && (e.u===current||e.v===current); el.classList.toggle('available', Boolean(can));
+  });
+  const info = eulerMsg();
+  $deg.textContent = `A:${info.d.A}, B:${info.d.B}, C:${info.d.C}, D:${info.d.D} — ${info.text}`;
+}
+
+/* ========= Interacción (grafo y ciudad) ========= */
+["A","B","C","D"].forEach(v=>{
+  document.getElementById(`node-${v}`)?.addEventListener("click", ()=>{
+    if(used.size>0 && current){ toast("Ruta en curso. Usa Reiniciar para cambiar inicio.",1400); return; }
+    setPos(v); toast(`Inicio en ${v}`,1000);
+    // posiciona walker en grafo
+    walkerG.setAttribute("cx", G_LAYOUT[v].x); walkerG.setAttribute("cy", G_LAYOUT[v].y); walkerG.style.display="";
+    walkerC.style.display=""; // en ciudad lo ajustamos al centro de A por estética
+  });
+});
+
+// Ciudad: puentes (arcos) clicables mapeados a ids
+document.querySelectorAll('[data-edge]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const id=el.getAttribute('data-edge');
+    const e=edges.find(x=>x.id===id);
+    tryCross(e,false,el);
+  });
+});
+
+/* ========= Cruce de arista + animaciones ========= */
+function tryCross(e, fromGraph=true, cityEl=null){
+  if(!e){ toast("Arista inexistente.",1000); return; }
+  if(used.has(e.id)){ toast("Ese puente ya fue usado.",1200); $board.classList.add('shake'); setTimeout(()=> $board.classList.remove('shake'), 350); return; }
+  if(!current){ toast("Elige un vértice inicial (A,B,C o D).",1600); $board.classList.add('shake'); setTimeout(()=> $board.classList.remove('shake'), 350); return; }
+  if(e.u!==current && e.v!==current){ toast("Debe ser adyacente a tu posición.",1400); $board.classList.add('shake'); setTimeout(()=> $board.classList.remove('shake'), 350); return; }
+
+  // animar walker en vista activa
+  const next = otherEnd(e,current);
+  animateAlong(e, fromGraph, cityEl, ()=> {
+    used.add(e.id); setPos(next); seq.push(next); $count.textContent=String(used.size); $path.textContent=seq.join(' → ');
+    // ondas/ripple
+    const rect=$board.getBoundingClientRect(); const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const r = document.createElement('div'); r.className='ripple'; r.style.left=cx+'px'; r.style.top=cy+'px'; document.body.appendChild(r); setTimeout(()=>r.remove(), 900);
+
+    updateUI();
+    if(used.size===edges.length){ toast("¡Completaste los 7 puentes! (No euleriano).",2200); confetti(); return; }
+    if(available(next).length===0){ toast(`Sin movimientos desde ${next}.`,1800); }
+  });
+}
+
+function animateAlong(e, fromGraph, cityEl, done){
+  const duration = 700; // ms
+  if(viewGraph.classList.contains('active')){
+    const path=document.getElementById(e.id);
+    const len=path.getTotalLength();
+    const start = performance.now();
+    walkerG.style.display="";
+    requestAnimationFrame(function step(t){
+      const k=Math.min(1,(t-start)/duration);
+      const pt=path.getPointAtLength(k*len);
+      walkerG.setAttribute('cx',pt.x); walkerG.setAttribute('cy',pt.y);
+      if(k<1) requestAnimationFrame(step); else done&&done();
+    });
+  }else{
+    // ciudad: animamos desde centroide aproximado de la isla/orilla
+    const map = {A:{x:520,y:260}, B:{x:300,y:300}, C:{x:820,y:200}, D:{x:960,y:300}};
+    const p=map[current], q=map[otherEnd(e,current)];
+    walkerC.style.display="";
+    const start=performance.now();
+    requestAnimationFrame(function step(t){
+      const k=Math.min(1,(t-start)/duration);
+      const x=p.x+(q.x-p.x)*k, y=p.y+(q.y-p.y)*k;
+      walkerC.setAttribute('cx',x); walkerC.setAttribute('cy',y);
+      if(k<1) requestAnimationFrame(step); else done&&done();
+    });
+    // marcar arco usado en ciudad
+    if(cityEl){ cityEl.classList.add('used'); }
+  }
+}
+
+/* ========= Botones ========= */
+document.getElementById("btn-toggle").addEventListener("click", ()=>{
+  const gActive = viewGraph.classList.contains('active');
+  viewGraph.classList.toggle('active', !gActive);
+  viewCity.classList.toggle('active', gActive);
+  document.getElementById("btn-toggle").textContent = gActive ? "🔄 Cambiar vista (Grafo)" : "🔄 Cambiar vista (Ciudad)";
+  updateUI();
+});
+document.getElementById("btn-euler").addEventListener("click", ()=>{
+  const info=eulerMsg(); toast(info.text, 2400);
+});
+document.getElementById("btn-reset").addEventListener("click", ()=>{ reset(true); document.querySelectorAll('.bridge-arch').forEach(b=>b.classList.remove('used')); });
+document.getElementById("btn-tutorial").addEventListener("click", ()=>{ document.getElementById("ov").classList.add('show'); document.getElementById("ov").setAttribute('aria-hidden','false'); });
+document.getElementById("tut-close").addEventListener("click", ()=>{ document.getElementById("ov").classList.remove('show'); });
+document.getElementById("tut-next").addEventListener("click", ()=>{
+  // secuencia que se atasca (ejemplo): A→C (AC1) → D (CD) → C (AC2) → A (AD) → B (AB1) y queda sin salida buena
+  reset(true);
+  setPos("A");
+  const seqEdges = ["AC1","CD","AC2","AD","AB1"];
+  let i=0;
+  (function play(){
+    if(i>=seqEdges.length){ toast("Observa cómo quedas sin opciones: demasiados grados impares.", 2800); return; }
+    const id=seqEdges[i++]; const e=edges.find(x=>x.id===id);
+    setTimeout(()=>tryCross(e,true), 600);
+    setTimeout(play, 800);
+  })();
+});
+document.getElementById("btn-whatif").addEventListener("click", ()=>{
+  document.getElementById("whatif").classList.toggle('show');
+});
+
+/* ========= What-if toggles ========= */
+function rebuildEdges(){
+  edges = structuredClone(BASE_EDGES);
+  if(document.getElementById("t_bc").checked) edges.push({id:"BC",u:"B",v:"C",n:1,k:0});
+  if(document.getElementById("t_ad").checked) edges.push({id:"AD2",u:"A",v:"D",n:1,k:0});
+  if(document.getElementById("t_rm_ac").checked){
+    // quitar una AC (la AC2)
+    edges = edges.filter(e=>e.id!=="AC2");
+  }
+  reset(); // soft reset manteniendo intentos
+}
+["t_bc","t_ad","t_rm_ac"].forEach(id=> document.getElementById(id).addEventListener("change", rebuildEdges));
+
+/* ========= Inicio ========= */
+renderEdges(); updateUI();
+</script>
+</body>
+</html>
