@@ -70,6 +70,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Data Flywheel",
+    "path": "/src/classroom/graphs/recursos/Data Flywheel.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-12T17:50:29-03:00"
+  },
+  {
     "title": "Data Flywheel Robótico — USA vs China",
     "path": "/src/classroom/graphs/recursos/Data Flywheel (U→D→Q→U).html",
     "tag": "Demo",
@@ -397,6 +404,20 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-12T08:47:19-03:00"
+  },
+  {
+    "title": "Robotic Capital and Data Flywheel — Interactive Demonstration",
+    "path": "/src/classroom/graphs/recursos/Robotic Capital vs. Common Capital — The Data Flywheel Effect.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-12T17:50:29-03:00"
+  },
+  {
+    "title": "Robotic Data Flywheel — USA vs China",
+    "path": "/src/classroom/graphs/recursos/Data Flywheel Simulator — USA vs China.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-12T17:50:29-03:00"
   },
   {
     "title": "Teoría de Grafos - Visualización Interactiva",
