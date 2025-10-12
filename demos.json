@@ -145,5 +145,12 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:31:14-03:00"
+  },
+  {
+    "title": "ZKP Demos — Cueva de Alí Babá + Compromiso Hash",
+    "path": "/src/classroom/graphs/recursos/Simulador_ZPK.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-11T23:33:17-03:00"
   }
 ]
