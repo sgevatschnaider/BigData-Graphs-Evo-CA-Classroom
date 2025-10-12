@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hipercubo y Distancia de Hamming</title>
+
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --accent: #0072ff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px rgba(0, 114, 255, 0.3);
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1d2b64 0%, #0d0d0d 100%);
+            --bg-secondary: rgba(45, 55, 72, 0.95);
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --accent: #00c6ff;
+            --card-bg: rgba(45, 55, 72, 0.9);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .bubble { position: absolute; background: rgba(255, 255, 255, 0.1); border-radius: 50%; opacity: 0.6; animation: float 15s infinite linear; }
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+        .header { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--bg-secondary); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 1rem 2rem; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .theme-toggle { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+        .theme-toggle:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0, 114, 255, 0.4); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 100px 2rem 2rem; position: relative; z-index: 1; }
+        .hero { text-align: center; margin-bottom: 3rem; background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 20px; padding: 3rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; background: linear-gradient(45deg, var(--accent), #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        [data-theme="dark"] .hero h1 { background: linear-gradient(45deg, #00c6ff, #92fe9d); -webkit-background-clip: text; }
+        .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+        .section { margin-bottom: 2.5rem; background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 20px; padding: 2.5rem; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.3s ease; }
+        .section:hover { transform: translateY(-5px); }
+        .section h2 { color: var(--accent); margin-bottom: 1.5rem; font-size: 2rem; display: flex; align-items: center; gap: 10px; }
+        .section-icon { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+        .formula { background: rgba(0, 114, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.5rem; margin: 1.5rem 0; border-radius: 5px; font-size: 1.2rem; overflow-x: auto; }
+        .highlight { background: linear-gradient(120deg, rgba(0, 198, 255, 0.3) 0%, rgba(0, 114, 255, 0.1) 100%); padding: 0.2rem 0.5rem; border-radius: 5px; font-weight: bold; }
+        [data-theme="dark"] .highlight { background: linear-gradient(120deg, rgba(0, 198, 255, 0.2) 0%, rgba(29, 43, 100, 0.2) 100%); }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .grid-item { background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: 10px; }
+        [data-theme="dark"] .grid-item { background: rgba(255,255,255,0.03); }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; } .hero p { font-size: 1.1rem; } .container { padding: 80px 1rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">📏 Hipercubo y Distancia</div>
+            <button class="theme-toggle" id="theme-toggle">🌙 Tema Oscuro</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="hero fade-in">
+            <h1>Distancia en el Hipercubo: Un Matrimonio Perfecto con Hamming</h1>
+            <p>Exploramos por qué la distancia más corta entre dos puntos en el grafo del hipercubo $Q_d$ es exactamente la distancia de Hamming, una propiedad fundamental con profundas implicaciones en computación y teoría de la información.</p>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">1</span>El Hipercubo como Grafo de Cayley</h2>
+            <p>Definimos el hipercubo $Q_d$ como el grafo de Cayley sobre el grupo $(\mathbb{Z}_2)^d = \{0,1\}^d$ (cadenas de $d$ bits con la operación XOR).</p>
+            <div class="formula">
+                $Q_d = \mathrm{Cay}((\mathbb{Z}_2)^d, \{e_1, \dots, e_d\})$
+            </div>
+            <p>Donde $e_i$ es el vector con un 1 en la posición $i$ y 0 en el resto. La regla de adyacencia es simple: dos vértices $u$ y $v$ están conectados, $u \sim v$, si $v = u + e_i$. Esto es equivalente a decir que <span class="highlight">$u$ y $v$ difieren en exactamente una coordenada</span> (un "bit flip").</p>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">2</span>La Afirmación Principal: $\mathrm{dist}_{Q_d}(u,v) = \mathrm{Ham}(u,v)$</h2>
+            <p>La distancia en el grafo, $\mathrm{dist}_{Q_d}(u,v)$, es la longitud del camino más corto entre $u$ y $v$. La distancia de Hamming, $\mathrm{Ham}(u,v)$, es el número de posiciones en las que los bits de $u$ y $v$ difieren. La afirmación es que estas dos medidas son idénticas.</p>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Prueba de $\mathrm{dist} \le \mathrm{Ham}$</h3>
+                    <p>Podemos construir un camino de $u$ a $v$ de longitud $\mathrm{Ham}(u,v) = k$. Simplemente "flipeamos" (aplicando el $e_i$ correspondiente) cada uno de los $k$ bits donde $u$ y $v$ difieren. Cada flip es un paso en el grafo, y en $k$ pasos llegamos a $v$. Por lo tanto, el camino más corto no puede ser más largo que $k$.</p>
+                </div>
+                <div class="grid-item">
+                    <h3>Prueba de $\mathrm{dist} \ge \mathrm{Ham}$</h3>
+                    <p>Cada paso (arista) en el grafo del hipercubo solo puede cambiar una coordenada a la vez. Para transformar $u$ en $v$, necesitamos corregir las $k$ coordenadas donde difieren. Como ningún paso puede arreglar más de una coordenada, se necesitan al menos $k$ pasos. Por lo tanto, el camino más corto debe tener al menos longitud $k$.</p>
+                </div>
+            </div>
+            <div class="formula" style="text-align:center; margin-top: 1.5rem;">
+            Dado que $\mathrm{dist} \le k$ y $\mathrm{dist} \ge k$, se concluye que $\mathrm{dist}_{Q_d}(u,v) = \mathrm{Ham}(u,v)$.
+            </div>
+        </section>
+        
+        <section class="section fade-in">
+            <h2><span class="section-icon">3</span>Consecuencias de esta Equivalencia</h2>
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h4>Diámetro del Hipercubo</h4>
+                    <p>El diámetro de un grafo es la máxima distancia entre cualquier par de vértices. En $Q_d$, esto equivale a $\max_{u,v} \mathrm{Ham}(u,v) = d$. Por ejemplo, entre $(0,0,\dots,0)$ y $(1,1,\dots,1)$.</p>
+                    <p class="formula">$\mathrm{diam}(Q_d) = d$</p>
+                </div>
+                 <div class="grid-item">
+                    <h4>Capas o Esferas de Hamming</h4>
+                    <p>El número de vértices a una distancia $r$ de un vértice dado (ej. el origen) es el número de maneras de elegir $r$ bits para flipear de un total de $d$.</p>
+                    <p class="formula">$|S_r| = \binom{d}{r}$</p>
+                </div>
+                <div class="grid-item">
+                    <h4>Número de Caminos Mínimos</h4>
+                    <p>Si $\mathrm{Ham}(u,v)=k$, hay $k!$ caminos más cortos entre ellos. Esto se debe a que podemos aplicar los $k$ flips necesarios en cualquier orden.</p>
+                    <p class="formula">$\#\{\text{caminos mínimos}\} = k!$</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section fade-in">
+            <h2><span class="section-icon">🚀</span>Aplicaciones en el Mundo Real</h2>
+            <p>Esta conexión entre la geometría del hipercubo y la métrica de Hamming no es solo una curiosidad matemática; es la base de tecnologías fundamentales:</p>
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h4>Teoría de Códigos Correctores</h4>
+                    <p>Modela cómo se detectan y corrigen errores en transmisiones digitales. Las "esferas" de Hamming definen la capacidad de un código para corregir bits erróneos.</p>
+                </div>
+                <div class="grid-item">
+                    <h4>Redes de Interconexión</h4>
+                    <p>La topología de hipercubo es ideal para redes de computación paralela por su bajo diámetro ($d = \log_2 N$) y su alta conectividad (muchos caminos mínimos), lo que ofrece tolerancia a fallos.</p>
+                </div>
+                <div class="grid-item">
+                    <h4>Búsqueda y Hashing</h4>
+                    <p>Se utiliza en búsqueda de vecinos cercanos y hashing sensible a la localidad (LSH) para comparar rápidamente firmas binarias, esencial en sistemas de recomendación y búsqueda de imágenes.</p>
+                </div>
+                <div class="grid-item">
+                    <h4>Códigos Gray</h4>
+                    <p>Son caminos Hamiltonianos en el hipercubo, secuencias donde solo un bit cambia en cada paso. Se usan en sensores y para evitar estados intermedios erróneos.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        createBubbles();
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙 Tema Oscuro';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Tema Claro';
+            }
+        });
+
+        const scrollElements = document.querySelectorAll('.fade-in');
+        const handleScrollAnimations = () => {
+            scrollElements.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                    el.classList.add('visible');
+                }
+            });
+        };
+        window.addEventListener('scroll', handleScrollAnimations);
+        handleScrollAnimations();
+    });
+
+    function createBubbles() {
+        const bubblesContainer = document.getElementById('bubbles');
+        if(!bubblesContainer) return;
+        setInterval(() => {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            const size = Math.random() * 60 + 20;
+            const posX = Math.random() * window.innerWidth;
+            const duration = Math.random() * 10 + 15;
+            bubble.style.width = `${size}px`; bubble.style.height = `${size}px`;
+            bubble.style.left = `${posX}px`; bubble.style.animationDuration = `${duration}s`;
+            bubblesContainer.appendChild(bubble);
+            setTimeout(() => bubble.remove(), duration * 1000);
+        }, 350);
+    }
+    </script>
+</body>
+</html>

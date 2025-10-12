@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gráfica de Cayley S₄ - Cubo Truncado Interactivo 3D</title>
+<style>
+  :root{
+    --bg-primary: #0a0b1e; --bg-secondary: #1a1535;
+    --accent-red: #ff3366; --accent-blue: #33ccff; --accent-gold: #ffaa33;
+    --text-primary: #ffffff; --text-secondary: #b8bcc8;
+    --panel-bg: rgba(255, 255, 255, 0.03); --panel-border: rgba(255, 255, 255, 0.1);
+    --glow-red: 0 0 20px #ff3366, 0 0 40px #ff336644;
+    --glow-blue: 0 0 20px #33ccff, 0 0 40px #33ccff44;
+    --glow-gold: 0 0 20px #ffaa33, 0 0 40px #ffaa3344;
+    --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%; margin: 0;
+    background: radial-gradient(ellipse 1400px 900px at 20% 15%, #2a1b5c 0%, #1a1535 30%, #0a0b1e 70%);
+    color: var(--text-primary); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+  }
+  /* CAMBIO: Rejilla principal ajustada para dar más espacio al grafo */
+  .container { display: grid; grid-template-columns: 340px 1fr; gap: 20px; height: 100vh; padding: 20px; }
+  .control-panel {
+    backdrop-filter: blur(20px) saturate(180%); background: var(--panel-bg);
+    border: 1px solid var(--panel-border); border-radius: 20px;
+    padding: 24px; box-shadow: var(--shadow-deep);
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .control-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent-red), var(--accent-blue), var(--accent-gold));
+    border-radius: 20px 20px 0 0;
+  }
+  h1 {
+    font-size: 24px; margin: 0 0 16px 0; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .subtitle { color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+  .legend { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+  .legend-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+  .legend-item:hover { background: rgba(255, 255, 255, 0.05); transform: translateY(-2px); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; }
+  .legend-dot.red { background: var(--accent-red); box-shadow: var(--glow-red); }
+  .legend-dot.blue { background: var(--accent-blue); box-shadow: var(--glow-blue); }
+  .controls { display: grid; gap: 16px; margin-top: auto; }
+  .control-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    flex-grow: 1; background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    color: var(--text-primary); border: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 18px;
+    border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px;
+    transition: all 0.3s ease; text-align: center;
+  }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.3); }
+  .btn:active { transform: translateY(-1px); }
+  .toggle-group { display: flex; flex-direction: column; gap: 12px; }
+  .toggle { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 14px; cursor: pointer; transition: color 0.3s ease; }
+  .toggle:hover { color: var(--text-primary); }
+  .toggle input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-blue); }
+  .info-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px; margin-top: 20px; font-family: 'Courier New', monospace; }
+  .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+  .info-value { color: var(--accent-gold); font-weight: bold; }
+  .stage { position: relative; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-deep); cursor: grab; }
+  .stage:active { cursor: grabbing; }
+  #svg { width: 100%; height: 100%; min-height: calc(100vh - 40px); background: radial-gradient(circle at 30% 40%, #1a1535, #0a0b1e); border-radius: 20px; }
+  .node { cursor: pointer; }
+  .node circle { fill: url(#nodeGradient); stroke: rgba(255, 255, 255, 0.4); stroke-width: 1.5; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2)); transition: all 0.3s ease; }
+  .node:hover circle { stroke: rgba(255, 255, 255, 0.8); stroke-width: 2.5; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4)); transform: scale(1.1); }
+  .node text { font-size: 11px; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--text-primary); font-weight: 600; text-shadow: 0 0 6px rgba(0, 0, 0, 0.8); }
+  .edge { fill: none; stroke-linecap: round; transition: opacity 0.3s; }
+  .edge.a { stroke: var(--accent-red); filter: drop-shadow(0 0 6px var(--accent-red)); stroke-width: 3; }
+  .edge.b { stroke: var(--accent-blue); filter: drop-shadow(0 0 6px var(--accent-blue)); stroke-width: 2.5; }
+  .edge.hidden { opacity: 0.05; }
+  .node.active circle { stroke: var(--accent-gold); stroke-width: 3; filter: drop-shadow(var(--glow-gold)); animation: pulse 1.5s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+  .tooltip { position: absolute; pointer-events: none; padding: 12px 16px; background: rgba(10, 11, 30, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 13px; transform: translate(-50%, -150%); white-space: nowrap; box-shadow: var(--shadow-deep); display: none; z-index: 1000; }
+  .credit { position: absolute; left: 24px; bottom: 20px; font-size: 12px; opacity: 0.7; color: var(--text-secondary); }
+
+  @media (max-width: 1100px) {
+    body { overflow-y: auto; }
+    .container { grid-template-columns: 1fr; grid-template-rows: minmax(500px, 60vh) auto; height: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <main class="stage" id="stage">
+    <svg id="svg" viewBox="-450 -450 900 900" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="nodeGradient" cx="30%" cy="30%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#33ccff" stop-opacity="0.3"/>
+        </radialGradient>
+        <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#33ccff" filter="drop-shadow(0 0 4px #33ccff)"/>
+        </marker>
+      </defs>
+      <g id="edgesA"></g>
+      <g id="edgesB"></g>
+      <g id="nodes"></g>
+    </svg>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="credit">Arrastra para rotar el Cubo Truncado</div>
+  </main>
+  <aside class="control-panel">
+    <h1>Gráfica de Cayley: S₄</h1>
+    <div class="subtitle"><strong>Cubo Truncado 3D Interactivo</strong><br>Generadores: <strong>a</strong> = (1 2), <strong>b</strong> = (1 2 3 4)</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot red"></div><span>Aristas ·a (orden 2)</span></div>
+      <div class="legend-item"><div class="legend-dot blue"></div><span>Aristas ·b (orden 4)</span></div>
+    </div>
+    <div class="info-panel">
+      <div class="info-row"><span>Elemento:</span><span class="info-value" id="curName">e</span></div>
+      <div class="info-row"><span>Ciclo:</span><span class="info-value" id="curCycle">( )</span></div>
+      <div class="info-row"><span>Palabra:</span><span class="info-value" id="curWord">ε</span></div>
+    </div>
+    <div class="controls">
+      <div class="control-row">
+        <button class="btn" id="btnA">·a</button>
+        <button class="btn" id="btnB">·b</button>
+        <button class="btn" id="btnBi">·b⁻¹</button>
+        <button class="btn" id="btnReset">Reset</button>
+      </div>
+      <div class="control-row">
+        <button class="btn" id="btnPlayA">Animar a</button>
+        <button class="btn" id="btnPlayB">Animar b</button>
+        <button class="btn" id="btnStop">Detener</button>
+      </div>
+      <div class="toggle-group">
+        <label class="toggle"><input type="checkbox" id="chkA" checked/> Mostrar aristas ·a</label>
+        <label class="toggle"><input type="checkbox" id="chkB" checked/> Mostrar aristas ·b</label>
+        <label class="toggle"><input type="checkbox" id="chkLabels" checked/> Mostrar etiquetas</label>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+class CayleyViewer3D {
+    constructor() {
+        this.initDOM();
+        this.initAlgebra();
+        this.init3D();
+        this.buildGraph();
+        this.addEventListeners();
+        this.update();
+    }
+
+    initDOM() {
+        this.svg = document.getElementById('svg');
+        this.gNodes = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.gEdgesA = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.gEdgesB = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.svg.append(this.gEdgesA, this.gEdgesB, this.gNodes);
+
+        this.tooltip = document.getElementById('tooltip');
+        this.curName = document.getElementById('curName');
+        this.curCycle = document.getElementById('curCycle');
+        this.curWord = document.getElementById('curWord');
+    }
+
+    initAlgebra() {
+        const e = [0, 1, 2, 3, 4];
+        this.a = [0, 2, 1, 3, 4];
+        this.b = [0, 2, 3, 4, 1];
+        this.bi = this.inv(this.b);
+
+        const compose = (p, q) => {
+            const r = [0, 0, 0, 0, 0];
+            for (let i = 1; i <= 4; i++) r[i] = p[q[i]];
+            return r;
+        };
+        const key = p => p.slice(1).join('');
+
+        const map = new Map();
+        map.set(key(e), { perm: e, word: 'ε' });
+        const queue = [map.get(key(e))];
+        let head = 0;
+        while (head < queue.length) {
+            const curr = queue[head++];
+            for (const [sym, gen] of [['a', this.a], ['b', this.b], ['b⁻¹', this.bi]]) {
+                const next_perm = compose(gen, curr.perm);
+                const next_key = key(next_perm);
+                if (!map.has(next_key)) {
+                    const next_word = curr.word === 'ε' ? sym : curr.word + sym;
+                    map.set(next_key, { perm: next_perm, word: next_word });
+                    queue.push(map.get(next_key));
+                }
+            }
+        }
+        this.elements = Array.from(map.values());
+        this.current = this.elements.find(el => this.eq(el.perm, e));
+    }
+
+    init3D() {
+        this.rotX = 0.5;
+        this.rotY = -0.5;
+        this.isDragging = false;
+        this.perspective = 800;
+        // CAMBIO: Escala aumentada para un grafo más grande
+        this.scale = 165;
+
+        const perms = [[1, 2, 0], [1, 0, 2], [2, 1, 0], [2, 0, 1], [0, 1, 2], [0, 2, 1]];
+        const signs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        let i = 0;
+        for (const p of perms) {
+            for (const s of signs) {
+                let c = [0, 0, 0];
+                let k = 0;
+                for (let j = 0; j < 3; ++j) if (p[j] !== 0) c[j] = p[j] * s[k++];
+                this.elements[i++].pos3D = c;
+            }
+        }
+    }
+
+    buildGraph() {
+        this.gEdgesA.innerHTML = ''; this.gEdgesB.innerHTML = ''; this.gNodes.innerHTML = '';
+
+        this.elements.forEach(el => {
+            const h_a = this.compose(this.a, el.perm);
+            el.tgt_a = this.elements.find(e => this.eq(e.perm, h_a));
+            const h_b = this.compose(this.b, el.perm);
+            el.tgt_b = this.elements.find(e => this.eq(e.perm, h_b));
+
+            const pathA = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathA.setAttribute('class', 'edge a');
+            this.gEdgesA.appendChild(pathA);
+            el.pathA = pathA;
+
+            const pathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathB.setAttribute('class', 'edge b');
+            pathB.setAttribute('marker-end', 'url(#arrowB)');
+            this.gEdgesB.appendChild(pathB);
+            el.pathB = pathB;
+
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('class', 'node');
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('r', 18);
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.textContent = this.cycleNotation(el.perm);
+            g.append(circle, text);
+            this.gNodes.appendChild(g);
+            el.g = g;
+        });
+        this.select(this.current);
+    }
+    
+    update() {
+        const cosX = Math.cos(this.rotX), sinX = Math.sin(this.rotX);
+        const cosY = Math.cos(this.rotY), sinY = Math.sin(this.rotY);
+
+        this.elements.forEach(el => {
+            const [x, y, z] = el.pos3D;
+            const rotY_x = x * cosY - z * sinY;
+            const rotY_z = x * sinY + z * cosY;
+            const rotX_y = y * cosX - rotY_z * sinX;
+            el.rotZ = y * sinX + rotY_z * cosX;
+
+            const pScale = this.perspective / (this.perspective - el.rotZ);
+            el.projX = rotY_x * pScale * this.scale;
+            el.projY = rotX_y * pScale * this.scale;
+            el.scale = pScale;
+        });
+
+        this.elements.sort((a, b) => a.rotZ - b.rotZ);
+
+        this.elements.forEach(el => {
+            this.gNodes.appendChild(el.g);
+            el.g.setAttribute('transform', `translate(${el.projX},${el.projY})`);
+            el.g.style.opacity = 0.6 + 0.4 * el.scale;
+            el.g.querySelector('circle').setAttribute('r', 18 * el.scale);
+            el.g.querySelector('text').setAttribute('font-size', 11 * el.scale);
+            
+            el.pathA.setAttribute('d', `M ${el.projX} ${el.projY} L ${el.tgt_a.projX} ${el.tgt_a.projY}`);
+            const mx = (el.projX + el.tgt_b.projX) / 2, my = (el.projY + el.tgt_b.projY) / 2;
+            const dx = el.tgt_b.projX - el.projX, dy = el.tgt_b.projY - el.projY;
+            const cx = mx - dy * 0.12, cy = my + dx * 0.12;
+            el.pathB.setAttribute('d', `M ${el.projX} ${el.projY} Q ${cx} ${cy} ${el.tgt_b.projX} ${el.tgt_b.projY}`);
+        });
+    }
+
+    // Helper methods
+    inv(p) { const r=[0,0,0,0,0]; for(let i=1;i<=4;i++)r[p[i]]=i; return r; }
+    eq(p,q) { for(let i=1;i<=4;i++)if(p[i]!==q[i])return false; return true; }
+    compose(p, q) { const r=[0,0,0,0,0]; for(let i=1;i<=4;i++)r[i]=p[q[i]]; return r; }
+    cycleNotation(p) {
+        const seen = [false,false,false,false,false], cycles = [];
+        for(let i=1;i<=4;i++) if(!seen[i] && p[i]!==i) {
+            let cyc=[i]; seen[i]=true; let j=p[i];
+            while(j!==i){ cyc.push(j); seen[j]=true; j=p[j]; }
+            cycles.push(`(${cyc.join(' ')})`);
+        }
+        return cycles.length ? cycles.join('') : '( )';
+    }
+
+    select(el) {
+        if (this.current) this.current.g.classList.remove('active');
+        this.current = el;
+        el.g.classList.add('active');
+        this.curName.textContent = el.word === 'ε' ? 'e' : el.word;
+        this.curCycle.textContent = this.cycleNotation(el.perm);
+        this.curWord.textContent = el.word;
+    }
+
+    step(gen) {
+        const h = this.compose(gen, this.current.perm);
+        const el = this.elements.find(e => this.eq(e.perm, h));
+        if (el) this.select(el);
+    }
+    
+    startAnim(gen) {
+        this.stopAnim();
+        this.timer = setInterval(() => this.step(gen), 700);
+    }
+
+    stopAnim() {
+        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    }
+
+    addEventListeners() {
+        const stage = document.getElementById('stage');
+        let lastMouseX = 0, lastMouseY = 0;
+
+        const onMouseDown = e => {
+            this.isDragging = true;
+            stage.style.cursor = 'grabbing';
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        };
+
+        const onMouseUp = () => {
+            this.isDragging = false;
+            stage.style.cursor = 'grab';
+        };
+        
+        const onMouseMove = e => {
+            if (!this.isDragging) return;
+            const dx = e.clientX - lastMouseX;
+            const dy = e.clientY - lastMouseY;
+            this.rotY += dx * 0.005;
+            this.rotX -= dy * 0.005;
+            this.update();
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        };
+
+        stage.addEventListener('mousedown', onMouseDown);
+        stage.addEventListener('mouseup', onMouseUp);
+        stage.addEventListener('mouseleave', onMouseUp);
+        stage.addEventListener('mousemove', onMouseMove);
+
+        document.getElementById('btnA').onclick = () => this.step(this.a);
+        document.getElementById('btnB').onclick = () => this.step(this.b);
+        document.getElementById('btnBi').onclick = () => this.step(this.bi);
+        document.getElementById('btnReset').onclick = () => this.select(this.elements.find(el => this.eq(el.perm, [0,1,2,3,4])));
+
+        document.getElementById('chkA').onchange = (e) => this.gEdgesA.classList.toggle('hidden', !e.target.checked);
+        document.getElementById('chkB').onchange = (e) => this.gEdgesB.classList.toggle('hidden', !e.target.checked);
+        document.getElementById('chkLabels').onchange = (e) => {
+            this.gNodes.querySelectorAll('text').forEach(t => t.style.display = e.target.checked ? 'block' : 'none');
+        };
+
+        document.getElementById('btnPlayA').onclick = () => this.startAnim(this.a);
+        document.getElementById('btnPlayB').onclick = () => this.startAnim(this.b);
+        document.getElementById('btnStop').onclick = () => this.stopAnim();
+        
+        this.gNodes.addEventListener('mouseover', e => {
+            const g = e.target.closest('.node');
+            if (!g) return;
+            const el = this.elements.find(el => el.g === g);
+            if(el) {
+                this.tooltip.style.display = 'block';
+                this.tooltip.innerHTML = `<strong>${this.cycleNotation(el.perm)}</strong><br><small>Palabra: ${el.word}</small>`;
+            }
+        });
+
+        this.gNodes.addEventListener('mousemove', e => {
+            this.tooltip.style.left = (e.clientX) + 'px';
+            this.tooltip.style.top = (e.clientY) + 'px';
+        });
+
+        this.gNodes.addEventListener('mouseout', e => {
+            const g = e.target.closest('.node');
+            if (g) this.tooltip.style.display = 'none';
+        });
+
+        window.addEventListener('keydown', (ev) => {
+          if (ev.target.tagName === 'INPUT') return;
+          if (ev.key === 'a') document.getElementById('btnA').click();
+          else if (ev.key === 'b') document.getElementById('btnB').click();
+          else if (ev.key === 'n') document.getElementById('btnBi').click();
+          else if (ev.key === 'r') document.getElementById('btnReset').click();
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => new CayleyViewer3D());
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cayley del Cubo — S₄ (Cubo Truncado)</title>
+<style>
+  :root{
+    --bg1:#0f1022; --bg2:#1a0f2e; --ink:#e9eaf5;
+    --accent:#ff5d5d; --accent2:#5fc8ff;
+    --panel:#ffffff0f; --panel-border:#ffffff22;
+    --glowA: 0 0 10px #ff4d4d, 0 0 24px #ff4d4d44;
+    --glowB: 0 0 10px #58c6ff, 0 0 24px #58c6ff44;
+    --shadow: 0 10px 40px #0008;
+  }
+  html,body{height:100%; margin:0; background: radial-gradient(1200px 800px at 15% 10%, #1c1f45 0%, var(--bg1) 40%, var(--bg2) 100%);
+    color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;}
+  .wrap{display:grid; grid-template-columns: 340px 1fr; gap:14px; height:100%; padding:16px;}
+  .panel{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:16px; padding:16px; box-shadow: var(--shadow);
+  }
+  h1{font-size:20px; margin:0 0 8px 0; letter-spacing:.5px}
+  p,small{color:#d7d9efbb; line-height:1.35}
+  .legend{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:6px}
+  .badge{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--panel-border); background:#ffffff08}
+  .dot{width:10px; height:10px; border-radius:50%}
+  .dot.a{background:var(--accent); box-shadow: var(--glowA)}
+  .dot.b{background:var(--accent2); box-shadow: var(--glowB)}
+  .controls{display:grid; gap:10px; margin-top:10px}
+  .row{display:flex; gap:8px; flex-wrap:wrap}
+  button, .toggle{
+    background:#ffffff12; color:var(--ink); border:1px solid var(--panel-border);
+    padding:8px 12px; border-radius:10px; cursor:pointer; transition: .2s ease;
+    font-weight:600; letter-spacing:.2px
+  }
+  button:hover{transform: translateY(-1px); background:#ffffff1e}
+  button:active{transform: translateY(0)}
+  .toggle{display:flex; align-items:center; gap:8px}
+  input[type="checkbox"]{accent-color:#8bf}
+  #info{font-variant-numeric: tabular-nums; margin-top:4px}
+
+  /* Canvas area (SVG) */
+  .stage{position:relative}
+  svg{width:100%; height:100%; min-height: calc(100vh - 32px); border-radius:16px; background: #0b0e22; box-shadow: var(--shadow)}
+  .node{cursor:pointer}
+  .node circle{fill:url(#nodeGrad); stroke:#ffffff33; stroke-width:1.2}
+  .node:hover circle{stroke:#fff9; filter: drop-shadow(0 0 6px #fff6)}
+  .node text{font-size:10px; text-anchor:middle; dominant-baseline:central; pointer-events:none; fill:var(--ink); opacity: 0.9;}
+  .labelWord{font-size:8px; opacity:.7}
+  .edge{fill:none; stroke-linecap:round; stroke-opacity:.9}
+  .edge.a{stroke:var(--accent); filter: drop-shadow(var(--glowA));}
+  .edge.b{stroke:var(--accent2); filter: drop-shadow(var(--glowB));}
+  .edge.hidden{opacity:.06}
+  .node.active circle{stroke:#ffd166; stroke-width:2}
+  .halo{fill:none; stroke:#ffd166; stroke-width:6; opacity:0; transition:.25s}
+  .node.active + .halo{opacity:.25}
+  .tooltip{
+    position:absolute; pointer-events:none; padding:8px 10px; background:#0b0e22; border:1px solid #ffffff2a;
+    border-radius:10px; font-size:12px; transform: translate(-50%, -140%);
+    white-space:nowrap; box-shadow: var(--shadow); display:none
+  }
+  .credit{position:absolute; left:20px; bottom:14px; font-size:12px; opacity:.7}
+  .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        background:#00000044; padding:2px 6px; border-radius:6px; border:1px solid #ffffff22}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="panel">
+    <h1>Gráfica de Cayley: $S_4$ <span style="opacity:.7">(Cubo Truncado)</span></h1>
+    <p>
+      Generadores: <b>a</b> = transposición (1 2), <b>b</b> = ciclo (1 2 3 4).
+      Las aristas muestran multiplicación <em>a la derecha</em>: <span class="kbd">g → g·a</span> (roja, no dirigida) y <span class="kbd">g → g·b</span> (azul, dirigida).
+    </p>
+    <div class="legend">
+      <span class="badge"><span class="dot a"></span> aristas ·a (orden 2)</span>
+      <span class="badge"><span class="dot b"></span> aristas ·b (orden 4)</span>
+    </div>
+
+    <div class="controls">
+      <div class="row">
+        <button id="btnA">·a</button>
+        <button id="btnB">·b</button>
+        <button id="btnBi">·b⁻¹</button>
+        <button id="btnReset">Reset</button>
+      </div>
+      <div class="row">
+        <button id="btnPlayA">Animar a</button>
+        <button id="btnPlayB">Animar b</button>
+        <button id="btnStop">Parar</button>
+      </div>
+      <div class="row">
+        <label class="toggle"><input type="checkbox" id="chkA" checked/> mostrar aristas ·a</label>
+        <label class="toggle"><input type="checkbox" id="chkB" checked/> mostrar aristas ·b</label>
+        <label class="toggle"><input type="checkbox" id="chkLabels" checked/> etiquetas</label>
+      </div>
+      <div id="info">
+        <small>Elemento actual: <span id="curName">e</span> — ciclo: <span id="curCycle">( )</span></small><br/>
+        <small>Palabra: <span id="curWord">ε</span></small>
+      </div>
+      <p style="margin-top:8px"><small>
+        Consejo: haz <b>clic</b> en un nodo para seleccionarlo; usa los botones para “caminar” por la gráfica.
+      </small></p>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <svg id="svg" viewBox="-450 -450 900 900" preserveAspectRatio="xMidYMid meet" aria-label="Cayley graph">
+      <defs>
+        <radialGradient id="nodeGrad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#c7d2ff" stop-opacity="0.12"/>
+        </radialGradient>
+        <marker id="arrowB" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#5fc8ff"/>
+        </marker>
+      </defs>
+      <g id="edgesA"></g>
+      <g id="edgesB"></g>
+      <g id="nodes"></g>
+    </svg>
+    <div class="tooltip" id="tip"></div>
+    <div class="credit">Layout basado en la proyección de un cubo truncado.</div>
+  </main>
+</div>
+
+<script>
+/* ===================== utilidades de permutaciones ===================== */
+function compose(p, q){
+  const r = [0,0,0,0,0];
+  for (let i=1;i<=4;i++) r[i] = p[q[i]];
+  return r;
+}
+function inv(p){
+  const r = [0,0,0,0,0];
+  for (let i=1;i<=4;i++) r[p[i]] = i;
+  return r;
+}
+function eq(p,q){ for(let i=1;i<=4;i++) if(p[i]!==q[i]) return false; return true; }
+function key(p){ return p.slice(1).join(''); }
+function cycleNotation(p){
+  const seen = [false,false,false,false,false];
+  const cycles = [];
+  for(let i=1;i<=4;i++){
+    if(!seen[i] && p[i]!==i){
+      let cyc = [i]; seen[i]=true; let j=p[i];
+      while(j!==i){ cyc.push(j); seen[j]=true; j=p[j]; }
+      cycles.push('(' + cyc.join(' ') + ')');
+    }
+  }
+  return cycles.length? cycles.join('') : '( )';
+}
+
+/* ===================== grupo S4 generado por a, b ===================== */
+/* ============== CAMBIO: Nuevos generadores para el layout del cubo truncado ============== */
+const e  = [0,1,2,3,4];        // identidad
+const a  = [0,2,1,3,4];        // (1 2)     — orden 2
+const b  = [0,2,3,4,1];        // (1 2 3 4) — orden 4
+const bi = inv(b);
+
+/* BFS para palabras mínimas (mejor que el bucle while anterior) */
+function buildGroup(){
+    const map = new Map();
+    map.set(key(e), { perm: e, word: 'ε', dist: 0 });
+    const queue = [map.get(key(e))];
+    const gens = [['a', a], ['b', b], ['b⁻¹', bi]];
+
+    let head = 0;
+    while(head < queue.length) {
+        const curr = queue[head++];
+        for(const [sym, gen] of gens) {
+            const next_perm = compose(gen, curr.perm);
+            const next_key = key(next_perm);
+            if(!map.has(next_key)) {
+                const next_word = curr.word === 'ε' ? sym : curr.word + sym;
+                const next_el = { perm: next_perm, word: next_word, dist: curr.dist + 1 };
+                map.set(next_key, next_el);
+                queue.push(next_el);
+            }
+        }
+    }
+    return Array.from(map.values());
+}
+const elements = buildGroup();
+
+/* ============== NUEVO: Layout basado en el Cubo Truncado ============== */
+function getTruncatedCubeLayout(){
+    // Coordenadas 3D de los 24 vértices de un cubo truncado (permutaciones de (±1, ±2, 0))
+    const coords3D = new Map();
+    const perms = [[1, 2, 0], [1, 0, 2], [2, 1, 0], [2, 0, 1], [0, 1, 2], [0, 2, 1]];
+    const signs = [[1,1], [1,-1], [-1,1], [-1,-1]];
+    let coord_idx = 0;
+    for(const p of perms){
+        for(const s of signs){
+            let c = [0,0,0];
+            let k=0;
+            for(let i=0; i<3; ++i){
+                if(p[i] !== 0) c[i] = p[i] * s[k++];
+            }
+            coords3D.set(elements[coord_idx++].perm, c);
+        }
+    }
+    
+    // Proyección 3D a 2D (isométrica simple)
+    const scale = 120;
+    elements.forEach(el => {
+        const p3d = coords3D.get(el.perm);
+        if(!p3d) return;
+        const [x,y,z] = p3d;
+        el.x = (x - y) * 0.9 * scale;
+        el.y = ((x + y) / 2 - z) * 0.6 * scale;
+    });
+}
+getTruncatedCubeLayout();
+
+
+/* ===================== preparar SVG ===================== */
+const svg = document.getElementById('svg');
+const gNodes = document.getElementById('nodes');
+const gEdgesA = document.getElementById('edgesA');
+const gEdgesB = document.getElementById('edgesB');
+const tip = document.getElementById('tip');
+
+/* ============== CAMBIO: Edge drawing logic actualizada ============== */
+function drawEdges(){
+    // Generador 'a' (orden 2) - aristas rectas, sin dirección
+    gEdgesA.innerHTML = '';
+    const drawn_a = new Set();
+    for(const el of elements){
+        const h = compose(a, el.perm);
+        const tgt = elements.find(e=>eq(e.perm,h));
+        const edgeKey = [key(el.perm), key(tgt.perm)].sort().join('-');
+        if (drawn_a.has(edgeKey)) continue;
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('class', `edge a`);
+        path.setAttribute('stroke-width', 2.5);
+        path.setAttribute('d', `M ${el.x} ${el.y} L ${tgt.x} ${tgt.y}`); // Línea recta
+        gEdgesA.appendChild(path);
+        drawn_a.add(edgeKey);
+    }
+
+    // Generador 'b' (orden 4) - aristas curvas, con dirección
+    gEdgesB.innerHTML = '';
+    for(const el of elements){
+        const h = compose(b, el.perm);
+        const tgt = elements.find(e=>eq(e.perm,h));
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('class', `edge b`);
+        path.setAttribute('marker-end', `url(#arrowB)`);
+        path.setAttribute('stroke-width', 1.8);
+        const dx=tgt.x-el.x, dy=tgt.y-el.y, mx=(el.x+tgt.x)/2, my=(el.y+tgt.y)/2;
+        const nx=-dy, ny=dx;
+        const cx=mx+nx*0.1, cy=my+ny*0.1; // Curva suave
+        path.setAttribute('d', `M ${el.x} ${el.y} Q ${cx} ${cy} ${tgt.x} ${tgt.y}`);
+        gEdgesB.appendChild(path);
+    }
+}
+
+function drawNodes(){
+  gNodes.innerHTML = '';
+  for(const el of elements){
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','node');
+    g.setAttribute('transform', `translate(${el.x},${el.y})`);
+    g.addEventListener('mouseenter', ev => {
+      tip.style.display='block';
+      tip.style.left = (ev.clientX)+'px';
+      tip.style.top  = (ev.clientY)+'px';
+      tip.innerHTML = `<b>${cycleNotation(el.perm)}</b><br><small>palabra: ${el.word}</small>`;
+    });
+    g.addEventListener('mouseleave', ()=> tip.style.display='none');
+    g.addEventListener('click', ()=> select(el));
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('r', 16);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.textContent = cycleNotation(el.perm);
+
+    const halo = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    halo.setAttribute('class','halo');
+    halo.setAttribute('r', 24);
+
+    g.appendChild(circle);
+    g.appendChild(text);
+    gNodes.appendChild(g);
+    gNodes.appendChild(halo);
+    el.g = g; el.halo = halo;
+  }
+}
+
+drawEdges(); drawNodes();
+
+/* ===================== interacción (con cambios menores) ===================== */
+const curName = document.getElementById('curName');
+const curCycle = document.getElementById('curCycle');
+const curWord = document.getElementById('curWord');
+let current = elements.find(el => eq(el.perm,e));
+select(current);
+
+function select(el){
+  if(current){ current.g.classList.remove('active'); }
+  current = el; current.g.classList.add('active');
+  curName.textContent = key(el.perm) === '1234' ? 'e' : el.word;
+  curCycle.textContent = cycleNotation(el.perm);
+  curWord.textContent  = el.word;
+}
+
+function findByPerm(p){
+  return elements.find(el => eq(el.perm,p));
+}
+function step(gen){
+  const h = compose(gen, current.perm);
+  const el = findByPerm(h);
+  if(el) select(el);
+}
+
+const btnA     = document.getElementById('btnA');
+const btnB     = document.getElementById('btnB');
+const btnBi    = document.getElementById('btnBi');
+const btnReset = document.getElementById('btnReset');
+
+btnA.onclick  = ()=> step(a);
+btnB.onclick  = ()=> step(b);
+btnBi.onclick = ()=> step(bi);
+btnReset.onclick = ()=> select(elements.find(el => eq(el.perm,e)));
+
+const chkA = document.getElementById('chkA');
+const chkB = document.getElementById('chkB');
+const chkLabels = document.getElementById('chkLabels');
+chkA.onchange = ()=> gEdgesA.classList.toggle('hidden', !chkA.checked);
+chkB.onchange = ()=> gEdgesB.classList.toggle('hidden', !chkB.checked);
+chkLabels.onchange = ()=> gNodes.style.opacity = chkLabels.checked ? 1 : 0;
+
+
+let timer=null;
+const btnPlayA = document.getElementById('btnPlayA');
+const btnPlayB = document.getElementById('btnPlayB');
+const btnStop  = document.getElementById('btnStop');
+btnPlayA.onclick = ()=> startAnim(a);
+btnPlayB.onclick = ()=> startAnim(b);
+btnStop.onclick = stopAnim;
+
+function startAnim(gen){
+  stopAnim();
+  timer = setInterval(()=> step(gen), 600);
+}
+function stopAnim(){ if(timer){ clearInterval(timer); timer=null; } }
+
+window.addEventListener('keydown', (ev)=>{
+  if(ev.target.tagName === 'INPUT') return;
+  if(ev.key==='a') btnA.click();
+  else if(ev.key==='b') btnB.click();
+  else if(ev.key==='n') btnBi.click();
+  else if(ev.key==='r') btnReset.click();
+});
+
+setInterval(()=>{
+  if(!current) return;
+  current.halo.style.opacity = current.halo.style.opacity==='0.25' ? '0.12' : '0.25';
+}, 800);
+</script>
+</body>
+</html>

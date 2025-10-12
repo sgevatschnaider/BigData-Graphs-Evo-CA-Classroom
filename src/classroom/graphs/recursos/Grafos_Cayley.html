@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafos de Cayley: La Geometría de los Grupos</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN (Sin cambios) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #434343 0%, #000000 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.9);
+            --text-primary: #333;
+            --text-secondary: #555;
+            --accent-primary: #8E2DE2;
+            --accent-secondary: #4A00E0;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --transition: all 0.3s ease-in-out;
+        }
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1d2b64 0%, #0d1430 100%);
+            --bg-secondary: rgba(26, 32, 44, 0.9);
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --accent-primary: #9f7aea;
+            --accent-secondary: #63b3ed;
+            --card-bg: rgba(45, 55, 72, 0.75);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; overflow-x: hidden; position: relative; line-height: 1.7;
+            transition: var(--transition);
+        }
+        .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .bubble { position: absolute; bottom: -150px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; animation: rise 25s infinite ease-in; }
+        @keyframes rise { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { transform: translateY(-100vh); opacity: 0; } }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; color: white; }
+        .subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+        .card { background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem; margin-bottom: 2.5rem; box-shadow: var(--shadow); transition: var(--transition); }
+        .card:hover { transform: translateY(-5px); }
+        h2 { font-size: 2rem; color: var(--accent-primary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--accent-secondary); padding-bottom: 0.5rem; }
+        h3 { font-size: 1.5rem; color: var(--text-primary); margin: 2rem 0 1rem; }
+        .formula { background: rgba(0, 0, 0, 0.05); border-left: 4px solid var(--accent-secondary); padding: 1.5rem; margin: 1rem 0; border-radius: 8px; font-size: 1.2rem; text-align: center; overflow-x: auto; color: var(--text-primary); }
+        [data-theme="dark"] .formula { background: rgba(0, 0, 0, 0.2); }
+        code { background-color: rgba(142, 45, 226, 0.1); color: var(--accent-primary); padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace; }
+        strong { color: var(--accent-primary); }
+        .theme-toggle { position: fixed; top: 1.5rem; right: 1.5rem; width: 50px; height: 50px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+        .theme-toggle:hover { transform: scale(1.1) rotate(360deg); box-shadow: var(--shadow); }
+        footer { text-align: center; padding: 2rem; margin-top: 2rem; color: rgba(255,255,255,0.8); font-style: italic; }
+        #interactive-demo { text-align: center; }
+        #cayley-canvas { width: 100%; max-width: 500px; height: auto; aspect-ratio: 1/1; background: rgba(0,0,0,0.05); border-radius: 15px; margin: 1rem auto; border: 1px solid var(--border-color); }
+        [data-theme="dark"] #cayley-canvas { background: rgba(0,0,0,0.2); }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; }
+        .control-group { display: flex; flex-direction: column; align-items: center; }
+        label { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        select, input[type="text"], input[type="number"] { padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-primary); font-family: 'SF Mono', monospace; }
+        .info-display { margin-top: 1.5rem; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--text-secondary); background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 10px; }
+        [data-theme="dark"] .info-display { background: rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="bubbles" id="bubbles-container"></div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Cambiar tema">🌙</button>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Grafos de Cayley</h1>
+            <p class="subtitle">Una visualización de la estructura de los grupos algebraicos, convirtiendo elementos y generadores en vértices y aristas para revelar su geometría subyacente.</p>
+        </header>
+
+        <section class="card">
+            <h2>Definición Formal</h2>
+            <p>Sea un grupo finito $G$ y un conjunto de generadores $S \subseteq G$ que no contiene a la identidad. El <strong>Grafo de Cayley</strong>, denotado como $Cay(G, S)$, se construye de la siguiente manera:</p>
+            <ul>
+                <li><strong>Vértices:</strong> Cada elemento del grupo $G$ es un vértice.</li>
+                <li><strong>Aristas Dirigidas:</strong> Por cada vértice $g \in G$ y cada generador $s \in S$, se crea una arista dirigida desde $g$ hacia $gs$.</li>
+            </ul>
+            <div class="formula">$$g \xrightarrow{s} gs$$</div>
+            <p>Si el conjunto de generadores $S$ es <strong>simétrico</strong> (es decir, si $s \in S$ implica que $s^{-1} \in S$), las aristas pueden considerarse no dirigidas, ya que la conexión $g \to gs$ tiene una conexión recíproca $gs \to gs s^{-1} = g$.</p>
+        </section>
+
+        <section class="card" id="interactive-demo">
+            <h2>Visualización Interactiva 🎨</h2>
+            <p>Selecciona un grupo y un conjunto de generadores para ver cómo se construye su grafo de Cayley. Observa cómo la estructura del grafo refleja las propiedades del grupo.</p>
+            
+            <canvas id="cayley-canvas" width="500" height="500"></canvas>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="graph-type">Tipo de Grafo:</label>
+                    <select id="graph-type">
+                        <option value="cycle">Ciclo ($C_n$)</option>
+                        <option value="circulant">Circulante ($Cay(\mathbb{Z}_n, S)$)</option>
+                        <option value="hypercube">Hipercubo ($Q_3$)</option>
+                    </select>
+                </div>
+                <div class="control-group" id="n-control">
+                    <label for="n-value">Orden n:</label>
+                    <input type="number" id="n-value" value="8" min="3" max="20">
+                </div>
+                <div class="control-group" id="s-control" style="display: none;">
+                    <label for="s-value">Generadores S (ej: 1,3):</label>
+                    <input type="text" id="s-value" value="1,3">
+                </div>
+            </div>
+            <div class="info-display" id="graph-info">
+                <strong>Grafo:</strong> Cay(ℤ<sub>8</sub>, {±1}) | <strong>Grado:</strong> 2
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Propiedades Fundamentales 🏛️</h2>
+            <p>Los grafos de Cayley son herramientas poderosas porque sus propiedades combinatorias están directamente ligadas a la estructura del grupo.</p>
+            <h3>Regularidad</h3>
+            <p>Si el grafo es no dirigido (con $S$ simétrico), es <strong>regular de grado $|S|$</strong>. Cada vértice tiene exactamente el mismo número de vecinos.</p>
+            <h3>Conectividad</h3>
+            <p>El grafo de Cayley $Cay(G,S)$ es fuertemente conexo si y solo si $S$ <strong>genera</strong> el grupo $G$ al completo.</p>
+            <h3>Simetría (Vértice-Transitividad)</h3>
+            <p>El grupo $G$ actúa sobre su propio grafo de Cayley. La multiplicación por la izquierda ($g \mapsto hg$) es un automorfismo del grafo. Esto implica que el grafo "se ve igual" desde cualquier vértice, una propiedad conocida como <strong>vértice-transitividad</strong>.</p>
+             <h3>Métrica de Palabras</h3>
+            <p>La distancia entre la identidad $e$ y un elemento $g$ en el grafo es igual a la longitud de la palabra más corta en los generadores $S$ que equivale a $g$.</p>
+        </section>
+        
+        <section class="card">
+            <h2>Ejemplos Canónicos</h2>
+            <h3>Grafo Ciclo $C_n$</h3>
+            <p>Es el grafo de Cayley del grupo cíclico $\mathbb{Z}_n$ con generadores $\{\pm 1\}$.</p>
+            <div class="formula">$$C_n = \mathrm{Cay}(\mathbb{Z}_n, \{\pm 1\})$$</div>
+            <p>Cada vértice $x$ se conecta con $x+1$ y $x-1$ (módulo $n$).</p>
+
+            <h3>Hipercubo $Q_d$</h3>
+            <p>Representa al grupo $(\mathbb{Z}_2)^d$ (cadenas de bits de longitud $d$ con la operación XOR) y los generadores son los vectores base $e_i$ (un 1 en la posición $i$ y 0 en las demás).</p>
+             <div class="formula">$$Q_d = \mathrm{Cay}((\mathbb{Z}_2)^d, \{e_1, e_2, \dots, e_d\})$$</div>
+             <p>Dos cadenas de bits están conectadas si difieren en exactamente una posición.</p>
+             
+            <h3>Grafos Circulantes</h3>
+            <p>Generalizan el ciclo, usando el grupo $\mathbb{Z}_n$ pero con un conjunto de generadores simétrico $S$ cualquiera.</p>
+            <div class="formula">$$\mathrm{Cay}(\mathbb{Z}_n, S), \text{ donde } S = S^{-1}$$</div>
+        </section>
+
+        <section class="card">
+            <h2>Análisis Espectral (Caso Abeliano) 📈</h2>
+            <p>Cuando el grupo $G$ es abeliano, el espectro (los autovalores de la matriz de adyacencia) del grafo de Cayley es sorprendentemente fácil de calcular usando los <strong>caracteres</strong> del grupo (la base de la Transformada de Fourier sobre $G$).</p>
+            <p>Los autovalores $\lambda_\chi$ están dados por la fórmula:</p>
+            <div class="formula">$$\lambda_\chi = \sum_{s \in S} \chi(s)$$</div>
+            <p>Para el caso de $\mathbb{Z}_n$, esto se simplifica a:</p>
+            <div class="formula">$$\lambda_k = \sum_{s \in S} \omega_n^{ks} \quad \text{donde } \omega_n = e^{2\pi i / n}$$</div>
+            <p>Conocer el espectro permite analizar rápidamente propiedades como la expansividad del grafo y la velocidad de convergencia de caminatas aleatorias.</p>
+        </section>
+        
+         <section class="card">
+            <h2>Aplicaciones Clave 💡</h2>
+            <ul>
+                <li><strong>Redes de Interconexión:</strong> Su regularidad y simetría los hacen ideales para topologías en computación paralela (anillos, toroides, hipercubos).</li>
+                <li><strong>Grafos Expansores:</strong> Muchos de los mejores grafos expansores (grafos muy conectados pero con pocas aristas) se construyen como grafos de Cayley de grupos no abelianos.</li>
+                <li><strong>Criptografía y Cadenas de Markov:</strong> La estructura predecible de su espectro facilita el estudio de caminatas aleatorias y procesos de mezcla.</li>
+                <li><strong>Modelado de Simetrías:</strong> Proporcionan una "geometría" natural para cualquier problema que posea un grupo de simetría inherente.</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- MÓDULO 1: LÓGICA DE LA INTERFAZ (TEMA Y BURBUJAS) ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const bubblesContainer = document.getElementById('bubbles-container');
+        const set_theme = (theme) => {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+        themeToggleBtn.addEventListener('click', () => {
+            const new_theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            set_theme(new_theme);
+        });
+        if (bubblesContainer) {
+            setInterval(() => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                bubblesContainer.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 25000);
+            }, 600);
+        }
+        set_theme(localStorage.getItem('theme') || 'dark');
+
+        // --- MÓDULO 2: CLASE DE VISUALIZACIÓN DE GRAFOS DE CAYLEY ---
+        class CayleyGraphVisualizer {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+            }
+
+            _getThemeColors() {
+                const style = getComputedStyle(document.documentElement);
+                return {
+                    node: style.getPropertyValue('--accent-primary').trim(),
+                    edge: style.getPropertyValue('--text-secondary').trim(),
+                    text: style.getPropertyValue('--text-primary').trim(),
+                };
+            }
+            
+            _generateCycle(n) {
+                const nodes = Array.from({ length: n }, (_, i) => ({ id: i }));
+                const edges = [];
+                for (let i = 0; i < n; i++) {
+                    edges.push({ source: i, target: (i + 1) % n });
+                }
+                return { nodes, edges };
+            }
+            
+            _generateCirculant(n, S) {
+                 const nodes = Array.from({ length: n }, (_, i) => ({ id: i }));
+                 const edges = [];
+                 const seen = new Set();
+                 for (let i = 0; i < n; i++) {
+                     for (const s of S) {
+                         const target = (i + s) % n;
+                         const edgeKey1 = `${i}-${target}`;
+                         const edgeKey2 = `${target}-${i}`;
+                         if (!seen.has(edgeKey1) && !seen.has(edgeKey2)) {
+                            edges.push({ source: i, target: target });
+                            seen.add(edgeKey1);
+                         }
+                     }
+                 }
+                 return { nodes, edges };
+            }
+            
+            _generateHypercube() {
+                const n = 8; // Q3
+                const nodes = Array.from({ length: n }, (_, i) => ({ id: i.toString(2).padStart(3, '0') }));
+                const edges = [];
+                for (let i = 0; i < n; i++) {
+                    for (let j = i + 1; j < n; j++) {
+                        // Check if Hamming distance is 1
+                        if ((i ^ j) && !((i ^ j) & ((i ^ j) - 1))) {
+                            edges.push({ source: i, target: j });
+                        }
+                    }
+                }
+                 return { nodes, edges };
+            }
+
+            draw(graphType, params) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                const colors = this._getThemeColors();
+                
+                let graphData;
+                switch(graphType) {
+                    case 'cycle':
+                        graphData = this._generateCycle(params.n);
+                        break;
+                    case 'circulant':
+                        graphData = this._generateCirculant(params.n, params.S);
+                        break;
+                    case 'hypercube':
+                         graphData = this._generateHypercube();
+                         break;
+                    default:
+                        return;
+                }
+
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const radius = Math.min(centerX, centerY) * 0.8;
+                const nodeRadius = Math.max(8, 20 - Math.sqrt(graphData.nodes.length * 4));
+                
+                const nodePositions = new Map();
+
+                // ### INICIO DE LA CORRECCIÓN ###
+                if (graphType === 'hypercube') {
+                    // Coordenadas 3D lógicamente ordenadas para los vértices de un cubo
+                    const cubeCoords = [
+                        {x: -1, y: -1, z: -1}, // 000
+                        {x:  1, y: -1, z: -1}, // 001
+                        {x: -1, y:  1, z: -1}, // 010
+                        {x:  1, y:  1, z: -1}, // 011
+                        {x: -1, y: -1, z:  1}, // 100
+                        {x:  1, y: -1, z:  1}, // 101
+                        {x: -1, y:  1, z:  1}, // 110
+                        {x:  1, y:  1, z:  1}  // 111
+                    ];
+
+                    graphData.nodes.forEach(node => {
+                        // Mapeo directo y correcto del ID binario al índice
+                        const idx = parseInt(node.id, 2);
+                        const {x, y, z} = cubeCoords[idx];
+                        
+                        // Proyección isométrica simple
+                        const scale = radius * 0.7;
+                        const screenX = centerX + scale * (x - y) * Math.cos(Math.PI / 6);
+                        const screenY = centerY + scale * (z - (x + y) / 2) * Math.sin(Math.PI / 6);
+
+                        nodePositions.set(node.id, { x: screenX, y: screenY });
+                    });
+                // ### FIN DE LA CORRECCIÓN ###
+                } else {
+                    // Circular layout para los otros grafos
+                    graphData.nodes.forEach((node, i) => {
+                        const angle = (i * 2 * Math.PI) / graphData.nodes.length - Math.PI / 2;
+                        nodePositions.set(node.id, {
+                            x: centerX + radius * Math.cos(angle),
+                            y: centerY + radius * Math.sin(angle)
+                        });
+                    });
+                }
+                
+                // Dibujar aristas
+                this.ctx.strokeStyle = colors.edge;
+                this.ctx.lineWidth = 1.5;
+                graphData.edges.forEach(edge => {
+                    const pos1 = nodePositions.get(graphData.nodes[edge.source].id);
+                    const pos2 = nodePositions.get(graphData.nodes[edge.target].id);
+                    if (pos1 && pos2) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(pos1.x, pos1.y);
+                        this.ctx.lineTo(pos2.x, pos2.y);
+                        this.ctx.stroke();
+                    }
+                });
+
+                // Dibujar nodos y etiquetas
+                this.ctx.font = `bold ${Math.max(9, nodeRadius)}px Arial`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                graphData.nodes.forEach(node => {
+                    const pos = nodePositions.get(node.id);
+                    if (pos) {
+                        this.ctx.beginPath();
+                        this.ctx.arc(pos.x, pos.y, nodeRadius, 0, 2 * Math.PI);
+                        this.ctx.fillStyle = colors.node;
+                        this.ctx.fill();
+                        
+                        this.ctx.fillStyle = colors.text;
+                        this.ctx.fillText(node.id, pos.x, pos.y);
+                    }
+                });
+            }
+        }
+
+        // --- MÓDULO 3: CONTROLADOR DE LA DEMO ---
+        const visualizer = new CayleyGraphVisualizer('cayley-canvas');
+        const graphTypeSelect = document.getElementById('graph-type');
+        const nValueInput = document.getElementById('n-value');
+        const sValueInput = document.getElementById('s-value');
+        const nControl = document.getElementById('n-control');
+        const sControl = document.getElementById('s-control');
+        const graphInfo = document.getElementById('graph-info');
+        const updateDemo = () => {
+            const type = graphTypeSelect.value;
+            const n = parseInt(nValueInput.value) || 8;
+            let params = { n };
+            let infoText = "";
+            let degree = 0;
+            nControl.style.display = 'block';
+            sControl.style.display = 'none';
+            if (type === 'cycle') {
+                params.S = [1, n-1];
+                degree = 2;
+                infoText = `<strong>Grafo:</strong> Cay(ℤ<sub>${n}</sub>, {±1}) | <strong>Grado:</strong> ${degree}`;
+            } else if (type === 'circulant') {
+                sControl.style.display = 'block';
+                const s_raw = sValueInput.value.split(',').map(s => parseInt(s.trim())).filter(s => !isNaN(s) && s > 0 && s < n);
+                const s_symmetric = new Set(s_raw);
+                s_raw.forEach(s => s_symmetric.add(n - s));
+                params.S = Array.from(s_symmetric);
+                degree = params.S.length;
+                infoText = `<strong>Grafo:</strong> Cay(ℤ<sub>${n}</sub>, S) | <strong>S:</strong> {${s_raw.join(',')}} | <strong>Grado:</strong> ${degree}`;
+            } else if (type === 'hypercube') {
+                nControl.style.display = 'none';
+                degree = 3;
+                infoText = `<strong>Grafo:</strong> Hipercubo Q₃ = Cay((ℤ₂)³, {e₁, e₂, e₃}) | <strong>Grado:</strong> ${degree}`;
+            }
+            graphInfo.innerHTML = infoText;
+            visualizer.draw(type, params);
+        };
+        [graphTypeSelect, nValueInput, sValueInput].forEach(el => el.addEventListener('input', updateDemo));
+        const themeObserver = new MutationObserver(() => updateDemo());
+        themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+        updateDemo();
+    });
+    </script>
+</body>
+</html>

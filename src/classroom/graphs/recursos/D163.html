@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafos de Cayley - Fusión Experta</title>
+    <style>
+        /* ————— ESTILOS GENERALES Y LAYOUT MODERNO (BASADO EN TU DISEÑO) ————— */
+        :root {
+            --bg-start: #1d2b64; --bg-end: #2f0743;
+            --text-light: #f0f0ff; --text-dim: #b0b0d0;
+            --panel-bg: rgba(255, 255, 255, 0.08);
+            --panel-border: rgba(255, 255, 255, 0.2);
+            --red: #ff5577; --blue: #55aaff; --yellow: #ffdd77;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            min-height: 100vh; color: var(--text-light);
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { font-size: 2.5rem; font-weight: 700; }
+        .subtitle { font-size: 1.1rem; opacity: 0.8; }
+        .controls {
+            display: flex; justify-content: center; gap: 15px;
+            margin-bottom: 30px; flex-wrap: wrap;
+        }
+        .control-group {
+            background: var(--panel-bg); backdrop-filter: blur(10px);
+            border-radius: 15px; padding: 12px 15px;
+            border: 1px solid var(--panel-border);
+        }
+        .control-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        select, button {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--panel-border);
+            border-radius: 8px; color: var(--text-light); padding: 8px 12px;
+            font-size: 14px; cursor: pointer; transition: all 0.3s ease;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .graph-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .graph-box {
+            background: var(--panel-bg); backdrop-filter: blur(15px);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid var(--panel-border);
+        }
+        .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .tally { text-align: center; margin-top: 15px; font-size: 14px; font-weight: 500; }
+
+        /* ————— ESTILOS PARA EL SVG (INTEGRACIÓN DE LA VERSIÓN EXPERTA) ————— */
+        .svg-container { border-radius: 15px; overflow: hidden; background: rgba(0,0,0,0.2); }
+        svg { width: 100%; height: 500px; display: block; }
+        .edge { fill: none; stroke-linecap: round; transition: opacity 0.3s; }
+        .edge.a { stroke: var(--red); stroke-width: 2.2; filter: drop-shadow(0 0 3px var(--red)); }
+        .edge.b { stroke: var(--blue); stroke-width: 1.8; filter: drop-shadow(0 0 3px var(--blue)); }
+        .node circle {
+            stroke: var(--panel-border); stroke-width: 1.5;
+            transition: all 0.2s ease;
+        }
+        .node:hover circle { stroke: var(--yellow); transform: scale(1.1); }
+        .node.active circle { stroke: var(--yellow); stroke-width: 3; }
+        .lbl {
+            font-family: 'Segoe UI', sans-serif; font-size: 11px;
+            text-anchor: middle; dominant-baseline: central;
+            fill: var(--text-dim); pointer-events: none;
+        }
+        .hidden { display: none; }
+
+        @media (max-width: 900px) {
+            .graph-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Visualizador de Grafos de Cayley</h1>
+            <p class="subtitle">Explorando la estructura de grupos finitos con subgrupos cíclicos de índice 2</p>
+        </div>
+
+        <div class="graph-container">
+            <div class="graph-box">
+                <div class="toolbar">
+                    <select id="groupL">
+                        <option value="SD16">SD₁₆ (k=7)</option>
+                        <option value="SA16">SA₁₆ (k=9)</option>
+                        <option value="D16">D₁₆ (k=15)</option>
+                        <option value="Q32">Q₃₂</option>
+                    </select>
+                    <button id="playAL">▶ ·A</button>
+                    <button id="playBL">▶ ·B</button>
+                    <button id="stopL">■</button>
+                    <label><input type="checkbox" id="showAL" checked> A</label>
+                    <label><input type="checkbox" id="showBL" checked> B</label>
+                </div>
+                <div class="svg-container">
+                    <svg id="svgL" viewBox="-300 -300 600 600"></svg>
+                </div>
+                <p class="tally" id="tallyL"></p>
+            </div>
+
+            <div class="graph-box">
+                <div class="toolbar">
+                    <select id="groupR">
+                        <option value="SA16">SA₁₆ (k=9)</option>
+                        <option value="SD16">SD₁₆ (k=7)</option>
+                        <option value="D16">D₁₆ (k=15)</option>
+                        <option value="Q32">Q₃₂</option>
+                    </select>
+                    <button id="playAR">▶ ·A</button>
+                    <button id="playBR">▶ ·B</button>
+                    <button id="stopR">■</button>
+                    <label><input type="checkbox" id="showAR" checked> A</label>
+                    <label><input type="checkbox" id="showBR" checked> B</label>
+                </div>
+                <div class="svg-container">
+                    <svg id="svgR" viewBox="-300 -300 600 600"></svg>
+                </div>
+                <p class="tally" id="tallyR"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ————— MOTOR ALGEBRAICO Y DE RENDERIZADO (BASADO EN LA VERSIÓN EXPERTA) —————
+
+    function setupPanel(panelId) {
+        // IDs para los elementos de este panel
+        const svg = document.getElementById(`svg${panelId}`);
+        const sel = document.getElementById(`group${panelId}`);
+        const chkA = document.getElementById(`showA${panelId}`);
+        const chkB = document.getElementById(`showB${panelId}`);
+        const btnPlayA = document.getElementById(`playA${panelId}`);
+        const btnPlayB = document.getElementById(`playB${panelId}`);
+        const btnStop = document.getElementById(`stop${panelId}`);
+        const tally = document.getElementById(`tally${panelId}`);
+
+        // Constantes algebraicas y de dibujo
+        const MOD = 16;
+        const TAU = Math.PI * 2;
+        const R1 = 250, R2 = 150, LBL_OFFSET = 20;
+
+        let current = { i: 0, t: 0 };
+        let timer = null;
+        const nodes = [];
+
+        // --- Funciones Algebraicas ---
+        const mod = (n, m = MOD) => (n % m + m) % m;
+
+        function getGroupParams(groupName) {
+            if (groupName === 'D16') return { k: 15, delta: 0, name: 'D₁₆', ordB: 2 };
+            if (groupName === 'SD16') return { k: 7, delta: 0, name: 'SD₁₆', ordB: 2 };
+            if (groupName === 'SA16') return { k: 9, delta: 0, name: 'SA₁₆', ordB: 2 };
+            if (groupName === 'Q32') return { k: 15, delta: 8, name: 'Q₃₂', ordB: 4 };
+        }
+
+        const mulA = (i, t, k) => [t ? mod(i + k) : mod(i + 1), t];
+        const mulB = (i, t, delta) => [t ? mod(i + delta) : i, 1 - t];
+
+        function countOrder2(k, delta) {
+            let count = 1; // A^8 siempre tiene orden 2
+            for (let i = 0; i < MOD; i++) {
+                if (mod((1 + k) * i + delta) === MOD / 2) count++;
+            }
+            return count;
+        }
+
+        // --- Funciones de Dibujo en SVG ---
+        function draw() {
+            const params = getGroupParams(sel.value);
+            svg.innerHTML = ''; // Limpiar SVG
+
+            // Crear capas <g> para aristas, nodos y etiquetas
+            const gA = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            const gB = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            const gN = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            const gL = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            gA.setAttribute('class', 'edges a');
+            gB.setAttribute('class', 'edges b');
+            svg.append(gA, gB, gN, gL);
+
+            // 1. Layout de nodos
+            nodes.length = 0;
+            for (let t of [0, 1]) { // 0: anillo exterior, 1: anillo interior
+                for (let i = 0; i < MOD; i++) {
+                    const theta = TAU * (i / MOD) - TAU / 4;
+                    const r = t === 0 ? R1 : R2;
+                    nodes.push({ i, t, x: r * Math.cos(theta), y: r * Math.sin(theta), r, theta });
+                }
+            }
+
+            // 2. Dibujar aristas
+            nodes.forEach(p => {
+                // Aristas A (rojas) como arcos circulares
+                const [niA, ntA] = mulA(p.i, p.t, params.k);
+                const qA = nodes[niA + MOD * ntA];
+                const pathA = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathA.setAttribute('d', `M ${p.x} ${p.y} A ${p.r} ${p.r} 0 0 1 ${qA.x} ${qA.y}`);
+                gA.appendChild(pathA);
+
+                // Aristas B (azules) como líneas rectas
+                const [niB, ntB] = mulB(p.i, p.t, params.delta);
+                const qB = nodes[niB + MOD * ntB];
+                const pathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathB.setAttribute('d', `M ${p.x} ${p.y} L ${qB.x} ${qB.y}`);
+                gB.appendChild(pathB);
+            });
+            
+            // 3. Dibujar nodos y etiquetas
+            nodes.forEach((p, idx) => {
+                const gNode = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                gNode.setAttribute('class', 'node');
+                gNode.addEventListener('click', () => select(p));
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', p.x);
+                circle.setAttribute('cy', p.y);
+                circle.setAttribute('r', 10);
+                circle.setAttribute('fill', p.t === 0 ? 'var(--red)' : 'var(--blue)');
+                gNode.appendChild(circle);
+                gN.appendChild(gNode);
+                p.g = gNode;
+
+                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const lbl_r = p.r + (p.t === 0 ? LBL_OFFSET : -LBL_OFFSET);
+                lbl.setAttribute('x', lbl_r * Math.cos(p.theta));
+                lbl.setAttribute('y', lbl_r * Math.sin(p.theta));
+                let text = p.t === 0 ? `A${p.i}` : `A${p.i}B`;
+                text = text.replace('A0B', 'B').replace('A0', 'e').replace('A1B', 'AB').replace('A1', 'A');
+                lbl.textContent = text;
+                lbl.setAttribute('class', 'lbl');
+                gL.appendChild(lbl);
+            });
+
+            // 4. Actualizar UI
+            tally.textContent = `${params.name} | orden(B)=${params.ordB} | elementos de orden 2: ${countOrder2(params.k, params.delta)}`;
+            select(nodes.find(n => n.i === 0 && n.t === 0));
+            gA.classList.toggle('hidden', !chkA.checked);
+            gB.classList.toggle('hidden', !chkB.checked);
+        }
+
+        function select(p) {
+            const activeNode = nodes.find(n => n.i === current.i && n.t === current.t);
+            if (activeNode) activeNode.g.classList.remove('active');
+            
+            current = { i: p.i, t: p.t };
+            p.g.classList.add('active');
+        }
+
+        // --- Lógica de Interacción ---
+        const stopAnimation = () => { if (timer) { clearInterval(timer); timer = null; } };
+        
+        btnPlayA.onclick = () => {
+            stopAnimation();
+            const params = getGroupParams(sel.value);
+            timer = setInterval(() => {
+                const [ni, nt] = mulA(current.i, current.t, params.k);
+                select(nodes[ni + MOD * nt]);
+            }, 300);
+        };
+        btnPlayB.onclick = () => {
+            stopAnimation();
+            const params = getGroupParams(sel.value);
+            timer = setInterval(() => {
+                const [ni, nt] = mulB(current.i, current.t, params.delta);
+                select(nodes[ni + MOD * nt]);
+            }, 300);
+        };
+        btnStop.onclick = stopAnimation;
+
+        sel.onchange = () => { stopAnimation(); draw(); };
+        chkA.onchange = () => svg.querySelector('.edges.a').classList.toggle('hidden', !chkA.checked);
+        chkB.onchange = () => svg.querySelector('.edges.b').classList.toggle('hidden', !chkB.checked);
+        
+        draw(); // Dibujo inicial
+    }
+
+    // Inicializar ambos paneles
+    document.addEventListener('DOMContentLoaded', () => {
+        setupPanel('L');
+        setupPanel('R');
+    });
+
+    </script>
+</body>
+</html>

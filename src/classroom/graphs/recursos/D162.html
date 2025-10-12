@@ -1,0 +1,298 @@
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figure 9 — Cayley graphs (order 32)</title>
+<style>
+  /* ————— Estilo "paper" como en el artículo ————— */
+  :root{
+    --paper:#ffffff;
+    --ink:#111;
+    --grid:#e9e9ef;
+    --node:#d8d8de;
+    --nodeStroke:#9a9aad;
+    --red:#d34040;  /* A */
+    --blue:#255ad7; /* B */
+  }
+  html,body{margin:0; background:var(--paper); color:var(--ink); font-family: "Georgia", "Times New Roman", serif}
+  .page{max-width:1100px; margin:28px auto 36px auto; padding:0 16px}
+  h1{font-size:20px; margin:0 0 10px 0; font-weight:600}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .panel{border:1px solid #ddd; border-radius:10px; padding:12px}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px}
+  select, button, label{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size:13px;
+  }
+  select, button{
+    border:1px solid #cfcfe8; background:#f8f8ff; padding:6px 8px; border-radius:8px; cursor:pointer
+  }
+  button:hover{background:#f0f0ff}
+  label{display:flex; align-items:center; gap:6px}
+  input[type="checkbox"]{accent-color:#2a5}
+  .svgWrap{position:relative}
+  svg{width:100%; height:520px; display:block;
+      /* Fondo sutilmente texturizado */
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(to right, var(--grid) 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-color: #fcfcff;
+      border:1px solid #ddd; border-radius:10px
+  }
+  .edge{fill:none; stroke-linecap:round; stroke-opacity:.95}
+  .edge.a{stroke:var(--red); stroke-width:2.2}
+  .edge.b{stroke:var(--blue); stroke-width:1.8}
+  .node{cursor:pointer}
+  .node circle{fill:var(--node); stroke:var(--nodeStroke); stroke-width:1.1}
+  .node:hover circle{stroke:#000; stroke-width:1.5}
+  .node.active circle{stroke:#f1a10a; stroke-width:2.5; fill:#fff}
+  .lbl{font-family: ui-sans-serif, system-ui; font-size:10px; text-anchor:middle; dominant-baseline:central; fill:#222; pointer-events: none;}
+  .caption{margin-top:12px; font-size:13px; text-align:center}
+  .legend{display:flex; gap:12px; justify-content:center; margin-top:6px}
+  .chip{display:flex; align-items:center; gap:6px; font-size:12px}
+  .dot{width:12px; height:2.5px; background:var(--red)}
+  .dot.blue{background:var(--blue)}
+  .tally{font-size:13px; font-weight:600; color:#445; font-family:ui-sans-serif, system-ui}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Figure 9 — Cayley graphs of order 32 with an index-2 cyclic subgroup</h1>
+
+  <div class="row">
+    <div class="panel">
+      <div class="toolbar">
+        <label>Grupo:
+          <select id="groupL">
+            <option value="SD16">SD₁₆ (k=7)</option>
+            <option value="SA16">SA₁₆ (k=9)</option>
+            <option value="D16">D₁₆ (k=−1)</option>
+            <option value="Q32">Q₃₂ (k=−1, B²=A⁸)</option>
+          </select>
+        </label>
+        <button id="playAL">▶ ·A</button>
+        <button id="playBL">▶ ·B</button>
+        <button id="stopL">■</button>
+        <label><input type="checkbox" id="showAL" checked> aristas ·A</label>
+        <label><input type="checkbox" id="showBL" checked> aristas ·B</label>
+      </div>
+      <div class="svgWrap">
+        <svg id="svgL" viewBox="-300 -300 600 600" aria-label="Cayley left">
+          <defs>
+            <marker id="arrR" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--red)"/>
+            </marker>
+            <marker id="arrB" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+            </marker>
+          </defs>
+          <g class="edgesA"></g>
+          <g class="edgesB"></g>
+          <g class="nodes"></g>
+          <g class="labels"></g>
+        </svg>
+      </div>
+      <p class="tally" id="tallyL" align="center"></p>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <label>Grupo:
+          <select id="groupR">
+            <option value="SA16">SA₁₆ (k=9)</option>
+            <option value="SD16">SD₁₆ (k=7)</option>
+            <option value="D16">D₁₆ (k=−1)</option>
+            <option value="Q32">Q₃₂ (k=−1, B²=A⁸)</option>
+          </select>
+        </label>
+        <button id="playAR">▶ ·A</button>
+        <button id="playBR">▶ ·B</button>
+        <button id="stopR">■</button>
+        <label><input type="checkbox" id="showAR" checked> aristas ·A</label>
+        <label><input type="checkbox" id="showBR" checked> aristas ·B</label>
+      </div>
+      <div class="svgWrap">
+        <svg id="svgR" viewBox="-300 -300 600 600" aria-label="Cayley right">
+          <defs>
+            <marker id="arrR2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--red)"/>
+            </marker>
+            <marker id="arrB2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+            </marker>
+          </defs>
+          <g class="edgesA"></g>
+          <g class="edgesB"></g>
+          <g class="nodes"></g>
+          <g class="labels"></g>
+        </svg>
+      </div>
+      <p class="tally" id="tallyR" align="center"></p>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="chip"><span class="dot"></span> aristas ·A (orden 16)</span>
+    <span class="chip"><span class="dot blue"></span> aristas ·B</span>
+  </div>
+  <div class="caption">
+    If either diagram describes a group of order 32, it must be the Cayley graph of \(D_{16}\), \(SD_{16}\), \(SA_{16}\), or \(Q_{32}\).
+  </div>
+</div>
+
+<script>
+/* ======= motor algebraico (Z16 ⋊_k C2) y Q32 ======= */
+const MOD = 16;
+const TAU = Math.PI*2;
+
+function mod(n,m=MOD){ n%=m; return n<0?n+m:n; }
+
+function params(group){
+  if(group==='D16')  return {k:MOD-1, delta:0,  name:'D₁₆', ordB:2};
+  if(group==='SD16') return {k:7,     delta:0,  name:'SD₁₆', ordB:2};
+  if(group==='SA16') return {k:9,     delta:0,  name:'SA₁₆', ordB:2};
+  if(group==='Q32')  return {k:MOD-1,  delta:8, name:'Q₃₂', ordB:4};
+}
+
+function mulA(i,t, k){ return [ t? mod(i+k):mod(i+1), t ]; }
+function mulB(i,t, delta){ return [ t? mod(i+delta):i , t?0:1 ]; }
+
+function countOrder2(k,delta){
+  let cnt=1; // A^8 siempre es de orden 2
+  for(let i=0;i<16;i++){
+    const val = mod((1+k)*i + delta);
+    if(val === 8) cnt++;
+  }
+  return cnt;
+}
+
+/* ======= render de un panel ======= */
+function makePanel(svgId, selectId, showAid, showBid, playAid, playBid, stopId, tallyId, arrIdR, arrIdB){
+  const svg = document.getElementById(svgId);
+  const gA = svg.querySelector('.edgesA');
+  const gB = svg.querySelector('.edgesB');
+  const gN = svg.querySelector('.nodes');
+  const gL = svg.querySelector('.labels'); /* NUEVO: capa para etiquetas */
+  const sel = document.getElementById(selectId);
+  const chkA = document.getElementById(showAid);
+  const chkB = document.getElementById(showBid);
+  const btnPlayA = document.getElementById(playAid);
+  const btnPlayB = document.getElementById(playBid);
+  const btnStop = document.getElementById(stopId);
+  const tally = document.getElementById(tallyId);
+
+  const R1=250, R2=150, LBL_OFFSET=18;
+  let current = {i:0,t:0};
+  let timer=null;
+  const nodes = [];
+
+  function layout(){
+    nodes.length=0;
+    for(let t=0;t<2;t++){
+      for(let i=0;i<16;i++){
+        const idx = i + 16*t;
+        const theta = TAU * (i/16) - TAU/4; // Rotado para empezar en la parte superior
+        const r = t? R2 : R1;
+        const x = r*Math.cos(theta), y=r*Math.sin(theta);
+        nodes[idx]={i,t,x,y,theta,r};
+      }
+    }
+  }
+
+  function draw(){
+    const {k,delta,name,ordB} = params(sel.value);
+    layout();
+    gA.innerHTML=''; gB.innerHTML=''; gN.innerHTML=''; gL.innerHTML='';
+
+    // Edges A (rojas) - DIBUJADAS COMO ARCOS
+    for(const p of nodes){
+      const [ni,nt] = mulA(p.i,p.t,k);
+      const q = nodes[ni + 16*nt];
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('class','edge a');
+      path.setAttribute('marker-end', `url(#${arrIdR})`);
+      // Comando SVG para un arco circular
+      path.setAttribute('d', `M ${p.x} ${p.y} A ${p.r} ${p.r} 0 0 1 ${q.x} ${q.y}`);
+      gA.appendChild(path);
+    }
+
+    // Edges B (azules) - DIBUJADAS COMO LÍNEAS RECTAS
+    for(const p of nodes){
+      const [ni,nt] = mulB(p.i,p.t,delta);
+      const q = nodes[ni + 16*nt];
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('class','edge b');
+      path.setAttribute('marker-end', `url(#${arrIdB})`);
+      // Comando SVG para una línea recta
+      path.setAttribute('d', `M ${p.x} ${p.y} L ${q.x} ${q.y}`);
+      gB.appendChild(path);
+    }
+
+    // Nodes y Labels (con posicionamiento radial)
+    for(const p of nodes){
+      // Nodo (círculo)
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','node');
+      g.setAttribute('transform',`translate(${p.x},${p.y})`);
+      g.addEventListener('click',()=>{ select(p); });
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('r', 9);
+      g.appendChild(c);
+      gN.appendChild(g);
+      p.g=g;
+
+      // Etiqueta (texto) - POSICIONAMIENTO RADIAL
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','lbl');
+      const label_r = p.r + (p.t ? -LBL_OFFSET : LBL_OFFSET); // Hacia adentro o hacia afuera
+      const lx = label_r*Math.cos(p.theta);
+      const ly = label_r*Math.sin(p.theta);
+      t.setAttribute('transform', `translate(${lx}, ${ly})`);
+      t.textContent = p.t? `A${p.i}B` : `A${p.i}`.replace('A0','e').replace('A1','A');
+      gL.appendChild(t);
+    }
+
+    tally.innerHTML = `${name} &nbsp;&nbsp;|&nbsp;&nbsp; orden(B) = ${ordB} &nbsp;&nbsp;|&nbsp;&nbsp; elementos de orden 2: ${countOrder2(k,delta)}`;
+    select(nodes[0]);
+    
+    // CAMBIO: Eficiencia - los checkboxes solo alteran la visibilidad
+    gA.style.display = chkA.checked ? 'block' : 'none';
+    gB.style.display = chkB.checked ? 'block' : 'none';
+  }
+
+  function select(p){
+    if(current && nodes[current.i+16*current.t]) nodes[current.i+16*current.t].g.classList.remove('active');
+    current = {i:p.i, t:p.t};
+    nodes[p.i + 16*p.t].g.classList.add('active');
+  }
+
+  function stepA(){
+    const {k} = params(sel.value);
+    const [ni,nt] = mulA(current.i,current.t,k);
+    select(nodes[ni + 16*nt]);
+  }
+  function stepB(){
+    const {delta} = params(sel.value);
+    const [ni,nt] = mulB(current.i,current.t,delta);
+    select(nodes[ni + 16*nt]);
+  }
+  
+  // CAMBIO: Event listeners optimizados
+  sel.addEventListener('change', draw);
+  chkA.addEventListener('change', () => { gA.style.display = chkA.checked ? 'block' : 'none'; });
+  chkB.addEventListener('change', () => { gB.style.display = chkB.checked ? 'block' : 'none'; });
+  
+  btnPlayA.addEventListener('click', ()=>{ clearInterval(timer); timer=setInterval(stepA, 480); });
+  btnPlayB.addEventListener('click', ()=>{ clearInterval(timer); timer=setInterval(stepB, 480); });
+  btnStop.addEventListener('click', ()=>{ clearInterval(timer); timer=null; });
+
+  draw();
+}
+
+/* ———— inicializar ambos paneles ———— */
+makePanel('svgL','groupL','showAL','showBL','playAL','playBL','stopL','tallyL','arrR','arrB');
+makePanel('svgR','groupR','showAR','showBR','playAR','playBR','stopR','tallyR','arrR2','arrB2');
+
+</script>
+</body>
+</html>

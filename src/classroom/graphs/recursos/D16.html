@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figure 9 — Cayley graphs (order 32)</title>
+<style>
+  /* ————— Estilo "paper" como en el artículo ————— */
+  :root{
+    --paper:#ffffff;
+    --ink:#111;
+    --grid:#e9e9ef;
+    --node:#d8d8de;
+    --nodeStroke:#9a9aad;
+    --red:#d34040;   /* A */
+    --blue:#255ad7;  /* B */
+  }
+  html,body{margin:0; background:var(--paper); color:var(--ink); font-family: "Georgia", "Times New Roman", serif}
+  .page{max-width:1100px; margin:28px auto 36px auto; padding:0 16px}
+  h1{font-size:20px; margin:0 0 10px 0; font-weight:600}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .panel{border:1px solid #ddd; border-radius:10px; padding:12px}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px}
+  select, button, label{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size:13px;
+  }
+  select, button{
+    border:1px solid #cfcfe8; background:#f8f8ff; padding:6px 8px; border-radius:8px; cursor:pointer
+  }
+  button:hover{background:#f0f0ff}
+  label{display:flex; align-items:center; gap:6px}
+  input[type="checkbox"]{accent-color:#2a5}
+  .svgWrap{position:relative}
+  svg{width:100%; height:520px; display:block; background:
+      radial-gradient(circle at 50% 50%, #fafafb 0%, #fafafb 40%, #f3f4f7 41%, #fafafb 42%, #fafafb 100%);
+      border:1px solid #ddd; border-radius:10px}
+  .edge{fill:none; stroke-linecap:round; stroke-opacity:.95}
+  .edge.a{stroke:var(--red); stroke-width:2}
+  .edge.b{stroke:var(--blue); stroke-width:1.7}
+  .node{cursor:pointer}
+  .node circle{fill:var(--node); stroke:var(--nodeStroke); stroke-width:1.1}
+  .node:hover circle{stroke:#000; stroke-width:1.5}
+  .node.active circle{stroke:#f1a10a; stroke-width:2}
+  .lbl{font-size:10px; text-anchor:middle; dominant-baseline:central; fill:#222}
+  .caption{margin-top:12px; font-size:13px; text-align:center}
+  .legend{display:flex; gap:12px; justify-content:center; margin-top:6px}
+  .chip{display:flex; align-items:center; gap:6px; font-size:12px}
+  .dot{width:12px; height:2.5px; background:var(--red)}
+  .dot.blue{background:var(--blue)}
+  .tally{font-size:12px; opacity:.8}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Figure 9 — Cayley graphs of order 32 with an index-2 cyclic subgroup</h1>
+
+  <div class="row">
+    <!-- Panel izquierdo -->
+    <div class="panel">
+      <div class="toolbar">
+        <label>Grupo:
+          <select id="groupL">
+            <option value="SD16">SD₁₆ (k=7)</option>
+            <option value="SA16">SA₁₆ (k=9)</option>
+            <option value="D16">D₁₆ (k=−1)</option>
+            <option value="Q32">Q₃₂ (k=−1, B²=A⁸)</option>
+          </select>
+        </label>
+        <button id="playAL">▶ ·A</button>
+        <button id="playBL">▶ ·B</button>
+        <button id="stopL">■</button>
+        <label><input type="checkbox" id="showAL" checked> aristas ·A</label>
+        <label><input type="checkbox" id="showBL" checked> aristas ·B</label>
+        <span class="tally" id="tallyL"></span>
+      </div>
+      <div class="svgWrap">
+        <svg id="svgL" viewBox="-420 -280 840 560" aria-label="Cayley left">
+          <defs>
+            <marker id="arrR" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--red)"/>
+            </marker>
+            <marker id="arrB" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+            </marker>
+          </defs>
+          <g class="edgesA"></g>
+          <g class="edgesB"></g>
+          <g class="nodes"></g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="panel">
+      <div class="toolbar">
+        <label>Grupo:
+          <select id="groupR">
+            <option value="SA16">SA₁₆ (k=9)</option>
+            <option value="SD16">SD₁₆ (k=7)</option>
+            <option value="D16">D₁₆ (k=−1)</option>
+            <option value="Q32">Q₃₂ (k=−1, B²=A⁸)</option>
+          </select>
+        </label>
+        <button id="playAR">▶ ·A</button>
+        <button id="playBR">▶ ·B</button>
+        <button id="stopR">■</button>
+        <label><input type="checkbox" id="showAR" checked> aristas ·A</label>
+        <label><input type="checkbox" id="showBR" checked> aristas ·B</label>
+        <span class="tally" id="tallyR"></span>
+      </div>
+      <div class="svgWrap">
+        <svg id="svgR" viewBox="-420 -280 840 560" aria-label="Cayley right">
+          <defs>
+            <marker id="arrR2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--red)"/>
+            </marker>
+            <marker id="arrB2" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+            </marker>
+          </defs>
+          <g class="edgesA"></g>
+          <g class="edgesB"></g>
+          <g class="nodes"></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="chip"><span class="dot"></span> aristas ·A (orden 16)</span>
+    <span class="chip"><span class="dot blue"></span> aristas ·B</span>
+  </div>
+  <div class="caption">
+    If either diagram describes a group of order 32, it must be the Cayley graph of \(D_{16}\), \(SD_{16}\), \(SA_{16}\), or \(Q_{32}\).
+  </div>
+</div>
+
+<script>
+/* ======= motor algebraico (Z16 ⋊_k C2) y Q32 ======= */
+const MOD = 16;
+const TAU = Math.PI*2;
+
+function mod(n,m=MOD){ n%=m; return n<0?n+m:n; }
+
+function params(group){
+  // Devuelve {k, delta, name}
+  if(group==='D16')  return {k:MOD-1, delta:0,  name:'D₁₆'};
+  if(group==='SD16') return {k:7,      delta:0,  name:'SD₁₆'};
+  if(group==='SA16') return {k:9,      delta:0,  name:'SA₁₆'};
+  if(group==='Q32')  return {k:MOD-1,  delta:8,  name:'Q₃₂'};
+}
+
+/* Multiplicación a la derecha por A y B */
+function mulA(i,t, k){ return [ t? mod(i+k):mod(i+1), t ]; }
+function mulB(i,t, delta){ return [ t? mod(i+delta):i , t?0:1 ]; }
+
+/* Cuenta elementos de orden 2: (i,0)^2 = (2i,0) ⇒ solo i=8;
+   (i,1)^2 = ( (1+k)i + delta , 0 ). Es orden 2 ⇔ (1+k)i + delta ≡ 8 (mod 16). */
+function countOrder2(k,delta){
+  let cnt=0;
+  // outer ring
+  if( (2*8)%16===0 ) cnt+=1; // siempre A^8
+  // inner ring
+  for(let i=0;i<16;i++){
+    const val = mod((1+k)*i + delta, 16);
+    if(val===8) cnt++;
+  }
+  return cnt;
+}
+
+/* ======= render de un panel ======= */
+function makePanel(svgId, selectId, showAid, showBid, playAid, playBid, stopId, tallyId, arrIdR, arrIdB){
+  const svg = document.getElementById(svgId);
+  const gA = svg.querySelector('.edgesA');
+  const gB = svg.querySelector('.edgesB');
+  const gN = svg.querySelector('.nodes');
+  const sel = document.getElementById(selectId);
+  const chkA = document.getElementById(showAid);
+  const chkB = document.getElementById(showBid);
+  const btnPlayA = document.getElementById(playAid);
+  const btnPlayB = document.getElementById(playBid);
+  const btnStop = document.getElementById(stopId);
+  const tally = document.getElementById(tallyId);
+
+  const R1=240, R2=130; // radios
+  let current = {i:0,t:0};
+  let timer=null;
+
+  const nodes = []; // 32 nodos con posiciones
+  function layout(){
+    nodes.length=0;
+    for(let t=0;t<2;t++){
+      for(let i=0;i<16;i++){
+        const idx = i + 16*t;
+        // ángulos coherentes con el estilo del artículo
+        const theta = TAU * (i/16) - (t? Math.PI/16 : 0);
+        const r = t? R2 : R1;
+        const x = r*Math.cos(theta), y=r*Math.sin(theta);
+        nodes[idx]={i,t,x,y,idx};
+      }
+    }
+  }
+
+  function edgePath(p,q, curvature){
+    // curva cuadrática con control desplazado perpendicularmente
+    const mx = (p.x+q.x)/2, my=(p.y+q.y)/2;
+    const dx = q.x-p.x, dy=q.y-p.y;
+    const nx = -dy, ny = dx;
+    const c = curvature ?? 0.14;
+    const cx = mx + nx*c, cy = my + ny*c;
+    return `M ${p.x} ${p.y} Q ${cx} ${cy} ${q.x} ${q.y}`;
+  }
+
+  function draw(){
+    const {k,delta} = params(sel.value);
+    layout();
+    gA.innerHTML=''; gB.innerHTML=''; gN.innerHTML='';
+    // edges A (rojas)
+    for(const p of nodes){
+      const [ni,nt] = mulA(p.i,p.t,k);
+      const q = nodes[ni + 16*nt];
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('class','edge a');
+      path.setAttribute('marker-end', `url(#${arrIdR})`);
+      // curvatura distinta por anillo para emular “trazo circular”
+      const curv = p.t? 0.28 : 0.22;
+      path.setAttribute('d', edgePath(p,q,curv));
+      if(!chkA.checked) path.style.opacity = .06;
+      gA.appendChild(path);
+    }
+    // edges B (azules) — “trenzado”
+    for(const p of nodes){
+      const [ni,nt] = mulB(p.i,p.t,delta);
+      const q = nodes[ni + 16*nt];
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('class','edge b');
+      path.setAttribute('marker-end', `url(#${arrIdB})`);
+      // más curvatura para los saltos entre anillos
+      const curv = p.t? 0.10 : 0.10;
+      path.setAttribute('d', edgePath(p,q, curv));
+      if(!chkB.checked) path.style.opacity = .06;
+      gB.appendChild(path);
+    }
+    // nodes
+    for(const p of nodes){
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','node');
+      g.setAttribute('transform',`translate(${p.x},${p.y})`);
+      g.addEventListener('click',()=>{ select(p); });
+
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('r', 8.5);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('class','lbl');
+      t.setAttribute('y', -16);
+      t.textContent = p.t? `A^${p.i}B` : `A^${p.i}`;
+
+      g.appendChild(c); g.appendChild(t);
+      gN.appendChild(g);
+      p.g=g;
+    }
+    // tallies
+    const count2 = countOrder2(k,delta);
+    tally.textContent = `elementos de orden 2: ${count2}`;
+    select(nodes[0]);
+  }
+
+  function select(p){
+    if(current && nodes[current.i+16*current.t]) nodes[current.i+16*current.t].g.classList.remove('active');
+    current = {i:p.i, t:p.t};
+    nodes[p.i + 16*p.t].g.classList.add('active');
+  }
+
+  function stepA(){
+    const {k} = params(sel.value);
+    const [ni,nt] = mulA(current.i,current.t,k);
+    select(nodes[ni + 16*nt]);
+  }
+  function stepB(){
+    const {delta} = params(sel.value);
+    const [ni,nt] = mulB(current.i,current.t,delta);
+    select(nodes[ni + 16*nt]);
+  }
+
+  // eventos
+  sel.addEventListener('change', draw);
+  chkA.addEventListener('change', draw);
+  chkB.addEventListener('change', draw);
+  btnPlayA.addEventListener('click', ()=>{ clearInterval(timer); timer=setInterval(stepA, 480); });
+  btnPlayB.addEventListener('click', ()=>{ clearInterval(timer); timer=setInterval(stepB, 480); });
+  btnStop.addEventListener('click', ()=>{ clearInterval(timer); timer=null; });
+
+  // render inicial
+  draw();
+  return {draw};
+}
+
+/* ———— inicializar ambos paneles (por defecto SD16 y SA16) ———— */
+makePanel('svgL','groupL','showAL','showBL','playAL','playBL','stopL','tallyL','arrR','arrB');
+makePanel('svgR','groupR','showAR','showBR','playAR','playBR','stopR','tallyR','arrR2','arrB2');
+</script>
+</body>
+</html>
