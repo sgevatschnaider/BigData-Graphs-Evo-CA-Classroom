@@ -230,6 +230,8 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 
 
 ---
+| **Animación: Crecimiento n! vs 2ⁿ** <br><br>![Animación n! vs 2ⁿ](https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/ede30340ef67070fc006e3c2caacea68c57c89f0/src/classroom/graphs/recursos/Hamilton_simulacion_NP.gif) | [![Ver GIF](https://img.shields.io/badge/Ver_Animación-GIF-lightgrey?style=for-the-badge&logo=html5)](https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/ede30340ef67070fc006e3c2caacea68c57c89f0/src/classroom/graphs/recursos/Hamilton_simulacion_NP.gif) |
+
 ## 📝 Camino y Ciclo Hamiltoneano
 
 | 📄 Recurso | 📥 Acceso |
