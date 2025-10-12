@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Estudio: Pruebas de Conocimiento Cero (ZKP)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    .code-container pre { background: transparent; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .code-container code { font-size: 0.9em; }
+    .code-container .comment { color: #8a99a8; }
+    .code-container .keyword { color: #c792ea; }
+    .code-container .string { color: #c3e88d; }
+    .code-container .number { color: #f78c6c; }
+    .code-container .function { color: #82aaff; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">El Paradigma de la Confianza Cero</h1>
+      <p class="subtitle">Un Análisis de ZKP en la Era Web3</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Introducción: La Revolución de la Privacidad Verificable</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Las Pruebas de Conocimiento Cero representan un cambio de paradigma en la criptografía, inaugurando una era de <strong>"privacidad verificable"</strong>. Una ZKP es un protocolo que permite a un "probador" convencer a un "verificador" de que una afirmación es verdadera, sin revelar ninguna información adicional más allá de la veracidad de dicha afirmación.</p>
+                <p>En el ecosistema blockchain, las ZKP permiten verificar cómputos o atributos —suficiencia de saldo, cumplimiento de edad, correcta ejecución de un contrato— sin exponer públicamente los datos subyacentes.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Flujo Básico de una Prueba de Conocimiento Cero</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Probador</strong><span>Posee un dato secreto (ej. contraseña) y quiere probar que lo conoce.</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Envía Prueba ZKP</div></div>
+                        <div class="diagram-box"><strong>Verificador</strong><span>Recibe la prueba, la verifica y queda convencido. Nunca aprende el dato secreto.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. La Intuición Fundamental: Comprendiendo ZKP con Analogías</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Para internalizar la poderosa intuición detrás de esta tecnología, podemos recurrir a analogías. Imagine el desafío de <strong>"¿Dónde está Wally?"</strong>. Con una ZKP, uno podría demostrar que ha localizado al personaje sin señalar su ubicación, tal vez cubriendo la ilustración con una cartulina opaca que solo tuviera un pequeño recorte sobre Wally.</p>
+                <p>De forma similar, un individuo podría demostrar que es mayor de 18 años sin revelar su fecha de nacimiento, o una empresa probar que sus reservas superan sus pasivos sin desvelar sus balances. El hilo conductor es el <strong>principio de revelación mínima de datos</strong>, una capacidad transformadora para proteger la privacidad y optimizar la eficiencia.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Los Pilares Criptográficos: Propiedades Formales</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La robustez de cualquier protocolo ZKP se sustenta en tres propiedades formales inquebrantables. Las implementaciones modernas se han migrado hacia las variantes <strong>no interactivas (NIZK)</strong>, donde el probador genera una prueba autónoma y compacta que cualquiera puede verificar de forma asíncrona, un requisito indispensable para la naturaleza descentralizada de blockchain.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Las 3 Propiedades Fundamentales de ZKP</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Completitud</strong><span>Si la afirmación es verdadera y todos son honestos, la prueba siempre será aceptada.</span></div>
+                        <div class="diagram-box"><strong>Solidez</strong><span>Si la afirmación es falsa, es imposible para un probador deshonesto convencer al verificador.</span></div>
+                        <div class="diagram-box"><strong>Cero Conocimiento</strong><span>El verificador no aprende nada más allá de la simple validez de la afirmación.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. El Ecosistema Tecnológico: Tipos de ZKP</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El campo de las ZKP ha florecido en un rico ecosistema de tecnologías, cada una con sus propios compromisos y ventajas. La elección entre ellas es un ejercicio de ingeniería que depende de las prioridades del caso de uso: eficiencia, transparencia o escalabilidad.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Comparativa de Tecnologías ZKP Populares</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>zk-SNARKs</strong><span>Pruebas muy pequeñas y verificación rápida. Ideal para rollups. Algunos requieren "trusted setup".</span></div>
+                        <div class="diagram-box"><strong>zk-STARKs</strong><span>Transparentes (sin "trusted setup"). Más escalables para cómputos complejos y resistentes a la computación cuántica. Pruebas más grandes.</span></div>
+                        <div class="diagram-box"><strong>Bulletproofs</strong><span>No requieren "trusted setup". Eficientes para pruebas de rango. Tamaño de prueba moderado.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Casos de Uso en Producción: Transformando Industrias</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Las aplicaciones actuales de las ZKP están redefiniendo industrias. En finanzas, habilitan la privacidad de transacciones. En identidad (zk-ID), permiten demostrar atributos sin entregar datos personales. Su impacto más visible es en el <strong>escalado de blockchain a través de ZK-rollups</strong>.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Flujo de un ZK-Rollup</div>
+                    <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Capa 2 (Off-chain)</div>
+                            <div class="diagram-box"><strong>Miles de transacciones</strong><span>Se agrupan y ejecutan fuera de la cadena principal.</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Genera prueba</div></div>
+                         <div class="diagram-box"><strong>Prueba ZKP Única</strong><span>Valida criptográficamente todo el lote de transacciones.</span></div>
+                         <div class="diagram-arrow down"><div class="diagram-arrow-label">Publica en</div></div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">Capa 1 (On-chain)</div>
+                             <div class="diagram-box"><strong>Verificación en Cadena</strong><span>Solo la prueba se publica y verifica, heredando la seguridad de la red principal.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. La Frontera Emergente: ZKP en Metaverso y Videojuegos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El metaverso y los videojuegos representan una frontera fértil para la aplicación de ZKP. En estos mundos digitales, la tecnología puede:</p>
+                <ul>
+                    <li>Certificar la <strong>propiedad y rareza</strong> de activos sin revelar el inventario completo de un jugador.</li>
+                    <li>Potenciar mecánicas de juego justas, como <strong>sistemas anti-trampas</strong> donde un jugador prueba que sus acciones son válidas sin exponer su lógica interna.</li>
+                    <li>Procesar <strong>micro-transacciones masivas</strong> a través de ZK-rollups, esenciales para una economía virtual vibrante.</li>
+                    <li>Habilitar una <strong>reputación portable</strong> a través de diferentes metaversos sin vincular todo el historial de un usuario.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Balance y Desafíos: Ventajas y Límites</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Ventajas</h4>
+                 <ul>
+                    <li><strong>Privacidad por diseño:</strong> Revelación mínima de datos como principio fundamental.</li>
+                    <li><strong>Integridad criptográfica:</strong> Garantías matemáticas de que las reglas se cumplen.</li>
+                    <li><strong>Escalabilidad:</strong> Permite procesar miles de transacciones con el costo de una sola.</li>
+                </ul>
+                <h4>Límites y Desafíos</h4>
+                <ul>
+                    <li><strong>Costo computacional:</strong> La generación de pruebas puede ser intensiva en CPU/RAM.</li>
+                    <li><strong>Complejidad de desarrollo:</strong> Crear circuitos ZK requiere conocimientos especializados.</li>
+                    <li><strong>Experiencia de usuario:</strong> Abstraer la complejidad para el usuario final es un reto.</li>
+                    <li><strong>Marco regulatorio:</strong> Equilibrar privacidad y cumplimiento normativo es un debate abierto.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">8. El Stack del Desarrollador: Herramientas para Construir</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Para los desarrolladores, el ecosistema de herramientas está madurando rápidamente. La recomendación es empezar con casos de uso simples, medir el rendimiento y auditar rigurosamente todo el código y la criptografía.</p>
+                <div class="code-container">
+<pre><code><span class="comment"># Pila de desarrollo conceptual para una aplicación con ZKP</span>
+
+<span class="comment"># 1. Capa de Lógica de Negocio (El "Circuito")</span>
+<span class="comment"># Se define qué se quiere probar.</span>
+<span class="keyword">language</span>: <span class="string">"Circom, Noir, Cairo"</span>
+
+<span class="comment"># 2. Sistema de Pruebas (El "Motor Criptográfico")</span>
+<span class="comment"># Genera y verifica las pruebas para el circuito.</span>
+<span class="keyword">proving_system</span>: <span class="string">"Groth16, PLONK, Stark"</span>
+
+<span class="comment"># 3. Librerías y SDKs (La "Caja de Herramientas")</span>
+<span class="comment"># Facilitan la interacción con el sistema de pruebas.</span>
+<span class="keyword">tooling</span>: <span class="string">"snarkjs, hardhat-circom, SDKs de Starknet/zkSync"</span>
+
+<span class="comment"># 4. Aplicación Final</span>
+<span class="comment"># Integra todo para resolver un problema del usuario (ej. voto privado, login, etc).</span>
+<span class="keyword">application</span>: <span class="string">"dApp, Backend, Wallet"</span>
+</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">9. Conclusión: La Esencia de las Pruebas de Conocimiento Cero</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En una sola frase, ZKP es la tecnología que te deja <strong>probar que algo es cierto sin contar el “cómo” ni el “cuánto”</strong>, habilitando privacidad verificable y escalado seguro en finanzas, identidad, juegos y metaverso—donde revelar menos, mantener la integridad y operar a baja fricción marca la diferencia.</p>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material de estudio sobre Pruebas de Conocimiento Cero (ZKP)</p>
+      <p>Elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZKP Demos — Cueva de Alí Babá + Compromiso Hash</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0b1020; --bg2:#0f1a3a;
+    --card:#141a32; --ink:#eaf0ff; --muted:#9aa3c7;
+    --acc:#6cf4db; --acc2:#a98bff; --good:#66e39f; --bad:#ff6b6b; --warn:#ffd166;
+    --line: rgba(255,255,255,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink);
+    background: radial-gradient(1200px 700px at 20% 10%, #101a3a 0%, transparent 55%),
+                radial-gradient(1200px 700px at 80% 90%, #0f2a4a 0%, transparent 55%),
+                linear-gradient(160deg,var(--bg1),var(--bg2));
+  }
+  .wrap{max-width:1200px; margin:0 auto; padding:28px;}
+  header h1{margin:0 0 6px; font-size:28px; font-weight:800; letter-spacing:.3px}
+  header p{margin:0; color:var(--muted)}
+  .tabs{margin-top:18px; display:flex; gap:10px; flex-wrap:wrap}
+  .tab-btn{
+    cursor:pointer; padding:10px 14px; border-radius:12px;
+    background:#0f1430; color:var(--ink); border:1px solid var(--line);
+    font-weight:700; letter-spacing:.2px; transition:filter .15s
+  }
+  .tab-btn.active{background:linear-gradient(135deg,var(--acc),var(--acc2)); color:#081022; border-color:transparent; box-shadow:0 10px 24px rgba(108,244,219,.2)}
+  .tab-panel{display:none; margin-top:16px}
+  .tab-panel.active{display:block}
+  .grid{display:grid; grid-template-columns: 420px 1fr; gap:24px}
+  @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,.04), transparent 60%), var(--card);
+    border:1px solid var(--line); border-radius:16px; padding:18px 18px 14px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .panel h2{margin:0 0 10px; font-size:16px; font-weight:800; letter-spacing:.2px}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .pill{padding:10px 14px; border-radius:12px; border:1px solid var(--line); background:#0f1430; color:var(--ink); font-size:14px}
+  .btn{
+    cursor:pointer; border:none; padding:12px 16px; font-weight:800; letter-spacing:.3px;
+    color:#0b1020; border-radius:12px; position:relative; overflow:hidden;
+    background: linear-gradient(135deg, var(--acc), var(--acc2));
+    box-shadow: 0 8px 22px rgba(108,244,219,.25), inset 0 0 0 1px rgba(0,0,0,.1);
+    transition: transform .08s ease, filter .2s ease;
+  }
+  .btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
+  .btn.alt{background: linear-gradient(135deg, #5bd1ff, #8a9bff); color:#091022}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.copy{padding:8px 10px; font-size:12px; border-radius:10px}
+  .toggle{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:#0e1433; border:1px solid var(--line)}
+  .toggle input{appearance:none; width:48px; height:26px; border-radius:999px; position:relative; background:#263057; outline:none; cursor:pointer; transition:background .2s}
+  .toggle input::after{content:""; position:absolute; width:20px; height:20px; border-radius:50%; background:white; top:3px; left:3px; transition:all .2s}
+  .toggle input:checked{background:linear-gradient(135deg,#45f2d2,#8a83ff)} .toggle input:checked::after{left:25px}
+  .stat{display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:12px}
+  .stat .box{background:#0f1430; border:1px solid var(--line); border-radius:12px; padding:12px}
+  .stat .k{font-size:12px; color:var(--muted); margin-bottom:6px}
+  .stat .v{font-size:18px; font-weight:800}
+  .stat .v.good{color:var(--good)} .stat .v.bad{color:var(--bad)} .stat .v.warn{color:var(--warn)}
+  .note{font-size:12px; color:var(--muted); margin-top:6px}
+  .sep{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent); margin:12px 0}
+  .legend{display:flex; gap:12px; font-size:12px; color:var(--muted); margin-top:10px}
+  .chip{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#0e1433; border:1px solid var(--line)}
+  .dot{width:10px; height:10px; border-radius:50%}
+  .dot.agent{background:linear-gradient(135deg,#6cf4db,#a98bff)} .dot.ok{background:var(--good)} .dot.fail{background:var(--bad)}
+
+  /* --- ESCENA TAB 1 --- */
+  .scene{position:relative; height:480px; border-radius:16px; overflow:hidden;
+    background: radial-gradient(600px 240px at 50% 100%, rgba(172,148,255,.18), transparent 70%),
+                radial-gradient(1000px 540px at 50% 110%, rgba(108,244,219,.12), transparent 60%),
+                linear-gradient(180deg,#0f1430,#0b1020 55%); border:1px solid var(--line);
+  }
+  .ground{position:absolute; left:0; right:0; bottom:0; height:160px; background: linear-gradient(0deg,#0c1128,transparent 70%); border-top:1px solid var(--line)}
+  .cave{position:absolute; left:50%; transform:translateX(-50%); bottom:80px; width:560px; height:280px; border-radius:60% 60% 14px 14px / 70% 70% 14px 14px;
+    background: radial-gradient(120px 60px at 50% 100%, rgba(0,0,0,.6), transparent 60%),
+                linear-gradient(180deg,#121935,#0c1026 50%);
+    box-shadow: inset 0 -30px 80px rgba(0,0,0,.5), inset 0 20px 50px rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.04)
+  }
+  .tunnel{position:absolute; bottom:18px; width:44%; height:75%; background: #0a0f22; border:1px solid rgba(255,255,255,.05); border-radius:20px 20px 8px 8px; box-shadow: inset 0 -20px 40px rgba(0,0,0,.5)}
+  .tunnel.left{left:4%} .tunnel.right{right:4%}
+  .door{position:absolute; bottom:18px; width:120px; height:150px; background:#0b0f24; border:1px solid rgba(255,255,255,.15); border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; letter-spacing:.6px; color:#b9c3ff; text-shadow:0 0 8px rgba(169,139,255,.35)}
+  .door.A{left:20%} .door.B{right:20%} .door span{opacity:.9} .door.flash{animation: flash .7s ease}
+  @keyframes flash{0%{box-shadow:0 0 0 rgba(108,244,219,0)}50%{box-shadow:0 0 24px rgba(108,244,219,.7)}100%{box-shadow:0 0 0 rgba(108,244,219,0)}}
+  .agent{--x:50%; --y:88%; position:absolute; width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#6cf4db,#a98bff);
+    box-shadow:0 0 12px rgba(169,139,255,.6), 0 0 30px rgba(108,244,219,.25); left:var(--x); top:var(--y); transform:translate(-50%,-50%);
+    transition: left .9s ease, top .9s ease; border:1px solid rgba(255,255,255,.3)}
+  .agent:after{content:""; position:absolute; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.8); top:2px; right:2px; filter:blur(2px)}
+  .label{position:absolute; padding:6px 10px; border-radius:10px; background:#0f1430cc; border:1px solid var(--line); font-size:12px; color:#c8d0ff; backdrop-filter: blur(6px)}
+  .label.verif{left:50%; transform:translateX(-50%); top:12px}
+  .label.challenge{left:50%; transform:translateX(-50%); top:42px; color:#ffe8a6}
+  .label.round{right:12px; bottom:12px; color:#b0ffc8}
+
+  /* --- TAB 2 FORM --- */
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media (max-width:980px){.form-grid{grid-template-columns:1fr}}
+  .f{display:flex; flex-direction:column; gap:8px}
+  .f label{font-size:12px; color:var(--muted)}
+  .f input, .f textarea{
+    width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--line); background:#0f1430; color:var(--ink);
+    font-size:14px; outline:none;
+  }
+  .f textarea{min-height:86px; resize:vertical; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .help{font-size:12px; color:var(--muted)}
+  .badge{display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid var(--line); background:#0f1430; color:#cbd3ff}
+  .result{padding:10px 12px; border-radius:12px; border:1px dashed var(--line); background:#0a0f24; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12.5px}
+  .ok{color:var(--good); font-weight:800}
+  .fail{color:var(--bad); font-weight:800}
+  .footnote{margin-top:12px; color:var(--muted); font-size:12px; text-align:center}
+  .credit{margin:24px 0 6px; color:#93a0d7; font-size:12px; text-align:center}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Pruebas de Conocimiento Cero (ZKP) — Demos Interactivas</h1>
+      <p>Dos formas de entender “probar sin revelar”: (1) <b>Cueva de Alí Babá</b> y (2) <b>Compromiso Hash (Commit–Reveal)</b>.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="t1">1) Cueva de Alí Babá</button>
+      <button class="tab-btn" data-tab="t2">2) Compromiso Hash (Commit–Reveal)</button>
+    </div>
+
+    <!-- TAB 1: CUEVA -->
+    <section id="t1" class="tab-panel active">
+      <div class="grid">
+        <!-- PANEL DE CONTROLES -->
+        <section class="panel">
+          <h2>Cueva de Alí Babá — Controles</h2>
+          <div class="row" style="gap:12px; margin-bottom:8px">
+            <label class="toggle">
+              <input type="checkbox" id="knowsSecret" checked>
+              <span>El probador conoce la palabra secreta</span>
+            </label>
+            <span class="pill">Desafío aleatorio: A ó B</span>
+          </div>
+
+          <div class="row" style="gap:10px; margin:10px 0 6px">
+            <button class="btn" id="btnRound">Jugar 1 ronda</button>
+            <button class="btn alt" id="btnAuto5">Auto ×5</button>
+            <button class="btn ghost" id="btnReset">Reiniciar</button>
+          </div>
+
+          <div class="stat">
+            <div class="box"><div class="k">Rondas totales</div><div class="v" id="statRounds">0</div></div>
+            <div class="box"><div class="k">Aciertos</div><div class="v good" id="statHits">0</div></div>
+            <div class="box"><div class="k">Fallos</div><div class="v bad" id="statMiss">0</div></div>
+            <div class="box"><div class="k">Si NO conoce el secreto, prob. de haber engañado</div><div class="v warn" id="statCheat">—</div></div>
+          </div>
+          <div class="note">Prob. de engañar tras k aciertos consecutivos sin secreto: <b>(1/2)<sup>k</sup></b>. Ej.: 10 aciertos ≈ 0,0977%.</div>
+
+          <div class="sep"></div>
+          <h2>Registro</h2>
+          <div class="log" id="log"></div>
+          <div class="footnote">Tip: Ejecuta <b>Auto ×5</b> varias veces con el secreto desactivado para visualizar la caída exponencial.</div>
+        </section>
+
+        <!-- ESCENA -->
+        <section class="scene panel" id="scene">
+          <div class="label verif" id="lblVerif">Verificador esperando…</div>
+          <div class="label challenge" id="lblChallenge">Desafío: —</div>
+          <div class="label round" id="lblRound">Ronda #0</div>
+
+          <div class="cave">
+            <div class="tunnel left"></div>
+            <div class="tunnel right"></div>
+            <div class="door A"><span>PUERTA A</span></div>
+            <div class="door B"><span>PUERTA B</span></div>
+          </div>
+          <div class="agent" id="agent"></div>
+          <div class="ground"></div>
+
+          <div class="legend" style="position:absolute; left:12px; bottom:12px">
+            <span class="chip"><span class="dot agent"></span> Probador</span>
+            <span class="chip"><span class="dot ok"></span> Éxito</span>
+            <span class="chip"><span class="dot fail"></span> Fallo</span>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- TAB 2: COMPROMISO HASH -->
+    <section id="t2" class="tab-panel">
+      <div class="grid">
+        <!-- PANEL IZQUIERDO: CREAR COMPROMISO -->
+        <section class="panel">
+          <h2>Crear compromiso (Commit)</h2>
+          <p class="help">Genera un compromiso <span class="badge">C = SHA-256(salt || ":" || secreto)</span>. El compromiso puede publicarse; el secreto no.</p>
+
+          <div class="f">
+            <label>Secreto (no se mostrará):</label>
+            <input type="password" id="commitSecret" placeholder="Escribe tu palabra/contraseña…">
+          </div>
+
+          <div class="row" style="margin:10px 0">
+            <button class="btn" id="btnCommit">Crear compromiso</button>
+            <button class="btn ghost" id="btnClearCommit">Limpiar</button>
+          </div>
+
+          <div class="sep"></div>
+          <div class="f">
+            <label>Salt generado (hex):</label>
+            <div class="row" style="align-items:stretch">
+              <input id="outSalt" readonly>
+              <button class="btn copy" data-copy="#outSalt">Copiar</button>
+            </div>
+          </div>
+
+          <div class="f">
+            <label>Compromiso C (hex, SHA-256):</label>
+            <div class="row" style="align-items:stretch">
+              <textarea id="outCommit" readonly></textarea>
+              <button class="btn copy" data-copy="#outCommit">Copiar</button>
+            </div>
+          </div>
+
+          <div class="note">El **salt** impide ataques de diccionario/reutilización; publicar <b>salt</b> + <b>C</b> no revela el secreto.</div>
+        </section>
+
+        <!-- PANEL DERECHO: VERIFICAR SIN REVELAR -->
+        <section class="panel">
+          <h2>Verificar conocimiento (Reveal sin revelar el secreto)</h2>
+          <p class="help">El verificador solo necesita el compromiso <b>C</b> y el <b>salt</b>. El probador introduce su secreto localmente; la UI solo muestra <b>Éxito/Fallo</b>.</p>
+
+          <div class="form-grid" style="margin-top:6px">
+            <div class="f">
+              <label>Salt (hex):</label>
+              <input id="inSalt" placeholder="Pega el salt…">
+            </div>
+            <div class="f">
+              <label>Compromiso C (hex, SHA-256):</label>
+              <input id="inCommit" placeholder="Pega el compromiso…">
+            </div>
+          </div>
+
+          <div class="f" style="margin-top:6px">
+            <label>Ingresa tu secreto (no se imprime):</label>
+            <input type="password" id="proveSecret" placeholder="Escribe el secreto para demostrar que lo conoces…">
+          </div>
+
+          <div class="row" style="margin:10px 0">
+            <button class="btn alt" id="btnProve">Probar conocimiento</button>
+            <button class="btn ghost" id="btnClearVerify">Limpiar</button>
+          </div>
+
+          <div class="result" id="verifyResult">Estado: —</div>
+
+          <div class="sep"></div>
+          <h2>¿Qué está pasando?</h2>
+          <ul class="help" style="margin-top:6px">
+            <li>Primero publicas <b>salt</b> y <b>C</b> (el compromiso). Nadie conoce el secreto.</li>
+            <li>Para verificar, introduces el secreto en tu dispositivo. La app calcula <b>H(salt || ":" || secreto)</b> y compara con <b>C</b>.</li>
+            <li>El verificador obtiene solo un **sí/no** (completitud/solidez) sin aprender el secreto (**cero conocimiento a nivel práctico de la UI**).</li>
+          </ul>
+          <div class="note">Nota: Esto modela un compromiso hash sencillo. En producción, las ZKP permiten pruebas formales sin revelar entradas ni re-ejecutar el cálculo en claro.</div>
+        </section>
+      </div>
+    </section>
+
+    <div class="credit">Material elaborado por el profesor Sergio Gevatschnaider</div>
+  </div>
+
+<script>
+/* ========= TABS ========= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ========= TAB 1: CUEVA DE ALÍ BABÁ ========= */
+(function(){
+  const agent = document.getElementById('agent');
+  if(!agent) return; // si no está montado (por SSR), salimos
+
+  const lblVerif = document.getElementById('lblVerif');
+  const lblChallenge = document.getElementById('lblChallenge');
+  const lblRound = document.getElementById('lblRound');
+  const knowsSecret = document.getElementById('knowsSecret');
+  const btnRound = document.getElementById('btnRound');
+  const btnAuto5 = document.getElementById('btnAuto5');
+  const btnReset = document.getElementById('btnReset');
+  const log = document.getElementById('log');
+
+  const statRounds = document.getElementById('statRounds');
+  const statHits   = document.getElementById('statHits');
+  const statMiss   = document.getElementById('statMiss');
+  const statCheat  = document.getElementById('statCheat');
+  const doors = { A: document.querySelector('.door.A'), B: document.querySelector('.door.B') };
+
+  let rounds=0, hits=0, miss=0, consecutiveProofs=0;
+
+  const pos = {
+    entryA: {x: '30%', y: '70%'},
+    entryB: {x: '70%', y: '70%'},
+    center: {x: '50%', y: '72%'},
+    hide:   {x: '50%', y: '30%'},
+    outA:   {x: '30%', y: '76%'},
+    outB:   {x: '70%', y: '76%'}
+  };
+
+  function move(p, delay=0){
+    return new Promise(res=>setTimeout(()=>{ agent.style.setProperty('--x', p.x); agent.style.setProperty('--y', p.y); setTimeout(res, 950); }, delay));
+  }
+  function fxFlash(door){ door.classList.add('flash'); setTimeout(()=>door.classList.remove('flash'), 700); }
+  function randAB(){ return Math.random()<.5 ? 'A':'B'; }
+
+  function updateStats(){
+    statRounds.textContent = rounds;
+    statHits.textContent = hits;
+    statMiss.textContent = miss;
+    if(!knowsSecret.checked){
+      const p = Math.pow(0.5, consecutiveProofs);
+      statCheat.textContent = consecutiveProofs===0 ? '—' : (p*100).toFixed(4)+'%';
+    }else{
+      statCheat.textContent = 'No aplica (con secreto)';
+    }
+  }
+  function appendLog(text, ok=null){
+    const color = ok===true ? ' style="color:#66e39f"' : ok===false ? ' style="color:#ff6b6b"' : '';
+    log.innerHTML = `<div${color}>${text}</div>` + log.innerHTML;
+  }
+
+  async function playOneRound(){
+    rounds++; lblRound.textContent = `Ronda #${rounds}`;
+    const entered = randAB();
+    const challenge = randAB();
+    lblVerif.textContent = 'Verificador: ¡Elige salida!';
+    lblChallenge.textContent = `Desafío: Sal por ${challenge}`;
+    await move(entered==='A' ? pos.entryA : pos.entryB, 50);
+    await move(pos.hide, 80);
+    const canSwitch = knowsSecret.checked;
+    const exitDoor = canSwitch ? challenge : entered;
+    await move(exitDoor==='A' ? pos.outA : pos.outB, 120);
+    const success = (exitDoor === challenge);
+    fxFlash(doors[challenge]);
+    if(success){ hits++; consecutiveProofs++; } else { miss++; consecutiveProofs = 0; }
+    appendLog(`<b>Ronda ${rounds}:</b> Entró por <b>${entered}</b>, desafío <b>${challenge}</b> → ` + (success ? '<b>ÉXITO</b> ✅' : '<b>FALLO</b> ❌'), success);
+    updateStats();
+    lblVerif.textContent = success ? 'Verificador: acepto la prueba ✅' : 'Verificador: rechazo ❌';
+  }
+
+  function autoN(n){
+    let i=0;
+    const step=async()=>{
+      if(i++>=n) return;
+      btnRound.disabled = btnAuto5.disabled = true;
+      await playOneRound();
+      setTimeout(()=>step(), 250);
+    };
+    step();
+    setTimeout(()=>{ btnRound.disabled = btnAuto5.disabled = false; }, n*1300+300);
+  }
+  function resetAll(){
+    rounds=hits=miss=consecutiveProofs=0;
+    log.innerHTML='';
+    updateStats();
+    lblVerif.textContent = 'Verificador esperando…';
+    lblChallenge.textContent = 'Desafío: —';
+    lblRound.textContent = 'Ronda #0';
+    move(pos.center, 0);
+  }
+
+  btnRound?.addEventListener('click', playOneRound);
+  btnAuto5?.addEventListener('click', ()=>autoN(5));
+  btnReset?.addEventListener('click', resetAll);
+  knowsSecret?.addEventListener('change', ()=>{
+    consecutiveProofs=0; updateStats();
+    appendLog(`<i>Modo cambiado:</i> ${knowsSecret.checked? 'con' : 'sin'} secreto.`);
+  });
+
+  resetAll();
+})();
+
+/* ========= TAB 2: COMPROMISO HASH ========= */
+(function(){
+  // helpers
+  const q = sel => document.querySelector(sel);
+  const qi = id => document.getElementById(id);
+
+  const commitSecret = qi('commitSecret');
+  const outSalt = qi('outSalt');
+  const outCommit = qi('outCommit');
+  const btnCommit = qi('btnCommit');
+  const btnClearCommit = qi('btnClearCommit');
+
+  const inSalt = qi('inSalt');
+  const inCommit = qi('inCommit');
+  const proveSecret = qi('proveSecret');
+  const verifyResult = qi('verifyResult');
+  const btnProve = qi('btnProve');
+  const btnClearVerify = qi('btnClearVerify');
+
+  // generate random salt (16 bytes -> hex)
+  function randomSaltHex(len=16){
+    const b = new Uint8Array(len);
+    crypto.getRandomValues(b);
+    return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+    const view = new Uint8Array(hashBuffer);
+    return Array.from(view).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+
+  function copyToClipboard(sel){
+    const el = q(sel);
+    if(!el) return;
+    const val = el.value || el.textContent || '';
+    navigator.clipboard.writeText(val).then(()=>{
+      const btn = document.querySelector(`[data-copy="${sel}"]`);
+      if(btn){
+        const old = btn.textContent;
+        btn.textContent = 'Copiado ✔';
+        setTimeout(()=>btn.textContent = old, 1000);
+      }
+    });
+  }
+
+  document.querySelectorAll('.btn.copy').forEach(b=>{
+    b.addEventListener('click', ()=>copyToClipboard(b.dataset.copy));
+  });
+
+  btnCommit?.addEventListener('click', async ()=>{
+    const secret = commitSecret.value ?? '';
+    if(!secret){ alert('Ingresa un secreto para comprometer.'); return; }
+    const salt = randomSaltHex(16);
+    const C = await sha256Hex(`${salt}:${secret}`);
+    outSalt.value = salt;
+    outCommit.value = C;
+  });
+
+  btnClearCommit?.addEventListener('click', ()=>{
+    commitSecret.value = ''; outSalt.value = ''; outCommit.value = '';
+  });
+
+  btnProve?.addEventListener('click', async ()=>{
+    const salt = (inSalt.value||'').trim();
+    const C = (inCommit.value||'').trim().toLowerCase();
+    const secret = proveSecret.value ?? '';
+    if(!salt || !C){ alert('Completa Salt y Compromiso C.'); return; }
+    if(!secret){ alert('Ingresa el secreto para probar conocimiento.'); return; }
+    const calc = (await sha256Hex(`${salt}:${secret}`)).toLowerCase();
+    const ok = (calc === C);
+    verifyResult.innerHTML = ok ? 'Estado: <span class="ok">ÉXITO — Conoces el secreto</span> ✅' :
+                                 'Estado: <span class="fail">FALLO — El secreto no coincide</span> ❌';
+    // Por privacidad, no imprimimos el secreto ni el hash calculado; solo sí/no.
+  });
+
+  btnClearVerify?.addEventListener('click', ()=>{
+    inSalt.value = ''; inCommit.value = ''; proveSecret.value = '';
+    verifyResult.textContent = 'Estado: —';
+  });
+})();
+</script>
+</body>
+</html>

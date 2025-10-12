@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Estudio: ZKP para Isomorfismo de Grafos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #f5a623 0%, #f76b1c 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #ff9900;
+      --accent-secondary: #f5a623;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #f5a623;
+      --accent-secondary: #f76b1c;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: stretch; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span, .diagram-box ul { font-size: 0.8em; text-align: left; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Anatomía de una Prueba de Conocimiento Cero</h1>
+      <p class="subtitle">El Protocolo del Isomorfismo de Grafos</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. El Flujo del Protocolo Interactivo</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El protocolo es una conversación coreografiada entre una probadora (Peggy) que afirma conocer un secreto y un verificador (Victor) que pone a prueba ese conocimiento sin que el secreto sea revelado.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Los 5 Pasos de la Prueba</div>
+                    <div class="diagram-col">
+                        <div class="diagram-box"><strong>Paso 1: Máscara (Peggy)</strong><span>Crea un grafo H aplicando una permutación aleatoria σ a G1. H = σ(G1).</span></div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-box"><strong>Paso 2: Compromiso (Peggy → Victor)</strong><span>Envía un "sello" de H (ej. un hash), sin revelar H.</span></div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-box"><strong>Paso 3: Desafío (Victor → Peggy)</strong><span>Elige aleatoriamente: "¿H se relaciona con G1 o con G2?"</span></div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-box"><strong>Paso 4: Respuesta (Peggy → Victor)</strong><span>Revela la permutación f que conecta H con el grafo solicitado.</span></div>
+                         <div class="diagram-arrow down"></div>
+                        <div class="diagram-box"><strong>Paso 5: Verificación (Victor)</strong><span>Comprueba si la respuesta de Peggy es matemáticamente correcta.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Los Pilares Teóricos del Protocolo</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La validez del protocolo se sostiene sobre tres propiedades teóricas fundamentales que garantizan su seguridad y honestidad.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Las 3 Propiedades Fundamentales</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong>Completitud</strong>
+                            <span>Un probador honesto que conoce el secreto siempre pasará la verificación.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong>Solidez (Soundness)</strong>
+                            <span>Un probador deshonesto que no conoce el secreto solo puede engañar con una probabilidad muy baja (50% por ronda).</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong>Conocimiento Cero (Zero-Knowledge)</strong>
+                            <span>El verificador no aprende absolutamente nada sobre el secreto, más allá de que el probador lo conoce.</span>
+                        </div>
+                    </div>
+                </div>
+                 <h4>La Solidez: El Dilema del Probador Deshonesto</h4>
+                <p>Sin el secreto, Peggy solo puede prepararse para uno de los dos posibles desafíos. Su éxito depende enteramente de la suerte.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">La Apuesta del 50%</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Peggy (sin el secreto)</strong><span>Prepara una respuesta solo para G1.</span></div>
+                        <div class="diagram-arrow"></div>
+                         <div class="diagram-box"><strong>Victor Desafía</strong><span>- Pregunta por G1 (Peggy gana)<br>- Pregunta por G2 (Peggy pierde)</span></div>
+                    </div>
+                    <p style="text-align:center; margin-top:1.5rem;">Al repetir la prueba k veces, la probabilidad de engañar siempre es (1/2)ᵏ.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Transformando la Prueba a No Interactiva</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La <strong>heurística de Fiat-Shamir</strong> permite convertir este protocolo interactivo en una prueba no interactiva, donde el probador puede generar una prueba completa de una sola vez.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Rol del Hash en la No Interactividad</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>1. Peggy genera el Compromiso</strong></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Calcula el Desafío</div></div>
+                        <div class="diagram-box"><strong>2. Desafío = hash(Compromiso)</strong><span>El desafío aleatorio de Victor es reemplazado por un hash determinista.</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Genera la Respuesta</div></div>
+                        <div class="diagram-box"><strong>3. Peggy calcula la Respuesta y publica todo</strong><span>(Compromiso, Respuesta) como una prueba única.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Glosario de Términos Esenciales</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Isomorfismo de Grafos</h4>
+                <p>Una correspondencia entre los vértices de dos grafos que preserva su estructura. Es el "secreto" en este protocolo.</p>
+                <h4>Permutación Aleatoria</h4>
+                <p>Una reordenación al azar de elementos. Actúa como una máscara para ocultar información.</p>
+                <h4>Compromiso Criptográfico</h4>
+                <p>Un mecanismo para fijar un valor sin revelarlo, garantizando que no pueda ser alterado.</p>
+                <h4>Conocimiento Cero</h4>
+                <p>Propiedad que garantiza que el verificador no aprende nada sobre el secreto, más allá de su existencia.</p>
+                <h4>Simulador</h4>
+                <p>Un algoritmo teórico usado para demostrar formalmente la propiedad de conocimiento cero.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Cuestionario de Autoevaluación</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Pregunta 1</h4>
+                <p>¿Cuál es la función principal de la permutación aleatoria σ en el protocolo?</p>
+                <p><strong>Respuesta:</strong> Actúa como una máscara criptográfica de un solo uso para ocultar la estructura de etiquetas del grafo G1, creando un nuevo grafo H. Esto es crucial para la propiedad de conocimiento cero.</p>
+                
+                <h4>Pregunta 2</h4>
+                <p>¿Por qué el protocolo requiere un compromiso criptográfico? ¿Qué pasaría si el probador enviara el grafo H directamente?</p>
+                <p><strong>Respuesta:</strong> El compromiso obliga al probador a fijar su elección de H antes de conocer el desafío, impidiendo que pueda hacer trampa. Sin él, podría construir una respuesta fraudulenta después de ver la pregunta.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material de estudio sobre Pruebas de Conocimiento Cero</p>
+      <p>Elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            set

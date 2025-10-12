@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZKP: Isomorfismo de Grafos (demo interactiva)</title>
+<style>
+  :root { --bg:#0f1220; --fg:#e8ecf1; --muted:#9aa3b2; --acc:#50e3c2; --warn:#ffad5a; --err:#ff6b6b; --ok:#8be28b; }
+  body { margin:0; font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--fg); }
+  header { padding:16px 20px; border-bottom:1px solid #1b2036; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:18px; margin:0; }
+  .wrap { display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px; }
+  .panel { background:#121733; border:1px solid #1b2036; border-radius:12px; padding:12px; }
+  .panel h2 { font-size:14px; margin:0 0 8px 0; color:#cbd5e1; letter-spacing:.2px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  button { background:#1b254b; color:#e8ecf1; border:1px solid #2a3470; padding:8px 10px; border-radius:10px; cursor:pointer; font-weight:600; }
+  button:hover { background:#22306b; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .accent { background:var(--acc); color:#072a2a; border-color:#3ac7ac; }
+  .warn { background:var(--warn); color:#2a1400; border-color:#e38c2d; }
+  .ok { background:var(--ok); color:#062406; border-color:#63bf63; }
+  .err { background:var(--err); color:#2b0000; border-color:#cc5252; }
+  .small { font-size:12px; color:var(--muted); }
+  .grid { display:grid; grid-template-columns: repeat(3, minmax(240px, 1fr)); gap:12px; }
+  svg { width:100%; height:280px; background:#0b1026; border:1px solid #1b2036; border-radius:10px; }
+  .node { fill:#83a1ff; stroke:#19224b; stroke-width:1.5; }
+  .node.secret { fill:#ffd166; }
+  .node.h { fill:#50e3c2; }
+  .edge { stroke:#5a6aa5; stroke-width:2; opacity:.9; }
+  .label { fill:#dbe4ff; font-size:11px; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
+  .stat { background:#101635; border:1px dashed #2a3470; border-radius:10px; padding:8px; margin-top:8px; }
+  code { background:#0b1026; padding:2px 6px; border-radius:6px; border:1px solid #1b2036; }
+  .map { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Prueba de Conocimiento Cero (Isomorfismo de Grafos)</h1>
+    <span class="small">Σ-protocolo: compromiso → desafío → respuesta → verificación</span>
+  </header>
+
+  <div class="wrap">
+    <div class="panel">
+      <h2>Controles</h2>
+      <div class="row" style="margin-bottom:6px">
+        <label>Número de nodos: <input id="nNodes" type="number" min="5" max="10" value="7" style="width:64px; margin-left:6px"></label>
+        <label style="margin-left:8px">Densidad p: <input id="density" type="number" min="0.1" max="0.9" step="0.05" value="0.35" style="width:64px; margin-left:6px"></label>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <button id="newInst" class="accent">Nueva instancia (G₁,G₂, π secreta)</button>
+        <button id="resetRounds">Reiniciar rondas</button>
+      </div>
+
+      <h2>Ronda interactiva</h2>
+      <ol class="small" style="margin-top:0; line-height:1.6">
+        <li><b>Compromiso:</b> el Probador envía <code>H = σ(G₁)</code>.</li>
+        <li><b>Desafío:</b> el Verificador elige <code>c ∈ {1,2}</code>.</li>
+        <li><b>Respuesta:</b> el Probador envía <code>f</code> tal que <code>f(G_c) = H</code>.</li>
+      </ol>
+      <div class="row" style="margin:6px 0">
+        <button id="commitBtn" class="">1) Comprometer H</button>
+        <button id="ch1" disabled>2) c = 1 (¿H ≅ G₁?)</button>
+        <button id="ch2" disabled>2) c = 2 (¿H ≅ G₂?)</button>
+        <button id="respondBtn" disabled class="warn">3) Responder f</button>
+      </div>
+      <div class="row" style="margin:6px 0">
+        <button id="autoRound" disabled>Auto-ronda</button>
+        <button id="autoMany" disabled>Auto-10 rondas</button>
+      </div>
+
+      <div class="stat" id="statusBox">Estado: prepara una instancia nueva.</div>
+
+      <h2>Mapeos</h2>
+      <div class="small">π (secreta, fija) mapea G₁ → G₂. σ (aleatoria por ronda) mapea G₁ → H. La respuesta <code>f</code> depende del desafío.</div>
+      <div class="map" id="piMap">π: —</div>
+      <div class="map" id="sigmaMap">σ: —</div>
+      <div class="map" id="fMap">f (respuesta): —</div>
+
+      <h2>Seguridad</h2>
+      <div class="stat" id="securityBox">Rondas: 0 · Prob. engañar: 1</div>
+    </div>
+
+    <div class="panel">
+      <h2>Visualización</h2>
+      <div class="grid">
+        <div>
+          <div class="small">G₁ (público)</div>
+          <svg id="g1"></svg>
+        </div>
+        <div>
+          <div class="small">G₂ = π(G₁) (público)</div>
+          <svg id="g2"></svg>
+        </div>
+        <div>
+          <div class="small">H = σ(G₁) (compromiso)</div>
+          <svg id="h"></svg>
+        </div>
+      </div>
+      <div class="small" style="margin-top:6px">
+        Colores: <span style="color:#83a1ff">G₁/G₂</span>, <span style="color:#50e3c2">H</span>. Los números son etiquetas de los nodos visibles;
+        las permutaciones solo relabelan, no cambian la estructura de aristas.
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== Utilidades de grafos ===== */
+function range(n){ return [...Array(n).keys()]; }
+function shuffle(arr){ const a=arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function compose(p, q){ // (p ∘ q)(i) = p[q[i]]
+  const n = p.length, r = new Array(n);
+  for (let i=0;i<n;i++) r[i] = p[q[i]];
+  return r;
+}
+function invert(p){ const n=p.length, inv=new Array(n); for(let i=0;i<n;i++) inv[p[i]]=i; return inv; }
+function permuteGraph(G, p){ // relabela vértices según p: v -> p[v]
+  const n=G.n; const E=new Set();
+  for (const [u,v] of G.edges){
+    const a = p[u], b = p[v];
+    const lo = Math.min(a,b), hi=Math.max(a,b);
+    E.add(lo+"-"+hi);
+  }
+  return {n, edges:[...E].map(s=>s.split("-").map(Number))};
+}
+function randomGraph(n, p){ // G(n,p) simple, sin lazos ni multiaristas
+  const edges=[];
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      if (Math.random()<p) edges.push([i,j]);
+    }
+  }
+  // Evitar trivialidad (sin aristas); si vacío, fuerza un par
+  if (edges.length===0) edges.push([0,1]);
+  return {n, edges};
+}
+function checkIso(G,H,f){ // ¿f(G) = H?
+  if (G.n!==H.n || f.length!==G.n) return false;
+  const map=new Set(H.edges.map(([a,b])=> (Math.min(a,b)+"-"+Math.max(a,b))));
+  for (const [u,v] of G.edges){
+    const a=f[u], b=f[v];
+    const key = (Math.min(a,b)+"-"+Math.max(a,b));
+    if (!map.has(key)) return false;
+  }
+  return true;
+}
+
+/* ===== Visual ===== */
+function polygonPositions(n, w, h, rPad=28){
+  const cx=w/2, cy=h/2, r=Math.min(w,h)/2 - rPad;
+  const pos = [];
+  for(let k=0;k<n;k++){
+    const ang = -Math.PI/2 + 2*Math.PI*k/n;
+    pos.push({x: cx + r*Math.cos(ang), y: cy + r*Math.sin(ang)});
+  }
+  return pos;
+}
+function drawGraph(svg, G, opts={}){
+  const ns="http://www.w3.org/2000/svg";
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const w=svg.clientWidth||svg.parentElement.clientWidth, h=svg.clientHeight||280;
+  svg.setAttribute("viewBox",`0 0 ${w} ${h}`);
+  const pos = polygonPositions(G.n, w, h);
+  // edges
+  for (const [u,v] of G.edges){
+    const e=document.createElementNS(ns,"line");
+    e.setAttribute("x1", pos[u].x); e.setAttribute("y1", pos[u].y);
+    e.setAttribute("x2", pos[v].x); e.setAttribute("y2", pos[v].y);
+    e.setAttribute("class","edge");
+    svg.appendChild(e);
+  }
+  // nodes
+  for (let i=0;i<G.n;i++){
+    const g=document.createElementNS(ns,"g");
+    const c=document.createElementNS(ns,"circle");
+    c.setAttribute("cx",pos[i].x); c.setAttribute("cy",pos[i].y); c.setAttribute("r",16);
+    c.setAttribute("class", opts.classNode || "node");
+    g.appendChild(c);
+    const t=document.createElementNS(ns,"text");
+    t.setAttribute("x",pos[i].x); t.setAttribute("y",pos[i].y);
+    t.setAttribute("class","label");
+    t.textContent = (opts.labels ? opts.labels[i] : i);
+    g.appendChild(t);
+    svg.appendChild(g);
+  }
+}
+
+/* ===== Estado del protocolo ===== */
+const state = {
+  G1:null, G2:null, H:null,
+  pi:null, sigma:null, f:null,
+  n:7, p:0.35,
+  rounds:0,
+  committed:false, challenged:null, responded:false
+};
+
+/* ===== UI helpers ===== */
+const el = id => document.getElementById(id);
+function setStatus(msg, cls=""){ const box=el("statusBox"); box.textContent="Estado: "+msg; box.className="stat "+cls; }
+function setSecurity(){
+  const prob = Math.pow(0.5, state.rounds);
+  el("securityBox").textContent = `Rondas: ${state.rounds} · Prob. engañar: ${(prob).toLocaleString(undefined,{maximumFractionDigits:6})}`;
+}
+function showMaps(){
+  el("piMap").textContent = "π: " + (state.pi? state.pi.join(" "): "—");
+  el("sigmaMap").textContent = "σ: " + (state.sigma? state.sigma.join(" "): "—");
+  el("fMap").textContent = "f (respuesta): " + (state.f? state.f.join(" "): "—");
+}
+function setButtons(){
+  el("commitBtn").disabled = !(state.G1 && !state.committed);
+  el("ch1").disabled = !state.committed || state.challenged!==null;
+  el("ch2").disabled = !state.committed || state.challenged!==null;
+  el("respondBtn").disabled = !(state.committed && state.challenged!==null && !state.responded);
+  const autoEn = !!state.G1 && !state.responded;
+  el("autoRound").disabled = !autoEn;
+  el("autoMany").disabled = !state.G1;
+}
+
+/* ===== Flujo ===== */
+function newInstance(){
+  state.n = parseInt(el("nNodes").value||"7",10);
+  state.p = parseFloat(el("density").value||"0.35");
+  state.G1 = randomGraph(state.n, state.p);
+  state.pi = shuffle(range(state.n));               // secreta
+  state.G2 = permuteGraph(state.G1, state.pi);      // pública
+  state.H = null; state.sigma=null; state.f=null;
+  state.rounds=0; state.committed=false; state.challenged=null; state.responded=false;
+  drawGraph(el("g1"), state.G1, {labels:range(state.n)});
+  drawGraph(el("g2"), state.G2, {labels:range(state.n)});
+  drawGraph(el("h"),  {n:state.n,edges:[]}, {labels:range(state.n), classNode:"node h"});
+  showMaps(); setButtons(); setSecurity();
+  setStatus("instancia creada. Pulsa «Comprometer H».","")
+}
+function commitH(){
+  state.sigma = shuffle(range(state.n));            // aleatoria por ronda
+  state.H = permuteGraph(state.G1, state.sigma);    // σ(G1)
+  drawGraph(el("h"), state.H, {labels:range(state.n), classNode:"node h"});
+  state.committed=true; state.challenged=null; state.responded=false; state.f=null;
+  showMaps(); setButtons();
+  setStatus("Compromiso enviado: H = σ(G₁). El verificador debe elegir c∈{1,2}.")
+}
+function challenge(c){
+  state.challenged = c; setButtons();
+  setStatus(`Desafío elegido: c = ${c}. Pulsa «Responder f».`);
+}
+function respond(){
+  if (state.challenged===1){
+    // f = σ
+    state.f = state.sigma.slice();
+  } else if (state.challenged===2){
+    // f = σ ∘ π^{-1}
+    state.f = compose(state.sigma, invert(state.pi));
+  }
+  state.responded=true;
+  showMaps(); setButtons();
+  // Verificación
+  const ok = state.challenged===1 ? checkIso(state.G1, state.H, state.f)
+                                  : checkIso(state.G2, state.H, state.f);
+  if (ok){
+    state.rounds += 1; setSecurity();
+    setStatus("Verificación: ✅ válida. Se completa la ronda. Puedes iniciar otra con «Comprometer H».","ok");
+  }else{
+    setStatus("Verificación: ❌ falló. El probador queda expuesto.","err");
+  }
+}
+function autoOneRound(){
+  if (!state.G1){ setStatus("Crea una instancia primero."); return; }
+  if (!state.committed) commitH();
+  if (state.challenged===null) challenge(Math.random()<0.5?1:2);
+  if (!state.responded) respond();
+}
+function autoManyRounds(k=10){
+  for (let i=0;i<k;i++){
+    if (!state.G1) break;
+    commitH();
+    challenge(Math.random()<0.5?1:2);
+    respond();
+  }
+}
+
+/* ===== Eventos ===== */
+el("newInst").onclick = newInstance;
+el("resetRounds").onclick = ()=>{ state.rounds=0; setSecurity(); setStatus("Rondas reiniciadas."); }
+el("commitBtn").onclick = commitH;
+el("ch1").onclick = ()=>challenge(1);
+el("ch2").onclick = ()=>challenge(2);
+el("respondBtn").onclick = respond;
+el("autoRound").onclick = autoOneRound;
+el("autoMany").onclick = ()=>autoManyRounds(10);
+
+/* Inicial */
+newInstance();
+// Ajusta botones cuando el viewport cambia (SVG responsive)
+window.addEventListener('resize', ()=>{
+  if (state.G1){ drawGraph(el("g1"), state.G1, {labels:range(state.n)}); }
+  if (state.G2){ drawGraph(el("g2"), state.G2, {labels:range(state.n)}); }
+  if (state.H){ drawGraph(el("h"), state.H, {labels:range(state.n), classNode:"node h"}); }
+});
+</script>
+</body>
+</html>
