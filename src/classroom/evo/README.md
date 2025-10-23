@@ -1,4 +1,4 @@
-   <h1>🧬 EvoAlgo — Algoritmos Evolutivos</h1>
+   <h1> EvoAlgo — Algoritmos Evolutivos</h1>
   <p>Un repositorio dedicado a la teoría y práctica de <b>Algoritmos Evolutivos (EA)</b>, diseñado para docencia, investigación y desarrollo.</p>
   <!-- Badges -->
   <p>
@@ -19,7 +19,7 @@
 
 ---
 
-## 🎯 Visión General
+##  Visión General
 
 Este repositorio ofrece una ruta de aprendizaje estructurada, desde los fundamentos teóricos de los Algoritmos Evolutivos (EA) hasta su implementación práctica en problemas de optimización, incluyendo algoritmos multiobjetivo (MOEA).
 
@@ -31,7 +31,7 @@ La siguiente animación ilustra la evolución de una población con **NSGA-II** 
 
 ---
 
-## 📂 Estructura del Repositorio
+##  Estructura del Repositorio
 
 ```
 EvoAlgo/
@@ -45,7 +45,7 @@ EvoAlgo/
 
 ---
 
-## 🎓 Objetivos de Aprendizaje
+##  Objetivos de Aprendizaje
 
 Al finalizar el estudio de este material, serás capaz de:
 
@@ -85,7 +85,21 @@ jupyter lab
 Ahora puedes explorar los tutoriales en la carpeta `notebooks/`.
 
 ---
+¡Entendido! He adaptado todos los enlaces al nuevo formato de Netlify que proporcionaste.
 
+Aquí está el código Markdown actualizado con los resúmenes y los nuevos enlaces de acceso.
+
+---
+
+### Módulo: Topología y Característica de Euler
+
+| 📄 Recurso | 📥 Acceso |
+|---|---|
+| **Poliedro_Euler.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso proporciona una demostración 3D interactiva de la Fórmula de Euler para poliedros (V - E + F = χ). Permite a los usuarios seleccionar sólidos platónicos (cubo, icosaedro, etc.), visualizarlos junto a su proyección esférica y verificar cómo la relación entre sus Vértices, Aristas y Caras resulta consistentemente en la característica de Euler χ = 2. Incluye una guía paso a paso para reforzar el aprendizaje.</p></details> | [![Explorar Demo Euler](https://img.shields.io/badge/Explorar-Demo%20de%20Euler-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/poliedro_euler) |
+| **Poliedro_Euler_topologia-index.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta avanzada herramienta interactiva conecta la característica de Euler (χ) con teoremas fundamentales de la topología. A través de tres pestañas, visualiza: 1) El Teorema de Poincaré-Hopf, sumando los índices de un campo vectorial sobre una esfera. 2) El Teorema de Gauss-Bonnet discreto, calculando la curvatura a través de los "defectos angulares" en los vértices de un cubo. 3) La relación entre el género de una superficie y su característica (χ = 2 - 2g).</p></details> | [![Explorar Topología](https://img.shields.io/badge/Explorar-Índice%20y%20Curvatura-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/poliedro_euler_topologia-index) |
+| **Poliedro_Superficies y su característica de Euler (χ).html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso visualiza la conexión entre el género (g, el número de "agujeros") de una superficie y su característica de Euler (χ). Presenta renderizados 3D de superficies con g=0 (esfera), g=1 (toro), g=2 (doble toro) y g=3. Para cada una, muestra cómo se cumple la fórmula χ = 2 - 2g, ayudando a construir una comprensión intuitiva de este importante invariante topológico.</p></details> | [![Explorar Superficies](https://img.shields.io/badge/Explorar-Superficies%20y%20Género-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/poliedro_superficies%20y%20su%20caracter%C3%ADstica%20de%20euler%20(%CF%87)) |
+| **Poliedro_homorfo.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta es una clara demostración interactiva del concepto de homeomorfismo. Visualiza la deformación continua entre una esfera y un cubo mediante una proyección radial. Un deslizador permite al usuario transformar una figura en la otra, reforzando la idea de que, aunque geométricamente distintas, son topológicamente equivalentes. El recurso también presenta las fórmulas matemáticas que definen la transformación.</p></details> | [![Explorar Homeomorfismo](https://img.shields.io/badge/Explorar-Homeomorfismo-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/poliedro_homorfo) |
+| **Poliedro_teoria.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso ofrece un marco teórico completo sobre los conceptos topológicos fundamentales, partiendo desde los orígenes en el trabajo de Euler. Explica la transición de la geometría rígida a las propiedades cualitativas, define los espacios topológicos y homeomorfismos, y detalla la importancia de los invariantes. El documento analiza en profundidad la fórmula de Euler (V-E+F=χ) y su conexión con el género (χ = 2 - 2g), sirviendo como un sólido respaldo teórico para las demostraciones interactivas.</p></details> | [![Explorar Teoría](https://img.shields.io/badge/Explorar-Fundamentos%20Teóricos-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/poliedro_teoria) |
 ## 📜 Tabla de Contenidos
 
 *   [1. Fundamentos Teóricos](#1-fundamentos-teóricos)
