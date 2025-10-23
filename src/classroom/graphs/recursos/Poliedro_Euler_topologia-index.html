@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-s-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Euler χ, Índice (Poincaré–Hopf) y Curvatura (Gauss–Bonnet) — Prototipo</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
+<style>
+  :root{
+    --bg:#0a0e27; --panel:#141a33; --accent:#4f7cff; --accent2:#b47cff; --ok:#37d67a; --warn:#ffd93d;
+    --muted:#a0a0ff; --text:#e0e0e0; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto;color:var(--text);background:linear-gradient(135deg,#0a0e27,#1a1f3a)}
+  header{padding:22px 16px;border-bottom:1px solid rgba(79,124,255,.25);background:linear-gradient(135deg, rgba(79,124,255,.08), rgba(138,43,226,.08))}
+  h1{margin:0;font-size:clamp(20px,3vw,34px);background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{opacity:.9;margin-top:6px}
+  .container{max-width:1200px;margin:auto;padding:16px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .tab{border:1px solid rgba(79,124,255,.35);border-radius:10px;padding:10px 14px;background:rgba(20,25,45,.6);cursor:pointer;user-select:none}
+  .tab.active{background:rgba(79,124,255,.25)}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+  .panel{background:rgba(20,25,45,.72);border:1px solid rgba(79,124,255,.25);border-radius:14px;padding:14px}
+  canvas{width:100%;height:460px;display:block;border-radius:10px;background:#0b1331;border:1px solid rgba(79,124,255,.25)}
+  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .card{background:linear-gradient(135deg, rgba(79,124,255,.15), rgba(138,43,226,.12));border:1px solid rgba(79,124,255,.35);
+        border-radius:12px;padding:12px;text-align:center}
+  .big{font-size:30px;font-weight:800}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:10px 0}
+  select,input[type=range]{width:100%;padding:8px;border-radius:8px;background:#111739;color:var(--text);
+    border:1px solid rgba(79,124,255,.3)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:14px}
+  .pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06)}
+  footer{opacity:.8;text-align:center;padding:26px;margin-top:12px;border-top:1px solid rgba(79,124,255,.25)}
+  @media (max-width:1000px){.grid{grid-template-columns:1fr} canvas{height:380px}}
+</style>
+</head>
+<body>
+<header class="container">
+  <h1>Visualizando χ (Euler), Índice (Poincaré–Hopf) y Curvatura (Gauss–Bonnet)</h1>
+  <div class="sub">Prototipo minimal que complementa tu demo de poliedros: <span class="mono">Σ indices = χ</span> y <span class="mono">∫K dA = 2πχ</span>.</div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" data-tab="ph">Índice de un campo sobre S² (Poincaré–Hopf)</div>
+    <div class="tab" data-tab="gb">Curvatura discreta y Gauss–Bonnet</div>
+    <div class="tab" data-tab="genus">Género g y χ = 2−2g</div>
+  </div>
+
+  <!-- TAB 1: Poincaré–Hopf -->
+  <section id="ph" class="grid tabpanel">
+    <div class="panel">
+      <h2>Campo tangente en la esfera: ceros y suma de índices</h2>
+      <canvas id="sphere"></canvas>
+      <div class="legend">
+        <div class="pill">Flechas: proyección tangente de un campo constante</div>
+        <div class="pill">● polos: ceros del campo (índice +1 cada uno)</div>
+      </div>
+      <div class="controls">
+        <label>Velocidad de rotación
+          <input id="rotPH" type="range" min="0" max="0.03" step="0.002" value="0.01">
+        </label>
+        <label>Densidad de flechas
+          <input id="dens" type="range" min="6" max="22" step="1" value="12">
+        </label>
+        <label>Inclinación del campo (°)
+          <input id="tilt" type="range" min="0" max="180" step="1" value="20">
+        </label>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Idea clave</h3>
+      <p>Tomamos un vector constante <span class="mono">w</span> en ℝ³ y lo proyectamos sobre el plano tangente de la esfera S².</p>
+      <p>El campo resultante se anula exactamente en dos puntos antipodales. La rotación de las direcciones alrededor de cada cero es una vuelta completa <span class="mono">(índice +1)</span>.</p>
+      <div class="kpi">
+        <div class="card"><div>Índice Polo Norte</div><div class="big">+1</div></div>
+        <div class="card"><div>Índice Polo Sur</div><div class="big">+1</div></div>
+        <div class="card"><div>Suma de índices</div><div class="big ok">2</div><div>⇢ χ(S²)</div></div>
+      </div>
+      <p class="mono">Σ Ind(p) = 2 = χ(S²)</p>
+      <p>Gira el campo (control “inclinación”) y observa que la suma de índices permanece invariante.</p>
+    </div>
+  </section>
+
+  <!-- TAB 2: Gauss–Bonnet discreto -->
+  <section id="gb" class="grid tabpanel" style="display:none">
+    <div class="panel">
+      <h2>Ángulo defecto en un cubo ⇒ ∑defectos = 2πχ</h2>
+      <canvas id="cube"></canvas>
+      <div class="legend">
+        <div class="pill">Vértices resaltados con su defecto κ(v)=2π−∑ángulos en v</div>
+        <div class="pill">Para el cubo: κ(v)=π/2, 8 vértices ⇒ ∑κ(v)=4π</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Cálculo discreto</h3>
+      <p>En un poliedro convexo, la curvatura total puede concentrarse en los vértices. Para el cubo, en cada vértice confluyen 3 ángulos rectos, suma 3·π/2=3π/2, por lo que:</p>
+      <p class="mono">κ(v)=2π − 3π/2 = π/2</p>
+      <div class="kpi">
+        <div class="card"><div>κ(v)</div><div class="big">π/2</div></div>
+        <div class="card"><div>#Vértices</div><div class="big">8</div></div>
+        <div class="card"><div>∑κ(v)</div><div class="big ok">4π</div></div>
+      </div>
+      <p class="mono">∑ κ(v) = 4π = 2π·χ  ⇒  χ = 2</p>
+      <p>Esto ilustra la versión discreta de Gauss–Bonnet en poliedros convexos.</p>
+    </div>
+  </section>
+
+  <!-- TAB 3: Genus -->
+  <section id="genus" class="grid tabpanel" style="display:none">
+    <div class="panel">
+      <h2>Descomposición celular y control de género</h2>
+      <canvas id="genusCanvas"></canvas>
+      <div class="controls">
+        <label>Género (g)
+          <input id="gSlider" type="range" min="0" max="3" step="1" value="0">
+        </label>
+        <label>Triangulación aproximada
+          <select id="triang">
+            <option value="coarse">Gruesa</option>
+            <option value="medium">Media</option>
+            <option value="fine">Fina</option>
+          </select>
+        </label>
+      </div>
+      <div class="legend">
+        <div class="pill">Superficie tipo rosquilla con g asas</div>
+        <div class="pill">χ = 2 − 2g</div>
+        <div class="pill">V−E+F se mantiene para cualquier triangulación</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>χ desde dos miradas</h3>
+      <ol>
+        <li><b>Combinatoria:</b> contamos <span class="mono">V, E, F</span> de una triangulación y computamos <span class="mono">χ=V−E+F</span>.</li>
+        <li><b>Topológica:</b> usamos <span class="mono">χ=2−2g</span>. Cada asa reduce χ en 2.</li>
+      </ol>
+      <div class="kpi">
+        <div class="card"><div>V</div><div class="big" id="KV">—</div></div>
+        <div class="card"><div>E</div><div class="big" id="KE">—</div></div>
+        <div class="card"><div>F</div><div class="big" id="KF">—</div></div>
+      </div>
+      <div class="kpi" style="margin-top:8px">
+        <div class="card"><div>χ (V−E+F)</div><div class="big ok" id="KChi1">—</div></div>
+        <div class="card"><div>χ (2−2g)</div><div class="big ok" id="KChi2">—</div></div>
+        <div class="card"><div>Consistencia</div><div class="big" id="KMatch">—</div></div>
+      </div>
+      <p class="mono" id="explain">Triangulación “Gruesa” ilustrativa.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Prototipo educativo — encaja como pestañas nuevas junto a tu demo original.</p>
+  <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------- util ----------
+function makeRenderer(canvas){
+  const r = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  // guard: if canvas is hidden (tab display:none), client sizes are 0.
+  // we'll set a fallback size and expose a resize hook stored on the canvas.
+  const set = ()=>{
+    const w = Math.max(1, canvas.clientWidth || canvas.parentElement.clientWidth || 600);
+    const h = Math.max(1, canvas.clientHeight || 420);
+    r.setSize(w, h, false);
+  };
+  set();
+  // expose a hook so the tab switcher can force a resize AFTER layout
+  canvas._forceResize = ()=>{ set(); };
+  return r;
+}
+function makeSceneCamera(canvas){
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+  cam.position.set(0,0,4.2);
+  const amb = new THREE.AmbientLight(0xffffff,.7);
+  const dir = new THREE.DirectionalLight(0xffffff,.9); dir.position.set(4,5,7);
+  scene.add(amb,dir);
+  return {scene,cam};
+}
+function handleResize(renderer, camera, canvas){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+
+// ---------- TAB 1: Sphere vector field ----------
+(function(){
+  const canvas = document.getElementById('sphere');
+  const {scene,cam} = makeSceneCamera(canvas);
+  const renderer = makeRenderer(canvas);
+
+  // sphere
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1.4, 48, 32),
+    new THREE.MeshPhongMaterial({color:0x3450ff,transparent:true,opacity:.18,shininess:80})
+  );
+  scene.add(sphere);
+  const wire = new THREE.Mesh(
+    new THREE.SphereGeometry(1.401, 24, 16),
+    new THREE.MeshBasicMaterial({wireframe:true, color:0x7f8cff, transparent:true, opacity:.4})
+  );
+  scene.add(wire);
+
+  // poles markers
+  const poleMat = new THREE.MeshBasicMaterial({color:0xff6b6b});
+  const poleGeo = new THREE.SphereGeometry(0.06, 16, 16);
+  const north = new THREE.Mesh(poleGeo, poleMat); north.position.set(0,1.4,0);
+  const south = new THREE.Mesh(poleGeo, poleMat); south.position.set(0,-1.4,0);
+  scene.add(north,south);
+
+  // arrow field
+  let arrows=[];
+  function buildArrows(N=12, tiltDeg=20){
+    arrows.forEach(a=>scene.remove(a)); arrows=[];
+    const tilt = tiltDeg*Math.PI/180;
+    const w = new THREE.Vector3(Math.sin(tilt), Math.cos(tilt), 0).normalize(); // constant vector
+    for(let i=0;i<N;i++){
+      const theta = Math.PI * (i+0.5)/N; // polar
+      const ring = Math.round(N * Math.sin(theta));
+      for(let j=0;j<Math.max(4,ring);j++){
+        const phi = 2*Math.PI*j/Math.max(4,ring);
+        const p = new THREE.Vector3(
+          1.4*Math.sin(theta)*Math.cos(phi),
+          1.4*Math.cos(theta),
+          1.4*Math.sin(theta)*Math.sin(phi)
+        );
+        // project w onto tangent of sphere at p
+        const n = p.clone().normalize();
+        const v = w.clone().sub(n.clone().multiplyScalar(w.dot(n))); // tangential component
+        const len = 0.35 * Math.max(0.2, v.length()); // avoid degenerate size
+        if(v.length()<1e-3) continue; // near zeros
+        v.normalize();
+        const arrow = new THREE.ArrowHelper(v, p, len, 0xffffaa, 0.08, 0.06);
+        arrows.push(arrow); scene.add(arrow);
+      }
+    }
+  }
+  buildArrows(12, 20);
+
+  // controls
+  let rot = parseFloat(document.getElementById('rotPH').value);
+  document.getElementById('rotPH').addEventListener('input', e=> rot=parseFloat(e.target.value));
+  document.getElementById('dens').addEventListener('input', e=> buildArrows(parseInt(e.target.value), parseInt(document.getElementById('tilt').value)));
+  document.getElementById('tilt').addEventListener('input', e=> buildArrows(parseInt(document.getElementById('dens').value), parseInt(e.target.value)));
+
+  function animate(){
+    requestAnimationFrame(animate);
+    sphere.rotation.y += rot; wire.rotation.y += rot;
+    arrows.forEach(a=> a.position.applyAxisAngle(new THREE.Vector3(0,1,0), rot));
+    renderer.render(scene,cam);
+  }
+  window.addEventListener('resize', ()=>handleResize(renderer, cam, canvas));
+  canvas._forceResize = ()=>handleResize(renderer, cam, canvas);
+  animate();
+})();
+
+// ---------- TAB 2: Gauss–Bonnet cube defects ----------
+(function(){
+  const canvas = document.getElementById('cube');
+  const {scene,cam} = makeSceneCamera(canvas);
+  const renderer = makeRenderer(canvas);
+
+  const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8,1.8,1.8),
+    new THREE.MeshPhongMaterial({color:0x4f7cff,transparent:true,opacity:.22,side:THREE.DoubleSide})
+  );
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(cube.geometry), new THREE.LineBasicMaterial({color:0x4ecdc4}));
+  cube.add(edges);
+  scene.add(cube);
+
+  // vertices + labels with κ = π/2
+  const vgeo = new THREE.SphereGeometry(0.06, 16, 16);
+  const vmat = new THREE.MeshBasicMaterial({color:0xffd93d});
+  const positions = cube.geometry.attributes.position;
+  const verts = new Set();
+  for(let i=0;i<positions.count;i++){
+    const v = new THREE.Vector3(positions.getX(i), positions.getY(i), positions.getZ(i));
+    const key = v.toArray().map(x=>x.toFixed(3)).join(',');
+    if(verts.has(key)) continue; verts.add(key);
+    const m = new THREE.Mesh(vgeo, vmat); m.position.copy(v); m.userData.label='π/2';
+    scene.add(m);
+  }
+
+  let rot = 0.01;
+  function animate(){
+    requestAnimationFrame(animate);
+    cube.rotation.y += rot; cube.rotation.x += rot*0.5;
+    renderer.render(scene,cam);
+  }
+  window.addEventListener('resize', ()=>handleResize(renderer, cam, canvas));
+  canvas._forceResize = ()=>handleResize(renderer, cam, canvas);
+  animate();
+})();
+
+// ---------- TAB 3: genus slider (schematic) ----------
+(function(){
+  const canvas = document.getElementById('genusCanvas');
+  const {scene,cam} = makeSceneCamera(canvas);
+  const renderer = makeRenderer(canvas);
+
+  // simple torus-like surface to hint genus; we won't model true g>1 surfaces, but we update counts consistently
+  let g = 0, level='coarse';
+  const mesh = new THREE.Mesh(
+    new THREE.TorusGeometry(0.9,0.35,48,100),
+    new THREE.MeshPhongMaterial({color:0x6b4fff,transparent:true,opacity:.2,side:THREE.DoubleSide})
+  );
+  scene.add(mesh);
+
+  function fakeCounts(g, level){
+    // illustrative combinatorics for a triangulation (not exact embedding)
+    const base = {coarse:[20,30,12], medium:[80,120,42], fine:[200,300,102]}[level];
+    // adjust so that V-E+F = 2-2g while keeping E ~ 1.5V, F chosen to match χ
+    let [V,E,F]=base;
+    const chi = 2 - 2*g;
+    // tweak F to satisfy χ with the chosen V,E
+    F = E - V + chi;
+    return {V,E,F,chi};
+  }
+  function refresh(){
+    const counts = fakeCounts(g, level);
+    document.getElementById('KV').textContent = counts.V;
+    document.getElementById('KE').textContent = counts.E;
+    document.getElementById('KF').textContent = counts.F;
+    document.getElementById('KChi1').textContent = (counts.V - counts.E + counts.F);
+    document.getElementById('KChi2').textContent = (2 - 2*g);
+    document.getElementById('KMatch').textContent = (counts.V - counts.E + counts.F) === (2 - 2*g) ? '✓' : '✗';
+    document.getElementById('explain').textContent = `Triangulación "${level}" con género g=${g}. χ se preserva.`;
+    // swap mesh: g=0 => sphere-like, g>=1 => torus-like
+    scene.remove(mesh);
+    if(g===0){
+      mesh.geometry.dispose();
+      mesh.geometry = new THREE.SphereGeometry(1.1, 48, 32);
+    }else{
+      mesh.geometry.dispose();
+      mesh.geometry = new THREE.TorusGeometry(0.9,0.35,48,100);
+    }
+    mesh.material.opacity = .18 + .04*g;
+    scene.add(mesh);
+  }
+  refresh();
+  let rot=.01; function animate(){ requestAnimationFrame(animate); mesh.rotation.y += rot; renderer.render(scene,cam); }
+  window.addEventListener('resize', ()=>handleResize(renderer, cam, canvas));
+  canvas._forceResize = ()=>handleResize(renderer, cam, canvas); animate();
+
+  document.getElementById('gSlider').addEventListener('input', e=>{ g=parseInt(e.target.value); refresh(); });
+  document.getElementById('triang').addEventListener('change', e=>{ level=e.target.value; refresh(); });
+})();
+
+// ---------- tabs ----------
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const sel = t.dataset.tab;
+    document.querySelectorAll('.tabpanel').forEach(p=> p.style.display = (p.id===sel)?'grid':'none');
+    // after layout, force canvas resizes inside the visible panel
+    requestAnimationFrame(()=>{
+      const panel = document.getElementById(sel);
+      panel.querySelectorAll('canvas').forEach(c=> c._forceResize && c._forceResize());
+    });
+  });
+});
+</script>
+</body>
+</html>```

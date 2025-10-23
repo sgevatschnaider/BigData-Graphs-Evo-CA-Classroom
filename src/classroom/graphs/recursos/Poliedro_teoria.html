@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Legado Topológico de Euler: Un Análisis Profundo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #3a6186 0%, #89253e 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #3a6186;
+      --accent-secondary: #89253e;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 12000px; /* Increased max-height */ padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '↔'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">El Legado Topológico de Euler</h1>
+      <p class="subtitle">De los Puentes de Königsberg a la Clasificación de Superficies</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. El Nacimiento de la Topología</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>1.1. De la geometría rígida a la forma cualitativa</h4>
+                <p>La matemática, hasta el siglo XVIII, era en gran medida una ciencia de la rigidez. La geometría euclidiana, el pináculo del pensamiento espacial, se fundamentaba en axiomas de congruencia, paralelismo y medida. Se preocupaba por propiedades que se pierden con la más mínima deformación: un triángulo rectángulo deja de serlo si alteramos sus ángulos; un círculo deja de ser un círculo si lo estiramos. El trabajo de Leonhard Euler sobre los puentes de Königsberg en 1736 no fue meramente la solución a un acertijo, fue un acto revolucionario que propuso una nueva forma de interrogar al espacio.</p>
+                <p>La pregunta de Euler no fue "¿cuánto mide?", sino "¿cómo se conecta?". Este cambio de perspectiva es la génesis de la topología. Al ignorar la longitud de los puentes y la forma de las islas, Euler destiló el problema a su esqueleto conectivo, una estructura de nodos y enlaces. Inauguró así el estudio de las propiedades que son intrínsecas a un objeto, aquellas que persisten bajo cualquier homeomorfismo: una deformación continua, con una inversa también continua. Pensemos en ello como la "geometría de la hoja de goma". Desde esta óptica, una taza de café y una rosquilla (dona) son topológicamente indistinguibles. Podemos, con imaginación, deformar la rosquilla, hundiendo una parte para formar el cuenco de la taza y engrosando y encogiendo otra para formar el asa, todo sin rasgar ni pegar la superficie. El "agujero" del asa es la propiedad esencial e invariante que ambas comparten. La topología es, por tanto, el estudio de la esencia de la forma, despojada de las contingencias de la métrica.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Homeomorfismo Clásico: La Taza y la Rosquilla</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Taza de Café</strong><span>Posee un asa (un "agujero")</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Topológicamente Equivalente</div></div>
+                        <div class="diagram-box"><strong>Rosquilla (Toro)</strong><span>Posee un agujero central</span></div>
+                    </div>
+                </div>
+
+                <h4>1.2. ¿Qué es (realmente) un espacio topológico?</h4>
+                <p>Para formalizar estas ideas intuitivas, la matemática del siglo XX desarrolló la definición axiomática de espacio topológico. Esta estructura es la base sobre la que descansa todo el campo, un marco de una generalidad y potencia asombrosas.</p>
+                <p><strong>Definición (estándar):</strong> Un espacio topológico es un par (X, τ), donde X es un conjunto de puntos y τ es una colección de subconjuntos de X, llamados conjuntos abiertos, que deben satisfacer tres axiomas fundamentales:</p>
+                
+                 <div class="diagram-container">
+                    <div class="diagram-title">Axiomas de un Espacio Topológico (X, τ)</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Axioma 1</strong><span>El conjunto vacío (∅) y el total (X) están en τ.</span></div>
+                        <div class="diagram-box"><strong>Axioma 2</strong><span>La unión (finita o infinita) de abiertos está en τ.</span></div>
+                        <div class="diagram-box"><strong>Axioma 3</strong><span>La intersección FINITA de abiertos está en τ.</span></div>
+                    </div>
+                </div>
+
+                <h4>1.3. Invariantes topológicos: qué no cambia cuando todo cambia</h4>
+                <p>El objetivo principal de la topología es clasificar los espacios. Dos espacios se consideran "iguales" si son homeomorfos. Para demostrar que dos espacios no son iguales, buscamos invariantes topológicos: propiedades que no se alteran por los homeomorfismos. Son las "huellas dactilares" de los espacios.</p>
+                <ul>
+                    <li><strong>Conexión:</strong> Un espacio es conexo si no puede ser partido en dos subconjuntos abiertos, no vacíos y disjuntos. Intuitivamente, es "de una sola pieza".</li>
+                    <li><strong>Compacidad:</strong> Generaliza la idea de ser "cerrado y acotado". Intuitivamente, un espacio compacto no se "escapa al infinito".</li>
+                    <li><strong>Invariantes algebraicos:</strong> La topología algebraica asocia estructuras algebraicas (como grupos) a los espacios topológicos, como la característica de Euler (χ) y el género (g).</li>
+                </ul>
+
+                <h4>1.4. Continuidad sin distancias y el papel de los abiertos</h4>
+                <p>La definición topológica de continuidad es más fundamental que la de ε-δ del cálculo. Nos permite hablar de funciones continuas entre espacios donde la noción de distancia no tiene sentido. A menudo trabajamos con una <strong>base</strong> para la topología: una subcolección de abiertos tal que cualquier otro abierto puede ser expresado como una unión de elementos de la base, como "bloques de construcción" que generan toda la estructura.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. De los Grafos a la Estructura del Espacio</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>2.1. Königsberg como idea, no como tema</h4>
+                <p>El problema de Königsberg no es un capítulo de la topología moderna, sino su prólogo filosófico. El valor pedagógico del problema reside en su demostración del método topológico:</p>
+                <ul>
+                    <li><strong>Reducción:</strong> Un problema del mundo real se reduce a su esqueleto abstracto: un grafo.</li>
+                    <li><strong>Abstracción:</strong> La solución emerge de una propiedad intrínseca de este esqueleto (la paridad de los grados de los vértices), una propiedad insensible a las deformaciones.</li>
+                </ul>
+                <p>El "giro topológico" que Euler realizó es este acto de despojamiento, de eliminar información métrica para revelar la estructura conectiva pura que yace debajo.</p>
+
+                <h4>2.2. Conectividad sin medidas: el puente hacia la topología</h4>
+                <p>Un grafo es, en esencia, un espacio topológico de dimensión 1 (un 1-complejo simplicial). Los vértices son los 0-símplices y las aristas son los 1-símplices que los conectan. El estudio de los grafos es el primer escalón de la topología combinatoria. La noción de conexión en un grafo (la existencia de un camino entre dos vértices cualesquiera) es el análogo discreto del concepto topológico de conexidad. La teoría de grafos, por tanto, no es solo una herramienta auxiliar, sino el punto de partida natural para entender cómo se construye la estructura topológica.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. La Fórmula de Euler y su Potencia Topológica</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Esta es quizás la contribución más profunda y de mayor alcance de Euler a la topología, un puente entre la combinatoria discreta y la estructura continua de las superficies.</p>
+                <h4>3.1. V - E + F no es aritmética: es estructura</h4>
+                <p>Cuando Euler afirmó que para cualquier poliedro convexo, la cantidad <strong>Vértices - Aristas + Caras</strong> era invariablemente 2, estaba revelando una ley profunda sobre la naturaleza de la esfera. No es un accidente numérico, es una propiedad fundamental de la estructura de cualquier partición de una superficie esférica.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Demostración Visual de la Fórmula de Euler (V - E + F = 2)</div>
+                    <div class="diagram-col">
+                        <div class="diagram-box"><strong>1. Poliedro Convexo</strong><span>Ej: Cubo (V=8, E=12, F=6)</span></div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Proyección Planar</div></div>
+                        <div class="diagram-box"><strong>2. Grafo Plano</strong><span>V-E+F se mantiene constante</span></div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Eliminación de Aristas de Ciclos</div></div>
+                        <div class="diagram-box"><strong>3. Árbol (Sin Ciclos)</strong><span>Para un árbol, E = V-1 y F=1</span></div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Cálculo Final</div></div>
+                        <div class="diagram-box"><strong>Resultado Invariante</strong><span>χ = V - (V-1) + 1 = 2</span></div>
+                    </div>
+                </div>
+
+                <h4>3.2. La característica de Euler (χ) y el género (g)</h4>
+                <p>La genialidad de este resultado se multiplica cuando nos damos cuenta de que no se limita a la esfera. La cantidad calculada, <strong>χ = V - E + F</strong>, se denomina la Característica de Euler de la superficie. Sorprendentemente, el resultado no depende del grafo que dibujemos, sino únicamente de la superficie subyacente. Esta relación se formaliza con el concepto de <strong>género (g)</strong>, el número de "agujeros", en la elegante fórmula:</p>
+                <p style="text-align:center; font-size: 1.5em; font-weight: bold; color: var(--text-primary);">χ = 2 - 2g</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Género y Característica de Euler</div>
+                     <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Esfera</strong><span>g=0 → χ = 2-2(0) = 2</span></div>
+                        <div class="diagram-box"><strong>Toro (Rosquilla)</strong><span>g=1 → χ = 2-2(1) = 0</span></div>
+                    </div>
+                </div>
+
+                <h4>3.3. De poliedros y grafos embebidos a la clasificación de superficies</h4>
+                <p>La estabilidad de la Característica de Euler es la clave que permite uno de los mayores triunfos de la topología: el <strong>Teorema de Clasificación de Superficies Compactas y Orientables</strong>. Este teorema establece que cualquier superficie de este tipo es topológicamente equivalente a una esfera con un cierto número g de asas adheridas. Gracias a la fórmula de Euler, podemos tomar cualquier superficie desconocida, dibujarle una malla, calcular χ, y a partir de ahí deducir su género g = 1 - χ/2. Hemos identificado su lugar exacto en el "mapa" de todas las superficies posibles.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Bibliografía</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Munkres, J. R. — Topology, 2nd ed. (2014): texto estándar.</h4>
+                <ul>
+                    <li><strong>Cap. 2: Topological Spaces and Continuous Functions</strong> (lenguaje formal y propiedades básicas).</li>
+                    <li><strong>Cap. 3: Connectedness and Compactness</strong> (invariantes globales fundamentales).</li>
+                    <li><strong>Cap. 12: Classification of Surfaces</strong> (marco para χ y g).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Conclusión: La Síntesis Moderna</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Leonhard Euler encendió una chispa con su intuición estructural. Resolvió un acertijo local, pero al hacerlo, reveló un conjunto de principios universales sobre la forma y la conexión. La topología moderna es la catedral construida sobre esos cimientos. Proporciona el lenguaje riguroso de los espacios topológicos y los conjuntos abiertos, y las herramientas poderosas de los invariantes, para explorar y clasificar el universo de las formas. Lo que en Euler fue una idea visionaria sobre la estructura subyacente a la geometría, hoy es un campo sistemático y profundo que nos permite entender el ADN del espacio, demostrando que muchos problemas que parecen geométricos son, en su corazón, puramente topológicos.</p>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

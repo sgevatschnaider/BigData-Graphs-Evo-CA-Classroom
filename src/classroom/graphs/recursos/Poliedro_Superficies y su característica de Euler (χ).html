@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superficies y Característica de Euler χ</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<style>
+  :root{
+    --bg:#0b1226; --panel:#111a33; --border:#2b3a6a; --accent:#61a0ff; --text:#e7eefc; --muted:#a9b7e6; --ok:#33d17a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(1200px 600px at 10% -10%, #17234a 0%, #0b1226 40%);color:var(--text)}
+  header{padding:22px 16px;border-bottom:1px solid var(--border)}
+  h1{margin:0 0 6px 0;font-size:clamp(22px,3vw,36px);letter-spacing:.2px}
+  .sub{opacity:.85;color:var(--muted)}
+  .container{max-width:1200px;margin:auto;padding:16px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{position:relative;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0f1731 0%, #0c1329 100%);padding:12px}
+  .title{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+  .name{font-weight:700;font-size:18px}
+  .chi{font-family:ui-monospace,Menlo,Consolas,monospace;opacity:.9}
+  .kpi{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);padding:6px 10px;border-radius:10px;font-family:ui-monospace}
+  canvas.scene{width:100%;height:380px;display:block;border-radius:10px;background:#0a1024}
+  footer{opacity:.75;text-align:center;padding:20px;color:var(--muted)}
+  .legend{margin-top:10px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="container">
+  <h1>Superficies y su característica de Euler (χ)</h1>
+  <div class="sub">Visualización cualitativa: cada panel muestra una superficie cerrada orientable con género <span class="mono">g</span>. Se cumple <span class="mono">χ = 2 − 2g</span>.</div>
+</header>
+
+<div class="container grid">
+  <div class="card">
+    <div class="title"><div class="name">Esfera (g=0)</div><div class="chi">χ = 2</div></div>
+    <div class="kpi">b₀−b₁+b₂ = 1−0+1=2</div>
+    <canvas id="s0" class="scene"></canvas>
+    <div class="legend">Isosuperficie de una metabola: topología de esfera.</div>
+  </div>
+  <div class="card">
+    <div class="title"><div class="name">Toro (g=1)</div><div class="chi">χ = 0</div></div>
+    <div class="kpi">b₀−b₁+b₂ = 1−2+1=0</div>
+    <canvas id="s1" class="scene"></canvas>
+    <div class="legend">Anillo de metabólas formando un “donut”.</div>
+  </div>
+  <div class="card">
+    <div class="title"><div class="name">Doble toro (g=2)</div><div class="chi">χ = −2</div></div>
+    <div class="kpi">b₀−b₁+b₂ = 1−4+1=−2</div>
+    <canvas id="s2" class="scene"></canvas>
+    <div class="legend">Dos anillos conectados en una sola pieza ⇒ dos asas.</div>
+  </div>
+  <div class="card">
+    <div class="title"><div class="name">Superficie con 3 agujeros (g=3)</div><div class="chi">χ = −4</div></div>
+    <div class="kpi">b₀−b₁+b₂ = 1−6+1=−4</div>
+    <canvas id="s3" class="scene"></canvas>
+    <div class="legend">Tres asas conectadas (pretzel) mediante campo de metabólas.</div>
+  </div>
+</div>
+
+<footer>Isosuperficies generadas con Marching Cubes (metaballs). Propósito pedagógico: topología correcta por número de asas; la geometría es aproximada.<br>Material Elaborado por el profesor Sergio Gevaschnaider</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/MarchingCubes.js"></script>
+<script>
+// helpers
+function makeScene(canvas){
+  if(typeof THREE.MarchingCubes === 'undefined'){
+    console.warn('MarchingCubes no se cargó. Verifica la ruta CDN. Mostrando esfera de respaldo.');
+  }
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, w/h, 0.1, 100);
+  camera.position.set(0,0,3.6);
+  const amb = new THREE.AmbientLight(0xffffff, .55);
+  const dir = new THREE.DirectionalLight(0xffffff, .85); dir.position.set(3, 5, 4);
+  const back = new THREE.DirectionalLight(0x88aaff, .25); back.position.set(-3,-2,-4);
+  scene.add(amb, dir, back);
+
+  // subtle space fog
+  scene.fog = new THREE.FogExp2(0x0a1024, 0.12);
+
+  // marching cubes material
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x5fa6ff, roughness: .35, metalness: .15,
+    transparent:true, opacity:.9
+  });
+
+  const res = 38;
+  let iso;
+  if(THREE.MarchingCubes){
+    iso = new THREE.MarchingCubes(res, material, true, true);
+    iso.position.set(0,0,0);
+    iso.scale.set(1.6,1.6,1.6);
+    iso.enableUvs = false;
+    iso.enableColors = false;
+    scene.add(iso);
+  }else{
+    // Respaldo: esfera simple
+    iso = new THREE.Mesh(new THREE.SphereGeometry(1.0, 48, 32), material);
+    scene.add(iso);
+  }
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(3.2,3.2,3.2)),
+    new THREE.LineBasicMaterial({transparent:true, opacity:.04})
+  );
+  // scene.add(edges);
+
+  function resize(){
+    const w = canvas.clientWidth || 640, h = canvas.clientHeight || 400;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+
+  return {renderer, scene, camera, iso};
+}
+
+function clearField(iso){ if(iso.reset) iso.reset(); }
+function addBall(iso, x,y,z, strength, subtract){
+  if(!iso.addBall) return; // fallback mesh
+  iso.addBall(x, y, z, strength, subtract);
+}
+function addRing(iso, cx, cy, cz, rx, rz, n, s, sub){
+  for(let i=0;i<n;i++){
+    const t = i/n * Math.PI*2;
+    const x = cx + rx*Math.cos(t);
+    const z = cz + rz*Math.sin(t);
+    addBall(iso, 0.5+0.5*x, 0.5+0.5*cy, 0.5+0.5*z, s, sub);
+  }
+}
+function addConnector(iso, x1,y1,z1, x2,y2,z2, count, s, sub){
+  for(let i=0;i<count;i++){
+    const t = i/count;
+    const x = x1*(1-t)+x2*t;
+    const y = y1*(1-t)+y2*t;
+    const z = z1*(1-t)+z2*t;
+    addBall(iso, 0.5+0.5*x, 0.5+0.5*y, 0.5+0.5*z, s, sub);
+  }
+}
+
+function buildGenus(iso, g){
+  clearField(iso);
+  const subtract = 12.0;        // iso threshold tuning
+  const strengthBall = 0.7;
+  const strengthRing = 0.8;
+  // sphere (g=0)
+  if(g===0){
+    addBall(iso, .5,.5,.5, 1.4, subtract);
+  }
+  // torus (g=1)
+  if(g===1){
+    addRing(iso, 0,0,0, 0.55,0.55, 34, strengthRing, subtract);
+    // thicken tube
+    addRing(iso, 0,0,0, 0.55,0.55, 34, strengthRing*0.85, subtract);
+  }
+  // genus 2 (two linked rings with connector to ensure one component)
+  if(g===2){
+    addRing(iso, -0.35,0,0, 0.38,0.28, 26, strengthRing, subtract);
+    addRing(iso,  0.35,0,0, 0.38,0.28, 26, strengthRing, subtract);
+    // connectors (a small bridge between rings)
+    addConnector(iso, -0.05,0.0,0, 0.05,0.0,0, 8, strengthBall*0.85, subtract);
+    // a central thickening to fuse
+    addBall(iso, .5,.5,.5, 0.5, subtract);
+  }
+  // genus 3 (triangle of rings + connectors)
+  if(g===3){
+    const R=0.42;
+    const centers = [
+      [ -R, 0,  0],
+      [  R, 0,  0],
+      [  0, 0,  0.42]
+    ];
+    for(const c of centers) addRing(iso, c[0],0,c[2], 0.28,0.24, 24, strengthRing, subtract);
+    addConnector(iso, -0.12,0,0.14, 0.12,0,0.14, 8, strengthBall*0.9, subtract);
+    addConnector(iso, -0.20,0,0.05, 0.0,0,0.36, 8, strengthBall*0.9, subtract);
+    addConnector(iso,  0.20,0,0.05, 0.0,0,0.36, 8, strengthBall*0.9, subtract);
+    addBall(iso, .5,.5,.55, 0.38, subtract);
+  }
+  if(iso.isolation!==undefined) iso.isolation = 80; // surface threshold
+}
+
+const scenes = [
+  {el:'s0', g:0},
+  {el:'s1', g:1},
+  {el:'s2', g:2},
+  {el:'s3', g:3},
+].map(spec=>{
+  const {renderer, scene, camera, iso} = makeScene(document.getElementById(spec.el));
+  buildGenus(iso, spec.g);
+  spec.renderer = renderer; spec.scene=scene; spec.camera=camera; spec.iso=iso;
+  return spec;
+});
+
+function animate(){
+  requestAnimationFrame(animate);
+  scenes.forEach((s,i)=>{
+    s.iso.rotation.y += 0.008 + i*0.002;
+    s.iso.rotation.x += 0.004 + i*0.001;
+    s.renderer.render(s.scene, s.camera);
+  });
+}
+animate();
+</script>
+</body>
+</html>
