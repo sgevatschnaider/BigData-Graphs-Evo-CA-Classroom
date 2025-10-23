@@ -98,11 +98,25 @@
     "mtime": "2025-10-11T23:20:08-03:00"
   },
   {
+    "title": "Demostración Visual - Fórmula de Euler",
+    "path": "/src/classroom/graphs/recursos/Poliedro_Euler.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-23T14:37:50-03:00"
+  },
+  {
     "title": "El Complemento de un Grafo: Invirtiendo las Conexiones",
     "path": "/src/classroom/graphs/recursos/El Complemento de un Grafo-irregular.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "El Legado Topológico de Euler: Un Análisis Profundo",
+    "path": "/src/classroom/graphs/recursos/Poliedro_teoria.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
     "title": "El Paseo de Euler: Teoría de Grafos",
@@ -124,6 +138,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Euler χ, Índice (Poincaré–Hopf) y Curvatura (Gauss–Bonnet) — Prototipo",
+    "path": "/src/classroom/graphs/recursos/Poliedro_Euler_topologia-index.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
     "title": "Examen Interactivo de Teoría de Grafos",
@@ -301,6 +322,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Homeomorfismo: Proyección radial de S² al cubo",
+    "path": "/src/classroom/graphs/recursos/Poliedro_homorfo.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-23T14:37:50-03:00"
+  },
+  {
     "title": "Índice Interactivo de Temas de Grafos",
     "path": "/src/classroom/graphs/recursos/Indice.html",
     "tag": "Demo",
@@ -418,6 +446,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-12T17:50:29-03:00"
+  },
+  {
+    "title": "Superficies y Característica de Euler χ",
+    "path": "/src/classroom/graphs/recursos/Poliedro_Superficies y su característica de Euler (χ).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
     "title": "Teoría de Grafos - Visualización Interactiva",
