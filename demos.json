@@ -1,5 +1,12 @@
 [
   {
+    "title": "Análisis Académico de Algoritmos Genéticos",
+    "path": "/src/classroom/graphs/recursos/Algoritmos_Genéticos Introducción.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-24T13:22:49-03:00"
+  },
+  {
     "title": "Análisis de Rendimiento en GPU: Un Caso de Estudio con Grafos",
     "path": "/src/classroom/graphs/recursos/Análisis de Rendimiento en GPU con Grafos_irregulares.html",
     "tag": "Demo",
@@ -168,6 +175,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Genetic Maze Solver + Index",
+    "path": "/src/classroom/graphs/recursos/Algoritmo_Genético_Simulación.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-24T13:22:49-03:00"
+  },
+  {
     "title": "Glosario de Pruebas de Conocimiento Cero (ZKP)",
     "path": "/src/classroom/graphs/recursos/ZPK_Glosario.html",
     "tag": "Demo",
@@ -280,6 +294,13 @@
     "mtime": "2025-10-11T23:48:15-03:00"
   },
   {
+    "title": "Guía de Estudio: Optimización y Complejidad",
+    "path": "/src/classroom/graphs/recursos/Alogritmo_Genetico_Optimización y Complejidad.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-24T13:22:49-03:00"
+  },
+  {
     "title": "Guía de Estudio: Pruebas de Conocimiento Cero (ZKP)",
     "path": "/src/classroom/graphs/recursos/ZPK_TEORIA.html",
     "tag": "Demo",
@@ -299,6 +320,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:48:15-03:00"
+  },
+  {
+    "title": "Guía Definitiva: Optimización y Complejidad en Machine Learning",
+    "path": "/src/classroom/graphs/recursos/Algoritmo_Genético_Optimización en Big Data y Machine Learning.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-24T13:22:49-03:00"
   },
   {
     "title": "Guía Detallada: Fuerza Bruta para el TSP",
