@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía Definitiva: Optimización y Complejidad en Machine Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    .code-container pre { background: transparent; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .code-container code { font-size: 0.9em; }
+    .code-container .comment { color: #8a99a8; }
+    .code-container .keyword { color: #c792ea; }
+    .code-container .string { color: #c3e88d; }
+    .code-container .number { color: #f78c6c; }
+    .code-container .function { color: #82aaff; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Optimización en Big Data y Machine Learning</h1>
+      <p class="subtitle">Convexidad, Complejidad y el Paisaje de la Inteligencia Artificial</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">I. El Paradigma Fundamental: ML como Optimización</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>1.1 La Formulación Matemática Universal</h4>
+                <p>En esencia, todo algoritmo de aprendizaje automático es un problema de optimización. Entrenar un modelo es sinónimo de resolver la siguiente ecuación:</p>
+                <div class="code-container">
+                    <pre><code>min(θ∈S) L(θ; X, y)</code></pre>
+                </div>
+                
+                <h4>1.2 Desglose de Componentes</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Ciclo de Entrenamiento de Machine Learning</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Datos (X, y)</strong><span>La evidencia empírica</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Alimentan a</div></div>
+                        <div class="diagram-box"><strong>Modelo (θ)</strong><span>Parámetros a aprender</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Cuyo error es medido por</div></div>
+                        <div class="diagram-box"><strong>Pérdida (L)</strong><span>Función a minimizar</span></div>
+                    </div>
+                     <div class="diagram-arrow down" style="margin-top:1rem;"><div class="diagram-arrow-label">El error guía a un Optimizador que ajusta θ para reducir L</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">II. El Terreno de Juego: El Espacio de Búsqueda en ML</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>2.1 La Maldición de la Dimensionalidad</h4>
+                <p>El tamaño del espacio de búsqueda S no crece linealmente, sino exponencialmente con el número de parámetros (dimensiones). En un espacio de miles de millones de dimensiones, nuestra intuición geométrica de 3D es completamente inútil y el volumen a explorar es tan vasto que una búsqueda aleatoria es fútil.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Visualizando la Maldición de la Dimensionalidad</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>1D</strong><span>Una línea</span></div>
+                        <div class="diagram-box"><strong>2D</strong><span>Un plano</span></div>
+                        <div class="diagram-box"><strong>3D</strong><span>Un cubo</span></div>
+                        <div class="diagram-box"><strong>Hiper-Dimensión</strong><span>Universo de 10⁹+ parámetros. Vasto, disperso, contraintuitivo.</span></div>
+                    </div>
+                </div>
+
+                <h4>2.2 Espacios Hiperdimensionales: El Universo No Convexo del Deep Learning</h4>
+                <p>Para modelos como BERT o GPT, con 10⁹ a 10¹² parámetros, el espacio S = ℝᵂ es un universo hiperdimensional, no convexo y multimodal. Las interdependencias entre parámetros crean un paisaje de pérdida inimaginablemente complejo, lleno de valles, crestas y mesetas.</p>
+
+                <h4>2.3 El Impacto de Big Data: Cuando Evaluar un Punto es Costoso</h4>
+                <p>En Big Data, cada evaluación de la función de pérdida L(θ) implica procesar terabytes de información, haciendo que cada paso del optimizador sea un evento computacionalmente masivo.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">III. La Gran División: Convexidad vs. No Convexidad</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>3.1 El Mundo Predecible: Modelos Convexos (Clase P)</h4>
+                <p>Modelos como la regresión lineal, SVM lineal y regresión logística poseen funciones de pérdida convexas. Esto ofrece garantías teóricas: convergencia garantizada a un único óptimo global de forma eficiente (Clase P).</p>
+
+                <h4>3.2 El Mundo Caótico: Modelos No Convexos (NP-hard)</h4>
+                <p>En Deep Learning, el objetivo cambia. Dado que encontrar el mínimo global es NP-hard, la meta práctica es encontrar un mínimo local que generalice bien. Sorprendentemente, la investigación ha demostrado que en redes muy grandes, la mayoría de los mínimos locales tienden a tener un rendimiento similar y de alta calidad.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">La Geometría de la Dificultad en ML</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-bowl-food"></i> Mundo Convexo</strong><span>Un único valle. El mínimo local es el global. Fácil de resolver (Clase P).</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-mountain"></i> Mundo No Convexo</strong><span>Múltiples valles. El objetivo es encontrar un "buen" mínimo local (NP-hard).</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-chess-knight"></i> Puntos de Silla</strong><span>El obstáculo real en alta dimensión. Gradiente es cero, pero no es un mínimo.</span></div>
+                    </div>
+                </div>
+                
+                <h4>3.3 Más Allá de los Mínimos Locales: El Problema de los Puntos de Silla</h4>
+                <p>En espacios de alta dimensión, los mínimos locales son raros. El obstáculo más común son los <strong>puntos de silla</strong>: puntos donde el gradiente es cero, pero no son un mínimo en todas las direcciones. Gran parte de la innovación en optimizadores como Adam está diseñada para escapar eficientemente de estas regiones.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">IV. Las Herramientas del Oficio: Algoritmos de Solución</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>4.1 La Familia del Gradiente Descendente</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">Variantes del Descenso de Gradiente</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>GD (Batch)</strong><span>Usa todos los datos. Preciso, pero muy lento en Big Data.</span></div>
+                        <div class="diagram-box"><strong>SGD (Estocástico)</strong><span>Usa mini-lotes. Rápido, "ruidoso" y eficaz para escapar de malos mínimos.</span></div>
+                        <div class="diagram-box"><strong>Adam / RMSProp</strong><span>Adaptativos. Ajustan la tasa de aprendizaje por parámetro. Rápidos y estables.</span></div>
+                    </div>
+                </div>
+                
+                <h4>4.2 Por Qué Funciona el Caos: La Eficacia del SGD</h4>
+                <p>El "ruido" introducido por SGD al estimar el gradiente con mini-lotes no es un defecto, sino una característica fundamental de su éxito. Esta aleatoriedad ayuda al algoritmo a escapar de mínimos locales poco profundos y puntos de silla, y a encontrar valles más "anchos" que generalizan mejor.</p>
+
+                <h4>4.3 Explorando Cordilleras: Metaheurísticas en el ML Moderno</h4>
+                <p>Dado que el gradiente no siempre es la mejor guía, los métodos evolutivos (GA, PSO, ES) se usan para tareas de optimización de "más alto nivel", como la optimización de hiperparámetros y la Búsqueda de Arquitecturas Neuronales (NAS).</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">V. La Lucha Contra el Sobreajuste: Regularización</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>5.1 El Problema del Sobreajuste (Overfitting)</h4>
+                <p>Un modelo sobreajusta cuando memoriza los datos de entrenamiento en lugar de aprender el patrón subyacente. Desde una perspectiva de optimización, significa que hemos encontrado un mínimo muy agudo en el paisaje de pérdida que solo se ajusta a la muestra de entrenamiento.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">Regularización: Modificando el Paisaje de Pérdida</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Sin Regularización</strong><span>El optimizador puede caer en "valles" muy agudos y estrechos (sobreajuste).</span></div>
+                        <div class="diagram-box"><strong>L2 (Ridge)</strong><span>Añade una penalización cuadrática (||θ||₂²). Suaviza el paisaje, favoreciendo valles anchos y pesos pequeños.</span></div>
+                        <div class="diagram-box"><strong>L1 (Lasso)</strong><span>Añade una penalización absoluta (||θ||₁). Fomenta que los pesos se vuelvan exactamente cero (sparsity).</span></div>
+                    </div>
+                </div>
+
+                <h4>5.2 Regularización L2 (Ridge): Suavizando el Paisaje de Pérdida</h4>
+                <p>La regularización L2 modifica la función de pérdida añadiendo un término de penalización (λ ||θ||₂²). Geométricamente, esto añade un "cuenco" parabólico al paisaje, suavizando los mínimos agudos y favoreciendo soluciones más planas y generalizables.</p>
+
+                <h4>5.3 Regularización L1 (Lasso): Fomentando la Escasez (Sparsity)</h4>
+                <p>La regularización L1 añade una penalización proporcional al valor absoluto de los pesos (λ ||θ||₁). Su efecto es fomentar que muchos de los pesos del modelo se vuelvan exactamente cero, realizando una selección de características automática.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">VI. La Barrera de la Escalabilidad: Complejidad</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>6.2 Complejidad Computacional vs. Complejidad Muestral</h4>
+                <ul>
+                    <li><strong>Complejidad Computacional:</strong> ¿Cuánto tiempo y memoria se necesitan para entrenar el modelo?</li>
+                    <li><strong>Complejidad Muestral:</strong> ¿Cuántos datos se necesitan para que el modelo generalice bien?</li>
+                </ul>
+
+                <h4>6.3 La Tiranía de la Escala: Cuando un Problema "Fácil" (P) se Vuelve Intratable</h4>
+                <p>La solución analítica de la regresión lineal, aunque en Clase P, tiene un coste de O(d²n). En Big Data, esto la hace computacionalmente prohibitiva y nos obliga a usar métodos iterativos y aproximados como SGD incluso para problemas "simples".</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Impacto de la Escala en un Problema de Clase P</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Algoritmo O(d²n) + Small Data</strong><span>Resultado: Viable y Rápido.</span></div>
+                        <div class="diagram-box"><strong>Mismo Algoritmo O(d²n) + Big Data</strong><span>Resultado: Intratable. El coste polinómico se vuelve prohibitivo.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">VII. El Cuello de Botella de Big Data: Coste de Evaluación</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>7.1 Estrategias para Reducir el Coste</h4>
+                <ul>
+                    <li><strong>Mini-Lotes:</strong> La norma en Deep Learning para aproximar el gradiente.</li>
+                    <li><strong>Streaming:</strong> Actualizar el modelo "sobre la marcha" con datos continuos, sin almacenar el dataset completo.</li>
+                    <li><strong>Computación Aproximada:</strong> Sacrificar precisión numérica para acelerar los cálculos en hardware especializado.</li>
+                </ul>
+
+                <h4>7.2 El Rol Crítico del Hardware: La Co-evolución Algoritmo-Silicio</h4>
+                <p>El auge del Deep Learning no habría sido posible sin hardware especializado como GPUs y TPUs. Vivimos en una era de co-diseño, donde los algoritmos se desarrollan pensando en la arquitectura del hardware, y el nuevo hardware se diseña para acelerar los algoritmos existentes.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Ciclo de Co-Evolución Hardware-Software</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Nuevos Algoritmos (ej. Transformers)</strong></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Exigen más cómputo</div></div>
+                        <div class="diagram-box"><strong>Nuevo Hardware (ej. GPUs/TPUs)</strong></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Permite crear algoritmos más grandes</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">IX. Fronteras Actuales y Desafíos Futuros</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>9.1 AutoML y Búsqueda de Arquitecturas Neuronales (NAS)</h4>
+                <p>El siguiente nivel de optimización es automatizar el diseño del propio modelo. AutoML utiliza técnicas de optimización (a menudo evolutivas) para encontrar la mejor arquitectura, hiperparámetros y pre-procesamiento, tratando todo el pipeline de ML como un gigantesco problema de optimización.</p>
+
+                <h4>9.2 Optimización Distribuida y Aprendizaje Federado</h4>
+                <p>El Aprendizaje Federado es una forma de optimización distribuida que preserva la privacidad. En lugar de mover los datos a un servidor central, se envía el modelo a los datos en los dispositivos locales, y solo las actualizaciones de los parámetros se envían de vuelta para ser promediadas.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Flujo del Aprendizaje Federado</div>
+                    <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Servidor Central</div>
+                            <div class="diagram-box"><strong>Modelo Global</strong><span>Coordina el aprendizaje.</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">1. Envía modelo</div></div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">Dispositivos de Usuario (Datos Privados)</div>
+                             <div class="diagram-box"><strong>Entrenamiento Local</strong><span>El modelo se entrena en el dispositivo, los datos nunca salen.</span></div>
+                        </div>
+                        <div class="diagram-arrow down" style="transform: rotate(180deg);"><div class="diagram-arrow-label">2. Envía solo actualizaciones</div></div>
+                    </div>
+                </div>
+
+                <h4>9.3 La Intersección con la Optimización Cuántica</h4>
+                <p>Aunque incipiente, la computación cuántica promete revolucionar la optimización. Algoritmos como QAOA o Quantum Annealing podrían, en el futuro, resolver problemas combinatorios NP-hard que son intratables para los ordenadores clásicos, abriendo nuevas fronteras para el ML.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">X. Conclusión Final: La Optimización como Motor de la IA</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La optimización es el lenguaje universal que conecta la teoría matemática con la aplicación práctica de la inteligencia artificial. La interacción entre la <strong>geometría del paisaje de pérdida</strong> (convexidad), la <strong>dificultad inherente del problema</strong> (complejidad P/NP), y las <strong>restricciones del mundo real</strong> (escala de Big Data y hardware) define el campo de batalla.</p>
+                <p>Mientras que los métodos basados en gradiente son los caballos de batalla para entrenar modelos específicos, los algoritmos evolutivos y las metaheurísticas son los estrategas, diseñando las arquitecturas y los planes de ataque. Entender esta interacción no solo es fundamental para aplicar el Machine Learning actual, sino que es la clave para construir la próxima generación de sistemas inteligentes.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material Elaborado por el profesor Sergio Gevtschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

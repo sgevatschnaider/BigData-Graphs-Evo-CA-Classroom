@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Académico de Algoritmos Genéticos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul, .topic-content blockquote { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    .topic-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; color: var(--text-secondary); font-size: 0.9em; }
+    .topic-content th, .topic-content td { border: 1px solid var(--border-color); padding: 0.8rem; text-align: center; }
+    .topic-content th { background-color: rgba(0,0,0,0.05); font-weight: 600; color: var(--text-primary); }
+    .topic-content blockquote { border-left: 4px solid var(--accent-primary); padding-left: 1rem; font-style: italic; }
+    [data-theme="dark"] .topic-content th { background-color: rgba(255,255,255,0.05); }
+
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    .code-container pre { background: transparent; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .code-container code { font-size: 0.9em; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Algoritmos Genéticos: Introducción</h1>
+      <p class="subtitle">Basado en Coley, “An Introduction to Genetic Algorithms for Scientists and Engineers”, y Eiben & Smith, “Introduction to Evolutionary Computing”</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Concepto General y Fundamentos Teóricos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un Algoritmo Genético (AG) es una heurística de búsqueda y optimización que pertenece a la clase más amplia de los Algoritmos Evolutivos (AE). Su paradigma computacional se inspira directamente en los mecanismos de la evolución natural, emulando conceptos como la herencia, la selección, el cruzamiento y la mutación.</p>
+                <p>A diferencia de los métodos de optimización tradicionales basados en cálculo (que a menudo requieren derivadas y pueden quedar atrapados en óptimos locales), los AG operan sobre una <b>población de soluciones candidatas</b>. Esta aproximación poblacional les permite explorar múltiples regiones del espacio de búsqueda simultáneamente, lo que aumenta significativamente la probabilidad de encontrar el óptimo global en problemas complejos, multimodales y no diferenciables.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Inspiración: De la Evolución Natural a la Computación Evolutiva</div>
+                    <div class="diagram-grid">
+                         <div class="diagram-section">
+                            <div class="diagram-section-title">Evolución Natural</div>
+                            <div class="diagram-box"><strong>Individuos</strong><span>Organismos en un entorno</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Selección Natural</strong><span>Supervivencia del más apto</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Reproducción</strong><span>Cruce (recombinación) y Mutación</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Algoritmo Genético</div>
+                            <div class="diagram-box"><strong>Población</strong><span>Soluciones candidatas (cromosomas)</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Selección por Aptitud</strong><span>Los individuos con mejor fitness son elegidos</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Operadores Genéticos</strong><span>Crossover y Mutación</span></div>
+                        </div>
+                    </div>
+                </div>
+                <blockquote>Eiben & Smith (Cap. 3): “Los algoritmos evolutivos son mecanismos generales de resolución de problemas que utilizan una población de soluciones y operadores inspirados en la genética. La selección actúa como una fuerza que incrementa la calidad media de la población, mientras que la variación (cruce y mutación) introduce novedad.”</blockquote>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Formulación de un Problema para Algoritmos Genéticos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La aplicación exitosa de un AG requiere una traducción cuidadosa del problema del "mundo real" al "mundo evolutivo". Esto implica definir cuatro componentes esenciales:</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Traducción del Problema al Mundo Evolutivo</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Codificación</strong><span>¿Cómo se representará una solución del problema como un "cromosoma"?</span></div>
+                        <div class="diagram-box"><strong>Función de Aptitud</strong><span>¿Cómo se medirá la calidad o "aptitud" de cada cromosoma?</span></div>
+                        <div class="diagram-box"><strong>Operadores Evolutivos</strong><span>¿Qué mecanismos de selección, cruce y mutación se usarán para crear nuevas generaciones?</span></div>
+                        <div class="diagram-box"><strong>Criterio de Parada</strong><span>¿Cuándo se detendrá el proceso evolutivo?</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. El Espacio de Búsqueda y el Paisaje de Aptitud (Fitness Landscape)</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El <b>espacio de búsqueda</b> es el conjunto N-dimensional de todas las soluciones posibles para un problema. Cada punto en este espacio es una solución candidata.</p>
+                <p>Al asignar un valor de fitness a cada punto, se crea una hipersuperficie llamada <b>paisaje de aptitud (fitness landscape)</b>. En este paisaje:</p>
+                <ul>
+                    <li>Las <b>cimas</b> representan soluciones de alta calidad (óptimos).</li>
+                    <li>Los <b>valles</b> representan soluciones de baja calidad.</li>
+                    <li>El <b>pico más alto</b> es el óptimo global.</li>
+                    <li>Los <b>picos menores</b> son óptimos locales.</li>
+                </ul>
+                <div class="diagram-container">
+                    <div class="diagram-title">Visualización del Paisaje de Aptitud</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-trophy"></i> Óptimo Global</strong><span>El pico más alto. La mejor solución posible.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-mountain"></i> Óptimo Local</strong><span>Un pico menor. Una buena solución, pero no la mejor. Puede "atrapar" a algoritmos simples.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-users"></i> Población del AG</strong><span>Múltiples puntos explorando el paisaje a la vez, capaces de "saltar" valles.</span></div>
+                    </div>
+                </div>
+                <p><b>Ejemplo Matemático:</b> Consideremos la función f(x) = x * sin(10π * x) + 2 en el intervalo x ∈ [-1, 2]. El paisaje de aptitud es una curva con múltiples picos. Un método basado en gradiente que comience en x=0.3 podría quedar atrapado en el óptimo local cercano, mientras que un GA, al mantener una población diversa, tiene la capacidad de "saltar" valles y explorar otros picos, aumentando la probabilidad de encontrar el pico más alto cerca de x=1.85.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Componentes Fundamentales de un Algoritmo Genético</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>4.1. Codificación: La Representación Genética de las Soluciones</h4>
+                <p>La codificación es la forma en que las variables de un problema (el fenotipo) se traducen a un formato que el GA puede manipular (el genotipo).</p>
+                <h5>Codificación Binaria</h5>
+                <p>Es la forma clásica. Cada variable se representa mediante una cadena de bits. Es ideal para problemas combinatorios o discretos.</p>
+                <p><b>Ejemplo Matemático:</b> Maximizar f(x) = x² para x entero en el rango [0, 31]. Se necesitan 5 bits (2^5 = 32).</p>
+                <table><thead><tr><th>Genotipo (Cromosoma)</th><th>Fenotipo (Decimal)</th><th>Fitness (f(x))</th></tr></thead><tbody><tr><td>00000</td><td>0</td><td>0</td></tr><tr><td>01101</td><td>13</td><td>169</td></tr><tr><td>11111</td><td>31</td><td>961</td></tr></tbody></table>
+                
+                <h5>Codificación Real</h5>
+                <p>Para problemas con variables continuas, es más natural y eficiente representar los genes como números de punto flotante.</p>
+                <p><b>Ejemplo Matemático:</b> Optimizar f(x, y) = sin(x) * cos(y) con x, y ∈ [0, π]. Un cromosoma sería un vector [x_i, y_i], por ejemplo [1.57, 0.78].</p>
+
+                <h4>4.2. Función de Aptitud (Fitness): La Medida del Éxito</h4>
+                <p>Es una función que asigna un valor numérico a cada individuo, indicando su calidad. Es el único vínculo entre el problema y el GA.</p>
+
+                <h4>4.3. Operadores Genéticos: El Motor de la Evolución</h4>
+                <h5>A. Selección</h5>
+                <p>Elige qué individuos se reproducirán. Los más aptos deben tener más probabilidades.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Métodos de Selección</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Selección por Ruleta</strong><span>La probabilidad de ser elegido es proporcional al fitness. <b>P(i) = fitness(i) / Σ(fitness)</b>.</span></div>
+                        <div class="diagram-box"><strong>Selección por Torneo</strong><span>Se eligen k individuos al azar; el más apto del grupo gana. Más eficiente y previene dominancia prematura.</span></div>
+                    </div>
+                </div>
+                
+                <h5>B. Cruce (Crossover)</h5>
+                <p>Crea uno o dos hijos combinando el material genético de dos padres. Se aplica con una probabilidad <b>p_c</b> (típicamente 0.6 - 0.9).</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Métodos de Cruce</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Cruce de un punto (Binario)</strong><span>Se elige un punto de corte. <br>P1: 110|10, P2: 011|01 →<br>H1: 110|01, H2: 011|10.</span></div>
+                        <div class="diagram-box"><strong>Cruce Aritmético (Real)</strong><span>Combinación lineal: <br>Hijo = α·P1 + (1-α)·P2.</span></div>
+                    </div>
+                </div>
+
+                <h5>C. Mutación</h5>
+                <p>Introduce cambios aleatorios para mantener la diversidad genética. Se aplica con una probabilidad <b>p_m</b> (muy baja, e.g., 0.001 - 0.05).</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Métodos de Mutación</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Mutación por Flip (Binario)</strong><span>Cada bit tiene una probabilidad p_m de ser invertido. <br>110<b>1</b>0 → 110<b>0</b>0.</span></div>
+                        <div class="diagram-box"><strong>Mutación Gaussiana (Real)</strong><span>Se añade un valor aleatorio de una distribución normal: x' = x + N(0, σ).</span></div>
+                    </div>
+                </div>
+
+                <h4>4.4. Parámetros Clave y Criterios de Parada</h4>
+                <ul>
+                    <li><b>Tamaño de la Población (N):</b> Típicamente entre 50 y 500.</li>
+                    <li><b>Probabilidad de Cruce (p_c):</b> ~0.8</li>
+                    <li><b>Probabilidad de Mutación (p_m):</b> ~0.01</li>
+                    <li><b>Elitismo:</b> Preservar al mejor(es) individuo(s) de cada generación. Es casi siempre beneficioso.</li>
+                    <li><b>Criterio de Parada:</b> Número máximo de generaciones, convergencia, o sin mejora en el fitness durante X generaciones.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. El Algoritmo Genético Canónico: Flujo de Ejecución Detallado</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <div class="code-container">
+<pre><code>PROCEDIMIENTO AlgoritmoGenetico:
+1.  g = 0  // Contador de generaciones
+2.  INICIALIZAR(Poblacion(g))  // Crear N individuos aleatorios
+3.  EVALUAR(Poblacion(g))      // Calcular fitness de cada uno
+4.
+5.  MIENTRAS (condicion_parada == FALSO):
+6.      g = g + 1
+7.
+8.      // Crear nueva población
+9.      Poblacion_Temporal = []
+10.
+11.     // Elitismo: Copiar el mejor individuo
+12.     Mejor_Individuo = OBTENER_MEJOR(Poblacion(g-1))
+13.     AÑADIR(Poblacion_Temporal, Mejor_Individuo)
+14.
+15.     // Generar el resto de la población
+16.     MIENTRAS (TAMAÑO(Poblacion_Temporal) < N):
+17.         Padre1 = SELECCIONAR(Poblacion(g-1))
+18.         Padre2 = SELECCIONAR(Poblacion(g-1))
+19.
+20.         SI (random() < p_c):
+21.             Hijo1, Hijo2 = CRUZAR(Padre1, Padre2)
+22.         SINO:
+23.             Hijo1, Hijo2 = Padre1, Padre2 // Clonación
+24.
+25.         MUTAR(Hijo1, p_m)
+26.         MUTAR(Hijo2, p_m)
+27.
+28.         AÑADIR(Poblacion_Temporal, Hijo1)
+29.         AÑADIR(Poblacion_Temporal, Hijo2)
+30.
+31.     Poblacion(g) = Poblacion_Temporal
+32.     EVALUAR(Poblacion(g))
+33.
+34. DEVOLVER OBTENER_MEJOR(Poblacion(g))</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Ejemplo Completo 1: Problema Discreto (Codificación Binaria)</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><b>Problema:</b> Maximizar f(x) = x² con x ∈ [0, 31] (solución óptima: x=31, f(x)=961).<br>
+                <b>Parámetros:</b> N=4, p_c=0.7, p_m=0.1, Elitismo activado.</p>
+                <h4>Generación 0 (Inicialización y Evaluación)</h4>
+                <table><thead><tr><th>ID</th><th>Cromosoma (Genotipo)</th><th>x (Fenotipo)</th><th>Fitness (f(x))</th></tr></thead><tbody><tr><td>A</td><td>10110</td><td>22</td><td>484</td></tr><tr><td>B</td><td>00101</td><td>5</td><td>25</td></tr><tr><td>C</td><td>11100</td><td>28</td><td>784</td></tr><tr><td>D</td><td>01010</td><td>10</td><td>100</td></tr></tbody></table>
+                <p>Mejor individuo (Élite): <b>C (11100)</b>, Fitness = 784.</p>
+                <h4>Generación 1</h4>
+                <ol>
+                    <li><b>Elitismo:</b> Se copia el individuo <b>C</b> a la nueva población.</li>
+                    <li><b>Selección:</b> Fitness Total = 1393. Probabilidades: P(A)≈0.35, P(B)≈0.02, P(C)≈0.56, P(D)≈0.07. Usando ruleta, supongamos que seleccionamos: <b>C, A, C</b>.</li>
+                    <li><b>Cruce:</b> Se cruza (C, A) con corte en 3.<br>Padre1 (C): 1 1 1 | 0 0<br>Padre2 (A): 1 0 1 | 1 0<br>Hijo1: 1 1 1 1 0, Hijo2: 1 0 1 0 0</li>
+                    <li><b>Mutación:</b> Supongamos que en Hijo1 (11110) muta el último bit. Nuevo <b>Hijo1: 11111</b>.</li>
+                </ol>
+                <h4>Población de Generación 1 (Reemplazo y Evaluación)</h4>
+                <table><thead><tr><th>ID</th><th>Cromosoma</th><th>x</th><th>Fitness</th><th>Origen</th></tr></thead><tbody><tr><td>C'</td><td>11100</td><td>28</td><td>784</td><td>Élite</td></tr><tr><td>E</td><td><b>11111</b></td><td><b>31</b></td><td><b>961</b></td><td>Hijo 1 mutado</td></tr><tr><td>F</td><td>10100</td><td>20</td><td>400</td><td>Hijo 2</td></tr><tr><td>G</td><td>11100</td><td>28</td><td>784</td><td>Padre C (clonado)</td></tr></tbody></table>
+                <p>El proceso ha encontrado el <b>óptimo global (x=31)</b> en la primera generación.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Ejemplo Completo 2: Problema Continuo (Codificación Real)</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p><b>Problema:</b> Maximizar f(x) = (cos(x) + 1)², x ∈ [0, 2π] (solución óptima: x=π≈3.14, f(x)=4).<br>
+                <b>Parámetros:</b> N=4, p_c=0.8, p_m=0.2, Elitismo activado, α aleatorio, σ=0.1.</p>
+                <h4>Generación 0</h4>
+                <table><thead><tr><th>ID</th><th>Genotipo (x)</th><th>Fitness (f(x))</th></tr></thead><tbody><tr><td>A</td><td>1.20</td><td>1.85</td></tr><tr><td>B</td><td>4.50</td><td>0.62</td></tr><tr><td>C</td><td>3.00</td><td>3.96</td></tr><tr><td>D</td><td>5.80</td><td>3.21</td></tr></tbody></table>
+                <p>Mejor individuo (Élite): <b>C (3.00)</b>, Fitness = 3.96.</p>
+                <h4>Generación 1</h4>
+                <ol>
+                    <li><b>Elitismo:</b> Se copia <b>C</b> a la nueva población.</li>
+                    <li><b>Selección:</b> Por torneo (k=2). Torneo 1 (A,D) gana D. Torneo 2 (C,A) gana C. Padres seleccionados: <b>D</b> y <b>C</b>.</li>
+                    <li><b>Cruce Aritmético:</b> Supongamos α=0.6. Hijo = 0.6 * D + 0.4 * C = 0.6 * 5.80 + 0.4 * 3.00 = <b>4.68</b>.</li>
+                    <li><b>Mutación Gaussiana:</b> Supongamos que el hijo muta con N(0, 0.1) = -0.15. Hijo' = 4.68 - 0.15 = <b>4.53</b>.</li>
+                </ol>
+                <h4>Población de Generación 1 (simplificada)</h4>
+                <table><thead><tr><th>ID</th><th>Genotipo (x)</th><th>Fitness</th><th>Origen</th></tr></thead><tbody><tr><td>C'</td><td>3.00</td><td>3.96</td><td>Élite</td></tr><tr><td>E</td><td>4.53</td><td>0.58</td><td>Hijo mutado</td></tr><tr><td>...</td><td>...</td><td>...</td><td>...</td></tr></tbody></table>
+                <p>El hijo generado tiene un fitness bajo, pero el elitismo aseguró que no perdiéramos la excelente solución C. El proceso continuará refinando soluciones alrededor de 3.00.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">8. Temas Avanzados y Aplicaciones Prácticas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <div class="diagram-container">
+                    <div class="diagram-title">Tópicos Avanzados en Computación Evolutiva</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Optimización Multiobjetivo</strong><span>Encuentra un conjunto de soluciones de compromiso (Frente de Pareto) para objetivos en conflicto.</span></div>
+                        <div class="diagram-box"><strong>Manejo de Restricciones</strong><span>Usa funciones de penalización para guiar la búsqueda hacia soluciones factibles.</span></div>
+                        <div class="diagram-box"><strong>Algoritmos Híbridos</strong><span>Combina la exploración global del GA con la explotación local de otros métodos (ej. Hill Climbing).</span></div>
+                        <div class="diagram-box"><strong>Algoritmos Meméticos</strong><span>Una forma de algoritmo híbrido donde el aprendizaje individual (búsqueda local) se incorpora al proceso.</span></div>
+                    </div>
+                </div>
+                <h4>Tabla de Aplicaciones</h4>
+                <table><thead><tr><th>Área</th><th>Ejemplo Específico</th><th>Tipo de Representación Común</th></tr></thead><tbody><tr><td>Ingeniería</td><td>Diseño de perfiles aerodinámicos</td><td>Real (parámetros de forma)</td></tr><tr><td>Logística</td><td>Problema del Viajante (TSP)</td><td>Permutacional (orden de ciudades)</td></tr><tr><td>Finanzas</td><td>Optimización de carteras</td><td>Real (pesos de los activos)</td></tr><tr><td>Robótica</td><td>Evolución de controladores de robots</td><td>Real (pesos de redes neuronales)</td></tr><tr><td>Juegos</td><td>Desarrollo de estrategias en ajerez</td><td>Árboles (programación genética)</td></tr></tbody></table>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">9. Conclusión: Fortalezas y Limitaciones</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <div class="diagram-container">
+                    <div class="diagram-title">Balanza de los Algoritmos Genéticos</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Fortalezas</div>
+                            <div class="diagram-box"><strong>Robustez</strong><span>Funcionan bien en una amplia gama de problemas.</span></div>
+                            <div class="diagram-box"><strong>Búsqueda Global</strong><span>Menos susceptibles a óptimos locales.</span></div>
+                            <div class="diagram-box"><strong>Paralelismo Inherente</strong><span>La población se puede evaluar en paralelo.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Limitaciones</div>
+                            <div class="diagram-box"><strong>Costo Computacional</strong><span>Evaluar poblaciones grandes puede ser lento.</span></div>
+                            <div class="diagram-box"><strong>Ajuste de Parámetros</strong><span>Rendimiento sensible a la configuración.</span></div>
+                            <div class="diagram-box"><strong>No Garantizan Optimalidad</strong><span>Son estocásticos, no hay garantía de encontrar el óptimo.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <blockquote>Coley (1999): “Si nunca has probado métodos evolutivos, suspende tu escepticismo y disfruta el viaje. Hay algo increíble en el poder del enfoque.”</blockquote>
+                <blockquote>Eiben & Smith (2015): “La evolución natural no es solo una metáfora; es una estrategia universal para resolver problemas complejos, y la computación evolutiva busca capturar esa esencia.”</blockquote>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material Elaborado por el profesor Sergio Gevtschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

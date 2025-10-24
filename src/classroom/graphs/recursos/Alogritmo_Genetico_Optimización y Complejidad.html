@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Estudio: Optimización y Complejidad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 4.2rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 9000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    .code-container pre { background: transparent; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .code-container code { font-size: 0.9em; }
+    .code-container .comment { color: #8a99a8; }
+    .code-container .keyword { color: #c792ea; }
+    .code-container .string { color: #c3e88d; }
+    .code-container .number { color: #f78c6c; }
+    .code-container .function { color: #82aaff; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Optimización y Complejidad</h1>
+      <p class="subtitle">Un Análisis Profundo de los Conceptos Fundamentales que Definen los Límites de lo Computable</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">I. Concepto General de un Problema de Optimización</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>1.1 Definición Formal</h4>
+                <p>Todo problema de optimización puede ser encapsulado en un triplete fundamental: <strong>P = (S, f, Ω)</strong>.</p>
+                
+                <div class="diagram-container">
+                    <div class="diagram-title">El Triplete de la Optimización</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>S: Espacio de Búsqueda</strong><span>Universo de todas las soluciones posibles.</span></div>
+                        <div class="diagram-arrow"><div class="diagram-arrow-label">Evaluadas por</div></div>
+                        <div class="diagram-box"><strong>f: Función Objetivo</strong><span>Métrica de calidad a optimizar (minimizar/maximizar).</span></div>
+                         <div class="diagram-arrow"><div class="diagram-arrow-label">Limitadas por</div></div>
+                        <div class="diagram-box"><strong>Ω: Restricciones</strong><span>Reglas que definen una solución "factible".</span></div>
+                    </div>
+                </div>
+                
+                <p><strong>S - Espacio de Búsqueda (Search Space):</strong> Representa el universo de todas las soluciones posibles o candidatas a un problema, sin importar si son buenas, malas o siquiera válidas. La naturaleza de este espacio define el tipo de problema.</p>
+                <ul>
+                    <li><strong>Ejemplo Discreto:</strong> En el Problema de la Mochila, donde debemos decidir si incluir o no n objetos, el espacio de búsqueda son todas las combinaciones binarias posibles, un conjunto de 2ⁿ vectores. S = {0, 1}ⁿ.</li>
+                    <li><strong>Ejemplo Continuo:</strong> Al calibrar los parámetros de un modelo climático, el espacio de búsqueda puede ser un subconjunto de los números reales, como S = [0.1, 2.5] x [-10, 10].</li>
+                </ul>
+
+                <p><strong>f - Función Objetivo (Objective Function) o de Aptitud (Fitness):</strong> Es la métrica cuantitativa que asigna una puntuación de "calidad" a cada solución x en el espacio de búsqueda S. Es el criterio que deseamos maximizar o minimizar.</p>
+                <ul>
+                    <li><strong>Ejemplo de Minimización:</strong> En un problema de logística, f(x) podría ser el coste total en dólares de una ruta de entrega x.</li>
+                    <li><strong>Ejemplo de Maximización:</strong> En el diseño de una cartera de inversión, f(x) podría ser el retorno esperado de la cartera x.</li>
+                </ul>
+
+                <p><strong>Ω - Restricciones (Constraints):</strong> Son las reglas, condiciones o limitaciones que una solución debe cumplir para ser considerada "factible" o válida. Las soluciones que no cumplen con Ω están en el espacio de búsqueda, pero no son soluciones válidas al problema.</p>
+                <ul>
+                    <li><strong>Ejemplo de Desigualdad:</strong> El peso total de los objetos en la mochila no puede superar la capacidad máxima W: ∑(peso_i * x_i) ≤ W.</li>
+                    <li><strong>Ejemplo de Igualdad:</strong> En un problema de asignación de presupuesto, la suma de todas las partidas asignadas debe ser exactamente igual al presupuesto total: ∑(asignacion_i) = Presupuesto_Total.</li>
+                </ul>
+
+                <h4>1.2 Objetivo del Problema</h4>
+                <p>El propósito de la optimización es encontrar una solución <strong>x*</strong> dentro del espacio de búsqueda S, que cumpla con todas las restricciones Ω, y que produzca el valor óptimo (mínimo o máximo) de la función objetivo f.</p>
+                <ul>
+                    <li><strong>Minimización:</strong> Encontrar x* = arg min f(x) para todo x ∈ S que satisface Ω. (Ej: Minimizar consumo de combustible).</li>
+                    <li><strong>Maximización:</strong> Encontrar x* = arg max f(x) para todo x ∈ S que satisface Ω. (Ej: Maximizar clics en anuncios).</li>
+                </ul>
+
+                <h4>1.3 Tipos de Optimización</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">Clasificación de Problemas de Optimización</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Determinista vs. Estocástica</strong><span>¿Hay incertidumbre en los datos?</span></div>
+                        <div class="diagram-box"><strong>Unimodal vs. Multimodal</strong><span>¿Hay un solo óptimo o múltiples?</span></div>
+                        <div class="diagram-box"><strong>Con vs. Sin Restricciones</strong><span>¿Existen reglas que limiten las soluciones?</span></div>
+                        <div class="diagram-box"><strong>Mono-objetivo vs. Multi-objetivo</strong><span>¿Se optimiza un criterio o varios en conflicto?</span></div>
+                    </div>
+                </div>
+
+                <h4>1.4 Ejemplo Clásico: Regresión Lineal</h4>
+                <p>El objetivo es encontrar la línea recta y = ax + b que mejor se ajuste a un conjunto de puntos de datos (x_i, y_i).</p>
+                <ul>
+                    <li><strong>Espacio de Búsqueda (S):</strong> Todas las posibles parejas de parámetros (a, b), es decir, S = ℝ².</li>
+                    <li><strong>Función Objetivo (f):</strong> Minimizar el Error Cuadrático Medio (ECM): min(a,b) Σ(y_i - (ax_i + b))².</li>
+                    <li><strong>Restricciones (Ω):</strong> Ninguna. Es un problema sin restricciones.</li>
+                </ul>
+                <p>Este problema es convexo y tiene una solución analítica exacta, lo que lo convierte en un pilar del aprendizaje automático y la estadística.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">II. Optimización Convexa y No Convexa</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La convexidad es la propiedad más importante que puede tener un problema de optimización, ya que divide el mundo de la optimización en "fácil" y "difícil".</p>
+                
+                <h4>2.1 Definición y 2.2 Implicación Geométrica</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">Visualización Intuitiva: Convexidad</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-concierge-bell"></i> Problema Convexo</strong>
+                            <span>El paisaje es un "cuenco". Cualquier mínimo local es el mínimo global. Es fácil encontrar el fondo.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-mountain-sun"></i> Problema No Convexo</strong>
+                            <span>El paisaje es una "cordillera". Existen múltiples valles (mínimos locales) que pueden atrapar a un algoritmo.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>2.3 Propiedades Clave</h4>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Tabla Comparativa de Propiedades</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">Propiedad</div>
+                             <div class="diagram-box"><span>Único Mínimo Global</span></div>
+                             <div class="diagram-box"><span>Garantía de Convergencia</span></div>
+                             <div class="diagram-box"><span>Complejidad Típica</span></div>
+                        </div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">Convexa</div>
+                             <div class="diagram-box"><strong>Sí</strong></div>
+                             <div class="diagram-box"><strong>Sí (con métodos de gradiente)</strong></div>
+                             <div class="diagram-box"><strong>Clase P (Eficiente)</strong></div>
+                        </div>
+                        <div class="diagram-section">
+                             <div class="diagram-section-title">No Convexa</div>
+                             <div class="diagram-box"><strong>No</strong></div>
+                             <div class="diagram-box"><strong>No (puede quedar en óptimo local)</strong></div>
+                             <div class="diagram-box"><strong>NP-hard (Intratable)</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>2.4 Ejemplos Ilustrativos</h4>
+                <ul>
+                    <li><strong>Función Convexa:</strong> f(x) = x² + 2x + 3. Su gráfica es una parábola que se abre hacia arriba, con un único valle global.</li>
+                    <li><strong>Función No Convexa:</strong> f(x) = x⁴ - 3x³ + 2. Su gráfica tiene subidas y bajadas, creando varios valles (mínimos locales).</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">III. Formulación General de un Problema de Optimización</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>3.1 Estructura Matemática Completa</h4>
+                <p>La forma canónica para expresar un problema de optimización es:</p>
+                <div class="code-container">
+                    <pre><code>min f(x)
+sujeto a:
+  gᵢ(x) ≤ 0,   i = 1, ..., m  (Restricciones de Desigualdad)
+  hⱼ(x) = 0,   j = 1, ..., p  (Restricciones de Igualdad)
+  x ∈ ℝⁿ</code></pre>
+                </div>
+                
+                <h4>3.2 Componentes Detallados</h4>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Anatomía de la Formulación</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>x (Vector de Decisión)</strong><span>Las "perillas" que podemos ajustar para optimizar.</span></div>
+                        <div class="diagram-box"><strong>f(x) (Función Objetivo)</strong><span>El criterio a minimizar (o maximizar).</span></div>
+                        <div class="diagram-box"><strong>gᵢ(x) ≤ 0 (Desigualdad)</strong><span>Límites o umbrales que no deben sobrepasarse.</span></div>
+                        <div class="diagram-box"><strong>hⱼ(x) = 0 (Igualdad)</strong><span>Condiciones que deben cumplirse con exactitud.</span></div>
+                    </div>
+                </div>
+                
+                <h4>3.3 Ejemplo: Programación Cuadrática (QP)</h4>
+                <p>Un QP busca minimizar una función cuadrática sujeta a restricciones lineales. Si la matriz Q es semidefinida positiva, el problema es convexo y puede resolverse eficientemente. Se usa, por ejemplo, en la optimización de carteras de inversión (Modelo de Markowitz).</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">IV. Espacio de Búsqueda y Paisaje de Aptitud</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El <strong>espacio de búsqueda S</strong> es el dominio conceptual donde viven todas las soluciones. El <strong>paisaje de aptitud</strong> es una visualización de este espacio, donde a cada solución x se le asigna una "altitud" correspondiente a su valor de f(x).</p>
+                
+                 <div class="diagram-container">
+                    <div class="diagram-title">De Espacio a Paisaje</div>
+                    <div class="diagram-col">
+                        <div class="diagram-box"><strong>Espacio de Búsqueda (S)</strong><span>Mapa de todas las soluciones candidatas.</span></div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Aplicando f(x)</div></div>
+                         <div class="diagram-box"><strong>Paisaje de Aptitud</strong><span>Visualización 3D con picos (buenas soluciones) y valles (malas soluciones).</span></div>
+                    </div>
+                </div>
+
+                <h4>4.2 Naturaleza del Espacio de Búsqueda</h4>
+                <p>El tipo de espacio determina qué tipo de "movimientos" (operadores de búsqueda) son posibles.</p>
+                <ul>
+                    <li><strong>Discreto:</strong> Vectores binarios (ej. Mochila). Operador: Bit-flip.</li>
+                    <li><strong>Continuo:</strong> Vectores reales (ej. Red Neuronal). Operador: Mutación Gaussiana.</li>
+                    <li><strong>Permutacional:</strong> Secuencias ordenadas (ej. Viajante de Comercio). Operador: Cruce de Orden (OX).</li>
+                    <li><strong>Estructural:</strong> Árboles de expresión (ej. Programación Genética). Operador: Cruce de Subárboles.</li>
+                </ul>
+                
+                <h4>4.4 Analogía Visual</h4>
+                <p>Imagina que el algoritmo es un equipo de montañistas (la población en un algoritmo genético) tratando de encontrar el pico más alto del Himalaya. El espacio de búsqueda es el mapa completo, la función de fitness es la altitud, y los operadores de cruce y mutación son sus estrategias para explorar y encontrar la cumbre.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">V. Algoritmos de Solución</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>5.1 Clasificación General</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">Enfoques de Solución</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-calculator"></i> Deterministas (Clásicos)</strong>
+                            <span>Siguen una ruta predecible usando derivadas. Ideales para problemas convexos. Ej: Descenso de Gradiente, Newton.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-dice"></i> Estocásticos (Metaheurísticas)</strong>
+                            <span>Usan aleatoriedad y se inspiran en la naturaleza para explorar. Ideales para problemas no convexos. Ej: Algoritmos Genéticos, PSO.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>5.3 Algoritmos Evolutivos y Metaheurísticas (Para Problemas No Convexos)</h4>
+                 <ul>
+                    <li><strong>Algoritmos Genéticos (GA):</strong> Imitan la selección natural de Darwin con poblaciones, cruce y mutación.</li>
+                    <li><strong>Particle Swarm Optimization (PSO):</strong> Simula una bandada de pájaros buscando comida, compartiendo la mejor posición encontrada.</li>
+                    <li><strong>Differential Evolution (DE):</strong> Crea nuevas soluciones combinando las diferencias vectoriales entre soluciones existentes.</li>
+                    <li><strong>Recocido Simulado (Simulated Annealing, SA):</strong> Imita el enfriamiento de un metal, explorando ampliamente al principio y convergiendo lentamente.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">VI. Complejidad Computacional: Clases P, NP y NP-hard</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>6.1 Definiciones</h4>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Zoo de la Complejidad</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Clase P</strong><span>Problemas "fáciles". Se pueden <strong>resolver</strong> eficientemente en tiempo polinómico. Ej: Ordenar una lista.</span></div>
+                        <div class="diagram-box"><strong>Clase NP</strong><span>Soluciones "fáciles de verificar". Si te dan una solución, puedes <strong>verificar</strong> si es correcta en tiempo polinómico. Ej: Problema del Viajante.</span></div>
+                        <div class="diagram-box"><strong>Clase NP-hard</strong><span>Problemas "al menos tan difíciles como los más difíciles de NP". No se conoce algoritmo eficiente para resolverlos.</span></div>
+                        <div class="diagram-box"><strong>Clase NP-complete</strong><span>La intersección de NP y NP-hard. Son los problemas más difíciles de NP. Ej: 3-SAT.</span></div>
+                    </div>
+                </div>
+                
+                <h4>6.2 Relación Intrínseca con la Convexidad</h4>
+                <p>Esta es una de las conexiones más profundas de la informática teórica y la optimización:</p>
+                <ul>
+                    <li><strong>Convexo → P:</strong> La geometría de "cuenco" único permite que los algoritmos "rueden" hacia el fondo sin obstáculos. El camino es claro y la complejidad es manejable.</li>
+                    <li><strong>No Convexo → NP-hard:</strong> La geometría de "cordillera" con potencialmente un número exponencial de valles locales obliga a una exploración exhaustiva para garantizar encontrar el más profundo. Esta explosión combinatoria es la firma de los problemas NP-hard.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">VII. Estrategias de Resolución según la Clase del Problema</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <div class="diagram-container">
+                    <div class="diagram-title">Eligiendo la Herramienta Adecuada</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Si el Problema es Convexo (Clase P)</strong><span>Usa Métodos de Gradiente (Newton, Punto Interior). Garantizan encontrar el óptimo global exacto.</span></div>
+                        <div class="diagram-box"><strong>Si el Problema es No Convexo (NP-hard)</strong><span>Usa Metaheurísticas Evolutivas (GA, DE, PSO). Encuentran óptimos aproximados de alta calidad en tiempo razonable.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">VIII. La Conexión Fundamental: Convexidad, P/NP y Heurísticas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Las Metaheurísticas (como los Algoritmos Genéticos) son nuestra mejor herramienta contra la barrera de la NP-dificultad. No intentan resolver el problema de forma exacta (lo cual es intratable), sino que usan la aleatoriedad y la exploración guiada para encontrar soluciones de muy alta calidad en un tiempo de ejecución razonable.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Flujo de la Dificultad</div>
+                    <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Geometría Favorable</div>
+                            <div class="diagram-box"><strong>Convexidad</strong><span>Estructura Global Simple</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Implica</div></div>
+                         <div class="diagram-box"><strong>Clase P</strong><span>Solucionable Eficientemente</span></div>
+                    </div>
+                    <hr style="width:100%; border:1px dashed var(--border-color); margin: 2rem 0;">
+                     <div class="diagram-col">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Geometría Compleja</div>
+                            <div class="diagram-box"><strong>No Convexidad</strong><span>Explosión Combinatoria</span></div>
+                        </div>
+                        <div class="diagram-arrow down"><div class="diagram-arrow-label">Implica</div></div>
+                         <div class="diagram-box"><strong>Clase NP-hard</strong><span>Se requieren Heurísticas</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">IX. Ejemplos Unificados por Dominio</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <div class="diagram-container">
+                    <div class="diagram-title">Optimización en la Práctica</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Estadística: Regresión Lineal</strong><span>Convexa, Clase P. Se resuelve con Mínimos Cuadrados.</span></div>
+                        <div class="diagram-box"><strong>Machine Learning: Red Neuronal</strong><span>No Convexa, NP-hard. Se aproxima con SGD y heurísticas.</span></div>
+                        <div class="diagram-box"><strong>Logística: Problema del Viajante</strong><span>Discreto, NP-complete. Se aproxima con GA, Recocido Simulado.</span></div>
+                        <div class="diagram-box"><strong>Ingeniería: Diseño de Antenas</strong><span>Multimodal, NP-hard. Se aproxima con GA, PSO.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">X. Analogía Global: El "Paisaje del Conocimiento" de la Optimización</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Podemos visualizar la dificultad de los problemas de optimización en niveles:</p>
+                <ul>
+                    <li><strong>Nivel 1️⃣:</strong> Un valle único y parabólico. Es un problema Convexo de clase P. Fácil de resolver.</li>
+                    <li><strong>Nivel 2️⃣:</strong> Una cordillera con múltiples valles. Es un problema No Convexo y NP-hard. Se necesitan exploradores inteligentes.</li>
+                    <li><strong>Nivel 3️⃣:</strong> Un mapa con una cantidad astronómica de ciudades y caminos. Es un problema Discreto Combinatorio y NP-complete.</li>
+                    <li><strong>Nivel 4️⃣:</strong> Los exploradores evolutivos (GA, PSO, DE) que no ven todo el mapa, pero usan estrategias de población y adaptación para encontrar las cumbres más altas o las rutas más cortas.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">XI. Síntesis Final</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Todo problema de optimización se define por su <strong>espacio de búsqueda, función objetivo y restricciones</strong>.</p>
+                <p>Su geometría (<strong>convexa o no convexa</strong>) es la propiedad más crítica, ya que determina su complejidad computacional (<strong>P o NP-hard</strong>).</p>
+                <p>Los métodos analíticos y de gradiente son los reyes de los problemas convexos, ofreciendo soluciones <strong>exactas y garantizadas</strong>.</p>
+                <p>Los algoritmos evolutivos y las metaheurísticas son las herramientas de elección para los problemas no convexos y NP-hard del mundo real, donde encontrar una solución "suficientemente buena" de forma robusta es más valioso que la búsqueda inútil de una perfección garantizada.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material Elaborado por el profesor Sergio Gevtschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
