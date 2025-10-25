@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topología, Geometría y Algoritmos Evolutivos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+    .section-subtitle { color: var(--text-light); text-align: center; margin-top: 3rem; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 500; border-top: 1px solid var(--border-color); padding-top: 2rem; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .topic-title .fa-question-circle { margin-right: 12px; color: var(--accent-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 1500px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content p:last-child { margin-bottom: 0; }
+    .topic-content b { color: var(--text-primary); font-weight: 600; }
+    
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Topología y Evolución Computacional</h1>
+      <p class="subtitle">Un análisis conceptual sobre la estructura, la forma y los algoritmos genéticos.</p>
+    </header>
+
+    <h3 class="section-subtitle">Preguntas 1 a 10: Fundamentos Topológicos y Analogías Evolutivas</h3>
+    <div class="lesson-container">
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>1. ¿Qué representa la fórmula de Euler y por qué es considerada una ley universal de la estructura?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La fórmula de Euler 𝑉 − 𝐸 + 𝐹 = 2 sintetiza la relación fundamental entre los vértices, aristas y caras de un poliedro convexo. Es una de las expresiones más notables de la matemática porque vincula lo discreto con lo continuo, lo combinatorio con lo geométrico. Lo que realmente revela es que, por más que un cuerpo cambie de tamaño, forma o proporciones, la conectividad entre sus partes —el modo en que las aristas enlazan vértices y delimitan caras— permanece invariable mientras no haya rupturas topológicas.</p>
+                <p>En términos de algoritmos genéticos, esta invariancia se asemeja a los “rasgos estructurales heredables” del genotipo de una población: durante las mutaciones o cruces, los individuos cambian sus parámetros pero no su topología funcional, de modo que la estructura general del sistema (su conectividad base) sigue preservando un equilibrio global.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>2. ¿Cómo se generaliza la fórmula de Euler a superficies de cualquier género?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La generalización se da a través de la característica de Euler, denotada como χ = 2 − 2g, donde g es el número de asas o agujeros que posee una superficie. Esta relación introduce una métrica topológica de complejidad: a medida que aumentan los agujeros, disminuye la característica de Euler. Así, la esfera (sin agujeros) tiene χ = 2, el toro (una asa) χ = 0, y una superficie con dos asas χ = −2.</p>
+                <p>Si pensamos esta estructura como un proceso evolutivo, cada incremento del género equivale a una “mutación estructural” del sistema: la red o la forma adquieren un nuevo tipo de conectividad. Un algoritmo genético que evoluciona estructuras —como redes neuronales o circuitos topológicos— puede interpretarse como un proceso que explora el espacio de configuraciones con diferentes géneros, buscando aquellas que maximizan la eficiencia o la adaptabilidad, igual que una superficie de mayor complejidad puede contener caminos más diversos para conectar puntos sin intersecciones.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>3. ¿Qué vínculo existe entre grafos y topología en el razonamiento de Euler?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Euler fue el primero en abstraer la noción de forma física en un modelo de relaciones: el grafo. Al estudiar los puentes de Königsberg, comprendió que la conectividad —no la distancia ni la medida— definía la esencia del problema. Así nació la idea de que una figura puede ser descrita como un conjunto de vértices conectados por aristas, lo que dio origen tanto a la teoría de grafos como a la topología moderna.</p>
+                <p>En los algoritmos genéticos, esta noción se traduce en representar soluciones como grafos de dependencia o redes de interacción. Igual que en topología, donde lo importante es la conectividad y no la geometría exacta, los AG buscan conservar la coherencia estructural del “grafo genético” durante la evolución, garantizando que las transformaciones mantengan la funcionalidad del sistema.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>4. ¿Por qué la topología se considera la “geometría de la hoja de goma”?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La metáfora de la “hoja de goma” explica que la topología se ocupa de las propiedades que no cambian cuando los objetos se deforman de manera continua. Si una taza se puede convertir en un toro estirando y deformando sin romper, ambas tienen el mismo tipo topológico. Esta idea de invariancia bajo deformaciones permite agrupar objetos según su estructura global.</p>
+                <p>En los algoritmos genéticos, el mismo principio aparece cuando una población se adapta sin perder su identidad funcional: los individuos se transforman mediante variaciones de parámetros (deformaciones continuas), pero la función o “forma evolutiva” del sistema persiste. La topología, entonces, actúa como el análogo matemático del “espacio de búsqueda” de un AG: un territorio deformable donde las soluciones cambian sin perder su esencia.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>5. ¿Qué implica el Teorema de Clasificación de Superficies?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Este teorema establece que toda superficie compacta y orientable puede obtenerse a partir de una esfera añadiendo un número finito de asas. Esto significa que cualquier superficie, por compleja que sea, pertenece a una familia finita descrita por un único parámetro topológico: el género.</p>
+                <p>Desde la perspectiva de los algoritmos genéticos, esta clasificación puede entenderse como un principio de reducción de dimensionalidad estructural: aunque la variedad de configuraciones sea infinita, todas pueden agruparse en tipos equivalentes según su conectividad fundamental. Igual que una población evolutiva converge hacia ciertos tipos de soluciones “esenciales”, la topología agrupa todas las formas posibles en un conjunto reducido de invariantes globales.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>6. ¿Por qué V − E + F es invariante bajo proyección esférica?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Porque toda proyección o deformación continua que mantenga la conectividad global no altera la característica de Euler. Si se proyecta un poliedro sobre una esfera o sobre un plano, las relaciones entre sus elementos se conservan. En topología, las transformaciones que preservan la estructura se denominan homeomorfismos, y garantizan la invariancia de χ.</p>
+                <p>En un contexto de algoritmos genéticos, esto equivale a garantizar que las transformaciones aplicadas a una solución (mutaciones o cruces) no destruyan su “esqueleto” funcional. El operador evolutivo actúa como un homeomorfismo sobre el espacio de soluciones, manteniendo inalteradas las propiedades fundamentales que determinan el rendimiento del sistema.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>7. ¿Cómo se interpreta la curvatura total en relación con la característica de Euler?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La versión discreta del teorema de Gauss–Bonnet afirma que la suma de los defectos angulares en los vértices de un poliedro equivale a 2πχ. En el caso del cubo, cada vértice contribuye con un defecto de π/2, y la suma de todos los vértices da 4π, correspondiente a χ = 2. Esto revela que la curvatura no solo es una propiedad geométrica, sino una manifestación cuantitativa de la conectividad topológica.</p>
+                <p>Desde la óptica evolutiva, esta “curvatura total” puede interpretarse como un gradiente de adaptación global: aunque los individuos (vértices) varíen localmente, el sistema mantiene un equilibrio global. Un algoritmo genético eficiente también busca ese equilibrio: maximizar la adaptación local sin alterar la coherencia estructural general, análoga a mantener constante la curvatura total del sistema.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>8. ¿Cuál es la relación entre el teorema de Poincaré–Hopf y la característica de Euler?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El teorema de Poincaré–Hopf une la dinámica de los campos vectoriales con la topología: la suma de los índices de los puntos críticos de un campo tangente sobre una superficie equivale a su característica de Euler. Cada punto crítico representa un “equilibrio local”, y el balance total de esos equilibrios expresa la estructura global del espacio.</p>
+                <p>En algoritmos genéticos, un paralelismo surge cuando se observan las soluciones estables de una población como “puntos fijos” dentro del espacio de búsqueda. Las regiones de máxima aptitud funcionan como polos de atracción, y la suma de sus “índices de estabilidad” refleja la topología del paisaje de aptitud. Así, Poincaré–Hopf ofrece una analogía topológica de la dinámica evolutiva global.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>9. ¿Cómo se relacionan los números de Betti con la conectividad evolutiva?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Los números de Betti cuantifican cuántos componentes conexos (b<sub>0</sub>), ciclos o agujeros (b<sub>1</sub>) y cavidades (b<sub>2</sub>) existen en un objeto. La característica de Euler se expresa como χ = b<sub>0</sub> − b<sub>1</sub> + b<sub>2</sub>. Estos valores definen la “firma topológica” del objeto, independientemente de su forma.</p>
+                <p>En un algoritmo genético, podrían verse como los invariantes de la diversidad estructural: b<sub>0</sub> refleja la cantidad de subpoblaciones independientes, b<sub>1</sub> los ciclos de exploración o redundancias, y b<sub>2</sub> las regiones cerradas del espacio de búsqueda. Mantener un equilibrio entre estos factores equivale a conservar la estabilidad adaptativa de la población sin perder variabilidad.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>10. ¿Qué papel cumple el género como medida de complejidad estructural?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El género g mide el número de asas o “canales de comunicación” que existen dentro de una superficie. Cuanto mayor es el género, más intrincadas son las rutas posibles entre puntos. En topología, esta complejidad no implica caos, sino nuevas posibilidades de conexión.</p>
+                <p>En los algoritmos genéticos, una estructura con mayor género sería análoga a un espacio de soluciones con múltiples óptimos locales interconectados. Explorar esos canales implica aumentar la diversidad de búsqueda sin perder la coherencia global. En ambos casos, el género mide el grado de libertad estructural que un sistema posee para evolucionar sin romperse.</p>
+            </div>
+        </div>
+    </div>
+    
+    <h3 class="section-subtitle">Preguntas 11 a 20: Tópicos Avanzados de Estructura y Conectividad</h3>
+    <div class="lesson-container">
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>11. ¿Qué significa la reducción a grafo en el contexto de Euler y qué valor conceptual tiene para la topología?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Reducir un problema espacial a un grafo consiste en abstraer la estructura geométrica de un cuerpo o superficie hasta quedarse únicamente con la información de conectividad: vértices como nodos y aristas como relaciones. Euler, al analizar los puentes de Königsberg, demostró que la solución del problema no dependía de la longitud de los puentes ni de su posición, sino de su disposición combinatoria. De esta forma, el razonamiento geométrico se transformó en un problema de estructura.</p>
+                <p>En los algoritmos genéticos, la idea es similar: se busca representar un sistema o una solución no por sus detalles numéricos, sino por su red de relaciones internas. Un individuo dentro de una población puede pensarse como un grafo dinámico que evoluciona, donde los genes son nodos y las conexiones entre ellos determinan su comportamiento funcional. Igual que Euler simplificó la ciudad a un conjunto de nodos y enlaces, los algoritmos genéticos reducen un problema complejo a una representación estructural mínima, sobre la que luego aplican operadores de mutación y selección. Esta abstracción facilita conservar los invariantes de conectividad incluso bajo transformaciones caóticas o estocásticas, preservando la coherencia del sistema.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>12. ¿Cómo vincula la característica de Euler la combinatoria con la geometría diferencial?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La característica de Euler establece un vínculo entre dos mundos conceptuales: el discreto y el continuo. En su forma combinatoria, V − E + F describe la estructura de una malla o poliedro; en su forma diferencial, el teorema de Gauss–Bonnet afirma que la integral de la curvatura sobre una superficie cerrada equivale a 2πχ. Esto significa que la forma total de un objeto (su curvatura) está determinada por su conectividad global, no por detalles locales.</p>
+                <p>Los algoritmos genéticos reflejan un principio análogo cuando optimizan sistemas que evolucionan tanto en el dominio discreto (mutaciones, codificación binaria) como en el continuo (ajuste de parámetros reales). Igual que χ actúa como un puente entre lo discreto y lo continuo, el proceso evolutivo combina cambios discretos en el genotipo con adaptaciones continuas en el fenotipo. Ambos mantienen la misma idea fundamental: conservar la estructura global del sistema incluso mientras sus parámetros locales fluctúan.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>13. ¿Por qué los poliedros convexos son modelos privilegiados en topología elemental?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Los poliedros convexos son las representaciones más simples y estables de las superficies sin agujeros. Su convexidad garantiza que cualquier segmento entre dos puntos permanece dentro de la figura, y que no existen concavidades que alteren la conectividad. Esto los convierte en ejemplos ideales para formular leyes universales como V − E + F = 2, ya que su estructura es lo suficientemente rígida para representar la totalidad de las superficies esféricas.</p>
+                <p>Desde la perspectiva evolutiva, el poliedro convexo se asemeja a una configuración estable dentro del espacio de soluciones de un algoritmo genético: un equilibrio estructural desde el cual pueden derivarse transformaciones más complejas. Los poliedros no convexos o con cavidades representarían mutaciones del sistema que alteran su topología; por eso, partir de un poliedro convexo es como iniciar una evolución desde un genotipo “puro”, sobre el que se pueden estudiar las desviaciones estructurales que surgen durante el proceso adaptativo.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>14. ¿Qué papel cumple la homeomorfía entre una esfera y un poliedro convexo?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un homeomorfismo es una función continua y biyectiva con inversa continua: transforma un objeto en otro sin cortar ni pegar. La existencia de un homeomorfismo entre una esfera y un poliedro convexo significa que ambos comparten la misma estructura topológica, aunque su geometría sea distinta. Esto valida que la fórmula de Euler se aplique indistintamente a poliedros y superficies esféricas.</p>
+                <p>En términos de algoritmos genéticos, el concepto de homeomorfismo puede entenderse como una transformación evolutiva reversible y estable. Dos configuraciones distintas del mismo sistema —por ejemplo, dos redes neuronales con diferente disposición pero igual funcionalidad— serían homeomorfas: diferentes fenotipos que comparten la misma estructura topológica de funcionamiento. El principio asegura que los cambios evolutivos no destruyen la esencia del sistema, sino que lo adaptan dentro del mismo espacio de posibilidades.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>15. ¿Qué significa “conectividad sin medidas” en la formulación topológica?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>“Conectividad sin medidas” es el núcleo conceptual de la topología: se eliminan las nociones de longitud, ángulo o área, y se conserva solo la relación entre puntos. En otras palabras, lo que importa no es cómo se mide un objeto, sino cómo sus partes se enlazan. Este enfoque permite comparar figuras radicalmente distintas que comparten la misma estructura conectiva.</p>
+                <p>En los algoritmos genéticos, la idea se traduce en evaluar soluciones no por su apariencia o tamaño, sino por su red funcional interna. Dos soluciones pueden ser numéricamente diferentes, pero topológicamente equivalentes si cumplen el mismo patrón de relaciones causales. La “conectividad sin medidas” es la base de los modelos robustos: sistemas que mantienen su funcionalidad aun cuando sus valores numéricos varían drásticamente, del mismo modo que una esfera sigue siendo una esfera sin importar su radio.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>16. ¿Qué distingue a las propiedades topológicas de las métricas?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Las propiedades métricas dependen de medidas concretas (distancia, ángulo, longitud), mientras que las topológicas son invariantes bajo transformaciones continuas. La diferencia esencial es que la topología estudia la estructura de las conexiones, no las proporciones del espacio. Así, estirar o comprimir un objeto no cambia su topología, pero sí sus métricas.</p>
+                <p>En algoritmos genéticos, esto se observa cuando la evaluación del desempeño (fitness) se construye sobre invariantes estructurales más que sobre valores numéricos exactos. Un buen diseño evolutivo se apoya en medidas topológicas: relaciones funcionales, conectividad entre nodos o patrones de interacción que resisten el ruido y la variabilidad. Esas propiedades topológicas garantizan que la evolución produzca soluciones estables y generalizables, sin depender de un ajuste métrico perfecto.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>17. ¿Cómo intervienen la compacidad y la continuidad en la clasificación de superficies?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La compacidad asegura que una superficie es cerrada y acotada; la continuidad garantiza que sus transformaciones no introducen rupturas. Juntas definen el dominio en el que la topología puede operar con precisión: un espacio que, aunque deformable, mantiene su identidad estructural. Las superficies compactas y orientables constituyen el universo cerrado donde la característica de Euler permite clasificar toda posible forma.</p>
+                <p>En términos evolutivos, un sistema compacto y continuo sería aquel que explora el espacio de soluciones dentro de límites definidos, sin dispersarse infinitamente ni colapsar. Los algoritmos genéticos que operan en espacios compactos (rangos acotados de variables) reproducen ese mismo principio: garantizan la estabilidad del proceso adaptativo, al igual que la topología asegura que una superficie compacta tiene un número finito de invariantes que la describen completamente.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>18. ¿Qué interpretación física puede darse a la característica de Euler dentro de sistemas complejos?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La característica de Euler puede interpretarse como un balance global entre elementos de construcción (vértices), conexiones (aristas) y regiones (caras). En un sentido físico o sistémico, χ representa un estado de equilibrio entre la conectividad y la clausura del sistema: valores altos implican estructuras más simples y cerradas, mientras que valores bajos o negativos revelan sistemas abiertos, con múltiples rutas internas.</p>
+                <p>En un algoritmo genético, esto se asemeja al equilibrio entre diversidad y coherencia. Un alto valor de χ correspondería a una población homogénea, con pocas rutas alternativas (baja diversidad), mientras que un χ reducido simboliza un ecosistema evolutivo con mayor complejidad estructural. La estabilidad del proceso adaptativo depende de mantener χ dentro de un rango que permita tanto la exploración como la consistencia del sistema.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>19. ¿Por qué la característica de Euler es constante bajo mutaciones topológicas suaves?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Porque las mutaciones que no implican cortes ni pegados conservan la estructura de conectividad de la superficie. La topología distingue entre transformaciones continuas (que preservan χ) y discontinuas (que la alteran). Mientras las modificaciones se mantengan dentro del mismo tipo de superficie, el valor de χ no cambia.</p>
+                <p>En los algoritmos genéticos, una analogía directa es la diferencia entre mutaciones estructurales y paramétricas. Las mutaciones paramétricas (ajustes de valores) son topológicamente suaves: modifican el sistema sin cambiar su esencia. En cambio, una mutación estructural que elimine o añada conexiones equivaldría a abrir o cerrar una asa topológica, cambiando el valor de χ. Por eso, en los procesos evolutivos complejos, la estabilidad del sistema requiere controlar qué tipo de mutaciones se permiten para no alterar su identidad global.</p>
+            </div>
+        </div>
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title"><i class="fas fa-question-circle"></i>20. ¿Qué relación existe entre la característica de Euler y los invariantes de la topología algebraica?</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La topología algebraica traduce la forma en términos de grupos y dimensiones. La característica de Euler puede expresarse como la suma alternada de las dimensiones de los grupos de homología: χ = b<sub>0</sub> − b<sub>1</sub> + b<sub>2</sub> − b<sub>3</sub> + … . Este resultado une la combinatoria con el álgebra y convierte a χ en un invariante fundamental que resume toda la estructura del objeto.</p>
+                <p>En los algoritmos genéticos, los invariantes algebraicos encuentran su paralelo en las propiedades emergentes del sistema: rasgos que permanecen estables a través de generaciones y que definen el comportamiento del conjunto, más allá de las variaciones individuales. Así como la homología sintetiza los ciclos y cavidades de una superficie, un invariante evolutivo sintetiza las dependencias funcionales que caracterizan a una población. En ambos casos, la esencia del sistema se mantiene codificada en estructuras que trascienden sus elementos particulares.</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
