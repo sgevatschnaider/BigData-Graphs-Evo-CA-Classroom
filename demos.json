@@ -1,6 +1,13 @@
 [
   {
     "title": "Análisis Académico de Algoritmos Genéticos",
+    "path": "/src/classroom/graphs/recursos/Algoritmo_Genetico_Cuestionario_Algoritmo Genético.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-25T18:36:16-03:00"
+  },
+  {
+    "title": "Análisis Académico de Algoritmos Genéticos",
     "path": "/src/classroom/graphs/recursos/Algoritmos_Genéticos Introducción.html",
     "tag": "Demo",
     "desc": "",
@@ -12,6 +19,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Análisis del Problema del Viajante (TSP)",
+    "path": "/src/classroom/graphs/recursos/Hamilton_Cuestionario_TSP.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-25T18:36:16-03:00"
   },
   {
     "title": "Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)",
@@ -502,6 +516,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Topología, Geometría y Algoritmos Evolutivos",
+    "path": "/src/classroom/graphs/recursos/Poliedro_Cuestionario_topologia.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-25T18:36:16-03:00"
   },
   {
     "title": "Visualizador Havel–Hakimi (HH) Corregido",
