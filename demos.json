@@ -196,6 +196,13 @@
     "mtime": "2025-10-24T13:22:49-03:00"
   },
   {
+    "title": "Genetic Maze Solver + Index",
+    "path": "/src/classroom/graphs/recursos/Polyhedra_Genetic Algorithm Maze Solver.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
     "title": "Glosario de Pruebas de Conocimiento Cero (ZKP)",
     "path": "/src/classroom/graphs/recursos/ZPK_Glosario.html",
     "tag": "Demo",
@@ -371,6 +378,13 @@
     "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
+    "title": "Homeomorphism: Radial Projection from S² to the Cube",
+    "path": "/src/classroom/graphs/recursos/Polyhedra_Homeomorphism Demo.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
     "title": "Índice Interactivo de Temas de Grafos",
     "path": "/src/classroom/graphs/recursos/Indice.html",
     "tag": "Demo",
@@ -497,6 +511,13 @@
     "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
+    "title": "Surfaces and Euler Characteristic χ",
+    "path": "/src/classroom/graphs/recursos/Polyhedra_Surfaces and Genus Demo.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
     "title": "Teoría de Grafos - Visualización Interactiva",
     "path": "/src/classroom/graphs/recursos/Preliminares.html",
     "tag": "Demo",
@@ -523,6 +544,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-25T18:36:16-03:00"
+  },
+  {
+    "title": "Visual Proof - Euler's Formula",
+    "path": "/src/classroom/graphs/recursos/Polyhedra__euler.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-10-26T19:32:18-03:00"
   },
   {
     "title": "Visualizador Havel–Hakimi (HH) Corregido",
