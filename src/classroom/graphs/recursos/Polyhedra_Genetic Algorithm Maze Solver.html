@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Genetic Maze Solver + Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#0f1530; --ink:#eaf1ff; --muted:#a9b3d1;
+      --accent:#6ea8fe; --accent2:#7ee7d7; --danger:#ff6b6b; --ok:#3ad29f;
+      --grid:#24304f; --card:#111736; --shadow:rgba(0,0,0,0.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background: radial-gradient(1200px 600px at 20% -10%, #151b3a 0%, #0b1020 45%),
+                         radial-gradient(900px 500px at 120% 30%, #102540 0%, #0b1020 45%),
+                         var(--bg);
+      color:var(--ink); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+    }
+    header{
+      padding:18px 20px; display:flex; gap:14px; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:10; background:linear-gradient(180deg, rgba(11,16,32,.95), rgba(11,16,32,.55), rgba(11,16,32,0));
+      backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(110,168,254,.08);
+    }
+    h1{font-size:16px; margin:0; letter-spacing:.4px; color:#dbe6ff}
+    .wrap{display:grid; gap:16px; padding:16px; grid-template-columns: 330px 1fr;}
+    .panel{
+      background: linear-gradient(180deg, rgba(17,23,54,.9), rgba(17,23,54,.6));
+      border:1px solid rgba(110,168,254,.15);
+      border-radius:16px; padding:14px; box-shadow: 0 6px 30px var(--shadow);
+      position:sticky; top:70px; height: calc(100vh - 90px); overflow:auto;
+    }
+    fieldset{border:none; padding:0; margin:0 0 16px}
+    legend{font-size:13px; color:#cdd7ff; margin:8px 0 10px; text-transform:uppercase; letter-spacing:.6px; font-weight:bold; padding:0}
+    .row{display:grid; grid-template-columns: 1fr 90px; gap:10px; align-items:center; margin:8px 0}
+    .row label{color:var(--muted)}
+    .row-full{display:flex; flex-direction:column; gap:6px; margin:10px 0}
+    .row-full label{color:var(--muted); font-size:13px}
+    .slider-container{display:flex; align-items:center; gap:10px}
+    .slider-value{
+      background:#0f183a; border:1px solid #223160; border-radius:8px;
+      padding:4px 10px; min-width:50px; text-align:center; color:#d7e1ff;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="number"], input[type="text"], select{
+      width:100%; background:#0c1330; color:var(--ink); border:1px solid #233059;
+      border-radius:10px; padding:8px 10px; outline:none;
+    }
+    input[type="range"]{
+      flex:1; -webkit-appearance: none; appearance: none; height:6px;
+      background: linear-gradient(to right, #1b3a78 0%, #6ea8fe 100%);
+      border-radius:5px; outline:none;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance: none; appearance: none; width:18px; height:18px;
+      background:#6ea8fe; border-radius:50%; cursor:pointer;
+      box-shadow: 0 2px 8px rgba(110,168,254,.5);
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:18px; height:18px; background:#6ea8fe; border:none;
+      border-radius:50%; cursor:pointer; box-shadow: 0 2px 8px rgba(110,168,254,.5);
+    }
+    .tog{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0}
+    .tog label{display:flex; align-items:center; gap:8px; background:#0f183a; border:1px solid #223160;
+      padding:6px 10px; border-radius:999px; color:#d7e1ff; cursor:pointer}
+    .btns{display:flex; gap:8px; margin-top:10px}
+    button{
+      flex:1; background:linear-gradient(135deg, #1b3a78, #20408c);
+      color:white; border:none; padding:10px 12px; border-radius:12px; cursor:pointer;
+      box-shadow: 0 4px 16px rgba(54,98,210,.3); transition: transform 0.1s;
+    }
+    button:hover:not(:disabled){transform: translateY(-1px);}
+    button.secondary{background:#1a274d}
+    button.danger{background:#7e2130}
+    button:disabled{opacity:.6; cursor:not-allowed}
+    .canvases{display:grid; gap:12px; grid-template-columns:1fr; align-content:start}
+    .card{
+      background: linear-gradient(180deg, rgba(17,23,54,.9), rgba(17,23,54,.65));
+      border:1px solid rgba(110,168,254,.15);
+      border-radius:16px; padding:10px; box-shadow: 0 6px 30px var(--shadow);
+    }
+    .grid-layout{display:grid; grid-template-columns: 1.2fr .8fr; gap:12px;}
+    .hud{display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:8px}
+    .chip{
+      background:#0f183a; border:1px solid #223160; border-radius:12px; padding:8px 10px; color:#d7e1ff;
+      font-variant-numeric: tabular-nums;
+    }
+    canvas{display:block; width:100%; height:auto; border-radius:12px; background:#0b0f24}
+    footer{padding:10px 16px; color:#8290b8; text-align:center;}
+    .mini{font-size:12px; color:#98a6cc}
+    .highlight{color:#7ee7d7; font-weight:bold}
+    .two-col{display:grid; grid-template-columns: 1fr 1fr; gap:8px}
+    .index-grid{display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-top:8px}
+    .pill{padding:6px 8px; border-radius:10px; background:#0f183a; border:1px solid #223160; text-align:center}
+
+    @media (max-width: 1200px) {
+        .wrap { grid-template-columns: 1fr; }
+        .panel { position: static; height: auto; }
+    }
+    @media (max-width: 768px) {
+        .grid-layout { grid-template-columns: 1fr; }
+        .two-col { grid-template-columns: 1fr; }
+        .hud { grid-template-columns: repeat(2, 1fr); }
+        .index-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🧬 Genetic Maze Solver + Topological Indices</h1>
+  <div class="mini">Genetic Algorithm with index measurements (χ, cycles, discrete critic)</div>
+</header>
+
+<div class="wrap">
+  <aside class="panel">
+    <fieldset>
+      <legend>🗺️ Maze</legend>
+      <div class="row"><label for="mazePreset">Preset</label><select id="mazePreset"><option value="default">10×10 (default)</option><option value="mini">5×5 (mini)</option></select></div>
+      <div class="row"><label for="startRC">Start (r,c)</label><input id="startRC" type="text" value="0,0"></div>
+      <div class="row"><label for="endRC">End (r,c)</label><input id="endRC" type="text" value="9,9"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>⚙️ GA Parameters</legend>
+      <div class="row"><label for="pop">Population</label><input id="pop" type="number" min="20" max="600" step="10" value="150"></div>
+      <div class="row"><label for="elite">Elitism</label><input id="elite" type="number" min="2" max="200" step="1" value="25"></div>
+      <div class="row"><label for="mut">Mutation</label><input id="mut" type="number" min="0.01" max="0.6" step="0.01" value="0.10"></div>
+      <div class="row"><label for="cross">Crossover</label><input id="cross" type="number" min="0.1" max="1" step="0.05" value="0.85"></div>
+      <div class="row"><label for="gens">Generations</label><input id="gens" type="number" min="10" max="2000" step="10" value="120"></div>
+      <div class="row"><label for="stagn">Stagnation</label><input id="stagn" type="number" min="10" max="400" step="5" value="30"></div>
+      <div class="row"><label for="maxlen">MaxLen ×</label><input id="maxlen" type="number" min="1" max="5" step="0.1" value="2.0"></div>
+      <div class="row"><label for="seed">Seed</label><input id="seed" type="number" value="42"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎯 Heuristics</legend>
+      <div class="tog">
+        <label><input id="animate" type="checkbox" checked> Animate</label>
+        <label><input id="adaptive" type="checkbox" checked> Adaptive Mutation</label>
+        <label><input id="reset" type="checkbox" checked> Population Reset</label>
+        <label><input id="localsearch" type="checkbox" checked> Local Search</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎬 Animation Speed</legend>
+      <div class="row-full">
+        <label for="speed">Generations per frame</label>
+        <div class="slider-container">
+          <input id="speed" type="range" min="1" max="20" step="1" value="1">
+          <span class="slider-value" id="speedValue">1</span>
+        </div>
+      </div>
+      <div class="row-full">
+        <label for="fps">FPS (frames per second)</label>
+        <div class="slider-container">
+          <input id="fps" type="range" min="1" max="60" step="1" value="10">
+          <span class="slider-value" id="fpsValue">10</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="btns">
+      <button id="runBtn" aria-label="Run algorithm">▶ Run</button>
+      <button id="pauseBtn" class="secondary" aria-label="Pause algorithm" disabled>⏸ Pause</button>
+      <button id="resetBtn" class="danger" aria-label="Reset algorithm" disabled>⟲ Reset</button>
+    </div>
+    <div id="msg" class="mini" style="margin-top:10px;color:#a9c4ff"></div>
+  </aside>
+
+  <main class="canvases">
+    <div class="grid-layout">
+      <section class="card">
+        <canvas id="mazeCanvas" width="720" height="720"></canvas>
+        <div class="hud">
+          <div class="chip" id="hudGen">Gen: -</div>
+          <div class="chip" id="hudBest">Best Fit: -</div>
+          <div class="chip" id="hudLen">Length: -</div>
+          <div class="chip" id="hudAvg">Avg Fit: -</div>
+          <div class="chip" id="hudDiv">Diversity: -</div>
+          <div class="chip" id="hudMut">Mutation: -</div>
+        </div>
+      </section>
+      <section class="card">
+        <canvas id="chartCanvas" width="520" height="360"></canvas>
+      </section>
+    </div>
+
+    <section class="card">
+      <legend style="color:#cdd7ff; font-weight:bold; text-transform:uppercase; letter-spacing:.6px;">Topological Indices</legend>
+      <div class="index-grid">
+        <div class="pill" id="hudEuler">χ (Euler): -</div>
+        <div class="pill" id="hudCycles">Cycles (best): -</div>
+        <div class="pill" id="hudMinSaddleMax">Min/Saddle/Max: -</div>
+        <div class="pill" id="hudGI">Genetic Index: -</div>
+      </div>
+      <div class="two-col" style="margin-top:10px">
+        <canvas id="indexChart" width="460" height="240"></canvas>
+        <div class="mini">
+          <p><span class="highlight">Operational definitions:</span></p>
+          <ul>
+            <li><b>χ (Euler):</b> V − E of the explored subgraph (visited cells and their 4-neighbor adjacencies).</li>
+            <li><b>Cycles (best):</b> number of loops removed by local search in the best path.</li>
+            <li><b>Min/Saddle/Max:</b> discrete classification of elites (see code: <em>classifyIndividual</em>).</li>
+            <li><b>Genetic Index (GI):</b> GI = (#min) − (#saddle) + (#max) in elites per generation.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="mini">
+        💡 <span class="highlight">Tip:</span> Reduce the 'Gens/frame' value to <span class="highlight">1</span> 
+        and set FPS to <span class="highlight">5-10</span> to see each generation step-by-step. 
+        Increase both values for faster results.
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <small>Material prepared by Professor Sergio Gevatschnaider</small>
+</footer>
+
+<script>
+"use strict";
+
+const Utils = {
+  clamp: (x, a, b) => Math.min(b, Math.max(a, x)),
+  parseRC: (str) => {
+    const parts = (str || '').split(',').map(s => parseInt(s.trim(), 10));
+    if (parts.length !== 2 || parts.some(Number.isNaN)) throw new Error("Invalid (r,c) coordinate format");
+    return parts;
+  },
+  mulberry32: (a) => () => {
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  },
+  average: (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0,
+  posKey: (p) => `${p[0]},${p[1]}`
+};
+
+const MAZES = {
+  default: {
+    grid: [[0,1,0,0,0,1,0,0,0,0],[0,1,0,1,0,1,0,1,1,0],[0,0,0,1,0,0,0,1,0,0],[0,1,1,1,1,1,0,1,0,1],[0,0,0,0,0,1,0,0,0,0],[1,1,1,1,0,1,1,1,1,0],[0,0,0,1,0,0,0,0,1,0],[0,1,0,1,0,1,0,1,1,0],[0,1,0,0,0,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,0]],
+    start: [0,0], end: [9,9]
+  },
+  mini: {
+    grid: [[0,0,0,1,0],[0,1,0,0,0],[0,1,1,1,0],[0,0,0,0,0],[0,1,0,1,0]],
+    start: [0,0], end: [3,4]
+  }
+};
+
+class MazeEnv {
+  constructor(grid, start, end) {
+    this.grid = grid.map(r => r.slice());
+    this.h = grid.length;
+    this.w = grid[0].length;
+    this.start = start.slice();
+    this.end = end.slice();
+    this.validate();
+  }
+
+  validate() {
+    const [sr, sc] = this.start;
+    const [er, ec] = this.end;
+    if (sr < 0 || sr >= this.h || sc < 0 || sc >= this.w) throw new Error("Start position out of bounds.");
+    if (er < 0 || er >= this.h || ec < 0 || ec >= this.w) throw new Error("End position out of bounds.");
+    if (this.grid[sr][sc] === 1 || this.grid[er][ec] === 1) throw new Error("Start or end cannot be on a wall.");
+  }
+
+  isWalkable(r, c) {
+    return r >= 0 && r < this.h && c >= 0 && c < this.w && this.grid[r][c] === 0;
+  }
+
+  getNeighbors([r, c]) {
+    return [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].filter(([nr, nc]) => this.isWalkable(nr, nc));
+  }
+
+  manhattanDistance([r1, c1], [r2, c2]) {
+    return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+  }
+}
+
+function countCyclesInPath(path){
+  // Count number of loop closures in a path (visiting a node already seen)
+  const seen = new Set();
+  let cycles = 0;
+  for(const p of path){
+    const k = Utils.posKey(p);
+    if(seen.has(k)) cycles++;
+    else seen.add(k);
+  }
+  return cycles;
+}
+
+function classifyIndividual(env, path){
+  // Discrete classification for elites:
+  //  - "min" if reaches end and has no cycles (clean, short)
+  //  - "saddle" if has cycles or zig-zags (repeated nodes) OR ends near end but not reaching
+  //  - "max" if ends far from end (dead-end)
+  if(!path || path.length < 2) return "max";
+  const last = path[path.length-1];
+  const d = env.manhattanDistance(last, env.end);
+  const cycles = countCyclesInPath(path);
+  const uniqueSteps = new Set(path.map(Utils.posKey)).size;
+  const hasCycles = uniqueSteps < path.length;
+  if(d === 0 && !hasCycles) return "min";
+  if(d <= Math.floor((env.h+env.w)/6) || hasCycles) return "saddle";
+  return "max";
+}
+
+function eulerCharacteristicExplored(env, exploredSet){
+  // Build subgraph of explored cells and compute χ = V - E (faces ignored for a 2D grid complex)
+  // V: number of explored vertices
+  // E: number of explored undirected edges between 4-neighbors
+  const V = exploredSet.size;
+  let E = 0;
+  for(const key of exploredSet){
+    const [r,c] = key.split(',').map(Number);
+    // Right and Down neighbors to avoid double counting
+    if(env.isWalkable(r, c+1) && exploredSet.has(`${r},${c+1}`)) E++;
+    if(env.isWalkable(r+1, c) && exploredSet.has(`${r+1},${c}`)) E++;
+  }
+  return V - E;
+}
+
+class GeneticMazeSolver {
+  constructor(env, params) {
+    this.env = env;
+    this.params = params;
+    
+    Object.assign(this, {
+      populationSize: 150, eliteSize: 25, initialMutationRate: 0.1,
+      crossoverRate: 0.85, maxGenerations: 120, stagnationLimit: 30,
+      adaptive: true, popReset: true, localSearch: true,
+      maxPathLenFactor: 2.0, rngSeed: 42
+    }, params);
+
+    this.rng = Utils.mulberry32((this.rngSeed >>> 0) || Date.now());
+    this.rand = () => this.rng();
+    this.randInt = (a, b) => Math.floor(this.rand() * (b - a + 1)) + a;
+    this.choice = arr => arr[this.randInt(0, arr.length - 1)];
+
+    this.ADAPTIVE_MUT_LOW_DIVERSITY_THRESHOLD = 0.20;
+    this.MAX_MUTATION_RATE = 0.50;
+    this.MUT_UP = 1.10;
+    this.MUT_DOWN = 0.98;
+    this.STAGNATION_FOR_RESET = 25;
+    this.RESET_FRAC = 0.3;
+  }
+
+  init() {
+    this.mutationRate = this.initialMutationRate;
+    this.maxPathLength = Math.floor(this.env.h * this.env.w * this.maxPathLenFactor);
+    
+    this.population = Array.from({ length: this.populationSize }, () => this.createIndividual());
+    this.fitnesses = this.population.map(p => this.calculateFitness(p));
+    this.updateBest();
+
+    // histories
+    this.bestFitnessHistory = [this.bestFitness];
+    this.avgFitnessHistory = [Utils.average(this.fitnesses.filter(f => f > -100000))];
+    this.diversityHistory = [this.calculateDiversity(this.population)];
+    this.mutationRateHistory = [this.mutationRate];
+
+    // index histories
+    this.eulerHistory = [];
+    this.cycleHistory = [];
+    this.GIHistory = [];
+    this.minSaddleMaxHistory = [];
+
+    this.currentGeneration = 0;
+    this.generationsSinceLastImprovement = 0;
+    this.generationsSinceLastReset = 0;
+  }
+
+  createIndividual() {
+    const path = [this.env.start.slice()];
+    const visited = new Set([Utils.posKey(this.env.start)]);
+    let current = this.env.start.slice();
+
+    for (let i = 0; i < this.maxPathLength - 1; i++) {
+      if (current[0] === this.env.end[0] && current[1] === this.env.end[1]) break;
+
+      const neighbors = this.env.getNeighbors(current).filter(n => !visited.has(Utils.posKey(n)));
+      if (neighbors.length === 0) break;
+
+      let next;
+      if (this.rand() < 0.80) {
+        const distances = neighbors.map(p => this.env.manhattanDistance(p, this.env.end));
+        const minDistance = Math.min(...distances);
+        const bestMoves = neighbors.filter((p, idx) => distances[idx] === minDistance);
+        next = this.choice(bestMoves);
+      } else {
+        next = this.choice(neighbors);
+      }
+      path.push(next);
+      visited.add(Utils.posKey(next));
+      current = next;
+    }
+    return path;
+  }
+  
+  calculateFitness(path) {
+    if (!this.isValidPath(path)) return -100000;
+    
+    const len = path.length;
+    const uniqueSteps = new Set(path.map(Utils.posKey)).size;
+    const lastPos = path[len - 1];
+    const distanceToEnd = this.env.manhattanDistance(lastPos, this.env.end);
+    
+    let score = 10000.0;
+    
+    if (distanceToEnd === 0) {
+      score += 50000;
+      score -= len * 10;
+    } else {
+      score -= distanceToEnd * 100;
+      score -= len;
+    }
+
+    score -= (len - uniqueSteps) * 20;
+
+    if (len > this.maxPathLength) score -= (len - this.maxPathLength) * 50;
+
+    return Math.max(score, -90000);
+  }
+
+  isValidPath(path) {
+    if (!path || !path.length) return false;
+    if (path[0][0] !== this.env.start[0] || path[0][1] !== this.env.start[1]) return false;
+    
+    for (let i = 0; i < path.length; i++) {
+      const [r, c] = path[i];
+      if (!this.env.isWalkable(r, c)) return false;
+      if (i > 0) {
+        if (this.env.manhattanDistance(path[i-1], path[i]) !== 1) return false;
+      }
+    }
+    return true;
+  }
+
+  selection(population, fitnesses) {
+    const selected = [];
+    const n = population.length;
+    for (let i = 0; i < n; i++) {
+      const tournamentSize = 5;
+      let bestIndex = -1;
+      let bestFitness = -Infinity;
+      for (let j = 0; j < tournamentSize; j++) {
+        const randomIndex = this.randInt(0, n - 1);
+        if (fitnesses[randomIndex] > bestFitness) {
+          bestFitness = fitnesses[randomIndex];
+          bestIndex = randomIndex;
+        }
+      }
+      selected.push(population[bestIndex]);
+    }
+    return selected;
+  }
+
+  crossover(p1, p2) {
+    if (this.rand() > this.crossoverRate || Math.min(p1.length, p2.length) < 2) {
+      return [p1.slice(), p2.slice()];
+    }
+    const c1 = this.randInt(1, p1.length - 1);
+    const c2 = this.randInt(1, p2.length - 1);
+    
+    let child1 = this.repairPath(p1.slice(0, c1).concat(p2.slice(c2)));
+    let child2 = this.repairPath(p2.slice(0, c2).concat(p1.slice(c1)));
+    
+    return [child1, child2];
+  }
+
+  mutate(path) {
+    if (this.rand() > this.mutationRate || path.length < 2) return path.slice();
+    
+    let mutatedPath = path.map(p => p.slice());
+    const mutationType = this.choice(['add', 'remove', 'change']);
+
+    if (mutationType === 'add' && mutatedPath.length < this.maxPathLength - 1 && mutatedPath.length > 1) {
+      const idx = this.randInt(0, mutatedPath.length - 2);
+      const neighbors = this.env.getNeighbors(mutatedPath[idx]);
+      if (neighbors.length > 0) {
+        mutatedPath.splice(idx + 1, 0, this.choice(neighbors));
+      }
+    } else if (mutationType === 'remove' && mutatedPath.length > 2) {
+      const idx = this.randInt(1, mutatedPath.length - 2);
+      mutatedPath.splice(idx, 1);
+    } else if (mutationType === 'change' && mutatedPath.length > 2) {
+      const idx = this.randInt(1, mutatedPath.length - 1);
+      const neighbors = this.env.getNeighbors(mutatedPath[idx - 1]);
+      if (neighbors.length > 0) {
+        mutatedPath[idx] = this.choice(neighbors);
+      }
+    }
+    return this.repairPath(mutatedPath);
+  }
+
+  repairPath(path) {
+    if (!path || path.length === 0) return this.createIndividual();
+    
+    const repaired = [this.env.start.slice()];
+    for (let i = 1; i < path.length; i++) {
+      if (repaired.length >= this.maxPathLength) break;
+      const current = path[i];
+      const prev = repaired[repaired.length - 1];
+      if (this.env.isWalkable(current[0], current[1]) && this.env.manhattanDistance(prev, current) === 1) {
+        repaired.push(current.slice());
+      }
+    }
+    return repaired;
+  }
+  
+  applyLocalSearch(path) {
+    const seen = new Map();
+    const cleanPath = [];
+    for (const point of path) {
+      const key = Utils.posKey(point);
+      if (seen.has(key)) {
+        const lastIndex = seen.get(key);
+        cleanPath.splice(lastIndex + 1);
+        for(let [k,v] of seen.entries()){
+            if(v > lastIndex) seen.delete(k);
+        }
+      }
+      seen.set(key, cleanPath.length);
+      cleanPath.push(point);
+    }
+    return cleanPath;
+  }
+  
+  calculateDiversity(population) {
+    if (!population || population.length < 2) return 0;
+    const sampleSize = Math.min(population.length, 30);
+    const sample = [];
+    while (sample.length < sampleSize) {
+      const individual = this.choice(population);
+      if (!sample.includes(individual)) {
+        sample.push(individual);
+      }
+    }
+    
+    let totalDist = 0;
+    let comparisons = 0;
+    for (let i = 0; i < sample.length; i++) {
+      for (let j = i + 1; j < sample.length; j++) {
+        const set1 = new Set(sample[i].map(Utils.posKey));
+        const set2 = new Set(sample[j].map(Utils.posKey));
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        totalDist += union.size > 0 ? (1 - intersection.size / union.size) : 0;
+        comparisons++;
+      }
+    }
+    return comparisons > 0 ? totalDist / comparisons : 0;
+  }
+
+  handlePopulationReset() {
+    if (this.popReset && this.generationsSinceLastImprovement > this.STAGNATION_FOR_RESET && this.generationsSinceLastReset > this.STAGNATION_FOR_RESET) {
+      const eliteCount = Math.floor(this.populationSize * (1 - this.RESET_FRAC));
+      const elite = this.getElite(eliteCount);
+      const freshIndividuals = Array.from({ length: this.populationSize - eliteCount }, () => this.createIndividual());
+      
+      this.population = [...elite, ...freshIndividuals];
+      this.fitnesses = this.population.map(p => this.calculateFitness(p));
+      this.generationsSinceLastReset = 0;
+    }
+  }
+
+  updateMutationRate(diversity) {
+    if (this.adaptive) {
+      if (diversity < this.ADAPTIVE_MUT_LOW_DIVERSITY_THRESHOLD && this.mutationRate < this.MAX_MUTATION_RATE) {
+        this.mutationRate *= this.MUT_UP;
+      } else if (this.mutationRate > this.initialMutationRate) {
+        this.mutationRate *= this.MUT_DOWN;
+      }
+      this.mutationRate = Utils.clamp(this.mutationRate, this.initialMutationRate, this.MAX_MUTATION_RATE);
+    }
+  }
+  
+  updateBest() {
+    let bestIndex = 0;
+    for (let i = 1; i < this.fitnesses.length; i++) {
+      if (this.fitnesses[i] > this.fitnesses[bestIndex]) {
+        bestIndex = i;
+      }
+    }
+    
+    if (!this.bestFitness || this.fitnesses[bestIndex] > this.bestFitness) {
+      this.bestFitness = this.fitnesses[bestIndex];
+      this.bestPath = this.population[bestIndex].slice();
+      this.generationsSinceLastImprovement = 0;
+    } else {
+      this.generationsSinceLastImprovement++;
+    }
+  }
+
+  getElite(size) {
+    return this.population
+      .map((ind, i) => ({ ind, fit: this.fitnesses[i] }))
+      .sort((a, b) => b.fit - a.fit)
+      .slice(0, size)
+      .map(item => item.ind);
+  }
+
+  step() {
+    this.currentGeneration++;
+    this.generationsSinceLastReset++;
+    
+    const parents = this.selection(this.population, this.fitnesses);
+    const elite = this.getElite(this.eliteSize);
+    
+    if (this.localSearch && this.currentGeneration % 10 === 0) {
+      for (let i = 0; i < elite.length; i++) {
+        elite[i] = this.applyLocalSearch(elite[i]);
+      }
+    }
+    
+    let nextPopulation = elite;
+    
+    for (let i = elite.length; i < this.populationSize; i += 2) {
+      const p1 = this.choice(parents);
+      const p2 = this.choice(parents);
+      let [c1, c2] = this.crossover(p1, p2);
+      
+      nextPopulation.push(this.mutate(c1));
+      if (nextPopulation.length < this.populationSize) {
+        nextPopulation.push(this.mutate(c2));
+      }
+    }
+    
+    this.population = nextPopulation;
+    this.fitnesses = this.population.map(p => this.calculateFitness(p));
+    
+    this.updateBest();
+    
+    const diversity = this.calculateDiversity(this.population);
+    this.updateMutationRate(diversity);
+    this.handlePopulationReset();
+    
+    this.bestFitnessHistory.push(this.bestFitness);
+    this.avgFitnessHistory.push(Utils.average(this.fitnesses.filter(f => f > -100000)));
+    this.diversityHistory.push(diversity);
+    this.mutationRateHistory.push(this.mutationRate);
+
+    // ---------- Index computations per generation ----------
+    // Explored set from a sample of population
+    const exploredCells = new Set();
+    const sampleSize = Math.min(40, this.population.length);
+    for (let i = 0; i < sampleSize; i++) {
+      const ind = this.population[this.randInt(0, this.population.length-1)];
+      ind.forEach(p => exploredCells.add(Utils.posKey(p)));
+    }
+    const chi = eulerCharacteristicExplored(this.env, exploredCells);
+    this.eulerHistory.push(chi);
+
+    // Cycles in best path
+    const cycles = countCyclesInPath(this.bestPath);
+    this.cycleHistory.push(cycles);
+
+    // Min/Saddle/Max among elites
+    let mins=0, saddles=0, maxs=0;
+    for(const e of elite){
+      const cls = classifyIndividual(this.env, e);
+      if(cls === "min") mins++;
+      else if(cls === "saddle") saddles++;
+      else maxs++;
+    }
+    this.minSaddleMaxHistory.push([mins, saddles, maxs]);
+
+    // Genetic Index (GI) = #min - #saddle + #max  (operational composite)
+    const GI = mins - saddles + maxs;
+    this.GIHistory.push(GI);
+  }
+
+  shouldTerminate() {
+    if (this.currentGeneration >= this.maxGenerations) return true;
+    if (this.generationsSinceLastImprovement >= this.stagnationLimit) return true;
+    
+    const lastPos = this.bestPath[this.bestPath.length - 1];
+    if (lastPos[0] === this.env.end[0] && lastPos[1] === this.env.end[1]) {
+      return this.generationsSinceLastImprovement > 5;
+    }
+    return false;
+  }
+}
+
+class Visualizer {
+  constructor(mazeCanvas, chartCanvas, indexCanvas) {
+    this.mazeCtx = mazeCanvas.getContext('2d');
+    this.chartCtx = chartCanvas.getContext('2d');
+    this.indexCtx = indexCanvas.getContext('2d');
+    this.mazeCanvas = mazeCanvas;
+    this.chartCanvas = chartCanvas;
+    this.indexCanvas = indexCanvas;
+    
+    this.animationProgress = 0;
+    this.cellAnimations = new Map();
+  }
+
+  drawMaze(env, solver, animateExploration = false) {
+    const ctx = this.mazeCtx;
+    const w = this.mazeCanvas.width;
+    const h = this.mazeCanvas.height;
+    
+    ctx.fillStyle = '#0b0f24';
+    ctx.fillRect(0, 0, w, h);
+    
+    const cellW = w / env.w;
+    const cellH = h / env.h;
+    
+    for (let r = 0; r < env.h; r++) {
+      for (let c = 0; c < env.w; c++) {
+        const x = c * cellW;
+        const y = r * cellH;
+        
+        if (env.grid[r][c] === 1) {
+          const gradient = ctx.createLinearGradient(x, y, x + cellW, y + cellH);
+          gradient.addColorStop(0, '#1a2540');
+          gradient.addColorStop(1, '#0f1830');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, y, cellW, cellH);
+          
+          ctx.strokeStyle = 'rgba(110, 168, 254, 0.1)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x, y, cellW, cellH);
+        } else {
+          ctx.fillStyle = '#0d1228';
+          ctx.fillRect(x, y, cellW, cellH);
+          
+          ctx.strokeStyle = 'rgba(110, 168, 254, 0.05)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(x, y, cellW, cellH);
+        }
+      }
+    }
+    
+    if (solver && solver.population && animateExploration) {
+      const exploredCells = new Set();
+      const sampleSize = Math.min(30, solver.population.length);
+      for (let i = 0; i < sampleSize; i++) {
+        const individual = solver.population[Math.floor(Math.random() * solver.population.length)];
+        individual.forEach(pos => exploredCells.add(Utils.posKey(pos)));
+      }
+      
+      exploredCells.forEach(key => {
+        const [r, c] = key.split(',').map(Number);
+        const x = c * cellW;
+        const y = r * cellH;
+        
+        const cellKey = key;
+        if (!this.cellAnimations.has(cellKey)) {
+          this.cellAnimations.set(cellKey, Math.random());
+        }
+        const phase = this.cellAnimations.get(cellKey);
+        const pulse = 0.3 + 0.2 * Math.sin(this.animationProgress * 0.1 + phase * Math.PI * 2);
+        
+        ctx.fillStyle = `rgba(110, 168, 254, ${pulse * 0.15})`;
+        ctx.fillRect(x + 2, y + 2, cellW - 4, cellH - 4);
+      });
+    }
+    
+    if (solver && solver.bestPath) {
+      this.drawPath(env, solver.bestPath, cellW, cellH, true);
+    }
+    
+    const [sr, sc] = env.start;
+    const [er, ec] = env.end;
+    
+    const startX = sc * cellW + cellW / 2;
+    const startY = sr * cellH + cellH / 2;
+    const endX = ec * cellW + cellW / 2;
+    const endY = er * cellH + cellH / 2;
+    
+    const pulse = 0.8 + 0.2 * Math.sin(this.animationProgress * 0.15);
+    
+    ctx.shadowBlur = 20 * pulse;
+    ctx.shadowColor = '#3ad29f';
+    ctx.fillStyle = '#3ad29f';
+    ctx.beginPath();
+    ctx.arc(startX, startY, Math.min(cellW, cellH) * 0.35 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#0d1228';
+    ctx.font = `bold ${Math.min(cellW, cellH) * 0.5}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('S', startX, startY);
+    
+    ctx.shadowBlur = 20 * pulse;
+    ctx.shadowColor = '#ff6b6b';
+    ctx.fillStyle = '#ff6b6b';
+    ctx.beginPath();
+    ctx.arc(endX, endY, Math.min(cellW, cellH) * 0.35 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#0d1228';
+    ctx.fillText('E', endX, endY);
+    
+    this.animationProgress++;
+  }
+
+  drawPath(env, path, cellW, cellH, isBest = false) {
+    const ctx = this.mazeCtx;
+    if (!path || path.length < 2) return;
+    const gradient = ctx.createLinearGradient(0, 0, this.mazeCanvas.width, this.mazeCanvas.height);
+    if (isBest) {
+      gradient.addColorStop(0, '#7ee7d7');
+      gradient.addColorStop(0.5, '#6ea8fe');
+      gradient.addColorStop(1, '#a78bfa');
+    } else {
+      gradient.addColorStop(0, 'rgba(110, 168, 254, 0.3)');
+      gradient.addColorStop(1, 'rgba(126, 231, 215, 0.3)');
+    }
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = isBest ? 4 : 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (isBest) {
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#6ea8fe';
+    }
+    ctx.beginPath();
+    const startX = path[0][1] * cellW + cellW / 2;
+    const startY = path[0][0] * cellH + cellH / 2;
+    ctx.moveTo(startX, startY);
+    for (let i = 1; i < path.length; i++) {
+      const x = path[i][1] * cellW + cellW / 2;
+      const y = path[i][0] * cellH + cellH / 2;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  drawFitnessChart(solver) {
+    const ctx = this.chartCtx;
+    const w = this.chartCanvas.width;
+    const h = this.chartCanvas.height;
+    const padding = 50;
+    ctx.fillStyle = '#0b0f24';
+    ctx.fillRect(0, 0, w, h);
+    if (!solver || !solver.bestFitnessHistory || solver.bestFitnessHistory.length < 2) return;
+    const chartW = w - padding * 2;
+    const chartH = h - padding * 2;
+    ctx.strokeStyle = 'rgba(110, 168, 254, 0.2)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+      const y = padding + (chartH / 5) * i;
+      ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+    }
+    const maxGen = solver.bestFitnessHistory.length - 1;
+    const allFitness = [...solver.bestFitnessHistory, ...solver.avgFitnessHistory].filter(f => f > -100000);
+    const minFit = Math.min(...allFitness);
+    const maxFit = Math.max(...allFitness);
+    const fitRange = maxFit - minFit || 1;
+    const toX = (gen) => padding + (gen / maxGen) * chartW;
+    const toY = (fit) => padding + chartH - ((fit - minFit) / fitRange) * chartH;
+    this.drawLine(ctx, solver.bestFitnessHistory, toX, toY, '#6ea8fe', 3);
+    this.drawLine(ctx, solver.avgFitnessHistory, toX, toY, '#7ee7d7', 2);
+    ctx.fillStyle = '#d7e1ff';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 5; i++) {
+      const fit = minFit + (fitRange / 5) * (5 - i);
+      const y = padding + (chartH / 5) * i;
+      ctx.fillText(fit.toFixed(0), padding - 10, y);
+    }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let i = 0; i <= 5; i++) {
+      const gen = Math.floor((maxGen / 5) * i);
+      const x = padding + (chartW / 5) * i;
+      ctx.fillText(gen, x, h - padding + 10);
+    }
+    ctx.fillStyle = '#a9b3d1';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Generation', w / 2, h - 15);
+    ctx.save();
+    ctx.translate(15, h / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Fitness', 0, 0);
+    ctx.restore();
+  }
+
+  drawIndexChart(solver){
+    const ctx = this.indexCtx;
+    const w = this.indexCanvas.width;
+    const h = this.indexCanvas.height;
+    const padding = 40;
+    ctx.fillStyle = '#0b0f24';
+    ctx.fillRect(0, 0, w, h);
+    if(!solver || solver.eulerHistory.length < 2) return;
+    const chartW = w - padding*2;
+    const chartH = h - padding*2;
+
+    // Build ranges across χ, cycles, GI
+    const X = solver.eulerHistory.length - 1;
+    const minChi = Math.min(...solver.eulerHistory);
+    const maxChi = Math.max(...solver.eulerHistory);
+    const minCyc = Math.min(...solver.cycleHistory);
+    const maxCyc = Math.max(...solver.cycleHistory);
+    const minGI  = Math.min(...solver.GIHistory);
+    const maxGI  = Math.max(...solver.GIHistory);
+    const minY = Math.min(minChi, minCyc, minGI);
+    const maxY = Math.max(maxChi, maxCyc, maxGI);
+    const rng = (maxY - minY) || 1;
+
+    const toX = (i) => padding + (i / X) * chartW;
+    const toY = (v) => padding + chartH - ((v - minY) / rng) * chartH;
+
+    // grid
+    ctx.strokeStyle = 'rgba(110,168,254,.15)';
+    ctx.lineWidth = 1;
+    for(let i=0;i<=5;i++){
+      const y = padding + (chartH/5)*i;
+      ctx.beginPath(); ctx.moveTo(padding,y); ctx.lineTo(w-padding,y); ctx.stroke();
+    }
+
+    // lines
+    this.drawLine(ctx, solver.eulerHistory, toX, toY, '#7ee7d7', 2); // χ
+    this.drawLine(ctx, solver.cycleHistory, toX, toY, '#a78bfa', 2); // cycles
+    this.drawLine(ctx, solver.GIHistory,    toX, toY, '#6ea8fe', 3); // GI
+
+    // axes labels
+    ctx.fillStyle = '#d7e1ff';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Indices per generation (χ, cycles, GI)', w/2, 12);
+    ctx.textAlign = 'center'; ctx.fillText('Generation', w/2, h-10);
+    ctx.save(); ctx.translate(14, h/2); ctx.rotate(-Math.PI/2);
+    ctx.textAlign='center'; ctx.fillText('Normalized Value', 0,0); ctx.restore();
+
+    // legend
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    const lx = w - padding - 160, ly = padding + 6;
+    ctx.fillStyle = '#7ee7d7'; ctx.fillRect(lx, ly, 18, 3); ctx.fillStyle = '#d7e1ff'; ctx.fillText('χ (Euler)', lx+26, ly+2);
+    ctx.fillStyle = '#a78bfa'; ctx.fillRect(lx, ly+16, 18, 3); ctx.fillStyle = '#d7e1ff'; ctx.fillText('Cycles (best)', lx+26, ly+18);
+    ctx.fillStyle = '#6ea8fe'; ctx.fillRect(lx, ly+32, 18, 3); ctx.fillStyle = '#d7e1ff'; ctx.fillText('GI (min - saddle + max)', lx+26, ly+34);
+  }
+
+  drawLine(ctx, data, toX, toY, color, width) {
+    if (data.length < 2) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = color;
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(data[0]));
+    for (let i = 1; i < data.length; i++) ctx.lineTo(toX(i), toY(data[i]));
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+}
+
+class App {
+  constructor() {
+    this.mazeCanvas = document.getElementById('mazeCanvas');
+    this.chartCanvas = document.getElementById('chartCanvas');
+    this.indexCanvas = document.getElementById('indexChart');
+    this.visualizer = new Visualizer(this.mazeCanvas, this.chartCanvas, this.indexCanvas);
+    
+    this.running = false;
+    this.paused = false;
+    this.animationFrameId = null;
+    
+    this.setupUI();
+    this.loadMazePreset('default');
+  }
+
+  setupUI() {
+    document.getElementById('runBtn').onclick = () => this.run();
+    document.getElementById('pauseBtn').onclick = () => this.togglePause();
+    document.getElementById('resetBtn').onclick = () => this.reset();
+    document.getElementById('mazePreset').onchange = (e) => this.loadMazePreset(e.target.value);
+    const speedSlider = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+    speedSlider.oninput = (e) => { speedValue.textContent = e.target.value; };
+    const fpsSlider = document.getElementById('fps');
+    const fpsValue = document.getElementById('fpsValue');
+    fpsSlider.oninput = (e) => { fpsValue.textContent = e.target.value; };
+  }
+
+  loadMazePreset(preset) {
+    const maze = MAZES[preset];
+    if (!maze) return;
+    this.currentMaze = maze;
+    document.getElementById('startRC').value = maze.start.join(',');
+    document.getElementById('endRC').value = maze.end.join(',');
+    try {
+      const env = new MazeEnv(maze.grid, maze.start, maze.end);
+      this.visualizer.drawMaze(env, null, false);
+    } catch (error) { this.showMessage(`Error: ${error.message}`, 'error'); }
+  }
+
+  getParams() {
+    try {
+      const preset = document.getElementById('mazePreset').value;
+      const maze = MAZES[preset];
+      const start = Utils.parseRC(document.getElementById('startRC').value);
+      const end = Utils.parseRC(document.getElementById('endRC').value);
+      return {
+        grid: maze.grid,
+        start,
+        end,
+        populationSize: parseInt(document.getElementById('pop').value, 10),
+        eliteSize: parseInt(document.getElementById('elite').value, 10),
+        initialMutationRate: parseFloat(document.getElementById('mut').value),
+        crossoverRate: parseFloat(document.getElementById('cross').value),
+        maxGenerations: parseInt(document.getElementById('gens').value, 10),
+        stagnationLimit: parseInt(document.getElementById('stagn').value, 10),
+        maxPathLenFactor: parseFloat(document.getElementById('maxlen').value),
+        rngSeed: parseInt(document.getElementById('seed').value, 10),
+        adaptive: document.getElementById('adaptive').checked,
+        popReset: document.getElementById('reset').checked,
+        localSearch: document.getElementById('localsearch').checked,
+        animate: document.getElementById('animate').checked,
+        gensPerFrame: parseInt(document.getElementById('speed').value, 10),
+        fps: parseInt(document.getElementById('fps').value, 10)
+      };
+    } catch (error) { throw new Error(`Invalid parameters: ${error.message}`); }
+  }
+
+  run() {
+    if (this.running) return;
+    try {
+      const params = this.getParams();
+      this.env = new MazeEnv(params.grid, params.start, params.end);
+      this.solver = new GeneticMazeSolver(this.env, params);
+      this.solver.init();
+      this.running = true; this.paused = false;
+      document.getElementById('runBtn').disabled = true;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('resetBtn').disabled = false;
+      this.showMessage('Algorithm running...', 'info');
+      if (params.animate) this.runAnimated(params.gensPerFrame, params.fps);
+      else this.runBatch();
+    } catch (error) { this.showMessage(`Error: ${error.message}`, 'error'); }
+  }
+
+  runAnimated(gensPerFrame, fps) {
+    const frameDelay = 1000 / fps;
+    let lastFrameTime = 0;
+    const animate = (timestamp) => {
+      if (!this.running) return;
+      if (this.paused) { this.animationFrameId = requestAnimationFrame(animate); return; }
+      if (timestamp - lastFrameTime >= frameDelay) {
+        for (let i = 0; i < gensPerFrame; i++) {
+          if (this.solver.shouldTerminate()) { this.finish(); return; }
+          this.solver.step();
+        }
+        this.updateUI();
+        lastFrameTime = timestamp;
+      }
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  runBatch() {
+    this.showMessage('Running without animation...', 'info');
+    setTimeout(() => {
+      while (!this.solver.shouldTerminate()) this.solver.step();
+      this.updateUI();
+      this.finish();
+    }, 100);
+  }
+
+  togglePause() {
+    this.paused = !this.paused;
+    const btn = document.getElementById('pauseBtn');
+    btn.textContent = this.paused ? '▶ Resume' : '⏸ Pause';
+    this.showMessage(this.paused ? 'Paused' : 'Resumed', 'info');
+  }
+
+  reset() {
+    this.running = false;
+    this.paused = false;
+    if (this.animationFrameId) { cancelAnimationFrame(this.animationFrameId); this.animationFrameId = null; }
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('resetBtn').disabled = true;
+    this.loadMazePreset(document.getElementById('mazePreset').value);
+    this.clearUI();
+    this.showMessage('Reset', 'info');
+  }
+
+  finish() {
+    this.running = false;
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = true;
+    const lastPos = this.solver.bestPath[this.solver.bestPath.length - 1];
+    const solved = lastPos[0] === this.env.end[0] && lastPos[1] === this.env.end[1];
+    if (solved) this.showMessage(`Maze solved in ${this.solver.currentGeneration} generations! Length: ${this.solver.bestPath.length}`, 'success');
+    else this.showMessage(`Finished without a complete solution (Gen ${this.solver.currentGeneration})`, 'warning');
+  }
+
+  updateUI() {
+    this.visualizer.drawMaze(this.env, this.solver, true);
+    this.visualizer.drawFitnessChart(this.solver);
+    this.visualizer.drawIndexChart(this.solver);
+
+    // HUD fitness
+    document.getElementById('hudGen').textContent = `Gen: ${this.solver.currentGeneration}`;
+    document.getElementById('hudBest').textContent = `Best Fit: ${this.solver.bestFitness.toFixed(0)}`;
+    document.getElementById('hudLen').textContent = `Length: ${this.solver.bestPath.length}`;
+    document.getElementById('hudAvg').textContent = `Avg Fit: ${Utils.average(this.solver.fitnesses.filter(f => f > -100000)).toFixed(0)}`;
+    document.getElementById('hudDiv').textContent = `Diversity: ${(this.solver.diversityHistory[this.solver.diversityHistory.length - 1] * 100).toFixed(1)}%`;
+    document.getElementById('hudMut').textContent = `Mutation: ${(this.solver.mutationRate * 100).toFixed(1)}%`;
+
+    // HUD index
+    const lastChi = this.solver.eulerHistory[this.solver.eulerHistory.length-1];
+    const lastCycles = this.solver.cycleHistory[this.solver.cycleHistory.length-1];
+    const lastGI = this.solver.GIHistory[this.solver.GIHistory.length-1];
+    const [mins, saddles, maxs] = this.solver.minSaddleMaxHistory[this.solver.minSaddleMaxHistory.length-1] || [0,0,0];
+    document.getElementById('hudEuler').textContent = `χ (Euler): ${lastChi !== undefined ? lastChi : '-'}`;
+    document.getElementById('hudCycles').textContent = `Cycles (best): ${lastCycles !== undefined ? lastCycles : '-'}`;
+    document.getElementById('hudMinSaddleMax').textContent = `Min/Saddle/Max: ${mins}/${saddles}/${maxs}`;
+    document.getElementById('hudGI').textContent = `Genetic Index: ${lastGI !== undefined ? lastGI : '-'}`;
+  }
+
+  clearUI() {
+    document.getElementById('hudGen').textContent = 'Gen: -';
+    document.getElementById('hudBest').textContent = 'Best Fit: -';
+    document.getElementById('hudLen').textContent = 'Length: -';
+    document.getElementById('hudAvg').textContent = 'Avg Fit: -';
+    document.getElementById('hudDiv').textContent = 'Diversity: -';
+    document.getElementById('hudMut').textContent = 'Mutation: -';
+
+    document.getElementById('hudEuler').textContent = 'χ (Euler): -';
+    document.getElementById('hudCycles').textContent = 'Cycles (best): -';
+    document.getElementById('hudMinSaddleMax').textContent = 'Min/Saddle/Max: -';
+    document.getElementById('hudGI').textContent = 'Genetic Index: -';
+  }
+
+  showMessage(msg, type = 'info') {
+    const el = document.getElementById('msg');
+    el.textContent = msg;
+    el.style.color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#3ad29f' : type === 'warning' ? '#ffa94d' : '#a9c4ff';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => { new App(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Homeomorphism: Radial Projection from S² to the Cube</title>
+<style>
+  html, body { height:100%; margin:0; background:#0b0f14; color:#e8eef6; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #app { position:relative; height:100%; }
+  #hud {
+    position:absolute; top:12px; left:12px; right:12px;
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    background:rgba(15,20,30,0.85); border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; padding:12px 16px; backdrop-filter: blur(8px);
+    z-index:10;
+  }
+  #slider { width:280px; cursor:pointer; }
+  .badge { 
+    padding:4px 12px; border-radius:999px; background:#1a2230; 
+    border:1px solid #2a364b; font-size:13px; font-weight:500;
+  }
+  button {
+    background:#1d2a3a; color:#dfe9f7; border:1px solid #2b3d57; border-radius:8px;
+    padding:7px 12px; cursor:pointer; font-size:13px; transition:all 0.2s;
+  }
+  button:hover { background:#243449; border-color:#3a5270; }
+  button:disabled { opacity:0.5; cursor:not-allowed; }
+  #legend { display:flex; gap:10px; align-items:center; font-size:12px; flex-wrap:wrap; }
+  .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .dot.sphere { background:#7cc5ff; }
+  .dot.cube { background:#ffb86b; }
+  .dot.ray { background:#9cf59c; }
+  
+  #info {
+    position:absolute; 
+    bottom: 12px; 
+    right: 12px;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    background:rgba(15,20,30,0.85); border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; padding:12px 16px; backdrop-filter: blur(8px);
+    font-size:12px; line-height:1.6; z-index:10;
+  }
+  #info h3 { margin:0 0 8px 0; font-size:14px; color:#9bd1ff; }
+  #info p { margin:6px 0; }
+  .formula { 
+    background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; 
+    margin:8px 0; font-family:Consolas,Monaco,monospace; font-size:11px;
+    border-left:3px solid #2a7fff;
+  }
+  #canvas { width:100%; height:100%; display:block; }
+  .control-group { display:flex; gap:8px; align-items:center; }
+  label { font-size:13px; font-weight:500; }
+
+  .credit {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-size: 11px;
+    color: rgba(232, 238, 246, 0.5);
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <span class="badge">Homeomorphism by Radial Projection f: S² → ∂C</span>
+    <div class="control-group">
+      <label for="slider">Interpolation <span id="lambdaLabel">(λ = 0.00)</span></label>
+      <input id="slider" type="range" min="0" max="1" step="0.005" value="0" />
+    </div>
+    <button id="play">▶ Animate</button>
+    <button id="pause" disabled>⏸ Pause</button>
+    <button id="reset">⟲ Reset</button>
+    <div id="legend">
+      <span class="dot sphere"></span> <strong>u ∈ S²</strong> &nbsp;·&nbsp;
+      <span class="dot cube"></span> <strong>f(u) ∈ ∂C</strong> &nbsp;·&nbsp;
+      <span class="dot ray"></span> rays
+    </div>
+  </div>
+  
+  <div id="info">
+    <h3>📐 Theorem: f is a homeomorphism</h3>
+    <p><strong>Definition:</strong> For u = (x,y,z) ∈ S², let t(u) = 1/max{|x|,|y|,|z|} be the first contact with ∂C.</p>
+    <div class="formula">
+      f(u) = t(u)·u = u / max{|x|,|y|,|z|}  [projection S² → ∂C]<br>
+      f⁻¹(p) = p / ‖p‖  [normalization ∂C → S²]
+    </div>
+    <p><strong>λ = 0:</strong> Shows the cube C = f(S²). <strong>λ = 1:</strong> Shows the sphere S². 
+    The slider interpolates (1−λ)f(u) + λu, showing the continuous deformation.</p>
+  </div>
+  
+  <div class="credit">Material prepared by Professor Sergio Gevatschnaider</div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// OrbitControls (r128)
+(function(){class OrbitControls extends THREE.EventDispatcher{constructor(object,domElement){super();this.object=object;this.domElement=domElement;this.enabled=true;this.target=new THREE.Vector3();this.minDistance=0;this.maxDistance=Infinity;this.minPolarAngle=0;this.maxPolarAngle=Math.PI;this.enableDamping=false;this.dampingFactor=0.05;this.enableZoom=true;this.zoomSpeed=1.0;this.enableRotate=true;this.rotateSpeed=1.0;this.enablePan=true;this.panSpeed=1.0;const scope=this;const EPS=0.000001;const spherical=new THREE.Spherical();const sphericalDelta=new THREE.Spherical();let scale=1;const panOffset=new THREE.Vector3();let zoomChanged=false;const rotateStart=new THREE.Vector2();const rotateEnd=new THREE.Vector2();const rotateDelta=new THREE.Vector2();const panStart=new THREE.Vector2();const panEnd=new THREE.Vector2();const panDelta=new THREE.Vector2();const dollyStart=new THREE.Vector2();const dollyEnd=new THREE.Vector2();const dollyDelta=new THREE.Vector2();const STATE={NONE:-1,ROTATE:0,DOLLY:1,PAN:2,TOUCH_ROTATE:3,TOUCH_PAN:4,TOUCH_DOLLY_PAN:5};let state=STATE.NONE;this.update=function(){const offset=new THREE.Vector3();const quat=new THREE.Quaternion().setFromUnitVectors(object.up,new THREE.Vector3(0,1,0));const quatInverse=quat.clone().invert();const lastPosition=new THREE.Vector3();const lastQuaternion=new THREE.Quaternion();return function update(){const position=scope.object.position;offset.copy(position).sub(scope.target);offset.applyQuaternion(quat);spherical.setFromVector3(offset);if(scope.enableDamping){spherical.theta+=sphericalDelta.theta*scope.dampingFactor;spherical.phi+=sphericalDelta.phi*scope.dampingFactor;}else{spherical.theta+=sphericalDelta.theta;spherical.phi+=sphericalDelta.phi;}
+spherical.theta=Math.max(0,Math.min(Math.PI*2,spherical.theta));spherical.phi=Math.max(scope.minPolarAngle,Math.min(scope.maxPolarAngle,spherical.phi));spherical.makeSafe();spherical.radius*=scale;spherical.radius=Math.max(scope.minDistance,Math.min(scope.maxDistance,spherical.radius));scope.target.add(panOffset);offset.setFromSpherical(spherical);offset.applyQuaternion(quatInverse);position.copy(scope.target).add(offset);scope.object.lookAt(scope.target);if(scope.enableDamping===true){sphericalDelta.theta*=(1-scope.dampingFactor);sphericalDelta.phi*=(1-scope.dampingFactor);panOffset.multiplyScalar(1-scope.dampingFactor);}else{sphericalDelta.set(0,0,0);panOffset.set(0,0,0);}
+scale=1;if(zoomChanged||lastPosition.distanceToSquared(scope.object.position)>EPS||8*(1-lastQuaternion.dot(scope.object.quaternion))>EPS){scope.dispatchEvent({type:'change'});lastPosition.copy(scope.object.position);lastQuaternion.copy(scope.object.quaternion);zoomChanged=false;return true;}
+return false;};}();function getZoomScale(){return Math.pow(0.95,scope.zoomSpeed);}
+function rotateLeft(angle){sphericalDelta.theta-=angle;}
+function rotateUp(angle){sphericalDelta.phi-=angle;}
+function dollyIn(dollyScale){scale/=dollyScale;}
+function dollyOut(dollyScale){scale*=dollyScale;}
+function handleMouseDownRotate(event){rotateStart.set(event.clientX,event.clientY);}
+function handleMouseDownDolly(event){dollyStart.set(event.clientX,event.clientY);}
+function handleMouseMoveRotate(event){rotateEnd.set(event.clientX,event.clientY);rotateDelta.subVectors(rotateEnd,rotateStart).multiplyScalar(scope.rotateSpeed);rotateLeft(2*Math.PI*rotateDelta.x/scope.domElement.clientHeight);rotateUp(2*Math.PI*rotateDelta.y/scope.domElement.clientHeight);rotateStart.copy(rotateEnd);scope.update();}
+function handleMouseMoveDolly(event){dollyEnd.set(event.clientX,event.clientY);dollyDelta.subVectors(dollyEnd,dollyStart);if(dollyDelta.y>0){dollyIn(getZoomScale());}else if(dollyDelta.y<0){dollyOut(getZoomScale());}
+dollyStart.copy(dollyEnd);scope.update();}
+function handleMouseWheel(event){if(event.deltaY<0){dollyOut(getZoomScale());}else if(event.deltaY>0){dollyIn(getZoomScale());}
+scope.update();}
+function onMouseDown(event){if(scope.enabled===false)return;event.preventDefault();switch(event.button){case 0:state=STATE.ROTATE;handleMouseDownRotate(event);break;case 2:state=STATE.DOLLY;handleMouseDownDolly(event);break;}
+if(state!==STATE.NONE){document.addEventListener('mousemove',onMouseMove,false);document.addEventListener('mouseup',onMouseUp,false);scope.dispatchEvent({type:'start'});}}
+function onMouseMove(event){if(scope.enabled===false)return;event.preventDefault();switch(state){case STATE.ROTATE:handleMouseMoveRotate(event);break;case STATE.DOLLY:handleMouseMoveDolly(event);break;}}
+function onMouseUp(){if(scope.enabled===false)return;document.removeEventListener('mousemove',onMouseMove,false);document.removeEventListener('mouseup',onMouseUp,false);scope.dispatchEvent({type:'end'});state=STATE.NONE;}
+function onMouseWheel(event){if(scope.enabled===false||scope.enableZoom===false||state!==STATE.NONE)return;event.preventDefault();event.stopPropagation();handleMouseWheel(event);scope.dispatchEvent({type:'start'});scope.dispatchEvent({type:'end'});}
+this.domElement.addEventListener('contextmenu',(e)=>e.preventDefault(),false);this.domElement.addEventListener('mousedown',onMouseDown,false);this.domElement.addEventListener('wheel',onMouseWheel,false);this.update();}}
+THREE.OrbitControls=OrbitControls;})();
+
+// Main Application
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0f14);
+
+const camera = new THREE.PerspectiveCamera(42, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+camera.position.set(3.2, 2.2, 3.2);
+scene.add(camera);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+scene.add(new THREE.HemisphereLight(0xcfe9ff, 0x203040, 0.6));
+const key = new THREE.DirectionalLight(0xffffff, 0.8);
+key.position.set(3, 4, 5);
+scene.add(key);
+
+// Geometries
+function projectToCube(u) {
+  const m = Math.max(Math.abs(u.x), Math.abs(u.y), Math.abs(u.z));
+  return u.clone().multiplyScalar(m > 1e-10 ? 1.0 / m : 1.0);
+}
+
+const sphereGeo = new THREE.IcosahedronGeometry(1, 4);
+const nVerts = sphereGeo.attributes.position.count;
+
+const uArray = []; // Vertices on the sphere
+const cubeArray = []; // Vertices projected on the cube
+
+for (let i = 0; i < nVerts; i++) {
+  const v = new THREE.Vector3().fromBufferAttribute(sphereGeo.attributes.position, i).normalize();
+  uArray.push(v);
+  cubeArray.push(projectToCube(v));
+}
+
+// Main deformable mesh
+const interpGeo = sphereGeo.clone();
+const solidMat = new THREE.MeshStandardMaterial({ color: 0x2a4870, transparent: true, opacity: 0.88 });
+const mesh = new THREE.Mesh(interpGeo, solidMat);
+scene.add(mesh);
+
+// Visual Guides
+const sphereWire = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.MeshBasicMaterial({ color: 0x7cc5ff, wireframe: true, transparent: true, opacity: 0.25 }));
+scene.add(sphereWire);
+const cubeEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 2, 2)), new THREE.LineBasicMaterial({ color: 0xffb86b, transparent: true, opacity: 0.3 }));
+scene.add(cubeEdges);
+
+// Interpolation and Deformation Logic
+let lambda = 0.0;
+const slider = document.getElementById('slider');
+const lambdaLabel = document.getElementById('lambdaLabel');
+
+function setLambda(val) {
+  lambda = Math.max(0, Math.min(1, val));
+  lambdaLabel.textContent = `(λ = ${lambda.toFixed(2)})`;
+  
+  const positions = interpGeo.attributes.position;
+
+  for (let i = 0; i < nVerts; i++) {
+    const u = uArray[i];
+    const c = cubeArray[i];
+    const x = (1 - lambda) * c.x + lambda * u.x;
+    const y = (1 - lambda) * c.y + lambda * u.y;
+    const z = (1 - lambda) * c.z + lambda * u.z;
+    
+    positions.setXYZ(i, x, y, z);
+  }
+  
+  positions.needsUpdate = true;
+  interpGeo.computeVertexNormals();
+
+  // Update guide opacity
+  const cubeInfluence = 1 - lambda;
+  solidMat.opacity = 0.75 + 0.15 * lambda;
+  sphereWire.material.opacity = 0.15 + 0.15 * lambda;
+  cubeEdges.material.opacity = 0.2 + 0.2 * cubeInfluence;
+}
+
+slider.addEventListener('input', (e) => setLambda(parseFloat(e.target.value)));
+
+// Animation Controls and Main Loop
+let playing = false;
+const btnPlay = document.getElementById('play');
+const btnPause = document.getElementById('pause');
+const btnReset = document.getElementById('reset');
+btnPlay.addEventListener('click', () => { playing = true; btnPlay.disabled = true; btnPause.disabled = false; });
+btnPause.addEventListener('click', () => { playing = false; btnPlay.disabled = false; btnPause.disabled = true; });
+btnReset.addEventListener('click', () => { playing = false; slider.value = 0; setLambda(0); btnPlay.disabled = false; btnPause.disabled = true; });
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (playing) {
+    let currentVal = parseFloat(slider.value) + 0.005;
+    if (currentVal > 1) currentVal = 0; // Loop animation
+    slider.value = currentVal;
+    setLambda(currentVal);
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// Initialization
+function onResize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+
+setLambda(0.0);
+onResize();
+animate();
+</script>
+</body>
+</html>

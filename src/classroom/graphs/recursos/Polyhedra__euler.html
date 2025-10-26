@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Proof - Euler's Formula</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      background: linear-gradient(135deg, rgba(79, 124, 255, 0.1), rgba(138, 43, 226, 0.1));
+      border-radius: 20px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(79, 124, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #4f7cff, #b47cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .formula-main {
+      font-size: 1.8em;
+      color: #ffd700;
+      margin: 15px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      background: rgba(30, 35, 60, 0.8);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(79, 124, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: rgba(10, 14, 39, 0.6);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid rgba(79, 124, 255, 0.3);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      background: rgba(20, 25, 45, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(79, 124, 255, 0.2);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #a0a0ff;
+      font-weight: 600;
+      font-size: 0.9em;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+      padding: 8px;
+      background: rgba(30, 35, 60, 0.8);
+      border: 1px solid rgba(79, 124, 255, 0.3);
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 1em;
+    }
+
+    input[type="range"] {
+      cursor: pointer;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #4f7cff, #6b8fff);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95em;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 124, 255, 0.4);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, #6b4fff, #8b6fff);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(79, 124, 255, 0.15), rgba(138, 43, 226, 0.15));
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(79, 124, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(79, 124, 255, 0.3);
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #a0a0ff;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .stat-formula {
+      font-size: 0.85em;
+      color: #ffd700;
+      margin-top: 8px;
+    }
+
+    .result {
+      background: linear-gradient(135deg, rgba(31, 139, 76, 0.2), rgba(31, 139, 76, 0.1));
+      border: 2px solid #1f8b4c;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.3em;
+      margin-top: 20px;
+    }
+
+    .result.invalid {
+      background: linear-gradient(135deg, rgba(176, 0, 32, 0.2), rgba(176, 0, 32, 0.1));
+      border-color: #b00020;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9em;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .info-box {
+      background: rgba(79, 124, 255, 0.1);
+      border-left: 4px solid #4f7cff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(20, 25, 45, 0.6);
+      border-radius: 10px;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .step.active {
+      background: rgba(79, 124, 255, 0.3);
+      border: 1px solid #4f7cff;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+      color: #888;
+      border-top: 1px solid rgba(79, 124, 255, 0.2);
+    }
+
+    @media (max-width: 968px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔷 Visual Proof of Euler's Formula 🔷</h1>
+      <div class="formula-main">V - E + F = χ</div>
+      <p>Explore 3D polyhedra with interactive spherical projection</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Vertices (V)</div>
+        <div class="stat-value" id="vertexCount">0</div>
+        <div class="stat-formula">Points</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Edges (E)</div>
+        <div class="stat-value" id="edgeCount">0</div>
+        <div class="stat-formula">Lines</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Faces (F)</div>
+        <div class="stat-value" id="faceCount">0</div>
+        <div class="stat-formula">Surfaces</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">χ (Chi)</div>
+        <div class="stat-value" id="chiValue">0</div>
+        <div class="stat-formula">V - E + F</div>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      Select a polyhedron to begin
+    </div>
+
+    <div class="panel">
+      <h2 style="margin-bottom: 20px;">🎮 Interactive Controls</h2>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label>Select Polyhedron</label>
+          <select id="polyhedronSelect">
+            <option value="tetrahedron">Tetrahedron (4 faces)</option>
+            <option value="cube" selected>Cube (6 faces)</option>
+            <option value="octahedron">Octahedron (8 faces)</option>
+            <option value="dodecahedron">Dodecahedron (12 faces)</option>
+            <option value="icosahedron">Icosahedron (20 faces)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>View Mode</label>
+          <select id="viewMode">
+            <option value="solid">Solid</option>
+            <option value="wireframe">Wireframe</option>
+            <option value="vertices">Vertices Only</option>
+            <option value="edges">Edges Only</option>
+            <option value="faces">Faces Only</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Auto-Rotation</label>
+          <input type="range" id="rotationSpeed" min="0" max="0.05" step="0.005" value="0.01">
+        </div>
+
+        <div class="control-group">
+          <label>Scale: <span id="scaleValue">1.0</span></label>
+          <input type="range" id="scaleSlider" min="0.5" max="2" step="0.1" value="1">
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button onclick="toggleProjection()">🌍 Show/Hide Sphere</button>
+        <button onclick="highlightVertices()">📍 Highlight Vertices</button>
+        <button onclick="highlightEdges()">📏 Highlight Edges</button>
+        <button onclick="highlightFaces()">🔷 Highlight Faces</button>
+        <button class="secondary" onclick="resetView()">↻ Reset View</button>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #ff6b6b;"></div>
+          <span>Vertices</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #4ecdc4;"></div>
+          <span>Edges</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #ffd93d;"></div>
+          <span>Faces</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>🎨 3D Polyhedron View</h2>
+        <div class="canvas-container">
+          <canvas id="canvas3d"></canvas>
+        </div>
+        <div class="info-box">
+          <strong>💡 Interaction:</strong> Drag to rotate • Scroll to zoom • Click elements to highlight
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🌐 Spherical Projection</h2>
+        <div class="canvas-container">
+          <canvas id="canvasSphere"></canvas>
+        </div>
+        <div class="info-box">
+          <strong>🔍 Concept:</strong> Every convex polyhedron can be projected onto a sphere. The formula V - E + F = 2 is invariant under this projection.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>📚 Step-by-Step Proof</h2>
+      <div class="step-indicator">
+        <div class="step active" onclick="showStep(1)">
+          <strong>1.</strong> Select
+        </div>
+        <div class="step" onclick="showStep(2)">
+          <strong>2.</strong> Count V
+        </div>
+        <div class="step" onclick="showStep(3)">
+          <strong>3.</strong> Count E
+        </div>
+        <div class="step" onclick="showStep(4)">
+          <strong>4.</strong> Count F
+        </div>
+        <div class="step" onclick="showStep(5)">
+          <strong>5.</strong> Calculate χ
+        </div>
+      </div>
+      <div id="stepContent" class="info-box">
+        Step 1: Select a polyhedron and observe its 3D structure.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Material prepared by Professor Sergio Gevatschnaider</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    let scene, camera, renderer, polyhedron, sphereWireframe;
+    let scene2, camera2, renderer2, projectedPolyhedron, projectionSphere;
+    let rotationSpeed = 0.01;
+    let showSphere = true;
+    let currentStep = 1;
+
+    const polyhedronData = {
+      tetrahedron: { V: 4, E: 6, F: 4, geometry: null },
+      cube: { V: 8, E: 12, F: 6, geometry: null },
+      octahedron: { V: 6, E: 12, F: 8, geometry: null },
+      dodecahedron: { V: 20, E: 30, F: 12, geometry: null },
+      icosahedron: { V: 12, E: 30, F: 20, geometry: null }
+    };
+
+    function init() {
+      // Main scene (polyhedron)
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      camera.position.z = 5;
+
+      const canvas = document.getElementById('canvas3d');
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+      renderer.setClearColor(0x0a0e27, 1);
+
+      // Spherical projection scene
+      scene2 = new THREE.Scene();
+      camera2 = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      camera2.position.z = 5;
+
+      const canvas2 = document.getElementById('canvasSphere');
+      renderer2 = new THREE.WebGLRenderer({ canvas: canvas2, antialias: true, alpha: true });
+      renderer2.setSize(canvas2.offsetWidth, canvas2.offsetHeight);
+      renderer2.setClearColor(0x0a0e27, 1);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      const pointLight = new THREE.PointLight(0xffffff, 0.8);
+      pointLight.position.set(10, 10, 10);
+      scene.add(ambientLight, pointLight);
+      scene2.add(ambientLight.clone(), pointLight.clone());
+
+      // Create polyhedra
+      createPolyhedron('cube');
+      createProjectionSphere();
+
+      // Event listeners
+      document.getElementById('polyhedronSelect').addEventListener('change', (e) => {
+        createPolyhedron(e.target.value);
+        showStep(1); // Reset steps on change
+      });
+
+      document.getElementById('rotationSpeed').addEventListener('input', (e) => {
+        rotationSpeed = parseFloat(e.target.value);
+      });
+
+      document.getElementById('scaleSlider').addEventListener('input', (e) => {
+        const scale = parseFloat(e.target.value);
+        document.getElementById('scaleValue').textContent = scale.toFixed(1);
+        if (polyhedron) polyhedron.scale.set(scale, scale, scale);
+        if (projectedPolyhedron) projectedPolyhedron.scale.set(scale, scale, scale);
+      });
+
+      document.getElementById('viewMode').addEventListener('change', (e) => {
+        updateViewMode(e.target.value);
+      });
+
+      // Mouse interaction
+      let isDragging = false;
+      let previousMousePosition = { x: 0, y: 0 };
+      const canvases = [document.getElementById('canvas3d'), document.getElementById('canvasSphere')];
+      
+      canvases.forEach(canvas => {
+          canvas.addEventListener('mousedown', () => isDragging = true);
+          canvas.addEventListener('mouseup', () => isDragging = false);
+          canvas.addEventListener('mouseleave', () => isDragging = false);
+          canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && polyhedron) {
+              const rect = canvas.getBoundingClientRect();
+              const currentX = e.clientX - rect.left;
+              const currentY = e.clientY - rect.top;
+              
+              if(previousMousePosition.x === 0 && previousMousePosition.y === 0) {
+                 // First move
+                 previousMousePosition = { x: currentX, y: currentY };
+                 return;
+              }
+
+              const deltaX = currentX - previousMousePosition.x;
+              const deltaY = currentY - previousMousePosition.y;
+              
+              polyhedron.rotation.y += deltaX * 0.01;
+              polyhedron.rotation.x += deltaY * 0.01;
+              if (projectedPolyhedron) {
+                projectedPolyhedron.rotation.y = polyhedron.rotation.y;
+                projectedPolyhedron.rotation.x = polyhedron.rotation.x;
+              }
+              previousMousePosition = { x: currentX, y: currentY };
+            } else {
+              previousMousePosition = { x: 0, y: 0 };
+            }
+          });
+      });
+
+
+      animate();
+    }
+
+    function createPolyhedron(type) {
+      if (polyhedron) scene.remove(polyhedron);
+      if (projectedPolyhedron) scene2.remove(projectedPolyhedron);
+
+      let geometry;
+      switch(type) {
+        case 'tetrahedron':
+          geometry = new THREE.TetrahedronGeometry(2);
+          break;
+        case 'cube':
+          geometry = new THREE.BoxGeometry(2, 2, 2);
+          break;
+        case 'octahedron':
+          geometry = new THREE.OctahedronGeometry(2);
+          break;
+        case 'dodecahedron':
+          geometry = new THREE.DodecahedronGeometry(2);
+          break;
+        case 'icosahedron':
+          geometry = new THREE.IcosahedronGeometry(2);
+          break;
+      }
+      polyhedronData[type].geometry = geometry; // Store for later access if needed
+
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x4f7cff,
+        transparent: true,
+        opacity: 0.8,
+        side: THREE.DoubleSide
+      });
+
+      polyhedron = new THREE.Mesh(geometry, material);
+      scene.add(polyhedron);
+
+      // Wireframe
+      const wireframe = new THREE.LineSegments(
+        new THREE.EdgesGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: 0x4ecdc4, linewidth: 2 })
+      );
+      polyhedron.add(wireframe);
+
+      // Vertices
+      const vertices = geometry.attributes.position;
+      const vertexGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+      const vertexMaterial = new THREE.MeshBasicMaterial({ color: 0xff6b6b });
+      
+      const uniqueVertices = new Set();
+      for (let i = 0; i < vertices.count; i++) {
+        const v = new THREE.Vector3(
+          vertices.getX(i),
+          vertices.getY(i),
+          vertices.getZ(i)
+        );
+        const key = `${v.x.toFixed(4)},${v.y.toFixed(4)},${v.z.toFixed(4)}`;
+        if (!uniqueVertices.has(key)) {
+          uniqueVertices.add(key);
+          const sphere = new THREE.Mesh(vertexGeometry, vertexMaterial);
+          sphere.position.copy(v);
+          polyhedron.add(sphere);
+        }
+      }
+
+      // Sphere projection
+      const projectedGeometry = geometry.clone();
+      const pos = projectedGeometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+          const v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
+          v.normalize().multiplyScalar(3); // Project onto a sphere of radius 3
+          pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      
+      projectedPolyhedron = new THREE.Mesh(projectedGeometry, material.clone());
+      
+      const projectedWireframe = new THREE.LineSegments(
+        new THREE.EdgesGeometry(projectedGeometry),
+        new THREE.LineBasicMaterial({ color: 0x4ecdc4, linewidth: 2 })
+      );
+      projectedPolyhedron.add(projectedWireframe);
+
+      scene2.add(projectedPolyhedron);
+      updateStats(type);
+      updateViewMode(document.getElementById('viewMode').value);
+    }
+
+    function createProjectionSphere() {
+      const sphereGeometry = new THREE.SphereGeometry(3, 32, 32);
+      const sphereMaterial = new THREE.MeshBasicMaterial({
+        color: 0x6b4fff,
+        transparent: true,
+        opacity: 0.1,
+        wireframe: true
+      });
+      projectionSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      scene2.add(projectionSphere);
+    }
+
+    function updateStats(type) {
+      const data = polyhedronData[type];
+      document.getElementById('vertexCount').textContent = data.V;
+      document.getElementById('edgeCount').textContent = data.E;
+      document.getElementById('faceCount').textContent = data.F;
+      
+      const chi = data.V - data.E + data.F;
+      document.getElementById('chiValue').textContent = chi;
+
+      const result = document.getElementById('result');
+      if (chi === 2) {
+        result.className = 'result';
+        result.innerHTML = `✓ <strong>${data.V} - ${data.E} + ${data.F} = ${chi}</strong> — Euler's formula holds!`;
+      } else {
+        result.className = 'result invalid';
+        result.innerHTML = `✗ Result: ${chi} (expected: 2 for convex polyhedra)`;
+      }
+    }
+
+    function updateViewMode(mode) {
+      if (!polyhedron || !projectedPolyhedron) return;
+      
+      const targets = [polyhedron, projectedPolyhedron];
+      
+      targets.forEach(target => {
+          target.material.visible = true;
+          target.material.opacity = 0.8;
+          
+          target.children.forEach(child => {
+            child.visible = true;
+          });
+
+          switch(mode) {
+            case 'wireframe':
+              target.material.opacity = 0.2;
+              break;
+            case 'vertices':
+              target.material.visible = false;
+              target.children.forEach((child, i) => {
+                if (i === 0) child.visible = false; // wireframe
+              });
+              break;
+            case 'edges':
+              target.material.visible = false;
+              target.children.forEach((child, i) => {
+                if (i !== 0) child.visible = false; // only wireframe
+              });
+              break;
+            case 'faces':
+              target.children.forEach(child => {
+                child.visible = false;
+              });
+              break;
+          }
+      });
+    }
+
+    function toggleProjection() {
+      showSphere = !showSphere;
+      if (projectionSphere) {
+        projectionSphere.visible = showSphere;
+      }
+    }
+
+    function highlightVertices() {
+      if (!polyhedron) return;
+      const targets = [polyhedron, projectedPolyhedron];
+      targets.forEach(target => {
+        target.children.forEach((child, i) => {
+            if (i > 0) { // vertices
+              child.material.emissive = new THREE.Color(0xff6b6b);
+              setTimeout(() => {
+                child.material.emissive = new THREE.Color(0x000000);
+              }, 1000);
+            }
+        });
+      });
+    }
+
+    function highlightEdges() {
+      if (!polyhedron) return;
+      const targets = [polyhedron, projectedPolyhedron];
+      targets.forEach(target => {
+          const wireframe = target.children[0];
+          const originalColor = wireframe.material.color.clone();
+          wireframe.material.color = new THREE.Color(0xffff00);
+          setTimeout(() => {
+            wireframe.material.color = originalColor;
+          }, 1000);
+      });
+    }
+
+    function highlightFaces() {
+      if (!polyhedron) return;
+       const targets = [polyhedron, projectedPolyhedron];
+       targets.forEach(target => {
+          const originalColor = target.material.color.clone();
+          target.material.color = new THREE.Color(0xffd93d);
+          target.material.emissive = new THREE.Color(0xffd93d);
+          target.material.emissiveIntensity = 0.3;
+          setTimeout(() => {
+            target.material.color = originalColor;
+            target.material.emissive = new THREE.Color(0x000000);
+          }, 1000);
+       });
+    }
+
+    function resetView() {
+      if (polyhedron) {
+        polyhedron.rotation.set(0, 0, 0);
+        polyhedron.scale.set(1, 1, 1);
+      }
+      if (projectedPolyhedron) {
+        projectedPolyhedron.rotation.set(0, 0, 0);
+        projectedPolyhedron.scale.set(1, 1, 1);
+      }
+      document.getElementById('scaleSlider').value = 1;
+      document.getElementById('scaleValue').textContent = '1.0';
+    }
+
+    function showStep(step) {
+      currentStep = step;
+      document.querySelectorAll('.step').forEach((el, i) => {
+        el.classList.toggle('active', i + 1 === step);
+      });
+
+      const content = document.getElementById('stepContent');
+      const type = document.getElementById('polyhedronSelect').value;
+      const data = polyhedronData[type];
+
+      const steps = [
+        `<strong>Step 1:</strong> Observe the selected polyhedron in 3D. You can rotate it by dragging with the mouse.`,
+        `<strong>Step 2:</strong> Let's count the vertices (V). This polyhedron has <span style="color: #ff6b6b; font-size: 1.2em;"><strong>${data.V} vertices</strong></span>. These are the points where the edges meet.`,
+        `<strong>Step 3:</strong> Now let's count the edges (E). There are <span style="color: #4ecdc4; font-size: 1.2em;"><strong>${data.E} edges</strong></span>. These are the lines connecting the vertices.`,
+        `<strong>Step 4:</strong> Finally, the faces (F). This polyhedron has <span style="color: #ffd93d; font-size: 1.2em;"><strong>${data.F} faces</strong></span>. These are the flat surfaces.`,
+        `<strong>Step 5:</strong> We apply the formula: V - E + F = ${data.V} - ${data.E} + ${data.F} = <span style="color: #4eff4e; font-size: 1.3em;"><strong>${data.V - data.E + data.F}</strong></span><br><br>✓ For all convex polyhedra, the result is always <strong>2</strong>. This is the Euler characteristic χ = 2.`
+      ];
+
+      content.innerHTML = steps[step - 1];
+
+      // Highlight corresponding elements
+      if (step === 2) highlightVertices();
+      if (step === 3) highlightEdges();
+      if (step === 4) highlightFaces();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (polyhedron) {
+        polyhedron.rotation.y += rotationSpeed;
+        polyhedron.rotation.x += rotationSpeed * 0.5;
+      }
+
+      if (projectedPolyhedron) {
+        projectedPolyhedron.rotation.y = polyhedron.rotation.y;
+        projectedPolyhedron.rotation.x = polyhedron.rotation.x;
+      }
+
+      if (projectionSphere) {
+        projectionSphere.rotation.y += rotationSpeed * 0.3;
+      }
+
+      renderer.render(scene, camera);
+      renderer2.render(scene2, camera2);
+    }
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('canvas3d');
+      const canvas2 = document.getElementById('canvasSphere');
+      
+      const canvas1Container = canvas.parentElement;
+      const canvas2Container = canvas2.parentElement;
+
+      const w1 = canvas1Container.offsetWidth;
+      const h1 = canvas1Container.offsetHeight;
+      camera.aspect = w1 / h1;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w1, h1);
+
+      const w2 = canvas2Container.offsetWidth;
+      const h2 = canvas2Container.offsetHeight;
+      camera2.aspect = w2 / h2;
+      camera2.updateProjectionMatrix();
+      renderer2.setSize(w2, h2);
+    });
+    
+    // Initial resize
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
+
+    init();
+  </script>
+</body>
+</html>
