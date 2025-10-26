@@ -81,20 +81,8 @@ pip install numpy pandas matplotlib scipy jupyter deap pymoo
 
 # 4. Inicia Jupyter
 jupyter lab
-```
-Ahora puedes explorar los tutoriales en la carpeta `notebooks/`.
-
 ---
 ¡Entendido! He adaptado todos los enlaces al nuevo formato de Netlify que proporcionaste.
-
-Aquí está el código Markdown actualizado con los resúmenes y los nuevos enlaces de acceso.
-
----
-¡Perfecto! He procesado y analizado el contenido completo de tu notebook de Google Colab. Es un módulo muy completo y bien estructurado sobre Algoritmos Genéticos.
-
-Aquí tienes el bloque en formato Markdown listo para añadir a tu `README.md` en GitHub, con el resumen detallado y el enlace directo a Colab.
-
----
 
 ### Módulo: Algoritmos Genéticos Aplicados
 
