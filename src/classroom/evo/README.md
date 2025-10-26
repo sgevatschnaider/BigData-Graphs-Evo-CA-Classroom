@@ -81,6 +81,7 @@ pip install numpy pandas matplotlib scipy jupyter deap pymoo
 
 # 4. Inicia Jupyter
 jupyter lab
+<img width="918" height="141" alt="image" src="https://github.com/user-attachments/assets/a21b9eff-8d3f-4dc5-bcfd-51c60897e922" />
 
 ### Módulo: Algoritmos Genéticos Aplicados
 
