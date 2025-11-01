@@ -24,7 +24,7 @@
 
 ---
 
-## 👁️ Visión General
+##  Visión General
 
 Este repositorio ofrece una ruta de aprendizaje estructurada, desde los fundamentos teóricos de los Algoritmos Evolutivos (EA) hasta su implementación práctica en problemas de optimización, incluyendo algoritmos multiobjetivo (MOEA).
 
@@ -104,7 +104,7 @@ Al finalizar el estudio de este material, serás capaz de:
 
 ---
 
-## 🚀 Instalación Rápida
+##  Instalación Rápida
 
 Se recomienda un entorno virtual para gestionar las dependencias.
 
