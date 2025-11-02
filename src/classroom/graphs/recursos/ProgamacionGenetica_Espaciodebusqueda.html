@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Espacio de Búsqueda y Complejidad en Programación Genética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg-primary: linear-gradient(135deg,#43cea2 0%,#185a9d 100%);
+      --bg-secondary: rgba(255,255,255,.85);
+      --bg-tertiary: rgba(248,250,252,.85);
+      --text-primary:#2c3e50;
+      --text-secondary:#34495e;
+      --text-light:#fff;
+      --accent-primary:#29b6f6;
+      --accent-secondary:#03a9f4;
+      --accent-grad: linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      --border: rgba(226,232,240,.8);
+      --shadow: 0 15px 35px rgba(0,0,0,.08);
+      --radius: 20px;
+      --transition: all .4s cubic-bezier(.25,.8,.25,1);
+    }
+    [data-theme="dark"]{
+      --bg-primary: linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);
+      --bg-secondary: rgba(26,32,44,.9);
+      --bg-tertiary: rgba(45,55,72,.7);
+      --text-primary:#f7fafc;
+      --text-secondary:#a0aec0;
+      --accent-primary:#43cea2;
+      --accent-secondary:#185a9d;
+      --border: rgba(255,255,255,.18);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI;line-height:1.8;background:var(--bg-primary);color:var(--text-primary);min-height:100vh}
+    .container{max-width:1000px;margin:0 auto;padding:2rem}
+    .header{text-align:center;margin-bottom:2rem}
+    .title{font-size:clamp(2rem,4.5vw,3.4rem);font-weight:800;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.6rem}
+    .subtitle{color:var(--text-light);opacity:.95;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+    .theme-toggle{position:fixed;top:1.2rem;right:1.2rem;width:56px;height:56px;border:1px solid var(--border);border-radius:50%;background:var(--bg-secondary);backdrop-filter:blur(12px);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--accent-primary);cursor:pointer;transition:var(--transition);z-index:10}
+    .theme-toggle:hover{transform:scale(1.1) rotate(180deg)}
+    .card{background:var(--bg-secondary);border:2px solid var(--border);box-shadow:var(--shadow);border-radius:var(--radius);overflow:hidden}
+    .section{padding:1.5rem 2rem;border-top:1px solid var(--border);background:var(--bg-tertiary)}
+    .section:first-of-type{border-top:none;background:var(--bg-secondary)}
+    h2{font-size:1.6rem;margin-bottom:.4rem}
+    h3{font-size:1.15rem;margin:1.2rem 0 .6rem;border-bottom:2px solid var(--border);padding-bottom:.4rem}
+    p{color:var(--text-secondary);margin:.8rem 0}
+    ul{padding-left:1.2rem;color:var(--text-secondary)}
+    li{margin:.5rem 0}
+    .mono{font-family:"JetBrains Mono",monospace}
+    .diagram{background:rgba(0,0,0,.03);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin:1.2rem 0;font-family:"JetBrains Mono",monospace;color:var(--text-secondary)}
+    [data-theme="dark"] .diagram{background:rgba(255,255,255,.06)}
+    .diagram-title{font-weight:700;text-align:center;margin-bottom:1rem;color:var(--text-primary);letter-spacing:.02em}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .box{border:2px solid var(--border);border-radius:10px;background:var(--bg-secondary);padding:1rem;text-align:center}
+    .box strong{display:block;color:var(--text-primary);margin-bottom:.3rem}
+    .flow{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem;justify-content:center}
+    .arrow{font-size:2rem;color:var(--accent-primary)}
+    .table{width:100%;border-collapse:collapse;margin:1rem 0;color:var(--text-secondary);font-size:.95rem}
+    .table th,.table td{border:1px solid var(--border);padding:.7rem;text-align:left}
+    .table th{background:rgba(0,0,0,.05);color:var(--text-primary)}
+    [data-theme="dark"] .table th{background:rgba(255,255,255,.06)}
+    footer{text-align:center;margin-top:2rem;padding:1.2rem 0;border-top:1px solid var(--border)}
+    footer p{color:var(--text-light);opacity:.9}
+  </style>
+</head>
+<body data-theme="dark">
+
+  <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+    <i class="fas fa-moon" id="themeIcon"></i>
+  </button>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Espacio de Búsqueda y Complejidad en Programación Genética</h1>
+      <p class="subtitle">Cómo crece el universo de programas, por qué su densidad útil es ínfima y qué implicaciones teóricas tiene.</p>
+    </header>
+
+    <div class="card">
+      <section class="section">
+        <h2>Introducción</h2>
+        <p>El <b>espacio de búsqueda</b> en Programación Genética (PG) es el conjunto de <b>todos los programas posibles</b> que pueden generarse a partir del conjunto de funciones <span class="mono">F</span> y terminales <span class="mono">T</span>. A diferencia de los Algoritmos Genéticos (AG), cuyo espacio suele ser finito y lineal (por ejemplo, todas las cadenas binarias de longitud <span class="mono">n</span>), el espacio en PG es <b>jerárquico</b>, <b>combinatorio</b> y potencialmente <b>infinito</b>, dado que la estructura (profundidad y aridad) es variable.</p>
+      </section>
+
+      <section class="section">
+        <h3>1) Crecimiento combinatorio del espacio</h3>
+        <p>Para funciones de aridad media <span class="mono">k</span>, el número aproximado de árboles distintos hasta una profundidad <span class="mono">d</span> crece como:</p>
+        <div class="diagram">
+          <div class="diagram-title">Aproximación del crecimiento</div>
+          <div class="mono">N(d) ≈ |T| + |F| · (N(d−1))^k, &nbsp; con N(0)=|T|</div>
+        </div>
+        <p>Incluso con conjuntos modestos de símbolos, este crecimiento produce magnitudes astronómicas. Resultado práctico: <b>explorar exhaustivamente es imposible</b> incluso para profundidades moderadas.</p>
+        <p><b>Analogía:</b> si los AG recorren un campo finito de flores, la PG intenta explorar una <i>selva fractal</i> donde cada nueva capa de profundidad multiplica especies de árboles (programas) posibles.</p>
+      </section>
+
+      <section class="section">
+        <h3>2) Espacios lineales (AG) vs. jerárquicos (PG)</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Propiedad</th>
+              <th>AG</th>
+              <th>PG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Representación</td>
+              <td>Vectores/cadenas de longitud fija</td>
+              <td>Árboles/grafos de longitud variable</td>
+            </tr>
+            <tr>
+              <td>Tamaño del espacio</td>
+              <td>Finito (p. ej., 2^n)</td>
+              <td>Potencialmente infinito</td>
+            </tr>
+            <tr>
+              <td>Vecindad</td>
+              <td>Local y simple (mutación de bits)</td>
+              <td>Compleja y discontinua (reemplazo de subárboles)</td>
+            </tr>
+            <tr>
+              <td>Efecto de cambios</td>
+              <td>Cuasi lineal en fitness</td>
+              <td>No lineal; pequeños cambios alteran semántica global</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>En PG, la <b>rugosidad del paisaje</b> de aptitud y la <b>discontinuidad semántica</b> son la norma: una mutación local puede cambiar profundamente el comportamiento.</p>
+      </section>
+
+      <section class="section">
+        <h3>3) Densidad de soluciones útiles</h3>
+        <p>Definimos la <b>densidad</b> de soluciones útiles como:</p>
+        <div class="diagram mono">
+          ρ = (número de programas válidos/altamente aptos) / (número total de programas generables)
+        </div>
+        <p>Los estudios clásicos muestran que <b>ρ es ínfima</b> en espacios GP realistas: la mayoría de los programas aleatorios no compilan, son semánticamente redundantes o tienen aptitud nula. Implicación: la búsqueda ciega rara vez encuentra algo útil; <b>la selección y los operadores</b> deben guiar hacia regiones prometedoras.</p>
+      </section>
+
+      <section class="section">
+        <h3>4) Ejemplos clásicos</h3>
+        <p><b>Artificial Ant Problem (Koza, 1992):</b> evolucionar un programa que guíe una hormiga virtual para recolectar comida. El espacio, aunque con programas cortos, supera fácilmente 10<sup>20</sup> combinaciones. La búsqueda aleatoria falla; la PG lo resuelve mediante presión selectiva y recombinación efectiva.</p>
+        <p><b>MAX Problem (Langdon &amp; Poli, 2002):</b> diseñado para estudiar la relación entre <i>tamaño del programa</i> y <i>aptitud</i>. Se observa que los tamaños tienden a estabilizarse (equilibrios de <i>bloat</i>) y que más grande no siempre es mejor: los operadores sesgan la búsqueda hacia regiones de tamaño medio eficaces.</p>
+      </section>
+
+      <section class="section">
+        <h3>5) Implicaciones teóricas</h3>
+        <ul>
+          <li><b>Inexplorabilidad:</b> el espacio GP no admite cobertura exhaustiva; requiere sesgos y guías.</li>
+          <li><b>Operadores definen geografía:</b> el cruce/mutación inducen la <i>vecindad efectiva</i> del paisaje.</li>
+          <li><b>Sesgo inductivo:</b> elegir <span class="mono">F</span> y <span class="mono">T</span> define qué estructuras son más accesibles.</li>
+          <li><b>Métricas semánticas:</b> conviene medir similitud/neutralidad fenotípica para explorar regiones útiles.</li>
+        </ul>
+      </section>
+
+      <!-- Gráficos al final -->
+      <section class="section">
+        <h2>Visualizaciones</h2>
+
+        <div class="diagram">
+          <div class="diagram-title">Pirámide de utilidad en el espacio GP</div>
+          <div class="grid">
+            <div class="box"><strong>Todos los programas generables</strong><span>Universo sintáctico (enorme)</span></div>
+            <div class="box"><strong>Programas ejecutables</strong><span>Sin errores de ejecución</span></div>
+            <div class="box"><strong>Programas válidos</strong><span>Comportamiento razonable</span></div>
+            <div class="box"><strong>Programas útiles</strong><span>Alta aptitud / cumplen objetivo</span></div>
+          </div>
+          <p style="margin-top:.8rem" class="mono">La “pirámide” sugiere que la fracción útil es diminuta respecto del total.</p>
+        </div>
+
+        <div class="diagram">
+          <div class="diagram-title">Comparación conceptual de espacios (AG vs PG)</div>
+          <div class="flow">
+            <div class="box" style="min-width:240px">
+              <strong>AG (lineal)</strong>
+              <span>Hiperplano discreto, vecindad por bits</span>
+            </div>
+            <div class="arrow">→</div>
+            <div class="box" style="min-width:240px">
+              <strong>PG (jerárquico)</strong>
+              <span>Árboles/grafos, vecindad estructural-semántica</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram">
+          <div class="diagram-title">Crecimiento aproximado con profundidad</div>
+          <pre class="mono">N(0) = |T|
+N(1) ≈ |F| · (|T|)^k
+N(2) ≈ |F| · (|F| · |T|^k)^k
+…
+N(d) ≈ |F| · (N(d−1))^k   ⟶  explosión combinatoria</pre>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+      const body = document.body;
+      function setTheme(t){
+        body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        icon.className = (t==='dark') ? 'fas fa-sun' : 'fas fa-moon';
+      }
+      btn.addEventListener('click', ()=>{
+        const cur = body.getAttribute('data-theme') || 'dark';
+        setTheme(cur==='dark' ? 'light' : 'dark');
+      });
+      setTheme(localStorage.getItem('theme') || 'dark');
+    })();
+  </script>
+</body>
+</html>

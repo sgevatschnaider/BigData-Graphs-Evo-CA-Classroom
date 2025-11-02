@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Académico de Programación Genética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul, .topic-content blockquote { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    .topic-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; color: var(--text-secondary); font-size: 0.9em; }
+    .topic-content th, .topic-content td { border: 1px solid var(--border-color); padding: 0.8rem; text-align: left; }
+    .topic-content th { background-color: rgba(0,0,0,0.05); font-weight: 600; color: var(--text-primary); }
+    .topic-content blockquote { border-left: 4px solid var(--accent-primary); padding-left: 1rem; font-style: italic; }
+    [data-theme="dark"] .topic-content th { background-color: rgba(255,255,255,0.05); }
+
+    .diagram-container, .code-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    .code-container pre { background: transparent; padding: 0; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .code-container code { font-size: 0.9em; }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Programación Genética</h1>
+      <p class="subtitle">Un enfoque evolutivo para la generación automática de programas y soluciones simbólicas.</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Introducción a la Programación Genética</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La Programación Genética (PG), conocida en inglés como <i>Genetic Programming</i> (GP), es una técnica avanzada dentro de la computación evolutiva, un subcampo de la inteligencia artificial inspirado en la biología evolutiva. Su objetivo fundamental es <b>evolucionar automáticamente programas de computadora</b> que resuelvan problemas complejos sin intervención humana directa en la codificación de la solución. En esencia, la PG transforma el proceso de programación en un mecanismo de búsqueda evolutiva, donde los programas se generan, evalúan y refinan iterativamente hasta aproximarse a una solución óptima.</p>
+                <p>Esta técnica fue formalizada por John Koza en la década de 1990, extendiendo las ideas de los algoritmos genéticos (AG) propuestos por John Holland en los años 70. Mientras que los AG optimizan vectores de parámetros fijos (como cadenas binarias representando soluciones numéricas), la PG evoluciona <b>estructuras jerárquicas variables</b>, como código ejecutable. Esto la hace particularmente adecuada para problemas donde la forma de la solución no es conocida a priori, permitiendo descubrimientos innovadores que un programador humano podría no concebir.</p>
+                <blockquote>Teóricamente, la PG se basa en el principio de que la evolución natural, a través de variación, herencia y selección, puede ser modelada computacionalmente para resolver problemas de optimización no lineales y de alta dimensionalidad.</blockquote>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Relación con los Algoritmos Evolutivos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Los algoritmos evolutivos (AE) son un conjunto de metaheurísticas inspiradas en procesos biológicos. La PG es una extensión específica de los AE, enfocada en la evolución de programas o expresiones simbólicas.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Jerarquía de la Computación Evolutiva</div>
+                    <div class="diagram-col">
+                        <div class="diagram-box"><strong>Algoritmos Evolutivos (AE)</strong><span>Metaheurísticas inspiradas en la evolución biológica</span></div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Tipos Principales de AE</div>
+                            <div class="diagram-grid">
+                                <div class="diagram-box"><strong>Algoritmos Genéticos (AG)</strong><span>Evolucionan soluciones de longitud fija (cadenas, vectores)</span></div>
+                                <div class="diagram-box"><strong>Programación Genética (PG)</strong><span>Evolucionan soluciones de estructura variable (árboles, programas)</span></div>
+                                <div class="diagram-box"><strong>Otras Técnicas</strong><span>Evolución Diferencial, PSO, etc.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p>Teóricamente, todos los AE comparten un marco común: una población de candidatos a soluciones que se itera a través de operadores de variación (mutación, cruce) y selección (basada en aptitud). Sin embargo, la PG se distingue por su <b>representación variable y no fija</b>, lo que la alinea más con la <i>evolución abierta</i> en biología.</p>
+                <p>En términos de convergencia teórica, los AE, incluyendo la PG, se analizan bajo el marco de la teoría de esquemas (schema theorem) de Holland. Para la PG, esta teoría se extiende a <b>esquemas arbóreos</b>, donde los subárboles representan bloques de código reutilizables.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. El Núcleo de la Programación Genética</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>3.1. Representación: El Árbol de Sintaxis</h4>
+                <p>La representación estándar en PG es el Árbol de Sintaxis Abstracta (AST), una estructura jerárquica que modela el código.</p>
+                <ul>
+                    <li><b>Nodos Internos (Funciones):</b> Operadores como <code>+</code>, <code>IF-THEN-ELSE</code>.</li>
+                    <li><b>Nodos Hoja (Terminales):</b> Entradas o constantes como <code>X</code>, <code>Y</code>, <code>2</code>.</li>
+                </ul>
+                <div class="diagram-container">
+                    <div class="diagram-title">Ejemplo de Árbol de Sintaxis para: (SIN(X) + COS(Y)) / 2</div>
+                    <div class="diagram-col">
+                        <div class="diagram-box"><strong>/</strong></div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-flow" style="width:100%; align-items: flex-start; justify-content:space-around;">
+                             <div class="diagram-col">
+                                 <div class="diagram-box"><strong>+</strong></div>
+                                 <div class="diagram-arrow down"></div>
+                                 <div class="diagram-flow" style="gap: 2rem;">
+                                      <div class="diagram-col">
+                                          <div class="diagram-box"><strong>SIN</strong></div>
+                                          <div class="diagram-arrow down"></div>
+                                          <div class="diagram-box"><span>X</span></div>
+                                      </div>
+                                      <div class="diagram-col">
+                                          <div class="diagram-box"><strong>COS</strong></div>
+                                          <div class="diagram-arrow down"></div>
+                                          <div class="diagram-box"><span>Y</span></div>
+                                      </div>
+                                 </div>
+                             </div>
+                             <div class="diagram-col">
+                                 <div class="diagram-box"><span>2</span></div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                <h4>3.2. La Función de Aptitud (Fitness)</h4>
+                <p>La función de aptitud es el motor selectivo de la evolución, cuantificando la calidad de cada individuo (programa). Se alinea con el concepto de <b>paisaje de aptitud (fitness landscape)</b> en biología evolutiva.</p>
+                <ul>
+                    <li><b>Definición Formal:</b> Para un programa 𝑝, la aptitud 𝑓(𝑝) es una métrica escalar, a menudo minimizada (error) o maximizada (precisión).</li>
+                    <li><b>Ejemplo (Regresión simbólica):</b> 𝑓(𝑝) = −Σ (𝑦ᵢ − 𝑝(𝑥ᵢ))², donde un valor más alto indica mejor ajuste.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. El Proceso Evolutivo (El Algoritmo)</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <p>El algoritmo de PG es un bucle evolutivo que itera sobre generaciones, refinando la población mediante variación y selección.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Flujo del Algoritmo de Programación Genética</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>1. Inicialización</strong><span>Crear población aleatoria de árboles</span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>2. Evaluación</strong><span>Calcular aptitud de cada árbol</span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>3. Selección</strong><span>Elegir padres para la siguiente generación</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">¿Condición de parada?</span></div>
+                        <div class="diagram-box"><strong>4. Operadores Genéticos</strong><span>Crear hijos (cruce, mutación)</span></div>
+                    </div>
+                </div>
+                
+                <h4>4.4. Operadores Genéticos (Creación de la Nueva Generación)</h4>
+                <p>Estos operadores introducen variación, análogos a la recombinación y mutación genética.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Operadores Genéticos Clave en PG</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-people-arrows"></i> Cruce (Crossover)</strong><span>Intercambia subárboles aleatorios entre dos padres para crear nuevos hijos. Es la principal fuente de innovación.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-random"></i> Mutación (Mutation)</strong><span>Reemplaza un subárbol aleatorio por uno nuevo. Mantiene la diversidad genética.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-crown"></i> Reproducción (Elitismo)</strong><span>Copia los mejores individuos directamente a la siguiente generación para no perder las mejores soluciones encontradas.</span></div>
+                    </div>
+                </div>
+
+                <h4>4.5. Terminación</h4>
+                <p>El proceso se detiene cuando se cumple un criterio, como alcanzar un número máximo de generaciones, que la aptitud de la mejor solución no mejore durante un tiempo, o alcanzar un umbral de calidad.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Ventajas, Desafíos y Avances Teóricos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <div class="diagram-container">
+                    <div class="diagram-title">Balanza de la Programación Genética</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Ventajas</div>
+                            <div class="diagram-box"><strong>Interpretabilidad</strong><span>Los árboles resultantes son legibles y pueden ofrecer insights sobre la solución.</span></div>
+                            <div class="diagram-box"><strong>Flexibilidad Estructural</strong><span>No se limita a optimizar parámetros, sino que crea la estructura de la solución.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Desafíos</div>
+                            <div class="diagram-box"><strong>Bloat</strong><span>Crecimiento descontrolado del tamaño de los árboles, aumentando el coste computacional.</span></div>
+                            <div class="diagram-box"><strong>Alto Costo Computacional</strong><span>Evaluar miles de programas durante cientos de generaciones es intensivo.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <h4>Avances Teóricos</h4>
+                <p>Las áreas de investigación activas incluyen la PG multi-árbol (para evolucionar módulos de software), la integración con deep learning (como en NEAT, Neuroevolution of Augmenting Topologies) y el uso de PG basada en grafos para representaciones más expresivas y complejas.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Comparación con Otros Algoritmos Evolutivos</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Esta tabla resalta cómo la PG extiende los AE hacia dominios simbólicos, mientras que otros se enfocan en la optimización numérica.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Programación Genética (PG)</th>
+                            <th>Algoritmos Genéticos (AG)</th>
+                            <th>Optimización por Enjambre de Partículas (PSO)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Representación</strong></td>
+                            <td>Árboles variables (estructuras jerárquicas)</td>
+                            <td>Cadenas de longitud fija (binarias o reales)</td>
+                            <td>Posiciones en un espacio continuo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Objetivo Principal</strong></td>
+                            <td>Evolucionar código/funciones</td>
+                            <td>Optimizar parámetros</td>
+                            <td>Búsqueda global en espacios continuos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Operadores Clave</strong></td>
+                            <td>Cruce de subárboles, mutación arbórea</td>
+                            <td>Cruce de puntos, mutación bit-flip</td>
+                            <td>Actualización de velocidad/partícula</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ventajas Teóricas</strong></td>
+                            <td>Maneja estructuras dinámicas; descubrimiento inductivo</td>
+                            <td>Simple y altamente paralelizable</td>
+                            <td>Convergencia rápida en problemas continuos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Desventajas</strong></td>
+                            <td>Alto costo evaluativo; bloat</td>
+                            <td>Limitado a estructuras de solución fijas</td>
+                            <td>Puede estancarse en óptimos locales</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aplicaciones</strong></td>
+                            <td>Regresión simbólica, diseño automatizado, IA</td>
+                            <td>Optimización combinatoria, scheduling</td>
+                            <td>Entrenamiento de redes neuronales, clustering</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Conclusión</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La Programación Genética representa un puente teórico entre la biología evolutiva y la computación, ofreciendo un marco poderoso para la síntesis automática de soluciones. Su capacidad para explorar y generar estructuras complejas la convierte en una herramienta fundamental en la búsqueda de inteligencia artificial general y la resolución de problemas donde la forma de la solución es desconocida.</p>
+                <blockquote>La integración de PG con otros algoritmos evolutivos y técnicas de aprendizaje automático promete avances significativos en la IA híbrida, donde la evolución guía el aprendizaje autónomo de manera más creativa y robusta.</blockquote>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">8. Bibliografía</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <ul>
+                    <li>Riolo, R., Worzel, W., Goldman, B., & Tozier, B. (Eds.). (2018). <i>Genetic Programming Theory and Practice XIV</i>. Springer.</li>
+                    <li>Langdon, W. B., & Poli, R. (2002). <i>Foundations of Genetic Programming</i>. Springer.</li>
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
