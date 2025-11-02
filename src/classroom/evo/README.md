@@ -104,6 +104,13 @@ Al finalizar el estudio de este material, serás capaz de:
 
 ---
 
+
+### Material adicional
+##AlphaEvolve y el Descubrimiento de Algoritmos
+
+| 📄 Recurso | 📥 Acceso |
+|---|---|
+|**AlphaEvolve Descubrimiento de Algoritmos.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este documento analiza "AlphaEvolve: A Code-Evolving Agent" de Google DeepMind, un sistema que emplea un proceso evolutivo, impulsado por Modelos de Lenguaje a Gran Escala (LLMs), para descubrir y mejorar algoritmos complejos de forma autónoma. Su arquitectura integra un ensamble de LLMs (Gemini Flash/Pro) para la mutación de código, un sofisticado muestreador de prompts para la generación contextual, un pool distribuido de evaluadores para una rigurosa verificación y puntuación de aptitud, y una base de datos de programas que funciona como una "memoria evolutiva". Al emular un ciclo darwiniano de variación, selección y herencia sobre bases de código completas, AlphaEvolve explora vastos espacios de búsqueda no convexos para hallar soluciones novedosas. El paper destaca descubrimientos significativos y verificados, incluyendo la superación del algoritmo de Strassen (con 56 años de antigüedad) para la multiplicación de matrices complejas y el avance del estado del arte en numerosos dominios matemáticos y de ingeniería en Google.</p></details> | [![Explorar AlphaEvolve](https://img.shields.io/badge/Explorar-AlphaEvolve-9cf?style=for-the-badge&logo=html5)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/cd7d0fdc0643a4ddc73079661dca89bdaeae3cb9/src/classroom/graphs/recursos/AlphaEvolve%20Descubrimiento%20de%20Algoritmos.html) |
 ##  Instalación Rápida
 
 Se recomienda un entorno virtual para gestionar las dependencias.
