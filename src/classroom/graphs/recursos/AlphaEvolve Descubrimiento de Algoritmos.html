@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF--8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis de AlphaEvolve de Google DeepMind</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.4rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow.up::after { content: '↑'; display: block; margin: 0.5rem 0; font-size: 2rem; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    
+    .button-container { text-align: center; margin: 2.5rem 0 1rem 0; }
+    .biblio-button {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .biblio-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">AlphaEvolve: Descubrimiento de Algoritmos</h1>
+      <p class="subtitle">Basado en el paper de Google DeepMind "AlphaEvolve: A Code-Evolving Agent"</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">1. Introducción: El Propósito de AlphaEvolve</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>AlphaEvolve, desarrollado por el equipo de Google DeepMind, representa un avance significativo en la intersección entre inteligencia artificial, algoritmos evolutivos y descubrimiento científico. Como se detalla en el paper, este sistema es un agente de codificación evolutiva que integra modelos de lenguaje de gran escala (LLMs) con un enfoque evolutivo para mejorar algoritmos en tareas complejas, como resolver problemas científicos abiertos o optimizar componentes críticos de infraestructuras computacionales. A diferencia de los LLMs tradicionales, que se limitan a generar código o texto basado en patrones aprendidos de datos humanos, AlphaEvolve opera en un ciclo autónomo de generación, mutación y evaluación de código, permitiendo la exploración de espacios de búsqueda vastos y abiertos donde las soluciones son programas completos que pueden verificarse automáticamente.</p>
+                <p>El paper plantea una pregunta fundamental: ¿pueden los sistemas de IA no solo ejecutar tareas preentrenadas, sino también inventar nuevos algoritmos o construcciones matemáticas que expandan el conocimiento humano? AlphaEvolve responde afirmativamente mediante un proceso inspirado en la evolución darwiniana, pero aplicado a código. Este enfoque supera limitaciones de métodos previos, como FunSearch (Romera-Paredes et al., 2023), al evolucionar archivos de código completos (hasta cientos de líneas) en cualquier lenguaje de programación, en lugar de funciones aisladas de 10-20 líneas. Además, aprovecha LLMs de vanguardia para manejar contextos ricos y evaluaciones paralelas en aceleradores, lo que permite optimizar múltiples métricas simultáneamente. Como resultado, AlphaEvolve ha logrado descubrimientos prácticos, como algoritmos más eficientes para multiplicación de matrices complejas (mejorando el de Strassen de 1969 después de 56 años) y optimizaciones en pilas computacionales de Google, demostrando su potencial para impactar en ciencia, matemáticas y computación.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Arquitectura General</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La arquitectura de AlphaEvolve se basa en un pipeline autónomo orquestado por un controlador distribuido, que integra cuatro componentes principales interconectados, como se ilustra en las Figuras 1 y 2 del paper:</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Diagrama de Flujo de la Arquitectura de AlphaEvolve</div>
+                    <div class="diagram-flow" style="align-items: stretch;">
+                        <div class="diagram-box"><strong>1. Ensemble de LLMs</strong><span>Generan mutaciones de código (diffs). Usan Gemini Flash y Pro.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Proponen</span></div>
+                        <div class="diagram-box"><strong>2. Muestreador de Prompts</strong><span>Construye prompts con contexto, feedback y código padre.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Generan</span></div>
+                        <div class="diagram-box"><strong>3. Pool de Evaluadores</strong><span>Ejecutan el código, verifican correctitud y calculan métricas.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Almacenan en</span></div>
+                        <div class="diagram-box"><strong>4. Base de Datos de Programas</strong><span>"Ecosistema" que guarda soluciones y su fitness.</span></div>
+                    </div>
+                     <div class="diagram-arrow up"><span class="diagram-arrow-label">Feedback y Selección de Padres</span></div>
+                </div>
+                <p>1. <strong>Ensemble de LLMs (Modelos Generadores)</strong>: Un conjunto de LLMs preentrenados, como Gemini 2.0 Flash y Gemini 2.0 Pro, que generan variantes de código. Cada generación se presenta como un "diff" (modificación diferencial) sobre un programa padre existente, similar a una mutación genética. Gemini 2.0 Flash prioriza la velocidad para generar alto volumen de ideas, mientras que Gemini 2.0 Pro ofrece sugerencias de mayor calidad para avances significativos. Este ensemble equilibra throughput y profundidad, permitiendo miles de muestras LLM en lugar de millones, como en sistemas previos.</p>
+                <p>2. <strong>Muestreador de Prompts (Prompt Sampler)</strong>: Este módulo construye prompts ricos y personalizados a partir de programas previos en la base de datos. Incluye contexto explícito (como ecuaciones, literatura o archivos PDF), formateo estocástico para diversidad (usando distribuciones probabilísticas en plantillas), resultados renderizados de evaluaciones previas y hasta meta-evolución de prompts (donde un LLM co-evoluciona instrucciones adicionales). Esto asegura que las generaciones sean informadas y variadas, evitando alucinaciones mediante feedback grounded.</p>
+                <p>3. <strong>Pool de Evaluadores (Evaluators Pool)</strong>: Un entorno de verificación externo que ejecuta el código generado y calcula métricas cuantitativas (e.g., precisión, eficiencia, tamaño de construcciones). Soporta cascadas de evaluación (hypothesis testing), donde soluciones prometedoras pasan etapas de dificultad creciente, y feedback generado por LLMs para características difíciles de codificar (e.g., simplicidad o novedad). Las evaluaciones pueden durar horas en paralelo sobre aceleradores, filtrando programas defectuosos tempranamente.</p>
+                <p>4. <strong>Base de Datos de Programas (Program Database)</strong>: Un "ecosistema digital" que almacena todos los programas evolucionados, categorizados por scores y feedback. Actúa como memoria evolutiva, preservando diversidad, seleccionando padres para nuevas generaciones y facilitando recombinaciones (e.g., inspiraciones de múltiples programas). Esto previene convergencia prematura y promueve exploración amplia.</p>
+                <p>El ciclo se ejecuta en paralelo en miles de núcleos, explorando millones de soluciones en horas. El usuario especifica el problema mediante un API flexible: marca bloques de código a evolucionar (# EVOLVE-BLOCK-START/END) y proporciona una función evaluate() que mapea soluciones a métricas maximizables. Esta modularidad permite abstracciones variadas, desde evolucionar strings crudos hasta algoritmos de búsqueda personalizados o co-evolución de soluciones intermedias.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. El Ciclo Evolutivo y la Analogía Biológica</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>AlphaEvolve replica algorítmicamente los principios de la evolución natural en un loop distribuido, como se describe en la Sección 2 del paper:</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">El Ciclo Evolutivo de Código</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Variación</strong><span>LLMs generan nuevas soluciones (mutaciones de código).</span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>Selección</strong><span>Evaluadores asignan fitness. Los mejores sobreviven.</span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>Herencia</strong><span>El código exitoso se convierte en padre para la siguiente generación.</span></div>
+                    </div>
+                </div>
+                <p>- <strong>Variación</strong>: El ensemble de LLMs genera múltiples mutaciones (diffs) a partir de un programa padre y "inspiraciones" muestreadas de la base de datos. Estas mutaciones son dirigidas por prompts que incluyen contextos ricos, fomentando diversidad sintáctica y funcional.</p>
+                <p>- <strong>Selección</strong>: Los evaluadores asignan scores basados en la función de aptitud (evaluate()), priorizando programas con mejores métricas. Solo los más aptos se agregan a la base de datos para propagación.</p>
+                <p>- <strong>Herencia y Recombinación</strong>: Partes de programas exitosos se heredan y recombinan implícitamente mediante los diffs propuestos por LLMs, que pueden fusionar ideas de múltiples ancestros.</p>
+                <p>- <strong>Diversificación</strong>: La base de datos mantiene un pool diverso, evitando mínimos locales al muestrear no solo los top performers, sino también variantes cercanas o meta-evolucionadas.</p>
+                <p>Estas operaciones emergen del LLM interpretando instrucciones de modificación, no de reglas hard-coded. La analogía biológica es precisa: los programas son "genomas" de código, los diffs son mutaciones/crossover, y los evaluadores simulan presión selectiva. A diferencia de algoritmos evolutivos clásicos (e.g., con cromosomas binarios), aquí el espacio es jerárquico (código compilable), y los LLMs actúan como agentes creativos, permitiendo saltos innovadores más allá de variaciones incrementales.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Representación y Espacio de Búsqueda</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <p>En AlphaEvolve, las soluciones se representan como programas completos en un espacio de búsqueda S de alta dimensionalidad, discontinuo y jerárquico: no todos los puntos son válidos (e.g., código que no compila falla). Formalmente, como en algoritmos evolutivos clásicos, el problema es P = (S, f, Ω), donde f: S → ℝ es la función de evaluación (maximizable), y Ω son restricciones de validez (e.g., corrección matemática). El LLM actúa como operador de transición, aprendiendo a navegar S mediante prompts que incorporan feedback previo, explorando regiones inaccesibles para optimización por gradiente (que asume continuidad).</p>
+                 <p>El paper enfatiza la flexibilidad: para problemas simétricos, se evolucionan funciones constructoras concisas; para no simétricos, algoritmos de búsqueda personalizados dentro de presupuestos fijos. Esto expande el alcance más allá de métodos directos, ya que evolucionar "cómo encontrar" la solución (instrumental) es often más efectivo que buscarla directamente. La no-simetría se maneja evolucionando soluciones customizadas, y la diversidad se preserva para hipótesis no convexas.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Evaluación, Verificación y Descubrimiento</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                 <p>Cada propuesta pasa por verificación rigurosa: no basta "parecer correcta"; debe ejecutarse y validar en el entorno. Por ejemplo, en multiplicación de matrices, el evaluador reconstruye el tensor y verifica exactitud algebraica, asignando scores solo a descomposiciones correctas. Esto incorpora falsabilidad científica: hipótesis se generan, prueban y refinan automáticamente, evitando sugerencias erróneas de LLMs mediante grounding en ejecución.</p>
+                 <p>La cascada de evaluación acelera el proceso: pruebas iniciales pequeñas filtran fallos, escalando a casos completos solo para prometedoras. Feedback LLM adicional captura cualidades intangibles (e.g., elegancia). Descubrimientos emergen iterativamente, con programas iniciales rudimentarios evolucionando a soluciones SOTA, probadas formalmente para reproducibilidad.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Resultados Principales</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El paper destaca avances en dominios clave, verificados en código público (ver Colab link):</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Dominios de Descubrimiento Clave</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Álgebra Lineal</strong><span>Mejora en matrices complejas 4x4, superando a Strassen (1969).</span></div>
+                        <div class="diagram-box"><strong>Matemáticas Constructivas</strong><span>Supera el estado del arte en ~20% de >50 problemas.</span></div>
+                        <div class="diagram-box"><strong>Geometría y Combinatoria</strong><span>Nuevas construcciones para "kissing numbers" y empaquetamientos.</span></div>
+                        <div class="diagram-box"><strong>Ingeniería en Google</strong><span>Optimización de scheduling, circuitos, kernels de ML y atención en Transformers.</span></div>
+                    </div>
+                </div>
+                <p>1. <strong>Álgebra Lineal y Descomposición de Tensores</strong>: AlphaEvolve descubrió 14 algoritmos mejorados, incluyendo uno para matrices complejas 4×4 usando 48 multiplicaciones escalares, superando Strassen (1969) por primera vez en 56 años.</p>
+                <p>2. <strong>Matemáticas Constructivas</strong>: En >50 problemas, igualó SOTA en ~75% y la superó en ~20%. Ejemplos: mejora en Minimum Overlap Problem (Erdős, 1960s) y Kissing Numbers en 11 dimensiones (mejorando construcciones previas). Nota: el paper no menciona explícitamente desigualdades de autocorrelación o incertidumbre en las páginas iniciales, pero estos podrían alinearse con problemas de análisis (e.g., uncertainty principles en contextos matemáticos); resultados completos en Colab incluyen espectro amplio.</p>
+                <p>3. <strong>Geometría Discreta y Combinatoria</strong>: Nuevas construcciones optimizando empaquetamientos (e.g., kissing numbers) y distribuciones, superando cotas conocidas.</p>
+                <p>4. <strong>Ingeniería en Google</strong>: Optimizó heurísticas de scheduling en data centers (más eficiente), simplificó circuitos en aceleradores hardware (equivalente funcional pero optimizado), aceleró kernels de multiplicación matricial para entrenamiento LLM, y optimizó runtime de attention en Transformers. Estas mejoras acumulan valor significativo en ejecuciones repetidas.</p>
+                <p>Todos verificados automáticamente, con transparencia total.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Significado y Alcance</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>AlphaEvolve representa un paradigma shift: IA como descubridor activo, no solo predictor. Combinando rigor matemático (verificación determinista) con adaptabilidad evolutiva (exploración LLM-driven), navega espacios infinitos para hallazgos que superan humanos. El paper concluye que podría universalizarse para exploración científica automatizada, extendiéndose a biología, física o ingeniería donde evaluaciones sean automáticas. Limitaciones incluyen dependencia de métricas cuantificables (excluyendo experimentos manuales), pero su escalabilidad y uso de LLMs SOTA lo posicionan como herramienta transformadora, potenciando descubrimientos en ciencia y computación.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="button-container">
+        <a href="https://arxiv.org/pdf/2501.17168v3" target="_blank" rel="noopener noreferrer" class="biblio-button"><i class="fas fa-file-pdf"></i> Leer el Paper en arXiv</a>
+        <a href="https://colab.research.google.com/github/google-deepmind/alphaevolve_results/blob/master/mathematical_results.ipynb#scrollTo=5RChGCn7d8eP" target="_blank" rel="noopener noreferrer" class="biblio-button"><i class="fas fa-cogs"></i> Ver Resultados en Colab</a>
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
