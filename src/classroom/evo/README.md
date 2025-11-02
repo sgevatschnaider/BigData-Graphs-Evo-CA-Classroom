@@ -105,8 +105,9 @@ Al finalizar el estudio de este material, serás capaz de:
 ---
 
 
-### Material adicional
-##AlphaEvolve y el Descubrimiento de Algoritmos
+### Casos de Estudio y Aplicaciones Avanzadas
+
+## AlphaEvolve y el Descubrimiento de Algoritmos
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
