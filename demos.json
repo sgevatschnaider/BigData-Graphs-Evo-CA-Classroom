@@ -28,6 +28,13 @@
     "mtime": "2025-11-02T08:00:57-03:00"
   },
   {
+    "title": "Análisis de Programación Genética",
+    "path": "/src/classroom/graphs/recursos/ProgramacionGenetica_Avances y Fronteras Aplicaciones Prácticas de la Programación Genética.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-03T17:43:15-03:00"
+  },
+  {
     "title": "Análisis de Rendimiento en GPU: Un Caso de Estudio con Grafos",
     "path": "/src/classroom/graphs/recursos/Análisis de Rendimiento en GPU con Grafos_irregulares.html",
     "tag": "Demo",
@@ -89,6 +96,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Comparativa: Programación Genética vs. AlphaEvolve",
+    "path": "/src/classroom/graphs/recursos/ProgramacionGenetica_El Salto Evolutivo Programación Genética Clásica vs. Agentes Modernos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-03T17:43:15-03:00"
   },
   {
     "title": "Construcción del Grafo de Cayley Cay(Z_4, {±1})",
@@ -481,6 +495,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "NASA: La Antena Evolucionada con Programación Genética",
+    "path": "/src/classroom/graphs/recursos/ProgramacionGenetica_Más Allá de la Intuición Humana La Antena Extraña y Brillante de la NASA.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-03T17:43:15-03:00"
   },
   {
     "title": "Perspectiva Algebraica: Grafos de Cayley",
