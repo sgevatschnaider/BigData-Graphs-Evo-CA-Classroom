@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NASA: La Antena Evolucionada con Programación Genética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { 
+        font-size: 1.1rem; 
+        color: var(--text-light); 
+        font-weight: 400; 
+        opacity: 0.95; 
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+        max-width: 900px; 
+        margin: auto; 
+    }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+
+    .button-container { text-align: center; margin-top: 2rem; }
+    .action-button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: var(--accent-gradient);
+        color: var(--text-light) !important;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        margin: 0.5rem;
+        transition: var(--transition);
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .action-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Más Allá de la Intuición Humana: La Antena "Extraña" y Brillante de la NASA</h1>
+      <p class="subtitle">Cómo la Programación Genética diseñó una antena para la misión ST5 que superó cualquier diseño humano, demostrando el poder de la evolución para resolver problemas complejos de ingeniería.</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. El Desafío de Ingeniería: La Antena ST5</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La misión ST5 requería una antena para microsatélites con un conjunto de especificaciones muy estrictas y contradictorias. Ningún diseño humano convencional lograba satisfacer todos los requisitos simultáneamente.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Requisitos Críticos de la Antena</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-broadcast-tower"></i> Cobertura Amplia</strong><span>Patrón de radiación hemisférico para una comunicación constante.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-tachometer-alt"></i> Máxima Eficiencia</strong><span>Bajo VSWR para minimizar la pérdida de potencia en la transmisión.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-compress-arrows-alt"></i> Robustez y Tamaño</strong><span>Pequeña, ligera y capaz de soportar las vibraciones del lanzamiento.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-sync-alt"></i> Polarización Específica</strong><span>Señal con polarización circular para garantizar una comunicación fiable.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. La Solución Evolutiva: Un Diseñador Digital</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El equipo del Ames Research Center de la NASA aplicó Programación Genética. En lugar de diseñar la antena, crearon un entorno de "selección natural digital" para que la mejor solución evolucionara por sí sola.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">El Ciclo de la Evolución Artificial</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>1. "ADN" de la Antena</strong><span>Codificación de diseños como instrucciones.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Crea</span></div>
+                        <div class="diagram-box"><strong>2. Población Inicial</strong><span>Cientos de diseños aleatorios.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Son evaluados por</span></div>
+                        <div class="diagram-box"><strong>3. Evaluación de Aptitud</strong><span>Simulación electromagnética para puntuar el rendimiento.</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Los mejores son</span></div>
+                        <div class="diagram-box"><strong>4. Selección y Reproducción</strong><span>Combinación y mutación para crear una nueva generación.</span></div>
+                    </div>
+                </div>
+                <p>Este ciclo de evaluación, selección y reproducción se repitió durante cientos de generaciones en supercomputadoras, refinando gradualmente las soluciones desde el caos aleatorio hasta diseños de alto rendimiento.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. El Resultado: Una Antena "Alienígena" y Superior</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El diseño final no se parecía a nada que un ingeniero humano hubiera creado: una estructura retorcida y asimétrica, a menudo descrita como un "clip de papel deformado". A pesar de su extraña apariencia, su rendimiento fue extraordinario.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Características del Diseño Evolucionado</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-chart-line"></i> Eficiencia Superior</strong><span>Cumplió y superó todos los requisitos de la misión, con un rendimiento mediblemente mejor que los diseños convencionales.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-infinity"></i> Innovación Asimétrica</strong><span>Demostró que la obsesión humana por la simetría es un sesgo que puede limitar la creatividad y la eficiencia.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-space-shuttle"></i> Validación en el Espacio</strong><span>La antena fue fabricada, voló en la misión ST5 y funcionó perfectamente en órbita, validando el enfoque evolutivo.</span></div>
+                    </div>
+                </div>
+                 <p>Este caso emblemático resalta que la PG no es solo una herramienta de optimización, sino un motor de innovación capaz de generar soluciones genuinamente nuevas que se encuentran más allá de los límites de nuestra intuición.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Vea el Diseño por Sí Mismo: Imágenes</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Para apreciar plenamente lo revolucionario de este diseño, es esencial verlo. El siguiente enlace lleva a una publicación científica con fotografías de los prototipos físicos que fueron fabricados y probados.</p>
+                <div class="button-container">
+                    <a href="https://www.researchgate.net/figure/Photographs-of-prototype-evolved-antennas-a-ST5-3-10-b-ST5-4W03_fig3_226096470" class="action-button" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-camera"></i> Ver la Antena Evolucionada (Fotografías)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
