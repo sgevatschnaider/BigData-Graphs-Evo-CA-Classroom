@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparativa: Programación Genética vs. AlphaEvolve</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { 
+        font-size: 1.1rem; 
+        color: var(--text-light); 
+        font-weight: 400; 
+        opacity: 0.95; 
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+        max-width: 900px; 
+        margin: auto; 
+    }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    .topic-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; color: var(--text-secondary); font-size: 0.9em; }
+    .topic-content th, .topic-content td { border: 1px solid var(--border-color); padding: 0.8rem; text-align: left; }
+    .topic-content th { background-color: rgba(0,0,0,0.05); font-weight: 600; color: var(--text-primary); }
+    [data-theme="dark"] .topic-content th { background-color: rgba(255,255,255,0.05); }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-box pre { font-size: 0.75em; text-align: left; background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word;}
+    [data-theme="dark"] .diagram-box pre { background: rgba(0,0,0,0.3); }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">El Salto Evolutivo: Programación Genética Clásica vs. Agentes Modernos</h1>
+      <p class="subtitle">Análisis de las diferencias fundamentales entre la PG tradicional y agentes de vanguardia como AlphaEvolve. Ambos se inspiran en la evolución darwiniana, pero representan cambios de paradigma en la generación automática de programas.</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. El "Genoma": Cómo se Representan las Soluciones</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La diferencia más fundamental radica en la estructura misma de lo que se está evolucionando. La PG clásica trabaja con árboles de expresiones abstractas, mientras que AlphaEvolve manipula directamente archivos de código fuente complejos.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Estructura del "Genoma" Evolutivo</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética Clásica</div>
+                            <div class="diagram-box"><strong>Árbol de Expresión Simbólica</strong><span>Ideal para fórmulas matemáticas. <br>Ej: (x + 5) * sin(y)</span><pre>    *
+   / \
+  +   sin
+ / \   |
+x   5  y</pre></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">AlphaEvolve</div>
+                            <div class="diagram-box"><strong>Código Fuente Real (Diffs)</strong><span>Maneja software complejo en Python, C++, etc.</span><pre>
+# sort_algorithm.py
+def sort(arr):
+-  # old inefficient code
++  # new optimized code
+   return arr
+</pre></div>
+                        </div>
+                    </div>
+                </div>
+                <p><b>Diferencia Clave:</b> La PG evoluciona expresiones matemáticas o simbólicas. AlphaEvolve evoluciona software funcional y complejo.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. El Motor de la Evolución: Operadores de Variación</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La forma en que se crea la "descendencia" (nuevas soluciones) es radicalmente distinta. La PG se basa en operadores aleatorios "ciegos", mientras que AlphaEvolve utiliza la inteligencia de los LLMs para proponer cambios con propósito.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Mecanismos de Creación de Variaciones</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética Clásica</div>
+                            <div class="diagram-box"><strong><i class="fas fa-random"></i> Operadores Aleatorios</strong><span>Cruce y mutación "ciegos" que intercambian o cambian nodos al azar. Alta probabilidad de generar código inválido.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">AlphaEvolve</div>
+                            <div class="diagram-box"><strong><i class="fas fa-brain"></i> IA Generativa (LLMs)</strong><span>Un LLM recibe un prompt ("mejora la eficiencia") y genera un cambio de código inteligente y semánticamente coherente.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p><b>Diferencia Clave:</b> La PG depende del azar para la variación. AlphaEvolve utiliza la creatividad y el razonamiento de los LLMs para generar cambios dirigidos.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. La Supervivencia del Más Apto: Evaluación y Selección</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Decidir qué programas sobreviven sigue procesos muy diferentes. La PG usa una métrica simple, mientras que AlphaEvolve implementa un sistema sofisticado y multifacético.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Proceso de Evaluación de Candidatos</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética Clásica</div>
+                            <div class="diagram-box"><strong>Función de Aptitud Única</strong><span>Cada programa recibe una puntuación (ej. error_cuadratico_medio) y los mejores son seleccionados.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">AlphaEvolve</div>
+                            <div class="diagram-box"><strong>Cascada de Evaluación Híbrida</strong><span>Filtros sucesivos: pruebas rápidas, luego pruebas costosas, y finalmente feedback cualitativo de un LLM sobre la calidad del código.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p><b>Diferencia Clave:</b> La PG se basa en una única métrica de rendimiento. AlphaEvolve utiliza un proceso de evaluación eficiente que combina métricas de rendimiento con análisis cualitativo de la IA.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. El Ecosistema Evolutivo: Arquitectura y Proceso</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La infraestructura subyacente refleja la diferencia de escala y ambición. La PG es un algoritmo autocontenido, mientras que AlphaEvolve es un sistema distribuido a gran escala.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Arquitectura del Sistema</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética Clásica</div>
+                            <div class="diagram-box"><strong>Algoritmo Monolítico</strong><span>Un único bucle iterativo (Generar → Evaluar → Seleccionar) que se ejecuta en un entorno localizado.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">AlphaEvolve</div>
+                            <div class="diagram-box"><strong>Agente Distribuido y Paralelo</strong><span>Múltiples componentes (Generador de Prompts, Ensemble de LLMs, Clúster de Evaluadores) operan en paralelo a escala masiva.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p><b>Diferencia Clave:</b> La PG es un algoritmo autocontenido. AlphaEvolve es un sistema agentico moderno, distribuido y masivamente paralelo.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. El Campo de Batalla: Aplicaciones y Alcance</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Sus objetivos y logros reflejan sus capacidades divergentes. La PG es una herramienta de optimización en dominios acotados, mientras que AlphaEvolve es una plataforma de descubrimiento científico a gran escala.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Dominios de Aplicación Típicos</div>
+                    <div class="diagram-grid">
+                         <div class="diagram-box"><strong>Programación Genética (PG)</strong><span>Regresión Simbólica, Diseño de Antenas (NASA), Neuroevolución, Optimización de Controladores.</span></div>
+                         <div class="diagram-box"><strong>AlphaEvolve</strong><span>Descubrimiento de Algoritmos (Multiplicación de Matrices), Optimización de Software a Gran Escala (Centros de Datos), Resolución de Problemas Abiertos en Ciencias.</span></div>
+                    </div>
+                </div>
+                <p><b>Diferencia Clave:</b> La PG es ideal para problemas que pueden ser representados por funciones interpretables. AlphaEvolve está diseñado para generar avances en problemas fundamentales de la ciencia y la computación.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Tabla Resumen Comparativa</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Programación Genética (PG)</th>
+                            <th>AlphaEvolve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>Representación</b></td>
+                            <td>Árboles de expresiones simbólicas</td>
+                            <td>Archivos de código completos (diffs)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Variación</b></td>
+                            <td>Operadores aleatorios (cruce, mutación)</td>
+                            <td>LLMs para cambios semánticos inteligentes</td>
+                        </tr>
+                        <tr>
+                            <td><b>Evaluación</b></td>
+                            <td>Función de aptitud cuantitativa simple</td>
+                            <td>Cascadas de evaluación + feedback de LLM</td>
+                        </tr>
+                        <tr>
+                            <td><b>Arquitectura</b></td>
+                            <td>Algoritmo tradicional, bucle iterativo</td>
+                            <td>Agente distribuido, sistema paralelo a gran escala</td>
+                        </tr>
+                         <tr>
+                            <td><b>Integración con IA</b></td>
+                            <td>Opcional (enfoques híbridos recientes)</td>
+                            <td>Central (su motor es un ensemble de LLMs)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Objetivo Principal</b></td>
+                            <td>Optimización de funciones y expresiones</td>
+                            <td>Descubrimiento de algoritmos complejos y avances científicos</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>```

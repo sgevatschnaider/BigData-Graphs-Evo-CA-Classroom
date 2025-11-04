@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis de Programación Genética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { 
+        font-size: 1.2rem; 
+        color: var(--text-light); 
+        font-weight: 400; 
+        opacity: 0.95; 
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+        max-width: 900px; 
+        margin: auto; 
+        text-align: justify; /* Texto justificado */
+    }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 15000px; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Avances y Fronteras: Aplicaciones Prácticas de la Programación Genética</h1>
+      <p class="subtitle">La Programación Genética (PG), una de las ramas más dinámicas de la computación evolutiva, continúa su expansión, consolidándose como una herramienta poderosa para automatizar la creación de programas y soluciones complejas. Inspirada en los principios darwinianos de selección, variación y herencia, la PG evoluciona poblaciones de programas informáticos para resolver problemas sin necesidad de un diseño explícito. Las conferencias clave del área, como GECCO 2025 y EuroGP 2025, marcan la pauta de la investigación, mostrando una clara tendencia hacia la integración con el aprendizaje automático y la inteligencia artificial.</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">Reparación Automática de Software</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La programación genética se ha establecido como una técnica clave para la depuración y reparación automática de software. En lugar de que un programador humano busque y corrija un error, la PG evoluciona un conjunto de modificaciones de código (parches) que son evaluadas en función de su capacidad para pasar un conjunto de pruebas de software previamente fallidas.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Flujo de Reparación Evolutiva de Software</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Software con Bug</strong><span>Falla las pruebas existentes</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">es procesado por</span></div>
+                        <div class="diagram-box"><strong>Programación Genética</strong><span>Evoluciona miles de parches candidatos</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">genera</span></div>
+                        <div class="diagram-box"><strong>Software Reparado</strong><span>Pasa todas las pruebas</span></div>
+                    </div>
+                </div>
+                <p>En 2025, los enfoques se han vuelto más sofisticados. Sistemas como <b>GMRepair</b> utilizan PG para reparar no solo el código fuente, sino también modelos de diseño. En el emergente campo de la computación cuántica, proyectos como <b>GeQuPI</b> emplean la PG para mejorar la robustez de los programas cuánticos, evolucionando operaciones que mitigan el ruido y los errores inherentes al hardware.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Evolución de Redes Neuronales y Neuroevolución</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La neuroevolución mediante PG automatiza el diseño de redes neuronales (NAS). La PG no solo optimiza los pesos, sino que también evoluciona la topología misma de la red: número de capas, neuronas, tipos de conexión y funciones de activación.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Comparativa: Entrenamiento Tradicional vs. Neuroevolución con PG</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Entrenamiento Tradicional</div>
+                            <div class="diagram-box"><strong>Arquitectura Fija</strong><span>Diseñada por un humano</span></div>
+                            <div class="diagram-box"><strong>Optimización</strong><span>Solo ajusta los pesos de las conexiones</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Neuroevolución (PG)</div>
+                            <div class="diagram-box"><strong>Arquitectura Flexible</strong><span>Evoluciona la topología completa</span></div>
+                            <div class="diagram-box"><strong>Optimización</strong><span>Ajusta capas, neuronas, conexiones y funciones</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Técnicas como la <b>Programación Genética Cartesiana (CGP)</b> han demostrado ser particularmente eficaces para diseñar Redes Neuronales Convolucionales (CNNs) y redes especializadas en la clasificación de arritmias cardíacas a partir de señales de ECG, logrando una alta precisión.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Optimización en Ingeniería y Diseño</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En ingeniería, la PG genera diseños no convencionales y altamente eficientes que un humano difícilmente concebiría. Un ejemplo icónico es el diseño de antenas para naves espaciales de la NASA.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Caso de Estudio: Antena de la Misión ST5 de la NASA</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-bullseye"></i> Problema</strong><span>Diseñar una antena con requisitos muy estrictos de ancho de banda y radiación.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-cogs"></i> Método</strong><span>Se utilizó un algoritmo evolutivo para explorar miles de diseños posibles.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-lightbulb"></i> Solución Evolucionada</strong><span>Una estructura asimétrica y compleja, similar a un clip deformado.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-trophy"></i> Resultado</strong><span>Superó a todos los diseños convencionales y cumplió con todos los requisitos de la misión.</span></div>
+                    </div>
+                </div>
+                <p>La tendencia en 2025 se extiende al <b>hardware evolutivo</b>, donde la PG diseña circuitos electrónicos en FPGAs que pueden adaptarse a cambios en su entorno o reparar fallos en tiempo real.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Programación de Horarios y Asignaciones Combinatorias</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Problemas como la programación de vuelos o la planificación de rutas son NP-hard. La PG se aplica como una <b>hiperheurística</b>: un método que no resuelve el problema directamente, sino que evoluciona heurísticas (reglas de decisión) a medida para ese problema.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">PG como Hiperheurística</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Problema Complejo</strong><span>Ej: Job Shop Scheduling</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">PG evoluciona</span></div>
+                        <div class="diagram-box"><strong>Heurísticas a Medida</strong><span>Reglas de decisión optimizadas</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">que generan una</span></div>
+                        <div class="diagram-box"><strong>Solución Eficiente</strong><span>Supera a las reglas diseñadas por humanos</span></div>
+                    </div>
+                </div>
+                <p>Las heurísticas evolucionadas a menudo superan a las diseñadas por expertos humanos, especialmente en entornos dinámicos donde las condiciones cambian constantemente.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Procesamiento de Imágenes Biomédicas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Mientras que el Deep Learning es una "caja negra", la PG ofrece una alternativa para generar pipelines de procesamiento de imágenes que son <b>interpretables</b>, algo crucial en aplicaciones médicas.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Comparativa en Segmentación de Imágenes Médicas</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Deep Learning</div>
+                            <div class="diagram-box"><strong>Naturaleza</strong><span>"Caja Negra"</span></div>
+                            <div class="diagram-box"><strong>Datos Requeridos</strong><span>Muy Grande (miles de imágenes)</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">PG (ej. Kartezio)</div>
+                            <div class="diagram-box"><strong>Naturaleza</strong><span>Transparente y Auditable</span></div>
+                            <div class="diagram-box"><strong>Datos Requeridos</strong><span>Muy Pequeño (5-10 imágenes)</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Sistemas como <b>Kartezio</b> evolucionan secuencias de operaciones de visión por computadora, logrando una precisión comparable a los modelos de Deep Learning en tareas como la segmentation de células, pero con la ventaja de ser completamente transparentes y requerir una fracción de los datos de entrenamiento.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Construcción de Características en Aprendizaje Automático</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La ingeniería de características es un paso crucial pero laborioso en ML. La PG automatiza este proceso evolucionando nuevas variables a partir de las originales para mejorar el rendimiento del modelo.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Proceso de Construcción de Características con PG</div>
+                     <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Datos Originales</strong><span>Features: A, B, C</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">PG evoluciona</span></div>
+                        <div class="diagram-box"><strong>Nuevas Features</strong><span>Ej: log(A)*B, A-C²</span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">para mejorar</span></div>
+                        <div class="diagram-box"><strong>Modelo de ML</strong><span>Mayor precisión</span></div>
+                    </div>
+                </div>
+                <p>Bibliotecas de código abierto como <b>EvolutionaryForest</b> ya implementan estas técnicas, proporcionando herramientas para mejorar automáticamente el rendimiento de modelos basados en árboles de decisión al enriquecer el conjunto de datos con características más expresivas.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Finanzas y Economía</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La PG se utiliza para modelar la complejidad de los sistemas económicos. A diferencia de los modelos econométricos tradicionales, puede descubrir relaciones matemáticas complejas directamente a partir de los datos.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Áreas de Aplicación en Finanzas y Economía</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Predicción de Mercados</strong><span>Precios de acciones y materias primas</span></div>
+                        <div class="diagram-box"><strong>Optimización de Carteras</strong><span>Gestión de riesgo y retorno</span></div>
+                        <div class="diagram-box"><strong>Modelado No Lineal</strong><span>Descubrimiento de dinámicas complejas</span></div>
+                        <div class="diagram-box"><strong>Previsión Macroeconómica</strong><span>Estimación del crecimiento del PIB</span></div>
+                    </div>
+                </div>
+                <p>Una revisión de 2025 destaca su capacidad para evolucionar ecuaciones predictivas que capturan la dinámica no lineal de los mercados, transformando datos cualitativos en estimaciones cuantitativas avanzadas.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Regresión Simbólica en Ciencias Físicas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La regresión simbólica es una aplicación emblemática de la PG. Su objetivo es encontrar un modelo matemático en forma de ecuación que se ajuste a los datos, yendo más allá de solo ajustar parámetros.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">Regresión Tradicional vs. Regresión Simbólica</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Regresión Tradicional</div>
+                            <div class="diagram-box"><strong>Input Humano</strong><span>Estructura de la ecuación (ej. y = ax² + b)</span></div>
+                            <div class="diagram-box"><strong>Output del Algoritmo</strong><span>Valores óptimos de los parámetros (a, b)</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Regresión Simbólica (PG)</div>
+                            <div class="diagram-box"><strong>Input Humano</strong><span>Solo los datos experimentales</span></div>
+                            <div class="diagram-box"><strong>Output del Algoritmo</strong><span>La estructura completa de la ecuación (ej. y = cos(x) / z)</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Un ejemplo notable es la derivación de aproximaciones explícitas para la <b>ecuación de Colebrook</b> en hidráulica. Utilizando PG, los investigadores han evolucionado fórmulas que son computacionalmente eficientes y muy precisas, demostrando que la PG puede redescubrir o aproximar leyes físicas complejas.</p>
+            </div>
+        </div>
+        
+         <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Seguridad, Privacidad y Robustez Adversarial</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En ciberseguridad, la PG se utiliza para evolucionar defensas contra ataques. Una aplicación emergente es mejorar la <b>robustez adversarial</b> de los modelos de ML, que son vulnerables a pequeñas perturbaciones diseñadas para engañarlos.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Evolución de Defensas Adversariales</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-user-secret"></i> Ataque Adversarial</strong><span>Pequeña perturbación en los datos de entrada</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-shield-alt"></i> Defensa con PG</strong><span>Evoluciona una función de preprocesamiento que neutraliza la perturbación</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-brain"></i> Modelo Robusto</strong><span>El modelo de IA clasifica correctamente a pesar del ataque</span></div>
+                    </div>
+                </div>
+                <p>La PG puede evolucionar funciones de preprocesamiento o transformaciones de datos que hacen que los modelos sean más resistentes a estas perturbaciones, un tema focal en conferencias como EuroGP 2025.</p>
+            </div>
+        </div>
+        
+         <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">Síntesis de Programas e Inducción</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En su esencia, la PG es una técnica de síntesis de programas: la creación automática de programas a partir de una descripción de alto nivel de su comportamiento deseado. Este es el objetivo fundamental que unifica todas las aplicaciones mencionadas.</p>
+                 <div class="diagram-container">
+                    <div class="diagram-title">La Programación Genética como un Sintetizador Universal de Programas</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Objetivo: Reparar Software</strong><span><strong>Programa Evolucionado:</strong> Un parche de código</span></div>
+                        <div class="diagram-box"><strong>Objetivo: Clasificar Imágenes</strong><span><strong>Programa Evolucionado:</strong> Una Red Neuronal</span></div>
+                        <div class="diagram-box"><strong>Objetivo: Planificar Logística</strong><span><strong>Programa Evolucionado:</strong> Una Heurística</span></div>
+                        <div class="diagram-box"><strong>Objetivo: Descubrir Leyes</strong><span><strong>Programa Evolucionado:</strong> Una Fórmula Científica</span></div>
+                    </div>
+                </div>
+                <p>Ya sea creando un parche, una red neuronal, una heurística o una fórmula, la PG está induciendo un programa que cumple una función específica, marcando el camino hacia una automatización cada vez mayor en el desarrollo de software.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>
