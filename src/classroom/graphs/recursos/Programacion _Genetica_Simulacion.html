@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suite Visual de Programación Genética — Clase</title>
+<style>
+  :root{
+    --bg:#0e1126; --panel:#14193a; --soft:#1b2250; --ink:#e9ecff; --muted:#b7c0ff;
+    --accent:#7c8cff; --ok:#2ee38a; --warn:#f5b971; --bad:#ff6a7a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--ink); font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Ubuntu;
+    background: radial-gradient(1000px 480px at 120% -20%, #3740a022, transparent),
+                radial-gradient(800px 360px at -20% 0%, #28307833, transparent),
+                var(--bg);
+  }
+  header{padding:22px 16px 8px}
+  h1{margin:0; font-size:clamp(22px,3vw,28px); letter-spacing:.3px}
+  p.lead{margin:6px 0 0; color:var(--muted); font-size:14px}
+  .tabs{display:flex; gap:8px; padding:10px 16px 0; flex-wrap:wrap}
+  .tab{
+    padding:10px 14px; border-radius:12px 12px 0 0; cursor:pointer; font-weight:700;
+    background:#0b0f2f; border:1px solid #ffffff18; border-bottom:none; color:#cfd6ff;
+  }
+  .tab.active{ background:linear-gradient(180deg,#3d47bb,#2d379f); color:#fff; border-color:#6d78ff66 }
+  .section{ display:none; padding:16px; border-radius:0 14px 14px 14px; margin:0 16px 16px;
+            background:linear-gradient(180deg,var(--panel),var(--soft)); border:1px solid #ffffff18;
+            box-shadow: inset 0 10px 30px #00000044 }
+  .section.active{ display:block }
+  .grid{display:grid; grid-template-columns: 360px 1fr; gap:14px}
+  @media (max-width:1100px){ .grid{grid-template-columns: 1fr} }
+  .panel{ background:#0b1034; border:1px solid #ffffff18; border-radius:14px; padding:14px }
+  .row{display:grid; grid-template-columns: 1fr 120px; gap:10px; align-items:center; margin:10px 0}
+  label{font-size:13px; color:var(--muted)}
+  input,select{width:100%; padding:8px 10px; border-radius:10px; border:1px solid #ffffff22; background:#0b0f2f; color:var(--ink)}
+  button{background:linear-gradient(180deg,#4650d4,#3844c0); border:1px solid #7c87ff66; color:#fff;
+         padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer; margin-right:8px}
+  button.secondary{background:#23295e; border-color:#ffffff22}
+  .svgbox, .canvasbox{height:420px; background:#0a0e2b; border:1px solid #ffffff18; border-radius:12px; position:relative; overflow:hidden}
+  .svgbox svg{width:100%; height:100%}
+  .small{font-size:12px; color:var(--muted)}
+  .stat{display:grid; grid-template-columns:auto 1fr; gap:8px; align-items:center; padding:8px 10px; background:#0d123a; border-radius:10px; border:1px solid #ffffff12; margin:6px 0}
+  .pill{font-size:12px; color:#dbe0ff; opacity:.9}
+  .legend{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
+  .tag{font-size:11px; padding:3px 8px; border:1px solid #ffffff22; border-radius:999px}
+  .table{border-collapse:collapse; width:100%; font-size:13px}
+  .table th,.table td{border-bottom:1px solid #ffffff18; padding:6px 4px; text-align:left; vertical-align:top}
+  .expr{background:#0b0f2f; border:1px solid #ffffff1a; padding:10px; border-radius:10px; min-height:42px; font-family:ui-monospace,monospace}
+  .board{display:grid; grid-template-columns: repeat(8, 1fr); gap:6px}
+  .cell{padding:10px 8px; background:#0a0f2f; border:1px solid #ffffff15; border-radius:10px; text-align:center; font-weight:700}
+  .cell .bits{font-weight:500; font-size:12px; color:#b7c0ffcc}
+  .cell.ok{border-color:#2ee38a66; box-shadow:0 0 0 1px #2ee38a33 inset}
+  .cell.bad{border-color:#ff6a7a66; box-shadow:0 0 0 1px #ff6a7a33 inset}
+  .bar{height:280px; background:#0a0f2f; border:1px solid #ffffff15; border-radius:10px; position:relative}
+  .bar .fill{position:absolute; bottom:0; left:0; right:0; background:#2ee38a; border-radius:10px 10px 0 0; height:0%}
+  .bar .lbl{position:absolute; top:8px; right:8px; font-size:12px; color:#b7c0ff}
+  .foot{padding:14px; text-align:center; color:#b7c0ff88; font-size:12px}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Suite Visual de Programación Genética (GP)</h1>
+    <p class="lead">Tres demos autónomos para clase: <b>Árboles & Animaciones</b>, <b>Síntesis Booleana</b> y <b>Regresión Simbólica</b>. Cambiá de pestaña y usalos en vivo.</p>
+  </header>
+
+  <nav class="tabs">
+    <div class="tab active" data-tab="anim">Árboles & Animaciones</div>
+    <div class="tab" data-tab="bool">Síntesis Booleana</div>
+    <div class="tab" data-tab="reg">Regresión Simbólica</div>
+    <div class="tab" data-tab="guide">Guía Docente</div>
+      <div class="tab" data-tab="theory">Teoría (GPTP XIV)</div>
+  </nav>
+
+  <!-- Sección 1: Animaciones de árboles -->
+  <section id="sec-anim" class="section active">
+    <div class="grid">
+      <div class="panel">
+        <h3 style="margin:6px 0 6px">Parámetros & Controles</h3>
+        <div class="row"><label>Profundidad máx.</label><input id="an-maxDepth" type="number" min="2" max="8" value="5"></div>
+        <div class="row"><label>Funciones</label>
+          <select id="an-fnset">
+            <option value="+,-,*,pdiv,sin,cos">+,-,*,pdiv,sin,cos</option>
+            <option value="+,-,*">+,-,*</option>
+            <option value="sin,cos,+" selected>sin,cos,+</option>
+          </select>
+        </div>
+        <div class="row"><label>Semilla</label><input id="an-seed" type="number" value="0"></div>
+        <div class="stat"><div class="pill">Subárbol A</div><div id="an-infoA">—</div></div>
+        <div class="stat"><div class="pill">Subárbol B</div><div id="an-infoB">—</div></div>
+        <div style="margin-top:8px">
+          <button id="an-genParents">Generar padres</button>
+          <button id="an-doCrossover">Animar crossover</button>
+          <button id="an-doMutation" class="secondary">Mutar (hijo 1)</button>
+        </div>
+        <div class="legend">
+          <span class="tag">Azul: Estructura</span>
+          <span class="tag" style="border-color:#2ee38a;color:#2ee38a">Verde: Subárbol seleccionado</span>
+          <span class="tag" style="border-color:#f5b971;color:#f5b971">Ámbar: Mutación</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin:6px 0 6px">Padre A / Padre B</h3>
+        <div class="svgbox"><svg id="an-svgParents" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <h3 style="margin:12px 0 6px">Hijos</h3>
+        <div class="svgbox"><svg id="an-svgChildren" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección 2: Síntesis Booleana -->
+  <section id="sec-bool" class="section">
+    <div class="grid">
+      <div class="panel">
+        <h3 style="margin:6px 0 6px">Problema</h3>
+        <div class="row"><label>Función objetivo</label>
+          <select id="bo-target">
+            <option value="xor">XOR de 3 bits (paridad)</option>
+            <option value="maj">Mayoría</option>
+            <option value="and3">AND de 3</option>
+          </select>
+        </div>
+        <div class="row"><label>Parsimonia λ</label><input id="bo-parsimony" type="range" min="0" max="1" step="0.01" value="0.05"></div>
+        <div class="row"><label>Población</label><input id="bo-pop" type="number" min="20" max="1000" value="120"></div>
+        <div class="row"><label>Profundidad máx.</label><input id="bo-depth" type="number" min="2" max="8" value="5"></div>
+        <div class="row"><label>Torneo k</label><input id="bo-tournament" type="number" min="2" max="10" value="3"></div>
+        <div class="row"><label>Crossover</label><input id="bo-cr" type="number" min="0" max="1" step="0.05" value="0.9"></div>
+        <div class="row"><label>Mutación</label><input id="bo-mr" type="number" min="0" max="1" step="0.01" value="0.1"></div>
+        <div style="margin-top:8px">
+          <button id="bo-start">▶️ Iniciar</button>
+          <button id="bo-stop" class="secondary">⏸️ Pausa</button>
+          <button id="bo-reset" class="secondary">🔄 Reset</button>
+        </div>
+        <div class="stat"><div class="pill">Generación</div><div id="bo-genOut">0</div></div>
+        <div class="stat"><div class="pill">Exactitud (mejor)</div><div id="bo-accOut">—</div></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin:6px 0 6px">Tablero (8 combinaciones)</h3>
+        <div class="board" id="bo-board"></div>
+        <h4 style="margin:10px 0 6px">Mejor fórmula</h4>
+        <div class="expr" id="bo-expr"></div>
+        <h3 style="margin:12px 0 6px">Exactitud</h3>
+        <div class="bar"><div class="fill" id="bo-barFill"></div><div class="lbl" id="bo-barLbl">0%</div></div>
+        <p class="small" style="margin-top:8px">Fitness = exactitud - λ·(tamaño-1)/20. Aumentá λ para fórmulas cortas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección 3: Regresión Simbólica -->
+  <section id="sec-reg" class="section">
+    <div class="grid">
+      <div class="panel">
+        <h3 style="margin:6px 0 6px">Problema</h3>
+        <div class="row">
+          <label>Objetivo (expresión en x)</label>
+          <select id="re-targetSelect">
+            <option value="Math.sin(x)">sin(x)</option>
+            <option value="x*Math.sin(x)">x*sin(x)</option>
+            <option value="x*x + x">x^2 + x</option>
+            <option value="Math.cos(2*x)+Math.sin(x)">cos(2x) + sin(x)</option>
+            <option value="custom">Personalizado…</option>
+          </select>
+        </div>
+        <div class="row" id="re-customRow" style="display:none">
+          <label>Expr personalizada</label>
+          <input id="re-customExpr" type="text" placeholder="Ej.: Math.sin(x)*x + 0.5">
+        </div>
+        <h3 style="margin:10px 0 6px">Parámetros</h3>
+        <div class="row"><label>Población</label><input id="re-popSize" type="number" min="10" max="1000" value="120"></div>
+        <div class="row"><label>Profundidad máx.</label><input id="re-maxDepth" type="number" min="2" max="10" value="6"></div>
+        <div class="row"><label>Generaciones por tick</label><input id="re-gensPerTick" type="number" min="1" max="200" value="20"></div>
+        <div class="row"><label>Rate crossover</label><input id="re-crossoverRate" type="number" step="0.05" min="0" max="1" value="0.9"></div>
+        <div class="row"><label>Rate mutación</label><input id="re-mutationRate" type="number" step="0.01" min="0" max="1" value="0.1"></div>
+        <div class="row"><label>Torneo k</label><input id="re-tournamentK" type="number" min="2" max="10" value="3"></div>
+        <div class="row"><label>Rango X</label><input id="re-rangeX" type="text" value="-3,3"></div>
+        <div class="row"><label>Muestras</label><input id="re-samples" type="number" min="16" max="256" value="96"></div>
+        <div class="row"><label>Parsimonia λ</label><input id="re-parsimony" type="range" min="0" max="1" step="0.01" value="0.05"></div>
+        <div style="margin-top:8px">
+          <button id="re-startBtn">▶️ Iniciar</button>
+          <button id="re-stopBtn" class="secondary">⏸️ Pausa</button>
+          <button id="re-resetBtn" class="secondary">🔄 Reset</button>
+        </div>
+        <div class="stat"><div class="pill">Generación</div><div id="re-genOut">0</div></div>
+        <div class="stat"><div class="pill">Mejor error</div><div id="re-bestErr">—</div></div>
+        <div class="stat"><div class="pill">Tamaño mejor</div><div id="re-bestSize">—</div></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin:6px 0 10px">Curva objetivo vs. mejor individuo</h3>
+        <div class="canvasbox"><canvas id="re-curveCanvas" width="1000" height="320"></canvas></div>
+        <h4 style="margin:10px 0 6px">Expresión del mejor individuo</h4>
+        <div class="expr" id="re-exprOut"></div>
+        <h3 style="margin:10px 0 10px">Progreso de fitness</h3>
+        <div class="canvasbox"><canvas id="re-fitnessCanvas" width="1000" height="320"></canvas></div>
+        <h4 style="margin:10px 0 6px">Top-8 individuos</h4>
+        <table class="table"><thead><tr><th>#</th><th>Fitness</th><th>Error</th><th>Tamaño</th><th>Expr</th></tr></thead><tbody id="re-topTable"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección 4: Guía Docente -->
+  <section id="sec-guide" class="section">
+    <div class="panel">
+      <h2 style="margin:6px 0 12px">Guía Docente (15–25 minutos)</h2>
+      <ol>
+        <li><b>Árboles & Animaciones (2–5 min)</b>: mostrar representación y animar crossover/mutación.</li>
+        <li><b>Síntesis Booleana (8–10 min)</b>: elegir “XOR” y jugar con λ; tablero verde/rojo da feedback inmediato.</li>
+        <li><b>Regresión (5–10 min)</b>: variar λ y parámetros; discutir <i>bloat</i> y parsimonia.</li>
+      </ol>
+      <p class="small">Sugerencia: fijar una semilla en la pestaña de árboles para reproducibilidad; usar población y tasas moderadas para velocidad en clase.</p>
+    </div>
+  </section>
+
+  
+  <!-- Sección 5: Teoría (GPTP XIV) -->
+  <section id="sec-theory" class="section">
+    <div class="panel">
+      <h2 style="margin:6px 0 8px">Notas y fórmulas clave de GPTP XIV</h2>
+      <p class="small">Resumen curado para conectar la teoría con las tres demos. Las ecuaciones están escritas en notación ASCII para ser 100% portable sin dependencias.</p>
+      <details open>
+        <summary><b>Diversidad y su importancia</b></summary>
+        <p>La pérdida de diversidad (genotípica o fenotípica) reduce la capacidad de adaptación y puede llevar a convergencia prematura. Mantener ambas perspectivas es útil para entender la dinámica poblacional.</p>
+        <ul>
+          <li><b>Genotípica baja</b>: dificulta generar novedades.</li>
+          <li><b>Fenotípica baja</b>: indica falta de progreso (hijos no mejoran a los padres).</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><b>Medidas de similitud y diversidad</b></summary>
+        <p><b>Diversidad media poblacional</b> (ecuación (1.1)):</p>
+        <pre>Div(T) = 1 - (sum_{i=1..N-1} sum_{j=i+1..N} Sim(t_i, t_j)) / (N*(N-1)/2)</pre>
+        <p><b>Similitud genotípica</b> (distancia bottom-up, (1.2)-(1.3)):</p>
+        <pre>BottomUpDistance(t1,t2) = 2*|M(t1,t2)| / (|t1| + |t2|)
+GenotypicSimilarity = 1 - BottomUpDistance</pre>
+        <p><b>Similitud fenotípica</b> (R^2 y regla especial, (1.4)-(1.5)):</p>
+        <pre>R^2 = ( Cov(X,Y) / (sigma_X * sigma_Y) )^2
+PhenotypicSimilarity(t1,t2) =
+  1  si Var(t1)=Var(t2)=0
+  0  si exactamente una Var(..)=0
+  R^2 en otro caso</pre>
+      </details>
+
+      <details>
+        <summary><b>Algoritmos comparados</b></summary>
+        <ul>
+          <li><b>SGP</b>: GP estándar (PTC2, 500 ind., 1000 gen., etc.).</li>
+          <li><b>OS‑GP</b> (selección de descendencia estricta): sólo acepta hijos más aptos que sus padres. <i>Presión activa</i> (1.6) guía el fin de ejecución:</li>
+        </ul>
+        <pre>SelectionPressure(i) = |GeneratedOffspring(i)| / |Population|</pre>
+        <ul>
+          <li><b>ALPS‑GP</b>: Estructura por capas etarias; re‑siembra periódica de la capa 0 y migración hacia capas superiores.</li>
+        </ul>
+        <p class="small">Efectos típicos reportados: en OS‑GP la similitud fenotípica puede tender a 1; en ALPS aparecen patrones periódicos ligados a la re‑inicialización de capas.</p>
+      </details>
+
+      <details>
+        <summary><b>Diversidad estructural vs. de comportamiento (Lexicase, GMD‑GP e híbridos)</b></summary>
+        <ul>
+          <li><b>Lexicase</b>: selección por casos de prueba; variantes con <i>bias por conteo</i> (Lex‑C) y <i>por error</i> (Lex‑E).</li>
+          <li><b>GMD‑GP</b>: mantiene diversidad estructural usando <i>marcadores genéticos</i> (fragmentos del tope del árbol) en un esquema multi‑objetivo.</li>
+          <li><b>Híbridos</b> GMD+Lex: combinan ambos enfoques; suelen elevar la diversidad que falta al método base (más diversidad fenotípica para GMD y más estructural para Lexicase).</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><b>Actividad guiada (usa las pestañas de la izquierda)</b></summary>
+        <ol>
+          <li>En <b>Árboles</b>: muestra el <i>crossover</i> y discute cómo cambios locales pueden alterar la <i>semántica</i> (curva/tabla en otras pestañas).</li>
+          <li>En <b>Booleana</b>: sube la población y bajá la mutación para observar clusters de comportamiento (celdas idénticas) y hablar de similitud fenotípica.</li>
+          <li>En <b>Regresión</b>: variá λ (parsimonia) y comentá el <i>bloat</i> vs. error; conectalo con diversidad genotípica/tamaño.</li>
+        </ol>
+      </details>
+
+      <p class="small">Nota: este módulo es explicativo; las métricas exactas de similitud no se computan aquí para mantener la fluidez de la demo.</p>
+    </div>
+  </section>
+
+  <div class="foot">
+    Suite Visual GP — HTML/JS/CSS autónomo • Sin dependencias<br>
+    Material elaborado por el profesor Sergio Gevatschnaider
+  </div>
+
+<script>
+/* ===== Tabs ===== */
+const tabs=document.querySelectorAll(".tab");
+const sections={anim:document.getElementById("sec-anim"),
+                bool:document.getElementById("sec-bool"),
+                reg:document.getElementById("sec-reg"),
+                guide:document.getElementById("sec-guide"),
+                theory:document.getElementById("sec-theory")};
+let inited={anim:false,bool:false,reg:false};
+tabs.forEach(t=>t.addEventListener("click",()=>{
+  tabs.forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  Object.values(sections).forEach(s=>s.classList.remove("active"));
+  sections[t.dataset.tab].classList.add("active");
+  if(t.dataset.tab==="anim" && !inited.anim){ GPAnim.init(); inited.anim=true; }
+  if(t.dataset.tab==="bool" && !inited.bool){ GPBool.init(); inited.bool=true; }
+  if(t.dataset.tab==="reg"  && !inited.reg ){ GPReg.init();  inited.reg =true; }
+}));
+// auto-init first
+window.addEventListener("DOMContentLoaded", ()=>{ GPAnim.init(); inited.anim=true; });
+
+/* ====== Módulo 1: Árboles & Animaciones (SVG) ====== */
+window.GPAnim = (function(){
+  // RNG con semilla opcional
+  let _seed = 0;
+  function srand(s){ _seed = s|0; }
+  function srandom(){ _seed = (_seed * 1664525 + 1013904223) >>> 0; return _seed/4294967296; }
+  const choice=(arr,rnd=Math.random)=>arr[Math.floor(rnd()*arr.length)];
+  const randint=(a,b,rnd=Math.random)=>Math.floor(rnd()*(b-a))+a;
+
+  // Primitivas
+  const PRIMS = { "+":{arity:2}, "-":{arity:2}, "*":{arity:2}, "pdiv":{arity:2}, "sin":{arity:1}, "cos":{arity:1} };
+  const TERMS = ["x","c"];
+  const nodeF=(sym,kids)=>({type:"f",sym,kids});
+  const nodeX=()=>({type:"x"});
+  const nodeC=v=>({type:"c",v});
+
+  function randTerm(rnd){ return (choice(TERMS,rnd)==="x")? nodeX(): nodeC((rnd()*6-3).toFixed(2)); }
+  function randFunc(fnset,rnd){ return choice(fnset.split(",").map(s=>s.trim()).filter(Boolean), rnd); }
+  function randTree(maxDepth, fnset, grow=true, rnd=Math.random){
+    if(maxDepth<=0) return randTerm(rnd);
+    if(!grow){ const f=randFunc(fnset,rnd), a=PRIMS[f].arity; return nodeF(f, Array.from({length:a}, _=>randTree(maxDepth-1, fnset, false, rnd))); }
+    if(rnd()<0.45) return randTerm(rnd);
+    const f=randFunc(fnset,rnd), a=PRIMS[f].arity;
+    return nodeF(f, Array.from({length:a}, _=>randTree(maxDepth-1, fnset, true, rnd)));
+  }
+  const clone=t=> t.type==="x"? nodeX(): t.type==="c"? nodeC(t.v): nodeF(t.sym, t.kids.map(clone));
+  const count=t=> t.type==="f"? 1+t.kids.reduce((s,k)=>s+count(k),0):1;
+  function getByIndex(t, idx, path=[], acc={i:0}){ if(acc.i===idx) return {node:t, path:[...path]}; acc.i++; if(t.type==="f"){ for(let k=0;k<t.kids.length;k++){ const r=getByIndex(t.kids[k], idx, [...path,k], acc); if(r) return r; } } return null; }
+  function setByPath(t, path, sub){ if(path.length===0) return clone(sub); if(t.type!=="f") return clone(t); const kids=t.kids.map(clone); kids[path[0]]=setByPath(kids[path[0]], path.slice(1), sub); return nodeF(t.sym,kids); }
+  function mutate(t, fnset, maxDepth, rnd=Math.random){
+    const idx=randint(0,count(t),rnd), hit=getByIndex(t,idx);
+    if(!hit) return clone(t);
+    let sub;
+    if(hit.node.type==="c" && rnd()<0.8) sub=nodeC((parseFloat(hit.node.v)+(rnd()*2-1)).toFixed(2));
+    else sub=randTree(Math.min(3,maxDepth), fnset, true, rnd);
+    return setByPath(t, hit.path, sub);
+  }
+  function crossover(a,b,rnd=Math.random){
+    const ia=randint(0,count(a),rnd), ib=randint(0,count(b),rnd);
+    const sa=getByIndex(a,ia), sb=getByIndex(b,ib);
+    if(!sa||!sb) return [clone(a),clone(b),null,null];
+    return [ setByPath(a, sa.path, sb.node), setByPath(b, sb.path, sa.node), sa.path, sb.path ];
+  }
+
+  // Layout & SVG
+  function widthOf(n){ return n.type==="f"? n.kids.map(widthOf).reduce((a,b)=>a+b,0):1; }
+  function depthOf(n){ return n.type==="f"? 1+Math.max(...n.kids.map(depthOf)):1; }
+  function computeLayout(t){
+    const nodes=[], edges=[]; const totalW=widthOf(t), maxD=depthOf(t);
+    const X0=40, X1=960, Y0=30, Y1=360; const gridW=(X1-X0)/totalW;
+    const label=n=> n.type==="x"? "x": n.type==="c"? n.v: n.sym;
+    function place(n,left,right,y,path=[]){
+      const mid=(left+right)/2; nodes.push({path:[...path],x:mid,y,label:label(n)});
+      if(n.type==="f"){
+        const widths=n.kids.map(widthOf); let cur=left;
+        for(let i=0;i<n.kids.length;i++){
+          const w=widths[i]*gridW; const nxL=cur, nxR=cur+w;
+          const childY = y + (Y1-Y0)/Math.max(1,(maxD-1));
+          edges.push({x1:mid,y1:y,x2:(nxL+nxR)/2,y2:childY});
+          place(n.kids[i], nxL, nxR, childY, [...path,i]); cur+=w;
+        }
+      }
+    }
+    place(t,X0,X1,Y0,[]);
+    return {nodes,edges};
+  }
+  function highlightPredicate(path){ return (nd)=>{ if(!path) return false; if(path.length===0) return true; const p=nd.path; if(p.length<path.length) return false; for(let i=0;i<path.length;i++){ if(p[i]!==path[i]) return false; } return true; }; }
+  function render(svg, t, hlPath=null, mode="parent"){
+    svg.innerHTML="";
+    const {nodes,edges}=computeLayout(t);
+    const gE=document.createElementNS("http://www.w3.org/2000/svg","g");
+    gE.setAttribute("stroke","#6e78ff44"); gE.setAttribute("stroke-width","2"); gE.setAttribute("fill","none");
+    edges.forEach(e=>{ const L=document.createElementNS("http://www.w3.org/2000/svg","line");
+      L.setAttribute("x1",e.x1); L.setAttribute("y1",e.y1); L.setAttribute("x2",e.x2); L.setAttribute("y2",e.y2); gE.appendChild(L); });
+    svg.appendChild(gE);
+    const gN=document.createElementNS("http://www.w3.org/2000/svg","g");
+    nodes.forEach(nd=>{
+      const g=document.createElementNS("http://www.w3.org/2000/svg","g");
+      const isHL = hlPath && highlightPredicate(hlPath)(nd);
+      const C=document.createElementNS("http://www.w3.org/2000/svg","circle");
+      C.setAttribute("cx",nd.x); C.setAttribute("cy",nd.y); C.setAttribute("r",14);
+      C.setAttribute("fill", isHL ? (mode==="mut"?"#f5b97155":"#2ee38a44") : "#1a2066");
+      C.setAttribute("stroke", isHL ? (mode==="mut"?"#f5b971":"#2ee38a") : "#7c8cff"); C.setAttribute("stroke-width","2");
+      const T=document.createElementNS("http://www.w3.org/2000/svg","text");
+      T.setAttribute("x",nd.x); T.setAttribute("y",nd.y+4); T.setAttribute("text-anchor","middle"); T.setAttribute("font-size","12"); T.setAttribute("fill","#e9ecff");
+      T.textContent=nd.label; g.appendChild(C); g.appendChild(T); gN.appendChild(g);
+    });
+    svg.appendChild(gN);
+  }
+
+  // UI
+  let parentA=null,parentB=null,childA=null,childB=null,pathA=null,pathB=null;
+  function init(){
+    const els={ md:document.getElementById("an-maxDepth"),
+                fs:document.getElementById("an-fnset"),
+                seed:document.getElementById("an-seed"),
+                infoA:document.getElementById("an-infoA"),
+                infoB:document.getElementById("an-infoB"),
+                genP:document.getElementById("an-genParents"),
+                doX:document.getElementById("an-doCrossover"),
+                doM:document.getElementById("an-doMutation"),
+                svgP:document.getElementById("an-svgParents"),
+                svgC:document.getElementById("an-svgChildren") };
+    function regen(){
+      const md=parseInt(els.md.value,10), fs=els.fs.value, seed=parseInt(els.seed.value,10)||0;
+      const rnd = seed===0 ? Math.random : (srand(seed), srandom);
+      parentA=randTree(md, fs, true, rnd);
+      parentB=randTree(md, fs, false, rnd);
+      childA=childB=pathA=pathB=null; els.infoA.textContent="—"; els.infoB.textContent="—";
+      render(els.svgP, nodeF("ROOT",[parentA,parentB]));
+      els.svgC.innerHTML="";
+    }
+    function animateX(){
+      if(!parentA||!parentB) regen();
+      const seed=parseInt(els.seed.value,10)||0;
+      const rnd = seed===0 ? Math.random : (srand(seed+1), srandom);
+      const res=crossover(parentA,parentB,rnd); childA=res[0]; childB=res[1]; pathA=res[2]; pathB=res[3];
+      els.infoA.textContent = pathA? "Ruta "+JSON.stringify(pathA):"—";
+      els.infoB.textContent = pathB? "Ruta "+JSON.stringify(pathB):"—";
+      render(els.svgP, nodeF("ROOT",[parentA,parentB]));
+      setTimeout(()=>render(els.svgP, nodeF("ROOT",[parentA,parentB]), [0,...pathA]),300);
+      setTimeout(()=>render(els.svgP, nodeF("ROOT",[parentA,parentB]), [1,...pathB]),900);
+      setTimeout(()=>render(els.svgC, nodeF("ROOT",[childA,childB])),1500);
+    }
+    function animateM(){
+      if(!childA) animateX();
+      const md=parseInt(els.md.value,10), fs=els.fs.value, seed=parseInt(els.seed.value,10)||0;
+      const rnd = seed===0 ? Math.random : (srand(seed+2), srandom);
+      childA = mutate(childA, fs, md, rnd);
+      render(els.svgC, nodeF("ROOT",[childA,childB||nodeX()]), [0], "mut");
+    }
+    els.genP.addEventListener("click", regen);
+    els.doX .addEventListener("click", animateX);
+    els.doM .addEventListener("click", animateM);
+    regen();
+  }
+  return {init};
+})();
+
+/* ====== Módulo 2: Síntesis Booleana ====== */
+window.GPBool = (function(){
+  const rand=(a=0,b=1)=>Math.random()*(b-a)+a;
+  const randint=(a,b)=>Math.floor(rand(a,b));
+  const choice=arr=>arr[randint(0,arr.length)];
+  const XOR=(a,b)=>!!(a^b);
+  const FNS={
+    "AND":{arity:2, fn:(a,b)=>a&&b, disp:(a,b)=>`(${a} ∧ ${b})`},
+    "OR": {arity:2, fn:(a,b)=>a||b, disp:(a,b)=>`(${a} ∨ ${b})`},
+    "XOR":{arity:2, fn:(a,b)=>XOR(a,b), disp:(a,b)=>`(${a} ⊕ ${b})`},
+    "NOT":{arity:1, fn:(a)=>!a, disp:(a)=>`¬${a}`},
+  };
+  const VARS=["x0","x1","x2"];
+  const nodeVar=name=>({type:"var",name});
+  const nodeConst=v=>({type:"const",value:!!v});
+  const nodeFn=(sym,kids)=>({type:"fn",sym,kids});
+  function randomTerminal(){ return Math.random()<0.8? nodeVar(choice(VARS)) : nodeConst(Math.random()<0.5); }
+  function randomFunction(){ return choice(Object.keys(FNS)); }
+  function randomTree(maxDepth, grow=true){
+    if(maxDepth<=0) return randomTerminal();
+    if(!grow){ const s=randomFunction(), a=FNS[s].arity; return nodeFn(s, Array.from({length:a}, _=>randomTree(maxDepth-1,false))); }
+    if(Math.random()<0.5) return randomTerminal();
+    const s=randomFunction(), a=FNS[s].arity; return nodeFn(s, Array.from({length:a}, _=>randomTree(maxDepth-1,true)));
+  }
+  const clone=n=> n.type==="var"? nodeVar(n.name): n.type==="const"? nodeConst(n.value): nodeFn(n.sym, n.kids.map(clone));
+  const count=n=> n.type==="fn"? 1+n.kids.reduce((s,k)=>s+count(k),0):1;
+  function getByIndex(n, idx, path=[], acc={i:0}){ if(acc.i===idx) return {node:n,path:[...path]}; acc.i++; if(n.type==="fn"){ for(let k=0;k<n.kids.length;k++){ const r=getByIndex(n.kids[k], idx, [...path,k], acc); if(r) return r; } } return null; }
+  function setByPath(root, path, sub){ if(path.length===0) return clone(sub); if(root.type!=="fn") return clone(root); const kids=root.kids.map(clone); kids[path[0]]=setByPath(kids[path[0]], path.slice(1), sub); return nodeFn(root.sym,kids); }
+  function mutate(t, maxDepth){
+    const idx=randint(0,count(t)), hit=getByIndex(t,idx);
+    if(!hit) return t;
+    let sub;
+    if(hit.node.type==="const" && Math.random()<0.8) sub=nodeConst(!hit.node.value);
+    else if(hit.node.type==="var" && Math.random()<0.4) sub=nodeVar(choice(VARS));
+    else sub=randomTree(Math.min(3,maxDepth), true);
+    return setByPath(t, hit.path, sub);
+  }
+  function crossover(a,b){
+    const ia=randint(0,count(a)), ib=randint(0,count(b));
+    const sa=getByIndex(a,ia), sb=getByIndex(b,ib);
+    if(!sa||!sb) return [clone(a),clone(b)];
+    return [ setByPath(a, sa.path, sb.node), setByPath(b, sb.path, sa.node) ];
+  }
+  function evalTree(t, asg){
+    switch(t.type){
+      case "var": return !!asg[t.name];
+      case "const": return !!t.value;
+      case "fn": const f=FNS[t.sym]; return f.arity===1? f.fn(evalTree(t.kids[0],asg)) : f.fn(evalTree(t.kids[0],asg), evalTree(t.kids[1],asg));
+    }
+  }
+  const toExpr=t=> t.type==="var"? t.name : t.type==="const"? (t.value?"⊤":"⊥") : (FNS[t.sym].arity===1? FNS[t.sym].disp(toExpr(t.kids[0])) : FNS[t.sym].disp(toExpr(t.kids[0]),toExpr(t.kids[1])));
+
+  const ALL = []; for(let a=0;a<2;a++) for(let b=0;b<2;b++) for(let c=0;c<2;c++){ ALL.push({x0:!!a,x1:!!b,x2:!!c}); }
+  function targetValue(kind, asg){ switch(kind){ case "xor": return XOR(XOR(asg.x0,asg.x1),asg.x2); case "maj": return (asg.x0+asg.x1+asg.x2)>=2; case "and3": return asg.x0&&asg.x1&&asg.x2; } }
+
+  function accuracy(ind, targetKind, lambda){
+    let ok=0; for(const asg of ALL){ const p=evalTree(ind.tree, asg), t=targetValue(targetKind, asg); if(p===t) ok++; }
+    const acc=ok/ALL.length, size=count(ind.tree), fitness=acc - lambda*Math.max(0,size-1)/20;
+    return {acc, fitness};
+  }
+  function makeIndividual(tree, targetKind, lambda){ const r=accuracy({tree}, targetKind, lambda); return {tree, acc:r.acc, fitness:r.fitness, size:count(tree)}; }
+  function tournament(pop,k){ let best=null; for(let i=0;i<k;i++){ const c=choice(pop); if(!best||c.fitness>best.fitness) best=c; } return best; }
+
+  let els, popArr=[], gen=0, running=false, targetKind="xor";
+  function renderBoard(best){
+    els.board.innerHTML="";
+    for(const asg of ALL){
+      const pred=evalTree(best.tree, asg), targ=targetValue(targetKind, asg);
+      const cell=document.createElement("div"); cell.className="cell "+(pred===targ?"ok":"bad");
+      const bits=`${asg.x0|0}${asg.x1|0}${asg.x2|0}`; cell.innerHTML=`<div class="bits">${bits}</div>${pred? "1":"0"} / ${targ? "1":"0"}`;
+      els.board.appendChild(cell);
+    }
+  }
+  function render(best){
+    els.genOut.textContent=gen; els.accOut.textContent=(best.acc*100).toFixed(1)+"%"; els.expr.textContent=toExpr(best.tree);
+    els.barFill.style.height=(best.acc*100)+"%"; els.barLbl.textContent=(best.acc*100).toFixed(1)+"%"; renderBoard(best);
+  }
+  function initPop(){
+    const N=parseInt(els.pop.value,10), md=parseInt(els.depth.value,10), lam=parseFloat(els.parsimony.value);
+    targetKind=els.target.value; popArr=[];
+    for(let i=0;i<N;i++){ const t=randomTree(md, i%2===0); popArr.push(makeIndividual(t, targetKind, lam)); }
+    gen=0; const best=[...popArr].sort((a,b)=>b.fitness-a.fitness)[0]; render(best);
+  }
+  function step(){
+    const N=parseInt(els.pop.value,10), k=parseInt(els.tournament.value,10), cr=parseFloat(els.cr.value), mr=parseFloat(els.mr.value), md=parseInt(els.depth.value,10), lam=parseFloat(els.parsimony.value);
+    const sorted=[...popArr].sort((a,b)=>b.fitness-a.fitness); const next=[sorted[0], sorted[1]];
+    while(next.length<N){
+      const r=Math.random();
+      if(r<cr){ const p1=tournament(popArr,k), p2=tournament(popArr,k); let [c1,c2]=crossover(p1.tree, p2.tree); if(Math.random()<mr) c1=mutate(c1, md); if(Math.random()<mr) c2=mutate(c2, md);
+        next.push(makeIndividual(c1, targetKind, lam)); if(next.length<N) next.push(makeIndividual(c2, targetKind, lam));
+      }else if(r<cr+mr){ const p=tournament(popArr,k); next.push(makeIndividual(mutate(p.tree, md), targetKind, lam));
+      }else{ const p=tournament(popArr,k); next.push(makeIndividual(clone(p.tree), targetKind, lam)); }
+    }
+    popArr=next.slice(0,N); gen++; const best=[...popArr].sort((a,b)=>b.fitness-a.fitness)[0]; render(best);
+  }
+  function loop(){ if(!running) return; for(let i=0;i<25;i++) step(); requestAnimationFrame(loop); }
+
+  function init(){
+    els={ target:document.getElementById("bo-target"), parsimony:document.getElementById("bo-parsimony"), pop:document.getElementById("bo-pop"),
+          depth:document.getElementById("bo-depth"), tournament:document.getElementById("bo-tournament"), cr:document.getElementById("bo-cr"),
+          mr:document.getElementById("bo-mr"), start:document.getElementById("bo-start"), stop:document.getElementById("bo-stop"), reset:document.getElementById("bo-reset"),
+          board:document.getElementById("bo-board"), expr:document.getElementById("bo-expr"), barFill:document.getElementById("bo-barFill"),
+          barLbl:document.getElementById("bo-barLbl"), genOut:document.getElementById("bo-genOut"), accOut:document.getElementById("bo-accOut") };
+    els.start.addEventListener("click", ()=>{ if(!running){ running=true; loop(); } });
+    els.stop .addEventListener("click", ()=>{ running=false; });
+    els.reset.addEventListener("click", ()=>{ running=false; initPop(); });
+    ["target","parsimony","pop","depth","tournament","cr","mr"].forEach(id=> els[id].addEventListener("change", initPop));
+    initPop();
+  }
+  return {init};
+})();
+
+/* ====== Módulo 3: Regresión Simbólica ====== */
+window.GPReg = (function(){
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const rand=(a=0,b=1)=>Math.random()*(b-a)+a;
+  const randint=(a,b)=>Math.floor(rand(a,b));
+  const choice=arr=>arr[randint(0,arr.length)];
+  const FUNCTIONS=[
+    {name:"+", arity:2, fn:(a,b)=>a+b, disp:(a,b)=>`(${a}+${b})`},
+    {name:"-", arity:2, fn:(a,b)=>a-b, disp:(a,b)=>`(${a}-${b})`},
+    {name:"*", arity:2, fn:(a,b)=>a*b, disp:(a,b)=>`(${a}*${b})`},
+    {name:"pdiv", arity:2, fn:(a,b)=>a/(Math.abs(b)+1e-6), disp:(a,b)=>`(${a}/${b})`},
+    {name:"sin", arity:1, fn:(a)=>Math.sin(a), disp:(a)=>`sin(${a})`},
+    {name:"cos", arity:1, fn:(a)=>Math.cos(a), disp:(a)=>`cos(${a})`},
+    {name:"exp", arity:1, fn:(a)=>Math.exp(clamp(a,-30,30)), disp:(a)=>`exp(${a})`},
+    {name:"log", arity:1, fn:(a)=>Math.log(Math.abs(a)+1e-6), disp:(a)=>`log(|${a}|+1e-6)`},
+    {name:"abs", arity:1, fn:(a)=>Math.abs(a), disp:(a)=>`abs(${a})`},
+  ];
+  const TERMINALS=["x","const"];
+  const nodeFunc=(def,children)=>({type:"func",def,children});
+  const nodeX=()=>({type:"x"});
+  const nodeConst=v=>({type:"const",value:v});
+  const randomTerminal=()=> (choice(TERMINALS)==="x")? nodeX(): nodeConst(rand(-3,3));
+  const randomFunction=()=> choice(FUNCTIONS);
+  function randomTree(maxDepth, grow=true){
+    if(maxDepth<=0) return randomTerminal();
+    if(!grow){ const f=randomFunction(); return nodeFunc(f, Array.from({length:f.arity}, _=>randomTree(maxDepth-1,false))); }
+    if(Math.random()<0.5) return randomTerminal();
+    const f=randomFunction(); return nodeFunc(f, Array.from({length:f.arity}, _=>randomTree(maxDepth-1,true)));
+  }
+  const clone=n=> n.type==="x"? nodeX(): n.type==="const"? nodeConst(n.value): nodeFunc(n.def, n.children.map(clone));
+  const count=n=> n.type==="func"? 1+n.children.reduce((s,c)=>s+count(c),0):1;
+  function getByIndex(n, idx, path=[], acc={i:0}){ if(acc.i===idx) return {node:n,path:[...path]}; acc.i++; if(n.type==="func"){ for(let k=0;k<n.children.length;k++){ const r=getByIndex(n.children[k], idx, [...path,k], acc); if(r) return r; } } return null; }
+  function setByPath(root, path, sub){ if(path.length===0) return clone(sub); if(root.type!=="func") return clone(root); const kids=root.children.map(clone); kids[path[0]]=setByPath(kids[path[0]], path.slice(1), sub); return nodeFunc(root.def, kids); }
+  function mutate(tree, maxDepth){
+    const idx=randint(0,count(tree)); const target=getByIndex(tree, idx);
+    if(!target) return tree; let newSub;
+    if(target.node.type==="const" && Math.random()<0.8) newSub=nodeConst(target.node.value + rand(-1,1));
+    else newSub=randomTree(randint(1, Math.max(1,Math.min(3,maxDepth-1))), true);
+    return setByPath(tree, target.path, newSub);
+  }
+  function crossover(a,b){
+    const ia=randint(0,count(a)), ib=randint(0,count(b));
+    const sa=getByIndex(a, ia), sb=getByIndex(b, ib);
+    if(!sa||!sb) return [clone(a),clone(b)];
+    return [ setByPath(a, sa.path, sb.node), setByPath(b, sb.path, sa.node) ];
+  }
+  function treeToString(n){ return n.type==="x"? "x" : n.type==="const"? Number(n.value).toFixed(3) : (n.def.arity===1? n.def.disp(treeToString(n.children[0])) : n.def.disp(treeToString(n.children[0]), treeToString(n.children[1]))); }
+  function evalTree(n,x){
+    try{
+      switch(n.type){
+        case "x": return x;
+        case "const": return n.value;
+        case "func": const d=n.def; if(d.arity===1){ return d.fn(evalTree(n.children[0],x)); }
+                     const a=evalTree(n.children[0],x), b=evalTree(n.children[1],x); return d.fn(a,b);
+      }
+    }catch(e){ return NaN; }
+  }
+  function makeDataset(expr, n=96, minX=-3, maxX=3){
+    const f=new Function("x", `return (${expr});`);
+    const X=[...Array(n)].map((_,i)=>minX+(maxX-minX)*i/(n-1));
+    const Y=X.map(x=>{ let v=f(x); if(!Number.isFinite(v)) v=NaN; return v; });
+    return {X,Y,exprStr:expr,minX,maxX};
+  }
+  function mseForTree(tree, ds){
+    let s=0,c=0;
+    for(let i=0;i<ds.X.length;i++){ const p=evalTree(tree, ds.X[i]), y=ds.Y[i];
+      if(!Number.isFinite(p) || Number.isNaN(p)){ s+=1e6; c++; } else { const d=p-y; s+=d*d; c++; } }
+    return s/Math.max(1,c);
+  }
+  const fitnessFromError=err=> 1/(1+err);
+  const makeIndividual=(tree, ds, par)=>{ const error=mseForTree(tree,ds)+par*(count(tree)-1)/100; return {tree,error,fitness:fitnessFromError(error),size:count(tree)}; };
+  const tournament=(pop,k)=>{ let best=null; for(let i=0;i<k;i++){ const c=choice(pop); if(!best||c.fitness>best.fitness) best=c; } return best; };
+  function plotCurves(canvas, ds, best){
+    const ctx=canvas.getContext("2d"), W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle="#0b0f2a"; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="#ffffff22"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(40,H-30); ctx.lineTo(W-10,H-30); ctx.moveTo(40,10); ctx.lineTo(40,H-30); ctx.stroke();
+    function w2s(x,y,xmin,xmax,ymin,ymax){ const X=40+(x-xmin)/(xmax-xmin)*(W-50); const Y=(H-30)-(y-ymin)/(ymax-ymin)*(H-40); return [X,Y]; }
+    const xs=ds.X, ys=ds.Y, pred=xs.map(x=>evalTree(best.tree,x)); const allY=ys.concat(pred.filter(v=>Number.isFinite(v)));
+    const ymin=Math.min(-2, ...allY), ymax=Math.max(2, ...allY);
+    ctx.strokeStyle="#7c8cff"; ctx.lineWidth=2; ctx.beginPath();
+    for(let i=0;i<xs.length;i++){ const [X,Y]=w2s(xs[i], ys[i], ds.minX, ds.maxX, ymin, ymax); if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y); } ctx.stroke(); ctx.fillStyle="#7c8cff"; ctx.fillText("Objetivo", W-100, 20);
+    ctx.strokeStyle="#2ee38a"; ctx.lineWidth=2; ctx.beginPath();
+    for(let i=0;i<xs.length;i++){ const py=pred[i]; if(!Number.isFinite(py)) continue; const [X,Y]=w2s(xs[i], py, ds.minX, ds.maxX, ymin, ymax); if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y); } ctx.stroke(); ctx.fillStyle="#2ee38a"; ctx.fillText("Mejor", W-100, 36);
+  }
+  function plotFitness(canvas, bestHist, meanHist){
+    const ctx=canvas.getContext("2d"), W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle="#0b0f2a"; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="#ffffff22"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(40,H-30); ctx.lineTo(W-10,H-30); ctx.moveTo(40,10); ctx.lineTo(40,H-30); ctx.stroke();
+    const n=Math.max(bestHist.length,1), xmin=0, xmax=n-1, ymin=0, ymax=Math.max(0.001, Math.max(...bestHist, ...meanHist));
+    const toXY=(i,v)=>{ const X=40+(i-xmin)/(xmax-xmin || 1)*(W-50); const Y=(H-30)-(v-ymin)/(ymax-ymin || 1)*(H-40); return [X,Y]; };
+    ctx.strokeStyle="#2ee38a"; ctx.lineWidth=2; ctx.beginPath(); bestHist.forEach((v,i)=>{ const [X,Y]=toXY(i,v); if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y); }); ctx.stroke(); ctx.fillStyle="#2ee38a"; ctx.fillText("Fitness (mejor)", W-160, 20);
+    ctx.strokeStyle="#7c8cff"; ctx.lineWidth=2; ctx.beginPath(); meanHist.forEach((v,i)=>{ const [X,Y]=toXY(i,v); if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y); }); ctx.stroke(); ctx.fillStyle="#7c8cff"; ctx.fillText("Fitness (media)", W-160, 36);
+  }
+
+  let els, ds=null, pop=[], gen=0, running=false, bestH=[], meanH=[];
+  const currentTargetExpr=()=> els.targetSelect.value==="custom" ? (els.customExpr.value.trim()||"Math.sin(x)") : els.targetSelect.value;
+  function refreshDataset(){ const [minX,maxX]=els.rangeX.value.split(",").map(v=>parseFloat(v.trim())); const n=parseInt(els.samples.value,10); ds=makeDataset(currentTargetExpr(), n, minX, maxX); }
+  function initPopulation(){
+    pop=[]; const N=parseInt(els.popSize.value,10), maxD=parseInt(els.maxDepth.value,10);
+    for(let i=0;i<N;i++){ const depth=2+(i%(maxD-1)); const tree=randomTree(depth, i%2===0); pop.push(makeIndividual(tree, ds, parseFloat(els.parsimony.value))); }
+    gen=0; bestH=[]; meanH=[]; render();
+  }
+  function nextGeneration(){
+    const N=parseInt(els.popSize.value,10), k=parseInt(els.tournamentK.value,10), cr=parseFloat(els.crossoverRate.value), mr=parseFloat(els.mutationRate.value), maxD=parseInt(els.maxDepth.value,10), par=parseFloat(els.parsimony.value);
+    const sorted=[...pop].sort((a,b)=>b.fitness-a.fitness); const next=[sorted[0],sorted[1]];
+    while(next.length<N){
+      const r=Math.random();
+      if(r<cr){ const p1=tournament(pop,k), p2=tournament(pop,k); let [c1,c2]=crossover(p1.tree,p2.tree); if(Math.random()<mr) c1=mutate(c1,maxD); if(Math.random()<mr) c2=mutate(c2,maxD);
+        next.push(makeIndividual(c1,ds,par)); if(next.length<N) next.push(makeIndividual(c2,ds,par));
+      }else if(r<cr+mr){ const p=tournament(pop,k); next.push(makeIndividual(mutate(p.tree,maxD), ds, par));
+      }else{ const p=tournament(pop,k); next.push(makeIndividual(clone(p.tree), ds, par)); }
+    }
+    pop=next.slice(0,N); gen++;
+  }
+  function renderTop(){
+    const sorted=[...pop].sort((a,b)=>a.error-b.error).slice(0,8);
+    els.topTable.innerHTML=sorted.map((ind,i)=>`<tr><td>${i+1}</td><td>${ind.fitness.toFixed(6)}</td><td>${ind.error.toFixed(6)}</td><td>${ind.size}</td><td><span class="small">${treeToString(ind.tree)}</span></td></tr>`).join("");
+  }
+  function render(){
+    const best=[...pop].sort((a,b)=>b.fitness-a.fitness)[0], mean=pop.reduce((s,p)=>s+p.fitness,0)/pop.length;
+    bestH.push(best.fitness); meanH.push(mean);
+    els.genOut.textContent=gen; els.bestErr.textContent=best.error.toFixed(6); els.bestSize.textContent=best.size; els.exprOut.textContent=treeToString(best.tree);
+    plotCurves(els.curveCanvas, ds, best); plotFitness(els.fitnessCanvas, bestH, meanH); renderTop();
+  }
+  function loop(){ if(!running) return; const steps=parseInt(els.gensPerTick.value,10); for(let s=0;s<steps;s++){ nextGeneration(); } render(); requestAnimationFrame(loop); }
+
+  function init(){
+    els={ targetSelect:document.getElementById("re-targetSelect"), customRow:document.getElementById("re-customRow"), customExpr:document.getElementById("re-customExpr"),
+          popSize:document.getElementById("re-popSize"), maxDepth:document.getElementById("re-maxDepth"), gensPerTick:document.getElementById("re-gensPerTick"),
+          crossoverRate:document.getElementById("re-crossoverRate"), mutationRate:document.getElementById("re-mutationRate"), tournamentK:document.getElementById("re-tournamentK"),
+          parsimony:document.getElementById("re-parsimony"), rangeX:document.getElementById("re-rangeX"), samples:document.getElementById("re-samples"),
+          startBtn:document.getElementById("re-startBtn"), stopBtn:document.getElementById("re-stopBtn"), resetBtn:document.getElementById("re-resetBtn"),
+          genOut:document.getElementById("re-genOut"), bestErr:document.getElementById("re-bestErr"), bestSize:document.getElementById("re-bestSize"),
+          exprOut:document.getElementById("re-exprOut"), curveCanvas:document.getElementById("re-curveCanvas"), fitnessCanvas:document.getElementById("re-fitnessCanvas"),
+          topTable:document.getElementById("re-topTable") };
+    els.targetSelect.addEventListener("change", ()=>{ els.customRow.style.display = els.targetSelect.value==="custom" ? "grid":"none"; refreshDataset(); initPopulation(); });
+    els.customExpr.addEventListener("change", ()=>{ refreshDataset(); initPopulation(); });
+    ["popSize","maxDepth","rangeX","samples","parsimony"].forEach(id=> els[id].addEventListener("change", ()=>{ refreshDataset(); initPopulation(); }));
+    els.startBtn.addEventListener("click", ()=>{ if(!running){ running=true; loop(); } });
+    els.stopBtn .addEventListener("click", ()=>{ running=false; });
+    els.resetBtn.addEventListener("click", ()=>{ running=false; refreshDataset(); initPopulation(); });
+    refreshDataset(); initPopulation();
+  }
+  return {init};
+})();
+</script>
+</body>
+</html>
