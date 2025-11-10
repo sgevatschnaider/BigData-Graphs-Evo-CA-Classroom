@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Triple Hélice de IA: Academia + Empresa + Gobierno (BAAI & Zhongguancun)</title>
+  <style>
+    :root{
+      --bg1:#0f1226; --bg2:#111827; --fg:#e7eaf0; --muted:#a7b0c0; --accent:#6ddcff; --accent2:#a17cff; --card:#141a2aee; --glow:#6ddcff44;
+      --academy:#4ade80; /* verde */
+      --industry:#60a5fa; /* azul */
+      --gov:#f59e0b; /* ámbar */
+      --link:#93c5fd;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 10% 10%, #1a1f3a 0%, var(--bg2) 50%, #0a0c18 100%);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,Arial}
+
+    /* Animated background blobs */
+    .blob{position:fixed; filter:blur(40px); opacity:.25; z-index:-1; mix-blend-mode:screen}
+    .b1{width:40vmax;height:40vmax;background:radial-gradient(circle at 30% 30%, #4f46e5, transparent 60%);left:-10vmax;top:-10vmax;animation:float1 22s ease-in-out infinite}
+    .b2{width:45vmax;height:45vmax;background:radial-gradient(circle at 70% 20%, #06b6d4, transparent 60%);right:-12vmax;top:-8vmax;animation:float2 26s ease-in-out infinite}
+    .b3{width:50vmax;height:50vmax;background:radial-gradient(circle at 40% 70%, #22c55e, transparent 60%);left:10vmax;bottom:-15vmax;animation:float3 28s ease-in-out infinite}
+    @keyframes float1{50%{transform:translate(4vmax,3vmax)}}
+    @keyframes float2{50%{transform:translate(-3vmax,4vmax)}}
+    @keyframes float3{50%{transform:translate(2vmax,-3vmax)}}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid #ffffff14;background:linear-gradient(180deg,#0e1324cc,#0e132400)}
+    .title{font-size:clamp(18px,2.5vw,28px);font-weight:700;letter-spacing:.3px}
+    .subtitle{color:var(--muted);font-size:clamp(12px,1.6vw,14px)}
+    .controls{display:flex;gap:10px;align-items:center}
+    button, .chip{background:var(--card);border:1px solid #ffffff22;color:var(--fg);padding:10px 14px;border-radius:12px;cursor:pointer;backdrop-filter: blur(8px);box-shadow:0 10px 30px #00000044}
+    button:hover{border-color:#ffffff44}
+
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr; gap:20px}
+    @media (max-width: 980px){.grid{grid-template-columns:1fr;}}
+
+    .card{background:var(--card);border:1px solid #ffffff1a;border-radius:18px; padding:18px 18px 10px; box-shadow:0 10px 40px #00000055}
+    .card h2{margin:.2em 0 .6em;font-size:clamp(18px,2.2vw,22px)}
+    .hint{color:var(--muted);font-size:13px}
+
+    /* Interactive triangle canvas */
+    .viz{position:relative;min-height:520px;display:flex;align-items:center;justify-content:center}
+    svg{width:100%;height:520px}
+    .node{filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));cursor:pointer}
+    .label{font-weight:700;letter-spacing:.3px;pointer-events:none}
+    .edge{stroke:#8da2fb55;stroke-width:3}
+    .edge-arrow{fill:#8da2fb88}
+    .pulse{animation:pulse 2.2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{filter:drop-shadow(0 0 0 rgba(109,220,255,.0))}50%{filter:drop-shadow(0 0 18px rgba(109,220,255,.6))}}
+
+    /* Info panel */
+    .info{display:grid;gap:10px}
+    .info .tag{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid #ffffff24}
+    .tag.academia{background:linear-gradient(90deg,#04371b,#0c2d1a);color:#a7f3d0;border-color:#10b98188}
+    .tag.empresa{background:linear-gradient(90deg,#0b2240,#0c1e35);color:#cfe5ff;border-color:#60a5fa88}
+    .tag.gob{background:linear-gradient(90deg,#3a2504,#2a1b05);color:#fde68a;border-color:#f59e0b88}
+
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+    .kpi{background:#0c1122aa;border:1px solid #ffffff1a;border-radius:14px;padding:12px}
+    .kpi b{display:block;font-size:18px;margin-bottom:4px}
+
+    footer{padding:18px 24px;color:#9aa6bd;font-size:12px;text-align:center}
+    a{color:var(--link)}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* Tooltip */
+    .tooltip{position:absolute;pointer-events:none;background:#0b1022; border:1px solid #ffffff2b; padding:10px 12px;border-radius:12px;font-size:13px; color:var(--fg); transform:translate(-50%,-120%); white-space:nowrap; box-shadow:0 6px 24px #00000066}
+    .tooltip.hidden{display:none}
+
+    /* Theme toggle */
+    .light body{background:linear-gradient(180deg,#f8fbff,#ebf2ff)}
+
+    /* Test UI */
+    .tests{margin-top:16px;display:grid;gap:8px}
+    .test{display:flex;justify-content:space-between;align-items:center;background:#0c1122aa;border:1px solid #ffffff1a;border-radius:12px;padding:8px 12px}
+    .badge{border-radius:999px;padding:4px 8px;font-size:12px}
+    .ok{background:#063; color:#b7ffd6}
+    .fail{background:#5b1010; color:#ffd1d1}
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <header>
+    <div>
+      <div class="title">Triple Hélice de IA en Beijing</div>
+      <div class="subtitle">BAAI (智源) + Zhongguancun: Academia ↔ Empresa ↔ Gobierno</div>
+    </div>
+    <div class="controls">
+      <button id="toggle-theme" title="Cambiar tema">🌓 Tema</button>
+      <span class="chip">Interactivo</span>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <!-- Viz -->
+    <section class="card viz" aria-label="Diagrama interactivo de la triple hélice">
+      <svg viewBox="0 0 800 520" role="img" aria-labelledby="ttl desc">
+        <title id="ttl">Triple hélice IA</title>
+        <desc id="desc">Triángulo con nodos Academia, Empresa y Gobierno conectados por flechas</desc>
+
+        <!-- edges -->
+        <defs>
+          <marker id="arrow" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto-start-reverse">
+            <polygon class="edge-arrow" points="0 0, 12 6, 0 12"></polygon>
+          </marker>
+        </defs>
+
+        <line id="e1" class="edge" x1="400" y1="90" x2="140" y2="430" marker-end="url(#arrow)"/>
+        <line id="e2" class="edge" x1="140" y1="430" x2="660" y2="430" marker-end="url(#arrow)"/>
+        <line id="e3" class="edge" x1="660" y1="430" x2="400" y2="90" marker-end="url(#arrow)"/>
+
+        <!-- nodes -->
+        <g class="node" id="n-academia" tabindex="0" data-key="academia" transform="translate(400,90)">
+          <circle r="52" fill="url(#gradA)" stroke="var(--academy)" stroke-width="3"/>
+          <text class="label" text-anchor="middle" y="5">🎓 Academia</text>
+        </g>
+
+        <g class="node" id="n-empresa" tabindex="0" data-key="empresa" transform="translate(140,430)">
+          <circle r="52" fill="url(#gradI)" stroke="var(--industry)" stroke-width="3"/>
+          <text class="label" text-anchor="middle" y="5">🏢 Empresa</text>
+        </g>
+
+        <g class="node" id="n-gob" tabindex="0" data-key="gobierno" transform="translate(660,430)">
+          <circle r="52" fill="url(#gradG)" stroke="var(--gov)" stroke-width="3"/>
+          <text class="label" text-anchor="middle" y="5">🏛️ Gobierno</text>
+        </g>
+
+        <!-- gradients -->
+        <defs>
+          <radialGradient id="gradA" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#10b981"/>
+            <stop offset="100%" stop-color="#065f46"/>
+          </radialGradient>
+          <radialGradient id="gradI" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#1e3a8a"/>
+          </radialGradient>
+          <radialGradient id="gradG" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#7c2d12"/>
+          </radialGradient>
+        </defs>
+      </svg>
+
+      <div id="tooltip" class="tooltip hidden"></div>
+    </section>
+
+    <!-- Info Panel -->
+    <aside class="card info" id="panel">
+      <h2 id="panel-title">Seleccioná un nodo</h2>
+      <div class="hint">Hacé clic en <b>Academia</b>, <b>Empresa</b> o <b>Gobierno</b> para ver cómo colaboran.</div>
+
+      <div class="kpis" aria-live="polite">
+        <div class="kpi"><b>Plataformas</b><span id="kpi1" class="small">—</span></div>
+        <div class="kpi"><b>Acciones</b><span id="kpi2" class="small">—</span></div>
+        <div class="kpi"><b>Impacto</b><span id="kpi3" class="small">—</span></div>
+      </div>
+
+      <div id="bullets" class="small" style="margin-top:8px"></div>
+
+      <div class="hint">Caso Beijing: <b>BAAI</b> actúa como plataforma puente; el clúster <b>Zhongguancun</b> articula parques, talento y foros; políticas locales y nacionales marcan rumbo y recursos.</div>
+    </aside>
+  </main>
+
+  <!-- Comparative Clusters Section -->
+  <section class="wrap" aria-label="Comparativa internacional de clústeres tecnológicos">
+    <div class="card" style="margin-top:8px">
+      <h2 style="margin-top:0">Comparativa internacional de clústeres tecnológicos (2025)</h2>
+      <p class="hint">Seleccioná países para comparar. Podés ordenar columnas y ver el gráfico actualizado en tiempo real.</p>
+
+      <div class="controls" style="flex-wrap:wrap;gap:8px;margin:8px 0 12px">
+        <label class="chip"><input id="chkAll" type="checkbox" checked style="margin-right:8px"> Seleccionar todo</label>
+        <span class="chip">Ordenar por:
+          <select id="sortKey" style="margin-left:8px;background:transparent;color:var(--fg);border:1px solid #ffffff33;border-radius:10px;padding:6px 8px">
+            <option value="country">País/Región</option>
+            <option value="clusters">N° de clústeres</option>
+          </select>
+          <button id="sortDir" class="chip" style="margin-left:8px">⬆︎</button>
+        </span>
+      </div>
+
+      <!-- Table -->
+      <div id="tableWrap" style="overflow:auto;border:1px solid #ffffff22;border-radius:14px">
+        <table id="tbl" style="width:100%;border-collapse:collapse;min-width:720px">
+          <thead>
+            <tr style="background:#10162a">
+              <th style="text-align:left;padding:10px 12px;border-bottom:1px solid #ffffff1a">Sel.</th>
+              <th style="text-align:left;padding:10px 12px;border-bottom:1px solid #ffffff1a">País/Región</th>
+              <th style="text-align:right;padding:10px 12px;border-bottom:1px solid #ffffff1a">N° de clústeres (2025)</th>
+              <th style="text-align:left;padding:10px 12px;border-bottom:1px solid #ffffff1a">Principales hubs</th>
+              <th style="text-align:left;padding:10px 12px;border-bottom:1px solid #ffffff1a">Producción destacada</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Chart -->
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin:.2em 0 .6em">Visualización: N° de clústeres por país (seleccionados)</h3>
+        <svg id="chart" viewBox="0 0 800 320" style="width:100%;height:320px;display:block"></svg>
+        <div class="hint">Consejo: hacé clic en el nombre del país para resaltar su barra.</div>
+      </div>
+
+      <!-- Tests -->
+      <div class="tests" id="tests"></div>
+    </div>
+  </section>
+
+  <footer>
+    Material elaborado por el profesor <b>Sergio Gevatschnaider</b>. Demo informativa (sin dependencias externas).
+  </footer>
+
+  <!-- Script 1: Triple hélice interactions -->
+  <script>
+    const data = {
+      academia: {
+        tag:'Academia', color:'var(--academy)',
+        kpi1:'BAAI, Tsinghua, Peking University',
+        kpi2:'Investigación básica, principios (Beijing AI Principles), formación de talento',
+        kpi3:'Modelos fundacionales (WuDao), toolkits y embeddings (FlagAI, BGE)',
+        bullets:[
+          'Orquesta comunidad científica y open-source (conferencias, papers, datasets).',
+          'Transferencia tecnológica: de laboratorio a prototipo (código y benchmarks).',
+          'Estándares y gobernanza: marcos éticos y de seguridad para IA.'
+        ]
+      },
+      empresa: {
+        tag:'Empresa', color:'var(--industry)',
+        kpi1:'Zhongguancun (Z-Park): startups, Big Tech',
+        kpi2:'Producto, escalado, casos de uso (NLP, visión, multimodal, agentes)',
+        kpi3:'Adopción de IA aplicada y retorno económico (empleo, inversión)',
+        bullets:[
+          'Co-desarrollo con universidades e institutos (pilotos y PoCs).',
+          'Uso de plataformas abiertas (FlagAI) + ajuste de modelos a dominio.',
+          'Cadenas de valor: de I+D a servicios y exportación tecnológica.'
+        ]
+      },
+      gobierno: {
+        tag:'Gobierno', color:'var(--gov)',
+        kpi1:'Zonas de innovación (Zhongguancun), ZGC Forum',
+        kpi2:'Políticas de talento, financiamiento I+D, infraestructura de cómputo',
+        kpi3:'Dirección estratégica (planes IA 2030), regulación y seguridad',
+        bullets:[
+          'Señales y coordinación: alinear academia ↔ industria.',
+          'Programas de incubación y atracción de talento (nacional y returnees).',
+          'Infraestructuras habilitantes: data centers y redes de cómputo.'
+        ]
+      }
+    };
+
+    const panelTitle = document.getElementById('panel-title');
+    const k1 = document.getElementById('kpi1');
+    const k2 = document.getElementById('kpi2');
+    const k3 = document.getElementById('kpi3');
+    const bullets = document.getElementById('bullets');
+
+    function render(key){
+      const d = data[key];
+      panelTitle.innerHTML = `${d.tag} <span class="tag ${key==='academia'?'academia':key==='empresa'?'empresa':'gob'}">${d.tag}</span>`;
+      k1.textContent = d.kpi1; k2.textContent = d.kpi2; k3.textContent = d.kpi3;
+      bullets.innerHTML = '<ul style="margin:6px 0 0 18px">' + d.bullets.map(x=>`<li>${x}</li>`).join('') + '</ul>';
+      pulseEdges(key);
+    }
+
+    // Node interactions
+    const nodes = document.querySelectorAll('.node');
+    const tooltip = document.getElementById('tooltip');
+
+    nodes.forEach(g=>{
+      g.addEventListener('click', ()=>render(g.dataset.key));
+      g.addEventListener('mouseenter', (e)=>{
+        const k = g.dataset.key;
+        tooltip.classList.remove('hidden');
+        tooltip.innerHTML = {
+          academia:'🎓 Academia: investigación, principios, talento',
+          empresa:'🏢 Empresa: producto, escalado, adopción',
+          gobierno:'🏛️ Gobierno: políticas, cómputo, regulación'
+        }[k];
+        const bbox = g.getBoundingClientRect();
+        tooltip.style.left = (bbox.left + bbox.width/2) + 'px';
+        tooltip.style.top = (bbox.top) + 'px';
+      });
+      g.addEventListener('mouseleave', ()=>tooltip.classList.add('hidden'));
+      g.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter' || ev.key===' '){render(g.dataset.key)} })
+    });
+
+    // Edge pulse toward selected path
+    function pulseEdges(key){
+      document.querySelectorAll('.edge').forEach(e=>e.classList.remove('pulse'));
+      if(key==='academia'){
+        document.getElementById('e1').classList.add('pulse');
+        document.getElementById('e3').classList.add('pulse');
+      } else if(key==='empresa'){
+        document.getElementById('e1').classList.add('pulse');
+        document.getElementById('e2').classList.add('pulse');
+      } else if(key==='gobierno'){
+        document.getElementById('e2').classList.add('pulse');
+        document.getElementById('e3').classList.add('pulse');
+      }
+    }
+
+    // default state
+    render('academia');
+
+    // Theme toggle
+    document.getElementById('toggle-theme').addEventListener('click',()=>{
+      document.documentElement.classList.toggle('light');
+    });
+  </script>
+
+  <!-- Script 2: Comparative table & chart + tests -->
+  <script>
+    // === Comparative table & chart ===
+    const dataset = [
+      {country:'China', clusters:25, hubs:'Shenzhen–Hong Kong–Guangzhou; Beijing; Shanghái–Suzhou', prod:'Patentes, papers, VC; SZ–HK–GZ como mayor clúster mundial', selected:true},
+      {country:'Estados Unidos', clusters:22, hubs:'San José–San Francisco; Nueva York; Boston; Los Ángeles', prod:'IA, biotecnología, semiconductores; Silicon Valley líder en productividad', selected:true},
+      {country:'Japón', clusters:4, hubs:'Tokio–Yokohama', prod:'Robótica, electrónica, automotriz', selected:true},
+      {country:'Alemania', clusters:7, hubs:'Múnich', prod:'Ingeniería avanzada y automotriz', selected:true},
+      {country:'India', clusters:4, hubs:'Bangalore', prod:'TI y servicios de software', selected:true},
+      {country:'Reino Unido', clusters:4, hubs:'Londres; Cambridge; Oxford', prod:'Ciencia, fintech, biomedicina', selected:true},
+      {country:'Corea del Sur', clusters:1, hubs:'Seúl', prod:'Electrónica, semiconductores, IA', selected:true}
+    ];
+
+    const tbody = document.getElementById('tbody');
+    const chart = document.getElementById('chart');
+    const chkAll = document.getElementById('chkAll');
+    const sortKey = document.getElementById('sortKey');
+    const sortDirBtn = document.getElementById('sortDir');
+    let asc = true;
+
+    function renderTable(){
+      tbody.innerHTML = '';
+      dataset.forEach((row,i)=>{
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #ffffff14';
+        tr.innerHTML = `
+          <td style="padding:8px 12px"><input type="checkbox" ${row.selected?'checked':''} data-idx="${i}"/></td>
+          <td style="padding:8px 12px;font-weight:600;cursor:pointer;color:var(--fg)" data-highlight="${i}">${row.country}</td>
+          <td style="padding:8px 12px;text-align:right">${row.clusters}</td>
+          <td style="padding:8px 12px;color:var(--muted)">${row.hubs}</td>
+          <td style="padding:8px 12px;color:var(--muted)">${row.prod}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      // Bind checkbox & highlight events
+      tbody.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+        cb.addEventListener('change', (e)=>{
+          const idx = +e.target.getAttribute('data-idx');
+          dataset[idx].selected = e.target.checked; updateChart();
+          chkAll.checked = dataset.every(d=>d.selected);
+        });
+      });
+      tbody.querySelectorAll('[data-highlight]').forEach(td=>{
+        td.addEventListener('click',()=>highlight(td.getAttribute('data-highlight')))
+      });
+    }
+
+    function highlight(i){
+      // Brief flash on chart bar
+      const bar = chart.querySelector(`[data-bar='${i}']`);
+      if(bar){ bar.classList.add('pulse'); setTimeout(()=>bar.classList.remove('pulse'),1500); }
+    }
+
+    function updateChart(){
+      const rows = dataset.filter(d=>d.selected);
+      const max = Math.max(1, ...rows.map(d=>d.clusters));
+      const padL = 150, padR = 30, padT = 20, padB = 40;
+      const W = 800, H = 320;
+      const innerW = W - padL - padR, innerH = H - padT - padB;
+      const barH = Math.max(18, innerH / Math.max(1, rows.length) - 8);
+
+      // Clear
+      chart.innerHTML = '';
+
+      // Axes (simple)
+      const axis = document.createElementNS('http://www.w3.org/2000/svg','line');
+      axis.setAttribute('x1', padL); axis.setAttribute('y1', H-padB);
+      axis.setAttribute('x2', W-padR); axis.setAttribute('y2', H-padB);
+      axis.setAttribute('stroke', '#ffffff33'); axis.setAttribute('stroke-width','1');
+      chart.appendChild(axis);
+
+      // Ticks
+      const ticks = 5;
+      for(let t=0;t<=ticks;t++){
+        const x = padL + innerW * (t/ticks);
+        const tick = document.createElementNS('http://www.w3.org/2000/svg','line');
+        tick.setAttribute('x1', x); tick.setAttribute('y1', H-padB);
+        tick.setAttribute('x2', x); tick.setAttribute('y2', H-padB+6);
+        tick.setAttribute('stroke', '#ffffff33');
+        chart.appendChild(tick);
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+        lbl.setAttribute('x', x); lbl.setAttribute('y', H-padB+20);
+        lbl.setAttribute('text-anchor','middle');
+        lbl.setAttribute('fill','#9aa6bd');
+        lbl.setAttribute('font-size','12');
+        lbl.textContent = Math.round(max*(t/ticks));
+        chart.appendChild(lbl);
+      }
+
+      // Bars
+      rows.forEach((d,ri)=>{
+        const x = padL; const y = padT + ri*(barH+8);
+        const w = innerW * (d.clusters/max);
+        const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        rect.setAttribute('x', x); rect.setAttribute('y', y);
+        rect.setAttribute('width', w); rect.setAttribute('height', barH);
+        rect.setAttribute('rx', '6'); rect.setAttribute('ry', '6');
+        rect.setAttribute('fill', 'url(#barGrad'+ri+')');
+        rect.setAttribute('data-bar', dataset.indexOf(d));
+        rect.style.filter = 'drop-shadow(0 6px 14px rgba(0,0,0,.4))';
+        chart.appendChild(rect);
+
+        // Gradients per bar
+        const defs = chart.querySelector('defs') || chart.appendChild(document.createElementNS('http://www.w3.org/2000/svg','defs'));
+        const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+        grad.setAttribute('id','barGrad'+ri);
+        grad.setAttribute('x1','0'); grad.setAttribute('x2','1');
+        grad.innerHTML = `<stop offset="0%" stop-color="#6ddcff"/><stop offset="100%" stop-color="#a17cff"/>`;
+        defs.appendChild(grad);
+
+        // Country label
+        const name = document.createElementNS('http://www.w3.org/2000/svg','text');
+        name.setAttribute('x', x-10); name.setAttribute('y', y+barH/2+4);
+        name.setAttribute('text-anchor','end'); name.setAttribute('fill','#cfd6e6');
+        name.setAttribute('font-size','13'); name.setAttribute('font-weight','600');
+        name.textContent = d.country;
+        chart.appendChild(name);
+
+        // Value label
+        const val = document.createElementNS('http://www.w3.org/2000/svg','text');
+        val.setAttribute('x', x + w + 8); val.setAttribute('y', y+barH/2+4);
+        val.setAttribute('fill','#a7b0c0'); val.setAttribute('font-size','12');
+        val.textContent = d.clusters;
+        chart.appendChild(val);
+      });
+    }
+
+    function sortData(){
+      const key = sortKey.value;
+      dataset.sort((a,b)=>{
+        if(key==='country') return asc ? a.country.localeCompare(b.country) : b.country.localeCompare(a.country);
+        if(key==='clusters') return asc ? a.clusters-b.clusters : b.clusters-a.clusters;
+        return 0;
+      });
+      renderTable(); updateChart();
+    }
+
+    chkAll.addEventListener('change',()=>{
+      dataset.forEach(d=>d.selected = chkAll.checked);
+      renderTable(); updateChart();
+    });
+    sortKey.addEventListener('change', sortData);
+    sortDirBtn.addEventListener('click',()=>{asc=!asc; sortDirBtn.textContent = asc ? '⬆︎' : '⬇︎'; sortData();});
+
+    // init UI
+    renderTable(); updateChart();
+
+    // === Minimal test suite ===
+    const testsEl = document.getElementById('tests');
+    function addResult(name, ok, msg=''){
+      const div = document.createElement('div');
+      div.className = 'test';
+      div.innerHTML = `<span>${name}${msg?` — <span class="small">${msg}</span>`:''}</span><span class="badge ${ok?'ok':'fail'}">${ok?'OK':'FAIL'}</span>`;
+      testsEl.appendChild(div);
+    }
+
+    try{
+      // Test 1: filas de tabla = dataset length
+      addResult('Tabla inicial', tbody.children.length === dataset.length, `filas=${tbody.children.length}`);
+
+      // Test 2: barras = seleccionados
+      const selectedCount = dataset.filter(d=>d.selected).length;
+      // cuenta rectángulos (barras)
+      const bars = () => chart.querySelectorAll('rect').length;
+      addResult('Gráfico inicial', bars() === selectedCount, `barras=${bars()} sel=${selectedCount}`);
+
+      // Test 3: ordenar por clusters ascendente coloca el mínimo primero
+      sortKey.value = 'clusters'; asc = true; sortData();
+      const minClusters = Math.min(...dataset.map(d=>d.clusters));
+      addResult('Orden ascendente por clústeres', dataset[0].clusters === minClusters, `min=${minClusters}, first=${dataset[0].clusters}`);
+
+      // Test 4: toggle select all → none
+      chkAll.checked = false; chkAll.dispatchEvent(new Event('change'));
+      addResult('Seleccionar todo OFF', dataset.every(d=>!d.selected));
+      addResult('Gráfico vacío', chart.querySelectorAll('rect').length === 0);
+
+      // Test 5: reactivar todo
+      chkAll.checked = true; chkAll.dispatchEvent(new Event('change'));
+      addResult('Seleccionar todo ON', dataset.every(d=>d.selected));
+    }catch(err){
+      addResult('Suite de tests', false, err.message);
+      console.error(err);
+    }
+  </script>
+</body>
+</html>
