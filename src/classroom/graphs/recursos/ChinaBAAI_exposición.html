@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAAI - Modelo Tripartito (Completo)</title>
+    <style>
+        /* --- Definición de Variables de Color --- */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-color-light: #ffffff;
+            --text-color-dark: #333333;
+            --container-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --line-color: rgba(102, 126, 234, 0.5);
+            --line-color-active: #667eea;
+            --transition-speed: 0.4s;
+        }
+
+        body.dark-theme {
+            --bg-gradient: linear-gradient(135deg, #1d2b64 0%, #3a3d8b 100%);
+            --text-color-light: #e0e0e0;
+            --text-color-dark: #f0f0f0; /* Texto dentro de las tarjetas ahora es claro */
+            --container-bg: rgba(29, 35, 42, 0.95);
+            --card-bg: #2c3e50;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --primary-color: #8a9cff;
+            --secondary-color: #9b84d4;
+            --line-color: rgba(138, 156, 255, 0.5);
+            --line-color-active: #8a9cff;
+        }
+        /* --- Fin de Variables --- */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color-dark);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .header {
+            text-align: center;
+            color: var(--text-color-light);
+            margin-bottom: 40px;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .container {
+            position: relative;
+            width: 90%;
+            max-width: 900px;
+            aspect-ratio: 9 / 7;
+            background: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            padding: 20px;
+            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .center-logo {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(120px, 20vw, 180px);
+            height: clamp(120px, 20vw, 180px);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color-light);
+            font-weight: bold;
+            font-size: clamp(1.2em, 3vw, 1.5em);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10;
+            cursor: pointer;
+            text-align: center;
+            animation: pulse 2.5s ease-in-out infinite;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .center-logo:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation-play-state: paused;
+        }
+
+        .center-logo .subtitle {
+            font-size: 0.5em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .vertex {
+            position: absolute;
+            width: clamp(150px, 25%, 200px);
+            padding: 20px;
+            background: var(--card-bg);
+            color: var(--text-color-dark);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px var(--shadow-color);
+            cursor: pointer;
+            border: 3px solid transparent;
+            z-index: 5;
+            animation: floatVertex 3s ease-in-out infinite;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .vertex:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            animation-play-state: paused;
+        }
+        
+        .vertex.active { 
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        }
+        body.dark-theme .vertex.active {
+            box-shadow: 0 10px 40px rgba(138, 156, 255, 0.4);
+        }
+        
+        .vertex-icon { font-size: 2em; margin-bottom: 10px; text-align: center; }
+        .vertex-title { font-size: 1.1em; font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .vertex-content { color: var(--text-color-dark); opacity: 0.8; font-size: 0.8em; line-height: 1.5; text-align: center; }
+
+        .academia { top: 3%; left: 50%; transform: translateX(-50%); border-top: 4px solid #3498db; animation-name: floatAcademia; }
+        .empresa { bottom: 3%; left: 3%; border-bottom: 4px solid #e74c3c; animation-delay: 0.5s; }
+        .gobierno { bottom: 3%; right: 3%; border-bottom: 4px solid #f39c12; animation-delay: 1s; }
+
+        @keyframes floatVertex { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes floatAcademia { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } }
+
+        .info-panel {
+            margin-top: 30px; padding: 25px; background: var(--card-bg); color: var(--text-color-dark);
+            border-radius: 15px; box-shadow: 0 5px 20px var(--shadow-color); width: 90%; max-width: 900px;
+            min-height: 150px; transition: all var(--transition-speed) ease;
+        }
+        .info-panel h3 { color: var(--primary-color); margin-bottom: 15px; font-size: 1.4em; }
+        .info-panel ul { list-style: none; padding-left: 0; }
+        .info-panel li { padding: 8px 0 8px 25px; position: relative; line-height: 1.6; }
+        .info-panel li:before { content: "→"; position: absolute; left: 0; color: var(--primary-color); font-weight: bold; }
+
+        .footer {
+            margin-top: 30px; padding: 20px; text-align: center; color: var(--text-color-light);
+            font-size: 0.95em; background: rgba(0,0,0,0.2); border-radius: 10px;
+            backdrop-filter: blur(10px); width: 90%; max-width: 900px;
+        }
+        
+        /* --- BOTÓN DE TEMA --- */
+        .theme-toggle-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-button:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                display: flex; flex-direction: column; align-items: center;
+                justify-content: flex-start; aspect-ratio: unset; height: auto;
+                position: relative; padding-top: 160px; padding-bottom: 20px;
+            }
+            .center-logo { top: 80px; width: 140px; height: 140px; }
+            .vertex { position: static; transform: none !important; animation: none; margin-bottom: 20px; width: 90%; }
+            svg { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle-button">🌙</button>
+
+    <div class="header">
+        <h1>🇨🇳 Beijing Academy of Artificial Intelligence</h1>
+        <p>Modelo de Colaboración Tripartito en IA</p>
+    </div>
+
+    <div class="container">
+        <svg style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 1;">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="var(--line-color)" />
+                </marker>
+                <marker id="arrowheadActive" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+                    <polygon points="0 0, 12 4, 0 8" fill="var(--line-color-active)" />
+                </marker>
+            </defs>
+            <line id="line1" x1="50%" y1="20%" x2="50%" y2="48%" stroke="var(--line-color)" stroke-width="4" marker-end="url(#arrowhead)" stroke-dasharray="1000" stroke-dashoffset="1000">
+                <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="2s" fill="freeze" repeatCount="indefinite"/>
+            </line>
+            <line id="line2" x1="48%" y1="52%" x2="18%" y2="80%" stroke="var(--line-color)" stroke-width="4" marker-end="url(#arrowhead)" stroke-dasharray="1000" stroke-dashoffset="1000">
+                <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="2s" begin="0.5s" fill="freeze" repeatCount="indefinite"/>
+            </line>
+            <line id="line3" x1="52%" y1="52%" x2="82%" y2="80%" stroke="var(--line-color)" stroke-width="4" marker-end="url(#arrowhead)" stroke-dasharray="1000" stroke-dashoffset="1000">
+                <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="2s" begin="1s" fill="freeze" repeatCount="indefinite"/>
+            </line>
+        </svg>
+
+        <div class="center-logo" onclick="showGeneral()">
+            <div>BAAI</div>
+            <div class="subtitle">2018 - Beijing</div>
+        </div>
+        <div class="vertex academia" onclick="showAcademia()">
+            <div class="vertex-icon">🎓</div>
+            <div class="vertex-title">ACADEMIA</div>
+            <div class="vertex-content">Tsinghua, Peking Univ., Academia China de Ciencias</div>
+        </div>
+        <div class="vertex empresa" onclick="showEmpresa()">
+            <div class="vertex-icon">🏢</div>
+            <div class="vertex-title">EMPRESA</div>
+            <div class="vertex-content">Baidu, ByteDance, Megvii, Meituan, Xiaomi</div>
+        </div>
+        <div class="vertex gobierno" onclick="showGobierno()">
+            <div class="vertex-icon">🏛️</div>
+            <div class="vertex-title">GOBIERNO</div>
+            <div class="vertex-content">Gobierno Municipal de Pekín - Apoyo estratégico</div>
+        </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <!-- Contenido se carga vía JS -->
+    </div>
+
+    <div class="footer">
+        <strong>Material elaborado por el profesor Sergio Gevatschnaider</strong>
+    </div>
+
+    <script>
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const body = document.body;
+        const vertices = document.querySelectorAll('.vertex');
+        const infoPanel = document.getElementById('infoPanel');
+        
+        const lines = {
+            line1: document.getElementById('line1'),
+            line2: document.getElementById('line2'),
+            line3: document.getElementById('line3')
+        };
+        
+        const defaultInfoPanelContent = `
+            <h3>📊 Modelo Tripartito de Innovación</h3>
+            <p style="line-height: 1.8;">
+                BAAI es un instituto sin fines de lucro fundado en 2018 que funciona como <strong>nexo institucional</strong> 
+                donde la ciencia académica, la capacidad productiva empresarial y el impulso estratégico gubernamental 
+                se unen para acelerar la investigación, estandarización y despliegue responsable de IA en China.
+            </p>
+            <p style="margin-top: 15px; opacity: 0.8; font-style: italic;">
+                💡 Haz clic en cada componente para explorar su rol específico
+            </p>`;
+        
+        // --- Lógica del Cambio de Tema ---
+        themeToggleButton.addEventListener('click', () => {
+            body.classList.toggle('dark-theme');
+            const isDarkMode = body.classList.contains('dark-theme');
+            themeToggleButton.textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        });
+
+        // --- Cargar Tema Guardado al iniciar ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggleButton.textContent = '☀️';
+            }
+            // Cargar contenido inicial del panel
+            infoPanel.innerHTML = defaultInfoPanelContent;
+        });
+        
+        // --- Lógica de la Interfaz Tripartita ---
+        function clearActive() {
+            vertices.forEach(v => v.classList.remove('active'));
+            if (window.innerWidth > 800) {
+                Object.values(lines).forEach(l => {
+                    if (l) {
+                        l.setAttribute('stroke', 'var(--line-color)');
+                        l.setAttribute('stroke-width', '4');
+                        l.setAttribute('marker-end', 'url(#arrowhead)');
+                    }
+                });
+            }
+        }
+
+        function activateLine(lineId) {
+            if (window.innerWidth <= 800) return;
+            const line = lines[lineId];
+            if (line) {
+                line.setAttribute('stroke', 'var(--line-color-active)');
+                line.setAttribute('stroke-width', '6');
+                line.setAttribute('marker-end', 'url(#arrowheadActive)');
+            }
+        }
+        
+        function showGeneral() {
+            clearActive();
+            infoPanel.innerHTML = `
+                <h3>🔄 Cómo Funciona la Colaboración</h3>
+                <ul>
+                    <li><strong>Cocreación de agendas I+D:</strong> Académicos definen retos científicos, empresas aportan casos de uso, gobierno marca prioridades públicas</li>
+                    <li><strong>Plataformas abiertas:</strong> Modelos WuDao, librerías y datasets que bajan barreras para startups y universidades</li>
+                    <li><strong>Eventos y foros:</strong> Conferencias BAAI que mezclan investigadores, reguladores y empresas</li>
+                    <li><strong>Gobernanza ética:</strong> Beijing AI Principles que informan regulación y buenas prácticas</li>
+                </ul>`;
+        }
+        
+        function showAcademia() {
+            clearActive();
+            document.querySelector('.academia').classList.add('active');
+            activateLine('line1');
+            infoPanel.innerHTML = `
+                <h3>🎓 Vértice ACADEMIA</h3>
+                <ul>
+                    <li><strong>Coalición universitaria:</strong> Tsinghua, Peking University, Academia China de Ciencias aportan líderes científicos y laboratorios</li>
+                    <li><strong>Formación de talento:</strong> Programas de investigación y desarrollo de capital humano avanzado en IA</li>
+                    <li><strong>Principios éticos:</strong> Desarrollo de los "Beijing AI Principles", marco internacional de ética en IA</li>
+                    <li><strong>Investigación básica:</strong> Definición de retos científicos fundamentales y exploración teórica</li>
+                </ul>`;
+        }
+        
+        function showEmpresa() {
+            clearActive();
+            document.querySelector('.empresa').classList.add('active');
+            activateLine('line2');
+            infoPanel.innerHTML = `
+                <h3>🏢 Vértice EMPRESA</h3>
+                <ul>
+                    <li><strong>Miembros fundadores:</strong> Baidu, ByteDance, Megvii, Meituan, Xiaomi como socios estratégicos</li>
+                    <li><strong>Datos y escenarios:</strong> Provisión de datasets reales y casos de uso industriales para investigación</li>
+                    <li><strong>Transferencia tecnológica:</strong> Aceleración del paso de laboratorio a mercado</li>
+                    <li><strong>Código abierto:</strong> Desarrollo de modelos como WuDao que la industria puede reutilizar</li>
+                </ul>`;
+        }
+        
+        function showGobierno() {
+            clearActive();
+            document.querySelector('.gobierno').classList.add('active');
+            activateLine('line3');
+            infoPanel.innerHTML = `
+                <h3>🏛️ Vértice GOBIERNO</h3>
+                <ul>
+                    <li><strong>Apoyo institucional:</strong> Respaldo financiero del gobierno municipal de Pekín para arranque y continuidad</li>
+                    <li><strong>Visión estratégica:</strong> Convertir Beijing en polo global de IA, alineación con objetivos nacionales</li>
+                    <li><strong>Infraestructura:</strong> Provisión de recursos, facilidades y marcos regulatorios favorables</li>
+                    <li><strong>Estandarización:</strong> Participación en iniciativas de estándares y gobernanza de IA</li>
+                    <li><strong>Contexto 2025:</strong> Incluida en listas de control de EE.UU., pero el modelo tripartito interno continúa operando</li>
+                </ul>`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hubs de IA y Tecnología en China</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0a0e27;
+      --bg-soft: rgba(10,14,39,0.4);
+      --surface: rgba(15,23,42,0.78);
+      --text: #e2e8f0;
+      --accent: #38bdf8;
+      --accent-2: #a855f7;
+      --muted: #94a3b8;
+      --table-head: rgba(148,163,184,0.12);
+      --bubble1: #38bdf840;
+      --bubble2: #a855f740;
+      --card: rgba(15,23,42,0.45);
+      --shadow: 0 24px 48px rgba(0,0,0,0.4);
+      --glow: 0 0 40px rgba(56,189,248,0.3);
+    }
+    body.light {
+      --bg: #f8fafc;
+      --bg-soft: rgba(248,250,252,0.5);
+      --surface: rgba(255,255,255,0.9);
+      --text: #0f172a;
+      --accent: #0d9488;
+      --accent-2: #7c3aed;
+      --muted: #64748b;
+      --table-head: rgba(226,232,240,0.9);
+      --bubble1: #0d948840;
+      --bubble2: #7c3aed40;
+      --card: rgba(255,255,255,0.92);
+      --shadow: 0 20px 50px rgba(13,148,136,0.12);
+      --glow: 0 0 30px rgba(13,148,136,0.2);
+    }
+    * { box-sizing: border-box; }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(120deg); }
+      66% { transform: translate(-20px, 20px) rotate(240deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at top, #1e3a8a 0%, var(--bg) 50%, #020617 100%);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      animation: fadeIn 0.6s ease;
+    }
+    /* Burbujas */
+    .bubble {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(60px);
+      opacity: .7;
+      pointer-events: none;
+      z-index: 0;
+      animation: float 20s ease-in-out infinite;
+    }
+    .bubble.one {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--bubble1), transparent);
+      top: -100px; right: -80px;
+    }
+    .bubble.two {
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, var(--bubble2), transparent);
+      bottom: -100px; left: -100px;
+      animation-delay: -10s;
+    }
+    .bubble.three {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, #f97316, transparent);
+      top: 50%; right: 10%;
+      animation-delay: -5s;
+      opacity: 0.35;
+    }
+    /* Partículas */
+    .particle {
+      position: fixed;
+      width: 3px; height: 3px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(135deg, rgba(15,23,42,.95), rgba(30,58,138,.85));
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(56,189,248,0.2);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+    .topbar {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2rem; gap: 1rem;
+      animation: slideUp 0.6s ease;
+    }
+    .brand { display: flex; gap: .8rem; align-items: center; }
+    .badge {
+      background: linear-gradient(135deg, rgba(56,189,248,0.3), rgba(168,85,247,0.3));
+      border: 2px solid rgba(56,189,248,0.5);
+      width: 48px; height: 48px; border-radius: 1rem;
+      display: grid; place-items: center; font-weight: 800; font-size: 1rem; color: var(--text);
+      box-shadow: 0 0 20px rgba(56,189,248,0.4);
+      transition: all 0.3s ease;
+    }
+    .badge:hover { transform: scale(1.1) rotate(5deg); box-shadow: var(--glow); }
+    h1.title {
+      font-size: 1.4rem; margin: 0; letter-spacing: -.02em; font-weight: 800;
+      background: linear-gradient(135deg, var(--text), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .subtitle { color: var(--muted); font-size: .8rem; margin-top: .3rem; font-weight: 500; }
+    .actions { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid rgba(56,189,248,0.3);
+      background: rgba(56,189,248,.15);
+      color: var(--text);
+      border-radius: 1rem;
+      padding: .6rem 1.1rem;
+      cursor: pointer;
+      display: inline-flex; gap: .5rem; align-items: center;
+      font-weight: 600; font-size: .85rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative; overflow: hidden;
+    }
+    .btn::before {
+      content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%;
+      background: rgba(56,189,248,0.3); transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s;
+    }
+    .btn:hover::before { width: 300px; height: 300px; }
+    .btn:hover { background: rgba(56,189,248,.25); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(56,189,248,0.3); }
+    .btn span { position: relative; z-index: 1; }
+    .container { max-width: 1280px; margin: 2rem auto 5rem; padding: 0 2rem; position: relative; z-index: 1; }
+    .intro {
+      background: var(--surface); border: 1px solid rgba(56,189,248,0.3);
+      border-radius: 2rem; padding: 2rem 2rem 1.5rem;
+      box-shadow: var(--shadow), var(--glow);
+      display: grid; gap: 1.3rem; animation: slideUp 0.8s ease 0.2s both; position: relative; overflow: hidden;
+    }
+    .intro::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+      background-size: 200% 100%; animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 100% 0%; } }
+    .intro h2 {
+      margin: 0; font-size: 1.8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .intro p { line-height: 1.7; font-size: .95rem; }
+    .chips { display: flex; gap: .7rem; flex-wrap: wrap; }
+    .chip {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(56,189,248,0.2));
+      border: 1px solid rgba(56,189,248,0.4);
+      border-radius: 999px; padding: .4rem .9rem; font-size: .75rem; font-weight: 600; transition: all 0.3s ease;
+    }
+    .chip:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(56,189,248,0.3); background: linear-gradient(135deg, rgba(15,118,110,0.3), rgba(56,189,248,0.3)); }
+    .grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid rgba(148,163,184,0.25); border-radius: 1.5rem; box-shadow: var(--shadow); overflow: hidden; animation: slideUp 1s ease 0.4s both; transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow), 0 0 30px rgba(56,189,248,0.2); }
+    .table-wrapper { max-height: 560px; overflow: auto; border-radius: 1rem; scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+    .table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+    .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .table-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    table { width: 100%; border-spacing: 0; border-collapse: collapse; font-size: .82rem; min-width: 760px; }
+    thead { background: var(--table-head); position: sticky; top: 0; backdrop-filter: blur(12px); z-index: 1; }
+    th, td { text-align: left; padding: .7rem .9rem; vertical-align: top; }
+    th {
+      font-weight: 700; color: var(--accent); text-transform: uppercase; font-size: .68rem; letter-spacing: .06em; cursor: pointer;
+    }
+    th.sort-asc::after { content: " ▲"; font-size: .7rem; color: var(--muted); }
+    th.sort-desc::after { content: " ▼"; font-size: .7rem; color: var(--muted); }
+    tbody tr { transition: all 0.3s ease; border-bottom: 1px solid rgba(148,163,184,0.1); }
+    tbody tr:nth-child(even) { background: rgba(15,23,42,0.15); }
+    tbody tr:hover { background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(168,85,247,0.08)); transform: scale(1.01); box-shadow: 0 4px 12px rgba(56,189,248,0.2); }
+    .right-panel { display: grid; gap: 1.2rem; }
+    .mini-title { font-size: .9rem; margin-bottom: .7rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+    .pill { background: var(--card); border: 1px solid rgba(56,189,248,0.25); border-radius: 1.2rem; padding: .9rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: .6rem; transition: all 0.3s ease; }
+    .pill:hover { background: rgba(56,189,248,0.1); transform: translateX(5px); border-color: var(--accent); }
+    .pill-left { display: flex; gap: .6rem; align-items: center; }
+    .dot { width: 10px; height: 10px; border-radius: 999px; animation: pulse 2s ease-in-out infinite; }
+    .search-bar { display: flex; gap: .5rem; background: rgba(15,23,42,0.15); border: 1px solid rgba(56,189,248,0.4); border-radius: 1rem; padding: .45rem .7rem; margin-top: .5rem; transition: all 0.3s ease; }
+    .search-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(56,189,248,0.3); background: rgba(15,23,42,0.25); }
+    .search-bar input { background: transparent; border: none; outline: none; flex: 1; color: var(--text); font-size: .85rem; font-weight: 500; }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar span { font-size: .8rem; color: var(--muted); }
+    .toolbar { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    footer { text-align: center; color: var(--muted); font-size: .75rem; padding: 2rem 0 3rem; font-weight: 500; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin-top: 1rem; }
+    .stat-box {
+      background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(168,85,247,0.1));
+      border: 1px solid rgba(56,189,248,0.3);
+      border-radius: 1rem; padding: 1rem; text-align: center; transition: all 0.3s ease;
+    }
+    .stat-box:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 10px 25px rgba(56,189,248,0.3); }
+    .stat-number {
+      font-size: 1.8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { font-size: .7rem; color: var(--muted); margin-top: .3rem; text-transform: uppercase; letter-spacing: .05em; }
+    @media (max-width: 950px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      table { min-width: 100%; }
+      .topbar { flex-wrap: wrap; padding: 1rem 1.5rem; }
+      h1.title { font-size: 1.1rem; }
+      .intro h2 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble one"></div>
+  <div class="bubble two"></div>
+  <div class="bubble three"></div>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge">🧠</div>
+        <div>
+          <h1 class="title">Hubs de IA y Tecnología en China</h1>
+          <div class="subtitle">Ciudades, ecosistemas, empresas y focos de desarrollo</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="toggleTheme" aria-label="Cambiar tema"><span>🌗</span> <span id="themeLabel">Modo claro</span></button>
+        <button class="btn" id="btnExport"><span>⬇</span><span>Exportar CSV</span></button>
+        <button class="btn" onclick="window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})"><span>🏁</span><span>Ir al final</span></button>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <section class="intro">
+      <div>
+        <h2>Mapa estratégico de hubs chinos de IA</h2>
+        <p style="margin-top:.5rem; max-width: 1000px;">
+          Esta visualización sintetiza las principales <strong>ciudades chinas</strong> que funcionan como polos de
+          innovación en inteligencia artificial, big data, chips y robótica. Incluye los <strong>hubs o parques tecnológicos</strong>,
+          las <strong>empresas ancla</strong> y una breve descripción de su <strong>especialización</strong>.
+        </p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number" id="statCities">—</div>
+          <div class="stat-label">Ciudades principales</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">+2.4k</div>
+          <div class="stat-label">Startups de IA</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">60%</div>
+          <div class="stat-label">Inversión en 3 ciudades</div>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip">🏛️ Pekín: algoritmos & BAAI</span>
+        <span class="chip">🏭 Shanghái: IA industrial & finanzas</span>
+        <span class="chip">🦾 Shenzhen: hardware & robótica</span>
+        <span class="chip">🛒 Hangzhou: comercio electrónico</span>
+        <span class="chip">🚗 Guangzhou: vehículos inteligentes</span>
+        <span class="chip">🎓 Chengdu/Xi'an: talento occidental</span>
+      </div>
+    </section>
+    <div class="grid" style="margin-top:2rem;">
+      <section class="card">
+        <div style="padding:1rem 1.2rem .7rem; display:flex;align-items:center;justify-content:space-between; gap: .8rem; flex-wrap: wrap;">
+          <h3 style="margin:0;font-size:.95rem;font-weight:700;color:var(--accent);">📊 Tabla de ciudades y hubs</h3>
+          <div class="toolbar">
+            <div class="search-bar">
+              <span>🔍</span>
+              <input type="text" id="search" placeholder="Filtrar por ciudad, hub, empresa o foco..." />
+            </div>
+            <span style="font-size:.78rem;color:var(--muted);">Filas: <strong id="rowCount">0</strong></span>
+          </div>
+        </div>
+        <div class="table-wrapper" id="tableWrapper">
+          <table id="hubsTable">
+            <thead>
+              <tr>
+                <th data-key="#" style="width:56px;">#</th>
+                <th data-key="ciudad">Ciudad</th>
+                <th data-key="hubs">Hubs / Parques</th>
+                <th data-key="empresas">Empresas / Instituciones</th>
+                <th data-key="foco">A qué se dedican</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <aside class="right-panel">
+        <div class="card" style="padding:1rem 1.2rem;">
+          <div class="mini-title">⚡ Indicadores rápidos 2025</div>
+          <div class="pill">
+            <div class="pill-left"><div class="dot" style="background:#38bdf8;"></div><div style="font-size:.78rem;font-weight:600;">+2.400 startups IA</div></div>
+            <span style="font-size:.75rem;color:var(--muted);">20% en Beijing</span>
+          </div>
+          <div class="pill">
+            <div class="pill-left"><div class="dot" style="background:#f97316;"></div><div style="font-size:.78rem;font-weight:600;">BAAI & Zhongguancun</div></div>
+            <span style="font-size:.75rem;color:var(--muted);">I+D avanzado</span>
+          </div>
+          <div class="pill">
+            <div class="pill-left"><div class="dot" style="background:#10b981;"></div><div style="font-size:.78rem;font-weight:600;">Clúster chips sur</div></div>
+            <span style="font-size:.75rem;color:var(--muted);">Shenzhen/Guangzhou</span>
+          </div>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:.9rem;line-height:1.6;">
+            Beijing, Shanghái y Shenzhen concentran la mayor parte de la inversión en IA, pero ciudades del oeste como Chongqing
+            o Chengdu están creciendo como polos de talento y datacenters vinculados a la estrategia nacional de IA.
+          </p>
+        </div>
+        <div class="card" style="padding:1rem 1.2rem;">
+          <div class="mini-title">🎯 Leyenda de focos</div>
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:.7rem;line-height:1.6;">
+            Los focos combinan IA, manufactura avanzada, chips y aplicaciones sectoriales.
+          </p>
+          <ul style="margin:0;padding-left:1.2rem;font-size:.75rem;display:grid;gap:.45rem;line-height:1.5;">
+            <li><strong>IA general:</strong> modelos base, PLN, visión.</li>
+            <li><strong>Robótica & hardware:</strong> Shenzhen, Guangzhou, Foshan.</li>
+            <li><strong>Comercio & fintech:</strong> Hangzhou, Shanghái, Hong Kong.</li>
+            <li><strong>IA industrial:</strong> Nanjing, Suzhou, Tianjin, Shenyang, Wuxi.</li>
+            <li><strong>Datacenters & cloud:</strong> Chengdu, Chongqing, Guiyang, Hohhot.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <footer>
+      Material elaborado por el profesor Sergio Gevatschnaider
+    </footer>
+  </main>
+  <script>
+    // Partículas decorativas
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.animationDelay = (Math.random() * 3) + 's';
+      document.body.appendChild(p);
+    }
+
+    // Datos: ciudades, hubs, empresas e industrias
+    const rows = [
+      { ciudad: "Beijing (Pekín)", hubs: "Zhongguancun; Beijing Academy of AI (BAAI)", empresas: "Baidu; ByteDance R&D; Megvii; iFlytek (centros); Tsinghua; Peking Univ.", foco: "Algoritmos; modelos fundacionales; visión; conducción autónoma; cooperación academia‑empresa‑gobierno" },
+      { ciudad: "Shanghái", hubs: "Zhangjiang Hi‑Tech Park; Lingang AI Island", empresas: "Tencent (centros); Huawei (R&D); SenseTime (HQ SH); Tesla Giga (IA industrial)", foco: "IA industrial; smart manufacturing; fintech; puertos inteligentes; aplicaciones urbanas" },
+      { ciudad: "Shenzhen", hubs: "Shenzhen High‑Tech Park; AI & Robotics Hub; Nanshan", empresas: "Huawei (HQ); Tencent (global); DJI; ZTE; UBTech", foco: "Hardware; robótica; 5G/6G; edge AI; chips; smart city" },
+      { ciudad: "Guangzhou (Cantón)", hubs: "Guangzhou Dev. District; Knowledge City", empresas: "XPeng; WeRide; Huawei (centros); Pony.ai (reg.)", foco: "Vehículos autónomos; movilidad; logística inteligente; automotriz conectada" },
+      { ciudad: "Hangzhou", hubs: "Hangzhou Future Sci‑Tech City", empresas: "Alibaba DAMO; Ant Group; Hikvision", foco: "Comercio electrónico; pagos & riesgo; visión industrial; cloud" },
+      { ciudad: "Nanjing", hubs: "Jiangbei New Area", empresas: "Huawei IA; NARI; Univ. locales", foco: "IA para energía; fabricación avanzada; ciudad inteligente" },
+      { ciudad: "Suzhou", hubs: "Suzhou Industrial Park; AI Innovation Park", empresas: "Cambricon (socios); ecosistema IoT", foco: "IA + IoT; manufactura inteligente; semiconductores; componentes" },
+      { ciudad: "Chengdu", hubs: "Chengdu Hi‑tech Zone; Tianfu New Area", empresas: "Tencent SW China; Huawei Cloud; iFlytek", foco: "Datacenters regionales; IA para servicios públicos; ecosistema universitario" },
+      { ciudad: "Chongqing", hubs: "Liangjiang New Area; Western Science City", empresas: "Changan Auto; Huawei Cloud (oeste)", foco: "IA para automoción; logística interior; nube; BRI" },
+      { ciudad: "Wuhan", hubs: "Optics Valley of China (Guanggu)", empresas: "FiberHome; Huawei (óptico); Univ. Huazhong", foco: "IA + 5G + fotónica; redes; salud inteligente" },
+      { ciudad: "Xi'an", hubs: "Xi'an Hi‑Tech Zone", empresas: "AVIC; CETC; NW Polytechnical Univ.", foco: "IA defensa/aeroespacial; big data; talento STEM" },
+      { ciudad: "Tianjin", hubs: "Binhai New Area; AI Innovation Base", empresas: "Sinopec smart; automotrices; puertos", foco: "IA industrial costera; puertos inteligentes; integración Jing‑Jin‑Ji" },
+      { ciudad: "Hong Kong (RAE)", hubs: "Hong Kong Science Park; Cyberport", empresas: "HKU; HKUST; fintech/IA startups", foco: "Finanzas cuantitativas; IA para trading; cooperación internacional" },
+      { ciudad: "Macao (RAE)", hubs: "Parques Guangdong‑Macao", empresas: "Universidades; turismo inteligente", foco: "IA para turismo; gaming; gestión urbana" },
+      { ciudad: "Hefei (Anhui)", hubs: "Hefei Hi‑Tech Zone; USTC cluster", empresas: "iFlytek (HQ); USTC; Origin Quantum", foco: "PLN & voz; IA académica; computación cuántica; chips emergentes" },
+      { ciudad: "Guiyang (Guizhou)", hubs: "National Big Data Pilot Zone", empresas: "Huawei/Apple (DC partners); China Unicom", foco: "Big data; datacenters; cloud; analítica gubernamental" },
+      { ciudad: "Wuxi (Jiangsu)", hubs: "Wuxi IoT Innovation Ctr.", empresas: "Bosch; CN IoT; armadoras", foco: "IoT a gran escala; sensores; fabricación inteligente" },
+      { ciudad: "Foshan (Guangdong)", hubs: "Foshan Robotics Town", empresas: "Midea‑KUKA; fabricantes robots", foco: "Robótica industrial; líneas automatizadas; IA en planta" },
+      { ciudad: "Zhuhai (Guangdong)", hubs: "Hengqin New Area", empresas: "Gree Electric; chip packaging", foco: "Electrodomésticos inteligentes; IA aplicada; semiconductores (ensamble)" },
+      { ciudad: "Dongguan (Guangdong)", hubs: "Songshan Lake Sci‑Tech", empresas: "Supply chain Huawei; fabricantes EMS", foco: "Manufactura electrónica; IA en cadena de suministro" },
+      { ciudad: "Qingdao (Shandong)", hubs: "Qingdao West Coast New Area", empresas: "Haier (COSMOPlat); Hisense", foco: "IA para manufactura; IA marina; electro‑hogar inteligente" },
+      { ciudad: "Shenyang (Liaoning)", hubs: "Shenyang Equip. Mfg. Base", empresas: "Shenyang Machine Tool; AVIC", foco: "IA industrial pesada; mantenimiento predictivo" },
+      { ciudad: "Harbin (Heilongjiang)", hubs: "Harbin Sci‑Tech; HIT cluster", empresas: "Harbin Institute of Tech.; aeroespacial", foco: "Robótica; aeroespacial; visión; materiales" },
+      { ciudad: "Hohhot (Mongolia Interior)", hubs: "Horinger DC Cluster", empresas: "Grandes DC estatales; telcos", foco: "Datacenters (energía eólica); almacenamiento de datos; IA backend" }
+    ];
+
+    // Render de tabla
+    const tbody = document.querySelector("#hubsTable tbody");
+    const searchInput = document.getElementById("search");
+    const rowCount = document.getElementById("rowCount");
+    const statCities = document.getElementById("statCities");
+    let sortKey = null;
+    let sortDir = 1; // 1 asc, -1 desc
+
+    function renderTable(data) {
+      tbody.innerHTML = "";
+      data.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${row.ciudad}</td>
+          <td>${row.hubs}</td>
+          <td>${row.empresas}</td>
+          <td>${row.foco}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      rowCount.textContent = data.length;
+      statCities.textContent = data.length;
+    }
+
+    function sortBy(key) {
+      const headers = document.querySelectorAll("th");
+      headers.forEach(h => { h.classList.remove("sort-asc", "sort-desc"); });
+      if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+      const sorted = [...filtered].sort((a, b) => {
+        const av = (key === "#") ? 0 : (a[key] || "");
+        const bv = (key === "#") ? 0 : (b[key] || "");
+        return av.localeCompare(bv, 'es', { sensitivity: 'base' }) * sortDir;
+      });
+      const th = [...headers].find(h => h.dataset.key === key);
+      if (th) th.classList.add(sortDir === 1 ? "sort-asc" : "sort-desc");
+      renderTable(sorted);
+      current = sorted;
+    }
+
+    let filtered = rows.slice();
+    let current = rows.slice();
+    renderTable(rows);
+
+    searchInput.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      filtered = rows.filter(r =>
+        r.ciudad.toLowerCase().includes(q) ||
+        r.hubs.toLowerCase().includes(q) ||
+        r.empresas.toLowerCase().includes(q) ||
+        r.foco.toLowerCase().includes(q)
+      );
+      current = filtered.slice();
+      renderTable(filtered);
+    });
+
+    // Ordenar al hacer click en encabezados
+    document.querySelectorAll("th").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+        if (!key || key === "#") return;
+        sortBy(key);
+      });
+    });
+
+    // Tema
+    const toggleBtn = document.getElementById("toggleTheme");
+    const themeLabel = document.getElementById("themeLabel");
+    function setTheme(mode) {
+      if (mode === "light") {
+        document.body.classList.add("light");
+        themeLabel.textContent = "Modo oscuro";
+        localStorage.setItem("theme", "light");
+      } else {
+        document.body.classList.remove("light");
+        themeLabel.textContent = "Modo claro";
+        localStorage.setItem("theme", "dark");
+      }
+    }
+    toggleBtn.addEventListener("click", () => {
+      const isLight = document.body.classList.contains("light");
+      setTheme(isLight ? "dark" : "light");
+    });
+    const saved = localStorage.getItem("theme");
+    if (saved) setTheme(saved);
+
+    // Exportar CSV
+    function toCSV(arr) {
+      const header = ["Ciudad","Hubs / Parques","Empresas / Instituciones","A qué se dedican"];
+      const lines = [header.join(",")];
+      arr.forEach(r => {
+        // Escapar comas y saltos
+        const vals = [r.ciudad, r.hubs, r.empresas, r.foco].map(v => `"${String(v).replace(/"/g, '""')}"`);
+        lines.push(vals.join(","));
+      });
+      return lines.join("\n");
+    }
+    document.getElementById("btnExport").addEventListener("click", () => {
+      const csv = toCSV(current);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "hubs_china.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
