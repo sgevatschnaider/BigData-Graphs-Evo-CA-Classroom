@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Mapa REE — Minas, Separación, Metales, Imanes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    .panel {
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
+      background: rgba(255,255,255,.95); padding: 10px 12px; border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      max-width: 320px;
+    }
+    .panel h1 { font-size: 16px; margin: 0 0 6px; }
+    .panel label { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 13px; }
+    .legend { position: absolute; bottom: 12px; left: 10px; background: rgba(255,255,255,.95); padding: 8px 10px; border-radius: 8px; font-size: 12px; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; font-size:11px; }
+    .mine { background:#a855f7; } .sep { background:#16a34a; } .metal { background:#ea580c; } .magnet { background:#2563eb; }
+    .reset { margin-top: 6px; font-size: 12px; border: none; padding: 6px 10px; border-radius: 8px; background: #1262BC; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <h1>Capas</h1>
+    <label><input type="checkbox" id="chkMine" checked> Minas <span class="pill mine">MIN</span></label>
+    <label><input type="checkbox" id="chkSep" checked> Separación <span class="pill sep">SEP</span></label>
+    <label><input type="checkbox" id="chkMetal" checked> Metales <span class="pill metal">MET</span></label>
+    <label><input type="checkbox" id="chkMagnet" checked> Imanes <span class="pill magnet">MAG</span></label>
+    <hr>
+    <label><input type="checkbox" id="onlyChina"> Solo China</label>
+    <button class="reset" id="resetView">Recentrar</button>
+  </div>
+  <div class="legend">
+    Pulsá marcadores para ver <b>capacidad</b> y <b>propietario</b> · Doble clic o rueda para zoom.
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Dataset mínimo de ejemplo (ampliable con un archivo JSON externo)
+    const data = [
+      // Minas
+      {type:'mine', name:'Bayan Obo', country:'China', owner:'Baotou Steel', capacity_tpa: 120000, lat:41.8, lon:109.98},
+      {type:'mine', name:'Mountain Pass', country:'Estados Unidos', owner:'MP Materials', capacity_tpa: 40000, lat:35.43, lon:-115.51},
+      // Separación
+      {type:'sep', name:'Ganzhou Separation Cluster', country:'China', owner:'Varias', capacity_tpa: 80000, lat:25.87, lon:114.94},
+      {type:'sep', name:'Lynas Malaysia Plant', country:'Malasia', owner:'Lynas', capacity_tpa: 22000, lat:3.64, lon:103.36},
+      // Metales
+      {type:'metal', name:'Baotou Metals', country:'China', owner:'Baotou Steel', capacity_tpa: 50000, lat:40.62, lon:109.84},
+      {type:'metal', name:'JX Metals Pilot', country:'Japón', owner:'JX', capacity_tpa: 3000, lat:35.68, lon:139.77},
+      // Imanes
+      {type:'magnet', name:'Ningbo Permanent Magnet Factory', country:'China', owner:'Varias', capacity_tpa: 45000, lat:29.87, lon:121.55},
+      {type:'magnet', name:'Hitachi Metals (Aichi)', country:'Japón', owner:'Proterial (ex Hitachi Metals)', capacity_tpa: 8000, lat:35.03, lon:137.15},
+    ];
+
+    const map = L.map('map').setView([25, 105], 3);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 10, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const iconColors = {
+      mine: '#a855f7',
+      sep: '#16a34a',
+      metal: '#ea580c',
+      magnet: '#2563eb'
+    };
+
+    function circle(color) {
+      return L.circleMarker([0,0], {
+        radius: 8, weight: 2, color: color, fillColor: color, fillOpacity: 0.8
+      });
+    }
+
+    const layers = {
+      mine: L.layerGroup().addTo(map),
+      sep: L.layerGroup().addTo(map),
+      metal: L.layerGroup().addTo(map),
+      magnet: L.layerGroup().addTo(map)
+    };
+
+    const markers = [];
+
+    function addPoint(pt) {
+      const m = L.circleMarker([pt.lat, pt.lon], {
+        radius: 8, weight: 2, color: iconColors[pt.type], fillColor: iconColors[pt.type], fillOpacity: 0.85
+      });
+      const cap = pt.capacity_tpa ? `${pt.capacity_tpa.toLocaleString('es-AR')} t/año` : '—';
+      m.bindTooltip(`<b>${pt.name}</b><br>${pt.country} · ${pt.owner}<br>Capacidad: ${cap}`);
+      m.bindPopup(`<b>${pt.name}</b><br>País: ${pt.country}<br>Propietario: ${pt.owner}<br>Capacidad: ${cap}<br>Etapa: ${pt.type.toUpperCase()}`);
+      m.pt = pt; // attach data for filtering
+      layers[pt.type].addLayer(m);
+      markers.push(m);
+    }
+
+    data.forEach(addPoint);
+
+    // Layer toggles
+    const chkMine = document.getElementById('chkMine');
+    const chkSep = document.getElementById('chkSep');
+    const chkMetal = document.getElementById('chkMetal');
+    const chkMagnet = document.getElementById('chkMagnet');
+    const onlyChina = document.getElementById('onlyChina');
+
+    function updateVisibility() {
+      const show = {
+        mine: chkMine.checked,
+        sep: chkSep.checked,
+        metal: chkMetal.checked,
+        magnet: chkMagnet.checked
+      };
+      Object.keys(layers).forEach(k => layers[k].clearLayers());
+      markers.forEach(m => {
+        const okType = show[m.pt.type];
+        const okCountry = !onlyChina.checked || m.pt.country === 'China';
+        if (okType && okCountry) {
+          layers[m.pt.type].addLayer(m);
+        }
+      });
+    }
+
+    [chkMine, chkSep, chkMetal, chkMagnet, onlyChina].forEach(el => el.addEventListener('change', updateVisibility));
+
+    // Reset view
+    document.getElementById('resetView').addEventListener('click', () => {
+      map.setView([25, 105], 3);
+    });
+
+    // Initial render
+    updateVisibility();
+  </script>
+</body>
+</html>
