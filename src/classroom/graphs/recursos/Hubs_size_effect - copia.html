@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tamaño de los hubs tecnológicos: por qué importa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --surface:rgba(16,24,39,.7);
+      --text:#e6edf5;
+      --muted:#94a3b8;
+      --accent:#3ecbf3;
+      --accent2:#7c3aed;
+      --card:rgba(16,24,39,.6);
+      --ring:rgba(62,203,243,.35);
+    }
+    body.light{
+      --bg:#f4f7fb;
+      --surface:#ffffffd8;
+      --text:#0b1220;
+      --muted:#475569;
+      --accent:#0ea5a4;
+      --accent2:#6d28d9;
+      --card:#ffffffee;
+      --ring:rgba(14,165,164,.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 80% -10%, #1e293b 0%, var(--bg) 40%, #060b13 100%);
+      color:var(--text);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:saturate(160%) blur(14px);
+      background:linear-gradient(90deg, rgba(6,11,19,.85), rgba(6,11,19,.35));
+      border-bottom:1px solid #33415555;
+    }
+    .topbar{
+      max-width:1100px; margin:0 auto; padding:12px 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+    }
+    .badge{
+      width:36px; height:36px; border-radius:10px;
+      display:grid; place-items:center; font-weight:700;
+      background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color:white; box-shadow:0 8px 24px #0005;
+    }
+    h1{font-size:18px; margin:0}
+    .subtitle{color:var(--muted); font-size:12px; margin-top:2px}
+    .btn{
+      border:1px solid var(--ring); background:transparent; color:var(--text);
+      padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:600;
+    }
+    .btn:hover{background:rgba(62,203,243,.08)}
+    main{max-width:1100px; margin:24px auto 60px; padding:0 20px}
+    .hero{
+      background:var(--surface);
+      border:1px solid #33415566;
+      border-radius:20px;
+      padding:18px 18px 12px;
+      box-shadow:0 24px 60px #00000044;
+    }
+    .lead{margin:0; color:var(--muted)}
+    .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+    .chip{font-size:12px; border:1px solid var(--ring); padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.02)}
+    .grid{display:grid; grid-template-columns:1.1fr .9fr; gap:16px; margin-top:16px}
+    .card{
+      background:var(--card); border:1px solid #33415555; border-radius:16px; padding:14px;
+    }
+    .kicker{font-size:12px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin:0 0 4px 0}
+    h3{margin:0 0 8px 0; font-size:16px}
+    .points{display:grid; gap:10px; margin-top:8px}
+    .point{display:grid; grid-template-columns:28px 1fr; gap:8px; align-items:start; padding:8px; border-radius:12px; border:1px dashed #33415555}
+    .point b{display:block; font-size:14px}
+    .ico{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(62,203,243,.12); border:1px solid var(--ring)}
+    .meter{display:grid; gap:10px; margin-top:8px}
+    .row{display:grid; grid-template-columns:110px 1fr 48px; align-items:center; gap:10px}
+    .bar{height:10px; border-radius:999px; background:#33415566; overflow:hidden; border:1px solid #33415555}
+    .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent2)); width:0%}
+    .scale{display:flex; align-items:center; gap:10px; margin-top:10px}
+    .scale input{width:100%}
+    .note{color:var(--muted); font-size:12px; margin-top:6px}
+    .example{display:grid; gap:8px}
+    .pill{display:flex; justify-content:space-between; align-items:center; background:rgba(62,203,243,.08); border:1px solid var(--ring); border-radius:12px; padding:8px 10px}
+    footer{margin-top:30px; color:var(--muted); font-size:12px; text-align:center}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge">Σ</div>
+        <div>
+          <h1>Tamaño de los hubs tecnológicos: por qué importa</h1>
+          <div class="subtitle">Relación entre escala, densidad y liderazgo innovador</div>
+        </div>
+      </div>
+      <button class="btn" id="toggle">🌗 Cambiar tema</button>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="lead">
+        La <b>relación entre tamaño y hubs</b> tecnológicos explica su impacto: no sólo el área física,
+        sino sobre todo la <b>escala económica y de recursos</b> determina su capacidad de innovación.
+      </p>
+      <div class="chips">
+        <span class="chip">Tamaño físico</span>
+        <span class="chip">Tamaño económico</span>
+        <span class="chip">Escalabilidad</span>
+        <span class="chip">Densidad de actores</span>
+        <span class="chip">Efecto red</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <p class="kicker">Ideas clave</p>
+        <h3>Cómo la escala potencia la innovación</h3>
+        <div class="points">
+          <div class="point">
+            <div class="ico">📏</div>
+            <div><b>Tamaño físico</b> Puede ser compacto (ej. Silicon Valley) o abarcar regiones metropolitanas (ej. Shenzhen–Hong Kong–Guangzhou).</div>
+          </div>
+          <div class="point">
+            <div class="ico">💹</div>
+            <div><b>Tamaño económico</b> Mueve capital, talento, patentes y startups; algunos hubs rivalizan con el PIB de países medianos.</div>
+          </div>
+          <div class="point">
+            <div class="ico">⚙️</div>
+            <div><b>Escalabilidad</b> Más población y empresas permiten economías de escala: menor costo, mayor velocidad, más inversión.</div>
+          </div>
+          <div class="point">
+            <div class="ico">🏛️</div>
+            <div><b>Densidad de actores</b> Más universidades, laboratorios, empresas y financiamiento aceleran la transferencia tecnológica.</div>
+          </div>
+          <div class="point">
+            <div class="ico">🔗</div>
+            <div><b>Efecto red</b> Más conexiones multiplican ideas y colaboración, reforzando el liderazgo global del hub.</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="card">
+        <p class="kicker">Explorador</p>
+        <h3>Simulá el efecto del tamaño</h3>
+        <div class="scale">
+          <span style="width:90px; color:var(--muted); font-size:12px;">Tamaño del hub</span>
+          <input type="range" id="k" min="10" max="100" step="1" value="60" />
+          <span id="kLabel" style="width:40px; text-align:right;">60</span>
+        </div>
+        <div class="meter">
+          <div class="row">
+            <span style="color:var(--muted); font-size:12px;">Capital</span>
+            <div class="bar"><div class="fill" id="m1"></div></div>
+            <span id="v1" style="font-size:12px;">0</span>
+          </div>
+          <div class="row">
+            <span style="color:var(--muted); font-size:12px;">Talento</span>
+            <div class="bar"><div class="fill" id="m2"></div></div>
+            <span id="v2" style="font-size:12px;">0</span>
+          </div>
+          <div class="row">
+            <span style="color:var(--muted); font-size:12px;">Patentes</span>
+            <div class="bar"><div class="fill" id="m3"></div></div>
+            <span id="v3" style="font-size:12px;">0</span>
+          </div>
+          <div class="row">
+            <span style="color:var(--muted); font-size:12px;">Conexiones</span>
+            <div class="bar"><div class="fill" id="m4"></div></div>
+            <span id="v4" style="font-size:12px;">0</span>
+          </div>
+        </div>
+        <p class="note">Los indicadores crecen de forma no lineal: el <b>efecto red</b> se acelera más que el resto a medida que aumenta el tamaño.</p>
+      </aside>
+    </div>
+
+    <section class="card" style="margin-top:16px;">
+      <p class="kicker">Ejemplo claro</p>
+      <h3>China: hubs de escala metropolitana</h3>
+      <div class="example">
+        <div class="pill">
+          <span><b>Delta del Río Perla</b> (Shenzhen–Hong Kong–Guangzhou): tamaño poblacional y económico que compite con países enteros.</span>
+          <span style="font-size:12px; color:var(--muted);">Escala → costos bajos, velocidad alta</span>
+        </div>
+        <div class="pill" style="background:rgba(124,58,237,.08); border-color:#7c3aed55;">
+          <span><b>Delta del Yangtzé</b> (Shanghái y alrededores): concentración masiva de capital, talento y manufactura avanzada.</span>
+          <span style="font-size:12px; color:var(--muted);">Efecto red → más innovación</span>
+        </div>
+      </div>
+      <p class="note" style="margin-top:8px;">
+        En resumen: <b>a mayor tamaño económico, poblacional y de recursos</b>, mayor capacidad de innovación, liderazgo y ventajas de escala frente a otros polos.
+      </p>
+    </section>
+
+    <footer>
+      Material elaborado por el profesor Sergio Gevatschnaider
+    </footer>
+  </main>
+  <script>
+    // Tema
+    const btn = document.getElementById('toggle');
+    function setTheme(mode){
+      if(mode==='light'){ document.body.classList.add('light'); localStorage.setItem('theme','light'); }
+      else{ document.body.classList.remove('light'); localStorage.setItem('theme','dark'); }
+    }
+    btn.addEventListener('click', ()=>{
+      const light = document.body.classList.contains('light');
+      setTheme(light? 'dark' : 'light');
+    });
+    const saved = localStorage.getItem('theme'); if(saved) setTheme(saved);
+
+    // Simulador
+    const k = document.getElementById('k');
+    const kLabel = document.getElementById('kLabel');
+    const m1 = document.getElementById('m1');
+    const m2 = document.getElementById('m2');
+    const m3 = document.getElementById('m3');
+    const m4 = document.getElementById('m4');
+    const v1 = document.getElementById('v1');
+    const v2 = document.getElementById('v2');
+    const v3 = document.getElementById('v3');
+    const v4 = document.getElementById('v4');
+
+    function fmt(x){ return Math.round(x).toString().padStart(2,'0'); }
+    function update(){
+      const s = Number(k.value); // 10..100
+      kLabel.textContent = s;
+      const x = s/100;
+      const capital = Math.pow(x, 1.00)*100;
+      const talento = Math.pow(x, 1.08)*100;
+      const patentes = Math.pow(x, 1.15)*100;
+      const red = Math.pow(x, 1.60)*100; // red acelera más
+
+      m1.style.width = capital + '%'; v1.textContent = fmt(capital);
+      m2.style.width = talento + '%'; v2.textContent = fmt(talento);
+      m3.style.width = patentes + '%'; v3.textContent = fmt(patentes);
+      m4.style.width = red + '%';     v4.textContent = fmt(red);
+    }
+    k.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
