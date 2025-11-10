@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educación en IA - China | Evolución y Talento</title>
+    <style>
+        /* --- Definición de Variables de Color y Estilos --- */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color-1: #ef4444;
+            --accent-color-2: #f59e0b;
+            --accent-color-3: #10b981;
+            --border-color: #e5e7eb;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --highlight-bg: #e0f2fe;
+            --highlight-text: #0c4a6e;
+            --transition-speed: 0.4s;
+        }
+
+        body.dark-theme {
+            --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            --card-bg: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #374151;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --highlight-bg: #1e293b;
+            --highlight-text: #a5f3fc;
+        }
+        /* --- Fin de Variables --- */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            transition: background var(--transition-speed) ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* --- Botón de Tema --- */
+        .theme-toggle-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-button:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        /* --- Estilos Generales de Tarjetas y Secciones --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            transition: all var(--transition-speed) ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            font-size: 2.5em;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-color-1), var(--accent-color-2), var(--accent-color-3));
+        }
+        .hero h1 {
+            font-size: clamp(2.2em, 5vw, 3.2em);
+            color: var(--text-primary);
+            margin-bottom: 25px;
+        }
+        .hero-subtitle {
+            font-size: 1.25em;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--highlight-bg);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--accent-color-3);
+            color: var(--highlight-text);
+        }
+
+        /* --- Timeline Section --- */
+        .timeline-wrapper {
+            position: relative;
+            padding-left: 40px; /* Espacio para la línea */
+        }
+        .timeline-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: var(--border-color);
+            border-radius: 2px;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .timeline-item::before { /* El punto en la línea de tiempo */
+            content: '';
+            position: absolute;
+            left: -58px; /* (40px de padding + 20px de gap) - 2px (mitad del ancho de la línea) */
+            top: 18px;
+            width: 20px;
+            height: 20px;
+            background: var(--card-bg);
+            border: 4px solid var(--accent-color-1);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-year {
+            min-width: 100px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent-color-1), #b91c1c);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.6em;
+            font-weight: bold;
+            height: fit-content;
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
+            text-align: center;
+        }
+        .timeline-content {
+            flex: 1;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid var(--accent-color-1);
+        }
+        .timeline-content h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 1.4em;
+        }
+
+        /* --- Stats Showcase --- */
+        .stats-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 5px solid var(--accent-color-1);
+        }
+        .stat-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px var(--shadow-color);
+        }
+        .stat-value {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: var(--accent-color-1);
+            margin-bottom: 15px;
+        }
+        .stat-label {
+            font-size: 1.2em;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .stat-detail {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+
+        /* --- Features & Highlight --- */
+        .features-grid, .highlight-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        .feature-card, .highlight-item {
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-title {
+            font-size: 1.4em;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .feature-examples {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--highlight-bg);
+            border-radius: 10px;
+            font-size: 0.95em;
+            color: var(--highlight-text);
+        }
+        .highlight-item h4 {
+            color: var(--highlight-text);
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+        .highlight-item ul { list-style: none; padding: 0; }
+        .highlight-item li {
+            padding: 8px 0 8px 25px;
+            position: relative;
+        }
+        .highlight-item li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color-3);
+            font-weight: bold;
+        }
+
+        /* --- Global Talent Flow --- */
+        .talent-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .country-box {
+            text-align: center;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            min-width: 250px;
+        }
+        .country-flag { font-size: 5em; margin-bottom: 15px; }
+        .country-name { font-size: 1.5em; font-weight: bold; color: var(--text-primary); margin-bottom: 10px; }
+        .country-stat { font-size: 2em; color: var(--accent-color-1); font-weight: bold; }
+        .flow-arrow {
+            font-size: 4em;
+            color: var(--accent-color-3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        .insight-banner {
+            background: var(--highlight-bg);
+            border-left: 6px solid var(--accent-color-2);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        .insight-banner h4 {
+            color: var(--highlight-text);
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            body { padding: 20px 10px; }
+            .card { padding: 30px; }
+            .section-header { font-size: 2em; }
+            .timeline-wrapper { padding-left: 20px; }
+            .timeline-item::before { left: -29px; }
+            .talent-flow { flex-direction: column; gap: 30px; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle-button">🌙</button>
+
+    <div class="container">
+        <div class="hero card">
+            <h1>🎓 La "Fábrica" de Talento en IA de China</h1>
+            <div class="hero-subtitle">
+                China ha desplegado <strong>iniciativas educativas masivas</strong> para sostener su base de talento en IA, 
+                transformando su sistema universitario para convertirse en el mayor productor mundial de especialistas.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-header">Evolución Estratégica</h2>
+            <div class="timeline-wrapper">
+                <div class="timeline-item">
+                    <div class="timeline-year">2018</div>
+                    <div class="timeline-content">
+                        <h3>Reforma Educativa Nacional</h3>
+                        <p>
+                            El Ministerio de Educación autoriza la creación de carreras específicas de IA, 
+                            alineando la educación superior con las prioridades nacionales de desarrollo tecnológico.
+                        </p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2024</div>
+                    <div class="timeline-content">
+                        <h3>Ecosistema Educativo Maduro</h3>
+                        <p>
+                            La IA se consolida como la especialidad más demandada por los estudiantes, 
+                            ofreciendo los salarios iniciales más altos entre todas las ingenierías.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-showcase">
+            <div class="stat-box">
+                <div class="stat-value">2,300+</div>
+                <div class="stat-label">Programas de Pregrado</div>
+                <div class="stat-detail">A nivel nacional</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">350</div>
+                <div class="stat-label">Programas de Élite</div>
+                <div class="stat-detail">En universidades top-tier</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">#1</div>
+                <div class="stat-label">Salario Inicial</div>
+                <div class="stat-detail">El más alto entre ingenierías</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-header">Pilares del Modelo Educativo</h2>
+            <div class="features-grid">
+                <div class="feature-card card">
+                    <div class="feature-title">Orientación Práctica</div>
+                    <p>Los programas están diseñados para aplicaciones del mundo real, preparando ingenieros listos para la industria.</p>
+                    <div class="feature-examples"><strong>Sectores:</strong> Finanzas, Manufactura, Salud, Agricultura.</div>
+                </div>
+                <div class="feature-card card">
+                    <div class="feature-title">Alta Demanda Estudiantil</div>
+                    <p>La IA ha desplazado a la informática tradicional como la carrera más buscada por sus oportunidades excepcionales.</p>
+                    <div class="feature-examples"><strong>Ventajas:</strong> Salarios top, múltiples ofertas, proyección.</div>
+                </div>
+                <div class="feature-card card">
+                    <div class="feature-title">Sinergia Universidad-Empresa</div>
+                    <p>Laboratorios conjuntos donde estudiantes trabajan en proyectos reales con líderes como Baidu, Tencent y Huawei.</p>
+                    <div class="feature-examples"><strong>Partners:</strong> Alibaba, ByteDance, entre otros.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" style="background: var(--highlight-bg);">
+            <h2 class="section-header" style="color: var(--highlight-text);">Ecosistema Integral de Formación</h2>
+            <div class="highlight-content">
+                <div class="highlight-item card">
+                    <h4>Pregrado</h4>
+                    <ul>
+                        <li>2,300+ programas especializados</li>
+                        <li>Enfoque en aplicaciones industriales</li>
+                        <li>Proyectos con empresas reales</li>
+                    </ul>
+                </div>
+                <div class="highlight-item card">
+                    <h4>Posgrado</h4>
+                    <ul>
+                        <li>Investigación de vanguardia</li>
+                        <li>Maestrías y doctorados especializados</li>
+                        <li>Publicaciones en conferencias top</li>
+                    </ul>
+                </div>
+                <div class="highlight-item card">
+                    <h4>Laboratorios Conjuntos</h4>
+                    <ul>
+                        <li>Infraestructura compartida</li>
+                        <li>Acceso a datos y casos de uso reales</li>
+                        <li>Transferencia tecnológica acelerada</li>
+                    </ul>
+                </div>
+                <div class="highlight-item card">
+                    <h4>Atracción de Talento</h4>
+                    <ul>
+                        <li>Reclutamiento de expertos globales</li>
+                        <li>Retorno de científicos del extranjero</li>
+                        <li>Recursos de investigación de clase mundial</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-header">Flujo Global y Repatriación de Talento</h2>
+            <div class="talent-flow">
+                <div class="country-box">
+                    <div class="country-flag">🇨🇳</div>
+                    <div class="country-name">China</div>
+                    <div class="country-stat">Origen</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="country-box">
+                    <div class="country-flag">🇺🇸</div>
+                    <div class="country-name">Estados Unidos</div>
+                    <div class="country-stat">+50%</div>
+                    <p>de investigadores extranjeros en IA son chinos</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="country-box">
+                    <div class="country-flag">🇨🇳</div>
+                    <div class="country-name">China</div>
+                    <div class="country-stat">Retorno</div>
+                </div>
+            </div>
+            <div class="insight-banner">
+                <h4>Estrategia de "Circulación de Cerebros"</h4>
+                <p>
+                    Más del 50% de los investigadores de IA en EE. UU. de origen extranjero son chinos. China busca activamente 
+                    atraer de vuelta ese conocimiento mediante incentivos y recursos de primer nivel, beneficiándose 
+                    tanto de la formación en el extranjero como del retorno de ese talento experto.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Material Elaborado por el profesor Sergio Gevatschnaider</p>
+        </div>
+    </div>
+
+    <script>
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        themeToggleButton.addEventListener('click', () => {
+            body.classList.toggle('dark-theme');
+            const isDarkMode = body.classList.contains('dark-theme');
+            themeToggleButton.textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggleButton.textContent = '☀️';
+            }
+        });
+    </script>
+</body>
+</html>
