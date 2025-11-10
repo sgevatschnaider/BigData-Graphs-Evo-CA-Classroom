@@ -56,6 +56,13 @@
     "mtime": "2025-10-25T18:36:16-03:00"
   },
   {
+    "title": "BAAI - Modelo Tripartito (Completo)",
+    "path": "/src/classroom/graphs/recursos/ChinaBAAI_exposición.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-10T17:51:49-03:00"
+  },
+  {
     "title": "Blockchain Gossip + Havel–Hakimi (enhanced + symmetric layouts)",
     "path": "/src/classroom/graphs/recursos/GOSSIP2.html",
     "tag": "Demo",
@@ -434,6 +441,13 @@
     "mtime": "2025-10-26T19:32:18-03:00"
   },
   {
+    "title": "Hubs de IA y Tecnología en China",
+    "path": "/src/classroom/graphs/recursos/Chinahubs_china_visual.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-10T17:51:49-03:00"
+  },
+  {
     "title": "Índice Interactivo de Temas de Grafos",
     "path": "/src/classroom/graphs/recursos/Indice.html",
     "tag": "Demo",
@@ -586,6 +600,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
+    "title": "Tamaño de los hubs tecnológicos: por qué importa",
+    "path": "/src/classroom/graphs/recursos/Chinahubs_size_effect.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-10T17:51:49-03:00"
   },
   {
     "title": "Teoría de Grafos - Visualización Interactiva",
