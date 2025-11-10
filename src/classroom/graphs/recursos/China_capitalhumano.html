@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capital Humano en IA - El Ascenso de China</title>
+    <style>
+        /* --- Definición de Variables de Color y Estilos --- */
+        :root {
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent-primary: #2a5298;
+            --accent-secondary: #1e3c72;
+            --accent-china: #ef4444;
+            --highlight-bg: #fffbeb;
+            --highlight-text: #b45309;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --transition-speed: 0.4s;
+        }
+
+        body.dark-theme {
+            --bg-color: #1a202c;
+            --card-bg: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #a0aec0;
+            --accent-primary: #63b3ed;
+            --accent-secondary: #4299e1;
+            --accent-china: #f56565;
+            --highlight-bg: #2d3748;
+            --highlight-text: #f6e05e;
+            --border-color: #4a5568;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+        /* --- Fin de Variables --- */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            transition: all var(--transition-speed) ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- Botón de Tema --- */
+        .theme-toggle-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-button:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+        
+        /* --- Header --- */
+        .header h1 {
+            color: var(--text-primary);
+            font-size: clamp(2em, 5vw, 2.8em);
+            margin-bottom: 20px;
+        }
+        .header .intro {
+            line-height: 1.8;
+            font-size: 1.1em;
+            background-color: var(--bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        /* --- Stats Grid --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        .stat-card {
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            border-top: 4px solid var(--accent-primary);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow-color);
+        }
+        .stat-number {
+            font-size: 2.8em;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        .stat-sublabel {
+            color: var(--text-secondary);
+            opacity: 0.7;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        /* --- Comparison Section --- */
+        .bar-item { margin-bottom: 25px; }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .bar-container {
+            background: var(--border-color);
+            border-radius: 8px;
+            height: 35px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 15px;
+            color: white;
+            font-weight: bold;
+            transition: width 2s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 0%; /* Inicia en 0 para la animación */
+        }
+        .bar-fill.china { background: linear-gradient(90deg, #f87171, var(--accent-china)); }
+        .bar-fill.usa { background: linear-gradient(90deg, #3b82f6, var(--accent-secondary)); }
+
+        /* --- Ranking Section --- */
+        .ranking-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .ranking-column h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-color);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .ranking-item:hover {
+            transform: translateX(5px);
+            border-color: var(--accent-primary);
+        }
+        .rank-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-primary);
+            width: 40px;
+            text-align: center;
+        }
+        .rank-info { flex: 1; }
+        .rank-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .rank-badge {
+            background-color: var(--accent-primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        /* --- Insight Box --- */
+        .insight-box {
+            background: var(--highlight-bg);
+            border-left: 4px solid var(--highlight-text);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .insight-box h3 {
+            color: var(--highlight-text);
+            margin-bottom: 15px;
+        }
+        .insight-box p {
+            color: var(--highlight-text);
+            line-height: 1.7;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 900px) {
+            .ranking-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 20px 10px; }
+            .card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle-button">🌙</button>
+
+    <main class="main-container">
+        <header class="header card">
+            <h1>Capital Humano en IA: El Ascenso de China</h1>
+            <div class="intro">
+                El progreso de China en IA se fundamenta en un <strong>crecimiento masivo de su capital humano</strong> y una sinergia única entre universidades, empresas y el Estado, consolidándose como una potencia global en investigación.
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" data-target="10000">0</div>
+                <div class="stat-label">Investigadores en 2015</div>
+                <div class="stat-sublabel">Punto de partida</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="52000">0</div>
+                <div class="stat-label">Investigadores en 2024</div>
+                <div class="stat-sublabel">Crecimiento del 420%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="63000">0</div>
+                <div class="stat-label">EE. UU. en 2024</div>
+                <div class="stat-sublabel">Líder actual</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="82">0</div>
+                <div class="stat-label">% Alcance de EE. UU.</div>
+                <div class="stat-sublabel">Reduciendo la brecha</div>
+            </div>
+        </section>
+
+        <section class="comparison-section card">
+            <h2 class="section-title">Comparación de Talento: China vs. EE. UU.</h2>
+            <div class="comparison-bars">
+                <div class="bar-item">
+                    <div class="bar-label">
+                        <span>🇨🇳 China (2024)</span>
+                        <span>52,000</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill china" data-width="82.5%">52k</div>
+                    </div>
+                </div>
+                <div class="bar-item">
+                    <div class="bar-label">
+                        <span>🇺🇸 Estados Unidos (2024)</span>
+                        <span>63,000</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill usa" data-width="100%">63k</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ranking-section card">
+            <h2 class="section-title">Top Instituciones y Empresas en IA de China</h2>
+            <div class="ranking-grid">
+                <div class="ranking-column">
+                    <h3>Instituciones Académicas</h3>
+                    <div class="ranking-item">
+                        <div class="rank-number">1</div>
+                        <div class="rank-info"><div class="rank-name">Academia China de Ciencias</div></div>
+                        <div class="rank-badge">3,453</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="rank-number">2</div>
+                        <div class="rank-info"><div class="rank-name">Universidad Tsinghua</div></div>
+                        <div class="rank-badge">2,667</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="rank-number">3</div>
+                        <div class="rank-info"><div class="rank-name">Universidad de Pekín</div></div>
+                        <div class="rank-badge">2,123</div>
+                    </div>
+                </div>
+                <div class="ranking-column">
+                    <h3>Empresas Privadas</h3>
+                    <div class="ranking-item">
+                        <div class="rank-number">1</div>
+                        <div class="rank-info"><div class="rank-name">Tencent</div></div>
+                        <div class="rank-badge">992</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="rank-number">2</div>
+                        <div class="rank-info"><div class="rank-name">Alibaba</div></div>
+                        <div class="rank-badge">633</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="rank-number">3</div>
+                        <div class="rank-info"><div class="rank-name">Huawei</div></div>
+                        <div class="rank-badge">598</div>
+                    </div>
+                </div>
+            </div>
+            <div class="insight-box">
+                <h3>Análisis Clave</h3>
+                <p>
+                    Empresas como <strong>Tencent y Alibaba ya superan a la mayoría de las universidades</strong> en personal dedicado a I+D en IA. Esto refleja el rol protagónico del sector privado en la investigación aplicada, un modelo donde la industria no solo consume talento, sino que lo genera.
+                </p>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>Material Elaborado por el profesor Sergio Gevatschnaider</p>
+        </footer>
+    </main>
+
+    <script>
+        // --- LÓGICA DE CAMBIO DE TEMA ---
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        themeToggleButton.addEventListener('click', () => {
+            body.classList.toggle('dark-theme');
+            const isDarkMode = body.classList.contains('dark-theme');
+            themeToggleButton.textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggleButton.textContent = '☀️';
+            }
+        });
+
+        // --- LÓGICA DE ANIMACIONES EN SCROLL ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    
+                    // Animar números
+                    const targetNumber = el.dataset.target;
+                    if (targetNumber) {
+                        animateNumber(el, parseInt(targetNumber, 10), 1500);
+                    }
+                    
+                    // Animar barras
+                    const targetWidth = el.dataset.width;
+                    if (targetWidth) {
+                        el.style.width = targetWidth;
+                    }
+                    
+                    observer.unobserve(el); // Animar solo una vez
+                }
+            });
+        }, { threshold: 0.5 }); // Iniciar cuando el 50% del elemento sea visible
+
+        // Observar todos los elementos que necesitan animación
+        document.querySelectorAll('[data-target]').forEach(el => observer.observe(el));
+        document.querySelectorAll('[data-width]').forEach(el => observer.observe(el));
+
+        function animateNumber(element, target, duration) {
+            let start = 0;
+            const stepTime = Math.abs(Math.floor(duration / target));
+            
+            const timer = setInterval(() => {
+                start += 1;
+                element.textContent = start.toLocaleString('es-ES');
+                if (start === target) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+            // Handle case for %
+            if(element.nextElementSibling && element.nextElementSibling.textContent.includes('%')){
+                 element.textContent = target + '%';
+            } else {
+                 element.textContent = target.toLocaleString('es-ES');
+            }
+            // A simplified but effective animation for numbers
+            let current = 0;
+            const increment = target / (duration / 16);
+            
+            const updateNumber = () => {
+                if (current < target) {
+                    current += increment;
+                    element.textContent = Math.ceil(current).toLocaleString('es-ES');
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    element.textContent = target.toLocaleString('es-ES') + (target === 82 ? '%' : '');
+                }
+            };
+            requestAnimationFrame(updateNumber);
+        }
+    </script>
+</body>
+</html>```
