@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hubs de IA en China — Visualización 16:9</title>
+
+  <!-- Leaflet CSS & JS (CDN) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1530;
+      --muted:#aab3c5;
+      --text:#eaf0ff;
+      --accent:#6aa6ff;
+      --accent2:#9d7cff;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow: 0 10px 24px rgba(0,0,0,.35);
+    }
+    html, body {
+      height: 100%; margin:0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+    }
+    /* Lienzo 16:9 que se ajusta a pantalla */
+    .stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(15,21,48,.92), rgba(15,21,48,.84));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 14px;
+      backdrop-filter: blur(6px);
+      overflow: auto;
+      max-height: calc(100vh - 32px);
+    }
+    .panel h1{
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      letter-spacing: .2px;
+      line-height: 1.2;
+    }
+    .panel .sub {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    .row { display: grid; gap: 8px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .seg {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    label, .label {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 4px; display: block;
+    }
+    input[type="text"], select, input[type="range"] {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 8px 10px;
+      outline: none;
+    }
+    input[type="range"] { height: 28px; }
+    .checks { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px; color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip input { accent-color: var(--accent); }
+    .legend { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .btn {
+      background: linear-gradient(180deg, var(--accent), #3d79ff);
+      color: white; border: none;
+      border-radius: 12px; padding: 10px 12px;
+      font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 18px rgba(61,121,255,.35);
+    }
+    .btn.secondary {
+      background: linear-gradient(180deg, var(--accent2), #5b48ff);
+      box-shadow: 0 8px 18px rgba(91,72,255,.35);
+    }
+    .btn.ghost {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      box-shadow: none;
+    }
+    #map {
+      width: 100%; height: 100%;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      outline: 1px solid rgba(255,255,255,.08);
+    }
+    .hint {
+      font-size: 11px; color: var(--muted);
+    }
+    .badge { padding: 2px 6px; border-radius: 6px; font-size: 11px; color: #fff; }
+    .acad{ background:#7c3aed; } .emp{ background:#2563eb; }
+    .cmp{ background:#f59e0b; } .stu{ background:#16a34a; }
+    .gov{ background:#ef4444; }
+
+    /* Leaflet popup theming */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: #0e1226; color: #eaf0ff;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .leaflet-tooltip {
+      background: rgba(15,21,48,.9);
+      color: #eaf0ff;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+    }
+    .mini {
+      font-size: 12px; color: var(--muted);
+    }
+
+    @media (max-width: 900px){
+      .stage { grid-template-columns: 1fr; grid-template-rows: 380px 1fr; }
+      .panel { order: 2; }
+      #map { order: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="panel">
+      <h1>Hubs de IA en China</h1>
+      <div class="sub">Explorá ciudades, fortalezas (academia/empresas/compute/startups/gobierno) y métricas clave. 16:9 listo para proyector.</div>
+
+      <div class="seg row">
+        <span class="label">Búsqueda</span>
+        <input id="search" type="text" placeholder="Ciudad o palabra clave (ej: Baidu, BAAI, Zhongguancun)" />
+        <div class="hint">Filtra por nombre de ciudad o términos en los highlights.</div>
+      </div>
+
+      <div class="seg row">
+        <span class="label">Capas</span>
+        <div class="checks">
+          <label class="chip"><input type="checkbox" id="f_academia" checked> Academia <span class="badge acad">A</span></label>
+          <label class="chip"><input type="checkbox" id="f_empresas" checked> Empresas <span class="badge emp">E</span></label>
+          <label class="chip"><input type="checkbox" id="f_compute"  checked> Compute/DC <span class="badge cmp">C</span></label>
+          <label class="chip"><input type="checkbox" id="f_startups" checked> Startups/VC <span class="badge stu">S</span></label>
+          <label class="chip"><input type="checkbox" id="f_gobierno" checked> Gobierno <span class="badge gov">G</span></label>
+        </div>
+      </div>
+
+      <div class="seg row grid-2">
+        <div class="row">
+          <span class="label">Ordenar / Escalar por</span>
+          <select id="metric">
+            <option value="indiceHub">Índice Hub (compuesto)</option>
+            <option value="talento">Talento (egresados IA/año)</option>
+            <option value="publicaciones">Publicaciones IA (5y)</option>
+            <option value="computeMW">Compute (MW estimados)</option>
+            <option value="vcUSD">Inversión VC (USD)</option>
+            <option value="unicorns">Unicornios</option>
+          </select>
+        </div>
+        <div class="row">
+          <span class="label">Tamaño de puntos</span>
+          <input id="size" type="range" min="18" max="56" value="32" />
+        </div>
+      </div>
+
+      <div class="seg row grid-2">
+        <button class="btn" id="btnRecenter">Recentrar China</button>
+        <button class="btn ghost" id="btnReset">Limpiar filtros</button>
+      </div>
+
+      <div class="seg legend">
+        <b>Leyenda</b><br>
+        <span class="badge acad">A</span> Academia ·
+        <span class="badge emp">E</span> Empresas ·
+        <span class="badge cmp">C</span> Compute ·
+        <span class="badge stu">S</span> Startups ·
+        <span class="badge gov">G</span> Gobierno
+        <div class="mini" style="margin-top:6px;">
+          Índice Hub = combinación ponderada de talento, publicaciones, compute, VC y unicornios (pesos por defecto: 0.25/0.25/0.20/0.20/0.10).
+        </div>
+      </div>
+
+      <div class="seg hint">
+        Material elaborado por el profesor Sergio Gevatschnaider · SGDataConsulting
+      </div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+<script>
+// =========================
+// Datos base (placeholder realistas para demo).
+// Podrás reemplazarlos luego con cifras propias.
+// =========================
+const hubs = [
+  {
+    city: "Beijing", province: "Beijing", lat: 39.9042, lon: 116.4074,
+    tags: ["academia","empresas","compute","startups","gobierno"],
+    metrics: { talento: 14000, publicaciones: 12500, unicorns: 18, patentesIA: 42000, computeMW: 650, vcUSD: 9500000000 },
+    highlights: ["Tsinghua, Peking University, CAS", "Baidu (Apollo), BAAI (WuDao)", "Zhongguancun Science Park"]
+  },
+  {
+    city: "Shanghai", province: "Shanghai", lat: 31.2304, lon: 121.4737,
+    tags: ["academia","empresas","compute","startups","gobierno"],
+    metrics: { talento: 11000, publicaciones: 9800, unicorns: 15, patentesIA: 30000, computeMW: 520, vcUSD: 8200000000 },
+    highlights: ["SJTU, Fudan", "SenseTime, Yitu", "Zhangjiang Hi-Tech Park"]
+  },
+  {
+    city: "Shenzhen", province: "Guangdong", lat: 22.5431, lon: 114.0579,
+    tags: ["empresas","compute","startups","gobierno"],
+    metrics: { talento: 9000, publicaciones: 7300, unicorns: 22, patentesIA: 27000, computeMW: 580, vcUSD: 11000000000 },
+    highlights: ["Huawei, Tencent (Shenzhen HQ)", "DJI", "Qianhai & Nanshan tech clusters"]
+  },
+  {
+    city: "Guangzhou", province: "Guangdong", lat: 23.1291, lon: 113.2644,
+    tags: ["academia","empresas","startups","gobierno"],
+    metrics: { talento: 7500, publicaciones: 6400, unicorns: 8, patentesIA: 19000, computeMW: 360, vcUSD: 4200000000 },
+    highlights: ["Sun Yat-sen University", "iFlytek (región)", "Huangpu District AI Park"]
+  },
+  {
+    city: "Hangzhou", province: "Zhejiang", lat: 30.2741, lon: 120.1551,
+    tags: ["empresas","startups","compute","gobierno"],
+    metrics: { talento: 6800, publicaciones: 5900, unicorns: 14, patentesIA: 21000, computeMW: 430, vcUSD: 7600000000 },
+    highlights: ["Alibaba DAMO", "Hikvision", "Hangzhou High-Tech Zone"]
+  },
+  {
+    city: "Nanjing", province: "Jiangsu", lat: 32.0603, lon: 118.7969,
+    tags: ["academia","compute","gobierno"],
+    metrics: { talento: 6200, publicaciones: 5600, unicorns: 5, patentesIA: 16000, computeMW: 300, vcUSD: 1800000000 },
+    highlights: ["Nanjing University", "AI Pilot Zones", "Jiangbei New Area"]
+  },
+  {
+    city: "Hefei", province: "Anhui", lat: 31.8206, lon: 117.2272,
+    tags: ["academia","empresas","compute","gobierno"],
+    metrics: { talento: 5800, publicaciones: 5400, unicorns: 6, patentesIA: 17000, computeMW: 320, vcUSD: 2500000000 },
+    highlights: ["USTC (USTC iFlytek roots)", "iFlytek HQ", "Hefei Hi-Tech Zone"]
+  },
+  {
+    city: "Wuhan", province: "Hubei", lat: 30.5928, lon: 114.3055,
+    tags: ["academia","compute","startups","gobierno"],
+    metrics: { talento: 6000, publicaciones: 5200, unicorns: 4, patentesIA: 15000, computeMW: 280, vcUSD: 1600000000 },
+    highlights: ["Huazhong University of Science and Technology", "Optics Valley", "AI pilot projects"]
+  },
+  {
+    city: "Chengdu", province: "Sichuan", lat: 30.5728, lon: 104.0668,
+    tags: ["empresas","startups","compute","gobierno"],
+    metrics: { talento: 5200, publicaciones: 4800, unicorns: 7, patentesIA: 12000, computeMW: 260, vcUSD: 2100000000 },
+    highlights: ["Chengdu Hi-tech Industrial Development Zone", "GPU clusters emergentes", "Ecosistema gaming/vision"]
+  },
+  {
+    city: "Xi'an", province: "Shaanxi", lat: 34.3416, lon: 108.9398,
+    tags: ["academia","compute","gobierno"],
+    metrics: { talento: 5600, publicaciones: 5000, unicorns: 3, patentesIA: 13000, computeMW: 240, vcUSD: 1200000000 },
+    highlights: ["Xi'an Jiaotong University", "Aerospace/defensa", "Parques tecnológicos locales"]
+  },
+  {
+    city: "Suzhou", province: "Jiangsu", lat: 31.2989, lon: 120.5853,
+    tags: ["empresas","startups","compute"],
+    metrics: { talento: 4500, publicaciones: 4100, unicorns: 5, patentesIA: 11000, computeMW: 220, vcUSD: 1900000000 },
+    highlights: ["Industrial parks (SIP)", "Manufactura avanzada + IA", "Proximidad a Shanghai"]
+  },
+  {
+    city: "Tianjin", province: "Tianjin", lat: 39.3434, lon: 117.3616,
+    tags: ["compute","gobierno","empresas"],
+    metrics: { talento: 3800, publicaciones: 3600, unicorns: 2, patentesIA: 9000, computeMW: 210, vcUSD: 900000000 },
+    highlights: ["Sino-Singapore Eco-city (región)", "Iniciativas de DC", "Parques industriales"]
+  },
+  {
+    city: "Hong Kong", province: "Hong Kong SAR", lat: 22.3193, lon: 114.1694,
+    tags: ["academia","empresas","startups"],
+    metrics: { talento: 5000, publicaciones: 6200, unicorns: 9, patentesIA: 10000, computeMW: 180, vcUSD: 5400000000 },
+    highlights: ["HKU, CUHK, HKUST", "Fintech/biotech IA", "Greater Bay Area synergy"]
+  },
+  {
+    city: "Macau", province: "Macau SAR", lat: 22.1987, lon: 113.5439,
+    tags: ["gobierno","startups"],
+    metrics: { talento: 1200, publicaciones: 800, unicorns: 0, patentesIA: 1200, computeMW: 60, vcUSD: 200000000 },
+    highlights: ["Iniciativas GBA", "Proyectos de nicho IA", "Conectividad con Zhuhai"]
+  }
+];
+
+// Pesos del índice compuesto (editable si quisieras exponer controles en UI)
+const weights = { talento: 0.25, publicaciones: 0.25, computeMW: 0.20, vcUSD: 0.20, unicorns: 0.10 };
+
+// Colores por "tag" dominante
+const tagColors = {
+  academia:"#7c3aed", empresas:"#2563eb", compute:"#f59e0b", startups:"#16a34a", gobierno:"#ef4444"
+};
+
+// =========================
+// Utilidades
+// =========================
+function zscores(arr, getter){
+  const vals = arr.map(getter);
+  const mean = vals.reduce((a,b)=>a+b,0) / vals.length;
+  const sd = Math.sqrt(vals.reduce((a,b)=>a + Math.pow(b-mean,2),0) / vals.length) || 1;
+  return arr.map(v => (getter(v) - mean) / sd);
+}
+function computeCompositeIndex(){
+  const zsTal = zscores(hubs, h=>h.metrics.talento);
+  const zsPub = zscores(hubs, h=>h.metrics.publicaciones);
+  const zsCmp = zscores(hubs, h=>h.metrics.computeMW);
+  const zsVC  = zscores(hubs, h=>h.metrics.vcUSD);
+  const zsUni = zscores(hubs, h=>h.metrics.unicorns);
+  hubs.forEach((h, i)=>{
+    const score = weights.talento*zsTal[i] + weights.publicaciones*zsPub[i] +
+                  weights.computeMW*zsCmp[i] + weights.vcUSD*zsVC[i] +
+                  weights.unicorns*zsUni[i];
+    h.indiceHub = score;
+  });
+}
+function dominantTag(h){
+  // Heurística simple
+  const s = {
+    academia: h.metrics.publicaciones + h.metrics.talento,
+    empresas: h.metrics.unicorns + h.metrics.vcUSD/1e9,
+    compute:  h.metrics.computeMW,
+    startups: h.metrics.unicorns * 1.2 + (h.metrics.vcUSD/1e9)*0.8,
+    gobierno: 0.6 * (h.metrics.patentesIA || 0) // aproximación si hiciera falta
+  };
+  let best = "academia", bestV = -Infinity;
+  for(const [k,v] of Object.entries(s)) if(v > bestV){ best=k; bestV=v; }
+  return best;
+}
+function radiusFor(value, minR, maxR, vmin, vmax){
+  if(vmin === vmax) return (minR + maxR)/2;
+  const t = Math.max(0, Math.min(1, (value - vmin)/(vmax - vmin)));
+  return minR + Math.sqrt(t) * (maxR - minR);
+}
+
+// =========================
+// Mapa
+// =========================
+const map = L.map('map', { zoomControl: true, attributionControl: true });
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 10,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+map.setView([35, 103], 4);
+
+computeCompositeIndex();
+
+// Capa contenedora de todos los marcadores
+const allMarkers = [];
+
+// Elementos UI
+const $search = document.getElementById('search');
+const $metric = document.getElementById('metric');
+const $size   = document.getElementById('size');
+const $btnReset = document.getElementById('btnReset');
+const $btnRecenter = document.getElementById('btnRecenter');
+
+const $f_academia = document.getElementById('f_academia');
+const $f_empresas = document.getElementById('f_empresas');
+const $f_compute  = document.getElementById('f_compute');
+const $f_startups = document.getElementById('f_startups');
+const $f_gobierno = document.getElementById('f_gobierno');
+
+// Crear marcadores una sola vez y guardarlos
+hubs.forEach(h => {
+  const tag = dominantTag(h);
+  const color = tagColors[tag] || "#6aa6ff";
+
+  const m = L.circleMarker([h.lat, h.lon], {
+    radius: 14,
+    color: color,
+    fillColor: color,
+    fillOpacity: 0.25,
+    weight: 2
+  });
+
+  const tt = `<b>${h.city}</b> — ${h.province}<br>` +
+             `Índice Hub: ${Math.round((h.indiceHub||0)*100)/100}`;
+  m.bindTooltip(tt, {direction:"top", offset:[0,-6]});
+
+  const pop = `<b>${h.city}</b> — ${h.province}
+    <div class="mini" style="margin-top:2px; margin-bottom:6px;">
+      <span class="badge acad">A</span> Acad ·
+      <span class="badge emp">E</span> Emp ·
+      <span class="badge cmp">C</span> Compute ·
+      <span class="badge stu">S</span> Startups ·
+      <span class="badge gov">G</span> Gob
+    </div>
+    <div style="font-size:13px; line-height:1.5;">
+      Talento: ${h.metrics.talento.toLocaleString('es-AR')}<br>
+      Publicaciones (5y): ${h.metrics.publicaciones.toLocaleString('es-AR')}<br>
+      Compute: ${h.metrics.computeMW} MW · VC: USD ${(h.metrics.vcUSD/1e9).toFixed(1)} B<br>
+      Unicornios: ${h.metrics.unicorns}
+      <hr style="border-color: rgba(255,255,255,.12)">
+      <b>Highlights</b>
+      <ul style="padding-left:18px; margin:6px 0;">
+        ${h.highlights.map(x=>`<li>${x}</li>`).join('')}
+      </ul>
+    </div>`;
+  m.bindPopup(pop);
+
+  // metadatos
+  m.__hub = h;
+  m.addTo(map); // por simplicidad, usamos una sola capa y controlamos visibilidad
+  allMarkers.push(m);
+});
+
+// Ajuste a bounds de China (según hubs)
+function recenter(){
+  const group = L.featureGroup(allMarkers);
+  try {
+    const b = group.getBounds();
+    if(b.isValid()) map.fitBounds(b.pad(0.12));
+  } catch(e){
+    map.setView([35, 103], 4);
+  }
+}
+recenter();
+
+// Filtro + render
+function update(){
+  const q = ($search.value || "").trim().toLowerCase();
+  const metricKey = $metric.value;
+  const sizeBase = +$size.value;
+
+  // check tags
+  const want = {
+    academia: $f_academia.checked,
+    empresas: $f_empresas.checked,
+    compute:  $f_compute.checked,
+    startups: $f_startups.checked,
+    gobierno: $f_gobierno.checked
+  };
+
+  // métrica para escala
+  const values = hubs.map(h => (metricKey === "indiceHub") ? (h.indiceHub||0) : (h.metrics[metricKey]||0));
+  const vmin = Math.min(...values);
+  const vmax = Math.max(...values);
+
+  // ordenar por métrica desc
+  const sorted = [...allMarkers].sort((a,b)=>{
+    const av = (metricKey==="indiceHub") ? (a.__hub.indiceHub||0) : (a.__hub.metrics[metricKey]||0);
+    const bv = (metricKey==="indiceHub") ? (b.__hub.indiceHub||0) : (b.__hub.metrics[metricKey]||0);
+    return bv - av;
+  });
+
+  sorted.forEach(m => {
+    const h = m.__hub;
+
+    // filtro por texto
+    let okText = true;
+    if(q){
+      const hay = [h.city, h.province, ...h.highlights].join(" ").toLowerCase();
+      okText = hay.includes(q);
+    }
+
+    // filtro por tags (si el hub no contiene ninguno activo, ocultar)
+    const hasAnyTag = h.tags.some(t => want[t]);
+
+    // aplicar
+    const show = okText && hasAnyTag;
+    if(show){
+      // tamaño proporcional
+      const val = (metricKey==="indiceHub") ? (h.indiceHub||0) : (h.metrics[metricKey]||0);
+      const r = radiusFor(val, Math.max(10, sizeBase-12), sizeBase+16, vmin, vmax);
+      m.setRadius(r);
+      m.setStyle({opacity: 1, fillOpacity: 0.25});
+      m.addTo(map);
+    } else {
+      m.setStyle({opacity: 0, fillOpacity: 0});
+      m.removeFrom(map);
+    }
+  });
+}
+
+function resetFilters(){
+  $search.value = "";
+  $metric.value = "indiceHub";
+  $size.value = 32;
+  $f_academia.checked = true;
+  $f_empresas.checked = true;
+  $f_compute.checked  = true;
+  $f_startups.checked = true;
+  $f_gobierno.checked = true;
+  update();
+}
+
+// Eventos UI (con leve debounce)
+let timer = null;
+function debouncedUpdate(){
+  clearTimeout(timer);
+  timer = setTimeout(update, 120);
+}
+[$search, $metric, $size].forEach(el => el.addEventListener('input', debouncedUpdate));
+[$f_academia, $f_empresas, $f_compute, $f_startups, $f_gobierno].forEach(el => el.addEventListener('change', update));
+$btnReset.addEventListener('click', resetFilters);
+$btnRecenter.addEventListener('click', recenter);
+
+// Render inicial
+update();
+</script>
+
+  <div class="footer" style="
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    padding: 8px 14px;
+    text-align: center;
+    font-size: 12px;
+    color: #eaf0ff;
+    background: rgba(15,21,48,.88);
+    border-top: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+  ">
+    Material elaborado por el profesor Sergio Gevatschnaider
+  </div>
+
+</body>
+</html>
