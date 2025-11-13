@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crecimiento combinatorio de árboles (PG) — N(d) ≈ |T| + |F|·(N(d−1))^k</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#121821; --ink:#eaf2ff; --muted:#9fb3c8; --accent:#6aa6ff; --accent2:#8ef0d4; --warn:#ffd38e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial; background:linear-gradient(120deg,#0b0f14,#0d1420 50%,#0b0f14); color:var(--ink)}
+    header{padding:24px 22px 8px; border-bottom:1px solid #1c2430}
+    h1{margin:0 0 6px; font-size:20px; font-weight:700; letter-spacing:.2px}
+    .sub{color:var(--muted); font-size:13px}
+    main{padding:18px; display:grid; gap:16px; grid-template-columns: 360px 1fr}
+    @media (max-width: 980px){ main{grid-template-columns: 1fr} }
+    .card{background:var(--panel); border:1px solid #1c2430; border-radius:14px; padding:16px; box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+    .card h2{margin:.2rem 0 1rem; font-size:16px; color:#d7e7ff}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    label{font-size:12px; color:var(--muted); display:block; margin:6px 0 6px}
+    input[type="number"], select{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #263141; background:#0f1520; color:var(--ink); outline:none}
+    input[type="number"]:focus{border-color:#2f4768; box-shadow:0 0 0 4px rgb(106 166 255 / .15)}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .row .fill{flex:1}
+    button{background:linear-gradient(180deg,#5d97ff,#3c78f0); border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; letter-spacing:.2px}
+    button.ghost{background:#0f1520; border:1px solid #263141}
+    .note{font-size:12px; color:var(--muted)}
+    .formula{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#0f1520; border:1px dashed #2a384d; padding:10px 12px; border-radius:10px; color:#e4eeff}
+    canvas{width:100%; height:420px; background:#0f1520; border-radius:14px; border:1px solid #1c2430}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th, td{padding:8px 10px; border-bottom:1px solid #1e2735}
+    th{color:#cfe1ff; text-align:left}
+    tr:hover td{background:#0d131e}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#0f1520; border:1px solid #263141; color:#d7e7ff; font-size:12px}
+    .legend-swatch{display:inline-block; width:12px; height:12px; border-radius:3px; background:linear-gradient(180deg,var(--accent),#3c78f0); border:1px solid #335a96}
+    .muted{color:var(--muted)}
+    .footer{padding:14px 18px 28px; color:var(--muted); font-size:12px}
+    .warn{color:var(--warn)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Crecimiento combinatorio de árboles (Programación Genética)</h1>
+    <div class="sub">Recurrencia: <span class="formula">N(d) ≈ |T| + |F| · (N(d−1))^k, &nbsp; con &nbsp; N(0)=|T|</span></div>
+  </header>
+
+  <main>
+    <!-- Panel de controles -->
+    <section class="card" aria-label="Parámetros">
+      <h2>Parámetros</h2>
+      <div class="grid">
+        <div>
+          <label for="tCount">Cantidad de terminales |T|</label>
+          <input id="tCount" type="number" min="1" step="1" value="3">
+        </div>
+        <div>
+          <label for="fCount">Cantidad de funciones |F|</label>
+          <input id="fCount" type="number" min="1" step="1" value="4">
+        </div>
+        <div>
+          <label for="arity">Aridad media k <span class="muted">(puede ser real)</span></label>
+          <input id="arity" type="number" min="0.1" step="0.1" value="2">
+        </div>
+        <div>
+          <label for="depth">Profundidad máxima d</label>
+          <input id="depth" type="number" min="0" step="1" value="6">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="pill"><input id="logScale" type="checkbox" style="accent-color:#5d97ff"> Escala log10</label>
+        <label class="pill"><input id="roundIntegers" type="checkbox" checked style="accent-color:#5d97ff"> Redondear N(d) a entero</label>
+        <div class="fill"></div>
+        <button id="btnCalc" title="Recalcular">Recalcular</button>
+        <button id="btnCSV" class="ghost" title="Exportar CSV">Exportar CSV</button>
+        <button id="btnPNG" class="ghost" title="Descargar gráfico">Descargar PNG</button>
+      </div>
+      <p class="note" style="margin-top:10px">Sugerencia: activa <strong>Escala log10</strong> para visualizar crecimientos extremos sin saturar el gráfico.</p>
+      <details style="margin-top:10px">
+        <summary class="muted">Supuestos y notas</summary>
+        <ul class="muted">
+          <li>La aridad media <em>k</em> aproxima la mezcla de funciones de distinta aridad; al elevar <em>N(d−1)</em> a <em>k</em> se modela el <em>branching</em> promedio.</li>
+          <li>La fórmula es una <em>aproximación</em>; en práctica, restricciones de tipado y gramáticas reducen el conteo.</li>
+          <li>Si desmarcas «Redondear», verás valores reales (útil cuando k∉ℕ).</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- Lienzo + tabla -->
+    <section class="card" aria-label="Visualización y tabla">
+      <h2 style="display:flex; align-items:center; gap:10px">Visualización <span class="legend-swatch" aria-hidden="true"></span></h2>
+      <canvas id="chart" width="1200" height="420" aria-label="Gráfico N(d) vs d"></canvas>
+      <div class="row" style="margin-top:8px">
+        <span class="note">Eje Y: valores <span id="scaleMode">lineales</span>. <span class="warn">Advertencia:</span> el crecimiento puede desbordar (Infinity) con parámetros grandes.</span>
+        <div class="fill"></div>
+        <span class="note">Pasa el cursor por el gráfico para ver tooltips.</span>
+      </div>
+      <div style="margin-top:14px">
+        <table id="tbl">
+          <thead><tr><th>d</th><th>N(d)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Material elaborado por el profesor Sergio Gevatschnaider · Este simulador es de propósito didáctico y emplea una modelización aproximada del espacio de programas en PG.
+  </footer>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const tCount = el('tCount');
+    const fCount = el('fCount');
+    const arity  = el('arity');
+    const depth  = el('depth');
+    const logScale = el('logScale');
+    const roundIntegers = el('roundIntegers');
+    const btnCalc = el('btnCalc');
+    const btnCSV  = el('btnCSV');
+    const btnPNG  = el('btnPNG');
+    const scaleMode = el('scaleMode');
+    const canvas = el('chart');
+    const ctx = canvas.getContext('2d');
+
+    function clampNum(v, min, max){ v=+v; if(!Number.isFinite(v)) return min; return Math.min(Math.max(v,min),max); }
+
+    function computeSeries(T, F, k, D, doRound=true){
+      const series = [];
+      let prev = T; // N(0)
+      series.push({d:0, N: doRound ? Math.round(prev) : prev});
+      for(let d=1; d<=D; d++){
+        // N(d) ≈ |T| + |F| · (N(d−1))^k
+        let Nd = T + F * Math.pow(prev, k);
+        if(!Number.isFinite(Nd)) Nd = Number.POSITIVE_INFINITY;
+        series.push({d, N: doRound ? Math.round(Nd) : Nd});
+        prev = Nd;
+      }
+      return series;
+    }
+
+    function niceNumber(x){
+      if(!Number.isFinite(x)) return '∞';
+      if (x === 0) return '0';
+      // Use compact formatting for huge values
+      if (Math.abs(x) >= 1e6) return x.toExponential(3);
+      return x.toLocaleString('es-AR');
+    }
+
+    function updateTable(series){
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML = '';
+      series.forEach(r => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td'); td1.textContent = r.d;
+        const td2 = document.createElement('td'); td2.textContent = niceNumber(r.N);
+        tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr);
+      });
+    }
+
+    function drawChart(series, useLog){
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      // Padding for axes
+      const padL = 58, padR = 24, padT = 18, padB = 42;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      // Background grid
+      ctx.fillStyle = '#0f1520';
+      ctx.fillRect(0,0,W,H);
+
+      // Axes
+      ctx.strokeStyle = '#223049';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, padT); ctx.lineTo(padL, H - padB); // y-axis
+      ctx.lineTo(W - padR, H - padB); // x-axis
+      ctx.stroke();
+
+      // X ticks (d)
+      const maxD = series[series.length-1].d;
+      const xForD = d => padL + (plotW) * (d / (maxD || 1));
+      ctx.fillStyle = '#9fb3c8';
+      ctx.font = '12px system-ui';
+      for(let d=0; d<=maxD; d++){
+        const x = xForD(d);
+        ctx.strokeStyle = '#182233'; ctx.beginPath(); ctx.moveTo(x, H-padB); ctx.lineTo(x, padT); ctx.stroke();
+        ctx.fillText(String(d), x-3, H-padB+16);
+      }
+
+      // Y scale
+      let values = series.map(s => s.N).filter(Number.isFinite);
+      let yMin = 0, yMax = values.length ? Math.max(...values) : 1;
+      if(useLog){
+        // log10; map N<=0 to NaN
+        const logs = series.map(s => s.N>0 && Number.isFinite(s.N) ? Math.log10(s.N) : NaN).filter(v=>!Number.isNaN(v));
+        yMin = 0; // show from 0 on log axis label as 10^0, but visually map 0->padB line
+        yMax = logs.length ? Math.max(...logs) : 1;
+      }
+      if(!Number.isFinite(yMax) || yMax <= 0) yMax = 1;
+
+      const yToPx = v => {
+        const frac = v / yMax; // 0..1
+        return padT + (1 - frac) * plotH;
+      };
+
+      // Y ticks
+      ctx.fillStyle = '#9fb3c8';
+      ctx.strokeStyle = '#182233';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      const tickCount = 6;
+      for(let i=0;i<=tickCount;i++){
+        const frac = i/tickCount;
+        let val = yMax * frac;
+        let label = '';
+        if(useLog){
+          // label as 10^{...}
+          const exp = Math.round(yMax * frac);
+          val = exp; // on the exp scale
+          label = exp === 0 ? '1' : `10^${exp}`;
+          const y = padT + (1 - (exp / yMax)) * plotH;
+          ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+          ctx.fillText(label, padL - 8, y);
+        } else {
+          const y = yToPx(val);
+          ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+          label = niceNumber(val);
+          ctx.fillText(label, padL - 8, y);
+        }
+      }
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+      // Line
+      ctx.lineWidth = 2.5;
+      const grad = ctx.createLinearGradient(padL, padT, padL, H-padB);
+      grad.addColorStop(0, '#6aa6ff'); grad.addColorStop(1, '#3c78f0');
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      series.forEach((s, i) => {
+        const x = xForD(s.d);
+        const yVal = useLog ? (s.N>0 && Number.isFinite(s.N) ? Math.log10(s.N) : 0) : (Number.isFinite(s.N) ? s.N : yMax);
+        const y = useLog ? (padT + (1 - (yVal / yMax)) * plotH) : yToPx(yVal);
+        if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Points
+      series.forEach(s => {
+        const x = xForD(s.d);
+        const yVal = useLog ? (s.N>0 && Number.isFinite(s.N) ? Math.log10(s.N) : 0) : (Number.isFinite(s.N) ? s.N : yMax);
+        const y = useLog ? (padT + (1 - (yVal / yMax)) * plotH) : yToPx(yVal);
+        ctx.fillStyle = '#8ef0d4';
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, Math.PI*2);
+        ctx.fill();
+      });
+
+      // Tooltip interaction
+      canvas.onmousemove = (ev) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = (ev.clientX - rect.left) * (canvas.width / rect.width);
+        const my = (ev.clientY - rect.top)  * (canvas.height / rect.height);
+        // Find nearest point
+        const pts = series.map(s => {
+          const x = xForD(s.d);
+          const yVal = useLog ? (s.N>0 && Number.isFinite(s.N) ? Math.log10(s.N) : 0) : (Number.isFinite(s.N) ? s.N : yMax);
+          const y = useLog ? (padT + (1 - (yVal / yMax)) * plotH) : yToPx(yVal);
+          return {d:s.d, N:s.N, x, y};
+        });
+        let best = null, bestDist = 1e9;
+        pts.forEach(p => { const dx = p.x-mx, dy = p.y-my; const dist = Math.hypot(dx,dy); if(dist<bestDist){best=p; bestDist=dist;} });
+        // Redraw to clear previous tooltip
+        drawChart.base(series, useLog);
+        if(best && bestDist < 24){
+          // highlight point
+          ctx.fillStyle = '#fff';
+          ctx.beginPath(); ctx.arc(best.x, best.y, 4.5, 0, Math.PI*2); ctx.fill();
+          // tooltip
+          const pad = 8;
+          const text = `d=${best.d}  N(d)=${niceNumber(best.N)}`;
+          ctx.font = '12px system-ui';
+          const tw = ctx.measureText(text).width;
+          const th = 18;
+          let bx = best.x + 10, by = best.y - 28;
+          if(bx+tw+2*pad > W - 6) bx = W - tw - 2*pad - 6;
+          if(by < padT + 6) by = best.y + 14;
+          ctx.fillStyle = 'rgba(13,19,30,.95)';
+          ctx.strokeStyle = '#335a96';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(bx, by, tw+2*pad, th+2*pad, 8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#eaf2ff';
+          ctx.fillText(text, bx+pad, by+pad+12);
+        }
+      }
+      // preserve a base redraw without tooltip artifacts
+      drawChart.base = (s,u) => drawChart(s,u);
+      canvas.onmouseleave = () => { drawChart(series, useLog); };
+    }
+
+    function recalc(){
+      const T = clampNum(tCount.value, 1, 1e6);
+      const F = clampNum(fCount.value, 1, 1e6);
+      const k = clampNum(arity.value, 0.1, 50);
+      const D = clampNum(depth.value, 0, 50);
+      const doRound = !!roundIntegers.checked;
+      const series = computeSeries(T, F, k, D, doRound);
+      updateTable(series);
+      drawChart(series, !!logScale.checked);
+      scaleMode.textContent = logScale.checked ? 'log10' : 'lineales';
+      return series;
+    }
+
+    function toCSV(series){
+      const rows = [['d','N(d)']].concat(series.map(r => [r.d, r.N]));
+      return rows.map(r => r.join(',')).join('\n');
+    }
+
+    btnCalc.addEventListener('click', recalc);
+    [tCount,fCount,arity,depth,logScale,roundIntegers].forEach(elm => elm.addEventListener('input', recalc));
+
+    btnCSV.addEventListener('click', () => {
+      const series = recalc();
+      const blob = new Blob([toCSV(series)], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'crecimiento_Nd.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    btnPNG.addEventListener('click', () => {
+      // Render a clean chart (no hover) to PNG
+      const series = recalc();
+      const link = document.createElement('a');
+      link.download = 'crecimiento_Nd.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Polyfill for roundRect on older canvases
+    if(!CanvasRenderingContext2D.prototype.roundRect){
+      CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r){
+        if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x+r, y);
+        this.arcTo(x+w, y,   x+w, y+h, r);
+        this.arcTo(x+w, y+h, x,   y+h, r);
+        this.arcTo(x,   y+h, x,   y,   r);
+        this.arcTo(x,   y,   x+w, y,   r);
+        this.closePath();
+        return this;
+      }
+    }
+
+    // Primer render
+    recalc();
+  </script>
+</body>
+</html>

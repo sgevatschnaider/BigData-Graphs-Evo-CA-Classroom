@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pirámide de utilidad en GP — Universo sintáctico → Programas útiles</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#121821; --ink:#eef6ff; --muted:#a9bed6; --line:#1d2736;
+      --u0:#64748b;   /* universo sintáctico */
+      --u1:#60a5fa;   /* ejecutables */
+      --u2:#34d399;   /* válidos */
+      --u3:#fbbf24;   /* comportamiento razonable */
+      --u4:#ef4444;   /* útiles */
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial; background:linear-gradient(120deg,#0b0f14,#0d1420 50%,#0b0f14); color:var(--ink)}
+    header{padding:22px 20px 10px; border-bottom:1px solid var(--line)}
+    h1{margin:0 0 6px; font-size:20px; font-weight:700}
+    .sub{color:var(--muted); font-size:13px}
+    main{padding:18px; display:grid; gap:16px; grid-template-columns: 380px 1fr}
+    @media (max-width: 980px){ main{grid-template-columns: 1fr} }
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+    .card h2{margin:.2rem 0 1rem; font-size:16px; color:#d7e7ff}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    label{font-size:12px; color:var(--muted); display:block; margin:6px 0 6px}
+    input[type="number"], input[type="range"]{width:100%;}
+    input[type="number"]{padding:10px 12px; border-radius:10px; border:1px solid #263141; background:#0f1520; color:var(--ink); outline:none}
+    input[type="number"]:focus{border-color:#2f4768; box-shadow:0 0 0 4px rgb(106 166 255 / .15)}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .row .fill{flex:1}
+    button{background:linear-gradient(180deg,#5d97ff,#3c78f0); border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; letter-spacing:.2px}
+    button.ghost{background:#0f1520; border:1px solid #263141}
+    .note{font-size:12px; color:var(--muted)}
+    .formula{font-family: ui-monospace, Menlo, Consolas, "Courier New", monospace; background:#0f1520; border:1px dashed #2a384d; padding:8px 10px; border-radius:10px; color:#e4eeff}
+    canvas{width:100%; height:520px; background:#0f1520; border-radius:14px; border:1px solid var(--line)}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th, td{padding:8px 10px; border-bottom:1px solid #1e2735}
+    th{color:#cfe1ff; text-align:left}
+    tr:hover td{background:#0d131e}
+    .legend{display:flex; gap:10px; flex-wrap:wrap}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#0f1520; border:1px solid #263141; color:#d7e7ff; font-size:12px}
+    .sw{width:12px; height:12px; border-radius:3px; display:inline-block}
+    .footer{padding:14px 18px 28px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pirámide de utilidad en Programación Genética (GP)</h1>
+    <div class="sub">De todos los <em>programas generables</em> (universo sintáctico) solo una fracción ínfima resulta <strong>útil</strong> para el objetivo. Ajustá los parámetros y observá cómo cambian los niveles.</div>
+  </header>
+
+  <main>
+    <!-- Panel de controles -->
+    <section class="card" aria-label="Parámetros">
+      <h2>Parámetros y supuestos</h2>
+      <p class="note">Calculamos el tamaño total con la aproximación <span class="formula">N(d) ≈ |T| + |F|·(N(d−1))^k, &nbsp; N(0)=|T|</span> y aplicamos fracciones sucesivas para cada nivel de la pirámide.</p>
+      <div class="grid">
+        <div>
+          <label for="tCount">Cantidad de terminales |T|</label>
+          <input id="tCount" type="number" min="1" step="1" value="4">
+        </div>
+        <div>
+          <label for="fCount">Cantidad de funciones |F|</label>
+          <input id="fCount" type="number" min="1" step="1" value="5">
+        </div>
+        <div>
+          <label for="arity">Aridad media k</label>
+          <input id="arity" type="number" min="0.1" step="0.1" value="2">
+        </div>
+        <div>
+          <label for="depth">Profundidad máxima d</label>
+          <input id="depth" type="number" min="0" step="1" value="6">
+        </div>
+      </div>
+
+      <details style="margin-top:12px">
+        <summary class="note">Fracciones por nivel (probabilidades condicionales)</summary>
+        <div style="margin-top:10px" class="grid">
+          <div>
+            <label for="pExec">P(ejecutable | sintáctico) [%]</label>
+            <input id="pExec" type="range" min="0" max="100" step="1" value="50" oninput="lbl_pExec.textContent=this.value+'%'">
+            <div class="row"><span class="note">Actual: <strong id="lbl_pExec">50%</strong></span></div>
+          </div>
+          <div>
+            <label for="pValid">P(válido | ejecutable) [%]</label>
+            <input id="pValid" type="range" min="0" max="100" step="1" value="40" oninput="lbl_pValid.textContent=this.value+'%'">
+            <div class="row"><span class="note">Actual: <strong id="lbl_pValid">40%</strong></span></div>
+          </div>
+          <div>
+            <label for="pReason">P(razonable | válido) [%]</label>
+            <input id="pReason" type="range" min="0" max="100" step="1" value="20" oninput="lbl_pReason.textContent=this.value+'%'">
+            <div class="row"><span class="note">Actual: <strong id="lbl_pReason">20%</strong></span></div>
+          </div>
+          <div>
+            <label for="pUseful">P(útil | razonable) [%]</label>
+            <input id="pUseful" type="range" min="0" max="100" step="1" value="5" oninput="lbl_pUseful.textContent=this.value+'%'">
+            <div class="row"><span class="note">Actual: <strong id="lbl_pUseful">5%</strong></span></div>
+          </div>
+        </div>
+        <p class="note">Estos deslizadores representan <em>probabilidades condicionales</em> encadenadas. La proporción absoluta de cada nivel se calcula multiplicando hacia abajo.</p>
+      </details>
+
+      <div class="row" style="margin-top:12px">
+        <div class="fill"></div>
+        <button id="btnCalc">Recalcular</button>
+        <button id="btnPNG" class="ghost">Descargar PNG</button>
+        <button id="btnCSV" class="ghost">Exportar CSV</button>
+      </div>
+    </section>
+
+    <!-- Visualización -->
+    <section class="card" aria-label="Visualización y tabla">
+      <h2>Visualización</h2>
+      <div class="legend" style="margin-bottom:10px">
+        <span class="pill"><span class="sw" style="background:var(--u0)"></span> Universo sintáctico</span>
+        <span class="pill"><span class="sw" style="background:var(--u1)"></span> Ejecutables</span>
+        <span class="pill"><span class="sw" style="background:var(--u2)"></span> Válidos</span>
+        <span class="pill"><span class="sw" style="background:var(--u3)"></span> Comportamiento razonable</span>
+        <span class="pill"><span class="sw" style="background:var(--u4)"></span> Útiles</span>
+      </div>
+      <canvas id="chart" width="1200" height="520" aria-label="Pirámide de utilidad"></canvas>
+      <div style="margin-top:14px">
+        <table id="tbl">
+          <thead><tr><th>Nivel</th><th>Cantidad</th><th>% del total</th><th>Prob. condicional</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Material elaborado por el profesor Sergio Gevatschnaider
+  </footer>
+
+  <script>
+    const $ = (id)=>document.getElementById(id);
+    const tCount=$('tCount'), fCount=$('fCount'), arity=$('arity'), depth=$('depth');
+    const pExec=$('pExec'), pValid=$('pValid'), pReason=$('pReason'), pUseful=$('pUseful');
+    const chart=$('chart'); const ctx=chart.getContext('2d');
+    const btnCalc=$('btnCalc'), btnPNG=$('btnPNG'), btnCSV=$('btnCSV');
+
+    function clamp(v,min,max){ v=+v; if(!Number.isFinite(v)) return min; return Math.min(Math.max(v,min),max); }
+
+    function Nd(T,F,k,D){
+      let N=T; // N(0)
+      for(let d=1; d<=D; d++){
+        N = T + F * Math.pow(N, k);
+        if(!Number.isFinite(N)) return Infinity;
+      }
+      return N;
+    }
+
+    function compute(){
+      const T=clamp(tCount.value,1,1e6), F=clamp(fCount.value,1,1e6), k=clamp(arity.value,0.1,50), D=clamp(depth.value,0,50);
+      const total = Nd(T,F,k,D);
+      const pe = +pExec.value/100, pv = +pValid.value/100, pr = +pReason.value/100, pu = +pUseful.value/100;
+      const lvl0 = total;
+      const lvl1 = lvl0 * pe;
+      const lvl2 = lvl1 * pv;
+      const lvl3 = lvl2 * pr;
+      const lvl4 = lvl3 * pu;
+      const levels = [
+        {name:'Universo sintáctico', color:getComputedStyle(document.documentElement).getPropertyValue('--u0').trim(), amount:lvl0, rel:1, cond:1},
+        {name:'Ejecutables', color:getComputedStyle(document.documentElement).getPropertyValue('--u1').trim(), amount:lvl1, rel: lvl1/lvl0, cond: pe},
+        {name:'Válidos', color:getComputedStyle(document.documentElement).getPropertyValue('--u2').trim(), amount:lvl2, rel: lvl2/lvl0, cond: pv},
+        {name:'Comportamiento razonable', color:getComputedStyle(document.documentElement).getPropertyValue('--u3').trim(), amount:lvl3, rel: lvl3/lvl0, cond: pr},
+        {name:'Útiles', color:getComputedStyle(document.documentElement).getPropertyValue('--u4').trim(), amount:lvl4, rel: lvl4/lvl0, cond: pu},
+      ];
+      return {T,F,k,D,total,levels};
+    }
+
+    function fmt(x){ if(!Number.isFinite(x)) return '∞'; if(Math.abs(x)>=1e7) return x.toExponential(3); return x.toLocaleString('es-AR'); }
+    function pct(x){ return (x*100).toLocaleString('es-AR', {maximumFractionDigits:4})+'%'; }
+
+    function drawPyramid(levels){
+      const W=chart.width, H=chart.height; ctx.clearRect(0,0,W,H);
+      // frame
+      ctx.fillStyle = '#0f1520'; ctx.fillRect(0,0,W,H);
+      const padL=60, padR=20, padT=20, padB=60;
+      const P = {x: padL, y: padT, w: W-padL-padR, h: H-padT-padB};
+
+      // base triangle coordinates (isosceles)
+      const apex = {x:P.x + P.w/2, y:P.y};
+      const left = {x:P.x, y:P.y+P.h};
+      const right= {x:P.x+P.w, y:P.y+P.h};
+
+      // compute cumulative ratios for heights
+      const total = levels[0].amount;
+      const ratios = levels.map(l => Math.max(0, Math.min(1, Number.isFinite(total) && total>0 ? l.rel : 0)));
+
+      // Helper to get y at ratio r from top (0) to bottom (1)
+      const yAt = r => apex.y + r*P.h;
+      // Helper for horizontal width at a given y in the triangle (linear tapering)
+      function halfWidthAt(y){
+        const frac = (y - apex.y) / (P.h); // 0..1
+        return (P.w/2) * frac; // 0 at top, half width at base
+      }
+
+      // draw base outlines
+      ctx.strokeStyle = '#1b2a3f'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(apex.x,apex.y); ctx.lineTo(left.x,left.y); ctx.lineTo(right.x,right.y); ctx.closePath(); ctx.stroke();
+
+      // draw each band
+      let prevR = 1; // start from base for stacking upward
+      for(let i=0;i<levels.length;i++){
+        const r = ratios[i];
+        const yTop = yAt(1 - r); // top of the band
+        const yBot = yAt(prevR);
+        prevR = 1 - r; // next band starts above
+        if(yTop>=yBot) continue;
+        const hwTop = halfWidthAt(yTop), hwBot = halfWidthAt(yBot);
+        const col = levels[i].color;
+        // gradient fill
+        const grad = ctx.createLinearGradient(0,yTop,0,yBot); grad.addColorStop(0,col); grad.addColorStop(1,'#0f1520');
+        ctx.fillStyle = grad; ctx.strokeStyle = '#20324a';
+        ctx.beginPath();
+        ctx.moveTo(apex.x - hwTop, yTop);
+        ctx.lineTo(apex.x + hwTop, yTop);
+        ctx.lineTo(apex.x + hwBot, yBot);
+        ctx.lineTo(apex.x - hwBot, yBot);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      }
+
+      // axes labels
+      ctx.fillStyle = '#a9bed6'; ctx.font='12px system-ui';
+      ctx.textAlign='center'; ctx.fillText('↓ Menos programas', apex.x, apex.y-6);
+      ctx.fillText('Más programas ↑', apex.x, right.y+18);
+
+      // tooltips: compute bands geometry once
+      const bands = [];
+      prevR = 1;
+      for(let i=0;i<levels.length;i++){
+        const r = ratios[i];
+        const yTop = yAt(1 - r); const yBot = yAt(prevR); prevR = 1 - r;
+        const hwTop = halfWidthAt(yTop), hwBot = halfWidthAt(yBot);
+        bands.push({i, yTop, yBot, hwTop, hwBot});
+      }
+
+      chart.onmousemove = e => {
+        const rect = chart.getBoundingClientRect();
+        const mx = (e.clientX-rect.left)*(chart.width/rect.width);
+        const my = (e.clientY-rect.top)*(chart.height/rect.height);
+        drawPyramid.base(levels);
+        for(const b of bands){
+          if(my < b.yTop || my > b.yBot) continue;
+          const t = (my - b.yTop)/(b.yBot-b.yTop);
+          const half = b.hwTop + t*(b.hwBot-b.hwTop);
+          if(mx < apex.x - half || mx > apex.x + half) continue;
+          // highlight band
+          ctx.save();
+          ctx.globalCompositeOperation='screen';
+          ctx.fillStyle='rgba(255,255,255,.08)';
+          ctx.beginPath();
+          ctx.moveTo(apex.x - b.hwTop, b.yTop);
+          ctx.lineTo(apex.x + b.hwTop, b.yTop);
+          ctx.lineTo(apex.x + b.hwBot, b.yBot);
+          ctx.lineTo(apex.x - b.hwBot, b.yBot);
+          ctx.closePath(); ctx.fill(); ctx.restore();
+          // tooltip
+          const L = levels[b.i];
+          const txt = `${L.name}\nCantidad: ${fmt(L.amount)}\n% del total: ${pct(L.rel)}${b.i>0?`\nProb. cond.: ${pct(L.cond)}`:''}`;
+          tooltip(mx+12, my-12, txt);
+          break;
+        }
+      };
+      chart.onmouseleave = ()=> drawPyramid(levels);
+      drawPyramid.base = (lv)=> drawPyramid(lv);
+
+      function tooltip(x,y,text){
+        const lines = text.split('\n');
+        ctx.font='12px system-ui';
+        const pad=8; let w=0; for(const ln of lines){ w = Math.max(w, ctx.measureText(ln).width); }
+        const h = lines.length*16 + pad*2 - 4;
+        if(x+w+pad*2>W-6) x = W-w-pad*2-6; if(y<20) y = 20;
+        ctx.fillStyle='rgba(13,19,30,.95)'; ctx.strokeStyle='#335a96'; ctx.lineWidth=1; roundRect(x,y,w+pad*2,h,8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#eaf2ff'; let ty=y+pad+11; for(const ln of lines){ ctx.fillText(ln, x+pad, ty); ty+=16; }
+      }
+
+      function roundRect(x,y,w,h,r){
+        if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+        ctx.beginPath(); ctx.moveTo(x+r, y);
+        ctx.arcTo(x+w, y,   x+w, y+h, r);
+        ctx.arcTo(x+w, y+h, x,   y+h, r);
+        ctx.arcTo(x,   y+h, x,   y,   r);
+        ctx.arcTo(x,   y,   x+w, y,   r);
+        ctx.closePath();
+      }
+    }
+
+    function updateTable(levels){
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML='';
+      levels.forEach((L,idx)=>{
+        const tr=document.createElement('tr');
+        const td1=document.createElement('td'); td1.textContent=L.name;
+        const td2=document.createElement('td'); td2.textContent=fmt(L.amount);
+        const td3=document.createElement('td'); td3.textContent=pct(L.rel);
+        const td4=document.createElement('td'); td4.textContent= idx===0? '—' : pct(L.cond);
+        tr.append(td1,td2,td3,td4); tbody.appendChild(tr);
+      });
+    }
+
+    function toCSV(levels){
+      const rows=[['Nivel','Cantidad','% del total','Prob. condicional']].concat(
+        levels.map((L,i)=>[L.name, L.amount, (L.rel*100), i===0? '' : (L.cond*100)])
+      );
+      return rows.map(r=>r.join(',')).join('\n');
+    }
+
+    function recalc(){
+      const {levels}=compute();
+      drawPyramid(levels);
+      updateTable(levels);
+      return levels;
+    }
+
+    btnCalc.addEventListener('click', recalc);
+    [tCount,fCount,arity,depth,pExec,pValid,pReason,pUseful].forEach(x=> x.addEventListener('input', recalc));
+
+    btnPNG.addEventListener('click', ()=>{
+      const link = document.createElement('a');
+      link.download = 'piramide_utilidad_gp.png';
+      link.href = chart.toDataURL('image/png');
+      link.click();
+    });
+
+    btnCSV.addEventListener('click', ()=>{
+      const csv = toCSV(recalc());
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='piramide_utilidad_gp.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Primer render
+    recalc();
+  </script>
+</body>
+</html>

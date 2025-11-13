@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comparación AG vs PG - Crecimiento del Espacio de Búsqueda</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#121821; --ink:#eaf2ff; --muted:#9fb3c8;
+      --accent-ag:#ff6b9d; --accent-ag-dark:#d63a73;
+      --accent-pg:#6aa6ff; --accent-pg-dark:#3c78f0;
+      --accent2:#8ef0d4; --warn:#ffd38e; --line:#1c2430;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+         background:linear-gradient(120deg,#0b0f14,#0d1420 50%,#0b0f14); color:var(--ink)}
+    header{padding:24px 22px 12px; border-bottom:1px solid var(--line)}
+    h1{margin:0 0 8px; font-size:22px; font-weight:700; letter-spacing:.2px}
+    .sub{color:var(--muted); font-size:13px; line-height:1.6}
+    main{padding:18px; display:grid; gap:16px; grid-template-columns: 380px 1fr}
+    @media (max-width: 1080px){ main{grid-template-columns: 1fr} }
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px;
+          box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+    .card h2{margin:.2rem 0 1rem; font-size:16px; color:#d7e7ff}
+    .card h3{margin:1.2rem 0 .6rem; font-size:14px; color:#b8d0f0}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    label{font-size:12px; color:var(--muted); display:block; margin:6px 0 6px}
+    input[type="number"], select{width:100%; padding:10px 12px; border-radius:10px;
+                                   border:1px solid #263141; background:#0f1520; color:var(--ink); outline:none}
+    input[type="number"]:focus{border-color:#2f4768; box-shadow:0 0 0 4px rgb(106 166 255 / .15)}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .row .fill{flex:1}
+    button{background:linear-gradient(180deg,#5d97ff,#3c78f0); border:none; color:white;
+           padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; letter-spacing:.2px}
+    button.ghost{background:#0f1520; border:1px solid #263141}
+    .note{font-size:12px; color:var(--muted); line-height:1.5}
+    .formula{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+             background:#0f1520; border:1px dashed #2a384d; padding:10px 12px; border-radius:10px;
+             color:#e4eeff; font-size:13px; margin:8px 0}
+    canvas{width:100%; height:480px; background:#0f1520; border-radius:14px; border:1px solid var(--line)}
+    table{width:100%; border-collapse:collapse; font-size:13px; margin-top:12px}
+    th, td{padding:8px 10px; border-bottom:1px solid #1e2735}
+    th{color:#cfe1ff; text-align:left; font-weight:600}
+    tr:hover td{background:#0d131e}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+          background:#0f1520; border:1px solid #263141; color:#d7e7ff; font-size:12px}
+    .legend{display:flex; gap:16px; flex-wrap:wrap; margin:10px 0}
+    .legend-item{display:flex; align-items:center; gap:8px; font-size:13px}
+    .legend-swatch{display:inline-block; width:18px; height:12px; border-radius:3px; border:1px solid #335a96}
+    .swatch-ag{background:linear-gradient(180deg,var(--accent-ag),var(--accent-ag-dark))}
+    .swatch-pg{background:linear-gradient(180deg,var(--accent-pg),var(--accent-pg-dark))}
+    .muted{color:var(--muted)}
+    .warn{color:var(--warn)}
+    .footer{padding:14px 18px 28px; color:var(--muted); font-size:12px}
+    .comparison-box{background:#0d1319; border:1px solid #1e2735; border-radius:10px; padding:12px; margin:10px 0}
+    .comparison-box h4{margin:0 0 8px; font-size:13px; color:#8ef0d4}
+    .comparison-box ul{margin:4px 0; padding-left:20px; color:var(--muted); font-size:12px}
+    .comparison-box ul li{margin:4px 0}
+    details{margin-top:12px}
+    summary{cursor:pointer; color:var(--accent2); font-size:13px; font-weight:600}
+    .badge{display:inline-block; padding:2px 8px; border-radius:6px; background:#0f1520; border:1px solid #243247; font-size:11px; color:#cfe1ff}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Comparación: Algoritmos Genéticos vs. Programación Genética</h1>
+    <div class="sub">
+      <strong>AG:</strong> Espacio lineal finito &nbsp;|&nbsp;
+      <strong>PG:</strong> Espacio jerárquico super‑exponencial
+    </div>
+  </header>
+
+  <main>
+    <!-- Panel de controles -->
+    <section class="card" aria-label="Parámetros">
+      <h2>Parámetros</h2>
+
+      <h3>Algoritmos Genéticos (AG)</h3>
+      <div class="grid">
+        <div>
+          <label for="agBits">Longitud del cromosoma (n)</label>
+          <input id="agBits" type="number" min="1" max="50" step="1" value="10">
+        </div>
+        <div>
+          <label for="agAlphabet">Tamaño del alfabeto (α)</label>
+          <select id="agAlphabet">
+            <option value="2" selected>Binario (2)</option>
+            <option value="4">Cuaternario (4)</option>
+            <option value="10">Decimal (10)</option>
+            <option value="26">Alfabético (26)</option>
+          </select>
+        </div>
+      </div>
+      <div class="formula">Espacio AG: N_AG(n) = α^n</div>
+      <div class="note">donde α = tamaño del alfabeto, n = longitud del cromosoma.</div>
+
+      <h3 style="margin-top:20px">Programación Genética (PG)</h3>
+      <div class="grid">
+        <div>
+          <label for="pgTerminals">Terminales |T|</label>
+          <input id="pgTerminals" type="number" min="1" step="1" value="3">
+        </div>
+        <div>
+          <label for="pgFunctions">Funciones |F|</label>
+          <input id="pgFunctions" type="number" min="1" step="1" value="4">
+        </div>
+        <div>
+          <label for="pgArity">Aridad media k</label>
+          <input id="pgArity" type="number" min="0.1" step="0.1" value="2">
+        </div>
+        <div>
+          <label for="pgDepth">Profundidad máxima d</label>
+          <input id="pgDepth" type="number" min="0" max="15" step="1" value="6">
+        </div>
+      </div>
+      <div class="formula">Espacio PG: N(d) ≈ |T| + |F| · (N(d−1))^k, &nbsp; con N(0)=|T|</div>
+      <div class="note">Crecimiento recursivo que modela el branching medio k.</div>
+
+      <div class="row" style="margin-top:16px">
+        <label class="pill">
+          <input id="logScale" type="checkbox" checked style="accent-color:#5d97ff">
+          Escala log₁₀
+        </label>
+        <label class="pill">
+          <input id="roundIntegers" type="checkbox" style="accent-color:#5d97ff" checked>
+          Redondear a enteros
+        </label>
+        <div class="fill"></div>
+        <button id="btnCalc" title="Recalcular">Recalcular</button>
+        <button id="btnExport" class="ghost" title="Exportar PNG">Exportar PNG</button>
+      </div>
+
+      <details>
+        <summary>Características comparativas</summary>
+        <div class="comparison-box">
+          <h4>Algoritmos Genéticos</h4>
+          <ul>
+            <li>Representación: vectores/cadenas de longitud fija.</li>
+            <li>Espacio: finito y completamente enumerable.</li>
+            <li>Crecimiento: exponencial simple (α^n).</li>
+            <li>Vecindad: local y continua.</li>
+            <li>Cambios: efecto cuasi lineal en fitness.</li>
+          </ul>
+        </div>
+        <div class="comparison-box">
+          <h4>Programación Genética</h4>
+          <ul>
+            <li>Representación: árboles de longitud variable.</li>
+            <li>Espacio: potencialmente infinito (sin límite de d).</li>
+            <li>Crecimiento: super‑exponencial recursivo.</li>
+            <li>Vecindad: compleja y discontinua (cambios estructurales).</li>
+            <li>Cambios: efecto no lineal, semántica global.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <!-- Visualización -->
+    <section class="card" aria-label="Visualización">
+      <h2>Visualización Comparativa del Crecimiento</h2>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch swatch-ag"></span><span>Algoritmos Genéticos (AG)</span></div>
+        <div class="legend-item"><span class="legend-swatch swatch-pg"></span><span>Programación Genética (PG)</span></div>
+        <span class="badge" id="badgeRange"></span>
+      </div>
+      <canvas id="chart" width="1200" height="480" aria-label="Gráfico comparativo"></canvas>
+      <div class="row" style="margin-top:10px">
+        <span class="note">Escala: <span id="scaleMode">logarítmica (log₁₀)</span></span>
+        <div class="fill"></div>
+        <span class="note">PG crece mucho más rápido que AG.</span>
+      </div>
+
+      <div style="margin-top:14px">
+        <h3>Tabla de Comparación</h3>
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Paso / Profundidad</th>
+              <th>AG (N_AG)</th>
+              <th>PG (N_PG)</th>
+              <th>Ratio PG/AG</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="comparison-box" style="margin-top:16px">
+        <h4>Conclusión práctica</h4>
+        <div class="note" style="margin-top:6px">
+          Mientras los AG exploran un <strong>campo finito</strong> de soluciones (α^n), la PG intenta navegar una <strong>selva fractal</strong> donde cada nueva capa de profundidad multiplica exponencialmente las especies de árboles (programas) posibles. Esto explica el <em>bloat</em>, la convergencia prematura y la rugosidad extrema del paisaje de aptitud en PG.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Material elaborado por el profesor Sergio Gevatschnaider · Este simulador compara el crecimiento combinatorio de espacios de búsqueda en computación evolutiva.
+  </footer>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // AG controls
+    const agBits = $('agBits');
+    const agAlphabet = $('agAlphabet');
+
+    // PG controls
+    const pgTerminals = $('pgTerminals');
+    const pgFunctions = $('pgFunctions');
+    const pgArity = $('pgArity');
+    const pgDepth = $('pgDepth');
+
+    // UI controls
+    const logScale = $('logScale');
+    const roundIntegers = $('roundIntegers');
+    const btnCalc = $('btnCalc');
+    const btnExport = $('btnExport');
+    const scaleMode = $('scaleMode');
+    const badgeRange = $('badgeRange');
+
+    // Canvas
+    const canvas = $('chart');
+    const ctx = canvas.getContext('2d');
+
+    function clampNum(v, min, max){ v = +v; if(!Number.isFinite(v)) return min; return Math.min(Math.max(v, min), max); }
+
+    function computeAG(alpha, n){
+      const series = [];
+      for(let i = 0; i <= n; i++){
+        let val = Math.pow(alpha, i);
+        if(!Number.isFinite(val)) val = Number.POSITIVE_INFINITY;
+        series.push({ step:i, N: val });
+      }
+      return series;
+    }
+
+    function computePG(T, F, k, D, doRound){
+      const series = [];
+      let prev = T; // N(0)
+      series.push({ step:0, N: doRound ? Math.round(prev) : prev });
+      for(let d = 1; d <= D; d++){
+        let Nd = T + F * Math.pow(prev, k);
+        if(!Number.isFinite(Nd)) Nd = Number.POSITIVE_INFINITY;
+        series.push({ step:d, N: doRound ? Math.round(Nd) : Nd });
+        prev = Nd;
+      }
+      return series;
+    }
+
+    function niceNumber(x){
+      if(!Number.isFinite(x)) return '∞';
+      if(x === 0) return '0';
+      if(Math.abs(x) >= 1e12) return x.toExponential(2);
+      if(Math.abs(x) >= 1e9) return (x/1e9).toFixed(2) + 'B';
+      if(Math.abs(x) >= 1e6) return (x/1e6).toFixed(2) + 'M';
+      if(Math.abs(x) >= 1e3) return (x/1e3).toFixed(2) + 'K';
+      return x.toLocaleString('es-AR', {maximumFractionDigits: 0});
+    }
+
+    function updateTable(agSeries, pgSeries){
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML = '';
+      const maxLen = Math.max(agSeries.length, pgSeries.length);
+      for(let i = 0; i < maxLen; i++){
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td'); td1.textContent = i;
+        const td2 = document.createElement('td'); td2.textContent = i < agSeries.length ? niceNumber(agSeries[i].N) : '-';
+        const td3 = document.createElement('td'); td3.textContent = i < pgSeries.length ? niceNumber(pgSeries[i].N) : '-';
+        const td4 = document.createElement('td');
+        if(i < agSeries.length && i < pgSeries.length && agSeries[i].N > 0 && Number.isFinite(pgSeries[i].N)){
+          const ratio = pgSeries[i].N / agSeries[i].N;
+          td4.textContent = Number.isFinite(ratio) ? (ratio >= 1e6 ? ratio.toExponential(2)+'x' : ratio.toFixed(2)+'x') : '∞';
+          if(Number.isFinite(ratio) && ratio > 1e3) td4.style.color = 'var(--warn)';
+        } else {
+          td4.textContent = '-';
+        }
+        tr.append(td1,td2,td3,td4); tbody.appendChild(tr);
+      }
+    }
+
+    function drawAxes(padL, padR, padT, padB, plotW, plotH, yMax, useLog){
+      // Background
+      ctx.fillStyle = '#0f1520'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      // Grid
+      ctx.strokeStyle = '#182233'; ctx.lineWidth = 1; const hTicks=10;
+      for(let i=0;i<=hTicks;i++){ const y = padT + (plotH*i/hTicks); ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(canvas.width-padR,y); ctx.stroke(); }
+      // Axes
+      ctx.strokeStyle = '#223049'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,canvas.height-padB); ctx.lineTo(canvas.width-padR,canvas.height-padB); ctx.stroke();
+      // Y labels
+      ctx.fillStyle = '#9fb3c8'; ctx.font = '11px system-ui'; ctx.textAlign='right'; ctx.textBaseline='middle';
+      const tickCount = 6;
+      for(let i=0;i<=tickCount;i++){
+        const frac = i/tickCount; let label=''; let y;
+        if(useLog){ const exp = Math.round(yMax * frac); label = exp===0 ? '1' : `10^${exp}`; y = padT + (1 - (exp/yMax)) * plotH; }
+        else { const val = yMax * frac; label = niceNumber(val); y = padT + (1-frac)*plotH; }
+        ctx.fillText(label, padL-8, y);
+      }
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    }
+
+    function drawSeriesLine(series, colorTop, colorBottom, padL, padR, padT, padB, plotW, plotH, maxStep, yMax, useLog){
+      const xForStep = s => padL + (plotW) * (s / (maxStep||1));
+      const yFromVal = v => {
+        if(useLog){ const yVal = (v>0 && Number.isFinite(v)) ? Math.log10(v) : 0; return padT + (1 - (yVal / yMax)) * plotH; }
+        return padT + (1 - (Number.isFinite(v)? (v/yMax):1)) * plotH;
+      };
+      const grad = ctx.createLinearGradient(padL, padT, padL, canvas.height - padB);
+      grad.addColorStop(0, colorTop); grad.addColorStop(1, colorBottom);
+      ctx.strokeStyle = grad; ctx.lineWidth = 2.5; ctx.beginPath();
+      series.forEach((s,i)=>{ const x=xForStep(s.step); const y=yFromVal(s.N); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+      ctx.stroke();
+      // points
+      ctx.fillStyle = colorBottom;
+      series.forEach(s=>{ const x=xForStep(s.step); const y=yFromVal(s.N); ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); });
+      return {xForStep, yFromVal};
+    }
+
+    function drawChart(agSeries, pgSeries, useLog){
+      const W = canvas.width, H = canvas.height;
+      const padL = 70, padR = 24, padT = 24, padB = 48;
+      const plotW = W - padL - padR; const plotH = H - padT - padB;
+
+      const allValues = [...agSeries, ...pgSeries].map(s=>s.N).filter(Number.isFinite);
+      let yMax = allValues.length ? Math.max(...allValues) : 1;
+      if(useLog){ const logs = allValues.filter(v=>v>0).map(v=>Math.log10(v)).filter(Number.isFinite); yMax = logs.length ? Math.max(...logs) : 1; if(yMax<=0) yMax=1; }
+
+      drawAxes(padL,padR,padT,padB,plotW,plotH,yMax,useLog);
+
+      const maxStep = Math.max(agSeries[agSeries.length-1].step, pgSeries[pgSeries.length-1].step);
+
+      const agDraw = drawSeriesLine(agSeries, getComputedStyle(document.documentElement).getPropertyValue('--accent-ag').trim(), getComputedStyle(document.documentElement).getPropertyValue('--accent-ag-dark').trim(), padL,padR,padT,padB,plotW,plotH,maxStep,yMax,useLog);
+      const pgDraw = drawSeriesLine(pgSeries, getComputedStyle(document.documentElement).getPropertyValue('--accent-pg').trim(), getComputedStyle(document.documentElement).getPropertyValue('--accent-pg-dark').trim(), padL,padR,padT,padB,plotW,plotH,maxStep,yMax,useLog);
+
+      // Tooltip interaction
+      canvas.onmousemove = (ev)=>{
+        const rect = canvas.getBoundingClientRect();
+        const mx = (ev.clientX-rect.left)*(canvas.width/rect.width);
+        const my = (ev.clientY-rect.top)*(canvas.height/rect.height);
+        drawChart.base(agSeries, pgSeries, useLog);
+        const candidates = [];
+        function collect(series, mapper){ series.forEach(s=>{ const x = mapper.xForStep(s.step); const y = mapper.yFromVal(s.N); candidates.push({label:series===agSeries?'AG':'PG', step:s.step, val:s.N, x,y}); }); }
+        collect(agSeries, agDraw); collect(pgSeries, pgDraw);
+        let best=null, bestDist=1e9; candidates.forEach(p=>{ const d = Math.hypot(p.x-mx, p.y-my); if(d<bestDist){best=p; bestDist=d;} });
+        if(best && bestDist<20){ ctx.save(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(best.x,best.y,4,0,Math.PI*2); ctx.fill(); ctx.restore();
+          const text = `${best.label}  step=${best.step}  N=${niceNumber(best.val)}`;
+          tooltip(mx+12, my-16, text);
+        }
+      };
+      canvas.onmouseleave = ()=> drawChart(agSeries, pgSeries, useLog);
+      drawChart.base = (a,p,u)=> drawChart(a,p,u);
+
+      function tooltip(x,y,text){
+        ctx.font='12px system-ui'; const pad=8; const lines = [text]; let w = lines.reduce((m,ln)=>Math.max(m, ctx.measureText(ln).width), 0); const h = lines.length*16 + pad*2 - 4;
+        if(x+w+pad*2>W-6) x = W-w-pad*2-6; if(y<24) y = 24;
+        ctx.fillStyle='rgba(13,19,30,.95)'; ctx.strokeStyle='#335a96'; ctx.lineWidth=1; roundRect(x,y,w+pad*2,h,8); ctx.fill(); ctx.stroke(); ctx.fillStyle='#eaf2ff'; ctx.fillText(lines[0], x+pad, y+pad+11);
+      }
+      function roundRect(x,y,w,h,r){ if(w<2*r) r=w/2; if(h<2*r) r=h/2; ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    }
+
+    function recalc(){
+      const alpha = clampNum(agAlphabet.value, 2, 1e6);
+      const n = clampNum(agBits.value, 1, 200);
+      const T = clampNum(pgTerminals.value, 1, 1e6);
+      const F = clampNum(pgFunctions.value, 1, 1e6);
+      const k = clampNum(pgArity.value, 0.1, 50);
+      const D = clampNum(pgDepth.value, 0, 50);
+      const useLog = !!logScale.checked;
+      const doRound = !!roundIntegers.checked;
+
+      const agSeries = computeAG(alpha, Math.max(n, D)); // asegurar rango comparable en eje X
+      const pgSeries = computePG(T, F, k, D, doRound);
+
+      badgeRange.textContent = `AG pasos: 0…${n} · PG profundidad: 0…${D}`;
+      drawChart(agSeries, pgSeries, useLog);
+      updateTable(agSeries.slice(0, D+1), pgSeries); // tabla alineada 0..D
+      scaleMode.textContent = useLog ? 'logarítmica (log₁₀)' : 'lineal';
+    }
+
+    btnCalc.addEventListener('click', recalc);
+    [agBits, agAlphabet, pgTerminals, pgFunctions, pgArity, pgDepth, logScale, roundIntegers].forEach(e=> e.addEventListener('input', recalc));
+
+    btnExport.addEventListener('click', ()=>{
+      const link = document.createElement('a');
+      link.download = 'comparacion_ag_pg.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Primer render
+    recalc();
+  </script>
+</body>
+</html>
