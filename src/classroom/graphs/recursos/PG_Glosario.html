@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glosario de Programación Genética</title>
+    <style>
+        /* --- VARIABLES DE TEMA --- */
+        :root {
+            --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-primary-light: #1c1e21;
+            --text-secondary-light: #4A5568;
+            --bg-secondary-light: rgba(255, 255, 255, 0.7);
+            --border-light: #d1d9e6;
+            --accent-light: #2b6cb0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+
+            --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --bg-secondary-dark: rgba(30, 41, 59, 0.7);
+            --border-dark: #334155;
+            --accent-dark: #60a5fa;
+            --shadow-color-dark: rgba(0, 0, 0, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.8;
+            overflow-x: hidden;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        body.light-theme {
+            background: var(--bg-primary-light);
+            color: var(--text-primary-light);
+        }
+
+        body.dark-theme {
+            background: var(--bg-primary-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 1rem auto;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 16px 40px var(--shadow-color);
+            border: 1px solid;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: background-color 0.4s, border-color 0.4s, box-shadow 0.4s;
+        }
+
+        body.light-theme .container {
+            background-color: var(--bg-secondary-light);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 16px 40px var(--shadow-color);
+        }
+
+        body.dark-theme .container {
+            background-color: var(--bg-secondary-dark);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 16px 40px var(--shadow-color-dark);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 0.75rem;
+            font-size: 2.4rem;
+            background: linear-gradient(45deg, var(--accent-light), #3182ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.dark-theme h1 {
+            background: linear-gradient(45deg, var(--accent-dark), #93c5fd);
+            -webkit-background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.05rem;
+            margin-bottom: 2.2rem;
+            color: var(--text-secondary-light);
+        }
+
+        body.dark-theme .subtitle {
+            color: var(--text-secondary-dark);
+        }
+
+        /* --- CONTROLES Y PROGRESO --- */
+        .controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            padding: 0.8rem 1.2rem;
+            border-radius: 25px;
+            border: 1px solid var(--border-light);
+            background-color: var(--bg-secondary-light);
+            transition: all 0.3s ease;
+            min-width: 280px;
+            font-size: 0.98rem;
+        }
+
+        body.dark-theme .search-box {
+            background-color: var(--bg-secondary-dark);
+            border-color: var(--border-dark);
+            color: var(--text-primary-dark);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent-light);
+            box-shadow: 0 0 12px rgba(43, 108, 176, 0.35);
+        }
+
+        body.dark-theme .search-box:focus {
+            border-color: var(--accent-dark);
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.35);
+        }
+
+        .progress-container {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+
+        body.dark-theme .progress-container {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.12);
+        }
+
+        body.dark-theme .progress-bar {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            background: linear-gradient(90deg, var(--accent-light), #63b3ed);
+        }
+
+        body.dark-theme .progress-fill {
+            background: linear-gradient(90deg, var(--accent-dark), #bfdbfe);
+        }
+
+        .progress-text {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary-light);
+        }
+
+        body.dark-theme .progress-text {
+            color: var(--text-secondary-dark);
+        }
+
+        /* --- BOTONES --- */
+        .action-button {
+            padding: 0.8rem 1.6rem;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-theme .theme-button {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            color: #f7fafc;
+        }
+
+        body.dark-theme .theme-button {
+            background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+            color: #1a202c;
+        }
+
+        body.light-theme .random-button {
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: #f7fafc;
+        }
+
+        body.dark-theme .random-button {
+            background: linear-gradient(135deg, #60a5fa, #93c5fd);
+            color: #111827;
+        }
+
+        /* --- ÍTEMS DEL GLOSARIO --- */
+        .entry-item {
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .entry-item.reviewed {
+            border-left: 5px solid #48bb78;
+        }
+
+        .entry-term {
+            background-color: transparent;
+            cursor: pointer;
+            padding: 1rem 1.4rem;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-theme .entry-term {
+            color: var(--text-primary-dark);
+        }
+
+        .entry-term:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-theme .entry-term:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .entry-icon {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-light);
+            transition: transform 0.25s ease-out;
+        }
+
+        body.dark-theme .entry-icon {
+            color: var(--accent-dark);
+        }
+
+        .entry-term.active .entry-icon {
+            transform: rotate(90deg);
+        }
+
+        .entry-definition {
+            padding: 0 1.4rem;
+            max-height: 0;
+            overflow: hidden;
+            border-top: 1px solid transparent;
+            transition: max-height 0.45s ease-in-out, padding 0.45s ease-in-out, border-color 0.3s ease;
+        }
+
+        .entry-definition.active {
+            padding: 1.4rem;
+            border-top-color: var(--border-light);
+        }
+
+        body.dark-theme .entry-definition.active {
+            border-top-color: var(--border-dark);
+        }
+
+        p {
+            margin-top: 0;
+        }
+
+        strong {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        body.dark-theme strong {
+            color: var(--accent-dark);
+        }
+
+        .review-button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.45rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #48bb78;
+            color: #48bb78;
+            background: transparent;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .review-button:hover,
+        .review-button.reviewed {
+            background-color: #48bb78;
+            color: #f7fafc;
+        }
+
+        /* --- BURBUJAS DE FONDO --- */
+        .bubble {
+            position: fixed;
+            bottom: -150px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -10;
+            opacity: 0;
+            animation: rise 25s infinite ease-in-out;
+        }
+
+        body.light-theme .bubble {
+            background-color: rgba(43, 108, 176, 0.12);
+        }
+
+        body.dark-theme .bubble {
+            background-color: rgba(96, 165, 250, 0.09);
+        }
+
+        @keyframes rise {
+            0%   { transform: translateY(0) scale(1);   opacity: 0;   }
+            10%  { opacity: 0.8; }
+            50%  { transform: translateY(-50vh) scale(1.2); }
+            90%  { opacity: 0.4; }
+            100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        body.dark-theme footer {
+            color: var(--text-secondary-dark);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1.2rem;
+            }
+            .container {
+                padding: 1.6rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <h1>Glosario de Programación Genética</h1>
+        <p class="subtitle">
+            Recurso interactivo para repasar y dominar los conceptos clave de Programación Genética, 
+            desde la estructura del espacio de búsqueda hasta AlphaEvolve y el descubrimiento de algoritmos.
+        </p>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">
+                Progreso: 0% – 0/0 términos revisados
+            </div>
+        </div>
+
+        <div class="controls-container">
+            <button class="action-button theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+            <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar término o concepto...">
+            <button class="action-button random-button" id="random-entry-btn">🎲 Término aleatorio</button>
+        </div>
+    </div>
+
+    <div class="container" id="entries-container">
+        <!-- Entradas del glosario generadas dinámicamente -->
+    </div>
+
+    <footer>
+        <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const entries = [
+                {
+                    term: "Programación Genética (PG)",
+                    definition: `
+                        <p>
+                            La <strong>Programación Genética</strong> es una técnica de computación evolutiva que no se limita a ajustar parámetros dentro de un modelo predefinido, 
+                            sino que directamente evoluciona programas completos. En lugar de trabajar con cromosomas binarios o vectores numéricos, la PG utiliza estructuras de datos 
+                            que representan código, generalmente en forma de árboles sintácticos. Cada individuo en la población es un programa que puede ser ejecutado, evaluado y 
+                            comparado con otros según una función de fitness.
+                        </p>
+                        <p>
+                            A través de operadores inspirados en la evolución biológica —selección, crossover, mutación—, la PG explora automáticamente un espacio inmenso de posibles soluciones, 
+                            buscando no solo valores óptimos, sino también estructuras algorítmicas novedosas. Esta capacidad la convierte en una herramienta especialmente potente para problemas 
+                            donde no se conoce de antemano la forma del modelo o donde se desea que el sistema “invente” fórmulas, estrategias o algoritmos.
+                        </p>
+                    `
+                },
+                {
+                    term: "Espacio de búsqueda en PG",
+                    definition: `
+                        <p>
+                            El <strong>espacio de búsqueda</strong> en Programación Genética es el conjunto de todos los programas que pueden construirse con el lenguaje evolutivo disponible 
+                            (funciones, terminales y reglas sintácticas). A diferencia de los algoritmos genéticos clásicos, donde el espacio está formado por cadenas de longitud fija 
+                            y topología regular, en PG el espacio es enorme, dinámico y estructuralmente heterogéneo.
+                        </p>
+                        <p>
+                            Cada punto del espacio no es solo un vector de números, sino un árbol de programa con una estructura jerárquica propia. Esto implica que el espacio es, en la práctica, 
+                            infinito o casi infinito, con regiones muy densas y otras muy poco exploradas. Navegar este espacio requiere mecanismos que combinen variación aleatoria, recombinación 
+                            inteligente y selección basada en desempeño, ya que es imposible cubrirlo de forma exhaustiva.
+                        </p>
+                    `
+                },
+                {
+                    term: "Topología del espacio de búsqueda",
+                    definition: `
+                        <p>
+                            La <strong>topología del espacio de búsqueda</strong> describe cómo están organizadas y conectadas entre sí las soluciones posibles. En PG, esta topología es 
+                            radicalmente distinta de la que se obtiene en espacios vectoriales: cuando se modifica un programa, no solo cambian sus parámetros, sino también su forma interna.
+                        </p>
+                        <p>
+                            Dos programas pueden ser muy “cercanos” sintácticamente (por ejemplo, diferir en un solo subárbol) pero producir salidas completamente diferentes, lo que genera 
+                            paisajes de fitness altamente irregulares y a menudo discontinuos. Esta topología no es un hipercubo uniforme, sino una especie de selva de estructuras, donde la noción 
+                            de distancia es mucho más compleja y donde pequeñas mutaciones pueden generar grandes saltos semánticos. Entender esta topología es clave para diseñar operadores 
+                            evolutivos eficaces.
+                        </p>
+                    `
+                },
+                {
+                    term: "Representación en forma de árbol sintáctico",
+                    definition: `
+                        <p>
+                            En PG, los programas suelen representarse como <strong>árboles sintácticos</strong> en los que los nodos internos son funciones (como +, −, *, sin, if, etc.) y las hojas 
+                            son terminales (variables o constantes). Esta representación refleja la forma en que se construyen las expresiones en muchos lenguajes funcionales o en notación prefija.
+                        </p>
+                        <p>
+                            El árbol permite componer operaciones de manera jerárquica, de modo que cada subárbol corresponde a una subexpresión o “módulo” del programa global. Esta estructura es 
+                            extremadamente conveniente para la evolución, porque hace posible cortar, pegar y reemplazar subárboles completos, preservando la sintaxis del programa. Además, facilita la 
+                            visualización y el análisis de la complejidad, ya que atributos como profundidad, tamaño o aridad se pueden medir directamente sobre la estructura del árbol.
+                        </p>
+                    `
+                },
+                {
+                    term: "Conjunto de funciones (F-set)",
+                    definition: `
+                        <p>
+                            El <strong>F-set</strong> es el conjunto de funciones u operadores que la PG puede utilizar como nodos internos del árbol. Incluye elementos como sumas, restas, multiplicaciones, 
+                            divisiones protegidas, funciones trigonométricas, operadores lógicos o condicionales, según el problema específico.
+                        </p>
+                        <p>
+                            La elección del F-set define el “vocabulario operativo” del lenguaje evolutivo: si es muy limitado, la PG no podrá expresar soluciones complejas; si es demasiado rico, el espacio de búsqueda 
+                            se dispara y se vuelve más difícil encontrar programas útiles. Diseñar un F-set adecuado implica conocer bien el dominio del problema y decidir qué operaciones son necesarias, cuáles son 
+                            redundantes y cuáles podrían introducir ruido o complejidad innecesaria.
+                        </p>
+                    `
+                },
+                {
+                    term: "Conjunto de terminales (T-set)",
+                    definition: `
+                        <p>
+                            El <strong>T-set</strong> está formado por los elementos que pueden aparecer como hojas del árbol: variables de entrada, constantes numéricas, símbolos especiales o incluso funciones sin argumentos 
+                            (cero-arias). Su papel es fundamental porque determina con qué “materia prima” trabaja la PG para construir las expresiones.
+                        </p>
+                        <p>
+                            Si el T-set es excesivamente pobre, la PG tendrá dificultades para expresar relaciones ricas; si, por el contrario, incluye demasiadas constantes arbitrarias, el espacio se volverá demasiado disperso. 
+                            La interacción entre F-set y T-set define el lenguaje evolutivo completo: funciones que operan sobre terminales para producir programas funcionales.
+                        </p>
+                    `
+                },
+                {
+                    term: "Función de fitness",
+                    definition: `
+                        <p>
+                            La <strong>función de fitness</strong> es el criterio con el que se evalúa la calidad de cada programa. Es el “juez” que decide qué individuos son preferibles dentro de la población. 
+                            En Programación Genética, el fitness se define a partir del problema concreto: puede ser el error cuadrático medio en una tarea de regresión, el porcentaje de aciertos en un problema de clasificación, 
+                            la cantidad de tests de software superados en reparación automática o cualquier métrica que mida el desempeño deseado.
+                        </p>
+                        <p>
+                            La función de fitness transforma el comportamiento de un programa en un valor numérico que guía la selección evolutiva. Un diseño inapropiado del fitness puede conducir a soluciones engañosas, 
+                            sobreajuste o estancamiento evolutivo, mientras que un buen diseño canaliza la exploración hacia regiones del espacio de búsqueda donde existen soluciones útiles y generalizables.
+                        </p>
+                    `
+                },
+                {
+                    term: "Selección evolutiva (torneo, ruleta, etc.)",
+                    definition: `
+                        <p>
+                            La <strong>selección evolutiva</strong> es el mecanismo que decide qué individuos “se reproducen” y cuáles desaparecen de la población. En PG, suelen utilizarse esquemas como selección por torneo, 
+                            donde se elige al mejor de un subconjunto al azar, o selección proporcional al fitness, donde la probabilidad de ser elegido está vinculada a la calidad del individuo.
+                        </p>
+                        <p>
+                            La selección actúa como una presión que empuja a la población hacia programas de mayor desempeño, pero si es demasiado intensa puede reducir drásticamente la diversidad y llevar a la convergencia 
+                            prematura. Por el contrario, una selección demasiado débil puede hacer que la evolución avance muy lentamente. El equilibrio entre presión selectiva y diversidad es crucial para mantener un proceso 
+                            evolutivo eficiente y creativo.
+                        </p>
+                    `
+                },
+                {
+                    term: "Crossover de subárboles",
+                    definition: `
+                        <p>
+                            El <strong>crossover de subárboles</strong> es el operador de recombinación típico de la PG. Dado un par de programas (dos árboles), se elige un nodo en el primero y un nodo en el segundo, 
+                            y se intercambian las ramas completas que cuelgan de esos nodos. El resultado son descendientes que combinan partes de la lógica de ambos padres.
+                        </p>
+                        <p>
+                            Este operador es especialmente poderoso porque no modifica simples bits, sino bloques estructurados de código con significado funcional. De esta manera, módulos útiles que han emergido en un individuo 
+                            pueden transferirse a otro, y la evolución puede producir programas cada vez más sofisticados a partir de la recombinación de “ideas parciales” ya descubiertas.
+                        </p>
+                    `
+                },
+                {
+                    term: "Mutación puntual",
+                    definition: `
+                        <p>
+                            La <strong>mutación puntual</strong> consiste en modificar un elemento pequeño del árbol, por ejemplo cambiar un operador por otro compatible (sustituir “+” por “*”) o alterar el valor de una constante. 
+                            Es un operador que introduce variaciones locales de baja intensidad, análogas a pequeños ajustes en un algoritmo clásico.
+                        </p>
+                        <p>
+                            Su función principal es explorar el entorno inmediato de una solución y refinar estructuras ya prometedoras. Una tasa de mutación puntual demasiado baja puede generar poblaciones “rígidas” que no exploran 
+                            alternativas cercanas, mientras que una tasa excesiva puede convertir la evolución en un proceso casi aleatorio.
+                        </p>
+                    `
+                },
+                {
+                    term: "Mutación por reemplazo de subárbol",
+                    definition: `
+                        <p>
+                            La <strong>mutación por reemplazo de subárbol</strong> afecta una parte completa del programa. Se selecciona una rama del árbol y se sustituye por un subárbol nuevo, generado aleatoriamente según el lenguaje 
+                            evolutivo. Esta operación es mucho más disruptiva: puede cambiar radicalmente el comportamiento del programa, introduciendo nuevas combinaciones de funciones y terminales.
+                        </p>
+                        <p>
+                            Su papel es facilitar “saltos” en el espacio de búsqueda, alejando a la población de soluciones que han quedado atrapadas en óptimos locales. No obstante, justamente por su carácter drástico, debe usarse con cuidado: 
+                            demasiadas mutaciones profundas pueden destruir sistemáticamente estructuras valiosas antes de que la selección alcance a consolidarlas.
+                        </p>
+                    `
+                },
+                {
+                    term: "Mutación restringida por aridad",
+                    definition: `
+                        <p>
+                            La <strong>mutación restringida por aridad</strong> es una variante que cuida la coherencia estructural del árbol. En lugar de reemplazar un nodo por cualquier otro, se exige que el nuevo operador tenga la misma 
+                            aridad que el anterior, es decir, que espere el mismo número de argumentos.
+                        </p>
+                        <p>
+                            De esta forma, la estructura general del árbol se conserva y se evita introducir nodos que rompan la sintaxis o que requieran reconfigurar el árbol completo. Esta restricción ayuda a mantener la estabilidad de la 
+                            población y reduce el riesgo de generar programas inválidos o excesivamente deformados, al tiempo que sigue proporcionando variación evolutiva significativa.
+                        </p>
+                    `
+                },
+                {
+                    term: "Bloat",
+                    definition: `
+                        <p>
+                            El <strong>bloat</strong> es el término que designa el crecimiento descontrolado del tamaño de los programas durante la evolución. En PG, es frecuente observar que los árboles se vuelven cada vez más grandes, 
+                            con ramas largas y subárboles que, en muchos casos, no contribuyen al resultado final.
+                        </p>
+                        <p>
+                            Este fenómeno tiene varias causas: la neutralidad semántica (código que no cambia la salida), la mayor robustez de individuos grandes frente a mutaciones, el sesgo estadístico del crossover y la acumulación de 
+                            estructuras “decorativas”. El problema del bloat no es solo estético: programas excesivamente grandes son más costosos de evaluar, más difíciles de interpretar y más propensos al sobreajuste.
+                        </p>
+                    `
+                },
+                {
+                    term: "Parsimonia",
+                    definition: `
+                        <p>
+                            La <strong>parsimonia</strong> es el principio según el cual, dadas dos soluciones con desempeño similar, debe preferirse la más simple. En el contexto de PG, este principio se implementa mediante una penalización al 
+                            tamaño del programa dentro de la función de fitness.
+                        </p>
+                        <p>
+                            Al restar una cantidad proporcional al número de nodos o a la profundidad del árbol, se desincentiva la proliferación de estructuras innecesarias y se fomenta la emergencia de soluciones compactas y elegantes. 
+                            La parsimonia mejora la interpretabilidad y la generalización, pero debe aplicarse con moderación para no asfixiar la creatividad estructural.
+                        </p>
+                    `
+                },
+                {
+                    term: "Regresión simbólica",
+                    definition: `
+                        <p>
+                            La <strong>regresión simbólica</strong> es una de las aplicaciones clásicas de la PG. Consiste en buscar una expresión matemática que describa la relación entre una o varias variables de entrada y una variable de salida, 
+                            sin imponer una forma funcional previa (como “lineal”, “polinómica de grado 2”, etc.).
+                        </p>
+                        <p>
+                            La PG explora un espacio de expresiones posibles —combinando operadores del F-set y terminales del T-set— y evalúa cada una según qué tan bien ajusta los datos observados. A diferencia de la regresión tradicional, donde se 
+                            ajustan parámetros de un modelo fijo, la regresión simbólica permite descubrir fórmulas completamente nuevas, potencialmente interpretables y cercanas a leyes o patrones subyacentes.
+                        </p>
+                    `
+                },
+                {
+                    term: "Reparación automática de software con PG",
+                    definition: `
+                        <p>
+                            La <strong>reparación automática de software</strong> utiliza Programación Genética para generar parches que corrigen errores en programas existentes. En lugar de que un humano analice el código y descubra la causa del fallo, 
+                            la PG propone variaciones del programa, las ejecuta contra un conjunto de tests y mantiene aquellas versiones que corrigen los errores sin introducir nuevas fallas.
+                        </p>
+                        <p>
+                            Cada individuo es una versión modificada del código original; la función de fitness se define, por ejemplo, como el número de tests superados. A través de muchas generaciones, la PG puede encontrar correcciones no triviales, 
+                            a veces incluso más elegantes que las soluciones intuitivas.
+                        </p>
+                    `
+                },
+                {
+                    term: "Neutralidad en el paisaje de fitness",
+                    definition: `
+                        <p>
+                            La <strong>neutralidad</strong> aparece cuando diferentes programas producen resultados prácticamente idénticos según la métrica de fitness. Esto genera zonas planas en el paisaje de evaluación, conocidas como plateaus, donde 
+                            múltiples individuos tienen el mismo nivel de desempeño.
+                        </p>
+                        <p>
+                            En esos espacios neutrales, la evolución puede desplazarse libremente sin mejora ni deterioro evidente, explorando variaciones sintácticas que no cambian la salida. Esta neutralidad facilita la deriva hacia estructuras más grandes 
+                            sin presión en contra (y por eso contribuye al bloat), pero también puede servir como “puente evolutivo” hacia regiones del espacio donde aparecen soluciones mejores.
+                        </p>
+                    `
+                },
+                {
+                    term: "Generalización y sobreajuste en PG",
+                    definition: `
+                        <p>
+                            Al igual que en otros métodos de aprendizaje, la PG puede caer en el <strong>sobreajuste</strong>, es decir, en la creación de programas que se ajustan muy bien a los datos de entrenamiento pero fallan cuando se enfrentan a nuevos 
+                            ejemplos. Esto ocurre especialmente cuando los árboles se vuelven muy grandes y flexibles, capaces de memorizar particularidades del conjunto de entrenamiento.
+                        </p>
+                        <p>
+                            La <strong>generalización</strong>, en cambio, es la capacidad del programa para captar patrones reales y robustos del problema. Favorecerla implica usar datasets adecuados, incorporar parsimonia, limitar la profundidad de los árboles, 
+                            utilizar validación cruzada o incluir penalizaciones específicas en la función de fitness. Los mecanismos que controlan el bloat suelen estar íntimamente ligados a la mejora de la capacidad de generalización.
+                        </p>
+                    `
+                },
+                {
+                    term: "AlphaEvolve y descubrimiento de algoritmos",
+                    definition: `
+                        <p>
+                            <strong>AlphaEvolve</strong> es un ejemplo moderno de sistema que combina ideas de Programación Genética con modelos de lenguaje y evaluación automatizada para descubrir algoritmos nuevos. A diferencia de un LLM que solo genera código 
+                            a partir de patrones aprendidos, AlphaEvolve integra un ciclo evolutivo: propone variantes de código, las ejecuta en tareas específicas, mide su desempeño y mantiene aquellas que muestran mejoras.
+                        </p>
+                        <p>
+                            Con el tiempo, puede producir soluciones que no están presentes en los datos de entrenamiento y que optimizan aspectos como velocidad, precisión o consumo de recursos. AlphaEvolve materializa la visión de la PG como herramienta de 
+                            invención algorítmica y muestra cómo la evolución de programas sigue siendo una línea de frontera en inteligencia artificial.
+                        </p>
+                    `
+                }
+            ];
+
+            const body = document.body;
+            const entriesContainer = document.getElementById('entries-container');
+            const searchInput = document.getElementById('search-input');
+            const themeToggle = document.getElementById('theme-toggle');
+            const randomBtn = document.getElementById('random-entry-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+
+            const reviewedEntries = new Set();
+
+            function renderEntries() {
+                entriesContainer.innerHTML = '';
+                entries.forEach((entry, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'entry-item';
+
+                    item.innerHTML = `
+                        <button class="entry-term">
+                            <span>${entry.term}</span>
+                            <span class="entry-icon">›</span>
+                        </button>
+                        <div class="entry-definition">
+                            ${entry.definition}
+                            <button class="review-button" data-index="${index}">Marcar como revisado</button>
+                        </div>
+                    `;
+
+                    entriesContainer.appendChild(item);
+                });
+
+                attachEntryEvents();
+                updateProgress();
+            }
+
+            function attachEntryEvents() {
+                document.querySelectorAll('.entry-term').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const definition = button.nextElementSibling;
+                        button.classList.toggle('active');
+                        definition.classList.toggle('active');
+
+                        const icon = button.querySelector('.entry-icon');
+                        if (button.classList.contains('active')) {
+                            definition.style.maxHeight = definition.scrollHeight + 'px';
+                        } else {
+                            definition.style.maxHeight = null;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.review-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const index = e.target.dataset.index;
+                        const item = e.target.closest('.entry-item');
+
+                        if (reviewedEntries.has(index)) {
+                            reviewedEntries.delete(index);
+                            e.target.textContent = 'Marcar como revisado';
+                            e.target.classList.remove('reviewed');
+                            item.classList.remove('reviewed');
+                        } else {
+                            reviewedEntries.add(index);
+                            e.target.textContent = '✓ Revisado';
+                            e.target.classList.add('reviewed');
+                            item.classList.add('reviewed');
+                        }
+                        updateProgress();
+                    });
+                });
+            }
+
+            function updateProgress() {
+                const total = entries.length;
+                const reviewed = reviewedEntries.size;
+                const percentage = total > 0 ? Math.round((reviewed / total) * 100) : 0;
+
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = `Progreso: ${percentage}% – ${reviewed}/${total} términos revisados`;
+            }
+
+            function filterEntries() {
+                const term = searchInput.value.toLowerCase().trim();
+                const items = document.querySelectorAll('.entry-item');
+
+                items.forEach((item, index) => {
+                    const entry = entries[index];
+                    const text = (entry.term + ' ' + entry.definition).toLowerCase();
+                    item.style.display = text.includes(term) ? 'block' : 'none';
+                });
+            }
+
+            function showRandomEntry() {
+                const visibleItems = Array.from(document.querySelectorAll('.entry-item'))
+                    .filter(item => item.style.display !== 'none');
+
+                if (visibleItems.length === 0) return;
+
+                const randomItem = visibleItems[Math.floor(Math.random() * visibleItems.length)];
+                randomItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                const termBtn = randomItem.querySelector('.entry-term');
+                if (!termBtn.classList.contains('active')) {
+                    termBtn.click();
+                }
+            }
+
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.animationDuration = `${Math.random() * 12 + 16}s`;
+
+                body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 26000);
+            }
+
+            // Inicialización
+            renderEntries();
+            setInterval(createBubble, 700);
+
+            searchInput.addEventListener('input', filterEntries);
+
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.textContent = isDark ? '☀️ Cambiar a Tema Claro' : '🌙 Cambiar a Tema Oscuro';
+            });
+
+            randomBtn.addEventListener('click', showRandomEntry);
+        });
+    </script>
+</body>
+</html>
