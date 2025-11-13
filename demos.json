@@ -301,6 +301,13 @@
     "mtime": "2025-10-23T14:37:50-03:00"
   },
   {
+    "title": "Examen Interactivo de Programación Genética",
+    "path": "/src/classroom/graphs/recursos/PG_Preguntas_respuestas.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T19:06:05-03:00"
+  },
+  {
     "title": "Examen Interactivo de Teoría de Grafos",
     "path": "/src/classroom/graphs/recursos/Cuestionario.html",
     "tag": "Demo",
