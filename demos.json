@@ -56,6 +56,27 @@
     "mtime": "2025-10-25T18:36:16-03:00"
   },
   {
+    "title": "Análisis Técnico: Algoritmos Genéticos vs. Programación Genética",
+    "path": "/src/classroom/graphs/recursos/PG_Topologiadelespaciodebúsqueda.html.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
+    "title": "Árbol Fractal: Nodos que Abarcan Subnodos (SVG)",
+    "path": "/src/classroom/graphs/recursos/PG_Arbolfractalanidado.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
+    "title": "Árbol Fractal: Nodos que Abarcan Subnodos (SVG)",
+    "path": "/src/classroom/graphs/recursos/PG_modulo_de_dimension_fractal_para_tu_ga_del_teseracto_html_listo_para_pegar (4).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
     "title": "BAAI - Modelo Tripartito (Completo)",
     "path": "/src/classroom/graphs/recursos/ChinaBAAI_exposición.html",
     "tag": "Demo",
@@ -126,6 +147,13 @@
     "mtime": "2025-11-10T19:17:00-03:00"
   },
   {
+    "title": "Clase Interactiva: Programación Genética (PG)",
+    "path": "/src/classroom/graphs/recursos/PG_modulo_de_dimension_fractal_para_tu_ga_del_teseracto_html_listo_para_pegar (2).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
     "title": "Comparativa: Programación Genética vs. AlphaEvolve",
     "path": "/src/classroom/graphs/recursos/ProgramacionGenetica_El Salto Evolutivo Programación Genética Clásica vs. Agentes Modernos.html",
     "tag": "Demo",
@@ -187,6 +215,20 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-23T14:37:50-03:00"
+  },
+  {
+    "title": "Dimensión Fractal Efectiva — Plugin para GA (Teseracto 4D)",
+    "path": "/src/classroom/graphs/recursos/PG_modulo_de_dimension_fractal_para_tu_ga_del_teseracto_html_listo_para_pegar (1).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
+    "title": "Distancia Sintáctica vs. Distancia Semántica — Visualización Interactiva",
+    "path": "/src/classroom/graphs/recursos/PG_modulo_de_dimension_fractal_para_tu_ga_del_teseracto_html_listo_para_pegar (5).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
     "title": "Educación en IA - China | Evolución y Talento",
@@ -264,6 +306,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Flujo Evolutivo sobre el Hipercubo",
+    "path": "/src/classroom/graphs/recursos/PG_modulo_de_dimension_fractal_para_tu_ga_del_teseracto_html_listo_para_pegar (3).html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
     "title": "Genetic Maze Solver + Index",
@@ -670,6 +719,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Teseracto 4D + Algoritmo Genético en vivo",
+    "path": "/src/classroom/graphs/recursos/PG_hipercubogenetico.html.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
     "title": "Topología, Geometría y Algoritmos Evolutivos",
