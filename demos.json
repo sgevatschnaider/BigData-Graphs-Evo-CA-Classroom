@@ -350,6 +350,13 @@
     "mtime": "2025-10-26T19:32:18-03:00"
   },
   {
+    "title": "Glosario de Programación Genética",
+    "path": "/src/classroom/graphs/recursos/PG_Glosario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T19:23:08-03:00"
+  },
+  {
     "title": "Glosario de Pruebas de Conocimiento Cero (ZKP)",
     "path": "/src/classroom/graphs/recursos/ZPK_Glosario.html",
     "tag": "Demo",
