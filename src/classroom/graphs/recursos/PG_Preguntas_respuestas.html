@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Interactivo de Programación Genética</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN --- */
+        :root {
+            --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --text-primary-light: #1c1e21;
+            --text-secondary-light: #4A5568;
+            --bg-secondary-light: rgba(255, 255, 255, 0.7);
+            --border-light: #d1d9e6;
+            --accent-light: #2b6cb0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+
+            --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-primary-dark: #e2e8f0;
+            --text-secondary-dark: #94a3b8;
+            --bg-secondary-dark: rgba(30, 41, 59, 0.7);
+            --border-dark: #334155;
+            --accent-dark: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        body.light-theme { background: var(--bg-primary-light); color: var(--text-primary-light); }
+        body.dark-theme { background: var(--bg-primary-dark); color: var(--text-primary-dark); }
+        
+        .container {
+            max-width: 1000px;
+            margin: 1rem auto;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 16px 40px var(--shadow-color);
+            border: 1px solid;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: background-color 0.4s, border-color 0.4s;
+        }
+        body.light-theme .container { background-color: var(--bg-secondary-light); border-color: rgba(255, 255, 255, 0.5); }
+        body.dark-theme .container { background-color: var(--bg-secondary-dark); border-color: rgba(255, 255, 255, 0.1); }
+
+        h1 {
+            text-align: center; margin-bottom: 1rem; font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-light), #3182ce);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        body.dark-theme h1 { background: linear-gradient(45deg, var(--accent-dark), #93c5fd); -webkit-background-clip: text; }
+        .subtitle {
+            text-align: center; font-size: 1.1rem; margin-bottom: 2.5rem;
+            color: var(--text-secondary-light);
+        }
+        body.dark-theme .subtitle { color: var(--text-secondary-dark); }
+
+        /* --- CONTROLES Y PROGRESO --- */
+        .controls-container {
+            display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+            justify-content: center; align-items: center; padding: 1rem;
+        }
+        .search-box {
+            padding: 0.8rem 1.2rem; border-radius: 25px; border: 1px solid var(--border-light);
+            background-color: var(--bg-secondary-light); transition: all 0.3s ease; min-width: 300px;
+            font-size: 1rem;
+        }
+        body.dark-theme .search-box { background-color: var(--bg-secondary-dark); color: var(--text-primary-dark); border-color: var(--border-dark); }
+        .search-box:focus { outline: none; border-color: var(--accent-light); box-shadow: 0 0 12px rgba(43, 108, 176, 0.3); }
+        body.dark-theme .search-box:focus { border-color: var(--accent-dark); }
+        
+        .progress-container {
+            padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        body.dark-theme .progress-container { background-color: rgba(255, 255, 255, 0.05); }
+        .progress-bar { width: 100%; height: 10px; background-color: rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; }
+        body.dark-theme .progress-bar { background-color: rgba(255,255,255,0.1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-light), #63b3ed); width: 0%; transition: width 0.5s ease-in-out; }
+        body.dark-theme .progress-fill { background: linear-gradient(90deg, var(--accent-dark), #bee3f8); }
+        .progress-text { margin-top: 0.5rem; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary-light); }
+        body.dark-theme .progress-text { color: var(--text-secondary-dark); }
+
+        /* --- ACORDEÓN DE PREGUNTAS Y RESPUESTAS --- */
+        .qa-item { margin-bottom: 1rem; border-radius: 12px; transition: all 0.3s ease; }
+        .qa-item.mastered { border-left: 5px solid #48bb78; } /* Verde para dominado */
+        
+        .question {
+            background-color: transparent; cursor: pointer; padding: 1.2rem 1.5rem;
+            width: 100%; border: none; text-align: left; outline: none;
+            font-size: 1.1rem; transition: background-color 0.4s; border-radius: 12px;
+            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+        }
+        body.dark-theme .question { color: var(--text-primary-dark); }
+        .question:hover { background-color: rgba(0, 0, 0, 0.05); }
+        body.dark-theme .question:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        .question-icon { font-size: 1.5rem; font-weight: bold; transition: transform 0.3s ease-out; color: var(--accent-light); }
+        body.dark-theme .question-icon { color: var(--accent-dark); }
+        .question.active .question-icon { transform: rotate(45deg); }
+        
+        .answer {
+            padding: 0 1.5rem; max-height: 0; overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            border-top: 1px solid transparent;
+        }
+        .answer.active { padding: 1.5rem; border-top-color: var(--border-light); }
+        body.dark-theme .answer.active { border-top-color: var(--border-dark); }
+
+        code {
+            background-color: rgba(43, 108, 176, 0.1); color: var(--accent-light);
+            padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        body.dark-theme code { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-dark); }
+        strong { color: var(--accent-light); font-weight: 600; }
+        body.dark-theme strong { color: var(--accent-dark); }
+        ul, ol { padding-left: 20px; }
+
+        .mastery-button {
+            display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem;
+            border-radius: 20px; border: 1px solid #48bb78; color: #48bb78;
+            background: transparent; cursor: pointer; transition: all 0.3s; font-weight: 500;
+        }
+        .mastery-button:hover, .mastery-button.mastered { background-color: #48bb78; color: white; }
+
+        /* --- BOTONES DE ACCIÓN Y FOOTER --- */
+        .action-button {
+            padding: 0.8rem 1.8rem; border-radius: 25px; border: none;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--shadow-color); }
+        
+        body.light-theme .theme-button { background: linear-gradient(135deg, #333, #555); color: white; }
+        body.dark-theme .theme-button { background: linear-gradient(135deg, #f0f0f0, #d0d0d0); color: black; }
+
+        body.light-theme .random-button { background: linear-gradient(135deg, #2b6cb0, #3182ce); color: white; }
+        body.dark-theme .random-button { background: linear-gradient(135deg, #60a5fa, #93c5fd); color: black; }
+
+        footer { text-align: center; margin-top: 3rem; font-size: 0.9rem; color: #888; padding: 2rem 0; }
+        body.dark-theme footer { color: var(--text-secondary-dark); }
+
+        /* --- BURBUJAS AUTOMÁTICAS --- */
+        .bubble {
+            position: fixed; bottom: -150px; border-radius: 50%;
+            pointer-events: none; z-index: -10; opacity: 0;
+            animation: rise 25s infinite ease-in-out;
+        }
+        body.light-theme .bubble { background-color: rgba(43, 108, 176, 0.1); }
+        body.dark-theme .bubble { background-color: rgba(96, 165, 250, 0.08); }
+        
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translateY(-50vh) scale(1.2); }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <div class="container">
+        <h1>Examen Interactivo de Programación Genética</h1>
+        <p class="subtitle">
+            Pon a prueba tus conocimientos sobre Programación Genética, meta-programación evolutiva y agentes como AlphaEvolve con estas preguntas de nivel avanzado.
+        </p>
+        
+        <div class="progress-container">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">Dominio: 0% - 0/20 preguntas dominadas</div>
+        </div>
+        
+        <div class="controls-container">
+            <div class="controls">
+                <button class="action-button theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+                <input type="text" class="search-box" id="search-input" placeholder="🔍 Buscar pregunta o concepto...">
+                <button class="action-button random-button" id="random-question-btn">🎲 Pregunta Aleatoria</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="qa-container">
+        <!-- Las preguntas se insertarán aquí dinámicamente -->
+    </div>
+
+    <footer>
+        <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const questionsAndAnswers = [
+                {
+                    question: "1. ¿En qué se diferencia la topología del espacio de búsqueda en Programación Genética respecto de la de un algoritmo genético clásico?",
+                    answer: `
+                        <p>
+                            En los algoritmos genéticos tradicionales, el espacio de búsqueda suele tener una geometría simple y estable. 
+                            Todos los individuos comparten una representación fija, como vectores de bits o listas de valores numéricos, 
+                            lo que convierte el espacio en un hipercubo o en una estructura regular donde la distancia entre soluciones 
+                            está bien definida y se mantiene estable a lo largo de la evolución.
+                        </p>
+                        <p>
+                            En Programación Genética, en cambio, los individuos son <strong>árboles sintácticos</strong> cuya estructura, 
+                            profundidad y número de nodos cambian de generación en generación. El espacio de búsqueda deja de tener 
+                            dimensión fija y se vuelve un territorio de geometría irregular, vasto, fractal y heterogéneo, donde cada 
+                            modificación puede alterar no solo el valor del programa, sino también su forma. La PG opera así sobre un 
+                            espacio mucho más creativo y expresivo, pero también más difícil de explorar y controlar.
+                        </p>
+                    `
+                },
+                {
+                    question: "2. ¿Por qué la Programación Genética trabaja con espacios de dimensionalidad variable y cómo afecta esto la dinámica evolutiva?",
+                    answer: `
+                        <p>
+                            La Programación Genética utiliza representaciones basadas en árboles porque los programas reales no tienen 
+                            una estructura rígida: pueden crecer, simplificarse, dividirse en módulos o combinarse en nuevos bloques. 
+                            Cada individuo tiene una dimensionalidad efectiva que depende del número de nodos y de la profundidad del árbol, 
+                            de modo que la población contiene simultáneamente soluciones pequeñas y enormes.
+                        </p>
+                        <p>
+                            Esta dimensionalidad variable hace que la dinámica evolutiva sea mucho más flexible que en un algoritmo genético clásico, 
+                            ya que permite explorar soluciones sencillas y complejas dentro de la misma población. Sin embargo, también introduce 
+                            desafíos importantes: el espacio se vuelve más difícil de recorrer, aparecen regiones donde el tamaño crece rápidamente, 
+                            aumentan los costos de evaluación y se manifiestan fenómenos como el <em>bloat</em>. En síntesis, se gana capacidad expresiva, 
+                            pero se requiere una gestión cuidadosa de la complejidad para no sacrificar eficiencia.
+                        </p>
+                    `
+                },
+                {
+                    question: "3. ¿Qué implicancias tiene la representación de programas como árboles en la exploración del espacio de hipótesis?",
+                    answer: `
+                        <p>
+                            Cuando un programa se representa como un árbol, cada nodo se convierte en una unidad semántica coherente 
+                            (una función, una operación o un terminal) y cada subárbol pasa a funcionar como un módulo funcional completo. 
+                            Esto facilita la exploración evolutiva porque permite modificar partes enteras del programa sin afectar el resto, 
+                            favoreciendo la recombinación de comportamientos útiles entre individuos distintos.
+                        </p>
+                        <p>
+                            Además, los árboles permiten construir soluciones de forma jerárquica, imitando el estilo humano de programación, 
+                            donde se diseñan componentes pequeños que luego se componen en bloques mayores. Esta flexibilidad, sin embargo, 
+                            multiplica el tamaño del espacio de hipótesis y puede dar lugar a programas innecesariamente complejos. Por ello, 
+                            la representación en forma de árbol es simultáneamente la fuente de la potencia creativa de la PG y el origen de su 
+                            necesidad de mecanismos de regulación estructural.
+                        </p>
+                    `
+                },
+                {
+                    question: "4. ¿Cómo influye la profundidad máxima permitida en el árbol en el trade-off entre expresividad y sobreajuste?",
+                    answer: `
+                        <p>
+                            La profundidad máxima de los árboles determina cuán complejos pueden llegar a ser los programas que la PG es capaz de generar. 
+                            Si se permite una profundidad grande, la evolución podrá construir estructuras muy elaboradas, capaces de capturar patrones 
+                            sutiles y relaciones altamente no lineales, pero al mismo tiempo aumenta el riesgo de que estas soluciones terminen 
+                            memorizando el conjunto de entrenamiento y pierdan capacidad de generalización.
+                        </p>
+                        <p>
+                            Si, por el contrario, la profundidad se restringe demasiado, las soluciones resultarán más simples, más fáciles de evaluar 
+                            y más interpretables, pero tal vez incapaces de representar la complejidad del problema. La profundidad máxima actúa entonces 
+                            como un regulador entre expresividad y riesgo de sobreajuste: elegirla bien implica permitir suficiente riqueza estructural 
+                            sin darle libertad absoluta al crecimiento descontrolado de los programas.
+                        </p>
+                    `
+                },
+                {
+                    question: "5. ¿Qué es el bloat y por qué emerge incluso sin presión selectiva explícita?",
+                    answer: `
+                        <p>
+                            El <strong>bloat</strong> es el crecimiento desproporcionado del tamaño de los programas, un fenómeno que aparece 
+                            de manera natural en Programación Genética incluso cuando no hay presión selectiva explícita que lo favorezca. 
+                            Surgen muchas ramas que son semánticamente neutras, es decir, no modifican el resultado de la evaluación, por lo que 
+                            la selección no las penaliza directamente.
+                        </p>
+                        <p>
+                            Además, los individuos más grandes tienden a ser más robustos frente a mutaciones disruptivas, lo que les otorga 
+                            una ligera ventaja evolutiva, y el operador de <em>crossover</em> suele producir descendientes algo más grandes que sus padres. 
+                            La combinación de estos efectos induce una deriva hacia árboles más extensos que no necesariamente mejoran el desempeño. 
+                            Esto dificulta la comprensión de las soluciones, encarece la evaluación y puede empeorar la capacidad de generalización, 
+                            por lo que es fundamental contar con mecanismos para contener el bloat.
+                        </p>
+                    `
+                },
+                {
+                    question: "6. ¿Cómo actúa la parsimonia (λ) sobre la función de fitness y qué riesgos tiene aplicarla en exceso?",
+                    answer: `
+                        <p>
+                            La parsimonia se introduce en la función de <em>fitness</em> como un término de penalización proporcional al tamaño del programa. 
+                            De este modo, no solo importa qué tan bien resuelve el problema un individuo, sino también cuán grande es su árbol. 
+                            Programas demasiado extensos pueden ver reducida su aptitud frente a soluciones más compactas con desempeño equivalente, 
+                            lo que desalienta el crecimiento innecesario y favorece modelos simples y elegantes.
+                        </p>
+                        <p>
+                            Sin embargo, si el parámetro de parsimonia, habitualmente denotado por <strong>λ</strong>, es demasiado grande, 
+                            la presión por reducir el tamaño puede volverse dominante. En ese escenario, la evolución tenderá a favorecer programas 
+                            triviales que no poseen la complejidad necesaria para capturar la estructura del problema, bloqueando la exploración de 
+                            soluciones más ricas. La parsimonia es, por tanto, una herramienta poderosa que requiere calibración fina para equilibrar 
+                            simplicidad y capacidad explicativa.
+                        </p>
+                    `
+                },
+                {
+                    question: "7. ¿En qué consiste el crossover de subárboles y por qué es un operador estructuralmente significativo?",
+                    answer: `
+                        <p>
+                            El <strong>crossover de subárboles</strong> consiste en seleccionar al azar un nodo en el árbol de un individuo 
+                            y otro nodo en el árbol de un segundo individuo, para luego intercambiar de forma simétrica los subárboles que 
+                            cuelgan de esos nodos. Así, las ramas completas de un programa pasan a insertarse dentro de la estructura del otro.
+                        </p>
+                        <p>
+                            Este operador es estructuralmente significativo porque no se limita a alterar valores puntuales, sino que 
+                            recombina módulos funcionales completos. De este modo, los descendientes pueden heredar comportamientos complejos 
+                            ya consolidados en sus progenitores, combinarlos entre sí y dar lugar a soluciones nuevas que serían muy difíciles 
+                            de alcanzar solo mediante mutaciones pequeñas. El crossover de subárboles actúa, en esencia, como motor de creatividad 
+                            evolutiva dentro de la Programación Genética.
+                        </p>
+                    `
+                },
+                {
+                    question: "8. ¿Cuál es la diferencia entre mutación puntual, mutación por reemplazo de subárbol y mutación restringida por aridad?",
+                    answer: `
+                        <p>
+                            La <strong>mutación puntual</strong> sustituye un nodo por otro nodo que cumple el mismo rol sintáctico: 
+                            por ejemplo, cambiar una suma por una multiplicación o modificar el valor de una constante. Es un operador de ajuste fino, 
+                            diseñado para explorar variaciones leves en el comportamiento del programa.
+                        </p>
+                        <p>
+                            La <strong>mutación por reemplazo de subárbol</strong> es mucho más drástica: reemplaza una rama completa del árbol por 
+                            un subárbol generado aleatoriamente, lo que puede transformar radicalmente la semántica del programa. 
+                            Finalmente, la <strong>mutación restringida por aridad</strong> se asegura de que el nuevo nodo tenga la misma cantidad 
+                            de hijos que el nodo original. Al respetar la aridad, la estructura sintáctica del árbol permanece válida, 
+                            evitando errores de tipo o de forma. En conjunto, estas variantes permiten combinar cambios suaves con saltos evolutivos 
+                            significativos sin romper la gramática del lenguaje.
+                        </p>
+                    `
+                },
+                {
+                    question: "9. ¿Por qué la Programación Genética puede considerarse una metodología de meta-programación evolutiva?",
+                    answer: `
+                        <p>
+                            La Programación Genética puede interpretarse como una forma de <strong>meta-programación evolutiva</strong> porque no solo 
+                            ajusta parámetros dentro de un modelo fijo, sino que modifica directamente el código de los programas. 
+                            El proceso evolutivo genera, evalúa, selecciona, recombina y muta estructuras sintácticas completas, 
+                            introduciendo nuevas funciones, reorganizando patrones lógicos y ensamblando módulos de manera novedosa.
+                        </p>
+                        <p>
+                            Desde esta perspectiva, la PG no se limita a optimizar una estructura dada, sino que <strong>evoluciona programas</strong> 
+                            que, a su vez, pueden generar o transformar otros programas. El sistema actúa en un nivel superior al del 
+                            aprendizaje paramétrico clásico, ocupando el rol de un programador colectivo guiado por la presión selectiva 
+                            y el desempeño medido sobre el problema.
+                        </p>
+                    `
+                },
+                {
+                    question: "10. ¿Qué papel cumplen el F-set y el T-set en la definición del lenguaje evolutivo?",
+                    answer: `
+                        <p>
+                            El <strong>F-set</strong> y el <strong>T-set</strong> constituyen los cimientos del lenguaje evolutivo en Programación Genética. 
+                            El F-set define el conjunto de funciones disponibles: operadores aritméticos, funciones trigonométricas, 
+                            condicionales, operadores lógicos y cualquier otro bloque funcional que se desee incorporar. 
+                            El T-set especifica los terminales, es decir, las variables de entrada, las constantes numéricas y, 
+                            eventualmente, otros símbolos de contexto.
+                        </p>
+                        <p>
+                            Juntos determinan el espacio expresivo del sistema: qué tipo de comportamientos pueden representarse y qué tan difícil 
+                            será encontrarlos. Un F-set y un T-set demasiado pobres limitan la capacidad para modelar fenómenos complejos; 
+                            un lenguaje excesivamente rico, en cambio, expande tanto el espacio de búsqueda que puede resultar inabordable. 
+                            Diseñar estos conjuntos es una decisión estratégica central, donde hay que equilibrar expresividad, relevancia 
+                            para el dominio y viabilidad computacional.
+                        </p>
+                    `
+                },
+                {
+                    question: "11. ¿Cómo evalúa la Programación Genética la corrección semántica de un programa cuando su sintaxis es válida pero su comportamiento es inesperado?",
+                    answer: `
+                        <p>
+                            En Programación Genética, la corrección semántica de un programa se evalúa exclusivamente a través de la 
+                            <strong>función de fitness</strong>. Aunque la sintaxis sea perfectamente válida, el programa puede producir resultados 
+                            erróneos, inestables o simplemente irrelevantes para el problema que se quiere resolver. 
+                            La manera de detectar esto no es inspeccionando el código, sino ejecutándolo.
+                        </p>
+                        <p>
+                            El programa se somete a un conjunto de pruebas, ejemplos o simulaciones y se cuantifica su desempeño con una métrica definida. 
+                            Si el comportamiento es inesperado o incorrecto, el valor de fitness será bajo y el individuo tendrá pocas probabilidades 
+                            de sobrevivir en la población. La PG es, por tanto, un sistema centrado en la semántica: lo decisivo no es cómo se ve 
+                            el programa, sino lo que hace frente a las tareas planteadas.
+                        </p>
+                    `
+                },
+                {
+                    question: "12. ¿Por qué la Programación Genética es especialmente efectiva en tareas como la reparación automática de software?",
+                    answer: `
+                        <p>
+                            La Programación Genética es especialmente útil en reparación automática de software porque puede trabajar 
+                            directamente sobre la sintaxis de un programa existente, introduciendo variaciones estructurales sin que el 
+                            desarrollador tenga que especificar manualmente cuál es el error. A partir de un conjunto de tests que capturan 
+                            el fallo, la PG genera múltiples candidatos de parche, modificando operadores, constantes o bloques completos de código.
+                        </p>
+                        <p>
+                            Cada variante se ejecuta contra los tests: las que no resuelven el error o rompen funcionalidades previas se descartan; 
+                            las que mejoran el comportamiento se retienen y se siguen refinando. Este ciclo convierte la reparación en un proceso 
+                            evolutivo guiado por evidencia empírica, capaz de explorar soluciones no obvias para humanos y de encontrar 
+                            correcciones que respetan el resto del comportamiento del sistema.
+                        </p>
+                    `
+                },
+                {
+                    question: "13. ¿Qué diferencia conceptual hay entre “ajustar parámetros” y “evolucionar estructuras programáticas”?",
+                    answer: `
+                        <p>
+                            <strong>Ajustar parámetros</strong> significa modificar valores dentro de una estructura fija: cambiar pesos en una red neuronal, 
+                            coeficientes en una fórmula o hiperparámetros en un modelo predefinido. La forma general del sistema permanece inalterada; 
+                            lo único que varía son los números que controlan su comportamiento.
+                        </p>
+                        <p>
+                            <strong>Evolucionar estructuras programáticas</strong> implica algo más radical: permitir que la forma misma del programa cambie. 
+                            Pueden aparecer nuevos módulos, desaparecer otros, reorganizarse ramas completas del árbol y combinarse patrones 
+                            de manera creativa. La diferencia conceptual es profunda: en un caso se “afina” un instrumento ya construido; 
+                            en el otro, se construyen instrumentos nuevos desde cero. La Programación Genética se sitúa precisamente en esta 
+                            segunda categoría.
+                        </p>
+                    `
+                },
+                {
+                    question: "14. ¿Qué aporta el modelo evolutivo a un agente como AlphaEvolve en contraste con un LLM tradicional?",
+                    answer: `
+                        <p>
+                            Un modelo de lenguaje grande puede generar fragmentos de código plausibles basados en patrones extraídos de datos, 
+                            pero no garantiza que ese código sea correcto, eficiente o estable. Un agente como <strong>AlphaEvolve</strong> integra esta 
+                            capacidad generativa con un <strong>marco evolutivo</strong> que introduce ciclos sistemáticos de prueba y mejora.
+                        </p>
+                        <p>
+                            AlphaEvolve no se queda con la primera versión de código producida por el modelo de lenguaje: la ejecuta, mide su desempeño, 
+                            introduce mutaciones, recombina variantes y selecciona las que funcionan mejor, en un proceso iterativo que va más allá 
+                            de la simple imitación de ejemplos humanos. Mientras un LLM tradicional se limita a proponer soluciones verosímiles, 
+                            el componente evolutivo transforma esa verosimilitud en un punto de partida para una búsqueda activa de algoritmos 
+                            que pueden superar las ideas presentes en los datos de entrenamiento.
+                        </p>
+                    `
+                },
+                {
+                    question: "15. ¿Cómo interactúan la generación estocástica de programas y los mecanismos de evaluación determinista del fitness?",
+                    answer: `
+                        <p>
+                            La Programación Genética combina un proceso de generación <strong>estocástica</strong> de programas con una evaluación 
+                            <strong>determinista</strong> de su desempeño. La estocasticidad aparece al generar la población inicial, 
+                            al aplicar crossover y al introducir mutaciones; es la fuente principal de diversidad y de exploración de regiones 
+                            inesperadas del espacio de soluciones.
+                        </p>
+                        <p>
+                            La evaluación, en cambio, se basa en reglas deterministas: dado un programa y un conjunto de entradas, su fitness 
+                            queda perfectamente definido. Esta combinación permite que el sistema mantenga un equilibrio saludable entre creatividad 
+                            y rigor: la aleatoriedad propone variaciones; la evaluación selecciona únicamente aquellas que producen mejoras reales. 
+                            De este modo, la PG explora ampliamente sin perder dirección ni criterios claros de éxito.
+                        </p>
+                    `
+                },
+                {
+                    question: "16. ¿Qué retos plantea la exploración de espacios de búsqueda multimodales y discontinuos en Programación Genética?",
+                    answer: `
+                        <p>
+                            Los espacios de búsqueda <strong>multimodales</strong> presentan múltiples óptimos locales, lo que hace fácil que la evolución 
+                            quede atrapada en soluciones aceptables pero lejos de las mejores posibles. En Programación Genética, además, 
+                            el espacio suele ser <strong>discontinuo</strong>: cambios sintácticos pequeños, como reemplazar un operador o un subárbol, 
+                            pueden producir saltos enormes en el comportamiento del programa y, por ende, en su fitness.
+                        </p>
+                        <p>
+                            Esta combinación de multimodalidad y discontinuidad complica la navegación evolutiva. La población puede estabilizarse 
+                            en configuraciones que parecen robustas pero que están rodeadas de “precipicios” en el paisaje de fitness. 
+                            Para afrontar estos retos, la PG necesita mecanismos que mantengan la diversidad, eviten la convergencia prematura, 
+                            exploren múltiples regiones del espacio en paralelo y, en algunos casos, incorporen estrategias de nichificación 
+                            o de mantenimiento de subpoblaciones especializadas.
+                        </p>
+                    `
+                },
+                {
+                    question: "17. ¿Por qué la Programación Genética puede descubrir soluciones no intuitivas para humanos, como en el diseño de antenas de la NASA?",
+                    answer: `
+                        <p>
+                            La Programación Genética no está limitada por la intuición, la estética o los prejuicios de diseño humanos. 
+                            Su único criterio es el desempeño medido por la función de fitness. Esto le permite explorar regiones del espacio 
+                            de soluciones que un ingeniero nunca consideraría porque parecen caóticas, “feas” o simplemente alejadas de los 
+                            patrones clásicos de diseño.
+                        </p>
+                        <p>
+                            En el caso de las antenas de la NASA, la PG generó geometrías irregulares y sorprendentes que habrían sido descartadas 
+                            a priori por un diseñador humano, pero que demostraron tener un rendimiento excepcional. El proceso evolutivo 
+                            rompe así las barreras de la intuición y del sentido común, y convierte la exploración sistemática del espacio de 
+                            soluciones en una fuente de innovaciones radicales y no obvias.
+                        </p>
+                    `
+                },
+                {
+                    question: "18. ¿Qué criterios pueden usarse para garantizar la seguridad y estabilidad de los programas generados durante la evolución?",
+                    answer: `
+                        <p>
+                            Garantizar la seguridad y estabilidad de los programas generados evolutivamente requiere actuar tanto sobre la 
+                            estructura sintáctica como sobre la semántica. Se pueden imponer restricciones de tipos para evitar combinaciones 
+                            ilegales de operadores, limitar la profundidad o el tamaño de los árboles para controlar la complejidad 
+                            y encapsular la ejecución en <em>sandboxes</em> que prevengan efectos colaterales no deseados.
+                        </p>
+                        <p>
+                            También es posible diseñar funciones de fitness que penalicen la inestabilidad numérica, la falta de robustez 
+                            frente a perturbaciones o la producción de salidas peligrosas. Pruebas adicionales de validación, análisis estático de código 
+                            y mecanismos de captura de excepciones durante la ejecución completan el arsenal de herramientas. 
+                            En conjunto, estos criterios aseguran que los individuos que sobreviven no sean solo eficaces, sino también seguros y confiables.
+                        </p>
+                    `
+                },
+                {
+                    question: "19. ¿Cómo se integra la Programación Genética con redes neuronales o modelos de aprendizaje profundo en enfoques híbridos modernos?",
+                    answer: `
+                        <p>
+                            La integración entre Programación Genética y aprendizaje profundo puede tomar diversas formas. 
+                            Una estrategia consiste en utilizar la PG para <strong>diseñar arquitecturas neuronales</strong>, 
+                            evolucionando la estructura de la red, sus bloques y patrones de conexión, mientras que el entrenamiento de pesos 
+                            se realiza con métodos gradientes tradicionales.
+                        </p>
+                        <p>
+                            Otra posibilidad es que la PG genere componentes simbólicos, algoritmos especializados o funciones de preprocesamiento 
+                            que luego se integran dentro de un pipeline dominado por redes neuronales. También se pueden usar modelos 
+                            de aprendizaje profundo como oráculos que predicen el potencial de éxito de ciertas estructuras, guiando así 
+                            la búsqueda evolutiva. Estos enfoques híbridos combinan la creatividad estructural de la PG con la potencia 
+                            paramétrica del deep learning, abriendo la puerta a sistemas más flexibles y expresivos.
+                        </p>
+                    `
+                },
+                {
+                    question: "20. ¿Qué diferencia filosófica y algorítmica existe entre “evolucionar fórmulas” (regresión simbólica) y “evolucionar algoritmos completos” (AlphaEvolve)?",
+                    answer: `
+                        <p>
+                            La <strong>regresión simbólica</strong> se centra en encontrar expresiones matemáticas que modelen datos numéricos. 
+                            Su objetivo es describir relaciones funcionales entre variables mediante combinaciones de operadores y funciones conocidas. 
+                            Operacionalmente, trabaja en un espacio de fórmulas relativamente acotado que busca explicar cómo se relacionan las magnitudes 
+                            observadas en los datos.
+                        </p>
+                        <p>
+                            <strong>Evolucionar algoritmos completos</strong>, como en el caso de AlphaEvolve, implica ir más allá de las fórmulas 
+                            estáticas para construir programas con flujo de control, condicionales, bucles, recursión y estructuras de decisión complejas. 
+                            Filosóficamente, la regresión simbólica busca <em>describir</em> el mundo; la evolución de algoritmos busca <em>actuar</em> sobre él. 
+                            Algorítmicamente, el segundo enfoque opera en un espacio mucho más amplio y complejo, capaz de capturar comportamientos dinámicos 
+                            y estrategias de resolución de problemas, y no solo relaciones funcionales entre entradas y salidas.
+                        </p>
+                    `
+                }
+            ];
+
+            const qaContainer = document.getElementById('qa-container');
+            const searchInput = document.getElementById('search-input');
+            const themeToggle = document.getElementById('theme-toggle');
+            const randomBtn = document.getElementById('random-question-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const body = document.body;
+
+            const completedQuestions = new Set();
+            
+            function renderQuestions() {
+                qaContainer.innerHTML = '';
+                questionsAndAnswers.forEach((qa, index) => {
+                    const qaItem = document.createElement('div');
+                    qaItem.className = 'qa-item';
+                    qaItem.innerHTML = `
+                        <button class="question">
+                            <span>${qa.question}</span>
+                            <span class="question-icon">+</span>
+                        </button>
+                        <div class="answer">
+                            ${qa.answer}
+                            <button class="mastery-button" data-index="${index}">Marcar como Dominado</button>
+                        </div>
+                    `;
+                    qaContainer.appendChild(qaItem);
+                });
+                addEventListeners();
+            }
+
+            function addEventListeners() {
+                document.querySelectorAll('.question').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const answer = button.nextElementSibling;
+                        button.classList.toggle('active');
+                        answer.classList.toggle('active');
+                        button.querySelector('.question-icon').textContent = button.classList.contains('active') ? '−' : '+';
+                        answer.style.maxHeight = answer.classList.contains('active') ? answer.scrollHeight + "px" : null;
+                    });
+                });
+
+                document.querySelectorAll('.mastery-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const index = e.target.dataset.index;
+                        const qaItem = e.target.closest('.qa-item');
+                        
+                        if (completedQuestions.has(index)) {
+                            completedQuestions.delete(index);
+                            e.target.textContent = 'Marcar como Dominado';
+                            e.target.classList.remove('mastered');
+                            qaItem.classList.remove('mastered');
+                        } else {
+                            completedQuestions.add(index);
+                            e.target.textContent = '¡Dominado!';
+                            e.target.classList.add('mastered');
+                            qaItem.classList.add('mastered');
+                        }
+                        updateProgress();
+                    });
+                });
+            }
+            
+            function updateProgress() {
+                const completedCount = completedQuestions.size;
+                const totalCount = questionsAndAnswers.length;
+                const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = `Dominio: ${percentage}% - ${completedCount}/${totalCount} preguntas dominadas`;
+            }
+
+            function filterQuestions() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                document.querySelectorAll('.qa-item').forEach((item, index) => {
+                    const qa = questionsAndAnswers[index];
+                    const content = (qa.question + qa.answer).toLowerCase();
+                    if (content.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            function showRandomQuestion() {
+                const visibleItems = Array.from(document.querySelectorAll('.qa-item')).filter(item => item.style.display !== 'none');
+                if (visibleItems.length === 0) return;
+
+                const randomItem = visibleItems[Math.floor(Math.random() * visibleItems.length)];
+                
+                randomItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                const questionBtn = randomItem.querySelector('.question');
+                if (!questionBtn.classList.contains('active')) {
+                    questionBtn.click();
+                }
+            }
+            
+            function createBubble() {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 80 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 15}s`;
+                body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 25000);
+            }
+            
+            // --- INICIALIZACIÓN ---
+            renderQuestions();
+            updateProgress();
+            setInterval(createBubble, 500);
+            searchInput.addEventListener('input', filterQuestions);
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.innerHTML = isDark ? '☀️ Cambiar a Tema Claro' : '🌙 Cambiar a Tema Oscuro';
+            });
+            randomBtn.addEventListener('click', showRandomQuestion);
+        });
+    </script>
+</body>
+</html>
