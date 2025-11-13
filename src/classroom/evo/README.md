@@ -28,13 +28,24 @@
 
 Este repositorio ofrece una ruta de aprendizaje estructurada, desde los fundamentos teóricos de los Algoritmos Evolutivos (EA) hasta su implementación práctica en problemas de optimización, incluyendo algoritmos multiobjetivo (MOEA).
 
-### Recurso Visual — Frente de Pareto (MOEA)
+### Recurso Visual — Hipercubo Genético
 
-La siguiente animación ilustra la evolución de una población con **NSGA-II** hacia el frente de Pareto. Es una herramienta útil para explicar conceptos clave como **dominancia**, **diversidad** (usando *crowding distance*) y **elitismo**.
+La siguiente animación ilustra la ejecución de un algoritmo genético en tiempo real sobre un hipercubo de 4 dimensiones (teseracto). Es una herramienta educativa para visualizar conceptos clave de la computación evolutiva:
 
-![Animación de Frente de Pareto](images/pareto.gif)
+*   **Representación**: Cada vértice del teseracto es un genotipo único de 4 bits.
+*   **Población**: Las esferas azules sobre los vértices representan a los individuos de la población.
+*   **Mejor Individuo**: La esfera verde brillante resalta al individuo con el mejor fitness de la generación actual.
+*   **Operadores**: Las líneas doradas que conectan vértices simbolizan el **cruce** entre dos padres, mientras que los destellos rojos indican una **mutación**.
 
----
+
+<div align="center">
+  <img
+    src="https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/main/src/classroom/graphs/recursos/hipercubogenetico%20.gif"
+    alt="Animación de Algoritmo Genético en un Teseracto"
+    width="800"
+  />
+</div>
+
 
 ## 📂 Estructura del Repositorio
 
