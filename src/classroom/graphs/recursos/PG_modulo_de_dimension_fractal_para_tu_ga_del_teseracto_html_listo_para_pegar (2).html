@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clase Interactiva: Programación Genética (PG)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.9);
+      --bg-tertiary: rgba(248, 250, 252, 0.85);
+      --text-primary: #1f2937;
+      --text-secondary: #374151;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+      --transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(30, 41, 59, 0.9);
+      --bg-tertiary: rgba(51, 65, 85, 0.85);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.16);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+    .container{max-width:1100px;margin:0 auto;padding:2rem}
+    header{display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;margin-bottom:2rem}
+    .title{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .subtitle{font-size:1.1rem;color:var(--text-light);opacity:.95;max-width:900px;text-shadow:0 2px 4px rgba(0,0,0,.25)}
+    .toolbar{display:flex;gap:.75rem;margin:1rem 0;flex-wrap:wrap;justify-content:center}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-radius:999px;border:1px solid var(--border-color);background:var(--bg-secondary);backdrop-filter:blur(10px);box-shadow:var(--shadow-card);cursor:pointer;transition:var(--transition);font-weight:600}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 20px 40px rgba(0,0,0,.12)}
+    .btn i{font-size:1rem}
+    .theme-toggle{position:fixed;right:1.2rem;top:1.2rem;z-index:1000}
+    .lesson{display:flex;flex-direction:column;gap:1.2rem}
+    .card{background:var(--bg-secondary);border:1.5px solid var(--border-color);border-radius:var(--radius);box-shadow:var(--shadow-card);overflow:hidden;transition:var(--transition)}
+    .card:hover{transform:translateY(-1px)}
+    .card .header{cursor:pointer;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+    .card .header h3{font-size:1.15rem}
+    .card .content{max-height:0;overflow:hidden;background:var(--bg-tertiary);transition:max-height 1.2s ease,padding 1.2s ease}
+    .card.open .content{max-height:30000px;padding:1.25rem 1.5rem;border-top:1px solid var(--border-color)}
+    .content p,.content ul,.content ol,.content blockquote{color:var(--text-secondary);margin:.9rem 0;line-height:1.75}
+    .content h4{margin-top:1.1rem;color:var(--text-primary)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1rem 0}
+    .box{border:1.5px solid var(--border-color);border-radius:12px;background:var(--bg-secondary);padding:1rem;box-shadow:var(--shadow-card)}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:.95rem}
+    .diagram{border:1.5px dashed var(--border-color);border-radius:12px;padding:1rem;margin:1rem 0}
+    canvas{width:100%;max-width:900px;height:320px;border:1px solid var(--border-color);border-radius:10px;background:rgba(0,0,0,0.03)}
+    footer{margin-top:2rem;padding:1.5rem 0;text-align:center;border-top:1px solid var(--border-color);color:var(--text-light)}
+    .note{font-size:.92rem;opacity:.9}
+    .pill{display:inline-block;padding:.15rem .55rem;border:1px solid var(--border-color);border-radius:999px;font-size:.8rem;margin-right:.35rem}
+    .kbd{font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--border-color);border-radius:6px;padding:.05rem .4rem}
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle">
+    <button class="btn" id="themeBtn" title="Cambiar tema">
+      <i id="themeIcon" class="fas fa-sun"></i><span>Tema</span>
+    </button>
+  </div>
+  <div class="container">
+    <header>
+      <h1 class="title">Programación Genética — Clase Interactiva</h1>
+      <p class="subtitle">Evolución automática de programas: teoría completa, aplicaciones por campo y demos visuales.</p>
+      <div class="toolbar">
+        <button class="btn" id="toggleAll"><i class="fas fa-layer-group"></i><span>Expandir/Contraer todo</span></button>
+        <button class="btn" id="simulateBtn"><i class="fas fa-chart-line"></i><span>Simular evolución</span></button>
+        <button class="btn" id="downloadBtn"><i class="fas fa-download"></i><span>Descargar HTML</span></button>
+      </div>
+    </header>
+
+    <main class="lesson">
+      <!-- 1. Introducción -->
+      <section class="card open">
+        <div class="header"><h3>1. Introducción a la Programación Genética (PG)</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <p>La <b>Programación Genética (PG)</b> es una técnica de computación evolutiva que <b>evoluciona árboles de sintaxis</b> (programas/expresiones) para resolver problemas sin conocer de antemano la forma de la solución. Formalizada por <i>John Koza</i> en los 90, extiende los Algoritmos Genéticos (AG) de Holland del espacio de <i>parámetros fijos</i> al de <i>estructuras variables</i>.</p>
+          <blockquote>Idea central: variación + herencia + selección sobre programas → búsqueda en el espacio de funciones/código.</blockquote>
+          <div class="diagram mono">
+            <div class="note"><b>Árbol de ejemplo:</b> (SIN(x)+COS(y))/2</div>
+            <pre>(/)
+├── (+)
+│   ├── SIN
+│   │   └── x
+│   └── COS
+│       └── y
+└── 2
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Núcleo teórico: representación, fitness y operadores -->
+      <section class="card">
+        <div class="header"><h3>2. Núcleo de PG: Representación, Aptitud y Operadores</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <h4>2.1 Representación</h4>
+          <ul>
+            <li><b>Nodos internos:</b> funciones/operadores (<span class="pill">+, −, ×, ÷</span> <span class="pill">SIN</span> <span class="pill">IF</span> …)</li>
+            <li><b>Hojas:</b> variables y constantes (<span class="pill">x</span> <span class="pill">y</span> <span class="pill">c</span>)</li>
+          </ul>
+          <h4>2.2 Aptitud (fitness)</h4>
+          <p>Define la calidad del programa, p. ej. <span class="mono">MSE</span> en regresión simbólica: <span class="mono">f(p) = −Σ(yi − p(xi))²</span>.</p>
+          <h4>2.3 Operadores</h4>
+          <div class="grid">
+            <div class="box"><b>Cruce</b> de subárboles (principal fuente de innovación).</div>
+            <div class="box"><b>Mutación</b> (reemplazo de subárbol) para mantener diversidad.</div>
+            <div class="box"><b>Elitismo</b> (reproducción directa de los mejores).</div>
+          </div>
+          <h4>2.4 Bloat y regularización</h4>
+          <p>Control de tamaño mediante <span class="pill">parsimony pressure</span>, límites de profundidad y penalizaciones.</p>
+        </div>
+      </section>
+
+      <!-- 3. Proceso evolutivo + gráfico -->
+      <section class="card">
+        <div class="header"><h3>3. Proceso evolutivo y gráfico de aptitud</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <ol>
+            <li><b>Inicialización</b> de población de árboles aleatorios.</li>
+            <li><b>Evaluación</b> de aptitud en dataset/tarea.</li>
+            <li><b>Selección</b> (torneo/roleta) → padres.</li>
+            <li><b>Variación</b> (cruce/mutación) → hijos.</li>
+            <li><b>Reemplazo</b> + <b>elitismo</b> → nueva generación.</li>
+          </ol>
+          <div class="diagram">
+            <div class="note"><i class="fas fa-chart-line"></i> <b>Gráfico interactivo:</b> evolución del <span class="mono">error</span> (↓) y <span class="mono">fitness</span> (↑) por generación.</div>
+            <canvas id="fitnessCanvas" width="900" height="320"></canvas>
+            <div class="note">Usa <span class="kbd">Simular evolución</span> arriba para regenerar la corrida.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Comparativa con AG y PSO -->
+      <section class="card">
+        <div class="header"><h3>4. Comparación: PG vs AG vs PSO</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <div class="grid">
+            <div class="box"><b>Representación</b><br/>PG: árboles variables<br/>AG: vectores fijos<br/>PSO: posiciones continuas</div>
+            <div class="box"><b>Objetivo</b><br/>PG: evolucionar funciones/código<br/>AG: parámetros<br/>PSO: búsqueda global</div>
+            <div class="box"><b>Operadores</b><br/>PG: cruce/mutación de subárboles<br/>AG: cruce/bit-flip<br/>PSO: velocidad/atracción</div>
+            <div class="box"><b>Ventajas</b><br/>PG: interpretabilidad y estructura<br/>AG: simplicidad<br/>PSO: rapidez</div>
+            <div class="box"><b>Desafíos</b><br/>PG: coste y bloat<br/>AG: rigidez estructural<br/>PSO: óptimos locales</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Aplicaciones por campo (teoría completa solicitada) -->
+      <section class="card open">
+        <div class="header"><h3>5. Aplicaciones por campo: casos y razones</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <h4>5.1 Ingeniería y control</h4>
+          <ul>
+            <li><b>Controladores adaptativos</b> para drones y manipuladores: leyes no lineales robustas sin modelo exacto.</li>
+            <li><b>Optimización de procesos</b> (química/energía): descubrimiento de <i>soft sensors</i> y ecuaciones empíricas.</li>
+          </ul>
+          <h4>5.2 Ciencia de datos / ML</h4>
+          <ul>
+            <li><b>Regresión simbólica</b>: hallazgo de ecuaciones interpretables (física de datos, ecuaciones fenomenológicas).</li>
+            <li><b>Feature engineering automático</b>: nuevas combinaciones no lineales que mejoran clasificadores/Regresión.</li>
+          </ul>
+          <h4>5.3 Biomedicina y bioinformática</h4>
+          <ul>
+            <li><b>Diagnóstico interpretable</b> a partir de biomarcadores (reglas simbólicas legibles por clínicos).</li>
+            <li><b>Diseño molecular/proteico</b> asistido (afinidad, estabilidad) con acoplamiento a <i>docking</i>.</li>
+          </ul>
+          <h4>5.4 Finanzas y economía</h4>
+          <ul>
+            <li><b>Trading algorítmico</b>: reglas evolucionadas con validación cruzada y presión de parsimonia.</li>
+            <li><b>Modelos macro/energía</b>: relaciones no lineales en series temporales para proyección.</li>
+          </ul>
+          <h4>5.5 Software y robótica</h4>
+          <ul>
+            <li><b>Evolución de programas</b> (optimización, parches). Ej.: ideas en la línea de <i>GenProg</i>.</li>
+            <li><b>Robótica evolutiva</b>: locomoción/comportamientos emergentes en simuladores (PyBullet, Gazebo).</li>
+          </ul>
+          <h4>5.6 Arte y creatividad</h4>
+          <ul>
+            <li><b>Composición musical evolutiva</b> con <i>human-in-the-loop</i>.</li>
+            <li><b>Diseño visual generativo</b> (texturas, paisajes, logos).</li>
+          </ul>
+          <h4>5.7 Ciencias naturales</h4>
+          <ul>
+            <li><b>Descubrimiento científico</b> (leyes físicas a partir de datos) y ecuaciones diferenciales aproximadas.</li>
+            <li><b>Clima/ecología</b>: dinámica de poblaciones y series ambientales.</li>
+          </ul>
+          <h4>5.8 Emergentes</h4>
+          <ul>
+            <li><b>Criptografía evolutiva</b> y <b>Blockchain</b> (optimización de gas/contratos inteligentes).</li>
+            <li><b>Arquitectura y química</b>: evolución de estructuras y rutas de síntesis.</li>
+          </ul>
+          <p class="note"><i class="fas fa-lightbulb"></i> Recomendación docente: mostrar evolución paso a paso de árboles y comparar con AG/PSO para remarcar la diferencia de <i>estructura vs. parámetros</i>.</p>
+        </div>
+      </section>
+
+      <!-- 6. Demo simple: árbol y mejor individuo -->
+      <section class="card">
+        <div class="header"><h3>6. Demo rápida: mejor individuo y árbol</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <p>La simulación genera una población sintética y muestra el <b>mejor individuo</b> como expresión simbólica interpretables y su <b>tamaño</b>.</p>
+          <div class="grid">
+            <div class="box mono" id="bestExpr">Mejor expresión: —</div>
+            <div class="box" id="bestSize">Tamaño del árbol: — nodos</div>
+          </div>
+          <div class="diagram mono">
+            <div class="note"><b>Árbol estimado (texto):</b></div>
+            <pre id="bestTree">(sin datos: simula para ver el árbol)</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Conclusión -->
+      <section class="card">
+        <div class="header"><h3>7. Conclusión</h3><i class="fas fa-chevron-down"></i></div>
+        <div class="content">
+          <p>La PG une biología evolutiva y computación simbólica para producir <b>soluciones interpretables</b>. Controlar el <i>bloat</i>, validar correctamente y usar presión de parsimonia es clave para <b>generalizar</b>.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p><b>Material elaborado por el profesor Sergio Gevatschnaider</b></p>
+      <p class="note">Usa el botón “Descargar HTML” para guardar esta clase como archivo.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Theme
+    (function() {
+      const body = document.body;
+      const themeBtn = document.getElementById('themeBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      function setTheme(t){ body.setAttribute('data-theme', t); localStorage.setItem('gp_theme', t); themeIcon.className = t==='dark' ? 'fas fa-sun' : 'fas fa-moon'; }
+      setTheme(localStorage.getItem('gp_theme') || 'dark');
+      themeBtn.addEventListener('click', () => setTheme((body.getAttribute('data-theme')||'dark')==='dark'?'light':'dark'));
+    })();
+
+    // Accordion
+    document.querySelectorAll('.card .header').forEach(h => {
+      h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
+    });
+    document.getElementById('toggleAll').addEventListener('click', () => {
+      const anyClosed = Array.from(document.querySelectorAll('.card')).some(c => !c.classList.contains('open'));
+      document.querySelectorAll('.card').forEach(c => c.classList.toggle('open', anyClosed));
+    });
+
+    // Simple GP simulation for didactics (synthetic)
+    const rand = (a,b)=>a+Math.random()*(b-a);
+    function simulateEvolution(gens=60) {
+      const error = [];
+      let e = rand(0.5, 1.0);
+      for (let i=0;i<gens;i++){
+        e *= rand(0.90, 0.98);                   // tendencia a bajar
+        if (Math.random()<0.12) e *= rand(0.97, 1.03); // ruido/exploración
+        error.push(Math.max(0.02, e));
+      }
+      const fitness = error.map(x => 1/(1+x));
+      return {error, fitness};
+    }
+
+    // Tiny expression generator (toy) to display "best individual"
+    const funcs = ['+', '-', '*', '/', 'SIN', 'COS'];
+    const terms = ['x', 'y', '1', '2', '3', '0.5'];
+    function genTree(depth=0, maxDepth=3){
+      if (depth>=maxDepth || Math.random()<0.35) return {type:'leaf', val: terms[(Math.random()*terms.length)|0]};
+      const f = funcs[(Math.random()*funcs.length)|0];
+      if (f==='SIN' || f==='COS') return {type:'un', f, a: genTree(depth+1,maxDepth)};
+      return {type:'bin', f, a: genTree(depth+1,maxDepth), b: genTree(depth+1,maxDepth)};
+    }
+    function treeToExpr(t){
+      if (t.type==='leaf') return t.val;
+      if (t.type==='un') return `${t.f}(${treeToExpr(t.a)})`;
+      return `(${treeToExpr(t.a)} ${t.f} ${treeToExpr(t.b)})`;
+    }
+    function treeSize(t){ return t.type==='leaf'?1:1+treeSize(t.a)+(t.type==='bin'?treeSize(t.b):0); }
+    function treeToAscii(t,prefix=''){ // simple pretty print
+      if (t.type==='leaf') return prefix + t.val + '\\n';
+      if (t.type==='un') return prefix + t.f + '\\n' + treeToAscii(t.a, prefix+'└── ');
+      return prefix + '('+t.f+')\\n' + treeToAscii(t.a, prefix+'├── ') + treeToAscii(t.b, prefix+'└── ');
+    }
+
+    // Canvas chart (no external libs)
+    function drawChart(canvas, series, label) {
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // axes
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(50,10); ctx.lineTo(50,H-30); ctx.lineTo(W-10,H-30); ctx.stroke();
+      // scale
+      const maxY = Math.max(...series), minY = Math.min(...series);
+      const xstep = (W-70)/(series.length-1);
+      function ymap(v){ return (H-30) - ( (v-minY)/(maxY-minY+1e-9) )*(H-50); }
+      // grid
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+      for (let i=0;i<5;i++){ const y=10+i*(H-40)/4; ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-10,y); ctx.stroke(); }
+      // line
+      ctx.strokeStyle = 'rgba(20,120,220,0.95)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      series.forEach((v,i)=>{ const x=50+i*xstep, y=ymap(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.stroke();
+      // labels
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.font = '12px Inter, sans-serif';
+      ctx.fillText(label, 60, 20);
+      ctx.fillText('Generaciones', W/2-40, H-10);
+    }
+
+    // Wiring simulate button
+    const canvas = document.getElementById('fitnessCanvas');
+    function runSim(){
+      const {error, fitness} = simulateEvolution();
+      // Alternate drawing: first error (minimizar), luego fitness (maximizar)
+      drawChart(canvas, error, 'Error (↓ mejor)');
+      setTimeout(()=>drawChart(canvas, fitness, 'Fitness (↑ mejor)'), 1200);
+
+      const t = genTree(0, Math.floor(3 + Math.random()*3));
+      document.getElementById('bestExpr').textContent = 'Mejor expresión: ' + treeToExpr(t);
+      document.getElementById('bestSize').textContent = 'Tamaño del árbol: ' + treeSize(t) + ' nodos';
+      document.getElementById('bestTree').textContent = treeToAscii(t);
+    }
+    document.getElementById('simulateBtn').addEventListener('click', runSim);
+    // Auto run once
+    runSim();
+
+    // Download HTML (serialize current DOM)
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const blob = new Blob([ '<!DOCTYPE html>' + document.documentElement.outerHTML ], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Programacion_Genetica_Clase.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+    });
+  </script>
+</body>
+</html>

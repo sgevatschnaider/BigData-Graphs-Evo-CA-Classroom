@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Teseracto 4D + Algoritmo Genético en vivo</title>
+<style>
+  :root{
+    --bg1:#0a0b14; --bg2:#0f1220;
+    --fg:#e6e8ff;  --mut:#ff3366; --cross:#ffbb00; --best:#00ff88; --pop:#5599ff;
+    --grid:#1a1e3a; --edge:#3040b0; --vertex:#7088ff;
+  }
+  html,body{height:100%; margin:0; 
+    background: radial-gradient(ellipse 1400px 800px at 65% -5%, #1a2050 0%, var(--bg2) 35%, var(--bg1) 75%); 
+    color:var(--fg); 
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    overflow: hidden;
+  }
+  .layout{display:grid; grid-template-columns:1fr 380px; gap:20px; height:100%; padding:20px;}
+  .panel{
+    background: linear-gradient(135deg, rgba(25,30,65,0.5) 0%, rgba(15,18,40,0.7) 100%); 
+    border:1px solid rgba(120,140,255,0.15); 
+    border-radius:16px; 
+    backdrop-filter: blur(12px); 
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  #stage{position:relative; overflow:hidden;}
+  #canvas{width:100%; height:100%; display:block;}
+  
+  /* Efecto de partículas de fondo */
+  #stage::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      radial-gradient(2px 2px at 20% 30%, rgba(100,150,255,0.3), transparent),
+      radial-gradient(2px 2px at 60% 70%, rgba(255,100,200,0.2), transparent),
+      radial-gradient(1px 1px at 50% 50%, rgba(0,255,150,0.3), transparent),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,200,100,0.2), transparent);
+    background-size: 300px 300px, 250px 250px, 400px 400px, 350px 350px;
+    background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+    pointer-events: none;
+    opacity: 0.15;
+    animation: driftParticles 60s linear infinite;
+  }
+  
+  @keyframes driftParticles {
+    to { background-position: 300px 300px, 340px 360px, 430px 570px, 370px 400px; }
+  }
+  
+  .hud{position:absolute; left:16px; top:16px; display:flex; gap:10px; flex-wrap:wrap; pointer-events:none; z-index:10;}
+  .chip{
+    padding:8px 14px; 
+    border-radius:24px; 
+    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,25,50,0.5) 100%); 
+    border:1px solid rgba(120,140,255,0.25); 
+    font-size:12px; 
+    pointer-events:auto;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  .chip:hover {
+    border-color: rgba(120,140,255,0.5);
+    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(25,30,60,0.6) 100%);
+  }
+  .legend{display:flex; gap:12px; align-items:center; font-size:12px; font-weight:500;}
+  .dot{width:10px; height:10px; border-radius:50%; box-shadow: 0 0 8px currentColor;}
+  .dot.pop{background: var(--pop); box-shadow: 0 0 12px var(--pop);}
+  .dot.best{background: var(--best); box-shadow: 0 0 20px var(--best), 0 0 40px rgba(0,255,136,0.4);}
+  .dot.cross{background: var(--cross); box-shadow: 0 0 12px var(--cross);}
+  .dot.mut{background: var(--mut); box-shadow: 0 0 12px var(--mut);}
+  
+  .sidebar{padding:20px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; max-height:100%; box-sizing: border-box;}
+  .sidebar::-webkit-scrollbar {width: 6px;}
+  .sidebar::-webkit-scrollbar-track {background: rgba(0,0,0,0.2); border-radius:3px;}
+  .sidebar::-webkit-scrollbar-thumb {background: rgba(120,140,255,0.3); border-radius:3px;}
+  .sidebar::-webkit-scrollbar-thumb:hover {background: rgba(120,140,255,0.5);}
+  
+  h1{
+    margin:0 0 8px; 
+    font-size:22px; 
+    letter-spacing:.5px; 
+    background: linear-gradient(135deg, #00ff88 0%, #5599ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight:700;
+  }
+  h2{
+    margin:12px 0 8px; 
+    font-size:12px; 
+    text-transform:uppercase; 
+    opacity:.75; 
+    letter-spacing:1.5px;
+    font-weight:600;
+    color: #8899ff;
+  }
+  .row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .controls label{display:block; font-size:12px; opacity:.9; margin-bottom:8px; font-weight:500;}
+  .controls input[type="range"]{
+    width:100%; 
+    height:6px; 
+    border-radius:3px; 
+    background: rgba(255,255,255,0.1);
+    outline:none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width:16px; 
+    height:16px; 
+    border-radius:50%; 
+    background: linear-gradient(135deg, #00ff88, #0088ff);
+    cursor:pointer;
+    box-shadow: 0 2px 10px rgba(0,255,136,0.5);
+  }
+  .controls input[type="range"]::-moz-range-thumb {
+    width:16px; 
+    height:16px; 
+    border-radius:50%; 
+    background: linear-gradient(135deg, #00ff88, #0088ff);
+    cursor:pointer;
+    border:none;
+    box-shadow: 0 2px 10px rgba(0,255,136,0.5);
+  }
+  
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .btns{display:flex; gap:10px; flex-wrap:wrap;}
+  button{
+    background: linear-gradient(135deg, #2a3080 0%, #1a2060 100%); 
+    color:var(--fg); 
+    border:1px solid rgba(120,140,255,0.3); 
+    padding:10px 16px; 
+    border-radius:12px; 
+    cursor:pointer;
+    font-weight:600;
+    font-size:13px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  button:hover{
+    background: linear-gradient(135deg, #3040a0 0%, #2030a0 100%);
+    border-color: rgba(120,140,255,0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  button.secondary{
+    background: linear-gradient(135deg, rgba(50,60,120,0.4) 0%, rgba(30,40,80,0.4) 100%);
+  }
+  button.secondary:hover{
+    background: linear-gradient(135deg, rgba(60,70,140,0.5) 0%, rgba(40,50,100,0.5) 100%);
+  }
+  button:active{transform: translateY(1px);}
+  
+  .stats{
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+    font-size:12px; 
+    line-height:1.7; 
+    background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(10,15,35,0.4) 100%); 
+    border:1px solid rgba(120,140,255,0.2); 
+    padding:14px; 
+    border-radius:12px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+  }
+  
+  .select{
+    width:100%; 
+    padding:8px 10px; 
+    border-radius:10px; 
+    border:1px solid rgba(120,140,255,0.25); 
+    background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(15,20,40,0.4) 100%); 
+    color:var(--fg);
+    font-size:13px;
+    cursor:pointer;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .select:hover {
+    border-color: rgba(120,140,255,0.5);
+    background: linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(20,25,50,0.5) 100%);
+  }
+  .select:focus {
+    outline: none;
+    border-color: rgba(0,255,136,0.5);
+  }
+  
+  .kbd{
+    font-family: 'Consolas', 'Monaco', monospace; 
+    background: rgba(120,140,255,0.15); 
+    padding:3px 8px; 
+    border-radius:6px; 
+    border:1px solid rgba(120,140,255,0.3); 
+    font-size:11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .footer-credit {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(120,140,255,0.15);
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.7;
+    font-style: italic;
+    color: #aabbff;
+  }
+  
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: 60vh auto; }
+    .sidebar { max-height: 40vh; }
+    h1 {font-size: 18px;}
+  }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <div id="stage" class="panel">
+      <canvas id="canvas"></canvas>
+      <div class="hud">
+        <div class="chip legend">
+          <span class="dot pop"></span> Población
+          <span class="dot best"></span> Mejor
+          <span class="dot cross"></span> Cruce
+          <span class="dot mut"></span> Mutación
+        </div>
+        <div class="chip">Rotación: Arrastrar | Zoom: Rueda</div>
+        <div class="chip">Pausa/Reanudar: <span class="kbd">Espacio</span></div>
+      </div>
+    </div>
+    <div class="panel sidebar">
+      <h1>Teseracto 4D + Algoritmo Genético</h1>
+      <div class="controls">
+        <h2>Parámetros del Algoritmo</h2>
+        <div class="grid">
+          <div>
+            <label>Población: <span id="lblPop">20</span></label>
+            <input type="range" id="popSize" min="4" max="64" value="20" />
+          </div>
+          <div>
+            <label>Mutación (pm): <span id="lblPm">0.08</span></label>
+            <input type="range" id="pm" min="0" max="0.3" step="0.01" value="0.08" />
+          </div>
+          <div>
+            <label>Cruce (pc): <span id="lblPc">0.9</span></label>
+            <input type="range" id="pc" min="0" max="1" step="0.05" value="0.9" />
+          </div>
+          <div>
+            <label>Torneo (k): <span id="lblK">3</span></label>
+            <input type="range" id="tournamentK" min="2" max="6" step="1" value="3" />
+          </div>
+        </div>
+        <label for="fitnessFn">Función objetivo</label>
+        <select id="fitnessFn" class="select">
+          <option value="onemax">OneMax: maximiza #1s</option>
+          <option value="weighted">Pesos: [1,2,3,4]</option>
+          <option value="trap">Trampa(4): óptimo 1111 vs pozo 0000</option>
+        </select>
+        <div class="row">
+          <label for="speed">Velocidad de Generación</label>
+          <input type="range" id="speed" min="0.2" max="2.2" step="0.2" value="1.0" />
+        </div>
+        <div class="btns">
+          <button id="toggle">Iniciar</button>
+          <button id="step" class="secondary">Siguiente Paso</button>
+          <button id="reset" class="secondary">Reiniciar</button>
+        </div>
+        <h2>Estado Actual</h2>
+        <div class="stats" id="stats"></div>
+        <div style="opacity:.75; font-size:11px; line-height:1.6; margin-top:8px;">
+          <strong>Visualización:</strong> Cada vértice del teseracto representa un genotipo de 4 bits (hipercubo 4D). La población se muestra como esferas brillantes sobre los vértices. Las líneas doradas indican operaciones de cruce entre individuos, y los destellos rojos muestran mutaciones en tiempo real.
+        </div>
+      </div>
+      <div class="footer-credit">
+        Material elaborado por el profesor Sergio Gevatschnaider
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =======================
+   TESERACTO + PROYECCIONES
+   ======================= */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+
+function resize() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Vértices del hipercubo 4D (-1, 1)
+const V4 = Array.from({ length: 16 }, (_, i) => [
+  (i & 1) ? 1 : -1,
+  (i & 2) ? 1 : -1,
+  (i & 4) ? 1 : -1,
+  (i & 8) ? 1 : -1
+]);
+
+// Aristas (conexiones entre vértices que difieren en un solo bit)
+const EDGES = [];
+for (let i = 0; i < 16; i++) {
+  for (let b = 0; b < 4; b++) {
+    const j = i ^ (1 << b);
+    if (j > i) EDGES.push([i, j]);
+  }
+}
+
+let rot4 = { xy: 0.003, xz: 0.002, yz: 0.001, xw: 0.0025, yw: 0.0017, zw: 0.0022 };
+let rot3 = { x: 0.008, y: -0.012, z: 0.006 };
+
+let drag = { active: false, lastX: 0, lastY: 0 };
+canvas.addEventListener('mousedown', e => { drag.active = true; drag.lastX = e.clientX; drag.lastY = e.clientY; });
+window.addEventListener('mouseup', () => { drag.active = false; });
+window.addEventListener('mousemove', e => {
+  if (!drag.active) return;
+  const dx = e.clientX - drag.lastX;
+  const dy = e.clientY - drag.lastY;
+  drag.lastX = e.clientX;
+  drag.lastY = e.clientY;
+  rot3.y += dx * 0.005;
+  rot3.x += dy * 0.005;
+});
+
+let zoom = 1.0;
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  zoom *= (e.deltaY > 0 ? 0.9 : 1.1);
+  zoom = Math.max(0.4, Math.min(2.5, zoom));
+}, { passive: false });
+
+function rotate4D(v, angles) {
+  let [x, y, z, w] = v;
+  let c, s;
+  // Rotaciones que involucran el eje W
+  c = Math.cos(angles.xw); s = Math.sin(angles.xw); [x, w] = [x * c - w * s, x * s + w * c];
+  c = Math.cos(angles.yw); s = Math.sin(angles.yw); [y, w] = [y * c - w * s, y * s + w * c];
+  c = Math.cos(angles.zw); s = Math.sin(angles.zw); [z, w] = [z * c - w * s, z * s + w * c];
+  // Rotaciones 3D clásicas
+  c = Math.cos(angles.xy); s = Math.sin(angles.xy); [x, y] = [x * c - y * s, x * s + y * c];
+  c = Math.cos(angles.xz); s = Math.sin(angles.xz); [x, z] = [x * c - z * s, x * s + z * c];
+  c = Math.cos(angles.yz); s = Math.sin(angles.yz); [y, z] = [y * c - z * s, y * s + z * c];
+  return [x, y, z, w];
+}
+
+function project4Dto3D(v) {
+  const [x, y, z, w] = v;
+  const distance = 3;
+  const k = distance / (distance - w);
+  return [x * k, y * k, z * k];
+}
+
+function rotate3D(v, angles) {
+  let [x, y, z] = v;
+  let c, s;
+  c = Math.cos(angles.y); s = Math.sin(angles.y); [x, z] = [x * c - z * s, x * s + z * c];
+  c = Math.cos(angles.x); s = Math.sin(angles.x); [y, z] = [y * c - z * s, y * s + z * c];
+  c = Math.cos(angles.z); s = Math.sin(angles.z); [x, y] = [x * c - y * s, x * s + y * c];
+  return [x, y, z];
+}
+
+function project3Dto2D(v, scale) {
+  const [x, y, z] = v;
+  const distance = 6;
+  const k = distance / (distance - z);
+  return [x * k * scale * zoom, y * k * scale * zoom];
+}
+
+/* =======================
+   ALGORITMO GENÉTICO
+   ======================= */
+const L = 4; // Longitud del cromosoma
+const params = {
+  popSize: 20,
+  pm: 0.08, // Probabilidad de mutación
+  pc: 0.9,  // Probabilidad de cruce
+  tournamentK: 3,
+  speed: 1.0,
+  fitness: 'onemax'
+};
+
+let population = [];
+let fitness = [];
+let gen = 0;
+let running = false;
+let animTime = 0;
+let lastEvents = [];
+
+function randInt(n) { return Math.floor(Math.random() * n); }
+function bitCount(x) {
+  let count = 0;
+  for (let i = 0; i < L; i++) if ((x >> i) & 1) count++;
+  return count;
+}
+function weightedFitness(x) {
+  return ((x >> 0) & 1) * 1 + ((x >> 1) & 1) * 2 + ((x >> 2) & 1) * 3 + ((x >> 3) & 1) * 4;
+}
+function trap4(x) {
+  const u = bitCount(x);
+  return (u === 4) ? 4 : (3 - u);
+}
+
+const fitnessFunctions = {
+    onemax: bitCount,
+    weighted: weightedFitness,
+    trap: trap4
+};
+function evaluate(x) { return fitnessFunctions[params.fitness](x); }
+
+function initPopulation() {
+  population = Array.from({ length: params.popSize }, () => randInt(16));
+  fitness = population.map(evaluate);
+  gen = 0;
+  updateStats();
+}
+
+function tournamentSelect() {
+  let best = -1, bestFit = -Infinity;
+  for (let i = 0; i < params.tournamentK; i++) {
+    const idx = randInt(population.length);
+    if (fitness[idx] > bestFit) {
+      bestFit = fitness[idx];
+      best = population[idx];
+    }
+  }
+  return best;
+}
+
+function onePointCrossover(a, b) {
+  const k = 1 + randInt(L - 1);
+  const mask = (1 << k) - 1;
+  const c1 = (a & ~mask) | (b & mask);
+  const c2 = (b & ~mask) | (a & mask);
+  return [c1, c2];
+}
+
+function mutate(x) {
+  let mutatedBits = [];
+  for (let i = 0; i < L; i++) {
+    if (Math.random() < params.pm) {
+      x ^= (1 << i);
+      mutatedBits.push(i);
+    }
+  }
+  return [x, mutatedBits];
+}
+
+function nextGeneration() {
+  const newPop = [];
+  const events = [];
+  while (newPop.length < params.popSize) {
+    const p1 = tournamentSelect();
+    const p2 = tournamentSelect();
+    let c1 = p1, c2 = p2;
+    
+    if (Math.random() < params.pc) {
+      [c1, c2] = onePointCrossover(p1, p2);
+      events.push({ type: 'cross', from: [p1, p2], to: [c1, c2] });
+    }
+    
+    const [m1, bits1] = mutate(c1);
+    if (bits1.length) events.push({ type: 'mut', to: m1 });
+    c1 = m1;
+    
+    const [m2, bits2] = mutate(c2);
+    if (bits2.length) events.push({ type: 'mut', to: m2 });
+    c2 = m2;
+
+    newPop.push(c1);
+    if (newPop.length < params.popSize) newPop.push(c2);
+  }
+  population = newPop;
+  fitness = population.map(evaluate);
+  gen += 1;
+  lastEvents = events.slice(0, 15);
+}
+
+/* =======================
+   RENDERIZADO
+   ======================= */
+function drawScene(dt) {
+  const { width, height } = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, width, height);
+
+  // Rotación automática
+  if (!drag.active) {
+    for (const k of Object.keys(rot4)) rot4[k] += dt * 0.0005 * params.speed;
+    rot3.x += dt * 0.00015 * params.speed;
+    rot3.z += dt * 0.00022 * params.speed;
+  }
+
+  const verts3D = V4.map(v => project4Dto3D(rotate4D(v, rot4)));
+  const verts2D = verts3D.map(v => project3Dto2D(rotate3D(v, rot3), width / 6));
+  
+  ctx.save();
+  ctx.translate(width / 2, height / 2);
+
+  // Aristas
+  ctx.lineWidth = 1.2;
+  for (const [i, j] of EDGES) {
+    const z = (verts3D[i][2] + verts3D[j][2]) / 2;
+    const alpha = 0.15 + (z + 2) * 0.08;
+    ctx.strokeStyle = `rgba(100, 120, 255, ${Math.min(alpha, 0.4)})`;
+    ctx.beginPath();
+    ctx.moveTo(verts2D[i][0], verts2D[i][1]);
+    ctx.lineTo(verts2D[j][0], verts2D[j][1]);
+    ctx.stroke();
+  }
+
+  // Vértices base
+  for (let i = 0; i < 16; i++) {
+    const p = verts2D[i];
+    ctx.fillStyle = `rgba(140, 160, 255, 0.5)`;
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  const tPulse = (Math.sin(animTime * 0.006) + 1) / 2;
+
+  // Eventos de Cruce
+  lastEvents.filter(e => e.type === 'cross').forEach(ev => {
+      const [p1, p2] = ev.from;
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = `rgba(255, 187, 0, ${0.5 + 0.4 * tPulse})`;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = 'rgba(255,187,0,0.8)';
+      ctx.beginPath();
+      ctx.moveTo(verts2D[p1][0], verts2D[p1][1]);
+      ctx.lineTo(verts2D[p2][0], verts2D[p2][1]);
+      ctx.stroke();
+  });
+  ctx.shadowBlur = 0;
+
+  // Población
+  const counts = new Map();
+  population.forEach(ind => counts.set(ind, (counts.get(ind) || 0) + 1));
+  const bestGenome = population[argmax(fitness)];
+  
+  for (const [genome, count] of counts.entries()) {
+    const p = verts2D[genome];
+    const isBest = genome === bestGenome;
+    const baseRadius = 4 + Math.log2(count + 1) * 2;
+    
+    ctx.fillStyle = isBest ? 'var(--best)' : 'var(--pop)';
+    if (isBest) {
+        const pulseScale = 1 + Math.sin(animTime * 0.008) * 0.15;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = 'rgba(0,255,136,0.8)';
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], baseRadius * pulseScale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    } else {
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], baseRadius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+  }
+
+  // Eventos de Mutación
+  lastEvents.filter(e => e.type === 'mut').forEach(ev => {
+      const p = verts2D[ev.to];
+      const phase = (animTime % 500) / 500;
+      ctx.fillStyle = `rgba(255, 51, 102, ${(1 - phase) * 0.8})`;
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 5 + phase * 15, 0, Math.PI * 2);
+      ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+function argmax(arr) {
+  if (!arr.length) return -1;
+  return arr.reduce((iMax, x, i, a) => x > a[iMax] ? i : iMax, 0);
+}
+
+
+/* =======================
+   ACTUALIZACIÓN Y LOOP
+   ======================= */
+let lastTime = 0;
+let accumulator = 0;
+const STEP_TIME = 1000;
+
+function animate(now) {
+  const dt = (now - lastTime);
+  lastTime = now;
+  animTime += dt;
+  
+  if (running) {
+    accumulator += dt * params.speed;
+    if (accumulator >= STEP_TIME) {
+      accumulator -= STEP_TIME;
+      nextGeneration();
+      updateStats();
+    }
+  }
+  
+  drawScene(dt);
+  requestAnimationFrame(animate);
+}
+
+function updateStats() {
+    if (!population.length) {
+        document.getElementById('stats').innerHTML = "Presiona 'Iniciar' para comenzar.";
+        return;
+    }
+  const avgFit = (fitness.reduce((a, b) => a + b, 0) / fitness.length).toFixed(2);
+  const maxFit = Math.max(...fitness);
+  const minFit = Math.min(...fitness);
+  const bestIdx = argmax(fitness);
+  const bestGenome = population[bestIdx];
+  const bestBinary = bestGenome.toString(2).padStart(L, '0');
+  const diversity = new Set(population).size;
+  
+  document.getElementById('stats').innerHTML = `
+<strong>Generación:</strong> ${gen}<br>
+<strong>Mejor fitness:</strong> ${maxFit} <span style="color:var(--best)">[${bestBinary}]</span><br>
+<strong>Promedio:</strong> ${avgFit}<br>
+<strong>Diversidad:</strong> ${diversity}/16 genotipos<br>
+<strong>Población:</strong> ${population.length}
+  `.trim();
+}
+
+/* =======================
+   CONTROLES UI
+   ======================= */
+const toggleBtn = document.getElementById('toggle');
+toggleBtn.onclick = () => {
+  if (gen === 0 && !running) {
+      initPopulation();
+  }
+  running = !running;
+  toggleBtn.textContent = running ? 'Pausar' : 'Reanudar';
+};
+
+document.getElementById('step').onclick = () => {
+  if (gen === 0) initPopulation();
+  nextGeneration();
+  updateStats();
+  if (running) {
+      running = false;
+      toggleBtn.textContent = 'Reanudar';
+  }
+};
+
+document.getElementById('reset').onclick = () => {
+  running = false;
+  toggleBtn.textContent = 'Iniciar';
+  gen = 0;
+  population = [];
+  fitness = [];
+  lastEvents = [];
+  accumulator = 0;
+  updateStats();
+};
+
+document.getElementById('popSize').oninput = e => {
+  params.popSize = +e.target.value;
+  document.getElementById('lblPop').textContent = params.popSize;
+  if(running || gen > 0) document.getElementById('reset').click();
+};
+document.getElementById('pm').oninput = e => {
+  params.pm = +e.target.value;
+  document.getElementById('lblPm').textContent = params.pm.toFixed(2);
+};
+document.getElementById('pc').oninput = e => {
+  params.pc = +e.target.value;
+  document.getElementById('lblPc').textContent = params.pc.toFixed(2);
+};
+document.getElementById('tournamentK').oninput = e => {
+  params.tournamentK = +e.target.value;
+  document.getElementById('lblK').textContent = params.tournamentK;
+};
+document.getElementById('speed').oninput = e => {
+  params.speed = +e.target.value;
+};
+document.getElementById('fitnessFn').onchange = e => {
+  params.fitness = e.target.value;
+  if (gen > 0) {
+    fitness = population.map(evaluate);
+    updateStats();
+  }
+};
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    toggleBtn.click();
+  }
+});
+
+/* =======================
+   INICIO
+   ======================= */
+updateStats();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

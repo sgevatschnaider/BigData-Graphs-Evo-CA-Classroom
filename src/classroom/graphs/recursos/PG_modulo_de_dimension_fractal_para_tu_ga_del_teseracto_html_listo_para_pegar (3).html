@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flujo Evolutivo sobre el Hipercubo</title>
+<style>
+  body {background:#0a0f14;color:#eaf2ff;font-family:Inter,system-ui,Arial;margin:0;padding:0;}
+  header{padding:20px;border-bottom:1px solid #1c2430;}
+  h1{margin:0;color:#8ef0d4;}
+  canvas{background:#0f1520;border:1px solid #223049;border-radius:12px;width:100%;height:520px;display:block;margin:20px auto;}
+  section{padding:20px;max-width:900px;margin:auto;line-height:1.6;}
+  footer{background:#0d1319;padding:16px;color:#9fb3c8;text-align:center;font-size:13px;margin-top:20px;border-top:1px solid #1c2430;}
+</style>
+</head>
+<body>
+<header>
+<h1>Visualización del Flujo Evolutivo en el Hipercubo</h1>
+<p>Representación geométrica de un algoritmo genético como sistema topológico.</p>
+</header>
+<canvas id="evolCanvas" width="900" height="520"></canvas>
+<section>
+<h2>Interpretación</h2>
+<p>El hipercubo representa el <strong>espacio genético</strong> de un algoritmo evolutivo con codificación binaria. Cada vértice es un posible genotipo y cada arista una mutación (flip de bit). El movimiento de la población en este espacio produce trayectorias cerradas y ciclos, cuya estructura refleja la <strong>característica de Euler</strong> del cubo o su frontera.</p>
+<p>En el caso del teseracto (L = 4), la frontera del hipercubo es homeomorfa a una esfera 3D (S³), lo que implica una característica de Euler <strong>χ = 0</strong>. Esto indica un espacio cerrado, sin borde, donde las trayectorias evolutivas pueden regresar a su origen a través de diferentes caminos — la esencia misma de un proceso evolutivo autoorganizado.</p>
+</section>
+<footer>
+Material Elaborado por el profesor Sergio Gevastschnaider
+</footer>
+<script>
+const canvas=document.getElementById('evolCanvas');
+const ctx=canvas.getContext('2d');
+const W=canvas.width,H=canvas.height;
+
+const vertices=[];
+for(let i=0;i<16;i++){
+  const x=(i&1)?1:-1;
+  const y=(i&2)?1:-1;
+  const z=(i&4)?1:-1;
+  const w=(i&8)?1:-1;
+  const X=(x+w*0.5)*100+W/2;
+  const Y=(y+z*0.5)*100+H/2;
+  vertices.push({x:X,y:Y,active:false});
+}
+const edges=[];
+for(let i=0;i<16;i++)for(let j=i+1;j<16;j++)if(((i^j)&(i^j)-1)===0)edges.push([i,j]);
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#1e2d45';ctx.lineWidth=1.2;
+  edges.forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(vertices[a].x,vertices[a].y);ctx.lineTo(vertices[b].x,vertices[b].y);ctx.stroke();});
+  vertices.forEach(v=>{ctx.beginPath();ctx.fillStyle=v.active?'#8ef0d4':'#5d97ff';ctx.arc(v.x,v.y,6,0,Math.PI*2);ctx.fill();});
+}
+let t=0;
+function animate(){
+  t+=0.02;
+  vertices.forEach((v,i)=>v.active=Math.sin(t+i*0.5)>0.8);
+  draw();requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

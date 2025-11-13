@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dimensión Fractal Efectiva — Plugin para GA (Teseracto 4D)</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#0f1620; --ink:#e8f0ff; --muted:#9ab; --accent:#69f; --accent2:#7df59a; --accent3:#ffb86b; --grid:#1b2430;
+    }
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    h1{font-size:22px;margin:16px 0 8px}
+    p{color:var(--muted);margin:6px 0}
+    .panel{background:var(--panel);border:1px solid #223041;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 6px 20px #00000055}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:8px}
+    .kpi{background:#0c121a;border:1px solid #1e2a39;border-radius:12px;padding:10px}
+    .kpi h3{font:600 12px/1.2 Inter,system-ui;letter-spacing:.3px;color:#ccdaf6;margin:0 0 6px}
+    .kpi .v{font:700 20px/1 Inter,system-ui}
+    canvas{display:block;width:100%;height:300px;background:linear-gradient(180deg,#0f1722,#0b1018);border:1px solid #1f2b3a;border-radius:12px}
+    .legend{display:flex;gap:16px;align-items:center;margin-top:8px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .foot{margin:22px 0 8px;color:#8fa1b7;font-size:12px;opacity:.9}
+    code{background:#0b1119;border:1px solid #1d2936;color:#cfe1ff;border-radius:8px;padding:2px 6px}
+    .small{font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Dimensión Fractal Efectiva del Proceso Evolutivo (GA)</h1>
+    <p>
+      Este módulo calcula y grafica en tiempo real dos estimadores de “dimensión fractal” sobre tu <em>algoritmo genético</em> con genotipo binario de 4 bits (teseracto 4D, 16 vértices):
+    </p>
+    <ul>
+      <li><b>D<sub>cov</sub> (cobertura)</b>: <code>log2(#genotipos_visitados_acumulados)</code>, en [0,4].</li>
+      <li><b>D<sub>corr</sub> (correlación)</b>: pendiente de <code>ln C(r)</code> vs <code>ln r</code> para r=1..4, convertida a base 2.</li>
+    </ul>
+
+    <div class="panel">
+      <div class="kpis">
+        <div class="kpi"><h3>Generación</h3><div class="v" id="k-gen">0</div></div>
+        <div class="kpi"><h3>Únicos visitados</h3><div class="v" id="k-uniq">0</div></div>
+        <div class="kpi"><h3>D<sub>cov</sub> (0–4)</h3><div class="v" id="k-dcov">0.00</div></div>
+        <div class="kpi"><h3>D<sub>corr</sub> (≈0–4)</h3><div class="v" id="k-dcorr">0.00</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <canvas id="df-chart" width="1024" height="360"></canvas>
+        <div class="legend small">
+          <div class="dot" style="background:var(--accent)"></div><span>D<sub>cov</sub></span>
+          <div class="dot" style="background:var(--accent2)"></div><span>D<sub>corr</sub></span>
+          <div class="dot" style="background:var(--accent3)"></div><span>Diversidad Hamming promedio (escala auxiliar)</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="small">Integración: llama a <code>window.updateFractalMetrics(poblacion_bits_o_enteros, generacion)</code> una vez por generación (después de evaluar fitness) y <code>window.initFractalUI()</code> en tu <em>onload</em>. Si tu población son enteros 0..15, el módulo los convierte a 4 bits automáticamente.</p>
+
+    <div class="foot">Material elaborado por el profesor Sergio Gevatschnaider</div>
+  </div>
+
+  <script>
+  ;(()=>{
+    // ===============================
+    // Utilidades de bits y Hamming
+    // ===============================
+    function toBits4(x){
+      // Acepta entero 0..15 o array de bits
+      if (Array.isArray(x)) {
+        // Normalizamos longitud y valores
+        const b = x.slice(0,4).map(v => v?1:0);
+        while(b.length<4) b.push(0);
+        return b;
+      }
+      x = x|0; // entero
+      return [ (x>>0)&1, (x>>1)&1, (x>>2)&1, (x>>3)&1 ];
+    }
+    function bitsToInt4(bits){
+      const b = toBits4(bits);
+      return (b[0]<<0)|(b[1]<<1)|(b[2]<<2)|(b[3]<<3);
+    }
+    function hamming(a,b){
+      const A = toBits4(a), B = toBits4(b);
+      let d=0; for(let i=0;i<4;i++) d += (A[i]^B[i]);
+      return d;
+    }
+
+    // ==========================================
+    // Estado del módulo (históricos y visitados)
+    // ==========================================
+    const visited = new Set();         // enteros 0..15 visitados (acumulado)
+    const histGen = [];                // generaciones
+    const histDcov = [];               // D_cov por generación
+    const histDcorr = [];              // D_corr por generación
+    const histHamAvg = [];             // Diversidad Hamming promedio (escala auxiliar)
+
+    // ==========================
+    // Cálculo de D_cov (cobertura)
+    // ==========================
+    function computeDcov(){
+      const n = Math.max(1, visited.size);
+      return Math.log2(n); // en [0,4]
+    }
+
+    // ======================================================
+    // Cálculo de D_corr (correlation dimension, estimador)
+    // ======================================================
+    // Para r=1..4, contamos pares (i,j) con H(i,j) <= r
+    // Luego regresión lineal sobre (ln r, ln C(r)) y pasamos a base 2
+    function computeDcorr(pop){
+      const P = pop.map(bitsToInt4);
+      if (P.length < 3) return 0; // no suficiente
+      const n = P.length;
+      // Contar pares por radios
+      const radii = [1,2,3,4];
+      const C = [0,0,0,0];
+      for(let i=0;i<n;i++){
+        for(let j=i+1;j<n;j++){
+          const d = hamming(P[i], P[j]);
+          for(let r=0;r<4;r++) if (d <= radii[r]) C[r]++;
+        }
+      }
+      // Filtramos radios con C>0 (evita log(0))
+      const xs=[]; const ys=[];
+      for(let k=0;k<4;k++){
+        if (C[k] > 0) { xs.push(Math.log(radii[k])); ys.push(Math.log(C[k])); }
+      }
+      if (xs.length < 2) return 0; // no hay puntos suficientes
+      // Regresión lineal mínima (slope)
+      const npts = xs.length;
+      let sx=0, sy=0, sxx=0, sxy=0;
+      for(let i=0;i<npts;i++){ sx+=xs[i]; sy+=ys[i]; sxx+=xs[i]*xs[i]; sxy+=xs[i]*ys[i]; }
+      const denom = (npts*sxx - sx*sx);
+      if (Math.abs(denom) < 1e-9) return 0;
+      const slope = (npts*sxy - sx*sy) / denom; // base e
+      const slopeBase2 = slope / Math.log(2);
+      // Acotamos a [0,4] por estabilidad visual
+      return Math.max(0, Math.min(4, slopeBase2));
+    }
+
+    // =====================================
+    // Diversidad Hamming promedio (auxiliar)
+    // =====================================
+    function meanHamming(pop){
+      const P = pop.map(bitsToInt4);
+      const n = P.length; if (n<2) return 0;
+      let acc=0, cnt=0; for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){ acc+=hamming(P[i],P[j]); cnt++; }
+      return acc / cnt; // en [0,4]
+    }
+
+    // ======================
+    // Render del gráfico 2D
+    // ======================
+    const canvas = () => document.getElementById('df-chart');
+    function drawChart(){
+      const c = canvas(); if (!c) return; const ctx = c.getContext('2d');
+      const W=c.width, H=c.height; const padL=50, padR=20, padT=20, padB=36;
+      // Fondo
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle = '#0e1420'; ctx.fillRect(0,0,W,H);
+      // Ejes
+      const xmin=0, xmax=Math.max(20, (histGen[histGen.length-1]||0));
+      const ymin=0, ymax=4; // dimensiones en [0,4]
+      function x2px(x){return padL + (W-padL-padR)*(x-xmin)/(xmax-xmin||1)}
+      function y2px(y){return H-padB - (H-padT-padB)*(y-ymin)/(ymax-ymin||1)}
+      // Cuadrícula
+      ctx.strokeStyle = '#1b2636'; ctx.lineWidth = 1;
+      for(let gy=0; gy<=4; gy++){
+        const y = y2px(gy);
+        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+        ctx.fillStyle = '#89a'; ctx.font = '12px Inter'; ctx.fillText(gy.toFixed(0), 12, y+4);
+      }
+      // Eje X (gen)
+      ctx.fillStyle = '#9fb3c8'; ctx.fillText('Generaciones', W/2-40, H-8);
+      // Leyendas Y
+      ctx.save(); ctx.translate(14, H/2); ctx.rotate(-Math.PI/2); ctx.fillStyle='#9fb3c8'; ctx.fillText('Dimensión (0–4)', -52, 0); ctx.restore();
+
+      // Función para trazar series
+      function drawSeries(arr, color){
+        if (arr.length<2) return; ctx.beginPath(); ctx.lineWidth=2; ctx.strokeStyle=color;
+        for(let i=0;i<arr.length;i++){
+          const x = x2px(histGen[i]||i); const y = y2px(arr[i]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+      // D_cov (azul) y D_corr (verde)
+      drawSeries(histDcov,'#5aa2ff');
+      drawSeries(histDcorr,'#7df59a');
+
+      // Diversidad Hamming promedio (naranja) en eje secundario (escala 0–4 ⇒ 0–4)
+      ctx.setLineDash([6,4]); drawSeries(histHamAvg, '#ffb86b'); ctx.setLineDash([]);
+    }
+
+    // ===================================================
+    // API pública: init + update (para integrar al GA)
+    // ===================================================
+    function updateFractalMetrics(population, generation){
+      // Normalizamos población a enteros 0..15
+      const P = population.map(bitsToInt4);
+      // Registrar visitados acumulados
+      for (const g of P) visited.add(g);
+      // Medidas
+      const dcov = computeDcov();
+      const dcorr = computeDcorr(P);
+      const ham = meanHamming(P);
+      // Históricos
+      const gen = (typeof generation === 'number') ? generation : ((histGen[histGen.length-1]||0)+1);
+      histGen.push(gen); histDcov.push(dcov); histDcorr.push(dcorr); histHamAvg.push(ham);
+      // KPIs
+      const el = (id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v};
+      el('k-gen', gen);
+      el('k-uniq', visited.size);
+      el('k-dcov', dcov.toFixed(2));
+      el('k-dcorr', dcorr.toFixed(2));
+      drawChart();
+    }
+
+    function initFractalUI(){ drawChart(); }
+
+    // Inicializa al cargar el DOM para garantizar que se pinte el lienzo
+    window.addEventListener('DOMContentLoaded', () => {
+      try { initFractalUI(); } catch(e) { console.error('Init Fractal UI error:', e); }
+    });
+
+    // Exponer API
+    let __fractalExternalUpdates = false;
+    window.updateFractalMetrics = (...args) => { __fractalExternalUpdates = true; return updateFractalMetrics(...args); };
+    window.initFractalUI = initFractalUI;
+
+    // Demo automático NO intrusivo: si en ~1s nadie llamó updateFractalMetrics,
+    // simulamos 30 generaciones para mostrar la visualización, y se detiene
+    // automáticamente cuando el GA real empiece a reportar.
+    setTimeout(()=>{
+      // Si no hubo actualizaciones externas, mostramos demo
+      if (!__fractalExternalUpdates) {
+        try { initFractalUI(); } catch {}
+        let gen=0; const timer = setInterval(()=>{
+          if (__fractalExternalUpdates) { clearInterval(timer); return; }
+          gen++;
+          const pop = Array.from({length: 20}, ()=> Math.floor(Math.random()*16));
+          updateFractalMetrics(pop, gen);
+          if(gen>=30) clearInterval(timer);
+        }, 250);
+      }
+    }, 800);
+  })();
+  </script>
+</body>
+</html>

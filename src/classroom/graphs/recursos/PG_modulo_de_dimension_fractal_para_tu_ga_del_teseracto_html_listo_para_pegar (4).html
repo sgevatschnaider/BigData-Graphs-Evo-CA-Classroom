@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Árbol Fractal: Nodos que Abarcan Subnodos (SVG)</title>
+<style>
+:root{
+  --bg:#0e1021; --panel:#15183a; --ink:#e7eaff; --mut:#ff6b6b; --ok:#00ffa6; --accent:#79a1ff;
+  --edge:#4050a8; --edge2:#6e7ce0; --ghost:#2a2f61;
+}
+html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 70% -10%, #20255a 0%, #17193d 40%, var(--bg) 80%);color:var(--ink);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; overflow: hidden;}
+.app{display:grid; grid-template-columns: 1fr 360px; gap:16px; height:100%; padding:16px;}
+.panel{background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; backdrop-filter: blur(6px); box-shadow: 0 10px 30px rgba(0,0,0,0.35);}
+.stage{position:relative; overflow:hidden; cursor: grab;}
+.stage:active{cursor: grabbing;}
+.toolbar{position:absolute; left:12px; top:12px; display:flex; gap:8px; flex-wrap:wrap; pointer-events: none;}
+.chip{padding:6px 10px; border-radius:20px; background: rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12); font-size:12px;}
+.sidebar{padding:16px; display:flex; flex-direction:column; gap:14px; overflow-y: auto;}
+h1{margin:0 0 6px; font-size:20px; letter-spacing:.3px;}
+h2{margin:8px 0; font-size:13px; text-transform:uppercase; opacity:.8; letter-spacing:1px;}
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+label {display: block; font-size: 12px; margin-bottom: 4px; opacity: 0.9;}
+.stats{font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12px; line-height:1.6; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px; min-height:100px;}
+button{background: linear-gradient(180deg,#2b307a,#1d215c); color:var(--ink); border:1px solid rgba(255,255,255,0.12); padding:8px 12px; border-radius:10px; cursor:pointer; width: 100%; transition: background-color 0.2s ease;}
+button:hover {background: linear-gradient(180deg,#3a419b,#292f7d);}
+button.secondary{background: rgba(255,255,255,0.06);}
+button.secondary:hover{background: rgba(255,255,255,0.1);}
+select,input[type="range"]{width:100%;}
+.select{padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.14); background: rgba(0,0,0,0.25); color:var(--ink);}
+.badge{display:inline-flex; align-items:center; gap:8px; font-size:12px;}
+.dot{width:10px; height:10px; border-radius:50%;}
+.dot1{background:var(--accent);} .dot2{background:var(--ok);} .dot3{background:var(--mut);} .dot4{background:#b1b8ff;}
+svg{width:100%; height:100%; display:block;}
+.tip{position:absolute; pointer-events:none; background:#0c0e22; border:1px solid rgba(255,255,255,0.12); color:var(--ink); padding:6px 8px; font-size:12px; border-radius:8px; opacity:0; transition:opacity .12s; z-index: 100;}
+.kbd{font-family: ui-monospace, Menlo, Consolas, monospace; background: rgba(255,255,255,0.08); padding:2px 6px; border-radius:6px; border:1px solid rgba(255,255,255,0.18); font-size:11px;}
+.footer{margin-top: auto; padding-top: 10px; opacity:.75; font-size:11px;}
+small.dim{display:block; opacity:.8; margin-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="panel stage" id="stage">
+    <svg id="svg" viewBox="-500 -350 1000 700">
+      <defs>
+        <radialGradient id="gNode" cx="50%" cy="45%">
+          <stop offset="0%" stop-color="#bcd0ff" stop-opacity="0.95"/>
+          <stop offset="70%" stop-color="#7fa2ff" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#6c7be0" stop-opacity="0.20"/>
+        </radialGradient>
+      </defs>
+      <g id="rootGroup"></g>
+    </svg>
+    <div class="toolbar">
+      <div class="chip">Vista: <b id="view-chip">Nidos</b></div>
+      <div class="chip">Zoom: rueda</div>
+      <div class="chip">Pan: arrastrar</div>
+      <div class="chip">Doble click: expandir/colapsar</div>
+    </div>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="panel sidebar">
+    <h1>Árbol Fractal Anidado</h1>
+    <h2>Controles</h2>
+    <div class="grid">
+      <div>
+        <label for="view">Vista</label>
+        <select id="view" class="select">
+          <option value="packed">Nidos (círculos anidados)</option>
+          <option value="links">Aristas (enlaces)</option>
+        </select>
+      </div>
+      <div>
+        <label for="seed">Semilla</label>
+        <select id="seed" class="select">
+          <option value="auto">Aleatoria</option>
+          <option value="balanced">Balanceada</option>
+          <option value="bushy">Muy ramificada</option>
+          <option value="stringy">Enredadera</option>
+        </select>
+      </div>
+      <div>
+        <label for="depth">Profundidad máx.: <span id="lblDepth">5</span></label>
+        <input type="range" id="depth" min="2" max="8" step="1" value="5"/>
+      </div>
+      <div>
+        <label for="branch">Factor hijos: <span id="lblBranch">0.55</span></label>
+        <input type="range" id="branch" min="0.2" max="0.9" step="0.05" value="0.55"/>
+      </div>
+    </div>
+    <div class="row">
+      <button id="btnReseed">Regenerar</button>
+      <button id="btnMutate" class="secondary">Mutar</button>
+    </div>
+    <div class="row">
+      <button id="btnCollapse" class="secondary">Colapsar Todo</button>
+      <button id="btnExpand" class="secondary">Expandir Todo</button>
+    </div>
+    <h2>Estado</h2>
+    <div class="stats" id="stats"></div>
+    <div class="footer">
+      <p>La vista <b>Nidos</b> realiza <i>circle packing</i> recursivo. La vista <b>Aristas</b> muestra el mismo árbol como un grafo radial.</p>
+      <p>Interacción: <span class="kbd">doble click</span> para expandir/colapsar, <span class="kbd">rueda</span> zoom, <span class="kbd">arrastrar</span> pan.</p>
+      <p style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Selección de Elementos del DOM ---
+  const DOM = {
+    svg: document.getElementById('svg'),
+    gRoot: document.getElementById('rootGroup'),
+    tip: document.getElementById('tip'),
+    viewSelect: document.getElementById('view'),
+    seedSelect: document.getElementById('seed'),
+    depthSlider: document.getElementById('depth'),
+    branchSlider: document.getElementById('branch'),
+    lblDepth: document.getElementById('lblDepth'),
+    lblBranch: document.getElementById('lblBranch'),
+    btnReseed: document.getElementById('btnReseed'),
+    btnMutate: document.getElementById('btnMutate'),
+    btnCollapse: document.getElementById('btnCollapse'),
+    btnExpand: document.getElementById('btnExpand'),
+    stats: document.getElementById('stats'),
+    viewChip: document.getElementById('view-chip'),
+    stage: document.getElementById('stage')
+  };
+
+  // --- Estado Global de la Aplicación ---
+  const state = {
+    tree: null,
+    view: 'packed',
+    depthMax: 5,
+    branchFactor: 0.55,
+    seedMode: 'auto',
+    transform: { k: 1, tx: 0, ty: 0 },
+    fractal: { D: NaN, R2: NaN, base: 'e' }
+  };
+
+  // --- Generación de Árbol Sintético ---
+  function rng(seed) {
+    let s = seed >>> 0;
+    return () => (s = (1664525 * s + 1013904223) >>> 0) / 2 ** 32;
+  }
+
+  function makeTree({ depth = 5, bias = "auto", seed = null } = {}) {
+    const R = seed ? rng(seed) : Math.random;
+    let id = 0;
+    
+    function nChildren(d) {
+      const r = R();
+      if (d >= depth) return 0;
+      switch (bias) {
+        case "balanced": return 2 + (r < 0.3 ? 1 : 0);
+        case "bushy": return 2 + (r < 0.7 ? 1 : 0) + (r < 0.35 ? 1 : 0);
+        case "stringy": return (r < 0.85) ? 1 : 0;
+        default: // auto
+          const factor = state.branchFactor;
+          if (r < (1 - factor) / 1.5) return 0;
+          if (r < factor) return 1;
+          if (r < factor + (1-factor)*0.8) return 2;
+          return 3;
+      }
+    }
+
+    function build(d) {
+      const k = nChildren(d);
+      const node = { id: id++, name: `n${id}`, children: [], collapsed: false, depth: d };
+      for (let i = 0; i < k; i++) node.children.push(build(d + 1));
+      return node;
+    }
+    return build(0);
+  }
+
+  function computeSize(node) {
+    if (!node.children || node.children.length === 0) {
+      node.size = 1;
+      node.height = 0;
+      return node.size;
+    }
+    let s = 1, h = 0;
+    for (const c of node.children) {
+      s += computeSize(c);
+      h = Math.max(h, c.height);
+    }
+    node.size = s;
+    node.height = h + 1;
+    return s;
+  }
+
+  // --- Conteos por nivel y dimensión fractal (regresión log-linear) ---
+  function levelCounts(root){
+    const counts = [];
+    (function dfs(n){
+      counts[n.depth] = (counts[n.depth]||0) + 1;
+      if(n.children && !n.collapsed) n.children.forEach(dfs);
+    })(root);
+    return counts;
+  }
+
+  function regressLogCounts(counts){
+    // usa niveles con conteo >= 1
+    const xs=[], ys=[];
+    for(let d=0; d<counts.length; d++){
+      const c = counts[d];
+      if(c && c>0){
+        xs.push(d);
+        ys.push(Math.log(c)); // base e
+      }
+    }
+    if(xs.length<2) return {D:NaN, R2:NaN};
+    const n=xs.length;
+    const mean = a=>a.reduce((s,v)=>s+v,0)/a.length;
+    const mx=mean(xs), my=mean(ys);
+    let num=0, den=0, sst=0;
+    for(let i=0;i<n;i++){
+      num += (xs[i]-mx)*(ys[i]-my);
+      den += (xs[i]-mx)*(xs[i]-mx);
+      sst += (ys[i]-my)*(ys[i]-my);
+    }
+    const slope = num/den;         // D ≈ pendiente
+    const intercept = my - slope*mx;
+    // R2
+    let ssr=0;
+    for(let i=0;i<n;i++){
+      const yhat = intercept + slope*xs[i];
+      ssr += (yhat - my)*(yhat - my);
+    }
+    const R2 = ssr/sst;
+    return {D:slope, R2};
+  }
+
+  // --- Algoritmos de Layout ---
+  function packCircle(node, radiusScale = 8, padding = 4) {
+    node.r = Math.max(6, Math.sqrt(node.size) * radiusScale);
+    if (!node.children || node.children.length === 0 || node.collapsed) {
+      node.childrenPos = [];
+      return;
+    }
+    for (const c of node.children) packCircle(c, radiusScale, padding);
+    
+    const kids = node.children.slice().sort((a, b) => b.r - a.r);
+    const placed = [];
+    const R = node.r - padding;
+    let angle = 0;
+
+    function nonOverlap(px, py, pr) {
+      for (const q of placed) {
+        if (Math.hypot(px - q.x, py - q.y) < pr + q.r + padding) return false;
+      }
+      return Math.hypot(px, py) + pr <= R;
+    }
+
+    for (const c of kids) {
+      let rad = Math.max(0, R - c.r - padding);
+      let found = false;
+      for (let t = 0; t < 360; t += 5) {
+        const a = angle + t * (Math.PI / 180);
+        const px = rad * Math.cos(a), py = rad * Math.sin(a);
+        if (nonOverlap(px, py, c.r)) {
+          c.x = px; c.y = py;
+          placed.push(c);
+          found = true;
+          break;
+        }
+      }
+      if (!found) { // Fallback
+        c.x = (R * 0.2) * (Math.random() - 0.5);
+        c.y = (R * 0.2) * (Math.random() - 0.5);
+        placed.push(c);
+      }
+      angle += Math.PI / 3;
+    }
+    node.childrenPos = placed;
+  }
+
+  function layoutRadial(node, radiusStep = 60, angleA = 0, angleB = 2 * Math.PI, depth = 0) {
+    node.x = depth * radiusStep;
+    node.sectorCenter = (angleA + angleB) / 2;
+    if (!node.children || node.children.length === 0 || node.collapsed) return;
+    
+    let a = angleA;
+    const total = node.children.reduce((s, c) => s + c.size, 0) || 1;
+    for (const c of node.children) {
+      const span = (angleB - angleA) * (c.size / total);
+      layoutRadial(c, radiusStep, a, a + span, depth + 1);
+      a += span;
+    }
+  }
+
+  function toCartesian(node) {
+    const ang = node.sectorCenter || 0;
+    node._cx = node.x * Math.cos(ang);
+    node._cy = node.x * Math.sin(ang);
+    if (node.children && !node.collapsed) {
+      for (const c of node.children) toCartesian(c);
+    }
+  }
+
+  // --- Renderizado SVG ---
+  function draw() {
+    DOM.gRoot.innerHTML = '';
+    if (!state.tree) return;
+
+    if (state.view === 'packed') {
+      const scale = 10 + 120 / Math.max(1, state.tree.height + 1);
+      packCircle(state.tree, scale, 6);
+      drawPacked(DOM.gRoot, state.tree, 0, 0);
+    } else {
+      const radiusStep = Math.max(60, 420 / (state.tree.height + 1));
+      layoutRadial(state.tree, radiusStep);
+      toCartesian(state.tree);
+      drawLinks(DOM.gRoot, state.tree);
+    }
+    applyTransform();
+  }
+
+  function drawPacked(g, node, ox, oy) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', ox);
+    circle.setAttribute('cy', oy);
+    circle.setAttribute('r', node.r);
+    circle.setAttribute('fill', 'url(#gNode)');
+    circle.setAttribute('stroke', 'rgba(255,255,255,0.14)');
+    circle.style.cursor = 'pointer';
+    g.appendChild(circle);
+    
+    setupNodeInteractions(circle, node);
+
+    if (node.children && !node.collapsed) {
+      for (const c of node.childrenPos) {
+        const sub = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        sub.setAttribute('transform', `translate(${ox + c.x}, ${oy + c.y})`);
+        g.appendChild(sub);
+        drawPacked(sub, c, 0, 0);
+      }
+    }
+  }
+
+  function drawLinks(g, node) {
+    if (node.children && !node.collapsed) {
+      for (const c of node.children) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const d = `M ${node._cx} ${node._cy} Q ${(node._cx + c._cx) / 2} ${(node._cy + c._cy) / 2} ${c._cx} ${c._cy}`;
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'rgba(110,124,224,0.55)');
+        path.setAttribute('stroke-width', 1.5);
+        g.appendChild(path);
+        drawLinks(g, c);
+      }
+    }
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', node._cx);
+    circle.setAttribute('cy', node._cy);
+    circle.setAttribute('r', Math.max(4, 3 + Math.log2(1 + node.size)));
+    circle.setAttribute('fill', 'rgba(121,161,255,0.9)');
+    circle.setAttribute('stroke', 'rgba(255,255,255,0.18)');
+    circle.style.cursor = 'pointer';
+    g.appendChild(circle);
+    setupNodeInteractions(circle, node);
+  }
+
+  // --- Lógica de la Aplicación y UI ---
+  function reseed() {
+    state.transform = { k: 1, tx: 0, ty: 0 };
+    state.seedMode = DOM.seedSelect.value;
+    state.depthMax = +DOM.depthSlider.value;
+    state.branchFactor = +DOM.branchSlider.value;
+    
+    const seed = state.seedMode === 'auto' ? Date.now() : state.seedMode.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+    state.tree = makeTree({ depth: state.depthMax, bias: state.seedMode, seed });
+    
+    computeSize(state.tree);
+
+    // calcular dimensión fractal
+    const counts = levelCounts(state.tree);
+    const {D, R2} = regressLogCounts(counts);
+    state.fractal = { D, R2, base:'e' };
+
+    draw();
+    updateStats();
+  }
+
+  function mutateTree(node, pAdd = 0.3, pDel = 0.25) {
+    if (!node) return;
+    if (!node.children) node.children = [];
+    if (Math.random() < pAdd) {
+      const leaf = makeTree({ depth: 2, bias: 'stringy' });
+      computeSize(leaf);
+      node.children.push(leaf);
+    }
+    if (node.children.length && Math.random() < pDel) {
+      node.children.splice(Math.floor(Math.random() * node.children.length), 1);
+    }
+    for (const c of node.children) {
+      if (Math.random() < state.branchFactor) mutateTree(c, pAdd * 0.9, pDel * 0.9);
+    }
+  }
+
+  function toggleAllNodes(node, isCollapsed) {
+      if (!node) return;
+      node.collapsed = isCollapsed;
+      if (node.children) {
+          node.children.forEach(child => toggleAllNodes(child, isCollapsed));
+      }
+  }
+
+  function updateStats() {
+    if (!state.tree) return;
+    let visibleNodes = 0, leaves = 0;
+    (function walk(n) {
+      visibleNodes++;
+      if (!n.collapsed && n.children && n.children.length > 0) {
+        n.children.forEach(walk);
+      } else {
+        leaves++;
+      }
+    })(state.tree);
+
+    const D = Number.isFinite(state.fractal.D) ? state.fractal.D.toFixed(3) : '—';
+    const R2 = Number.isFinite(state.fractal.R2) ? state.fractal.R2.toFixed(3) : '—';
+    
+    DOM.stats.innerHTML = `
+      Nodos totales: <b>${state.tree.size}</b><br>
+      Nodos visibles: <b>${visibleNodes}</b><br>
+      Hojas visibles: <b>${leaves}</b><br>
+      Altura del árbol: <b>${state.tree.height}</b>
+      <small class="dim">Dimensión fractal estimada (base e): <b>${D}</b> &nbsp;•&nbsp; R²: <b>${R2}</b></small>`;
+    DOM.viewChip.textContent = state.view === 'packed' ? 'Nidos' : 'Aristas';
+  }
+
+  // --- Interacción y Eventos ---
+  function setupNodeInteractions(element, node) {
+    const originalColor = element.getAttribute('fill');
+    
+    element.addEventListener('mousemove', e => {
+      DOM.tip.style.opacity = 1;
+      DOM.tip.style.left = (e.clientX + 12) + 'px';
+      DOM.tip.style.top = (e.clientY + 12) + 'px';
+      DOM.tip.innerHTML = `Nodo: <b>${node.name}</b><br/>Subárbol: <b>${node.size}</b><br/>Altura: <b>${node.height}</b>${node.collapsed ? '<br/><i>(colapsado)</i>' : ''}`;
+      element.setAttribute('fill', 'var(--ok)');
+    });
+    
+    element.addEventListener('mouseleave', () => {
+      DOM.tip.style.opacity = 0;
+      element.setAttribute('fill', originalColor);
+    });
+    
+    element.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      node.collapsed = !node.collapsed;
+      // recomputar stats y dimensión tras colapsar/expandir
+      computeSize(state.tree);
+      const counts = levelCounts(state.tree);
+      const {D, R2} = regressLogCounts(counts);
+      state.fractal = { D, R2, base:'e' };
+      draw();
+      updateStats();
+    });
+  }
+
+  function applyTransform() {
+    if (DOM.gRoot.firstChild) {
+      DOM.gRoot.firstChild.setAttribute('transform', `translate(${state.transform.tx}, ${state.transform.ty}) scale(${state.transform.k})`);
+    }
+  }
+  
+  function setupInteractions() {
+    let isPanning = false, lastPos = { x: 0, y: 0 };
+
+    DOM.stage.addEventListener('wheel', e => {
+      e.preventDefault();
+      const k = state.transform.k * (e.deltaY > 0 ? 0.9 : 1.1);
+      const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(DOM.svg.getScreenCTM().inverse());
+      
+      state.transform.tx = pt.x - (pt.x - state.transform.tx) * (k / state.transform.k);
+      state.transform.ty = pt.y - (pt.y - state.transform.ty) * (k / state.transform.k);
+      state.transform.k = Math.max(0.1, Math.min(10, k));
+      applyTransform();
+    }, { passive: false });
+
+    DOM.stage.addEventListener('mousedown', e => {
+      isPanning = true;
+      lastPos = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mouseup', () => isPanning = false);
+    
+    window.addEventListener('mousemove', e => {
+      if (!isPanning) return;
+      const dx = e.clientX - lastPos.x;
+      const dy = e.clientY - lastPos.y;
+      lastPos = { x: e.clientX, y: e.clientY };
+      state.transform.tx += dx;
+      state.transform.ty += dy;
+      applyTransform();
+    });
+  }
+
+  function init() {
+    // --- Lógica de Controles ---
+    DOM.viewSelect.addEventListener('change', e => {
+      state.view = e.target.value;
+      draw();
+      updateStats();
+    });
+    DOM.depthSlider.addEventListener('input', e => DOM.lblDepth.textContent = e.target.value);
+    DOM.branchSlider.addEventListener('input', e => DOM.lblBranch.textContent = (+e.target.value).toFixed(2));
+    
+    DOM.depthSlider.addEventListener('change', reseed);
+    DOM.branchSlider.addEventListener('change', reseed);
+    DOM.seedSelect.addEventListener('change', reseed);
+    
+    DOM.btnReseed.addEventListener('click', reseed);
+    DOM.btnMutate.addEventListener('click', () => {
+      mutateTree(state.tree);
+      computeSize(state.tree);
+      const counts = levelCounts(state.tree);
+      const {D, R2} = regressLogCounts(counts);
+      state.fractal = { D, R2, base:'e' };
+      draw();
+      updateStats();
+    });
+    DOM.btnCollapse.addEventListener('click', () => {
+      toggleAllNodes(state.tree, true);
+      if (state.tree) state.tree.collapsed = false; // Mantener la raíz visible
+      computeSize(state.tree);
+      const counts = levelCounts(state.tree);
+      const {D, R2} = regressLogCounts(counts);
+      state.fractal = { D, R2, base:'e' };
+      draw();
+      updateStats();
+    });
+    DOM.btnExpand.addEventListener('click', () => {
+      toggleAllNodes(state.tree, false);
+      computeSize(state.tree);
+      const counts = levelCounts(state.tree);
+      const {D, R2} = regressLogCounts(counts);
+      state.fractal = { D, R2, base:'e' };
+      draw();
+      updateStats();
+    });
+
+    setupInteractions();
+    reseed();
+  }
+
+  init();
+});
+</script>
+</body>
+</html>

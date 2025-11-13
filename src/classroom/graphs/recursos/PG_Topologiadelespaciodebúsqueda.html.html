@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Técnico: Algoritmos Genéticos vs. Programación Genética</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.85);
+      --bg-tertiary: rgba(248, 250, 252, 0.8);
+      --text-primary: #2c3e50;
+      --text-secondary: #34495e;
+      --text-light: #ffffff;
+      --accent-primary: #29b6f6;
+      --accent-secondary: #03a9f4;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.08);
+      --border-radius: 20px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.85);
+      --bg-tertiary: rgba(45, 55, 72, 0.7);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.8; background: var(--bg-primary); color: var(--text-primary); transition: var(--transition); min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; z-index: 1; }
+    .header { text-align: center; margin-bottom: 3rem; position: relative; }
+    .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+    .subtitle { font-size: 1.2rem; color: var(--text-light); font-weight: 400; opacity: 0.95; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); max-width: 900px; margin: auto; }
+
+    .theme-toggle { position: fixed; top: 2rem; right: 2rem; width: 60px; height: 60px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-secondary); backdrop-filter: blur(15px); box-shadow: var(--shadow-card); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-primary); transition: var(--transition); z-index: 1000; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(180deg); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 30px rgba(102, 126, 234, 0.3); }
+
+    .lesson-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .topic-card { background: var(--bg-secondary); backdrop-filter: blur(20px); border-radius: var(--border-radius); box-shadow: var(--shadow-card); border: 2px solid var(--border-color); overflow: hidden; transition: var(--transition); }
+    .topic-header { cursor: pointer; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .topic-title { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); }
+    .expand-icon { font-size: 1.2rem; color: var(--text-secondary); transition: var(--transition); }
+    .topic-card.open .expand-icon { transform: rotate(180deg); }
+    .topic-content { max-height: 0; overflow: hidden; transition: max-height 1.5s ease, padding 1.5s ease; background: var(--bg-tertiary); }
+    .topic-card.open .topic-content { max-height: 25000px; /* Increased max-height */ padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
+    .topic-content p, .topic-content ul { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .topic-content h4 { font-size: 1.2rem; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+    .topic-content ul { padding-left: 20px; }
+    .topic-content li { margin-bottom: 1rem; line-height: 1.7; }
+    .topic-content strong, .topic-content b { color: var(--text-primary); font-weight: 600; }
+    .topic-content code { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.05); padding: 2px 5px; border-radius: 4px; color: var(--accent-primary); }
+    [data-theme="dark"] .topic-content code { background: rgba(255,255,255,0.1); }
+    
+    .formula-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); text-align: center; font-size: 1.1em; }
+    [data-theme="dark"] .formula-container { background: rgba(0,0,0,0.2); }
+
+    .diagram-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin: 2.5rem 0; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+    [data-theme="dark"] .diagram-container { background: rgba(0,0,0,0.2); }
+    .diagram-title { font-weight: 600; text-align: center; margin-bottom: 2rem; color: var(--text-primary); font-size: 1rem; }
+    .diagram-flow, .diagram-grid { display: flex; justify-content: space-around; align-items: center; gap: 1rem; flex-wrap: wrap;}
+    .diagram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; gap: 1.5rem; }
+    .diagram-box { border: 2px solid var(--border-color); padding: 1rem; border-radius: 8px; text-align: center; background: var(--bg-secondary); box-shadow: var(--shadow-card); min-width: 120px; display: flex; flex-direction: column; justify-content: center; }
+    .diagram-box strong { display: block; font-size: 0.9em; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .diagram-box span { font-size: 0.8em; }
+    .diagram-arrow { flex-grow: 1; position: relative; text-align: center; }
+    .diagram-arrow::after { content: '→'; font-size: 2.5rem; color: var(--accent-primary); }
+    .diagram-arrow.down::after { content: '↓'; display: block; margin: 0.5rem 0; }
+    .diagram-arrow-label { font-size: 0.8em; font-weight: 500; }
+    .diagram-col { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .diagram-section { padding: 1rem; border: 2px dashed var(--border-color); border-radius: var(--border-radius); width: 100%; }
+    .diagram-section-title { font-weight: 600; text-align: center; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-primary); }
+
+    footer { text-align: center; margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border-color); }
+    footer p { color: var(--text-light); opacity: 0.9; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="theme-toggle" id="themeToggleButton" title="Cambiar tema"><i class="fas fa-moon" id="theme-icon"></i></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="main-title">Análisis Técnico Comparado: AG vs. PG</h1>
+      <p class="subtitle">Índice Técnico: Representación, Dinámica de Búsqueda, Operadores, Estructuras, Métricas y Aplicaciones en Algoritmos Genéticos y Programación Genética.</p>
+    </header>
+
+    <div class="lesson-container">
+        
+        <div class="topic-card open">
+            <div class="topic-header"><span class="topic-title">1. Planteamiento General y Separación Conceptual</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>El contraste entre algoritmos genéticos y programación genética no se agota en la forma de codificar soluciones; inaugura dos regímenes de búsqueda con geometrías distintas. En los algoritmos genéticos, el espacio de hipótesis suele modelarse como <code>{0,1}<sup>L</sup></code> o <code>ℝ<sup>L</sup></code> para una longitud <code>L</code> fija; la búsqueda opera sobre una variedad de dimensión constante con operadores que preservan esa dimensionalidad. En programación genética, por el contrario, el espacio de hipótesis es la unión disjunta de lenguajes de programas de todos los tamaños y formas, <code>P = ⋃<sub>n≥1</sub> T<sub>n</sub></code>, donde <code>T<sub>n</sub></code> denota el conjunto de árboles o grafos ejecutables con <code>n</code> nodos, de modo que la dimensionalidad efectiva y la topología varían durante la evolución.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Geometría del Espacio de Búsqueda</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Algoritmo Genético (AG)</div>
+                            <div class="diagram-box"><strong>Espacio Fijo</strong><span>Cadenas de longitud L en {0,1}<sup>L</sup></span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Dimensión Constante</strong><span>La búsqueda optimiza valores dentro de una estructura fija.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética (PG)</div>
+                            <div class="diagram-box"><strong>Espacio Variable</strong><span>Árboles/programas de tamaño y forma variables.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Topología Dinámica</strong><span>La búsqueda optimiza la estructura y los valores simultáneamente.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">2. Representación, Topología y Genotipo–Fenotipo</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En algoritmos genéticos con codificación binaria, el genotipo es un vector <code>x = (x<sub>1</sub>, ..., x<sub>L</sub>) ∈ {0,1}<sup>L</sup></code>. Una función de decodificación <code>ϕ: {0,1}<sup>L</sup> → X</code> traduce el cromosoma a un fenotipo <code>θ = ϕ(x)</code> que vive en el dominio de decisión <code>X</code>. Cuando <code>ϕ</code> es separable por loci y la aptitud <code>f(θ)</code> es suave o al menos Lipschitz en <code>θ</code>, la distancia de Hamming <code>d<sub>H</sub>(x, y)</code> se correlaciona con cambios moderados en el fenotipo, salvo epistasis fuerte.</p>
+                <p>En programación genética, el genotipo es un programa <code>p</code> representado por un árbol de sintaxis abstracta <code>t ∈ T</code> sobre un conjunto de funciones <code>F</code> y terminales <code>Term</code>, con clausura semántica. La interpretación <code>⟦t⟧: I → O</code> asigna a cada entrada un comportamiento. En la práctica, dos sintaxis muy distintas pueden ser semánticamente idénticas, <code>⟦t<sub>1</sub>⟧ = ⟦t<sub>2</sub>⟧</code>, lo que induce regiones neutrales extensas y una topología con fibras semánticas sobre el cociente <code>T/∼</code>, donde <code>t<sub>1</sub> ∼ t<sub>2</sub></code> si y solo si son equivalentes.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Mapeo Genotipo → Fenotipo</div>
+                    <div class="diagram-grid">
+                         <div class="diagram-section">
+                            <div class="diagram-section-title">Algoritmo Genético</div>
+                            <div class="diagram-box"><strong>Genotipo</strong><span>Vector Binario<br><code>10110</code></span></div>
+                            <div class="diagram-arrow down"><span class="diagram-arrow-label">Función ϕ</span></div>
+                            <div class="diagram-box"><strong>Fenotipo</strong><span>Solución en Dominio X<br><code>θ = 22</code></span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética</div>
+                            <div class="diagram-box"><strong>Genotipo</strong><span>Árbol de Sintaxis<br><code>(+, (×, x, x), x)</code></span></div>
+                            <div class="diagram-arrow down"><span class="diagram-arrow-label">Interpretación ⟦.⟧</span></div>
+                            <div class="diagram-box"><strong>Fenotipo</strong><span>Comportamiento Funcional<br><code>f(x) = x²+x</code></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">3. Dinámica, Semántica y Neutralidad</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>En el régimen vectorial, la dinámica de la población puede aproximarse como una cadena de Markov sobre <code>{0,1}<sup>L</sup></code> con operadores de recombinación y mutación que garantizan irreducibilidad y aperiodicidad bajo condiciones estándar. La noción de esquema permite razonar sobre “bloques constructivos” cuya prevalencia se amplifica cuando su aptitud media supera a la población.</p>
+                <p>En el régimen estructural, la neutralidad y los precipicios semánticos generan un paisaje accidentado: pequeñas mutaciones sintácticas inducen saltos fenotípicos, mientras que grandes cambios pueden ser neutros. Por ello se introducen distancias semánticas <code>d<sub>S</sub>(p, q) = ∥F(p) − F(q)∥</code> definidas sobre vectores de salidas <code>F(p) = (p(x<sup>(1)</sup>), ..., p(x<sup>(m)</sup>))</code> respecto de un banco de casos.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Naturaleza del Paisaje de Aptitud</div>
+                     <div class="diagram-grid">
+                        <div class="diagram-box"><strong><i class="fas fa-chart-line"></i> Paisaje en AG</strong><span>Generalmente más suave. La distancia de Hamming se correlaciona con la aptitud. Búsqueda localmente más predecible.</span></div>
+                        <div class="diagram-box"><strong><i class="fas fa-mountain"></i> Paisaje en PG</strong><span>Rugoso y con "precipicios". Pequeños cambios sintácticos pueden causar grandes saltos en la aptitud. Contiene vastas mesetas neutrales.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">4. Operadores en Algoritmos Genéticos Binarios</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Se supone una población <code>P<sub>t</sub> = {x<sup>(1)</sup>, ..., x<sup>(N)</sup>} ⊂ {0,1}<sup>L</sup></code> en la generación <code>t</code>. La selección, cruce y mutación son los motores de la evolución.</p>
+                <div class="formula-container"><code>π(x) = f(ϕ(x)) / ∑<sub>z∈P<sub>t</sub></sub> f(ϕ(z))</code></div>
+                <div class="diagram-container">
+                    <div class="diagram-title">Operadores Clásicos en AG Binario</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Cruce de un Punto</strong><span>Padre A: 110|10<br>Padre B: 001|01<br>↓<br>Hijo 1: 11001<br>Hijo 2: 00110</span></div>
+                        <div class="diagram-box"><strong>Mutación Puntual (Flip)</strong><span>Probabilidad p<sub>m</sub> por bit.<br>Original: 10110<br>↓<br>Mutado: 10010</span></div>
+                    </div>
+                </div>
+                <h4>Teorema de los Esquemas</h4>
+                <p>Formaliza la propagación de "bloques constructivos" (esquemas <code>H</code>). La cota inferior para el número esperado de instancias <code>m(H, t+1)</code> es:</p>
+                <div class="formula-container"><code>E[m(H,t+1)] ≥ m(H,t) [f̄(H,t)/f̄(t)] (1 - p<sub>c</sub>[δ(H)/(L-1)]) (1 - p<sub>m</sub>)<sup>o(H)</sup></code></div>
+                <h4>Funciones de Ejemplo</h4>
+                <ul>
+                    <li><b>OneMax:</b> <code>f(x) = ∑x<sub>i</sub></code>. Paisaje simple y unimodal.</li>
+                    <li><b>Trap Functions:</b> <code>trap<sub>k</sub>(u)</code>. Engaña al algoritmo hacia óptimos locales (ej. <code>0<sup>k</sup></code>) lejos del global (<code>1<sup>k</sup></code>).</li>
+                    <li><b>Paisajes NK:</b> Controlan la rugosidad (epistasis) mediante el parámetro <code>K</code>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">5. Estructuras en Programación Genética</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Un programa es un árbol enraizado etiquetado por símbolos de un conjunto de funciones <code>F</code> y terminales <code>Term</code>. La clausura y el tipado (fuerte) aseguran la validez sintáctica y semántica de los programas generados.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Variantes de Representación en PG</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>PG Arbórea (Estándar)</strong><span>Soluciones como Árboles de Sintaxis Abstracta (AST).</span></div>
+                        <div class="diagram-box"><strong>PG Lineal</strong><span>Secuencia de instrucciones para una máquina de registros.</span></div>
+                        <div class="diagram-box"><strong>PG Cartesiana</strong><span>Grafos acíclicos en una rejilla, permite reutilización de nodos.</span></div>
+                        <div class="diagram-box"><strong>PG Gramatical</strong><span>Evoluciona reglas de derivación de una gramática formal.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">6. Operadores de Variación en Programación Genética</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Los operadores en PG manipulan directamente la estructura de los programas.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Operadores Principales en PG Arbórea</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Cruce por Subárbol</div>
+                            <div class="diagram-box"><strong>Padre A</strong><span>Selecciona un subárbol.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Padre B</strong><span>Selecciona otro subárbol.</span></div>
+                            <div class="diagram-arrow down"></div>
+                             <div class="diagram-box"><strong>Hijo</strong><span>Intercambia los subárboles seleccionados.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Mutaciones Estructurales</div>
+                             <div class="diagram-box"><strong>Sustitución</strong><span>Cambia un nodo (ej. '+' por '×').</span></div>
+                             <div class="diagram-box"><strong>Regeneración</strong><span>Elimina y recrea un subárbol aleatoriamente.</span></div>
+                             <div class="diagram-box"><strong>Hoist</strong><span>Un subárbol es elevado para convertirse en la nueva raíz.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <h4>Inicialización y Control de Tamaño</h4>
+                <p>La inicialización se realiza con métodos como "full", "grow" o "ramped half-and-half". Para un control más preciso, <b>PTC2 (Probabilistic Tree Creation)</b> genera árboles que siguen una distribución de tamaño objetivo <code>π<sub>n</sub></code>, ayudando a prevenir el crecimiento descontrolado desde el inicio.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">7. Aptitud, Bloat, Parsimonia y Multiobjetivo</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La aptitud se mide con una función de pérdida, como el error cuadrático medio (MSE). El fenómeno del <b>bloat</b> es el crecimiento del tamaño del programa sin una mejora correspondiente en la aptitud.</p>
+                <div class="formula-container"><code>F̃(p) = -E(p) - λ C(p)</code></div>
+                <p>Esta fórmula introduce una penalización de parsimonia, donde <code>E(p)</code> es el error, <code>C(p)</code> es la complejidad (ej. número de nodos), y <code>λ</code> es el coeficiente de regularización. Esto es una aproximación a la regularización L₀.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Manejo de Complejidad vs. Error (Multiobjetivo)</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-col">
+                            <div class="diagram-box"><strong>Solución A</strong><span>Error Bajo<br>Complejidad Alta</span></div>
+                            <div class="diagram-box"><strong>Solución B</strong><span>Error Medio<br>Complejidad Media</span></div>
+                            <div class="diagram-box"><strong>Solución C</strong><span>Error Alto<br>Complejidad Baja</span></div>
+                        </div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Optimización<br>NSGA-II</span></div>
+                        <div class="diagram-box"><strong>Frontera de Pareto</strong><span>Conjunto de soluciones no dominadas que representan el mejor compromiso entre error y complejidad.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">8. Métricas Sintácticas y Semánticas</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Medir la distancia entre programas es clave para entender la diversidad de la población.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Comparación de Métricas de Distancia</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box"><strong>Distancia Sintáctica (d<sub>T</sub>)</strong><span>Basada en ediciones de árbol. Mide diferencias estructurales. <code>(+, x, x)</code> y <code>(×, 2, x)</code> son muy diferentes.</span></div>
+                        <div class="diagram-box"><strong>Distancia Semántica (d<sub>S</sub>)</strong><span>Basada en vectores de salida <code>∥F(p) - F(q)∥</code>. Mide diferencias de comportamiento. <code>(+, x, x)</code> y <code>(×, 2, x)</code> son semánticamente idénticos.</span></div>
+                    </div>
+                </div>
+                 <p>La distancia semántica es invariante a transformaciones que preservan el comportamiento, pero su cálculo puede ser costoso computacionalmente, ya que requiere evaluar los programas en un banco de casos de prueba.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">9. Ejemplos Integrales</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <h4>Ejemplo en AG (OneMax)</h4>
+                <p>Con <code>L=12</code>, <code>p<sub>m</sub>=1/L</code>. Dados dos padres:</p>
+                <ul>
+                    <li>Padre X: <code>101100|101110</code> (fitness=8)</li>
+                    <li>Padre Y: <code>111100|001100</code> (fitness=7)</li>
+                </ul>
+                <p>Un cruce en k=6 produce:</p>
+                <ul>
+                    <li>Hijo 1: <code>101100001100</code> (fitness=6)</li>
+                    <li>Hijo 2: <code>111100101110</code> (fitness=9)</li>
+                </ul>
+                <p>El Hijo 2 ha combinado exitosamente los mejores bloques de ambos padres.</p>
+                
+                <h4>Ejemplo en PG (Regresión Simbólica)</h4>
+                <p>Objetivo: <code>y = x² + x</code>. Conjunto de funciones <code>F={+, -, ×}</code>, terminales <code>Term={x, c}</code>.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Cruce en Regresión Simbólica</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>Padre A</strong><span>(<b>+</b>, (×, x, x), x)<br><i>Evalúa a x²+x</i></span></div>
+                        <div class="diagram-arrow"><span class="diagram-arrow-label">Cruce</span></div>
+                        <div class="diagram-box"><strong>Padre B</strong><span>(<b>-</b>, (×, c, x), c')<br><i>Evalúa a c·x - c'</i></span></div>
+                    </div>
+                    <div class="diagram-arrow down"></div>
+                    <div class="diagram-box"><strong>Hijo Resultante</strong><span>(<b>+</b>, (×, c, x), x)<br><i>Evalúa a c·x + x</i></span></div>
+                </div>
+                <p>El hijo hereda la estructura de alto nivel del Padre A, pero un bloque de construcción del Padre B. La evolución posterior podría ajustar el valor de la constante <code>c</code> o reemplazar esa estructura.</p>
+            </div>
+        </div>
+        
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">10. Protocolo de Inicialización PTC2 con Profundidad Adaptativa</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>Para controlar el bloat y mantener la estabilidad, se utiliza un protocolo que combina PTC2 con un límite de profundidad dinámico.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Ciclo de Control de Tamaño y Profundidad</div>
+                    <div class="diagram-flow">
+                        <div class="diagram-box"><strong>1. Medir Tamaño Medio</strong><span>Calcular <code>N̄<sub>t</sub></code> en la gen. <code>t</code></span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>2. Ajustar Profundidad Límite</strong><span><code>d<sub>t</sub> = min(d<sub>max</sub>, ⌊β·N̄<sub>t</sub>⌋)</code></span></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box"><strong>3. Generar/Mutar</strong><span>Usar PTC2 y mutaciones (ej. hoist) con el nuevo límite <code>d<sub>t</sub></code></span></div>
+                    </div>
+                </div>
+                <p>Este ciclo de retroalimentación (feedback) estabiliza el tamaño promedio <code>E[N<sub>t</sub>]</code> alrededor de un valor objetivo <code>μ<sub>0</sub></code>, previniendo el crecimiento descontrolado sin sacrificar la exploración estructural.</p>
+            </div>
+        </div>
+
+        <div class="topic-card">
+            <div class="topic-header"><span class="topic-title">11. Analogía Integradora y Criterios de Ingeniería</span><i class="fas fa-chevron-down expand-icon"></i></div>
+            <div class="topic-content">
+                <p>La elección entre AG y PG depende de la naturaleza del problema.</p>
+                <div class="diagram-container">
+                    <div class="diagram-title">Analogía del Sintetizador Modular</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Algoritmo Genético</div>
+                            <div class="diagram-box"><strong>Acción</strong><span>Ajustar las "perillas" de módulos con una configuración fija.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Criterio de Uso</strong><span>La estructura de la solución es conocida o parametrizable. Se optimizan los parámetros.</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Programación Genética</div>
+                            <div class="diagram-box"><strong>Acción</strong><span>Reconectar los cables entre módulos, cambiando la arquitectura del sistema.</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Criterio de Uso</strong><span>La estructura de la solución es desconocida. Se busca una composición funcional novedosa.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Si la estructura óptima es conocida, se debe usar un AG. Si la estructura es parte del problema, la PG ofrece el sesgo inductivo adecuado, siempre que se controle el crecimiento y se evalúe la robustez de las soluciones.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+      <p>Material Elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </div>
+  
+  <script>
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                card.classList.toggle('open');
+            });
+        });
+    })();
+  </script>
+</body>
+</html>

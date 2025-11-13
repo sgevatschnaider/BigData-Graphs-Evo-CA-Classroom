@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distancia Sintáctica vs. Distancia Semántica — Visualización Interactiva</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#121821; --ink:#eaf2ff; --muted:#9fb3c8; --line:#1c2430;
+      --p:#6aa6ff; --q:#ff6b9d; --grid:#182233; --ok:#8ef0d4; --warn:#ffd38e; --err:#ff938e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+         background:linear-gradient(120deg,#0b0f14,#0d1420 50%,#0b0f14); color:var(--ink)}
+    header{padding:22px 20px 10px; border-bottom:1px solid var(--line)}
+    h1{margin:0 0 6px; font-size:20px; font-weight:700}
+    .sub{color:var(--muted); font-size:13px}
+    main{padding:18px; display:grid; gap:16px; grid-template-columns: 390px 1fr}
+    @media (max-width: 1100px){ main{grid-template-columns: 1fr} }
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+    .card h2{margin:.2rem 0 1rem; font-size:16px; color:#d7e7ff}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    label{font-size:12px; color:var(--muted); display:block; margin:6px 0 6px}
+    textarea, input[type="number"], select{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #263141; background:#0f1520; color:var(--ink); outline:none; font-family:ui-monospace,Menlo,Consolas,monospace}
+    textarea{min-height:80px; resize:vertical}
+    textarea:focus, input[type="number"]:focus{border-color:#2f4768; box-shadow:0 0 0 4px rgb(106 166 255 / .15)}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .row .fill{flex:1}
+    button{background:linear-gradient(180deg,#5d97ff,#3c78f0); border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; letter-spacing:.2px}
+    button.ghost{background:#0f1520; border:1px solid #263141}
+    .note{font-size:12px; color:var(--muted)}
+    .formula{font-family: ui-monospace, Menlo, Consolas, "Courier New", monospace; background:#0f1520; border:1px dashed #2a384d; padding:8px 10px; border-radius:10px; color:#e4eeff}
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    svg{width:100%; height:360px; background:#0f1520; border-radius:12px; border:1px solid var(--line)}
+    canvas.chart{width:100%; height:300px; background:#0f1520; border-radius:12px; border:1px solid var(--line); display:block}
+    table{width:100%; border-collapse:collapse; font-size:13px; margin-top:12px}
+    th, td{padding:8px 10px; border-bottom:1px solid #1e2735}
+    th{color:#cfe1ff; text-align:left; font-weight:600}
+    tr:hover td{background:#0d131e}
+    .badge{display:inline-block; padding:2px 8px; border-radius:6px; background:#0f1520; border:1px solid #243247; font-size:11px; color:#cfe1ff}
+    .out{display:inline-block; min-width:90px}
+    .err{color:var(--err)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Distancia Sintáctica (d_T) vs. Distancia Semántica (d_S)</h1>
+    <div class="sub">Escriba programas en notación prefija tipo S-Expr. Operadores soportados: <span class="badge">+, -, *, /, sin, cos</span>; variables: <span class="badge">x</span>; constantes: enteros o reales.</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Programas P y Q</h2>
+      <div class="grid">
+        <div>
+          <label for="progP">Programa P (prefijo)</label>
+          <textarea id="progP">(+ x x)</textarea>
+        </div>
+        <div>
+          <label for="progQ">Programa Q (prefijo)</label>
+          <textarea id="progQ">(* 2 x)</textarea>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label for="preset">Presets</label>
+        <select id="preset">
+          <optgroup label="Equivalentes semánticamente (d_S = 0)">
+            <option value="(+ x x)|(* 2 x)">(+ x x) vs (* 2 x) — duplicación vs factor 2</option>
+            <option value="(+ x 0)|(x)">(+ x 0) vs (x) — elemento neutro suma</option>
+            <option value="(- x 0)|(x)">(- x 0) vs (x) — resta de cero</option>
+            <option value="(/ x 1)|(x)">(/ x 1) vs (x) — división por uno</option>
+            <option value="(+ (* x 0) x)|(x)">(+ (* x 0) x) vs (x) — anulación por cero</option>
+            <option value="(* (- 3 1) x)|(* 2 x)">(* (- 3 1) x) vs (* 2 x) — constantes equivalentes</option>
+            <option value="(cos 0)|(1)">(cos 0) vs (1) — constante igual</option>
+            <option value="(+ x 1)|(+ 1 x)">(+ x 1) vs (+ 1 x) — conmutatividad</option>
+          </optgroup>
+          <optgroup label="No equivalentes semánticamente (d_S > 0)">
+            <option value="(- x x)|(sin x)">(- x x) vs (sin x) — cero vs seno</option>
+            <option value="(* x x)|(x)">(* x x) vs (x) — cuadrático vs lineal</option>
+            <option value="(sin x)|(cos x)">(sin x) vs (cos x) — fases distintas</option>
+            <option value="(/ x x)|(1)">(/ x x) vs (1) — excepción en x=0 (penaliza)</option>
+            <option value="(/ (+ x 1) (- x 2))|(+ x 1)">(/ (+ x 1) (- x 2)) vs (+ x 1) — racional vs lineal</option>
+            <option value="(+ (* x x) 1)|(+ (* x x) 2)">(+ (* x x) 1) vs (+ (* x x) 2) — constantes distintas</option>
+          </optgroup>
+        </select>
+        <button id="btnLoad">Cargar</button>
+        <div class="fill"></div>
+        <button id="btnCalc">Recalcular</button>
+        <button id="btnPNG" class="ghost">Descargar gráfico</button>
+        <button id="btnCSV" class="ghost">Exportar CSV</button>
+      </div>
+      <details style="margin-top:8px">
+        <summary>Ayuda de sintaxis</summary>
+        <div class="note">Ejemplos válidos: <code>(+ x x)</code>, <code>(* 2 x)</code>, <code>(sin (* x x))</code>, <code>(/ (+ x 1) (- x 2))</code>. Espacios no significativos. Aridad: binaria para +, -, *, /; unaria para sin, cos; hojas: <code>x</code> o constantes.</div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Parámetros de evaluación</h2>
+      <div class="grid">
+        <div>
+          <label for="xmin">x mínimo</label>
+          <input id="xmin" type="number" step="0.1" value="-3">
+        </div>
+        <div>
+          <label for="xmax">x máximo</label>
+          <input id="xmax" type="number" step="0.1" value="3">
+        </div>
+        <div>
+          <label for="npts">Número de puntos</label>
+          <input id="npts" type="number" min="2" step="1" value="25">
+        </div>
+        <div>
+          <label for="norm">Norma para d_S</label>
+          <select id="norm"><option value="l2" selected>L2 (euclidiana)</option><option value="l1">L1 (Manhattan)</option><option value="linf">L∞ (máximo)</option></select>
+        </div>
+      </div>
+      <div class="note" style="margin-top:8px">Política de valores inválidos: si una evaluación produce NaN/∞ (por ejemplo, división por cero), se penaliza con un valor 1e6 en ese punto para el cálculo de <code>d_S</code>.</div>
+    </section>
+
+    <section class="card">
+      <h2>Árboles y gráfico de salidas</h2>
+      <div class="split">
+        <svg id="treeP" viewBox="0 0 600 360" aria-label="Árbol P"></svg>
+        <svg id="treeQ" viewBox="0 0 600 360" aria-label="Árbol Q"></svg>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="out">d_T(P,Q): <strong id="dT">-</strong></span>
+        <span class="out">d_S(P,Q): <strong id="dS">-</strong></span>
+        <span class="out">|P| tamaño: <strong id="sizeP">-</strong></span>
+        <span class="out">|Q| tamaño: <strong id="sizeQ">-</strong></span>
+        <div class="fill"></div>
+        <span class="badge" id="status"></span>
+      </div>
+      <canvas id="chart" class="chart" width="1200" height="300"></canvas>
+      <div class="note" style="margin-top:8px">El gráfico muestra las salidas P(x) y Q(x) en el rango especificado. Si coinciden, las curvas se superponen.</div>
+
+      <div style="margin-top:12px">
+        <h3>Tabla de evaluación</h3>
+        <table>
+          <thead><tr><th>x</th><th>P(x)</th><th>Q(x)</th><th>|Δ|</th></tr></thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="note" style="padding:14px 18px 28px">Material elaborado por el profesor Sergio Gevatschnaider</footer>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const progP = $('progP'), progQ = $('progQ');
+    const preset = $('preset'), btnLoad = $('btnLoad');
+    const xmin = $('xmin'), xmax = $('xmax'), npts = $('npts'), normSel = $('norm');
+    const dTOut = $('dT'), dSOut = $('dS'), sizePOut = $('sizeP'), sizeQOut = $('sizeQ'), status = $('status');
+    const treeP = $('treeP'), treeQ = $('treeQ');
+    const chart = $('chart'); const ctx = chart.getContext('2d');
+
+    const btnCalc = $('btnCalc'), btnPNG = $('btnPNG'), btnCSV = $('btnCSV');
+
+    // Parsing S-Expr (prefijo)
+    function tokenize(s){
+      return s.replace(/\(/g,' ( ').replace(/\)/g,' ) ').trim().split(/\s+/).filter(Boolean);
+    }
+    function parseExpr(tokens){
+      if(tokens.length===0) throw new Error('Expresión vacía');
+      const t = tokens.shift();
+      if(t==='('){
+        const list=[]; while(tokens[0]!==')'){ if(tokens.length===0) throw new Error('Paréntesis sin cerrar'); list.push(parseExpr(tokens)); }
+        tokens.shift(); // consume ')'
+        if(list.length===0) throw new Error('Expresión vacía ()');
+        return list; // lista prefija [op, ...]
+      } else if(t===')'){
+        throw new Error('Paréntesis inesperado')
+      } else {
+        // átomo: número o símbolo
+        const num = Number(t); if(!Number.isNaN(num)) return num; return String(t);
+      }
+    }
+    function parse(s){
+      return parseExpr(tokenize(s))
+    }
+
+    // Convertir lista prefija a árbol {label, children[]}
+    function toTree(expr){
+      if(Array.isArray(expr)){
+        const op = String(expr[0]);
+        const children = expr.slice(1).map(toTree);
+        return {label: op, children};
+      } else {
+        return {label: String(expr), children: []};
+      }
+    }
+
+    // Aridad esperada
+    function arityOf(label){
+      if(['+','-','*','/'].includes(label)) return 2;
+      if(['sin','cos'].includes(label)) return 1;
+      // constante o variable
+      return 0;
+    }
+
+    // Tamaño de árbol
+    function size(node){ return 1 + node.children.reduce((a,c)=>a+size(c),0); }
+
+    // Distancia sintáctica (edición de árbol simplificada)
+    // Costo de reemplazo: 1 si labels distintos; inserción/eliminación: tamaño del subárbol
+    function dT(a,b){
+      if(!a && !b) return 0;
+      if(!a) return size(b);
+      if(!b) return size(a);
+      const rep = (a.label===b.label) ? 0 : 1;
+      // emparejar por posición (árbol ordenado); si aridades difieren, se acolcha con null
+      const m = Math.max(a.children.length, b.children.length);
+      let sum = 0;
+      for(let i=0;i<m;i++){
+        sum += dT(a.children[i], b.children[i]);
+      }
+      return rep + sum;
+    }
+
+    // Evaluación semántica
+    function evalNode(node, x){
+      const L = node.label;
+      if(node.children.length===0){
+        if(L==='x') return x;
+        const n = Number(L); if(!Number.isNaN(n)) return n;
+        return NaN; // símbolo desconocido
+      }
+      const ev = node.children.map(c=>evalNode(c,x));
+      switch(L){
+        case '+': return ev[0] + ev[1];
+        case '-': return ev[0] - ev[1];
+        case '*': return ev[0] * ev[1];
+        case '/': return ev[1]===0 ? NaN : ev[0] / ev[1];
+        case 'sin': return Math.sin(ev[0]);
+        case 'cos': return Math.cos(ev[0]);
+        default: return NaN;
+      }
+    }
+
+    function linspace(a,b,n){ if(n<2) return [a,b]; const step=(b-a)/(n-1); return Array.from({length:n},(_,i)=>a+i*step); }
+
+    function semanticVector(node, xs){ return xs.map(x=>evalNode(node,x)); }
+
+    function dS(vecP, vecQ, norm){
+      const PEN = 1e6;
+      const diffs = vecP.map((v,i)=>{
+        const a = (Number.isFinite(v) ? v : PEN);
+        const b = (Number.isFinite(vecQ[i]) ? vecQ[i] : PEN);
+        return a-b;
+      });
+      if(norm==='l2'){
+        const s = Math.sqrt(diffs.reduce((acc,d)=>acc+d*d,0));
+        return s;
+      } else if(norm==='l1'){
+        const s = diffs.reduce((acc,d)=>acc+Math.abs(d),0);
+        return s;
+      } else { // linf
+        return diffs.reduce((m,d)=>Math.max(m, Math.abs(d)), 0);
+      }
+    }
+
+    // Render árbol en SVG
+    function measure(node){
+      if(!node) return {w:0,h:0};
+      if(node.children.length===0) return {w:60,h:60};
+      const kids = node.children.map(measure);
+      const w = Math.max(60, kids.reduce((a,m)=>a+m.w,0) + (node.children.length-1)*20);
+      const h = 60 + Math.max(...kids.map(k=>k.h));
+      return {w,h};
+    }
+    function layout(node, x, y){
+      if(node.children.length===0) return {x,y, label:node.label, children: []};
+      const kidsSize = node.children.map(measure);
+      const totalW = kidsSize.reduce((a,m)=>a+m.w,0) + (node.children.length-1)*20;
+      let curX = x - totalW/2;
+      const laid = [];
+      for(let i=0;i<node.children.length;i++){
+        const m = kidsSize[i];
+        const cx = curX + m.w/2;
+        laid.push(layout(node.children[i], cx, y+80));
+        curX += m.w + 20;
+      }
+      return {x,y, label:node.label, children: laid};
+    }
+    function renderTree(svg, node, color){
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      const m = measure(node);
+      const root = layout(node, 300, 40);
+      svg.setAttribute('viewBox', `0 0 600 ${Math.max(360, m.h+60)}`);
+      const NS = 'http://www.w3.org/2000/svg';
+      function el(name, attrs){ const e=document.createElementNS(NS,name); for(const k in attrs){ e.setAttribute(k, attrs[k]); } return e; }
+      function drawEdges(n){ n.children.forEach(c=>{ svg.appendChild(el('line', {x1:n.x, y1:n.y+18, x2:c.x, y2:c.y-18, stroke:'#243247', 'stroke-width':1.5})); drawEdges(c); }); }
+      function drawNodes(n){ n.children.forEach(drawNodes); svg.appendChild(el('circle',{cx:n.x, cy:n.y, r:18, fill:'#0f1520', stroke:color, 'stroke-width':2})); svg.appendChild(el('text',{x:n.x, y:n.y+4, 'text-anchor':'middle', 'font-size':'12', fill:color})).textContent = n.label; }
+      drawEdges(root); drawNodes(root);
+    }
+
+    function drawChart(xs, yp, yq){
+      const W=chart.width, H=chart.height; ctx.clearRect(0,0,W,H);
+      const padL=60,padR=20,padT=20,padB=40; const plotW=W-padL-padR, plotH=H-padT-padB;
+      ctx.fillStyle='#0f1520'; ctx.fillRect(0,0,W,H);
+      // axes
+      ctx.strokeStyle= '#223049'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,H-padB); ctx.lineTo(W-padR,H-padB); ctx.stroke();
+      // scales
+      const xMin = Math.min(...xs), xMax=Math.max(...xs);
+      const allY = yp.concat(yq).filter(Number.isFinite);
+      const yMin = allY.length? Math.min(...allY): -1;
+      const yMax = allY.length? Math.max(...allY): 1;
+      const xTo = x=> padL + (x - xMin)/(xMax-xMin||1) * plotW;
+      const yTo = y=> padT + (1 - (y - yMin)/(yMax-yMin||1)) * plotH;
+      // grid
+      ctx.strokeStyle = '#182233'; ctx.lineWidth=1; for(let i=0;i<=10;i++){ const y=padT+i*(plotH/10); ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke(); }
+      // lines
+      function drawLine(data, color){ ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.beginPath(); data.forEach((v,i)=>{ const x=xTo(xs[i]); const y=Number.isFinite(v)? yTo(v): yTo(yMax); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke(); }
+      drawLine(yp, '#6aa6ff'); drawLine(yq,'#ff6b9d');
+      // legend
+      ctx.fillStyle='#9fb3c8'; ctx.font='12px system-ui'; ctx.fillText('P(x)', padL+8, padT+14);
+      ctx.fillText('Q(x)', padL+58, padT+14);
+      ctx.fillStyle='#6aa6ff'; ctx.fillRect(padL-8, padT+6, 10,2);
+      ctx.fillStyle='#ff6b9d'; ctx.fillRect(padL+44, padT+6, 10,2);
+    }
+
+    function fmt(x){ if(Number.isNaN(x)) return 'NaN'; if(!Number.isFinite(x)) return '∞'; return x.toLocaleString('es-AR',{maximumFractionDigits:6}); }
+
+    function recompute(){
+      status.textContent='';
+      let exprP, exprQ, treeObjP, treeObjQ;
+      try{ exprP = parse(progP.value); treeObjP = toTree(exprP); } catch(e){ status.textContent='Error en P: '+e.message; status.style.color='var(--err)'; return; }
+      try{ exprQ = parse(progQ.value); treeObjQ = toTree(exprQ); } catch(e){ status.textContent='Error en Q: '+e.message; status.style.color='var(--err)'; return; }
+
+      // Distancia sintáctica
+      const dt = dT(treeObjP, treeObjQ);
+      dTOut.textContent = dt;
+      sizePOut.textContent = size(treeObjP);
+      sizeQOut.textContent = size(treeObjQ);
+
+      // Evaluaciones
+      const a = Number(xmin.value), b = Number(xmax.value), n = Math.max(2, Math.floor(Number(npts.value))||25);
+      const xs = linspace(a,b,n);
+      const vecP = semanticVector(treeObjP, xs);
+      const vecQ = semanticVector(treeObjQ, xs);
+      const ds = dS(vecP, vecQ, normSel.value);
+      dSOut.textContent = fmt(ds);
+
+      // Render
+      renderTree(treeP, treeObjP, '#6aa6ff');
+      renderTree(treeQ, treeObjQ, '#ff6b9d');
+      drawChart(xs, vecP, vecQ);
+
+      // Tabla
+      const tbody = $('tbl'); tbody.innerHTML='';
+      xs.forEach((x,i)=>{
+        const tr = document.createElement('tr');
+        const delta = Math.abs((Number.isFinite(vecP[i])?vecP[i]:NaN) - (Number.isFinite(vecQ[i])?vecQ[i]:NaN));
+        tr.innerHTML = `<td>${fmt(x)}</td><td>${fmt(vecP[i])}</td><td>${fmt(vecQ[i])}</td><td>${fmt(delta)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    btnLoad.addEventListener('click', ()=>{ const [p,q] = preset.value.split('|'); progP.value=p; progQ.value=q; recompute(); });
+    btnCalc.addEventListener('click', recompute);
+    [progP, progQ, xmin, xmax, npts, normSel].forEach(el=> el.addEventListener('input', recompute));
+
+    btnPNG.addEventListener('click', ()=>{ const link=document.createElement('a'); link.download='distancias_pg.png'; link.href=chart.toDataURL('image/png'); link.click(); });
+
+    btnCSV.addEventListener('click', ()=>{
+      // exportar xs, P(x), Q(x)
+      const a = Number(xmin.value), b = Number(xmax.value), n = Math.max(2, Math.floor(Number(npts.value))||25);
+      const xs = linspace(a,b,n);
+      let exprP, exprQ, treeObjP, treeObjQ; try{ exprP=parse(progP.value); treeObjP=toTree(exprP); }catch{}; try{ exprQ=parse(progQ.value); treeObjQ=toTree(exprQ);}catch{};
+      const vecP = treeObjP? semanticVector(treeObjP, xs):[];
+      const vecQ = treeObjQ? semanticVector(treeObjQ, xs):[];
+      const rows = [['x','P(x)','Q(x)']].concat(xs.map((x,i)=>[x, vecP[i], vecQ[i]]));
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob); const aEl=document.createElement('a'); aEl.href=url; aEl.download='evaluacion.csv'; aEl.click(); URL.revokeObjectURL(url);
+    });
+
+    // primer render
+    recompute();
+  </script>
+</body>
+</html>
