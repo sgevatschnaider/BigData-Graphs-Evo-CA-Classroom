@@ -153,6 +153,12 @@ Al finalizar el estudio de este material, serás capaz de:
 |**PG_piramide_de_utilidad.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta visualización interactiva ilustra el concepto de la "pirámide de utilidad" en Programación Genética. Partiendo del vasto universo de todos los programas sintácticamente posibles, la herramienta muestra cómo solo una fracción de ellos son ejecutables, una fracción aún menor son semánticamente válidos, un subconjunto más pequeño tiene un comportamiento "razonable", y finalmente, una porción ínfima resulta verdaderamente útil para resolver el problema. El usuario puede ajustar los parámetros que definen el tamaño total del espacio y las probabilidades condicionales en cada nivel de la pirámide, observando gráficamente la drástica reducción del número de soluciones de interés.</p></details> | [![Explorar Pirámide de Utilidad](https://img.shields.io/badge/Explorar-Pirámide%20de%20Utilidad%20en%20PG-9cf?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/pg_piramide_de_utilidad_en_gp_visualizacion_interactiva) |
 
 
+## Programación Genética – Preguntas y Respuestas
+
+| 📄 Recurso | 📥 Acceso |
+|---|---|
+| **PG_Preguntas_respuestas.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Cuestionario interactivo avanzado sobre Programación Genética y agentes evolutivos como AlphaEvolve. Contiene 20 preguntas de nivel experto con respuestas narrativas y profundas, diseñadas para que cada ítem funcione como una mini-clase teórica. Incluye acordeones desplegables, barra de progreso según preguntas dominadas, buscador en tiempo real y función de pregunta aleatoria para simulacros de examen. Ideal para preparar evaluaciones o repasar conceptos clave de PG en un entorno gamificado.</p></details> | [![Iniciar Cuestionario PG](https://img.shields.io/badge/Iniciar-Cuestionario%20PG-blue?style=for-the-badge&logo=quora)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/PG_Preguntas_respuestas.html) |
+
 ##  Instalación Rápida
 
 Se recomienda un entorno virtual para gestionar las dependencias.
