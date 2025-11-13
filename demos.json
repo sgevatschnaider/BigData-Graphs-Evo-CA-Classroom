@@ -154,6 +154,13 @@
     "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
+    "title": "Comparación AG vs PG - Crecimiento del Espacio de Búsqueda",
+    "path": "/src/classroom/graphs/recursos/PG_ag_vs_pg_comparador_de_crecimiento_html_completo.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:41:55-03:00"
+  },
+  {
     "title": "Comparativa: Programación Genética vs. AlphaEvolve",
     "path": "/src/classroom/graphs/recursos/ProgramacionGenetica_El Salto Evolutivo Programación Genética Clásica vs. Agentes Modernos.html",
     "tag": "Demo",
@@ -173,6 +180,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:22:05-03:00"
+  },
+  {
+    "title": "Crecimiento combinatorio de árboles (PG) — N(d) ≈ |T| + |F|·(N(d−1))^k",
+    "path": "/src/classroom/graphs/recursos/PG_Crecimiento combinatorio del espacio.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:41:55-03:00"
   },
   {
     "title": "Cuestionario Experto: Grafos de Cayley y Redes P2P",
@@ -628,6 +642,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Pirámide de utilidad en GP — Universo sintáctico → Programas útiles",
+    "path": "/src/classroom/graphs/recursos/PG_piramide_de_utilidad_en_gp_visualizacion_interactiva.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-13T15:41:55-03:00"
   },
   {
     "title": "Puentes de Königsberg — Grafo equivalente (interactivo)",
