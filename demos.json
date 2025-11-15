@@ -175,6 +175,13 @@
     "mtime": "2025-11-03T21:56:11-03:00"
   },
   {
+    "title": "Computadora de Origami – Visualización Educativa",
+    "path": "/src/classroom/graphs/recursos/ORGIGAMI-origami_COMPUTER.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
     "title": "Construcción del Grafo de Cayley Cay(Z_4, {±1})",
     "path": "/src/classroom/graphs/recursos/cayley-cuadrado.html",
     "tag": "Demo",
@@ -348,6 +355,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
+    "title": "Geometría Visual: Regla & Compás vs. Origami (Huzita–Hatori)",
+    "path": "/src/classroom/graphs/recursos/Origami_origami_euclides.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
   },
   {
     "title": "Glosario de Programación Genética",
@@ -630,6 +644,13 @@
     "mtime": "2025-11-10T19:59:12-03:00"
   },
   {
+    "title": "Máquina de Turing de Origami",
+    "path": "/src/classroom/graphs/recursos/Origami_origami_Máquina de Turing de Origami - Simulación Computacional.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
     "title": "n! vs 2^n — visualización interactiva (con animación)",
     "path": "/src/classroom/graphs/recursos/Hamilton_crecimiento_factorial_exponencial.html",
     "tag": "Demo",
@@ -649,6 +670,34 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-03T21:56:49-03:00"
+  },
+  {
+    "title": "Origami Folding Lab — Plegado Dinámico (H6) + Overlay 3D",
+    "path": "/src/classroom/graphs/recursos/Origami_orgiami-Folding-Lab-H6-Explicado.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Origami Turing-Completo — Demo Visual Interactiva",
+    "path": "/src/classroom/graphs/recursos/Origami_origami Turing‑Completo — Demo Visual Interactiva.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Origami Turing-Completo — Demo Visual Interactiva",
+    "path": "/src/classroom/graphs/recursos/Origami_origami _Turing-Completo — Demo Visual Interactiva.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Origami Turing-Completo — Demo Visual Interactiva (v2)",
+    "path": "/src/classroom/graphs/recursos/Origami_origami-turing-demo-v2.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-15T19:02:58-03:00"
   },
   {
     "title": "Perspectiva Algebraica: Grafos de Cayley",
