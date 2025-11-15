@@ -1,0 +1,1041 @@
+<html lang="es"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Origami Turing-Completo — Demo Visual Interactiva</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#111735; --soft:#18204a; --ink:#eaf1ff; --muted:#a9b3d1;
+      --accent:#6ea8fe; --accent2:#7ee7d7; --accent3:#ff8ab3; --ok:#3ad29f; --warn:#f5b971;
+      --grid:#24304f; --card:#0c1428; --shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100vh;background:
+      radial-gradient(1200px 600px at 20% -10%, #151b3a 0%, #0b1020 45%),
+      var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
+    header{
+      position:sticky;top:0;z-index:20;padding:12px 16px;
+      background:linear-gradient(180deg, rgba(11,16,32,.9), rgba(11,16,32,0));
+      backdrop-filter:blur(6px);border-bottom:1px solid rgba(110,168,254,.12);
+      display:flex;gap:12px;align-items:center;justify-content:space-between
+    }
+    header h1{margin:0;font-size:18px;letter-spacing:.4px;color:#dbe6ff}
+    header .sub{font-size:12px;color:var(--muted)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      background:linear-gradient(135deg,#1b3a78,#20408c);color:#fff;border:1px solid #2b3c6b;
+      padding:9px 12px;border-radius:12px;cursor:pointer;box-shadow:0 6px 18px rgba(54,98,210,.3);
+      font-size:13px
+    }
+    .btn.alt{background:#1a274d}
+    .btn.ok{background:linear-gradient(135deg,#2d7a4d,#3a9960)}
+    .btn.warn{background:linear-gradient(135deg,#7c5b1a,#c6922a)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:16px}
+    @media (max-width:1100px){.wrap{grid-template-columns:1fr}}
+    .panel{
+      background:linear-gradient(180deg, rgba(17,23,54,.95), rgba(17,23,54,.65));
+      border:1px solid rgba(110,168,254,.15);border-radius:16px;padding:14px;box-shadow:var(--shadow)
+    }
+    .panel h2{
+      margin:0 0 10px 0;font-size:14px;letter-spacing:.6px;color:#cdd7ff;text-transform:uppercase;
+      border-bottom:1px solid var(--grid);padding-bottom:8px
+    }
+    .row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+    label{color:var(--muted);font-size:13px}
+    select,input[type=number],input[type=range]{
+      background:#0f1530;color:var(--ink);border:1px solid var(--grid);border-radius:8px;padding:6px 8px;
+      font-size:13px
+    }
+    .small{font-size:12px;color:var(--muted)}
+    .legend{font-size:13.5px;color:var(--muted);line-height:1.55}
+    .legend ul{padding-left:18px;margin:8px 0}
+    .gatebox{display:grid;grid-template-columns:1fr;gap:10px}
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;padding:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:#0c1632;border:1px solid #24304f;border-radius:999px;font-size:12px}
+    .mv{width:22px;height:10px;border-radius:10px;border:2px dashed var(--accent2);display:inline-block}
+    .mm{width:22px;height:10px;border-radius:10px;border:2px dashed var(--accent3);border-style:solid}
+    .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    canvas{max-width:100%;border:1px solid var(--grid);border-radius:16px;background:#0c1422}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:800px){.two-col{grid-template-columns:1fr}}
+    footer{margin:14px auto 24px;text-align:center;color:#a4abdb;font-size:12px}
+    .credit{margin-top:10px;color:#cfd6ff;font-weight:600}
+    .tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .tab{padding:8px 12px;border:1px solid var(--grid);border-radius:10px;background:#0e1836;cursor:pointer;color:#bcd7ff}
+    .tab.active{background:#1a2a5a;color:#fff;border-color:#37559e}
+    .hidden{display:none}
+    .gridbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+    .hint{font-size:12px;color:#bcd7ff}
+    .kbd{background:#0a1a2a;border:1px solid #2a3a5a;border-radius:6px;padding:2px 6px;font-size:11px}
+    .steps{display:flex;gap:6px;flex-wrap:wrap}
+    .stepbox{background:#0a1734;border:1px solid #23345d;border-radius:10px;padding:6px 8px;font-size:12px;color:#cfe0ff}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid #2a3f73;cursor:pointer;font-size:12px;background:#0e1a3a}
+    .chip.active{background:#1a2a5a;border-color:#3a5fab}
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Origami Turing-Completo — Demo Visual Interactiva</h1>
+    <div class="sub">Bits como pliegues (Montaña = 1, Valle = 0) + Regla 110 = Computación Universal</div>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="btnDownload">⬇️ Descargar este HTML</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <main class="panel">
+    <div class="tabs">
+      <button class="tab" data-tab="gates">Compuertas</button>
+      <button class="tab" data-tab="cell">Celda 110 — Paso a paso</button>
+      <button class="tab" data-tab="rule110">Simulación Regla 110</button>
+      <button class="tab" data-tab="gadgets">Modo Gadgets</button>
+      <button class="tab active" data-tab="inspector">Inspector de Vértices</button>
+    </div>
+
+    <!-- Tab 1: Gates -->
+    <section id="tab-gates" class="gatebox hidden">
+      <div class="two-col">
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">Compuerta con Pliegues</h3>
+          <div class="small">Selecciona la compuerta y las entradas. El papel muestra los “wires” como <span class="pill"><span class="mm"></span> Montaña (1)</span> y <span class="pill"><span class="mv"></span> Valle (0)</span>.</div>
+          <div class="row">
+            <label>Compuerta</label>
+            <select id="gateSel">
+              <option>AND</option>
+              <option>OR</option>
+              <option>NOT</option>
+              <option selected="">NAND</option>
+              <option>NOR</option>
+              <option>XOR</option>
+            </select>
+            <label>A</label>
+            <select id="inA">
+              <option value="0">0 (Valle)</option>
+              <option value="1" selected="">1 (Montaña)</option>
+            </select>
+            <label>B</label>
+            <select id="inB">
+              <option value="0">0 (Valle)</option>
+              <option value="1" selected="">1 (Montaña)</option>
+            </select>
+            <button class="btn ok" id="btnCalc">Calcular</button>
+          </div>
+          <canvas id="cvGate" width="800" height="520" aria-label="Visualización de compuertas con pliegues"></canvas>
+          <div class="row">
+            <div class="pill">Salida: <strong id="gateOut">0</strong></div>
+            <div class="pill">Explicación: <span id="gateExp">Salida 1 solo si A=1 y B=1.</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">Notas</h3>
+          <div class="legend">
+            <ul>
+              <li><strong>Bits como pliegues:</strong> “pleats” valle-montaña-valle transportan 0/1.</li>
+              <li><strong>Compuertas:</strong> regiones que fuerzan combinaciones válidas (Kawasaki/Maekawa) para realizar AND/NOR/NAND/NOT.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Celda 110 paso a paso -->
+    <section id="tab-cell" class="hidden">
+      <div class="two-col">
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">“Célula” de Regla 110</h3>
+          <div class="small">Ahora con <strong>Paso 0</strong>: preparación de <em>inversores</em> (¬B y ¬C), y luego 1→6 con el flujo lógico.</div>
+          <canvas id="cvCell" width="900" height="560" aria-label="Celda Regla 110 en papel"></canvas>
+          <div class="row">
+            <label>A</label><select id="cA"><option>0</option><option selected="">1</option></select>
+            <label>B</label><select id="cB"><option>0</option><option selected="">1</option></select>
+            <label>C</label><select id="cC"><option>0</option><option selected="">1</option></select>
+            <button class="btn ok" id="btnCell">Propagar</button>
+            <div class="pill">Salida: <strong id="cellOut">1</strong></div>
+          </div>
+          <div class="row steps">
+            <button class="btn alt" id="cellPrev">◀ Paso anterior</button>
+            <button class="btn alt" id="cellNext">Paso siguiente ▶</button>
+            <div class="stepbox">Paso: <span id="cellStepIdx">6</span>/6</div>
+            <div class="stepbox">Explicación: <span id="cellExplain">out = ¬(P ∧ Q) = ¬(1 ∧ 0) = 1</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">Tabla de la Regla 110</h3>
+          <div class="legend">
+            <p><strong>111→0, 110→1, 101→1, 100→0, 011→1, 010→1, 001→1, 000→0.</strong></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Rule 110 -->
+    <section id="tab-rule110" class="hidden">
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Editor de Fila Inicial</h3>
+        <div class="legend">Haz clic en la grilla para activar/desactivar celdas (1 = Montaña, 0 = Valle). Luego <em>Evolucionar</em> o avanza con <em>Paso+</em>.</div>
+        <div class="row">
+          <label>Ancho</label><input type="number" id="width" value="121" min="21" max="401" step="2">
+          <label>Pasos</label><input type="number" id="steps" value="80" min="10" max="300">
+          <label>Tamaño celda</label><input type="number" id="cellSize" value="7" min="5" max="18">
+          <button class="btn" id="btnCenter">Pico central</button>
+          <button class="btn alt" id="btnRandom">Aleatorio</button>
+          <button class="btn" id="btnClear">Borrar</button>
+        </div>
+        <canvas id="cvInit" width="847" height="29" aria-label="Fila inicial editable"></canvas>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Evolución Regla 110</h3>
+        <div class="gridbar">
+          <div class="flex">
+            <button class="btn ok" id="btnRun">Evolucionar</button>
+            <button class="btn warn" id="btnAnimate">Animar</button>
+            <button class="btn alt" id="btnStep">Paso+</button>
+            <button class="btn alt" id="btnStepBack">Paso−</button>
+            <span class="hint">Atajos: <span class="kbd">Espacio</span> animar/pausar · <span class="kbd">→</span>/<span class="kbd">←</span> paso+/−</span>
+          </div>
+          <div class="pill">Generación: <strong id="gen">79</strong></div>
+        </div>
+        <canvas id="cvGrid" width="847" height="560" aria-label="Evolución Regla 110"></canvas>
+      </div>
+    </section>
+
+    <!-- Tab 4: Gadgets -->
+    <section id="tab-gadgets" class="hidden">
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Modo Gadgets</h3>
+        <div class="row">
+          <label>Gadget</label>
+          <select id="gadgetSel">
+            <option value="wire">Wire recto</option>
+            <option value="bend">Wire con curva</option>
+            <option value="delay">Delay (zig-zag)</option>
+            <option value="split">Splitter (fan-out)</option>
+            <option value="cross">Crossing (cruce)</option>
+            <option value="not">Inverter (NOT)</option>
+            <option value="twist">Twist (cambia fase)</option>
+            <option value="eater">Eater (sumidero)</option>
+          </select>
+          <label>A</label><select id="gadA"><option>0</option><option selected="">1</option></select>
+          <label class="gadBRow" style="display: none;">B</label><select id="gadB" class="gadBRow" style="display: none;"><option selected="">0</option><option>1</option></select>
+          <button class="btn ok" id="btnPulse">Iniciar pulso</button>
+        </div>
+        <canvas id="cvGad" width="900" height="420" aria-label="Gadgets de origami computacional"></canvas>
+        <div class="legend">
+          <p>Wire/Bend/Delay transportan el bit; Splitter duplica; Crossing cruza por capas; NOT/Twist invierten; Eater absorbe el pulso.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 5: Inspector de Vértices -->
+    <section id="tab-inspector" class="">
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Inspector de Vértices (Kawasaki &amp; Maekawa)</h3>
+        <div class="row">
+          <label>N° creases (par)</label>
+          <select id="viN">
+            <option value="4" selected="">4</option>
+            <option value="6">6</option>
+          </select>
+          <label>Tolerancia (°)</label>
+          <input id="viTol" type="number" value="1" min="0" max="10" step="0.5">
+          <button class="btn" id="viPresetK">Preset Kawasaki OK</button>
+          <button class="btn" id="viPresetM">Preset Maekawa OK</button>
+          <button class="btn alt" id="viRandom">Aleatorio</button>
+        </div>
+
+        <div class="row" id="viAnglesRow"><div class="chip" style="gap: 10px;">θ<sub>0</sub> <input type="range" min="10" max="340" value="181" step="1" id="viAng0">
+                   <span id="viAngVal0">181°</span></div><div class="chip" style="gap: 10px;">θ<sub>1</sub> <input type="range" min="10" max="340" value="54" step="1" id="viAng1">
+                   <span id="viAngVal1">54°</span></div><div class="chip" style="gap: 10px;">θ<sub>2</sub> <input type="range" min="10" max="340" value="124" step="1" id="viAng2">
+                   <span id="viAngVal2">124°</span></div><div class="chip">θ<sub>3</sub> = <strong id="viAngLast">10°</strong></div></div>
+        <div class="row" id="viMVRow"><div class="chip active" style="border-color: rgb(125, 79, 163);">M <small>(c0)</small></div><div class="chip " style="border-color: rgb(42, 63, 115);">V <small>(c1)</small></div><div class="chip " style="border-color: rgb(42, 63, 115);">V <small>(c2)</small></div><div class="chip active" style="border-color: rgb(125, 79, 163);">M <small>(c3)</small></div></div>
+
+        <canvas id="cvVI" width="900" height="500" aria-label="Inspector de vértices — condiciones locales"></canvas>
+
+        <div class="two-col">
+          <div class="card">
+            <h4 style="margin:0 0 6px 0">Kawasaki</h4>
+            <div class="legend">
+              <p><strong>Suma de ángulos alternos = 180°</strong> (para vértice plano con N par).</p>
+              <div class="pill">Suma alternos A: <span id="viAltA">305.0</span>°</div>
+              <div class="pill">Suma alternos B: <span id="viAltB">64.0</span>°</div>
+              <div class="pill">Residuo |A−180|: <span id="viResA">125.00</span>°</div>
+              <div class="pill">Residuo |B−180|: <span id="viResB">116.00</span>°</div>
+              <div class="pill">Estado: <strong id="viKStatus" style="color: rgb(255, 138, 179);">No cumple</strong></div>
+            </div>
+          </div>
+          <div class="card">
+            <h4 style="margin:0 0 6px 0">Maekawa</h4>
+            <div class="legend">
+              <p><strong>|M − V| = 2</strong> (diferencia entre pliegues Montaña y Valle).</p>
+              <div class="pill">M: <span id="viM">2</span></div>
+              <div class="pill">V: <span id="viV">2</span></div>
+              <div class="pill">Estado: <strong id="viMStatus" style="color: rgb(255, 138, 179);">No cumple</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <p>Puedes <strong>arrastrar</strong> un <em>crease</em> directamente en el canvas para ajustar los ángulos adyacentes
+             (se conserva la suma total de 360°). Los sliders y chips se sincronizan.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <aside class="panel">
+    <h2>Guía</h2>
+    <div class="card">
+      <div class="legend">
+        <p><strong>Convención MV:</strong> <span style="color:var(--accent3);font-weight:700">Montaña</span>=1 y <span style="color:var(--accent2);font-weight:700">Valle</span>=0.</p>
+        <p><strong>Kawasaki:</strong> en un vértice plano con N par, la suma de ángulos alternos debe ser 180°.</p>
+        <p><strong>Maekawa:</strong> |#Montaña − #Valle| = 2.</p>
+      </div>
+    </div>
+    <footer>
+      <div class="credit">Material elaborado por el profesor Sergio Gevatschnaider</div>
+    </footer>
+  </aside>
+</div>
+
+<script>
+const $ = sel => document.querySelector(sel);
+const $$ = sel => [...document.querySelectorAll(sel)];
+
+/* ---------- Tabs ---------- */
+$$('.tab').forEach(t => t.addEventListener('click', () => {
+  $$('.tab').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  const target = t.dataset.tab;
+  $('#tab-gates').classList.toggle('hidden', target !== 'gates');
+  $('#tab-cell').classList.toggle('hidden', target !== 'cell');
+  $('#tab-rule110').classList.toggle('hidden', target !== 'rule110');
+  $('#tab-gadgets').classList.toggle('hidden', target !== 'gadgets');
+  $('#tab-inspector').classList.toggle('hidden', target !== 'inspector');
+}));
+
+/* ---------- Drawing helpers ---------- */
+const colors = {
+  bg: '#0c1422',
+  ink: '#eaf1ff',
+  mountain: '#ff8ab3',
+  valley: '#7ee7d7',
+  wire: '#9ad1ff',
+  accent: '#6ea8fe',
+  muted: '#a9b3d1',
+  warn: '#f5b971',
+  ok: '#3ad29f'
+};
+function drawPleatLine(ctx, x1,y1,x2,y2, type){
+  ctx.save();
+  ctx.strokeStyle = (type==='M')? colors.mountain : colors.valley;
+  ctx.lineWidth = 3;
+  if(type==='V'){ ctx.setLineDash([6,6]); }
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.restore();
+}
+function drawWire(ctx, x,y, len, vertical, bit){
+  const s = 8;
+  if(vertical){
+    drawPleatLine(ctx, x, y, x, y+len, 'V');
+    drawPleatLine(ctx, x+s, y, x+s, y+len, 'M');
+    drawPleatLine(ctx, x+2*s, y, x+2*s, y+len, 'V');
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath();
+    const dx = bit ? -10 : 10;
+    ctx.moveTo(x+s, y+len*0.5);
+    ctx.lineTo(x+s+dx, y+len*0.5-6);
+    ctx.lineTo(x+s+dx, y+len*0.5+6);
+    ctx.closePath(); ctx.fill();
+  }else{
+    drawPleatLine(ctx, x, y, x+len, y, 'V');
+    drawPleatLine(ctx, x, y+s, x+len, y+s, 'M');
+    drawPleatLine(ctx, x, y+2*s, x+len, y+2*s, 'V');
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath();
+    const dy = bit ? -10 : 10;
+    ctx.moveTo(x+len*0.5, y+s);
+    ctx.lineTo(x+len*0.5-6, y+s+dy);
+    ctx.lineTo(x+len*0.5+6, y+s+dy);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+/* ---------- Gates ---------- */
+const cvGate = document.getElementById('cvGate');
+const gtx = cvGate.getContext('2d');
+const Wg = cvGate.width, Hg = cvGate.height;
+function gateEval(gate, a, b){
+  a = +a; b = +b;
+  switch(gate){
+    case 'AND': return a & b;
+    case 'OR': return a | b;
+    case 'NOT': return a ^ 1; // usa solo A
+    case 'NAND': return (a & b) ^ 1;
+    case 'NOR': return (a | b) ^ 1;
+    case 'XOR': return a ^ b;
+    default: return 0;
+  }
+}
+const gateExplain = {
+  'AND':'Salida 1 solo si A=1 y B=1.',
+  'OR':'Salida 1 si al menos una entrada es 1.',
+  'NOT':'Invierte A (B se ignora).',
+  'NAND':'0 solo si A=1 y B=1.',
+  'NOR':'1 solo si A=0 y B=0.',
+  'XOR':'1 si A y B son distintos.'
+};
+function drawGateCanvas(gate,a,b){
+  gtx.clearRect(0,0,Wg,Hg);
+  gtx.fillStyle = 'rgba(255,255,255,.05)'; gtx.fillRect(40,40,Wg-80,Hg-80);
+  gtx.strokeStyle = 'rgba(110,168,254,.25)'; gtx.lineWidth = 2; gtx.strokeRect(40,40,Wg-80,Hg-80);
+  gtx.fillStyle = colors.accent; gtx.font = 'bold 20px system-ui';
+  gtx.textAlign='center'; gtx.fillText('Compuerta '+gate+' en papel', Wg/2, 70);
+
+  const midY = Hg/2;
+  drawWire(gtx, 120, midY-120, 140, true, a);
+  drawWire(gtx, Wg-140, midY-120, 140, true, b);
+
+  const bx = Wg/2 - 120, by = midY-80, bw = 240, bh = 160;
+  gtx.fillStyle = 'rgba(110,168,254,.18)'; gtx.fillRect(bx,by,bw,bh);
+  gtx.strokeStyle = colors.accent; gtx.lineWidth=3; gtx.strokeRect(bx,by,bw,bh);
+  gtx.fillStyle = colors.ink; gtx.font = 'bold 24px system-ui'; gtx.textAlign='center';
+  gtx.fillText(gate, Wg/2, by+bh/2+8);
+
+  gtx.strokeStyle = colors.wire; gtx.lineWidth=2; gtx.setLineDash([5,6]);
+  gtx.beginPath(); gtx.moveTo(120+8, midY-120+8); gtx.lineTo(bx, by+30); gtx.stroke();
+  gtx.beginPath(); gtx.moveTo(Wg-140+8, midY-120+8); gtx.lineTo(bx+bw, by+bh-30); gtx.stroke();
+  gtx.setLineDash([]);
+
+  const out = gateEval(gate,a,b);
+  drawWire(gtx, Wg/2-40, by+bh, 180, true, out);
+  gtx.fillStyle = colors.mountain; gtx.font='bold 14px system-ui'; gtx.textAlign='left';
+  gtx.fillText('A = '+a, 80, midY-130);
+  gtx.textAlign='right'; gtx.fillText('B = '+b, Wg-80, midY-130);
+  gtx.textAlign='center'; gtx.fillStyle = colors.accent;
+  gtx.fillText('Salida = '+out, Wg/2, by+bh+200);
+  $('#gateOut').textContent = out;
+  $('#gateExp').textContent = gateExplain[gate];
+}
+drawGateCanvas('NAND',1,1);
+$('#btnCalc').addEventListener('click', ()=>{
+  const g = $('#gateSel').value;
+  const a = +$('#inA').value, b = +$('#inB').value;
+  drawGateCanvas(g,a,b);
+});
+['gateSel','inA','inB'].forEach(id => $('#'+id).addEventListener('change', ()=>$('#btnCalc').click()));
+
+/* ---------- Celda 110 paso a paso (0–6) ---------- */
+const cvCell = document.getElementById('cvCell');
+const ctxC = cvCell.getContext('2d');
+const Wc = cvCell.width, Hc = cvCell.height;
+const rule110 = [0,1,1,1,0,1,1,0];
+let cellStep = 0, cellState = {A:1,B:1,C:1};
+function drawCellGadget(step=-1){
+  ctxC.clearRect(0,0,Wc,Hc);
+  ctxC.fillStyle='rgba(255,255,255,.05)'; ctxC.fillRect(40,40,Wc-80,Hc-80);
+  ctxC.strokeStyle='rgba(110,168,254,.25)'; ctxC.lineWidth=2; ctxC.strokeRect(40,40,Wc-80,Hc-80);
+  ctxC.fillStyle=colors.accent; ctxC.font='bold 20px system-ui'; ctxC.textAlign='center';
+  ctxC.fillText('Celda Regla 110 — Paso a paso', Wc/2, 70);
+
+  const A=cellState.A, B=cellState.B, C=cellState.C;
+  const notb = B^1, notc = C^1;
+  const X = A | notb;
+  const Y = notb & C;
+  const Z = B & notc;
+  const P = X;
+  const Q = (Y | Z) ^ 1;
+  const out = (P & Q) ^ 1;
+
+  // entradas
+  drawWire(ctxC, 160, 120, 120, true, A);
+  drawWire(ctxC, Wc/2-12, 120, 120, true, B);
+  drawWire(ctxC, Wc-160-16, 120, 120, true, C);
+  ctxC.fillStyle = colors.mountain; ctxC.font='bold 14px system-ui';
+  ctxC.fillText('A', 160+10, 114); ctxC.fillText('B', Wc/2, 114); ctxC.fillText('C', Wc-160, 114);
+
+  function box(x,y,w,h,label,active=false){
+    ctxC.fillStyle = active? 'rgba(110,168,254,.30)' : 'rgba(110,168,254,.14)'; ctxC.fillRect(x,y,w,h);
+    ctxC.strokeStyle = active? colors.accent : 'rgba(110,168,254,.35)'; ctxC.lineWidth= active? 3:2; ctxC.strokeRect(x,y,w,h);
+    ctxC.fillStyle = colors.ink; ctxC.font='bold 16px system-ui'; ctxC.textAlign='center'; ctxC.fillText(label, x+w/2, y+h/2+6);
+  }
+  const cx = Wc/2, cy = Hc/2+10;
+  const pos = {
+    INVB:{x:cx-110,y:cy-170,w:70,h:40},
+    INVC:{x:cx+170,y:cy-170,w:70,h:40},
+    OR:{x:cx-260,y:cy-100,w:120,h:60},
+    ANDY:{x:cx-60,y:cy-100,w:120,h:60},
+    ANDZ:{x:cx+120,y:cy-100,w:120,h:60},
+    BUF:{x:cx-140,y:cy-10,w:120,h:60},
+    NOR:{x:cx+20,y:cy-10,w:120,h:60},
+    NAND:{x:cx-60,y:cy+80,w:120,h:60}
+  };
+  const activeNames = ['INVB','INVC','OR','ANDY','ANDZ','BUF','NOR','NAND'];
+  activeNames.forEach((k,i)=> box(pos[k].x,pos[k].y,pos[k].w,pos[k].h,k, step===i));
+
+  // conexiones e inversores
+  ctxC.strokeStyle=colors.wire; ctxC.lineWidth=2;
+  // B -> INVB
+  ctxC.beginPath(); ctxC.moveTo(Wc/2-12+8, 240); ctxC.lineTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y+pos.INVB.h); ctxC.stroke();
+  // C -> INVC
+  ctxC.beginPath(); ctxC.moveTo(Wc-160, 240); ctxC.lineTo(pos.INVC.x+pos.INVC.w/2, pos.INVC.y+pos.INVC.h); ctxC.stroke();
+
+  // INVB -> OR & ANDY & NOR
+  ctxC.beginPath(); ctxC.moveTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y); ctxC.lineTo(pos.OR.x+pos.OR.w, pos.OR.y+20); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y); ctxC.lineTo(pos.ANDY.x+20, pos.ANDY.y+20); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y); ctxC.lineTo(pos.NOR.x+10, pos.NOR.y+10); ctxC.stroke();
+  // INVC -> ANDZ
+  ctxC.beginPath(); ctxC.moveTo(pos.INVC.x+pos.INVC.w/2, pos.INVC.y); ctxC.lineTo(pos.ANDZ.x+20, pos.ANDZ.y+20); ctxC.stroke();
+
+  // A -> OR
+  ctxC.beginPath(); ctxC.moveTo(160+8, 240); ctxC.lineTo(pos.OR.x, pos.OR.y+20); ctxC.stroke();
+
+  // OR -> BUF
+  ctxC.beginPath(); ctxC.moveTo(pos.OR.x+pos.OR.w/2, pos.OR.y+pos.OR.h); ctxC.lineTo(pos.BUF.x+pos.BUF.w/2, pos.BUF.y); ctxC.stroke();
+  // ANDY -> NOR; ANDZ -> NOR
+  ctxC.beginPath(); ctxC.moveTo(pos.ANDY.x+pos.ANDY.w/2, pos.ANDY.y+pos.ANDY.h); ctxC.lineTo(pos.NOR.x+pos.NOR.w/3, pos.NOR.y); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.ANDZ.x+pos.ANDZ.w/2, pos.ANDZ.y+pos.ANDZ.h); ctxC.lineTo(pos.NOR.x+2*pos.NOR.w/3, pos.NOR.y); ctxC.stroke();
+  // BUF & NOR -> NAND
+  ctxC.beginPath(); ctxC.moveTo(pos.BUF.x+pos.BUF.w/2, pos.BUF.y+pos.BUF.h); ctxC.lineTo(pos.NAND.x+pos.NAND.w/3, pos.NAND.y); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.NOR.x+pos.NOR.w/2, pos.NOR.y+pos.NOR.h); ctxC.lineTo(pos.NAND.x+2*pos.NAND.w/3, pos.NAND.y); ctxC.stroke();
+
+  // símbolos ¬
+  ctxC.fillStyle=colors.warn; // diamantes
+  // INVB
+  ctxC.beginPath(); ctxC.moveTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y+pos.INVB.h+14);
+  ctxC.lineTo(pos.INVB.x+pos.INVB.w/2+12, pos.INVB.y+pos.INVB.h);
+  ctxC.lineTo(pos.INVB.x+pos.INVB.w/2, pos.INVB.y+pos.INVB.h-14);
+  ctxC.lineTo(pos.INVB.x+pos.INVB.w/2-12, pos.INVB.y+pos.INVB.h); ctxC.closePath(); ctxC.fill();
+  ctxC.fillStyle=colors.ink; ctxC.font='12px system-ui'; ctxC.textAlign='center'; ctxC.fillText('¬', pos.INVB.x+pos.INVB.w/2, pos.INVB.y+pos.INVB.h+4);
+  // INVC
+  ctxC.fillStyle=colors.warn;
+  ctxC.beginPath(); ctxC.moveTo(pos.INVC.x+pos.INVC.w/2, pos.INVC.y+pos.INVC.h+14);
+  ctxC.lineTo(pos.INVC.x+pos.INVC.w/2+12, pos.INVC.y+pos.INVC.h);
+  ctxC.lineTo(pos.INVC.x+pos.INVC.w/2, pos.INVC.y+pos.INVC.h-14);
+  ctxC.lineTo(pos.INVC.x+pos.INVC.w/2-12, pos.INVC.y+pos.INVC.h); ctxC.closePath(); ctxC.fill();
+  ctxC.fillStyle=colors.ink; ctxC.fillText('¬', pos.INVC.x+pos.INVC.w/2, pos.INVC.y+pos.INVC.h+4);
+
+  // salida parcial por step
+  let showOut = null;
+  if(step<=0){ showOut = null; }         // preparacion de inversores
+  else if(step===1){ showOut = X; }
+  else if(step===2){ showOut = Y; }
+  else if(step===3){ showOut = Z; }
+  else if(step===4){ showOut = P; }
+  else if(step===5){ showOut = Q; }
+  else if(step>=6){ showOut = out; }
+
+  drawWire(ctxC, cx-16, pos.NAND.y+pos.NAND.h+20, 160, true, (showOut===null)? out : showOut);
+  ctxC.fillStyle=colors.accent; ctxC.font='bold 16px system-ui'; ctxC.textAlign='center';
+  ctxC.fillText(`A=${A}  B=${B}  C=${C}  →  salida=${out}`, cx, pos.NAND.y+pos.NAND.h+200);
+
+  const exp = [
+    `Preparación: ¬B = ${notb}, ¬C = ${notc}`,
+    `X = A ∨ ¬B = ${A} ∨ ${notb} = ${X}`,
+    `Y = ¬B ∧ C = ${notb} ∧ ${C} = ${Y}`,
+    `Z = B ∧ ¬C = ${B} ∧ ${notc} = ${Z}`,
+    `P = X = ${X}`,
+    `Q = ¬(Y ∨ Z) = ¬(${Y} ∨ ${Z}) = ${Q}`,
+    `out = ¬(P ∧ Q) = ¬(${P} ∧ ${Q}) = ${out}`
+  ];
+  $('#cellExplain').textContent = (step>=0 && step<=6)? exp[step] : '—';
+  $('#cellOut').textContent = out;
+}
+function updateCellInputs(){
+  cellState.A = +$('#cA').value;
+  cellState.B = +$('#cB').value;
+  cellState.C = +$('#cC').value;
+  cellStep = 0; $('#cellStepIdx').textContent = 0;
+  drawCellGadget(cellStep);
+}
+$('#btnCell').addEventListener('click', updateCellInputs);
+['cA','cB','cC'].forEach(id => document.getElementById(id).addEventListener('change', updateCellInputs));
+$('#cellPrev').addEventListener('click', ()=>{ cellStep = Math.max(0, cellStep-1); $('#cellStepIdx').textContent = cellStep; drawCellGadget(cellStep); });
+$('#cellNext').addEventListener('click', ()=>{ cellStep = Math.min(6, cellStep+1); $('#cellStepIdx').textContent = cellStep; drawCellGadget(cellStep); });
+updateCellInputs();
+
+/* ---------- Regla 110 simulador ---------- */
+const cvInit = document.getElementById('cvInit');
+const ix = cvInit.getContext('2d');
+const cvGrid = document.getElementById('cvGrid');
+const gx = cvGrid.getContext('2d');
+let width = +document.getElementById('width').value | 0;
+let steps = +document.getElementById('steps').value | 0;
+let cellSize = +document.getElementById('cellSize').value | 0;
+let row = new Array(width).fill(0);
+let grid = [];
+let shownGen = 0;
+function resizeCanvases(){
+  width = Math.max(21, Math.min(401, (+document.getElementById('width').value|0)));
+  steps = Math.max(10, Math.min(300, (+document.getElementById('steps').value|0)));
+  cellSize = Math.max(5, Math.min(18, (+document.getElementById('cellSize').value|0)));
+  cvInit.width = width * cellSize;
+  cvInit.height = 3 * cellSize + 8;
+  cvGrid.width = width * cellSize;
+  cvGrid.height = steps * cellSize;
+  drawRow();
+  if(grid.length===0){ gx.clearRect(0,0,cvGrid.width,cvGrid.height); }
+}
+function drawRow(){
+  ix.clearRect(0,0,cvInit.width,cvInit.height);
+  ix.fillStyle = '#0c1422'; ix.fillRect(0,0,cvInit.width,cvInit.height);
+  for(let i=0;i<width;i++){
+    const x = i*cellSize, y = 8;
+    const v = row[i];
+    ix.fillStyle = 'rgba(255,255,255,.03)'; ix.fillRect(x,y,cellSize,cellSize*2);
+    ix.strokeStyle = 'rgba(110,168,254,.15)'; ix.strokeRect(x,y,cellSize,cellSize*2);
+    ix.strokeStyle = 'rgba(110,168,254,.12)';
+    ix.beginPath(); ix.moveTo(x,y+cellSize*2); ix.lineTo(x+cellSize,y); ix.stroke();
+    ix.fillStyle = v? '#ff8ab3':'#7ee7d7';
+    ix.fillRect(x+1,y+1,cellSize-2,cellSize*2-2);
+  }
+}
+cvInit.addEventListener('click', e=>{
+  const rect = cvInit.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const i = Math.floor(x / cellSize);
+  if(i>=0 && i<width){ row[i] ^= 1; drawRow(); }
+});
+function evolve(){
+  grid = new Array(steps);
+  grid[0] = row.slice();
+  for(let y=1;y<steps;y++){
+    const prev = grid[y-1];
+    const next = new Array(width).fill(0);
+    for(let i=0;i<width;i++){
+      const L = prev[(i-1+width)%width];
+      const C = prev[i];
+      const R = prev[(i+1)%width];
+      const idx = (L<<2)|(C<<1)|R;
+      next[i] = rule110[idx];
+    }
+    grid[y] = next;
+  }
+  shownGen = 0;
+  drawGridUpTo(shownGen);
+}
+function drawGridUpTo(gen){
+  gx.clearRect(0,0,cvGrid.width,cvGrid.height);
+  gx.fillStyle='#0c1422'; gx.fillRect(0,0,cvGrid.width,cvGrid.height);
+  const maxY = Math.min(gen, grid.length-1);
+  for(let y=0;y<=maxY;y++){
+    const arr = grid[y];
+    for(let i=0;i<width;i++){
+      const x = i*cellSize, yy = y*cellSize;
+      gx.fillStyle='rgba(255,255,255,.02)'; gx.fillRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.12)'; gx.strokeRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.08)';
+      gx.beginPath(); gx.moveTo(x,yy+cellSize); gx.lineTo(x+cellSize,yy); gx.stroke();
+      gx.fillStyle = arr[i]? '#ff8ab3':'#7ee7d7'; gx.fillRect(x+1,yy+1,cellSize-2,cellSize-2);
+    }
+  }
+  $('#gen').textContent = maxY;
+}
+document.getElementById('btnRun').addEventListener('click', ()=>{ resizeCanvases(); evolve(); });
+document.getElementById('btnCenter').addEventListener('click', ()=>{ row = new Array(width).fill(0); row[Math.floor(width/2)] = 1; drawRow(); });
+document.getElementById('btnRandom').addEventListener('click', ()=>{ row = row.map(()=> Math.random()<0.5?0:1); drawRow(); });
+document.getElementById('btnClear').addEventListener('click', ()=>{ row = new Array(width).fill(0); drawRow(); grid=[]; gx.clearRect(0,0,cvGrid.width,cvGrid.height); $('#gen').textContent=0; });
+['width','steps','cellSize'].forEach(id => document.getElementById(id).addEventListener('change', resizeCanvases));
+
+let anim=null, frame=0;
+function stepAnim(){
+  if(frame===0){ evolve(); gx.clearRect(0,0,cvGrid.width,cvGrid.height); }
+  if(frame<steps){
+    const arr = grid[frame];
+    for(let i=0;i<width;i++){
+      const x = i*cellSize, yy = frame*cellSize;
+      gx.fillStyle='rgba(255,255,255,.02)'; gx.fillRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.12)'; gx.strokeRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.08)'; gx.beginPath(); gx.moveTo(x,yy+cellSize); gx.lineTo(x+cellSize,yy); gx.stroke();
+      gx.fillStyle = arr[i]? '#ff8ab3':'#7ee7d7'; gx.fillRect(x+1,yy+1,cellSize-2,cellSize-2);
+    }
+    $('#gen').textContent = frame;
+    frame++;
+    anim = requestAnimationFrame(stepAnim);
+  }else{
+    cancelAnimationFrame(anim); anim=null; frame=0;
+  }
+}
+function toggleAnim(){ if(anim){ cancelAnimationFrame(anim); anim=null; } else { frame=0; stepAnim(); } }
+document.getElementById('btnAnimate').addEventListener('click', toggleAnim);
+document.getElementById('btnStep').addEventListener('click', ()=>{
+  if(grid.length===0) evolve();
+  shownGen = Math.min(steps-1, shownGen+1);
+  drawGridUpTo(shownGen);
+});
+document.getElementById('btnStepBack').addEventListener('click', ()=>{
+  if(grid.length===0) return;
+  shownGen = Math.max(0, shownGen-1);
+  drawGridUpTo(shownGen);
+});
+window.addEventListener('keydown', (e)=>{
+  if(e.code==='Space'){ e.preventDefault(); toggleAnim(); }
+  if(e.code==='ArrowRight'){ e.preventDefault(); $('#btnStep').click(); }
+  if(e.code==='ArrowLeft'){ e.preventDefault(); $('#btnStepBack').click(); }
+});
+resizeCanvases();
+
+/* ---------- Gadgets ---------- */
+const cvG = document.getElementById('cvGad');
+const gxg = cvG.getContext('2d');
+function clearGad(){
+  gxg.clearRect(0,0,cvG.width,cvG.height);
+  gxg.fillStyle='rgba(255,255,255,.05)'; gxg.fillRect(20,20,cvG.width-40,cvG.height-40);
+  gxg.strokeStyle='rgba(110,168,254,.25)'; gxg.lineWidth=2; gxg.strokeRect(20,20,cvG.width-40,cvG.height-40);
+}
+function drawLabel(txt,x,y){
+  gxg.fillStyle=colors.accent; gxg.font='bold 18px system-ui'; gxg.textAlign='center'; gxg.fillText(txt,x,y);
+}
+let pulse=null;
+function stopPulse(){ if(pulse){ cancelAnimationFrame(pulse); pulse=null; } }
+function drawPolyline(ctx, pts, bit){
+  for(let i=0;i<pts.length-1;i++){
+    const [x1,y1]=pts[i], [x2,y2]=pts[i+1];
+    drawPleatLine(ctx, x1,y1,x2,y2,'V');
+    drawPleatLine(ctx, x1,y1+8,x2,y2+8,'M');
+    drawPleatLine(ctx, x1,y1+16,x2,y2+16,'V');
+  }
+  ctx.fillStyle = bit? colors.mountain : colors.valley;
+  const [xa,ya] = pts[0], [xb,yb] = pts[1];
+  ctx.beginPath();
+  const ang = Math.atan2(yb-ya, xb-xa);
+  ctx.moveTo(xa+18*Math.cos(ang), ya+8+18*Math.sin(ang));
+  ctx.lineTo(xa+8*Math.cos(ang+Math.PI/2), ya+8+8*Math.sin(ang+Math.PI/2));
+  ctx.lineTo(xa+8*Math.cos(ang-Math.PI/2), ya+8+8*Math.sin(ang-Math.PI/2));
+  ctx.closePath(); ctx.fill();
+}
+function animatePulse(ctx, pathPts, bit, effect='normal'){
+  let seg = 0, t = 0;
+  function step(){
+    clearGad(); currentGadgetDrawStatic();
+    const [x1,y1] = pathPts[seg];
+    const [x2,y2] = pathPts[seg+1];
+    const x = x1 + (x2-x1)*t;
+    const y = y1 + (y2-y1)*t;
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath(); ctx.arc(x, y+8, 8, 0, Math.PI*2); ctx.fill();
+    t += 0.02;
+    if(t>=1){
+      t=0; seg++;
+      if(effect==='invert' && seg===Math.floor(pathPts.length/2)) bit ^= 1;
+      if(effect==='eat' && seg===Math.floor(pathPts.length/2)){ stopPulse(); return; }
+    }
+    if(seg < pathPts.length-1){ pulse = requestAnimationFrame(step); }
+    else { stopPulse(); }
+  }
+  pulse = requestAnimationFrame(step);
+}
+let currentGadgetDrawStatic = ()=>{};
+function drawGadget(){
+  stopPulse(); clearGad();
+  const type = $('#gadgetSel').value;
+  const A = +$('#gadA').value;
+  const B = +$('#gadB').value;
+  $$('.gadBRow').forEach(el => el.style.display = (type==='cross') ? '' : 'none');
+
+  if(type==='wire'){
+    drawLabel('Wire recto', cvG.width/2, 50);
+    const pts = [[140,200],[760,200]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  } else if(type==='bend'){
+    drawLabel('Wire con curva', cvG.width/2, 50);
+    const pts = [[140,260],[420,260],[760,160]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  } else if(type==='delay'){
+    drawLabel('Delay (zig-zag)', cvG.width/2, 50);
+    const pts = [[140,220],[300,180],[460,260],[620,180],[760,220]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  } else if(type==='split'){
+    drawLabel('Splitter (fan-out)', cvG.width/2, 50);
+    const inPts = [[140,220],[360,220]];
+    drawPolyline(gxg, inPts, A);
+    const out1 = [[360,220],[700,160]];
+    const out2 = [[360,220],[700,280]];
+    drawPolyline(gxg, out1, A); drawPolyline(gxg, out2, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, inPts, A); drawPolyline(gxg, out1, A); drawPolyline(gxg, out2, A); };
+  } else if(type==='cross'){
+    drawLabel('Crossing (cruce)', cvG.width/2, 50);
+    const pathA = [[140,260],[420,200],[760,260]];
+    const pathB = [[220,140],[420,260],[620,140]];
+    drawPolyline(gxg, pathA, A); drawPolyline(gxg, pathB, B);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pathA, A); drawPolyline(gxg, pathB, B); };
+  } else if(type==='not'){
+    drawLabel('Inverter (NOT)', cvG.width/2, 50);
+    const pts = [[140,220],[480,220],[760,220]];
+    drawPolyline(gxg, pts, A);
+    gxg.fillStyle=colors.warn; gxg.beginPath(); gxg.moveTo(480,208); gxg.lineTo(492,220); gxg.lineTo(480,232); gxg.lineTo(468,220); gxg.closePath(); gxg.fill();
+    gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('¬', 480, 226);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.fillStyle=colors.warn; gxg.beginPath(); gxg.moveTo(480,208); gxg.lineTo(492,220); gxg.lineTo(480,232); gxg.lineTo(468,220); gxg.closePath(); gxg.fill(); gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('¬', 480, 226); };
+  } else if(type==='twist'){
+    drawLabel('Twist (fase)', cvG.width/2, 50);
+    const pts = [[140,240],[360,180],[540,300],[760,240]];
+    drawPolyline(gxg, pts, A);
+    gxg.strokeStyle=colors.accent; gxg.lineWidth=2;
+    gxg.beginPath(); gxg.arc(450,240,26,0,Math.PI*2); gxg.stroke();
+    gxg.fillStyle=colors.accent; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('twist', 450, 246);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.strokeStyle=colors.accent; gxg.lineWidth=2; gxg.beginPath(); gxg.arc(450,240,26,0,Math.PI*2); gxg.stroke(); gxg.fillStyle=colors.accent; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('twist', 450, 246); };
+  } else if(type==='eater'){
+    drawLabel('Eater (sumidero)', cvG.width/2, 50);
+    const pts = [[140,220],[500,220]];
+    drawPolyline(gxg, pts, A);
+    gxg.fillStyle='rgba(255,255,255,.12)'; gxg.fillRect(500,200,90,40);
+    gxg.strokeStyle=colors.accent; gxg.strokeRect(500,200,90,40);
+    gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('EATER', 545, 224);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.fillStyle='rgba(255,255,255,.12)'; gxg.fillRect(500,200,90,40); gxg.strokeStyle=colors.accent; gxg.strokeRect(500,200,90,40); gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('EATER', 545, 224); };
+  }
+}
+$('#gadgetSel').addEventListener('change', drawGadget);
+$('#gadA').addEventListener('change', drawGadget);
+$('#gadB').addEventListener('change', drawGadget);
+$('#btnPulse').addEventListener('click', ()=>{
+  const type = $('#gadgetSel').value;
+  const A = +$('#gadA').value; const B = +$('#gadB').value;
+  if(type==='wire'){
+    animatePulse(gxg, [[140,200],[760,200]], A);
+  }else if(type==='bend'){
+    animatePulse(gxg, [[140,260],[420,260],[760,160]], A);
+  }else if(type==='delay'){
+    animatePulse(gxg, [[140,220],[300,180],[460,260],[620,180],[760,220]], A);
+  }else if(type==='split'){
+    animatePulse(gxg, [[140,220],[360,220]], A);
+    setTimeout(()=>animatePulse(gxg, [[360,220],[700,160]], A), 400);
+    setTimeout(()=>animatePulse(gxg, [[360,220],[700,280]], A), 400);
+  }else if(type==='cross'){
+    animatePulse(gxg, [[140,260],[420,200],[760,260]], A);
+    setTimeout(()=>animatePulse(gxg, [[220,140],[420,260],[620,140]], B), 200);
+  }else if(type==='not'){
+    animatePulse(gxg, [[140,220],[480,220],[760,220]], A, 'invert');
+  }else if(type==='twist'){
+    animatePulse(gxg, [[140,240],[360,180],[540,300],[760,240]], A, 'invert');
+  }else if(type==='eater'){
+    animatePulse(gxg, [[140,220],[500,220],[545,220]], A, 'eat');
+  }
+});
+drawGadget();
+
+/* ---------- Inspector de Vértices ---------- */
+const cvVI = document.getElementById('cvVI');
+const vix = cvVI.getContext('2d');
+let viN = 4;
+let viTol = 1;
+let viAngles = [90, 90, 90, 90]; // θ0..θ(N-1)
+let viMV = []; // +1=M, -1=V para cada crease (N)
+let dragIdx = -1; // índice del crease que se arrastra (0..N-1)
+function initVI(){
+  viN = +$('#viN').value;
+  viTol = +$('#viTol').value;
+  viAngles = new Array(viN).fill(360/viN);
+  viMV = new Array(viN).fill(-1);
+  viMV[0]=+1; viMV[2%viN]=+1;
+  buildAngleSliders();
+  buildMVChips();
+  drawVI();
+}
+function buildAngleSliders(){
+  const row = $('#viAnglesRow'); row.innerHTML = '';
+  for(let i=0;i<viN-1;i++){
+    const w = document.createElement('div'); w.className='chip'; w.style.gap='10px';
+    w.innerHTML = `θ<sub>${i}</sub> <input type="range" min="10" max="340" value="${viAngles[i]|0}" step="1" id="viAng${i}">
+                   <span id="viAngVal${i}">${viAngles[i].toFixed(0)}°</span>`;
+    row.appendChild(w);
+    $('#viAng'+i).addEventListener('input', (e)=>{
+      viAngles[i] = +e.target.value;
+      $('#viAngVal'+i).textContent = viAngles[i].toFixed(0)+'°';
+      const sum = viAngles.slice(0,viN-1).reduce((a,b)=>a+b,0);
+      viAngles[viN-1] = Math.max(1, 360 - sum);
+      drawVI(); updateKawasakiUI();
+    });
+  }
+  const last = document.createElement('div'); last.className='chip';
+  last.innerHTML = `θ<sub>${viN-1}</sub> = <strong id="viAngLast">${viAngles[viN-1].toFixed(0)}°</strong>`;
+  row.appendChild(last);
+}
+function buildMVChips(){
+  const row = $('#viMVRow'); row.innerHTML = '';
+  for(let i=0;i<viN;i++){
+    const c = document.createElement('div'); c.className='chip '+(viMV[i]===1?'active':'');
+    c.style.borderColor = viMV[i]===1? '#7d4fa3' : '#2a3f73';
+    c.innerHTML = (viMV[i]===1? 'M':'V') + ` <small>(c${i})</small>`;
+    c.addEventListener('click', ()=>{
+      viMV[i]*=-1;
+      buildMVChips(); drawVI(); updateMaekawaUI();
+    });
+    row.appendChild(c);
+  }
+}
+function viSums(){
+  const altA = viAngles.filter((_,i)=> i%2===0).reduce((a,b)=>a+b,0);
+  const altB = viAngles.filter((_,i)=> i%2===1).reduce((a,b)=>a+b,0);
+  return {altA, altB};
+}
+function updateKawasakiUI(){
+  const {altA,altB} = viSums();
+  $('#viAltA').textContent = altA.toFixed(1);
+  $('#viAltB').textContent = altB.toFixed(1);
+  $('#viResA').textContent = Math.abs(altA-180).toFixed(2);
+  $('#viResB').textContent = Math.abs(altB-180).toFixed(2);
+  const ok = Math.abs(altA-180) <= viTol && Math.abs(altB-180) <= viTol;
+  $('#viKStatus').textContent = ok ? 'Cumple' : 'No cumple';
+  $('#viKStatus').style.color = ok ? colors.ok : colors.mountain;
+  $('#viAngLast').textContent = viAngles[viN-1].toFixed(0)+'°';
+}
+function updateMaekawaUI(){
+  const M = viMV.filter(x=>x===1).length;
+  const V = viMV.filter(x=>x===-1).length;
+  $('#viM').textContent = M; $('#viV').textContent = V;
+  const ok = Math.abs(M - V) === 2;
+  $('#viMStatus').textContent = ok ? 'Cumple' : 'No cumple';
+  $('#viMStatus').style.color = ok ? colors.ok : colors.mountain;
+}
+function toThetaArray(){
+  const theta = [0];
+  for(let i=1;i<viN;i++){
+    theta[i] = theta[i-1] + (Math.PI/180)*viAngles[i-1];
+  }
+  return theta;
+}
+function drawVI(){
+  vix.clearRect(0,0,cvVI.width,cvVI.height);
+  vix.fillStyle='rgba(255,255,255,.05)'; vix.fillRect(20,20,cvVI.width-40,cvVI.height-40);
+  vix.strokeStyle='rgba(110,168,254,.25)'; vix.lineWidth=2; vix.strokeRect(20,20,cvVI.width-40,cvVI.height-40);
+  const cx = cvVI.width/2, cy = cvVI.height/2, R = 170;
+  const theta = toThetaArray();
+  vix.save(); vix.translate(cx,cy);
+  for(let i=0;i<viN;i++){
+    const a0 = theta[i];
+    const a1 = theta[(i+1)%viN] || (2*Math.PI);
+    vix.beginPath();
+    vix.moveTo(0,0); vix.arc(0,0,R,a0,a1,false); vix.closePath();
+    vix.fillStyle = i%2===0? 'rgba(126,231,215,.20)' : 'rgba(255,138,179,.18)';
+    vix.fill();
+    const am = (a0+a1)/2;
+    vix.fillStyle = colors.ink; vix.font='12px system-ui'; vix.textAlign='center';
+    vix.fillText(`θ${i}`, (R+18)*Math.cos(am), (R+18)*Math.sin(am));
+  }
+  for(let i=0;i<viN;i++){
+    const a = theta[i];
+    vix.strokeStyle = viMV[i]===1? colors.mountain : colors.valley;
+    vix.lineWidth=3; vix.setLineDash(viMV[i]===1? [] : [7,7]);
+    vix.beginPath(); vix.moveTo(0,0); vix.lineTo(R*Math.cos(a), R*Math.sin(a)); vix.stroke();
+    // manejadores (handles) para drag
+    vix.setLineDash([]); vix.fillStyle='rgba(255,255,255,.35)';
+    vix.beginPath(); vix.arc(R*Math.cos(a), R*Math.sin(a), 6, 0, Math.PI*2); vix.fill();
+  }
+  vix.setLineDash([]); vix.fillStyle='rgba(255,255,255,.15)'; vix.beginPath(); vix.arc(0,0,6,0,Math.PI*2); vix.fill();
+  vix.restore();
+  updateKawasakiUI(); updateMaekawaUI();
+}
+// Dragging
+cvVI.addEventListener('mousedown', (e)=>{
+  const rect = cvVI.getBoundingClientRect();
+  const cx = cvVI.width/2 + rect.left, cy = cvVI.height/2 + rect.top;
+  const theta = toThetaArray();
+  for(let i=0;i<viN;i++){
+    const ax = cvVI.width/2 + 170*Math.cos(theta[i]);
+    const ay = cvVI.height/2 + 170*Math.sin(theta[i]);
+    const dx = e.clientX - (rect.left + ax - cvVI.width/2);
+    const dy = e.clientY - (rect.top + ay - cvVI.height/2);
+    const dist = Math.hypot(dx - cvVI.width/2, dy - cvVI.height/2);
+    // simpler: compute distance to handle in canvas coords
+  }
+  // compute in canvas coordinates directly
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const theta2 = toThetaArray();
+  let best = -1, bestd = 1e9;
+  for(let i=0;i<viN;i++){
+    const hx = cvVI.width/2 + 170*Math.cos(theta2[i]);
+    const hy = cvVI.height/2 + 170*Math.sin(theta2[i]);
+    const d = Math.hypot(x - hx, y - hy);
+    if(d < bestd && d < 14){ bestd = d; best = i; }
+  }
+  dragIdx = best;
+});
+cvVI.addEventListener('mousemove', (e)=>{
+  if(dragIdx<0) return;
+  const rect = cvVI.getBoundingClientRect();
+  const x = e.clientX - rect.left - cvVI.width/2;
+  const y = e.clientY - rect.top - cvVI.height/2;
+  let ang = Math.atan2(y, x);
+  if(ang<0) ang += 2*Math.PI;
+  // actualizar ángulos adyacentes: θ_{dragIdx-1} y θ_{dragIdx}
+  const theta = toThetaArray();
+  const i = dragIdx;
+  const prev = (i-1+viN)%viN;
+  const next = (i+1)%viN;
+  const a_prev = (ang - theta[prev] + 2*Math.PI) % (2*Math.PI);
+  const a_i = (theta[next] - ang + 2*Math.PI) % (2*Math.PI);
+  let deg_prev = Math.max(10*Math.PI/180, a_prev) * 180/Math.PI;
+  let deg_i = Math.max(10*Math.PI/180, a_i) * 180/Math.PI;
+  // normalizar si excede
+  const others = viAngles.reduce((s,v,idx)=> idx===prev||idx===i ? s : s+v, 0);
+  const leftover = 360 - others;
+  const scale = leftover / (deg_prev + deg_i);
+  deg_prev *= scale; deg_i *= scale;
+  viAngles[prev] = deg_prev;
+  viAngles[i] = deg_i;
+  if(viN-1 !== prev) { const el = document.getElementById('viAng'+prev); if(el){ el.value = viAngles[prev].toFixed(0); $('#viAngVal'+prev).textContent = viAngles[prev].toFixed(0)+'°'; } }
+  if(viN-1 !== i) { const el2 = document.getElementById('viAng'+i); if(el2){ el2.value = viAngles[i].toFixed(0); $('#viAngVal'+i).textContent = viAngles[i].toFixed(0)+'°'; } }
+  // recompute last
+  const sum = viAngles.slice(0,viN-1).reduce((a,b)=>a+b,0);
+  viAngles[viN-1] = Math.max(1, 360 - sum);
+  $('#viAngLast').textContent = viAngles[viN-1].toFixed(0)+'°';
+  drawVI();
+});
+window.addEventListener('mouseup', ()=>{ dragIdx=-1; });
+
+$('#viN').addEventListener('change', initVI);
+$('#viTol').addEventListener('change', ()=>{ viTol=+$('#viTol').value; updateKawasakiUI(); });
+$('#viPresetK').addEventListener('click', ()=>{
+  viN = +$('#viN').value;
+  if(viN===4){
+    viAngles = [60,120,60,120]; // alternos 60+60=120? -> alternos 60+60=120; necesitamos 180: mejor 90,90,90,90, pero usar diferente: 60,120,60,120 tiene alternos 60+60=120. Corrijamos: 80,100,100,80
+    viAngles = [80,100,100,80]; // altA: 80+100=180, altB: 100+80=180
+  }else{ // viN===6
+    viAngles = [40,60,70,60,70,60]; // alt pares impares = 180
+  }
+  buildAngleSliders(); buildMVChips(); drawVI();
+});
+$('#viPresetM').addEventListener('click', ()=>{
+  viN = +$('#viN').value;
+  viMV = new Array(viN).fill(-1);
+  // |M - V| = 2  -> M = V + 2
+  const Mneeded = (viN/2)+1;
+  for(let i=0;i<Mneeded;i++){ viMV[i]=+1; }
+  buildMVChips(); drawVI();
+});
+$('#viRandom').addEventListener('click', ()=>{
+  viN = +$('#viN').value;
+  const n1 = viN-1; viAngles = new Array(viN).fill(0);
+  let remaining = 360;
+  for(let i=0;i<n1;i++){
+    const minKeep = (n1-i-1)*10;
+    const val = Math.max(10, Math.min(remaining - minKeep - 1, Math.floor(10 + Math.random()* (180))));
+    viAngles[i] = val; remaining -= val;
+  }
+  viAngles[viN-1] = Math.max(10, remaining);
+  viMV = viMV.map(()=> Math.random()<0.5? -1: +1);
+  buildAngleSliders(); buildMVChips(); drawVI();
+});
+initVI();
+
+/* ---------- Descargar ---------- */
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'origami-turing-demo-v4.html';
+  document.body.appendChild(a); a.click(); a.remove();
+});
+</script>
+
+
+</body></html>

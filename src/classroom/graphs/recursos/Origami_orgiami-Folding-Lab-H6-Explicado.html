@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Origami Folding Lab — Plegado Dinámico (H6) + Overlay 3D</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#141829; --ink:#e8eaff; --muted:#98a0d0;
+    --accent:#6b8fff; --accent2:#00d4aa; --warn:#ffb86c; --bad:#ff6b6b; --ok:#9cff57;
+    --paper:#1f2a4a; --paper2:#243055; --grid:#1a1e32;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse 1200px 700px at 15% 0%, rgba(107,143,255,.08) 0%, transparent 55%),
+      radial-gradient(ellipse 900px 600px at 85% 100%, rgba(0,212,170,.06) 0%, transparent 55%),
+      linear-gradient(180deg,#0a0e1a 0%,#0d1120 50%,#0a0d18 100%);
+    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
+    min-height:100vh;
+  }
+  header{position:sticky;top:0;z-index:5;padding:16px 24px;border-bottom:1px solid #263056;
+    background:#101424e6;backdrop-filter:blur(10px)}
+  header h1{font-size:22px;margin:0;background:linear-gradient(135deg,#e8eaff,#8ba5ff);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  header .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;max-width:1600px;margin:0 auto}
+  aside{background:#12162a;border:1px solid #28305a;border-radius:14px;padding:16px;height:fit-content;position:sticky;top:84px}
+  main{background:#12162a;border:1px solid #28305a;border-radius:14px;overflow:hidden;position:relative}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #28305a;background:#0f1426}
+  .title{color:#9bb2ff;font-weight:700}
+  .group{margin:12px 0}
+  .badge{display:inline-block;padding:4px 8px;border-radius:8px;border:1px solid #38437a;background:#151a34;color:#9bb2ff;font-size:11px;font-weight:700;letter-spacing:.3px}
+  .small{font-size:12px;color:var(--muted);line-height:1.55}
+  button{padding:9px 10px;border-radius:10px;border:1px solid #3a437a;background:#1a1f39;color:var(--ink);cursor:pointer;font-size:12px}
+  button:hover{border-color:#4a56a0;background:#1e2445}
+  button.accent{background:linear-gradient(135deg,#6b8fff,#5a7eef);border-color:#6b8fff}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
+  input[type=range]{width:100%}
+  .meter{font-family:ui-monospace,monospace;background:#0e1326;border:1px solid #28305a;border-radius:10px;padding:10px}
+  /* SVG stage */
+  svg{width:100%;height:68vh;display:block;background:
+    linear-gradient(0deg, transparent 24%, rgba(107,143,255,0.03) 25%, rgba(107,143,255,0.03) 26%, transparent 27%, transparent 74%, rgba(107,143,255,0.03) 75%, rgba(107,143,255,0.03) 76%, transparent 77%),
+    linear-gradient(90deg, transparent 24%, rgba(107,143,255,0.03) 25%, rgba(107,143,255,0.03) 26%, transparent 27%, transparent 74%, rgba(107,143,255,0.03) 75%, rgba(107,143,255,0.03) 76%, transparent 77%),
+    linear-gradient(0deg, rgba(26,30,50,0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,30,50,0.6) 1px, transparent 1px);
+    background-size:80px 80px,80px 80px,40px 40px,40px 40px;
+  }
+  .line{stroke:#8fb0ff;stroke-width:2.5}
+  .crease{stroke:var(--accent2);stroke-width:3.2;stroke-dasharray:10 8;filter:drop-shadow(0 0 6px rgba(0,212,170,.6))}
+  .pt{fill:#ff5d8f;stroke:#fff;stroke-width:1.5;cursor:grab}
+  .pt.ghost{fill:#00d4aa;opacity:.5}
+  .label{fill:#e8eaff;font-size:12px;paint-order:stroke;stroke:#0a0e1a;stroke-width:4px}
+  .paper{opacity:.28;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+  #staticHalf{fill:var(--paper)}
+  #foldingHalf{fill:var(--paper2)}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  /* 3D overlay */
+  .overlay3d{position:absolute;inset:0;pointer-events:none;perspective:2000px;z-index:10;display:none}
+  .sheet{position:absolute;width:1200px;height:800px;left:50%;top:50%;transform:translate(-50%,-50%);transform-style:preserve-3d}
+  .half{position:absolute;top:0;width:600px;height:800px;border:1px solid rgba(0,212,170,.35)}
+  .left{left:0;transform-origin:right center;backface-visibility:hidden;background:rgba(0,212,170,.22)}
+  .right{left:600px;background:rgba(107,143,255,.2)}
+  .shadowEdge{position:absolute;right:-10px;top:0;width:10px;height:100%;box-shadow:inset -5px 0 16px rgba(0,0,0,.5);opacity:0;transition:.2s}
+  .left.fold{transform:rotateY(-180deg)}
+  .left.fx .shadowEdge{opacity:1}
+  .creaseGlow{position:absolute;left:50%;top:0;width:4px;height:100%;background:var(--accent2);box-shadow:0 0 14px rgba(0,212,170,.7);transform:translateX(-2px)}
+  .hint{position:absolute;right:12px;bottom:10px;color:var(--muted);font-size:11px;background:#0f1426aa;border:1px solid #28305a;border-radius:8px;padding:6px 8px}
+  /* details block */
+  details{border:1px solid #2a355f;border-radius:10px;padding:10px 12px;background:#0f1426}
+  details>summary{cursor:pointer;color:#c7d2ff;font-weight:700;margin:-8px -8px 6px -8px;padding:8px}
+  .footer{margin:22px 0 6px;color:#a4abdb;font-size:12px;text-align:center;opacity:.95}
+  .credit{margin-top:6px;color:#d5dbff;font-size:12px;text-align:center}
+  @media (max-width: 1100px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:relative;top:0}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Origami Folding Lab — Plegado Dinámico (H6) + Overlay 3D</h1>
+  <div class="sub">Arrastrá P, Q, y los extremos de ℓ₁, ℓ₂. Resolvé H6 (Beloch) y plegá con el slider. El overlay 3D refuerza la percepción del pliegue.</div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="group">
+      <span class="badge">Presets</span>
+      <div class="btns">
+        <button id="presetDemo">Demo</button>
+        <button id="presetWide">Ángulo amplio</button>
+        <button id="presetTight">Ángulo agudo</button>
+      </div>
+      <div class="small">Sugerencia: resolvé y activá <b>Overlay 3D</b> para un efecto “libro” claro.</div>
+    </div>
+
+    <div class="group">
+      <span class="badge">Acciones</span>
+      <div class="btns">
+        <button id="solve" class="accent">Resolver H6 (Beloch)</button>
+        <button id="toggleGhosts">Mostrar/ocultar P′, Q′</button>
+        <button id="toggle3d">Overlay 3D</button>
+        <button id="reset">Reiniciar</button>
+      </div>
+      <div class="controls">
+        <span class="small" style="width:70px">Plegado</span>
+        <input id="alpha" type="range" min="0" max="1" step="0.01" value="0">
+        <button id="auto">Auto</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="badge">Medidores</span>
+      <div class="meter" id="meters">—</div>
+    </div>
+
+    <div class="group small">
+      <span class="badge">¿Por qué H6 excede regla y compás?</span>
+      <details open>
+        <summary>Idea central (intuitiva)</summary>
+        <div>
+          El axioma H6 (Beloch) pide una <b>única creasa</b> tal que la <i>reflexión</i> de P caiga sobre la recta ℓ₁ <u>y simultáneamente</u> la reflexión de Q caiga sobre ℓ₂.
+          Esa condición simultánea impone una <b>restricción cúbica</b> sobre la orientación/posición de la creasa. Las construcciones con <i>regla y compás</i> sólo resuelven
+          extensiones cuadráticas (raíces de ecuaciones de grado potencia de 2), por lo que, en general, <b>no pueden realizar este paso cúbico</b>.
+        </div>
+      </details>
+      <details>
+        <summary>Derivación breve (geométrica)</summary>
+        <div class="small">
+          Representamos la creasa como normal unitaria <code>n=(cos φ, sin φ)</code> y desplazamiento <code>c</code> (forma normal <code>n·x=c</code>). La reflexión de un punto X en esa recta es
+          <code>X′ = X − 2((n·X − c))n</code>. Las condiciones H6 son:
+          <pre style="white-space:pre-wrap;background:#0b1024;border:1px solid #28305a;border-radius:8px;padding:8px;margin:8px 0">
+(i)  n₁·P′ = c₁   (P′ sobre ℓ₁)
+(ii) n₂·Q′ = c₂   (Q′ sobre ℓ₂)
+          </pre>
+          Sustituyendo P′ y Q′ se obtienen dos ecuaciones no lineales en <code>(φ,c)</code>. Eliminando <code>c</code> (por ejemplo, con diferencias y usando <code>tan(φ/2)</code> para parametrizar la dirección)
+          surge una <b>ecuación polinómica de grado 3</b> en la variable angular (o en la pendiente de la creasa). Esa cúbica caracteriza las soluciones de H6.
+        </div>
+      </details>
+      <details>
+        <summary>Marco algebraico (constructibilidad)</summary>
+        <div class="small">
+          Con regla y compás sólo se obtienen longitudes cuyos números pertenecen a una torre de <b>extensiones cuadráticas</b> de ℚ; por tanto, sus <i>grados</i> sobre ℚ son potencias de 2.
+          En términos de polinomios mínimos, sólo se resuelven ecuaciones cuyas raíces tienen grado <code>2ᵏ</code>. Los problemas <i>cúbicos</i> (grado 3 irreducible) como la <b>trisección</b> de un ángulo genérico
+          o la <b>duplicación del cubo</b> quedan fuera del alcance euclidiano clásico. El pliegue H6 es un caso de <i>neusis</i> en papel que <b>sí</b> permite resolver cúbicas; por eso H6 excede regla y compás.
+        </div>
+      </details>
+      <details>
+        <summary>Consecuencia práctica</summary>
+        <div class="small">
+          En este laboratorio, el botón <b>Resolver H6</b> utiliza un método numérico (tipo Levenberg–Marquardt) para encontrar <code>(φ,c)</code>. Ese solver refleja precisamente que la condición
+          geométrica subyacente conduce a una cúbica: si el caso fuese puramente euclidiano (cuadrático), sería resoluble por construcciones clásicas sin recurrir a un pliegue “neusis”.
+        </div>
+      </details>
+    </div>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="title">Escena H6 (2 puntos → 2 rectas) con plegado animado</div>
+      <div class="small">Verde = creasa; azul = rectas; rosa = puntos; cian = imágenes reflejadas.</div>
+    </div>
+
+    <div class="overlay3d" id="overlay3d">
+      <div class="sheet" id="sheet3d">
+        <div class="creaseGlow"></div>
+        <div class="half left" id="left3d"><div class="shadowEdge"></div></div>
+        <div class="half right" id="right3d"></div>
+      </div>
+      <div class="hint">Overlay 3D — ilustrativo (no métrico), alineado con la creasa calculada</div>
+    </div>
+
+    <svg id="svg" viewBox="0 0 900 600">
+      <g id="g-paper">
+        <polygon id="staticHalf" class="paper" points=""/>
+        <polygon id="foldingHalf" class="paper" points=""/>
+      </g>
+      <g id="g-lines">
+        <line id="l1" class="line" x1="120" y1="520" x2="780" y2="520"/>
+        <line id="l2" class="line" x1="450" y1="520" x2="780" y2="220"/>
+        <line id="crease" class="crease" x1="0" y1="0" x2="0" y2="0" visibility="hidden"/>
+      </g>
+      <g id="g-points">
+        <circle id="P" class="pt" r="6" cx="270" cy="360"/>
+        <circle id="Q" class="pt" r="6" cx="660" cy="320"/>
+        <circle id="Pghost" class="pt ghost" r="5" cx="0" cy="0" visibility="hidden"/>
+        <circle id="Qghost" class="pt ghost" r="5" cx="0" cy="0" visibility="hidden"/>
+      </g>
+      <g id="labels">
+        <text class="label" id="labP" x="0" y="0">P</text>
+        <text class="label" id="labQ" x="0" y="0">Q</text>
+        <text class="label" id="labL1" x="0" y="0">ℓ₁</text>
+        <text class="label" id="labL2" x="0" y="0">ℓ₂</text>
+      </g>
+    </svg>
+  </main>
+</div>
+
+<footer class="footer">
+  <hr style="border:none;border-top:1px solid #2a335c;margin:10px 0 14px">
+  <div class="credit">Material elaborado por el profesor Sergio Gevatschnader</div>
+</footer>
+
+<script>
+// ======= Utils =======
+const svg = document.getElementById('svg');
+const P = document.getElementById('P'), Q = document.getElementById('Q');
+const Pghost = document.getElementById('Pghost'), Qghost = document.getElementById('Qghost');
+const l1 = document.getElementById('l1'), l2 = document.getElementById('l2');
+const crease = document.getElementById('crease');
+const meters = document.getElementById('meters');
+const labP=document.getElementById('labP'), labQ=document.getElementById('labQ');
+const labL1=document.getElementById('labL1'), labL2=document.getElementById('labL2');
+const staticHalf = document.getElementById('staticHalf');
+const foldingHalf = document.getElementById('foldingHalf');
+const alphaEl = document.getElementById('alpha');
+const autoBtn = document.getElementById('auto');
+const overlay3d = document.getElementById('overlay3d');
+const sheet3d = document.getElementById('sheet3d');
+const left3d = document.getElementById('left3d');
+const right3d = document.getElementById('right3d');
+
+function v(x,y){return {x,y}}
+function add(a,b){return v(a.x+b.x,a.y+b.y)}
+function sub(a,b){return v(a.x-b.x,a.y-b.y)}
+function dot(a,b){return a.x*b.x+a.y*b.y}
+function norm(a){const m=Math.hypot(a.x,a.y)||1;return v(a.x/m,a.y/m)}
+function perp(a){return v(-a.y,a.x)}
+function setLine(line,a,b){ line.setAttribute('x1',a.x); line.setAttribute('y1',a.y); line.setAttribute('x2',b.x); line.setAttribute('y2',b.y); }
+function lineToPts(line){ return [v(+line.getAttribute('x1'),+line.getAttribute('y1')), v(+line.getAttribute('x2'),+line.getAttribute('y2'))]; }
+function getPt(el){ return v(+el.getAttribute('cx'), +el.getAttribute('cy')); }
+function setPt(el,p){ el.setAttribute('cx',p.x); el.setAttribute('cy',p.y); }
+function setPoly(el, pts){ el.setAttribute('points', pts.map(p=>`${p.x},${p.y}`).join(' ')); }
+
+// normal form n·x = c, |n|=1 de la línea que pasa por a-b
+function normalForm(a,b){
+  const t = norm(sub(b,a));
+  const n = norm(perp(t));
+  const c = dot(n,a);
+  return {n,c};
+}
+function reflectPoint(X,n,c){
+  const s = dot(n,X)-c;
+  return add(X, v(-2*s*n.x, -2*s*n.y));
+}
+function ptLineDist(X,n,c){ return Math.abs(dot(n,X)-c); }
+
+// ======= Solver H6 (Beloch): 2 ecuaciones / 2 variables =======
+function solveH6(P0, L1, Q0, L2){
+  // Variables: φ y c; n=(cosφ,sinφ). Objetivo: L1.n·P' = L1.c y L2.n·Q' = L2.c
+  let phi = Math.atan2(L1.n.y+L2.n.y, L1.n.x+L2.n.x);
+  let c = 0, lambda=1e-2;
+  const maxIt=120, eps=1e-7;
+  function residuals(phi,c){
+    const n=v(Math.cos(phi), Math.sin(phi));
+    const Pm = reflectPoint(P0,n,c);
+    const Qm = reflectPoint(Q0,n,c);
+    return [ dot(L1.n,Pm)-L1.c, dot(L2.n,Qm)-L2.c ];
+  }
+  for(let it=0; it<maxIt; it++){
+    const F = residuals(phi,c);
+    const E = Math.hypot(F[0],F[1]);
+    if(E<1e-6) break;
+    const h=1e-6;
+    const Fphi = residuals(phi+h,c), Fc = residuals(phi,c+h);
+    const J = [
+      [(Fphi[0]-F[0])/h, (Fc[0]-F[0])/h],
+      [(Fphi[1]-F[1])/h, (Fc[1]-F[1])/h]
+    ];
+    const a11 = J[0][0]*J[0][0]+J[1][0]*J[1][0]+lambda;
+    const a12 = J[0][0]*J[0][1]+J[1][0]*J[1][1];
+    const a22 = J[0][1]*J[0][1]+J[1][1]*J[1][1]+lambda;
+    const b1 = -(J[0][0]*F[0]+J[1][0]*F[1]);
+    const b2 = -(J[0][1]*F[0]+J[1][1]*F[1]);
+    const det = a11*a22 - a12*a12;
+    if(Math.abs(det)<1e-14){ lambda*=5; continue; }
+    const dphi = ( a22*b1 - a12*b2)/det;
+    const dc   = (-a12*b1 + a11*b2)/det;
+    const Fnew = residuals(phi+dphi, c+dc);
+    const Enew = Math.hypot(Fnew[0],Fnew[1]);
+    if(Enew<E){ phi+=dphi; c+=dc; lambda*=0.7; if(Math.hypot(dphi,dc)<eps) break; }
+    else{ lambda*=2.0; }
+  }
+  const n=v(Math.cos(phi), Math.sin(phi));
+  return {phi,c,n};
+}
+
+// ======= Paper model based on crease (n,c) =======
+let solution=null; // {phi,c,n}
+let playing=false, rafId=null;
+function drawCrease(n,c){
+  const t=perp(n); const x0=v(n.x*c, n.y*c);
+  const A=add(x0, v(-4000*t.x, -4000*t.y));
+  const B=add(x0, v( 4000*t.x,  4000*t.y));
+  setLine(crease, A, B); crease.setAttribute('visibility','visible');
+  // build half-planes (finite big strips)
+  const L=4000;
+  const staticPts  = [ add(A, v(-L*n.x, -L*n.y)), add(B, v(-L*n.x, -L*n.y)), B, A ];
+  const foldingPts = [ add(A, v( L*n.x,  L*n.y)), add(B, v( L*n.x,  L*n.y)), B, A ];
+  setPoly(staticHalf, staticPts);
+  setPoly(foldingHalf, foldingPts);
+  // store original and reflected vertices for morph
+  foldingHalf._orig = foldingPts;
+  foldingHalf._refl = foldingPts.map(p=>reflectPoint(p,n,c));
+}
+function updateFoldView(alpha){
+  if(!solution) return;
+  const n=solution.n, c=solution.c;
+  // morph folding polygon
+  const pts = foldingHalf._orig.map((p,i)=>{
+    const r=foldingHalf._refl[i];
+    return v((1-alpha)*p.x + alpha*r.x, (1-alpha)*p.y + alpha*r.y);
+  });
+  setPoly(foldingHalf, pts);
+  // morph P,Q towards their reflections
+  const p=getPt(P), q=getPt(Q);
+  const Pg = reflectPoint(p,n,c), Qg = reflectPoint(q,n,c);
+  const pA = v((1-alpha)*p.x + alpha*Pg.x, (1-alpha)*p.y + alpha*Pg.y);
+  const qA = v((1-alpha)*q.x + alpha*Qg.x, (1-alpha)*q.y + alpha*Qg.y);
+  setPt(Pghost,pA); setPt(Qghost,qA);
+  Pghost.setAttribute('visibility','visible'); Qghost.setAttribute('visibility','visible');
+  // meters
+  const L1 = normalForm(...lineToPts(l1)); const L2 = normalForm(...lineToPts(l2));
+  const e1 = ptLineDist(pA,L1.n,L1.c), e2=ptLineDist(qA,L2.n,L2.c);
+  const E = Math.max(e1,e2);
+  const color = E<0.5 ? 'ok' : (E<2.0 ? 'warn' : 'bad');
+  meters.innerHTML = `dist(Pα,ℓ₁)=<b>${e1.toFixed(3)}</b> px<br>dist(Qα,ℓ₂)=<b>${e2.toFixed(3)}</b> px<br>Max E(α)=<b class="${color}">${E.toFixed(3)}</b> px`;
+  // 3D overlay rotation
+  if(overlay3d.style.display!=='none'){
+    const deg = -180*alpha;
+    left3d.style.transform = `rotateY(${deg}deg)`;
+    left3d.classList.toggle('fx', alpha>0 && alpha<1);
+  }
+}
+function play(){
+  playing=true; autoBtn.textContent='Pausa';
+  const step=()=>{
+    if(!playing){ cancelAnimationFrame(rafId); return; }
+    let a=parseFloat(alphaEl.value);
+    a = Math.min(1, a+0.01);
+    alphaEl.value=a.toFixed(2);
+    updateFoldView(a);
+    if(a>=1){ playing=false; autoBtn.textContent='Auto'; return; }
+    rafId=requestAnimationFrame(step);
+  };
+  rafId=requestAnimationFrame(step);
+}
+
+// ======= Interaction =======
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+function makeDraggableCircle(el){
+  let drag=false, off=v(0,0);
+  el.addEventListener('pointerdown',e=>{drag=true;el.setPointerCapture(e.pointerId);off=v(e.clientX - +el.getAttribute('cx'), e.clientY - +el.getAttribute('cy'));});
+  el.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const p=v(clamp(e.clientX-off.x,10,890), clamp(e.clientY-off.y,10,590));
+    setPt(el,p); updateLabels(); if(solution){ alphaEl.value=0; updateFoldView(0); }
+  });
+  el.addEventListener('pointerup',()=>drag=false);
+}
+function makeDraggableEndpoint(line, which){
+  let drag=false, off=v(0,0);
+  const handler=(e)=>{
+    if(!drag) return;
+    const p=v(clamp(e.clientX-off.x,10,890), clamp(e.clientY-off.y,10,590));
+    if(which===1){ setLine(line, p, v(+line.getAttribute('x2'), +line.getAttribute('y2'))); }
+    else { setLine(line, v(+line.getAttribute('x1'), +line.getAttribute('y1')), p); }
+    updateLabels(); if(solution){ alphaEl.value=0; updateFoldView(0); }
+  };
+  svg.addEventListener('pointermove',handler);
+  line.addEventListener('pointerdown',e=>{
+    drag=true; line.setPointerCapture(e.pointerId);
+    const x = which===1? +line.getAttribute('x1'): +line.getAttribute('x2');
+    const y = which===1? +line.getAttribute('y1'): +line.getAttribute('y2');
+    off=v(e.clientX - x, e.clientY - y);
+  });
+  svg.addEventListener('pointerup',()=>drag=false);
+}
+function updateLabels(){
+  const p=getPt(P), q=getPt(Q);
+  labP.setAttribute('x', p.x+8); labP.setAttribute('y', p.y-8);
+  labQ.setAttribute('x', q.x+8); labQ.setAttribute('y', q.y-8);
+  const [a1,b1]=lineToPts(l1), [a2,b2]=lineToPts(l2);
+  labL1.setAttribute('x', (a1.x+b1.x)/2+8); labL1.setAttribute('y', (a1.y+b1.y)/2-8);
+  labL2.setAttribute('x', (a2.x+b2.x)/2+8); labL2.setAttribute('y', (a2.y+b2.y)/2-8);
+}
+
+// ======= 3D overlay helpers =======
+function update3DOverlay(n,c){
+  const t = Math.atan2(-n.x, n.y); // angle of vector perpendicular to n
+  const deg = t*180/Math.PI;
+  const center=v(450,300);
+  const x0=v(n.x*c, n.y*c);
+  const tvec=v(-n.y, n.x);
+  const s = dot(sub(center,x0),tvec);
+  const onCrease = add(x0, v(s*tvec.x, s*tvec.y));
+  sheet3d.style.left = onCrease.x + 'px';
+  sheet3d.style.top  = onCrease.y + 'px';
+  sheet3d.style.transform = `translate(-50%,-50%) rotate(${deg}deg)`;
+}
+function toggle3D(on){
+  overlay3d.style.display = on? 'block':'none';
+  if(on){
+    left3d.classList.remove('fold');
+    left3d.style.transform = 'rotateY(0deg)';
+    left3d.classList.remove('fx');
+  }
+}
+
+// ======= Buttons =======
+document.getElementById('presetDemo').addEventListener('click', ()=>{ 
+  setLine(l1, v(120,520), v(780,520));
+  setLine(l2, v(450,520), v(780,220));
+  setPt(P, v(270,360)); setPt(Q, v(660,320));
+  resetScene(false);
+  updateLabels();
+});
+document.getElementById('presetWide').addEventListener('click', ()=>{ 
+  setLine(l1, v(100,530), v(820,530));
+  setLine(l2, v(200,520), v(820,300));
+  setPt(P, v(250,380)); setPt(Q, v(720,260));
+  resetScene(false);
+  updateLabels();
+});
+document.getElementById('presetTight').addEventListener('click', ()=>{ 
+  setLine(l1, v(120,540), v(780,540));
+  setLine(l2, v(500,560), v(820,160));
+  setPt(P, v(340,400)); setPt(Q, v(680,360));
+  resetScene(false);
+  updateLabels();
+});
+
+document.getElementById('reset').addEventListener('click', ()=>{ 
+  document.getElementById('presetDemo').click();
+});
+document.getElementById('solve').addEventListener('click', ()=>{
+  const p=getPt(P), q=getPt(Q);
+  const L1=normalForm(...lineToPts(l1)), L2=normalForm(...lineToPts(l2));
+  const sol=solveH6(p,L1,q,L2);
+  solution=sol;
+  drawCrease(sol.n,sol.c);
+  alphaEl.value=0; updateFoldView(0);
+  // prepare 3D overlay
+  update3DOverlay(sol.n, sol.c);
+});
+document.getElementById('toggleGhosts').addEventListener('click', ()=>{
+  const vis = Pghost.getAttribute('visibility')==='visible';
+  Pghost.setAttribute('visibility', vis?'hidden':'visible');
+  Qghost.setAttribute('visibility', vis?'hidden':'visible');
+});
+document.getElementById('toggle3d').addEventListener('click', ()=>{
+  const on = overlay3d.style.display==='none';
+  toggle3D(on);
+});
+alphaEl.addEventListener('input', ()=>{ updateFoldView(parseFloat(alphaEl.value)); });
+autoBtn.addEventListener('click', ()=>{ if(!solution) return; if(playing){ playing=false; autoBtn.textContent='Auto'; } else { play(); } });
+
+function resetScene(clear3d=true){
+  solution=null;
+  crease.setAttribute('visibility','hidden');
+  staticHalf.setAttribute('points','');
+  foldingHalf.setAttribute('points','');
+  Pghost.setAttribute('visibility','hidden'); Qghost.setAttribute('visibility','hidden');
+  meters.textContent='—'; alphaEl.value=0; playing=false; autoBtn.textContent='Auto';
+  if(clear3d) toggle3D(false);
+}
+
+// ======= Init =======
+makeDraggableCircle(P); makeDraggableCircle(Q);
+makeDraggableEndpoint(l1,1); makeDraggableEndpoint(l1,2);
+makeDraggableEndpoint(l2,1); makeDraggableEndpoint(l2,2);
+document.getElementById('presetDemo').click();
+updateLabels();
+</script>
+</body>
+</html>

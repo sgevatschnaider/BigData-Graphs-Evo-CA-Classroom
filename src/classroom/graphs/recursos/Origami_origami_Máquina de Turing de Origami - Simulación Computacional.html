@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Máquina de Turing de Origami</title>
+<style>
+  :root {
+    --bg: #0b1020; --panel: #0f1530; --ink: #eaf1ff; --muted: #a9b3d1;
+    --accent: #6ea8fe; --accent2: #7ee7d7; --danger: #ff6b6b; --ok: #3ad29f; --warn: #f5b971;
+    --grid-line: #24304f; --card: #111736; --shadow: rgba(0,0,0,0.25);
+    --mountain-fold: #ff8ab3; --valley-fold: #7ee7d7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: radial-gradient(1200px 600px at 20% -10%, #151b3a 0%, #0b1020 45%), var(--bg);
+    color: var(--ink); font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+  }
+  .wrap { display: grid; grid-template-columns: 1fr 420px; gap: 16px; height: 100vh; padding: 16px; }
+  header {
+    grid-column: 1 / -1; padding: 10px 16px;
+    background: linear-gradient(180deg, rgba(11,16,32,.85), rgba(11,16,32,0));
+    backdrop-filter: blur(4px); border-bottom: 1px solid rgba(110,168,254,.1);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .4px; color: #dbe6ff; }
+  #main-content { grid-column: 1 / 2; display: grid; place-items: center; padding-top: 60px; }
+  #side-panel { grid-column: 2 / 3; padding-top: 60px; height: calc(100vh - 76px); overflow-y: auto; }
+  canvas {
+    width: min(92vmin, 1100px); height: min(92vmin, 1100px); max-width: 100%; max-height: 100%;
+    aspect-ratio: 1; background: #0c1422; border: 1px solid var(--grid-line);
+    border-radius: 16px; image-rendering: pixelated; cursor: crosshair;
+  }
+  .panel {
+    background: linear-gradient(180deg, rgba(17,23,54,.9), rgba(17,23,54,.6));
+    border: 1px solid rgba(110,168,254,.15); border-radius: 16px;
+    padding: 14px; margin-bottom: 16px; box-shadow: 0 6px 30px var(--shadow);
+  }
+  .panel h2 {
+    margin: 0 0 12px 0; font-size: 14px; letter-spacing: .6px; color: #cdd7ff;
+    text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--grid-line); padding-bottom: 8px;
+  }
+  .row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .stat { flex: 1; display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; }
+  .stat b { font-size: 18px; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .pill {
+    font: 12px/1.8 system-ui; padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--grid-line); color: var(--muted); text-align: center;
+  }
+  .ok { color: var(--ok); border-color: #1b3b29; background: #12221a; }
+  .warn { color: var(--warn); border-color: #3b2a12; background: #1f160c; }
+  .bad { color: var(--danger); border-color: #3b1a1a; background: #1a1010; }
+  .btn {
+    background: linear-gradient(135deg, #1b3a78, #20408c); color: white; border: none;
+    padding: 9px 12px; border-radius: 12px; cursor: pointer; flex: 1;
+    box-shadow: 0 4px 16px rgba(54,98,210,.3); transition: transform 0.1s;
+    font-size: 13px;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.alt { background: #1a274d; }
+  .btn.active { background: linear-gradient(135deg, #3a5a98, #4060ac); box-shadow: 0 0 20px rgba(110,168,254,.5); }
+  label { color: var(--muted); font-size: 13px; }
+  .legend { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  .legend p { margin: 8px 0; }
+  .legend .highlight { color: var(--accent2); font-weight: bold; }
+  .legend ul { padding-left: 20px; margin: 8px 0; }
+  .tip {
+    font-size: 13px; color: #bcd7ff; background: #111736; padding: 10px;
+    border-radius: 10px; border: 1px solid var(--grid-line);
+  }
+  .gate-selector {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0;
+  }
+  .gate-btn {
+    padding: 12px 8px; background: #0f1530; border: 2px solid var(--grid-line);
+    border-radius: 10px; cursor: pointer; transition: all 0.2s;
+    text-align: center; font-size: 13px; color: var(--muted);
+  }
+  .gate-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .gate-btn.selected { background: var(--accent); color: white; border-color: var(--accent); }
+  .binary-display {
+    font-family: 'Courier New', monospace; font-size: 16px;
+    background: #0c1422; padding: 12px; border-radius: 8px;
+    border: 1px solid var(--grid-line); margin: 8px 0;
+    color: var(--accent2);
+  }
+  .computation-step {
+    background: #0f1530; padding: 8px 12px; border-radius: 8px;
+    margin: 4px 0; border-left: 3px solid var(--accent);
+    font-size: 13px;
+  }
+  #side-panel::-webkit-scrollbar { width: 6px; }
+  #side-panel::-webkit-scrollbar-thumb { background: #24304f; border-radius: 3px; }
+  
+  .mode-tabs {
+    display: flex; gap: 8px; margin-bottom: 12px;
+  }
+  .mode-tab {
+    flex: 1; padding: 8px; background: #0f1530; border: 1px solid var(--grid-line);
+    border-radius: 8px; cursor: pointer; text-align: center; font-size: 12px;
+    transition: all 0.2s;
+  }
+  .mode-tab:hover { border-color: var(--accent); }
+  .mode-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+</style>
+</head>
+<body>
+  <header><h1>🎴 Máquina de Turing de Origami - Simulación Computacional</h1></header>
+
+  <div class="wrap">
+    <main id="main-content">
+      <canvas id="cv" width="1100" height="1100" aria-label="Lienzo de la máquina de origami"></canvas>
+    </main>
+
+    <aside id="side-panel">
+      <div class="panel">
+        <h2>Modo de Operación</h2>
+        <div class="mode-tabs">
+          <div class="mode-tab active" data-mode="topology">Topología</div>
+          <div class="mode-tab" data-mode="logic">Lógica</div>
+          <div class="mode-tab" data-mode="automaton">Autómata</div>
+        </div>
+      </div>
+
+      <!-- Modo Topología -->
+      <div id="topology-mode">
+        <div class="panel">
+          <div class="tip">
+            <b>Clic:</b> Añadir vértice. <b style="color:var(--accent2)">Shift+Clic</b> en vértice para crear pliegue.<br/>
+            <b>Arrastrar:</b> Mover vértice. <b>Clic en pliegue:</b> Cambiar tipo (M/V).
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Análisis Topológico (χ de Euler)</h2>
+          <div class="row">
+            <div class="stat"><label>Vértices (V)</label><b id="vV">0</b></div>
+            <div class="stat"><label>Pliegues (E)</label><b id="vE">0</b></div>
+          </div>
+          <div class="row">
+            <div class="stat"><label>Caras (F)</label><b id="vF">0</b></div>
+            <div class="stat"><label>Componentes (C)</label><b id="vC">0</b></div>
+          </div>
+          <hr style="border-color: var(--grid-line); margin: 12px 0;">
+          <div class="row">
+            <div class="stat"><label>χ = V − E + F</label><b id="vChi">0</b></div>
+            <span id="badge" class="pill">—</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Inspector de Vértices</h2>
+          <div class="legend" id="vertexInspector" style="text-align:center;">
+            Haz clic en un vértice para analizar los teoremas de Maekawa y Kawasaki.
+          </div>
+        </div>
+      </div>
+
+      <!-- Modo Lógica -->
+      <div id="logic-mode" style="display:none;">
+        <div class="panel">
+          <h2>Gadgets Lógicos</h2>
+          <div class="tip">
+            Selecciona una compuerta lógica y coloca sus componentes en el lienzo. Los pliegues representan bits: <span style="color:var(--mountain-fold)">Montaña=1</span>, <span style="color:var(--valley-fold)">Valle=0</span>.
+          </div>
+          <div class="gate-selector">
+            <div class="gate-btn" data-gate="AND">AND</div>
+            <div class="gate-btn" data-gate="OR">OR</div>
+            <div class="gate-btn" data-gate="NOT">NOT</div>
+            <div class="gate-btn" data-gate="NAND">NAND</div>
+          </div>
+          <div id="gateInfo" class="legend" style="margin-top:12px;">
+            Selecciona una compuerta para ver su descripción.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Estado de Bits</h2>
+          <div class="binary-display" id="bitState">
+            Sin pliegues definidos
+          </div>
+          <button id="btnEvaluate" class="btn">Evaluar Compuerta</button>
+        </div>
+
+        <div class="panel">
+          <h2>Resultado Lógico</h2>
+          <div id="logicResult" class="legend">
+            Los resultados aparecerán aquí después de evaluar.
+          </div>
+        </div>
+      </div>
+
+      <!-- Modo Autómata -->
+      <div id="automaton-mode" style="display:none;">
+        <div class="panel">
+          <h2>Autómata Celular 1D</h2>
+          <div class="tip">
+            Simula un autómata celular elemental usando patrones de pliegues. Cada fila representa un paso temporal.
+          </div>
+          <div class="row">
+            <label>Regla:</label>
+            <input type="number" id="ruleInput" min="0" max="255" value="110" style="width:60px; padding:4px; background:#0f1530; border:1px solid var(--grid-line); color:var(--ink); border-radius:4px;">
+          </div>
+          <div class="row">
+            <button id="btnInitCA" class="btn">Inicializar</button>
+            <button id="btnStepCA" class="btn" disabled>Paso</button>
+            <button id="btnRunCA" class="btn" disabled>Ejecutar</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Estado del Autómata</h2>
+          <div id="caState" class="legend">
+            Inicializa el autómata para comenzar.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Interpretación Computacional</h2>
+          <div class="legend">
+            <p>El autómata celular es <b>Turing completo</b> (especialmente regla 110). Cada celda es un pliegue, y su estado evoluciona según reglas locales.</p>
+            <p>Esto demuestra que los patrones de origami pueden realizar cómputo universal.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Controles</h2>
+        <div class="row">
+          <!-- NUEVO BOTÓN AÑADIDO AQUÍ -->
+          <button id="btnGenerate" class="btn">Generar Pliegue Base</button>
+          <button id="btnClear" class="btn alt">Limpiar</button>
+          <button id="btnGrid" class="btn">Ocultar Rejilla</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Teoría: Origami como Máquina de Turing</h2>
+        <div class="legend">
+          <p>Se ha demostrado que el origami es <span class="highlight">Turing completo</span>. Esto significa que cualquier cálculo computacional puede, en teoría, realizarse mediante pliegues.</p>
+          <p><b>Claves matemáticas:</b></p>
+          <ul>
+            <li><b>Espacio de estados:</b> S = {0,1}ⁿ (pliegues como bits)</li>
+            <li><b>Transiciones:</b> Tᵢ: S → S (reglas de plegado)</li>
+            <li><b>Funcionalidad completa:</b> Gadgets NAND pueden generar toda la lógica booleana.</li>
+          </ul>
+          <p>La topología (χ=1 para un disco) + las reglas locales (Maekawa, Kawasaki) garantizan la consistencia física del sistema computacional.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const pad = 40;
+  const sheet = { x: pad, y: pad, w: W - 2 * pad, h: H - 2 * pad, showGrid: true };
+
+  const colors = {
+      accent: '#6ea8fe',
+      accent2: '#7ee7d7',
+      mountainFold: '#ff8ab3',
+      valleyFold: '#7ee7d7',
+      gridLine: '#24304f',
+      ink: '#eaf1ff'
+  };
+
+  let vertices = [];
+  let edges = [];
+  let nextId = 0;
+  let dragging = null;
+  let hoverVid = null;
+  let hoverEid = null;
+  let pendingEdgeFrom = null;
+  let selectedVid = null;
+  let currentMode = 'topology';
+  let selectedGate = null;
+  
+  // Autómata celular
+  let caGrid = [];
+  let caRule = 110;
+  let caRunning = false;
+  let caInterval = null;
+
+  const $ = id => document.getElementById(id);
+
+  // Helpers
+  function distToSegment(p, v, w) {
+    const l2 = (v.x - w.x)**2 + (v.y - w.y)**2;
+    if (l2 == 0) return Math.hypot(p.x - v.x, p.y - v.y);
+    let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+  }
+
+  function getVertexById(id) { return vertices.find(v => v.id === id); }
+  function findEdge(id1, id2) {
+      const pair = id1 < id2 ? { a: id1, b: id2 } : { a: id2, b: id1 };
+      return edges.find(e => e.a === pair.a && e.b === pair.b);
+  }
+
+  function addVertex(x, y) {
+    const id = nextId++;
+    vertices.push({ id, x, y });
+    return id;
+  }
+
+  function addEdge(aId, bId, type = 'V') {
+    if (aId === bId) return;
+    const pair = aId < bId ? { a: aId, b: bId } : { a: bId, b: aId };
+    if (!edges.some(e => e.a === pair.a && e.b === pair.b)) {
+      edges.push({ id: nextId++, a: pair.a, b: pair.b, type: type });
+    }
+  }
+
+  function components() {
+    if (vertices.length === 0) return 0;
+    const adj = new Map(vertices.map(v => [v.id, []]));
+    edges.forEach(e => {
+      adj.get(e.a).push(e.b);
+      adj.get(e.b).push(e.a);
+    });
+    const seen = new Set();
+    let compCount = 0;
+    for (const v of vertices) {
+      if (seen.has(v.id)) continue;
+      compCount++;
+      const stack = [v.id];
+      seen.add(v.id);
+      while (stack.length) {
+        const u = stack.pop();
+        adj.get(u).forEach(wId => {
+          if (!seen.has(wId)) {
+            seen.add(wId);
+            stack.push(wId);
+          }
+        });
+      }
+    }
+    return compCount;
+  }
+
+  function counts() {
+    const V = vertices.length;
+    const E = edges.length;
+    const C = components();
+    const F = (V === 0) ? 0 : (E - V + C); 
+    const chi = V - E + F;
+    return { V, E, C, F, chi };
+  }
+
+  function updateSidebar() {
+    if (currentMode === 'topology') {
+      const { V, E, C, F, chi } = counts();
+      $('vV').textContent = V;
+      $('vE').textContent = E;
+      $('vC').textContent = C;
+      $('vF').textContent = Math.max(0, F);
+      $('vChi').textContent = chi;
+
+      const badge = $('badge');
+      if (V === 0 && E === 0) {
+        badge.className = 'pill';
+        badge.textContent = 'Dibuja un patrón de pliegues';
+      } else if (chi === 1) {
+        badge.className = 'pill ok';
+        badge.textContent = 'χ = 1 ✓ (Topología de disco correcta)';
+      } else {
+        badge.className = 'pill bad';
+        badge.textContent = `χ = ${chi} ✗ (No es un disco simple)`;
+      }
+      
+      updateVertexInspector();
+    } else if (currentMode === 'logic') {
+      updateBitState();
+    }
+  }
+
+  function updateVertexInspector() {
+    const vertexInspector = $('vertexInspector');
+    if (selectedVid === null) {
+      vertexInspector.innerHTML = '<span style="color:var(--muted);">Haz clic en un vértice para analizarlo.</span>';
+      return;
+    }
+    const v = getVertexById(selectedVid);
+    if (!v) {
+      selectedVid = null;
+      updateVertexInspector();
+      return;
+    }
+    
+    const incidentEdges = edges.filter(e => e.a === v.id || e.b === v.id);
+    let mountainCount = 0, valleyCount = 0;
+    incidentEdges.forEach(e => {
+      if (e.type === 'M') mountainCount++;
+      if (e.type === 'V') valleyCount++;
+    });
+
+    const angles = [];
+    incidentEdges.forEach(e => {
+        const neighborId = e.a === v.id ? e.b : e.a;
+        const neighbor = getVertexById(neighborId);
+        const angle = Math.atan2(neighbor.y - v.y, neighbor.x - v.x);
+        angles.push({angle, type: e.type});
+    });
+    angles.sort((a,b) => a.angle - b.angle);
+
+    let sum1 = 0, sum2 = 0;
+    for(let i = 0; i < angles.length; i++) {
+        const nextAngle = angles[(i + 1) % angles.length].angle;
+        let diff = nextAngle - angles[i].angle;
+        if (diff < 0) diff += 2 * Math.PI;
+        if (i % 2 === 0) sum1 += diff;
+        else sum2 += diff;
+    }
+    const sum1Deg = (sum1 * 180 / Math.PI).toFixed(1);
+    const sum2Deg = (sum2 * 180 / Math.PI).toFixed(1);
+    const kawasakiCheck = angles.length > 0 && Math.abs(sum1Deg - 180) < 1.5 && Math.abs(sum2Deg - 180) < 1.5;
+    
+    const maekawaCheck = Math.abs(mountainCount - valleyCount) === 2;
+
+    let html = `<h3 style="margin:0 0 10px 0; font-size:14px;">Análisis del Vértice ${v.id}</h3>`;
+    html += `<div class="row" style="justify-content:center; gap:16px; margin-bottom:12px;">
+                <div><span style="color:var(--mountain-fold)">Montaña:</span> <b>${mountainCount}</b></div>
+                <div><span style="color:var(--valley-fold)">Valle:</span> <b>${valleyCount}</b></div>
+             </div>`;
+    
+    html += `<h4 style="margin:8px 0 4px 0; font-size:13px;">Teorema de Maekawa (M - V = ±2)</h4>`;
+    if (maekawaCheck) {
+        html += `<div class="pill ok">✓ Cumple</div>`;
+    } else {
+        html += `<div class="pill bad">✗ No Cumple (${mountainCount - valleyCount})</div>`;
+    }
+
+    html += `<h4 style="margin:12px 0 4px 0; font-size:13px;">Teorema de Kawasaki (Σα_alt = 180°)</h4>`;
+    if (kawasakiCheck) {
+        html += `<div class="pill ok">✓ Cumple</div>`;
+    } else {
+        html += `<div class="pill warn">✗ No Cumple</div>`;
+    }
+    html += `<div style="font-size:12px; color:var(--muted); margin-top:6px;">Σα₁=${sum1Deg}°, Σα₂=${sum2Deg}°</div>`;
+    
+    vertexInspector.innerHTML = html;
+  }
+
+  function updateBitState() {
+    const bitStateEl = $('bitState');
+    if (edges.length === 0) {
+      bitStateEl.textContent = 'Sin pliegues definidos';
+      return;
+    }
+    
+    const bits = edges.map(e => e.type === 'M' ? '1' : (e.type === 'V' ? '0' : '?'));
+    bitStateEl.textContent = `Estado: ${bits.join(' ')} (${bits.length} bits)`;
+  }
+
+  // Drawing
+  function drawGrid() {
+    if (!sheet.showGrid) return;
+    const { x, y, w, h } = sheet;
+    const gridSize = 40;
+    ctx.save();
+    ctx.strokeStyle = '#132033';
+    ctx.lineWidth = 1;
+    for (let gx = x; gx <= x + w; gx += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(gx, y);
+      ctx.lineTo(gx, y + h);
+      ctx.stroke();
+    }
+    for (let gy = y; gy <= y + h; gy += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, gy);
+      ctx.lineTo(x + w, gy);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSheet() {
+    const { x, y, w, h } = sheet;
+    ctx.fillStyle = '#0c1422';
+    ctx.strokeStyle = colors.gridLine;
+    ctx.lineWidth = 2;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+  }
+
+  function drawEdges() {
+    const typeStyles = {
+        'M': { color: colors.mountainFold, dash: [] },
+        'V': { color: colors.valleyFold, dash: [8, 4] }
+    };
+    edges.forEach(e => {
+      const A = getVertexById(e.a);
+      const B = getVertexById(e.b);
+      if (!A || !B) return;
+      
+      const style = typeStyles[e.type];
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = (hoverEid === e.id) ? 4.5 : 3;
+      ctx.setLineDash(style.dash);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y);
+      ctx.lineTo(B.x, B.y);
+      ctx.stroke();
+      
+      if (currentMode === 'logic') {
+        ctx.setLineDash([]);
+        const mx = (A.x + B.x) / 2;
+        const my = (A.y + B.y) / 2;
+        ctx.fillStyle = style.color;
+        ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(e.type === 'M' ? '1' : '0', mx, my - 12);
+      }
+    });
+    ctx.setLineDash([]);
+    
+    if (pendingEdgeFrom !== null && hoverVid !== null && hoverVid !== pendingEdgeFrom) {
+      const A = getVertexById(pendingEdgeFrom);
+      const B = getVertexById(hoverVid);
+      if(A && B){
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = '#9ad1ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  function drawVertices() {
+    vertices.forEach(v => {
+      const isHover = hoverVid === v.id;
+      const isSelected = selectedVid === v.id;
+      const r = isHover ? 9 : (isSelected ? 8 : 6);
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = isHover ? '#fff' : (isSelected ? colors.accent2 : '#cfe7ff');
+      ctx.fill();
+      ctx.strokeStyle = colors.accent;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawGrid();
+    drawSheet();
+    drawEdges();
+    drawVertices();
+    
+    if (currentMode === 'automaton' && caGrid.length > 0) {
+      drawCellularAutomaton();
+    }
+  }
+
+  function drawCellularAutomaton() {
+    const cellSize = 10;
+    const startX = sheet.x + 20;
+    const startY = sheet.y + 20;
+    
+    caGrid.forEach((row, rowIdx) => {
+      row.forEach((cell, colIdx) => {
+        if (cell === 1) {
+          ctx.fillStyle = colors.mountainFold;
+          ctx.fillRect(
+            startX + colIdx * cellSize,
+            startY + rowIdx * cellSize,
+            cellSize - 1,
+            cellSize - 1
+          );
+        }
+      });
+    });
+  }
+
+  // Mouse handling
+  function getMousePos(e) {
+    const rect = cv.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (W / rect.width),
+      y: (e.clientY - rect.top) * (H / rect.height)
+    };
+  }
+
+  cv.addEventListener('mousedown', e => {
+    const m = getMousePos(e);
+    
+    const clickedVertex = vertices.find(v => Math.hypot(m.x - v.x, m.y - v.y) < 12);
+    if (clickedVertex) {
+      if (e.shiftKey) {
+        if (pendingEdgeFrom === null) {
+          pendingEdgeFrom = clickedVertex.id;
+        } else if (pendingEdgeFrom !== clickedVertex.id) {
+          addEdge(pendingEdgeFrom, clickedVertex.id);
+          pendingEdgeFrom = null;
+        }
+      } else {
+        selectedVid = clickedVertex.id;
+        dragging = clickedVertex;
+      }
+      updateSidebar();
+      draw();
+      return;
+    }
+    
+    const clickedEdge = edges.find(e => {
+      const A = getVertexById(e.a);
+      const B = getVertexById(e.b);
+      return A && B && distToSegment(m, A, B) < 8;
+    });
+    if (clickedEdge) {
+      clickedEdge.type = clickedEdge.type === 'V' ? 'M' : 'V';
+      updateSidebar();
+      draw();
+      return;
+    }
+    
+    if (m.x >= sheet.x && m.x <= sheet.x + sheet.w && 
+        m.y >= sheet.y && m.y <= sheet.y + sheet.h) {
+      addVertex(m.x, m.y);
+      updateSidebar();
+      draw();
+    }
+  });
+
+  cv.addEventListener('mousemove', e => {
+    const m = getMousePos(e);
+    
+    if (dragging) {
+      dragging.x = Math.max(sheet.x, Math.min(sheet.x + sheet.w, m.x));
+      dragging.y = Math.max(sheet.y, Math.min(sheet.y + sheet.h, m.y));
+      updateSidebar();
+      draw();
+      return;
+    }
+    
+    const oldHoverVid = hoverVid;
+    const oldHoverEid = hoverEid;
+    hoverVid = vertices.find(v => Math.hypot(m.x - v.x, m.y - v.y) < 12)?.id || null;
+    hoverEid = edges.find(e => {
+      const A = getVertexById(e.a); const B = getVertexById(e.b);
+      return A && B && distToSegment(m, A, B) < 8;
+    })?.id || null;
+    
+    if (oldHoverVid !== hoverVid || oldHoverEid !== hoverEid) {
+      draw();
+    }
+  });
+
+  cv.addEventListener('mouseup', () => { dragging = null; });
+  cv.addEventListener('mouseleave', () => {
+    dragging = null; hoverVid = null; hoverEid = null;
+    draw();
+  });
+
+  // Mode switching
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentMode = tab.dataset.mode;
+      document.getElementById('topology-mode').style.display = currentMode === 'topology' ? 'block' : 'none';
+      document.getElementById('logic-mode').style.display = currentMode === 'logic' ? 'block' : 'none';
+      document.getElementById('automaton-mode').style.display = currentMode === 'automaton' ? 'block' : 'none';
+      updateSidebar();
+      draw();
+    });
+  });
+
+  // Logic gate selection
+  document.querySelectorAll('.gate-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.gate-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGate = btn.dataset.gate;
+      const descriptions = {
+        'AND': 'Compuerta AND: Salida es 1 solo si ambas entradas son 1. Fórmula: A ∧ B',
+        'OR': 'Compuerta OR: Salida es 1 si al menos una entrada es 1. Fórmula: A ∨ B',
+        'NOT': 'Compuerta NOT: Invierte la entrada. Fórmula: ¬A',
+        'NAND': 'Compuerta NAND: Invierte AND. Es funcionalmente completa. Fórmula: ¬(A ∧ B)'
+      };
+      $('gateInfo').textContent = descriptions[selectedGate];
+    });
+  });
+
+  // Logic evaluation
+  $('btnEvaluate').addEventListener('click', () => {
+    if (edges.length < 1) {
+      $('logicResult').innerHTML = '<span class="pill warn">Necesitas al menos 1 pliegue para evaluar</span>';
+      return;
+    }
+    if (!selectedGate) {
+      $('logicResult').innerHTML = '<span class="pill warn">Selecciona una compuerta primero</span>';
+      return;
+    }
+    const bits = edges.map(e => e.type === 'M' ? 1 : 0);
+    let result;
+    switch(selectedGate) {
+      case 'AND':
+        if (bits.length < 2) { $('logicResult').innerHTML = '<span class="pill warn">AND necesita 2 pliegues</span>'; return; }
+        result = bits[0] && bits[1];
+        break;
+      case 'OR':
+        if (bits.length < 2) { $('logicResult').innerHTML = '<span class="pill warn">OR necesita 2 pliegues</span>'; return; }
+        result = bits[0] || bits[1];
+        break;
+      case 'NOT':
+        result = bits[0] ? 0 : 1;
+        break;
+      case 'NAND':
+        if (bits.length < 2) { $('logicResult').innerHTML = '<span class="pill warn">NAND necesita 2 pliegues</span>'; return; }
+        result = !(bits[0] && bits[1]) ? 1 : 0;
+        break;
+    }
+    $('logicResult').innerHTML = `
+      <div class="computation-step">Entrada A: ${bits[0]} ${selectedGate !== 'NOT' ? `| Entrada B: ${bits[1] || 0}`: ''}</div>
+      <div class="computation-step">Operación: ${selectedGate}</div>
+      <div class="computation-step"><b>Resultado: ${result}</b> ${result ? '(Pliegue Montaña)' : '(Pliegue Valle)'}</div>`;
+  });
+
+  // Cellular automaton controls
+  $('btnInitCA').addEventListener('click', () => {
+    caRule = parseInt($('ruleInput').value) || 110;
+    const width = Math.floor((sheet.w - 40) / 10);
+    const height = Math.floor((sheet.h - 40) / 10);
+    caGrid = Array(height).fill(null).map(() => Array(width).fill(0));
+    caGrid[0][Math.floor(width / 2)] = 1;
+    $('btnStepCA').disabled = false;
+    $('btnRunCA').disabled = false;
+    $('caState').innerHTML = `<div class="computation-step">Autómata inicializado (Regla ${caRule})</div>`;
+    draw();
+  });
+
+  function stepCA() {
+    if (caGrid.length === 0) return;
+    let currentRowIdx = caGrid.findIndex(row => row.every(c => c === 0)) -1;
+    if (currentRowIdx < 0) currentRowIdx = 0;
+    while(caGrid[currentRowIdx+1] && caGrid[currentRowIdx+1].some(c=>c===1)) currentRowIdx++;
+    
+    const nextRowIdx = currentRowIdx + 1;
+    if (nextRowIdx >= caGrid.length) {
+      $('caState').innerHTML = '<span class="pill warn">Autómata completado</span>';
+      caRunning = false;
+      $('btnRunCA').textContent = 'Ejecutar';
+      clearInterval(caInterval);
+      return;
+    }
+
+    const prevRow = caGrid[currentRowIdx];
+    for (let i = 0; i < prevRow.length; i++) {
+      const left = prevRow[i - 1] || 0;
+      const center = prevRow[i];
+      const right = prevRow[i + 1] || 0;
+      const config = (left << 2) | (center << 1) | right;
+      caGrid[nextRowIdx][i] = (caRule >> config) & 1;
+    }
+    $('caState').innerHTML = `<div class="computation-step">Paso: ${nextRowIdx}/${caGrid.length - 1}</div>`;
+    draw();
+  }
+
+  $('btnStepCA').addEventListener('click', stepCA);
+  $('btnRunCA').addEventListener('click', () => {
+    if (caRunning) {
+      caRunning = false;
+      $('btnRunCA').textContent = 'Ejecutar';
+      clearInterval(caInterval);
+    } else {
+      caRunning = true;
+      $('btnRunCA').textContent = 'Detener';
+      caInterval = setInterval(stepCA, 100);
+    }
+  });
+
+  function clearCanvas(){
+    vertices = []; edges = []; nextId = 0; selectedVid = null; pendingEdgeFrom = null; caGrid = [];
+    caRunning = false; clearInterval(caInterval);
+    $('btnStepCA').disabled = true; $('btnRunCA').disabled = true; $('btnRunCA').textContent = 'Ejecutar';
+    updateSidebar(); draw();
+  }
+  
+  $('btnClear').addEventListener('click', clearCanvas);
+
+  $('btnGrid').addEventListener('click', () => {
+    sheet.showGrid = !sheet.showGrid;
+    $('btnGrid').textContent = sheet.showGrid ? 'Ocultar Rejilla' : 'Mostrar Rejilla';
+    draw();
+  });
+  
+  // *** NUEVA FUNCIÓN PARA GENERAR PLIEGUE ***
+  $('btnGenerate').addEventListener('click', () => {
+    clearCanvas();
+    const { x, y, w, h } = sheet;
+    const centerX = x + w / 2, centerY = y + h / 2;
+
+    const v_center = addVertex(centerX, centerY);
+    const v_top = addVertex(centerX, y);
+    const v_bottom = addVertex(centerX, y + h);
+    const v_left = addVertex(x, centerY);
+    const v_right = addVertex(x + w, centerY);
+    const v_tl = addVertex(x, y);
+    const v_tr = addVertex(x + w, y);
+    const v_bl = addVertex(x, y + h);
+    const v_br = addVertex(x + w, y + h);
+
+    // Pliegues Montaña (M)
+    addEdge(v_top, v_center, 'M');
+    addEdge(v_bottom, v_center, 'M');
+    addEdge(v_left, v_center, 'M');
+    addEdge(v_right, v_center, 'M');
+    
+    // Pliegues Valle (V)
+    addEdge(v_tl, v_center, 'V');
+    addEdge(v_tr, v_center, 'V');
+    addEdge(v_bl, v_center, 'V');
+    addEdge(v_br, v_center, 'V');
+    
+    updateSidebar();
+    draw();
+  });
+
+  // Initial draw
+  updateSidebar();
+  draw();
+})();
+</script>
+</body>
+</html>

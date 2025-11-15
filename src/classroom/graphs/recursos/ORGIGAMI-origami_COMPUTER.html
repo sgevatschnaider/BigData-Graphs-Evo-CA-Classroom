@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Computadora de Origami – Visualización Educativa</title>
+<style>
+  :root {
+    --bg: #0b1020; --panel: #0f1530; --ink: #eaf1ff; --muted: #a9b3d1;
+    --accent: #6ea8fe; --accent2: #7ee7d7; --danger: #ff6b6b; --ok: #3ad29f; --warn: #f5b971;
+    --grid-line: #24304f; --card: #111736; --shadow: rgba(0,0,0,0.25);
+    --mountain-fold: #ff8ab3; --valley-fold: #7ee7d7; --ghost: rgba(126,231,215,.18);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #151b3a 0%, #0b1020 45%), var(--bg);
+    color: var(--ink); font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+  }
+  header {
+    position: sticky; top: 0; z-index: 20; padding: 10px 16px;
+    background: linear-gradient(180deg, rgba(11,16,32,.85), rgba(11,16,32,0));
+    backdrop-filter: blur(4px); border-bottom: 1px solid rgba(110,168,254,.1);
+    display:flex; gap:10px; align-items:center; justify-content:space-between;
+  }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .4px; color: #dbe6ff; }
+  .toolbar { display:flex; gap:8px; }
+  .btnTop { background:#1b294f; color:#fff; border:1px solid #2b3c6b; padding:8px 10px; border-radius:10px; cursor:pointer; font-size:12px }
+  .btnTop:hover{ background:#203260 }
+  .wrap { display: grid; grid-template-columns: 1fr 450px; gap: 16px; padding: 16px; }
+  @media (max-width: 1024px) {
+    .wrap { grid-template-columns: 1fr; }
+  }
+  #main-content { grid-column: 1 / 2; display: grid; place-items: center; }
+  #side-panel { grid-column: 2 / 3; max-height: calc(100vh - 90px); overflow-y: auto; }
+  @media (max-width: 1024px) {
+    #side-panel { grid-column: 1 / 2; max-height: none; }
+  }
+  canvas {
+    width: min(92vmin, 800px); height: min(92vmin, 800px); max-width: 100%; max-height: 100%;
+    aspect-ratio: 1; background: #0c1422; border: 1px solid var(--grid-line);
+    border-radius: 16px; cursor: crosshair;
+  }
+  .panel {
+    background: linear-gradient(180deg, rgba(17,23,54,.9), rgba(17,23,54,.6));
+    border: 1px solid rgba(110,168,254,.15); border-radius: 16px;
+    padding: 14px; margin-bottom: 16px; box-shadow: 0 6px 30px var(--shadow);
+  }
+  .panel h2 {
+    margin: 0 0 12px 0; font-size: 14px; letter-spacing: .6px; color: #cdd7ff;
+    text-transform: uppercase; font-weight: bold; border-bottom: 1px solid var(--grid-line); padding-bottom: 8px;
+  }
+  .row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .btn {
+    background: linear-gradient(135deg, #1b3a78, #20408c); color: white; border: none;
+    padding: 9px 12px; border-radius: 12px; cursor: pointer; flex: 1;
+    box-shadow: 0 4px 16px rgba(54,98,210,.3); transition: transform 0.1s;
+    font-size: 13px;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.alt { background: #1a274d; }
+  .btn.success { background: linear-gradient(135deg, #2d7a4d, #3a9960); }
+  label { color: var(--muted); font-size: 13px; margin-right: 8px; }
+  .legend { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  .legend p { margin: 8px 0; }
+  .legend ul { padding-left: 20px; margin: 8px 0; }
+  .tip { font-size: 13px; color: #bcd7ff; background: #111736; padding: 10px; border-radius: 10px; border: 1px solid var(--grid-line); margin-bottom: 12px; }
+  .output-display {
+    background: #0c1422; border: 1px solid var(--grid-line); border-radius: 8px;
+    padding: 12px; margin: 12px 0; font-family: monospace; font-size: 16px;
+    min-height: 60px; display: flex; align-items: center; justify-content: center;
+  }
+  .gate-visual {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 20px; background: #0c1422; border-radius: 8px; margin: 12px 0;
+  }
+  .input-bit, .output-bit {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 18px; border: 2px solid var(--grid-line);
+  }
+  .bit-0 { background: #2a3a5a; color: #6a7a9a; }
+  .bit-1 { background: var(--valley-fold); color: #0a1a2a; }
+  .gate-box {
+    padding: 15px 25px; background: var(--panel); border: 2px solid var(--accent);
+    border-radius: 12px; font-weight: bold; color: var(--accent2);
+  }
+  select {
+    background: #0f1530; border: 1px solid var(--grid-line); color: var(--ink);
+    border-radius: 8px; padding: 6px; font-size: 13px;
+  }
+  footer { margin: 14px 0 8px; color: #a4abdb; font-size: 12px; text-align: center; }
+  .explanation {
+    background: rgba(110,168,254,.1); border-left: 3px solid var(--accent);
+    padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🎴 Computadora de Origami – Demostración Educativa</h1>
+    <div class="toolbar">
+      <button id="btnDemo" class="btnTop">Demo Automática</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <main id="main-content">
+      <canvas id="cv" width="800" height="800" aria-label="Visualización de compuerta lógica"></canvas>
+    </main>
+
+    <aside id="side-panel">
+      <div class="panel">
+        <h2>¿Qué es una Computadora de Origami?</h2>
+        <div class="tip">
+          <strong>Concepto clave:</strong> Matemáticos han demostrado que el origami es "Turing completo", 
+          lo que significa que puede realizar CUALQUIER cálculo que una computadora normal puede hacer, 
+          usando solo papel y pliegues.
+        </div>
+        <div class="legend">
+          <p><strong>Representación de bits:</strong></p>
+          <ul>
+            <li>🔴 <span style="color:var(--mountain-fold)">Pliegue Montaña (M) = 1</span></li>
+            <li>🔵 <span style="color:var(--valley-fold)">Pliegue Valle (V) = 0</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Compuerta Lógica Interactiva</h2>
+        <div class="row">
+          <label>Compuerta:</label>
+          <select id="gateSel">
+            <option>AND</option>
+            <option>OR</option>
+            <option>NOT</option>
+            <option selected>NAND</option>
+            <option>NOR</option>
+            <option>XOR</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Entrada A:</label>
+          <select id="inA">
+            <option value="0">0 (Valle)</option>
+            <option value="1" selected>1 (Montaña)</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Entrada B:</label>
+          <select id="inB">
+            <option value="0">0 (Valle)</option>
+            <option value="1" selected>1 (Montaña)</option>
+          </select>
+        </div>
+        <div class="row">
+          <button id="btnCalculate" class="btn success">Calcular</button>
+        </div>
+
+        <div class="gate-visual">
+          <div>
+            <div class="input-bit bit-1" id="visualA">1</div>
+            <small style="color:var(--muted)">Entrada A</small>
+          </div>
+          <div class="gate-box" id="gateLabel">NAND</div>
+          <div>
+            <div class="output-bit bit-0" id="visualOut">?</div>
+            <small style="color:var(--muted)">Salida</small>
+          </div>
+          <div>
+            <div class="input-bit bit-1" id="visualB">1</div>
+            <small style="color:var(--muted)">Entrada B</small>
+          </div>
+        </div>
+
+        <div class="output-display" id="result">
+          Resultado: <span id="outputValue" style="color:var(--accent2); margin-left:10px; font-size:20px;">?</span>
+        </div>
+
+        <div class="explanation" id="explanation">
+          Selecciona valores y presiona Calcular para ver cómo funciona la compuerta lógica.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>¿Cómo funciona?</h2>
+        <div class="legend">
+          <p><strong>El proceso:</strong></p>
+          <ol>
+            <li>Dos pliegues de entrada (pleats) representan los bits A y B</li>
+            <li>Un "gadget" complejo de pliegues procesa estas entradas</li>
+            <li>Un tercer pliegue se forma automáticamente, mostrando el resultado</li>
+            <li>La dirección del pliegue final indica 0 o 1</li>
+          </ol>
+          
+          <p style="margin-top:15px;"><strong>¿Por qué es importante?</strong></p>
+          <p>Los investigadores Zakharevich y Hull demostraron que combinando estas compuertas 
+          (AND, OR, NAND, NOR), se puede construir cualquier cálculo computacional. ¡Es como 
+          tener una computadora hecha completamente de papel!</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Teoría: Más allá de Regla y Compás</h2>
+        <div class="legend">
+          <p>El origami puede resolver problemas que regla y compás NO pueden:</p>
+          <ul>
+            <li><strong>Trisección de ángulos</strong> – dividir un ángulo en 3 partes iguales</li>
+            <li><strong>Duplicación del cubo</strong> – construir un cubo de volumen exactamente el doble</li>
+          </ul>
+          <p>Estos requieren resolver ecuaciones <strong>cúbicas</strong>, que el origami puede manejar 
+          gracias a los axiomas de Huzita-Hatori.</p>
+        </div>
+      </div>
+
+      <footer>
+        <div>Basado en la investigación de Inna Zakharevich y Thomas Hull</div>
+        <div>Artículo: Quanta Magazine (2024)</div>
+      </footer>
+    </aside>
+  </div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  const colors = {
+    mountain: '#ff8ab3',
+    valley: '#7ee7d7',
+    accent: '#6ea8fe',
+    wire: '#9ad1ff',
+    bg: '#0c1422'
+  };
+
+  const $ = id => document.getElementById(id);
+
+  // Función para evaluar compuerta lógica
+  function evalGate(gate, a, b) {
+    a = +a; b = +b;
+    switch(gate) {
+      case 'AND': return a & b;
+      case 'OR': return a | b;
+      case 'NOT': return a ^ 1;
+      case 'NAND': return (a & b) ^ 1;
+      case 'NOR': return (a | b) ^ 1;
+      case 'XOR': return a ^ b;
+      default: return 0;
+    }
+  }
+
+  // Dibujar visualización de origami
+  function drawOrigamiGate(gateType, inputA, inputB, output) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    const centerX = W / 2;
+    const centerY = H / 2;
+
+    // Dibujar "papel" de fondo
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fillRect(100, 100, W-200, H-200);
+    ctx.strokeStyle = 'rgba(110,168,254,0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(100, 100, W-200, H-200);
+
+    // Título
+    ctx.fillStyle = colors.accent;
+    ctx.font = 'bold 24px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Compuerta ${gateType}`, centerX, 80);
+
+    // Dibujar pliegues de entrada (izquierda)
+    drawFold(200, centerY - 80, inputA === 1 ? 'M' : 'V', 'Entrada A = ' + inputA);
+    drawFold(200, centerY + 80, inputB === 1 ? 'M' : 'V', 'Entrada B = ' + inputB);
+
+    // Dibujar "gadget" central (caja de compuerta)
+    ctx.fillStyle = 'rgba(110,168,254,0.2)';
+    ctx.fillRect(centerX - 80, centerY - 60, 160, 120);
+    ctx.strokeStyle = colors.accent;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(centerX - 80, centerY - 60, 160, 120);
+    
+    ctx.fillStyle = colors.wire;
+    ctx.font = 'bold 20px system-ui';
+    ctx.fillText(gateType, centerX, centerY + 5);
+
+    // Líneas de conexión
+    ctx.strokeStyle = colors.wire;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(250, centerY - 80);
+    ctx.lineTo(centerX - 80, centerY - 30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(250, centerY + 80);
+    ctx.lineTo(centerX - 80, centerY + 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Línea de salida
+    ctx.beginPath();
+    ctx.moveTo(centerX + 80, centerY);
+    ctx.lineTo(W - 200, centerY);
+    ctx.stroke();
+
+    // Dibujar pliegue de salida (derecha)
+    drawFold(W - 200, centerY, output === 1 ? 'M' : 'V', 'Salida = ' + output);
+
+    // Leyenda
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = colors.mountain;
+    ctx.fillText('━━━ Pliegue Montaña (1)', 120, H - 60);
+    ctx.fillStyle = colors.valley;
+    ctx.fillText('- - - Pliegue Valle (0)', 120, H - 35);
+  }
+
+  function drawFold(x, y, type, label) {
+    const isMountain = type === 'M';
+    const color = isMountain ? colors.mountain : colors.valley;
+    
+    // Dibujar línea de pliegue
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.setLineDash(isMountain ? [12, 6] : [6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(x, y - 30);
+    ctx.lineTo(x, y + 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Círculo indicador
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Etiqueta
+    ctx.fillStyle = colors.accent;
+    ctx.font = '13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, y + 50);
+  }
+
+  // Actualizar visualización
+  function calculate() {
+    const gate = $('gateSel').value;
+    const a = +$('inA').value;
+    const b = +$('inB').value;
+    const result = evalGate(gate, a, b);
+
+    // Actualizar canvas
+    drawOrigamiGate(gate, a, b, result);
+
+    // Actualizar UI
+    $('visualA').textContent = a;
+    $('visualA').className = `input-bit bit-${a}`;
+    $('visualB').textContent = b;
+    $('visualB').className = `input-bit bit-${b}`;
+    $('visualOut').textContent = result;
+    $('visualOut').className = `output-bit bit-${result}`;
+    $('gateLabel').textContent = gate;
+    $('outputValue').textContent = result;
+
+    // Explicación
+    const explanations = {
+      'AND': 'Salida es 1 solo si AMBAS entradas son 1',
+      'OR': 'Salida es 1 si AL MENOS UNA entrada es 1',
+      'NOT': 'Invierte la entrada A (ignora B)',
+      'NAND': 'Opuesto de AND. Salida es 0 solo si ambas son 1',
+      'NOR': 'Opuesto de OR. Salida es 1 solo si ambas son 0',
+      'XOR': 'Salida es 1 si las entradas son DIFERENTES'
+    };
+    $('explanation').innerHTML = `<strong>${gate}:</strong> ${explanations[gate]}<br><br>
+      <strong>Cálculo:</strong> ${gate}(${a}, ${b}) = ${result}`;
+  }
+
+  // Event listeners
+  $('btnCalculate').addEventListener('click', calculate);
+  ['gateSel', 'inA', 'inB'].forEach(id => {
+    $(id).addEventListener('change', calculate);
+  });
+
+  // Demo automática
+  $('btnDemo').addEventListener('click', () => {
+    const gates = ['AND', 'OR', 'NAND', 'NOR', 'XOR'];
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i >= gates.length) {
+        clearInterval(interval);
+        return;
+      }
+      $('gateSel').value = gates[i];
+      $('inA').value = Math.random() > 0.5 ? '1' : '0';
+      $('inB').value = Math.random() > 0.5 ? '1' : '0';
+      calculate();
+      i++;
+    }, 2000);
+  });
+
+  // Inicializar
+  calculate();
+})();
+</script>
+</body>
+</html>

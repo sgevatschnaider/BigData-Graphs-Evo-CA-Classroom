@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geometría Visual: Regla & Compás vs. Origami (Huzita–Hatori)</title>
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --panel:#141829;
+    --panel-hover:#1a1f35;
+    --ink:#e8eaff;
+    --muted:#98a0d0;
+    --accent:#6b8fff;
+    --accent-bright:#8ba5ff;
+    --accent2:#00d4aa;
+    --accent2-bright:#1fffc4;
+    --warn:#ffb86c;
+    --ok:#9cff57;
+    --grid:#1a1e32;
+    --construction:#9aa7ff;
+    --crease:#00d4aa;
+    --arc:#ffd166;
+    --line:#70d6ff;
+    --point:#ff5d8f;
+    --glow-blue: 0 0 20px rgba(107, 143, 255, 0.3);
+    --glow-cyan: 0 0 20px rgba(0, 212, 170, 0.3);
+    --glow-pink: 0 0 15px rgba(255, 93, 143, 0.4);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 8px currentColor); }
+    50% { filter: drop-shadow(0 0 16px currentColor); }
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  @keyframes dash {
+    to { stroke-dashoffset: -100; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  
+  *{box-sizing:border-box; margin:0; padding:0;}
+  
+  body{
+    color:var(--ink);
+    background: 
+      radial-gradient(ellipse 1400px 900px at 20% 0%, rgba(107, 143, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 1200px 800px at 80% 100%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+      linear-gradient(180deg, #0a0e1a 0%, #0d1120 50%, #0a0d18 100%);
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  header{
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(107, 143, 255, 0.15);
+    background: linear-gradient(180deg, rgba(20, 24, 41, 0.95), rgba(20, 24, 41, 0.7));
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  header h1{
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #e8eaff 0%, #8ba5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  
+  header .sub{
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  header .hl{
+    color: var(--accent-bright);
+    font-weight: 600;
+  }
+  
+  .wrap{
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    padding: 24px;
+    min-height: calc(100vh - 120px);
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  
+  aside{
+    background: linear-gradient(135deg, rgba(20, 24, 41, 0.8) 0%, rgba(26, 31, 53, 0.6) 100%);
+    border: 1px solid rgba(107, 143, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.5s ease-out;
+    height: fit-content;
+    position: sticky;
+    top: 120px;
+  }
+  
+  aside h2{
+    font-size: 18px;
+    font-weight: 700;
+    margin: 12px 0 16px;
+    color: var(--accent-bright);
+  }
+  
+  aside .tabs{
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 16px;
+    background: rgba(10, 14, 26, 0.5);
+    padding: 6px;
+    border-radius: 12px;
+  }
+  
+  .tab{
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(107, 143, 255, 0.1), rgba(139, 165, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .tab:hover::before {
+    opacity: 1;
+  }
+  
+  .tab.active{
+    background: linear-gradient(135deg, rgba(107, 143, 255, 0.25), rgba(139, 165, 255, 0.15));
+    border-color: rgba(107, 143, 255, 0.4);
+    color: var(--ink);
+    box-shadow: 
+      0 4px 16px rgba(107, 143, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .block{
+    margin: 20px 0;
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  .small{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  
+  .callout{
+    background: linear-gradient(135deg, rgba(107, 143, 255, 0.08), rgba(139, 165, 255, 0.04));
+    border: 1px solid rgba(107, 143, 255, 0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+    backdrop-filter: blur(5px);
+  }
+  
+  button, .btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(107, 143, 255, 0.2);
+    background: linear-gradient(135deg, rgba(30, 33, 54, 0.8), rgba(26, 30, 48, 0.6));
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  button:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(40, 43, 64, 0.9), rgba(36, 40, 58, 0.7));
+    border-color: rgba(107, 143, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(107, 143, 255, 0.2);
+  }
+  
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  button:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  .btn.accent{
+    background: linear-gradient(135deg, #6b8fff, #5a7eef);
+    border-color: rgba(139, 165, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(107, 143, 255, 0.3);
+  }
+  
+  .btn.accent:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7a9bff, #6a8eff);
+    box-shadow: 0 6px 24px rgba(107, 143, 255, 0.4);
+  }
+  
+  .btn.ghost{
+    background: transparent;
+    border-color: rgba(107, 143, 255, 0.15);
+  }
+  
+  .btn-group{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .legend{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  
+  .legend div{
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: rgba(10, 14, 26, 0.4);
+    border-radius: 8px;
+    transition: all 0.3s;
+  }
+  
+  .legend div:hover {
+    background: rgba(20, 24, 41, 0.6);
+    transform: translateX(4px);
+  }
+  
+  .legend .swatch{
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    margin-right: 8px;
+    box-shadow: 0 2px 8px currentColor;
+    flex-shrink: 0;
+  }
+  
+  main{
+    background: linear-gradient(135deg, rgba(20, 24, 41, 0.8) 0%, rgba(26, 31, 53, 0.6) 100%);
+    border: 1px solid rgba(107, 143, 255, 0.2);
+    border-radius: 20px;
+    padding: 0;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: scaleIn 0.5s ease-out;
+    overflow: hidden;
+  }
+  
+  .toolbar{
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(107, 143, 255, 0.15);
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(20, 24, 41, 0.9), rgba(23, 27, 49, 0.7));
+    backdrop-filter: blur(10px);
+  }
+  
+  .toolbar .title{
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent-bright);
+  }
+  
+  .canvas-wrap{
+    position: relative;
+    overflow: hidden;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(107, 143, 255, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(0, 212, 170, 0.02) 0%, transparent 50%);
+  }
+  
+  svg{
+    width: 100%;
+    height: 70vh;
+    display: block;
+    background: 
+      linear-gradient(0deg, transparent 24%, rgba(107, 143, 255, 0.03) 25%, rgba(107, 143, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(107, 143, 255, 0.03) 75%, rgba(107, 143, 255, 0.03) 76%, transparent 77%),
+      linear-gradient(90deg, transparent 24%, rgba(107, 143, 255, 0.03) 25%, rgba(107, 143, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(107, 143, 255, 0.03) 75%, rgba(107, 143, 255, 0.03) 76%, transparent 77%),
+      linear-gradient(0deg, rgba(26, 30, 50, 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26, 30, 50, 0.6) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px, 40px 40px, 40px 40px;
+    background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+  }
+  
+  .footer{
+    border-top: 1px solid rgba(107, 143, 255, 0.15);
+    padding: 12px 20px;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(20, 24, 41, 0.9), rgba(23, 27, 49, 0.7));
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #angle-measure {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    background: rgba(10, 14, 26, 0.6);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(107, 143, 255, 0.2);
+  }
+  #angle-measure .ok { color: var(--ok); }
+  #angle-measure .warn { color: var(--warn); }
+  
+  .note{
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  
+  .badge{
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(107, 143, 255, 0.3);
+    background: linear-gradient(135deg, rgba(107, 143, 255, 0.15), rgba(139, 165, 255, 0.1));
+    color: var(--accent-bright);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(107, 143, 255, 0.15);
+  }
+  
+  .axiom-box{
+    background: linear-gradient(135deg, rgba(20, 24, 41, 0.6), rgba(26, 31, 53, 0.4));
+    border: 1px solid rgba(107, 143, 255, 0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+    line-height: 1.6;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  .hl{color: var(--accent-bright); font-weight: 600;}
+  .ok{color: var(--ok); font-weight: 600;}
+  .warn{color: var(--warn); font-weight: 600;}
+  
+  .kbd{
+    padding: 4px 8px;
+    border: 1px solid rgba(107, 143, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(10, 14, 26, 0.6);
+    color: #c7cff9;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    box-shadow: 
+      0 2px 0 rgba(107, 143, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .pill{
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 212, 170, 0.3);
+    color: var(--accent2-bright);
+    font-size: 11px;
+    background: linear-gradient(135deg, rgba(0, 212, 170, 0.15), rgba(31, 255, 196, 0.1));
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.15);
+  }
+  
+  .postulates, .axioms{
+    font-size: 13px;
+    line-height: 1.6;
+    color: #d0d5ff;
+    padding-left: 20px;
+  }
+  
+  .postulates li, .axioms li{
+    margin: 10px 0;
+    padding: 8px;
+    background: rgba(10, 14, 26, 0.3);
+    border-radius: 8px;
+    border-left: 3px solid rgba(107, 143, 255, 0.4);
+    transition: all 0.3s;
+  }
+  
+  .postulates li:hover, .axioms li:hover {
+    background: rgba(20, 24, 41, 0.5);
+    border-left-color: var(--accent-bright);
+    transform: translateX(4px);
+  }
+  
+  .paper-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    perspective: 2000px; 
+    z-index: 10;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .paper-sheet {
+    position: absolute;
+    top: 300px; 
+    left: 450px;
+    width: 1200px;
+    height: 600px;
+    transform-origin: 600px 300px;
+    transform-style: preserve-3d;
+    transform: translate(-600px, -300px);
+  }
+
+  .paper-half {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    top: 0;
+    border: 1px solid rgba(0, 212, 170, 0.4);
+  }
+
+  .static-half {
+    left: 600px;
+    background-color: rgba(0, 212, 170, 0.1);
+  }
+
+  .folding-half {
+    left: 0px;
+    transform-origin: right center;
+    transition: transform 1.5s cubic-bezier(0.5, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+
+  .folding-half.folded {
+    transform: rotateY(-180deg);
+  }
+
+  .crease-shadow {
+    position: absolute;
+    right: -10px; top: 0;
+    width: 10px; height: 100%;
+    background: transparent;
+    box-shadow: inset -5px 0 15px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  .folding-half.is-folding .crease-shadow {
+    opacity: 1;
+  }
+  .folding-half.folded .crease-shadow {
+    opacity: 0;
+    transition-delay: 1.2s;
+  }
+
+  .face {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden; 
+  }
+
+  .front {
+    background-color: rgba(0, 212, 170, 0.2);
+  }
+
+  .back {
+    background-color: rgba(107, 143, 255, 0.25);
+    transform: rotateY(180deg);
+  }
+
+  .line-overlay {
+    position: absolute;
+    background-color: var(--accent2-bright);
+    height: 4px;
+    width: 150%;
+    top: 50%;
+    left: 0;
+    transform-origin: left center;
+    box-shadow: 0 0 10px var(--accent2-bright);
+    border-radius: 2px;
+  }
+
+  .ray{
+    stroke: var(--line);
+    stroke-width: 2.5;
+    stroke-dasharray: 8 8;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px rgba(112, 214, 255, 0.4));
+    animation: dash 20s linear infinite;
+  }
+  
+  .line{
+    stroke: var(--line);
+    stroke-width: 2.5;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px rgba(112, 214, 255, 0.4));
+  }
+  
+  .bisector{
+    stroke: var(--accent2);
+    stroke-width: 3.5;
+    filter: drop-shadow(0 0 8px rgba(0, 212, 170, 0.6));
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .arc{
+    stroke: var(--arc);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 6 8;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(255, 209, 102, 0.4));
+  }
+  
+  .circle{
+    stroke: var(--arc);
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.3));
+    transition: all 0.5s;
+  }
+  
+  .crease{
+    stroke: var(--crease);
+    stroke-width: 4;
+    stroke-dasharray: 12 8;
+    filter: drop-shadow(0 0 10px rgba(0, 212, 170, 0.7));
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .guideline{
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  
+  .pt{
+    fill: var(--point);
+    stroke: #fff;
+    stroke-width: 2;
+    cursor: grab;
+    filter: drop-shadow(0 0 8px rgba(255, 93, 143, 0.6));
+    transition: all 0.3s;
+  }
+  
+  .pt:hover {
+    r: 8;
+    filter: drop-shadow(0 0 16px rgba(255, 93, 143, 0.9));
+    animation: pulse 1s ease-in-out infinite;
+  }
+  
+  .pt:active {
+    cursor: grabbing;
+    filter: drop-shadow(0 0 20px rgba(255, 93, 143, 1));
+  }
+  
+  .label{
+    fill: #e8eaff;
+    font-size: 14px;
+    font-weight: 700;
+    paint-order: stroke;
+    stroke: #0a0e1a;
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  }
+  
+  .hidden{ display: none; }
+  
+  .shadow{
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  }
+  
+  @media (max-width: 1200px) {
+    .wrap {
+      grid-template-columns: 1fr;
+    }
+    aside {
+      position: relative;
+      top: 0;
+    }
+  }
+
+  @keyframes elementAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .appearing {
+    animation: elementAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Geometría Visual — Regla & Compás vs. Origami</h1>
+  <div class="sub">Problema guía: <span class="hl">bisecar un ángulo dado ∠ABC</span>. Compara la construcción clásica con los axiomas de Huzita–Hatori.</div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <h2>Modo y problema</h2>
+    <div class="tabs">
+      <button class="tab active" data-mode="rc">Regla & Compás</button>
+      <button class="tab" data-mode="origami">Origami</button>
+    </div>
+    <div class="block small">
+      <div><span class="pill">Arrastra</span> los puntos <b>A</b> y <b>C</b>; <b>B</b> es el vértice fijo.</div>
+      <div class="callout small">Pulsa <span class="kbd">Espacio</span> para avanzar al siguiente paso, o usa los botones.</div>
+    </div>
+
+    <div class="block">
+      <div class="btn-group">
+        <button id="prev" class="btn ghost">Paso previo</button>
+        <button id="next" class="btn accent">Siguiente paso</button>
+        <button id="reset" class="btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="badge">Paso actual</div>
+      <div id="stepText" class="axiom-box">—</div>
+    </div>
+
+    <div class="block">
+      <div class="badge">Fundamento usado</div>
+      <div id="foundation" class="axiom-box">—</div>
+    </div>
+
+    <div class="block">
+      <div class="badge">Leyenda</div>
+      <div class="legend">
+        <div><span class="swatch" style="background:var(--line)"></span>Rayos / rectas</div>
+        <div><span class="swatch" style="background:var(--arc)"></span>Arcos / círculos</div>
+        <div><span class="swatch" style="background:var(--accent2)"></span>Bisectriz / pliegue</div>
+        <div><span class="swatch" style="background:var(--point)"></span>Puntos arrastrables</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="badge">Postulados de Euclides</div>
+      <ol class="postulates">
+        <li><b>P1.</b> Se puede trazar una recta entre <i>dos puntos</i> cualesquiera.</li>
+        <li><b>P2.</b> Una recta finita puede prolongarse indefinidamente.</li>
+        <li><b>P3.</b> Con un centro y una distancia dadas, se puede trazar un <i>círculo</i>.</li>
+        <li><b>P4.</b> Todos los ángulos rectos son iguales.</li>
+        <li><b>P5.</b> (Paralelas) Por un punto exterior a una recta pasa <i>una única</i> paralela a dicha recta.</li>
+      </ol>
+    </div>
+
+    <div class="block">
+      <div class="badge">Axiomas de Huzita–Hatori</div>
+      <ul class="axioms">
+        <li><b>H1.</b> Dadas dos <i>puntos</i>, existe un pliegue que pasa por ambos.</li>
+        <li><b>H2.</b> Dadas dos <i>puntos</i>, existe un pliegue que superpone uno sobre el otro (mediatriz).</li>
+        <li><b>H3.</b> Dadas dos <i>rectas</i>, existe un pliegue que superpone una sobre la otra (bisectrices del ángulo).</li>
+        <li><b>H4.</b> Dado un <i>punto</i> y una <i>recta</i>, existe un pliegue perpendicular a la recta que pasa por el punto.</li>
+        <li><b>H5.</b> Dado un <i>punto</i> y una <i>recta</i>, existe un pliegue que lleva el punto a la recta (reflexión).</li>
+        <li><b>H6.</b> Dados dos <i>puntos</i> y dos <i>rectas</i>, existe un pliegue que lleva cada punto a su correspondiente recta (resuelve cúbicas y triseca ángulos).</li>
+        <li><b>H7.</b> Dado un <i>punto</i> y dos <i>rectas</i>, existe un pliegue que pasa por el punto y superpone las rectas.</li>
+      </ul>
+      <div class="note">Para nuestro problema usaremos principalmente <b>H3</b> (bisectriz por superposición de rectas).</div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="title">Construcción dinámica ∠ABC <span class="small">(|BA| y |BC| son rayos)</span></div>
+      <div class="btn-group">
+        <button id="toggleLabels" class="btn">Etiquetas</button>
+        <button id="toggleGuides" class="btn">Guías</button>
+        <button id="snap" class="btn">Activar "compás fijo"</button>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <div id="origamiPaper" class="paper-container hidden">
+        <div class="paper-sheet">
+          <div class="paper-half static-half">
+            <div class="line-overlay" id="staticLine"></div>
+          </div>
+          <div class="paper-half folding-half">
+            <div class="face front">
+              <div class="crease-shadow"></div>
+              <div class="line-overlay" id="foldingLine"></div>
+            </div>
+            <div class="face back"></div>
+          </div>
+        </div>
+      </div>
+      
+      <svg id="scene" viewBox="0 0 900 600">
+        <g id="guides" class="hidden">
+          <line x1="450" y1="0" x2="450" y2="600" class="guideline"/>
+          <line x1="0" y1="300" x2="900" y2="300" class="guideline"/>
+        </g>
+        <g id="base">
+          <line id="rayBA" class="ray" x1="0" y1="0" x2="0" y2="0"/>
+          <line id="rayBC" class="ray" x1="0" y1="0" x2="0" y2="0"/>
+        </g>
+        <g id="rcLayer" class="">
+          <circle id="circleB" class="circle hidden" cx="0" cy="0" r="0"/>
+          <path id="arcD" class="arc hidden" d=""/>
+          <path id="arcE" class="arc hidden" d=""/>
+          <circle id="circleD" class="circle hidden" cx="0" cy="0" r="0"/>
+          <circle id="circleE" class="circle hidden" cx="0" cy="0" r="0"/>
+          <line id="bisectorRC" class="bisector hidden" x1="0" y1="0" x2="0" y2="0"/>
+        </g>
+        <g id="origamiLayer">
+          <line id="crease1" class="crease hidden" x1="0" y1="0" x2="0" y2="0"/>
+          <line id="crease2" class="crease hidden" x1="0" y1="0" x2="0" y2="0" style="stroke-dasharray: 4 6; stroke-width: 2.5; opacity: 0.7;"/>
+        </g>
+        <g id="points">
+          <circle id="ptB" class="pt" cx="450" cy="300" r="6"/>
+          <circle id="ptA" class="pt" cx="250" cy="200" r="6"/>
+          <circle id="ptC" class="pt" cx="650" cy="200" r="6"/>
+          <circle id="ptD" class="pt hidden" cx="0" cy="0" r="6"/>
+          <circle id="ptE" class="pt hidden" cx="0" cy="0" r="6"/>
+          <circle id="ptF" class="pt hidden" cx="0" cy="0" r="6"/>
+        </g>
+        <g id="labels">
+          <text id="lblA" class="label" x="0" y="0">A</text>
+          <text id="lblB" class="label" x="0" y="0">B</text>
+          <text id="lblC" class="label" x="0" y="0">C</text>
+          <text id="lblD" class="label hidden" x="0" y="0">D</text>
+          <text id="lblE" class="label hidden" x="0" y="0">E</text>
+          <text id="lblF" class="label hidden" x="0" y="0">F</text>
+        </g>
+      </svg>
+    </div>
+    <div class="footer">
+      <div id="angle-measure">Esperando construcción...</div>
+      <div style="text-align: right; flex-grow: 1;">
+        <div class="hl">Paso <span id="stepNum">0</span> de <span id="totalSteps">5</span></div>
+        <div>Material elaborado por el profesor Sergio Gevatschnaider</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ============================================================
+// STATE & CONFIGURATION
+// ============================================================
+const SVG_NS = "http://www.w3.org/2000/svg";
+const EPSILON = 1e-6;
+const state = {
+  mode: 'rc',
+  step: 0,
+  snapMode: false,
+  fixedRadius: null,
+  showLabels: true,
+  showGuides: false,
+  dragging: null,
+  points: {
+    B: { x: 450, y: 300 },
+    A: { x: 250, y: 200 },
+    C: { x: 650, y: 200 }
+  }
+};
+
+const RC_STEPS = [
+  {
+    desc: "Puntos iniciales A, B, C definen el ángulo ∠ABC",
+    foundation: "Punto B es el vértice. Rayos BA y BC forman el ángulo a bisecar.",
+    elements: ['rayBA', 'rayBC']
+  },
+  {
+    desc: "Trazar círculo con centro B y radio arbitrario, corta BA en D y BC en E",
+    foundation: "<b>Postulado 3:</b> Con centro B y distancia dada, trazamos un círculo que interseca ambos rayos.",
+    elements: ['rayBA', 'rayBC', 'circleB', 'ptD', 'ptE', 'lblD', 'lblE']
+  },
+  {
+    desc: "Trazar arcos desde D y E con el mismo radio, se intersecan en F",
+    foundation: "<b>Postulado 3:</b> Círculos con centros D y E del mismo radio se cortan en F. Existen dos puntos de intersección, que definen las dos bisectrices.",
+    elements: ['rayBA', 'rayBC', 'circleB', 'ptD', 'ptE', 'arcD', 'arcE', 'circleD', 'circleE', 'ptF', 'lblD', 'lblE', 'lblF']
+  },
+  {
+    desc: "Trazar el rayo BF, que es la bisectriz del ángulo ∠ABC",
+    foundation: "<b>Postulado 1:</b> Trazamos la recta entre B y F. Por construcción (SSS), el triángulo ΔBDF es congruente con ΔBEF, por lo que BF biseca el ángulo.",
+    elements: ['rayBA', 'rayBC', 'ptF', 'bisectorRC', 'lblF']
+  },
+  {
+    desc: "Bisectriz completada con regla y compás",
+    foundation: "La construcción usa únicamente los postulados euclidianos de rectas y círculos.",
+    elements: ['rayBA', 'rayBC', 'bisectorRC']
+  }
+];
+
+const ORIGAMI_STEPS = [
+  {
+    desc: "Puntos iniciales A, B, C definen el ángulo ∠ABC con rayos BA y BC",
+    foundation: "Punto B es el vértice. Los rayos BA y BC representan los bordes del papel.",
+    elements: ['rayBA', 'rayBC']
+  },
+  {
+    desc: "Identificar las rectas BA y BC como los lados del ángulo",
+    foundation: "<b>Axioma H3:</b> Dadas dos rectas (BA y BC), existe un pliegue que superpone una sobre la otra.",
+    elements: []
+  },
+  {
+    desc: "<b>Realizar el pliegue</b> que superpone el rayo BA sobre el rayo BC",
+    foundation: "<b>Axioma H3:</b> La animación muestra el pliegue que genera la bisectriz interior.",
+    elements: []
+  },
+  {
+    desc: "Los pliegues resultantes son las bisectrices del ángulo ∠ABC",
+    foundation: "H3 garantiza la existencia de dos pliegues (bisectriz interior y exterior). Ambos se muestran.",
+    elements: ['rayBA', 'rayBC', 'crease1', 'crease2']
+  },
+  {
+    desc: "Bisectrices completadas con origami",
+    foundation: "El origami usa <b>Axioma H3</b> directamente, mostrando las dos soluciones de forma natural.",
+    elements: ['rayBA', 'rayBC', 'crease1', 'crease2']
+  }
+];
+
+// ============================================================
+// GEOMETRY HELPERS
+// ============================================================
+function distance(p1, p2) {
+  return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+}
+
+function zCross(v1, v2) { // Producto vectorial en 2D (componente Z)
+    return v1.x * v2.y - v1.y * v2.x;
+}
+
+function extendRay(start, through, length = 2000) {
+  const dx = through.x - start.x;
+  const dy = through.y - start.y;
+  const mag = Math.sqrt(dx * dx + dy * dy);
+  if (mag < EPSILON) return { x: start.x + length, y: start.y };
+  return {
+    x: start.x + (dx / mag) * length,
+    y: start.y + (dy / mag) * length
+  };
+}
+
+function circleLineIntersection(center, radius, lineStart, lineEnd) {
+  const dx = lineEnd.x - lineStart.x;
+  const dy = lineEnd.y - lineStart.y;
+  const fx = lineStart.x - center.x;
+  const fy = lineStart.y - center.y;
+  
+  const a = dx * dx + dy * dy;
+  const b = 2 * (fx * dx + fy * dy);
+  const c = fx * fx + fy * fy - radius * radius;
+  const discriminant = b * b - 4 * a * c;
+  
+  if (discriminant < 0) return null;
+  
+  const t = (-b + Math.sqrt(discriminant)) / (2 * a);
+  return {
+    x: lineStart.x + t * dx,
+    y: lineStart.y + t * dy
+  };
+}
+
+function circleIntersections(c1, r1, c2, r2) {
+  const d = distance(c1, c2);
+  if (d > r1 + r2 || d < Math.abs(r1 - r2) || d < EPSILON) return null;
+  
+  const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+  const h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
+  
+  const px = c1.x + a * (c2.x - c1.x) / d;
+  const py = c1.y + a * (c2.y - c1.y) / d;
+  
+  const x1 = px + h * (c2.y - c1.y) / d;
+  const y1 = py - h * (c2.x - c1.x) / d;
+  const x2 = px - h * (c2.y - c1.y) / d;
+  const y2 = py + h * (c2.x - c1.x) / d;
+  
+  return [{ x: x1, y: y1 }, { x: x2, y: y2 }];
+}
+
+function getAngleBisectors(vertex, p1, p2) {
+  const v1x = p1.x - vertex.x;
+  const v1y = p1.y - vertex.y;
+  const v2x = p2.x - vertex.x;
+  const v2y = p2.y - vertex.y;
+  
+  const len1 = Math.sqrt(v1x * v1x + v1y * v1y);
+  const len2 = Math.sqrt(v2x * v2x + v2y * v2y);
+
+  if (len1 < EPSILON || len2 < EPSILON) return null;
+
+  const u1 = { x: v1x / len1, y: v1y / len1 };
+  const u2 = { x: v2x / len2, y: v2y / len2 };
+
+  const intDir = { x: u1.x + u2.x, y: u1.y + u2.y };
+  const extDir = { x: u1.x - u2.x, y: u1.y - u2.y };
+  
+  const intMag = Math.sqrt(intDir.x**2 + intDir.y**2);
+  const extMag = Math.sqrt(extDir.x**2 + extDir.y**2);
+
+  let interior = null;
+  if (intMag > EPSILON) {
+    interior = { x: intDir.x / intMag, y: intDir.y / intMag };
+  } else {
+    interior = { x: -u1.y, y: u1.x };
+  }
+
+  let exterior = null;
+  if (extMag > EPSILON) {
+    exterior = { x: extDir.x / extMag, y: extDir.y / extMag };
+  } else {
+    exterior = { x: -u1.y, y: u1.x };
+  }
+
+  return { interior, exterior };
+}
+
+function calculateAngle(p1, vertex, p2) {
+    const v1 = { x: p1.x - vertex.x, y: p1.y - vertex.y };
+    const v2 = { x: p2.x - vertex.x, y: p2.y - vertex.y };
+    const angleRad = Math.atan2(v2.y, v2.x) - Math.atan2(v1.y, v1.x);
+    let angleDeg = angleRad * 180 / Math.PI;
+    if (angleDeg < 0) angleDeg += 360;
+    return angleDeg > 180 ? 360 - angleDeg : angleDeg;
+}
+
+
+// ============================================================
+// ORIGAMI FOLDING ANIMATION
+// ============================================================
+function setupOrigamiAnimation() {
+  const paper = document.getElementById('origamiPaper');
+  const sheet = document.querySelector('.paper-sheet');
+  const staticLine = document.getElementById('staticLine');
+  const foldingLine = document.getElementById('foldingLine');
+  const foldingHalf = document.querySelector('.folding-half');
+  
+  const { B, A, C } = state.points;
+  const bisectors = getAngleBisectors(B, A, C);
+  if (!bisectors) return;
+
+  const bisectorAngleRad = Math.atan2(bisectors.interior.y, bisectors.interior.x);
+  const bisectorAngleDeg = bisectorAngleRad * 180 / Math.PI;
+
+  sheet.style.transform = `translate(-600px, -300px) rotate(${bisectorAngleDeg}deg)`;
+
+  const angleC = Math.atan2(C.y - B.y, C.x - B.x) * 180 / Math.PI;
+  const angleA = Math.atan2(A.y - B.y, A.x - B.x) * 180 / Math.PI;
+  
+  const relativeAngleC = angleC - bisectorAngleDeg;
+  const relativeAngleA = angleA - bisectorAngleDeg;
+  
+  staticLine.style.transform = `translateY(-50%) rotate(${relativeAngleC}deg)`;
+  foldingLine.style.transform = `translateY(-50%) rotate(${relativeAngleA}deg)`;
+
+  paper.classList.remove('hidden');
+  foldingHalf.classList.remove('folded', 'is-folding');
+  document.getElementById('base').classList.add('hidden');
+}
+
+function performOrigamiFold() {
+  const foldingHalf = document.querySelector('.folding-half');
+  foldingHalf.classList.add('is-folding');
+  
+  setTimeout(() => {
+    foldingHalf.classList.add('folded');
+  }, 10);
+  
+  setTimeout(() => {
+    foldingHalf.classList.remove('is-folding');
+  }, 1500);
+}
+
+function cleanupOrigamiAnimation() {
+  document.getElementById('origamiPaper').classList.add('hidden');
+  document.querySelector('.folding-half').classList.remove('folded', 'is-folding');
+  document.getElementById('base').classList.remove('hidden');
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function updateGeometry() {
+  const { B, A, C } = state.points;
+  
+  const extA = extendRay(B, A);
+  const extC = extendRay(B, C);
+  
+  document.getElementById('rayBA').setAttribute('x1', B.x);
+  document.getElementById('rayBA').setAttribute('y1', B.y);
+  document.getElementById('rayBA').setAttribute('x2', extA.x);
+  document.getElementById('rayBA').setAttribute('y2', extA.y);
+  
+  document.getElementById('rayBC').setAttribute('x1', B.x);
+  document.getElementById('rayBC').setAttribute('y1', B.y);
+  document.getElementById('rayBC').setAttribute('x2', extC.x);
+  document.getElementById('rayBC').setAttribute('y2', extC.y);
+  
+  if (state.mode === 'rc' && state.step >= 1) {
+    let radiusB;
+    if (state.snapMode) {
+        if (state.fixedRadius === null) {
+            state.fixedRadius = Math.min(distance(B, A), distance(B, C)) * 0.6;
+        }
+        radiusB = state.fixedRadius;
+    } else {
+        radiusB = Math.min(distance(B, A), distance(B, C)) * 0.6;
+    }
+
+    document.getElementById('circleB').setAttribute('cx', B.x);
+    document.getElementById('circleB').setAttribute('cy', B.y);
+    document.getElementById('circleB').setAttribute('r', radiusB);
+    
+    const D = circleLineIntersection(B, radiusB, B, extA);
+    const E = circleLineIntersection(B, radiusB, B, extC);
+    
+    if (D && E) {
+      state.points.D = D; state.points.E = E;
+      document.getElementById('ptD').setAttribute('cx', D.x); document.getElementById('ptD').setAttribute('cy', D.y);
+      document.getElementById('ptE').setAttribute('cx', E.x); document.getElementById('ptE').setAttribute('cy', E.y);
+      
+      if (state.step >= 2) {
+        const distDE = distance(D, E);
+        let arcRadius = state.snapMode ? radiusB : distDE * 0.8;
+        if (arcRadius < distDE / 2) arcRadius = distDE / 2 + 1;
+
+        document.getElementById('circleD').setAttribute('cx', D.x); document.getElementById('circleD').setAttribute('cy', D.y); document.getElementById('circleD').setAttribute('r', arcRadius);
+        document.getElementById('circleE').setAttribute('cx', E.x); document.getElementById('circleE').setAttribute('cy', E.y); document.getElementById('circleE').setAttribute('r', arcRadius);
+        
+        const intersectionsF = circleIntersections(D, arcRadius, E, arcRadius);
+        if (intersectionsF) {
+            const vecBA = { x: A.x - B.x, y: A.y - B.y };
+            const vecBC = { x: C.x - B.x, y: C.y - B.y };
+            const vecBF1 = { x: intersectionsF[0].x - B.x, y: intersectionsF[0].y - B.y };
+            
+            const cross1 = zCross(vecBA, vecBF1);
+            const cross2 = zCross(vecBF1, vecBC);
+
+            const F = (cross1 * cross2 >= 0) ? intersectionsF[0] : intersectionsF[1];
+            state.points.F = F;
+
+            document.getElementById('ptF').setAttribute('cx', F.x); document.getElementById('ptF').setAttribute('cy', F.y);
+          
+            if (state.step >= 3) {
+                const bisPt = extendRay(B, F);
+                document.getElementById('bisectorRC').setAttribute('x1', B.x); document.getElementById('bisectorRC').setAttribute('y1', B.y);
+                document.getElementById('bisectorRC').setAttribute('x2', bisPt.x); document.getElementById('bisectorRC').setAttribute('y2', bisPt.y);
+            }
+        }
+      }
+    }
+  }
+  
+  if (state.mode === 'origami' && state.step >= 3) {
+    const bisectors = getAngleBisectors(B, A, C);
+    if (bisectors) {
+        const intPt = extendRay(B, { x: B.x + bisectors.interior.x, y: B.y + bisectors.interior.y });
+        const intBack = extendRay(B, { x: B.x + bisectors.interior.x, y: B.y + bisectors.interior.y }, -2000);
+        document.getElementById('crease1').setAttribute('x1', intBack.x); document.getElementById('crease1').setAttribute('y1', intBack.y);
+        document.getElementById('crease1').setAttribute('x2', intPt.x); document.getElementById('crease1').setAttribute('y2', intPt.y);
+
+        const extPt = extendRay(B, { x: B.x + bisectors.exterior.x, y: B.y + bisectors.exterior.y });
+        const extBack = extendRay(B, { x: B.x + bisectors.exterior.x, y: B.y + bisectors.exterior.y }, -2000);
+        document.getElementById('crease2').setAttribute('x1', extBack.x); document.getElementById('crease2').setAttribute('y1', extBack.y);
+        document.getElementById('crease2').setAttribute('x2', extPt.x); document.getElementById('crease2').setAttribute('y2', extPt.y);
+    }
+  }
+  
+  updateLabels();
+  updateAngleMeasurement();
+}
+
+function updateAngleMeasurement() {
+    const measureDiv = document.getElementById('angle-measure');
+    const { B, A, C } = state.points;
+    let bisectorPoint = null;
+
+    if (state.mode === 'rc' && state.step >= 3 && state.points.F) {
+        bisectorPoint = state.points.F;
+    } else if (state.mode === 'origami' && state.step >= 3) {
+        const bisectors = getAngleBisectors(B, A, C);
+        if(bisectors) {
+          bisectorPoint = { x: B.x + bisectors.interior.x, y: B.y + bisectors.interior.y };
+        }
+    }
+
+    if (bisectorPoint) {
+        const angleABF = calculateAngle(A, B, bisectorPoint);
+        const angleFBC = calculateAngle(bisectorPoint, B, C);
+        const error = Math.abs(angleABF - angleFBC);
+
+        measureDiv.innerHTML = `
+            ∠ABF: <span class="hl">${angleABF.toFixed(2)}°</span> | 
+            ∠FBC: <span class="hl">${angleFBC.toFixed(2)}°</span> | 
+            Error: <span class="${error < 0.01 ? 'ok' : 'warn'}">${error.toFixed(4)}°</span>
+        `;
+    } else {
+        measureDiv.textContent = 'Esperando construcción de bisectriz...';
+    }
+}
+
+function updateLabels() {
+  if (!state.showLabels) return;
+  const offsets = { A: { x: -20, y: -10 }, B: { x: -10, y: 25 }, C: { x: 15, y: -10 }, D: { x: -20, y: -10 }, E: { x: 15, y: -10 }, F: { x: 0, y: -15 } };
+  for (const [label, offset] of Object.entries(offsets)) {
+    const pt = state.points[label];
+    if (pt) {
+      const elem = document.getElementById(`lbl${label}`);
+      elem.setAttribute('x', pt.x + offset.x); elem.setAttribute('y', pt.y + offset.y);
+    }
+  }
+}
+
+function updateVisibility() {
+  const steps = state.mode === 'rc' ? RC_STEPS : ORIGAMI_STEPS;
+  const currentStep = steps[state.step];
+  document.querySelectorAll('.circle, .arc, .bisector, .crease, .pt:not(#ptB):not(#ptA):not(#ptC), .label:not(#lblA):not(#lblB):not(#lblC)').forEach(el => el.classList.add('hidden'));
+  if (currentStep && currentStep.elements) {
+    currentStep.elements.forEach(id => {
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.classList.remove('hidden');
+        elem.classList.add('appearing');
+        setTimeout(() => elem.classList.remove('appearing'), 600);
+      }
+    });
+  }
+  document.getElementById('rcLayer').classList.toggle('hidden', state.mode !== 'rc');
+  document.getElementById('origamiLayer').classList.toggle('hidden', state.mode !== 'origami');
+  document.getElementById('stepNum').textContent = state.step;
+  document.getElementById('totalSteps').textContent = steps.length - 1;
+  if (currentStep) {
+    document.getElementById('stepText').innerHTML = currentStep.desc;
+    document.getElementById('foundation').innerHTML = currentStep.foundation;
+  }
+  document.getElementById('prev').disabled = state.step === 0;
+  document.getElementById('next').disabled = state.step >= steps.length - 1;
+}
+
+function setupDragging() {
+  const svg = document.getElementById('scene');
+  const draggablePoints = ['ptA', 'ptC'];
+  const handleMove = (x, y) => {
+    state.points[state.dragging] = { x, y };
+    document.getElementById(`pt${state.dragging}`).setAttribute('cx', x);
+    document.getElementById(`pt${state.dragging}`).setAttribute('cy', y);
+    updateGeometry();
+    if (state.mode === 'origami' && (state.step === 2 || state.step === 3)) {
+      setupOrigamiAnimation();
+    }
+  };
+  const startDrag = (id) => { state.dragging = id.replace('pt', ''); };
+  const stopDrag = () => { state.dragging = null; };
+  draggablePoints.forEach(id => {
+    const elem = document.getElementById(id);
+    elem.addEventListener('mousedown', (e) => { startDrag(id); e.preventDefault(); });
+    elem.addEventListener('touchstart', (e) => { startDrag(id); e.preventDefault(); }, { passive: false });
+  });
+  svg.addEventListener('mousemove', (e) => {
+    if (!state.dragging) return;
+    const rect = svg.getBoundingClientRect();
+    handleMove((e.clientX - rect.left) * (900 / rect.width), (e.clientY - rect.top) * (600 / rect.height));
+  });
+  svg.addEventListener('touchmove', (e) => {
+    if (!state.dragging) return;
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    const touch = e.touches[0];
+    handleMove((touch.clientX - rect.left) * (900 / rect.width), (touch.clientY - rect.top) * (600 / rect.height));
+  }, { passive: false });
+  svg.addEventListener('mouseup', stopDrag);
+  svg.addEventListener('mouseleave', stopDrag);
+  svg.addEventListener('touchend', stopDrag);
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.mode = tab.dataset.mode;
+    state.step = 0;
+    cleanupOrigamiAnimation(); updateGeometry(); updateVisibility();
+  });
+});
+
+document.getElementById('next').addEventListener('click', () => {
+  const steps = state.mode === 'rc' ? RC_STEPS : ORIGAMI_STEPS;
+  if (state.step >= steps.length - 1) return;
+  state.step++;
+  if (state.mode === 'origami') {
+    if (state.step === 2) { setupOrigamiAnimation(); } 
+    else if (state.step === 3) { performOrigamiFold(); } 
+    else { cleanupOrigamiAnimation(); }
+  }
+  updateGeometry(); updateVisibility();
+});
+
+document.getElementById('prev').addEventListener('click', () => {
+  if (state.step <= 0) return;
+  state.step--;
+  if (state.mode === 'origami') {
+    if (state.step === 2) { setupOrigamiAnimation(); } 
+    else { cleanupOrigamiAnimation(); }
+  }
+  updateGeometry(); updateVisibility();
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  state.step = 0;
+  state.points = { B: { x: 450, y: 300 }, A: { x: 250, y: 200 }, C: { x: 650, y: 200 } };
+  state.fixedRadius = null;
+  document.getElementById('ptA').setAttribute('cx', state.points.A.x); document.getElementById('ptA').setAttribute('cy', state.points.A.y);
+  document.getElementById('ptC').setAttribute('cx', state.points.C.x); document.getElementById('ptC').setAttribute('cy', state.points.C.y);
+  cleanupOrigamiAnimation(); updateGeometry(); updateVisibility();
+});
+
+document.getElementById('toggleLabels').addEventListener('click', () => {
+  state.showLabels = !state.showLabels;
+  document.getElementById('labels').classList.toggle('hidden', !state.showLabels);
+  updateLabels();
+});
+
+document.getElementById('toggleGuides').addEventListener('click', () => {
+  state.showGuides = !state.showGuides;
+  document.getElementById('guides').classList.toggle('hidden', !state.showGuides);
+});
+
+document.getElementById('snap').addEventListener('click', (e) => {
+  state.snapMode = !state.snapMode;
+  e.target.textContent = state.snapMode ? 'Compás fijo: ON' : 'Activar "compás fijo"';
+  e.target.classList.toggle('accent', state.snapMode);
+  if (!state.snapMode) state.fixedRadius = null;
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); document.getElementById('next').click(); } 
+  else if (e.code === 'ArrowLeft') { e.preventDefault(); document.getElementById('prev').click(); }
+});
+
+setupDragging();
+updateGeometry();
+updateVisibility();
+</script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Origami Turing-Completo — Demo Visual Interactiva (v2)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#111735; --soft:#18204a; --ink:#eaf1ff; --muted:#a9b3d1;
+      --accent:#6ea8fe; --accent2:#7ee7d7; --accent3:#ff8ab3; --ok:#3ad29f; --warn:#f5b971;
+      --grid:#24304f; --card:#0c1428; --shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100vh;background:
+      radial-gradient(1200px 600px at 20% -10%, #151b3a 0%, #0b1020 45%),
+      var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
+    header{
+      position:sticky;top:0;z-index:20;padding:12px 16px;
+      background:linear-gradient(180deg, rgba(11,16,32,.9), rgba(11,16,32,0));
+      backdrop-filter:blur(6px);border-bottom:1px solid rgba(110,168,254,.12);
+      display:flex;gap:12px;align-items:center;justify-content:space-between
+    }
+    header h1{margin:0;font-size:18px;letter-spacing:.4px;color:#dbe6ff}
+    header .sub{font-size:12px;color:var(--muted)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      background:linear-gradient(135deg,#1b3a78,#20408c);color:#fff;border:1px solid #2b3c6b;
+      padding:9px 12px;border-radius:12px;cursor:pointer;box-shadow:0 6px 18px rgba(54,98,210,.3);
+      font-size:13px
+    }
+    .btn.alt{background:#1a274d}
+    .btn.ok{background:linear-gradient(135deg,#2d7a4d,#3a9960)}
+    .btn.warn{background:linear-gradient(135deg,#7c5b1a,#c6922a)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:16px}
+    @media (max-width:1100px){.wrap{grid-template-columns:1fr}}
+    .panel{
+      background:linear-gradient(180deg, rgba(17,23,54,.95), rgba(17,23,54,.65));
+      border:1px solid rgba(110,168,254,.15);border-radius:16px;padding:14px;box-shadow:var(--shadow)
+    }
+    .panel h2{
+      margin:0 0 10px 0;font-size:14px;letter-spacing:.6px;color:#cdd7ff;text-transform:uppercase;
+      border-bottom:1px solid var(--grid);padding-bottom:8px
+    }
+    .row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+    label{color:var(--muted);font-size:13px}
+    select,input[type=number],input[type=range]{
+      background:#0f1530;color:var(--ink);border:1px solid var(--grid);border-radius:8px;padding:6px 8px;
+      font-size:13px
+    }
+    .small{font-size:12px;color:var(--muted)}
+    .legend{font-size:13.5px;color:var(--muted);line-height:1.55}
+    .legend ul{padding-left:18px;margin:8px 0}
+    .gatebox{display:grid;grid-template-columns:1fr;gap:10px}
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:14px;padding:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:#0c1632;border:1px solid #24304f;border-radius:999px;font-size:12px}
+    .mv{width:22px;height:10px;border-radius:10px;border:2px dashed var(--accent2);display:inline-block}
+    .mm{width:22px;height:10px;border-radius:10px;border:2px dashed var(--accent3);border-style:solid}
+    .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    canvas{max-width:100%;border:1px solid var(--grid);border-radius:16px;background:#0c1422}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:800px){.two-col{grid-template-columns:1fr}}
+    footer{margin:14px auto 24px;text-align:center;color:#a4abdb;font-size:12px}
+    .credit{margin-top:10px;color:#cfd6ff;font-weight:600}
+    .tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .tab{padding:8px 12px;border:1px solid var(--grid);border-radius:10px;background:#0e1836;cursor:pointer;color:#bcd7ff}
+    .tab.active{background:#1a2a5a;color:#fff;border-color:#37559e}
+    .hidden{display:none}
+    .gridbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+    .hint{font-size:12px;color:#bcd7ff}
+    .kbd{background:#0a1a2a;border:1px solid #2a3a5a;border-radius:6px;padding:2px 6px;font-size:11px}
+    .steps{display:flex;gap:6px;flex-wrap:wrap}
+    .stepbox{background:#0a1734;border:1px solid #23345d;border-radius:10px;padding:6px 8px;font-size:12px;color:#cfe0ff}
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🎴 Origami Turing-Completo — Demo Visual Interactiva (v2)</h1>
+    <div class="sub">Bits como pliegues (Montaña = 1, Valle = 0) + Regla 110 = Computación Universal</div>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="btnDownload">⬇️ Descargar este HTML</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <main class="panel">
+    <div class="tabs">
+      <button class="tab active" data-tab="gates">Compuertas de Origami</button>
+      <button class="tab" data-tab="cell">Celda 110 — Paso a paso</button>
+      <button class="tab" data-tab="rule110">Simulación Regla 110</button>
+      <button class="tab" data-tab="gadgets">Modo Gadgets</button>
+    </div>
+
+    <!-- Tab 1: Gates -->
+    <section id="tab-gates" class="gatebox">
+      <div class="two-col">
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">Visualización de Compuerta con Pliegues</h3>
+          <div class="small">Selecciona la compuerta y las entradas. El papel muestra los “wires” como <span class="pill"><span class="mm"></span> Montaña (1)</span> y <span class="pill"><span class="mv"></span> Valle (0)</span>.</div>
+          <div class="row">
+            <label>Compuerta</label>
+            <select id="gateSel">
+              <option>AND</option>
+              <option>OR</option>
+              <option>NOT</option>
+              <option selected>NAND</option>
+              <option>NOR</option>
+              <option>XOR</option>
+            </select>
+            <label>Entrada A</label>
+            <select id="inA">
+              <option value="0">0 (Valle)</option>
+              <option value="1" selected>1 (Montaña)</option>
+            </select>
+            <label>Entrada B</label>
+            <select id="inB">
+              <option value="0">0 (Valle)</option>
+              <option value="1" selected>1 (Montaña)</option>
+            </select>
+            <button class="btn ok" id="btnCalc">Calcular</button>
+          </div>
+          <canvas id="cvGate" width="800" height="520" aria-label="Visualización de compuertas con pliegues"></canvas>
+          <div class="row">
+            <div class="pill">Salida: <strong id="gateOut">?</strong></div>
+            <div class="pill">Explicación: <span id="gateExp">—</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">¿Qué estás viendo?</h3>
+          <div class="legend">
+            <ul>
+              <li><strong>Bits como pliegues dirigidos:</strong> cada “wire” es un trío de líneas paralelas (valle-montaña-valle). Un solo valle activo codifica 0 u 1 según su lado. La línea central (montaña) guía el flujo.</li>
+              <li><strong>Compuertas como gadgets:</strong> regiones del papel que fuerzan combinaciones válidas de pliegues (Kawasaki, Maekawa) para implementar AND/NOR/NAND/NOT. El orden de capas impide estados inválidos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Celda 110 paso a paso -->
+    <section id="tab-cell" class="hidden">
+      <div class="two-col">
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">“Célula” de Regla 110 con Pliegues</h3>
+          <div class="small">La salida se calcula con la Regla 110 usando el vecindario (A,B,C) = (izq, centro, der). Sigue el <em>paso a paso</em> para ver cómo se propaga el cálculo por los gadgets.</div>
+          <canvas id="cvCell" width="900" height="540" aria-label="Celda Regla 110 en papel"></canvas>
+          <div class="row">
+            <label>A</label><select id="cA"><option>0</option><option selected>1</option></select>
+            <label>B</label><select id="cB"><option>0</option><option selected>1</option></select>
+            <label>C</label><select id="cC"><option>0</option><option selected>1</option></select>
+            <button class="btn ok" id="btnCell">Propagar</button>
+            <div class="pill">Salida: <strong id="cellOut">?</strong></div>
+          </div>
+          <div class="row steps">
+            <button class="btn alt" id="cellPrev">◀ Paso anterior</button>
+            <button class="btn alt" id="cellNext">Paso siguiente ▶</button>
+            <div class="stepbox">Paso: <span id="cellStepIdx">0</span>/6</div>
+            <div class="stepbox">Explicación: <span id="cellExplain">—</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px 0">Tabla de la Regla 110</h3>
+          <div class="legend">
+            <p><strong>111→0, 110→1, 101→1, 100→0, 011→1, 010→1, 001→1, 000→0.</strong></p>
+            <p>La celda está implementada como composición: X=A∨¬B; Y=¬B∧C; Z=B∧¬C; P=X; Q=¬(Y∨Z); out=¬(P∧Q).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Rule 110 -->
+    <section id="tab-rule110" class="hidden">
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Editor de Fila Inicial</h3>
+        <div class="legend">Haz clic en la grilla para activar/desactivar celdas (1 = Montaña, 0 = Valle). Luego <em>Evolucionar</em> o avanza con <em>Paso+</em> generación por generación.</div>
+        <div class="row">
+          <label>Ancho</label><input type="number" id="width" value="121" min="21" max="401" step="2">
+          <label>Pasos</label><input type="number" id="steps" value="80" min="10" max="300">
+          <label>Tamaño celda</label><input type="number" id="cellSize" value="7" min="5" max="18">
+          <button class="btn" id="btnCenter">Pico central</button>
+          <button class="btn alt" id="btnRandom">Aleatorio</button>
+          <button class="btn" id="btnClear">Borrar</button>
+        </div>
+        <canvas id="cvInit" width="900" height="60" aria-label="Fila inicial editable"></canvas>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Evolución Regla 110 en Papel</h3>
+        <div class="gridbar">
+          <div class="flex">
+            <button class="btn ok" id="btnRun">Evolucionar</button>
+            <button class="btn warn" id="btnAnimate">Animar</button>
+            <button class="btn alt" id="btnStep">Paso+</button>
+            <button class="btn alt" id="btnStepBack">Paso−</button>
+            <span class="hint">Atajos: <span class="kbd">Espacio</span> animar/pausar · <span class="kbd">→</span>/<span class="kbd">←</span> paso+/−</span>
+          </div>
+          <div class="pill">Generación mostrada: <strong id="gen">0</strong></div>
+        </div>
+        <canvas id="cvGrid" width="900" height="600" aria-label="Evolución Regla 110"></canvas>
+        <div class="small">Colores: <span class="pill"><span class="mm"></span> 1 = Montaña</span> · <span class="pill"><span class="mv"></span> 0 = Valle</span>.</div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Gadgets -->
+    <section id="tab-gadgets" class="hidden">
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Modo Gadgets (wires & operadores de origami computacional)</h3>
+        <div class="row">
+          <label>Gadget</label>
+          <select id="gadgetSel">
+            <option value="wire">Wire recto</option>
+            <option value="bend">Wire con curva</option>
+            <option value="split">Splitter (fan-out)</option>
+            <option value="cross">Crossing (cruce sin interferencia)</option>
+            <option value="not">Inverter (NOT)</option>
+            <option value="delay">Delay (zig-zag)</option>
+            <option value="twist">Twist (cambia fase)</option>
+            <option value="eater">Eater (absorbe pulso)</option>
+          </select>
+          <label>A</label><select id="gadA"><option>0</option><option selected>1</option></select>
+          <label class="gadBRow">B</label><select id="gadB" class="gadBRow"><option selected>0</option><option>1</option></select>
+          <button class="btn ok" id="btnPulse">Iniciar pulso</button>
+        </div>
+        <canvas id="cvGad" width="900" height="420" aria-label="Gadgets de origami computacional"></canvas>
+        <div class="legend">
+          <ul>
+            <li><strong>Wire / Bend / Delay:</strong> transporte del bit mediante pleats; <em>Delay</em> agrega longitud efectiva (retardo).</li>
+            <li><strong>Splitter:</strong> fan-out controlado (duplica el pulso manteniendo consistencia MV).</li>
+            <li><strong>Crossing:</strong> cruce ortogonal aislado por capas; evita acoplamiento entre señales.</li>
+            <li><strong>Inverter (NOT):</strong> invierte la convención Valle↔Montaña en la rama.</li>
+            <li><strong>Twist:</strong> invierte fase/orden de capas (visualizado como giro); útil para compatibilidad.</li>
+            <li><strong>Eater:</strong> sumidero estable que absorbe el pulso (borra señal).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel">
+    <h2>Guía Rápida</h2>
+    <div class="card">
+      <div class="legend">
+        <p><strong>Convención MV:</strong> usamos líneas <span style="color:var(--accent3);font-weight:700">Montaña</span> para 1 y <span style="color:var(--accent2);font-weight:700">Valle</span> para 0. Las “pleats” (tríos paralelos) transmiten bits.</p>
+        <p><strong>Regla 110 (tabla):</strong> 111→0, 110→1, 101→1, 100→0, 011→1, 010→1, 001→1, 000→0.</p>
+        <p><strong>Consejo didáctico:</strong> empiece por gadgets → celda 110 paso a paso → evolución global.</p>
+      </div>
+    </div>
+
+    <footer>
+      <div class="credit">Material elaborado por el profesor Sergio Gevatschnaider</div>
+    </footer>
+  </aside>
+</div>
+
+<script>
+const $ = sel => document.querySelector(sel);
+const $$ = sel => [...document.querySelectorAll(sel)];
+
+/* ---------- Tabs ---------- */
+$$('.tab').forEach(t => t.addEventListener('click', () => {
+  $$('.tab').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  const target = t.dataset.tab;
+  $('#tab-gates').classList.toggle('hidden', target !== 'gates');
+  $('#tab-cell').classList.toggle('hidden', target !== 'cell');
+  $('#tab-rule110').classList.toggle('hidden', target !== 'rule110');
+  $('#tab-gadgets').classList.toggle('hidden', target !== 'gadgets');
+}));
+
+/* ---------- Colors & helpers ---------- */
+const colors = {
+  bg: '#0c1422',
+  ink: '#eaf1ff',
+  mountain: '#ff8ab3',
+  valley: '#7ee7d7',
+  wire: '#9ad1ff',
+  accent: '#6ea8fe',
+  muted: '#a9b3d1'
+};
+function drawPleatLine(ctx, x1,y1,x2,y2, type){
+  ctx.save();
+  ctx.strokeStyle = (type==='M')? colors.mountain : colors.valley;
+  ctx.lineWidth = 3;
+  if(type==='V'){ ctx.setLineDash([6,6]); }
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.restore();
+}
+function drawWire(ctx, x,y, len, vertical, bit){
+  const s = 8;
+  if(vertical){
+    drawPleatLine(ctx, x, y, x, y+len, 'V');
+    drawPleatLine(ctx, x+s, y, x+s, y+len, 'M');
+    drawPleatLine(ctx, x+2*s, y, x+2*s, y+len, 'V');
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath();
+    const dx = bit ? -10 : 10;
+    ctx.moveTo(x+s, y+len*0.5);
+    ctx.lineTo(x+s+dx, y+len*0.5-6);
+    ctx.lineTo(x+s+dx, y+len*0.5+6);
+    ctx.closePath(); ctx.fill();
+  }else{
+    drawPleatLine(ctx, x, y, x+len, y, 'V');
+    drawPleatLine(ctx, x, y+s, x+len, y+s, 'M');
+    drawPleatLine(ctx, x, y+2*s, x+len, y+2*s, 'V');
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath();
+    const dy = bit ? -10 : 10;
+    ctx.moveTo(x+len*0.5, y+s);
+    ctx.lineTo(x+len*0.5-6, y+s+dy);
+    ctx.lineTo(x+len*0.5+6, y+s+dy);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+/* ---------- Gates Canvas ---------- */
+const cvGate = document.getElementById('cvGate');
+const gtx = cvGate.getContext('2d');
+const Wg = cvGate.width, Hg = cvGate.height;
+function gateEval(gate, a, b){
+  a = +a; b = +b;
+  switch(gate){
+    case 'AND': return a & b;
+    case 'OR': return a | b;
+    case 'NOT': return a ^ 1; // usa solo A
+    case 'NAND': return (a & b) ^ 1;
+    case 'NOR': return (a | b) ^ 1;
+    case 'XOR': return a ^ b;
+    default: return 0;
+  }
+}
+const gateExplain = {
+  'AND':'Salida 1 solo si A=1 y B=1.',
+  'OR':'Salida 1 si al menos una entrada es 1.',
+  'NOT':'Invierte A (B se ignora).',
+  'NAND':'0 solo si A=1 y B=1.',
+  'NOR':'1 solo si A=0 y B=0.',
+  'XOR':'1 si A y B son distintos.'
+};
+function drawGateCanvas(gate,a,b){
+  gtx.clearRect(0,0,Wg,Hg);
+  gtx.fillStyle = 'rgba(255,255,255,.05)'; gtx.fillRect(40,40,Wg-80,Hg-80);
+  gtx.strokeStyle = 'rgba(110,168,254,.25)'; gtx.lineWidth = 2; gtx.strokeRect(40,40,Wg-80,Hg-80);
+  gtx.fillStyle = colors.accent; gtx.font = 'bold 20px system-ui';
+  gtx.textAlign='center'; gtx.fillText('Compuerta '+gate+' en papel', Wg/2, 70);
+
+  const midY = Hg/2;
+  drawWire(gtx, 120, midY-120, 140, true, a);
+  drawWire(gtx, Wg-140, midY-120, 140, true, b);
+
+  const bx = Wg/2 - 120, by = midY-80, bw = 240, bh = 160;
+  gtx.fillStyle = 'rgba(110,168,254,.18)'; gtx.fillRect(bx,by,bw,bh);
+  gtx.strokeStyle = colors.accent; gtx.lineWidth=3; gtx.strokeRect(bx,by,bw,bh);
+  gtx.fillStyle = colors.ink; gtx.font = 'bold 24px system-ui'; gtx.textAlign='center';
+  gtx.fillText(gate, Wg/2, by+bh/2+8);
+
+  gtx.strokeStyle = colors.wire; gtx.lineWidth=2; gtx.setLineDash([5,6]);
+  gtx.beginPath(); gtx.moveTo(120+8, midY-120+8); gtx.lineTo(bx, by+30); gtx.stroke();
+  gtx.beginPath(); gtx.moveTo(Wg-140+8, midY-120+8); gtx.lineTo(bx+bw, by+bh-30); gtx.stroke();
+  gtx.setLineDash([]);
+
+  const out = gateEval(gate,a,b);
+  drawWire(gtx, Wg/2-40, by+bh, 180, true, out);
+  gtx.fillStyle = colors.mountain; gtx.font='bold 14px system-ui'; gtx.textAlign='left';
+  gtx.fillText('A = '+a, 80, midY-130);
+  gtx.textAlign='right'; gtx.fillText('B = '+b, Wg-80, midY-130);
+  gtx.textAlign='center'; gtx.fillStyle = colors.accent;
+  gtx.fillText('Salida = '+out, Wg/2, by+bh+200);
+  $('#gateOut').textContent = out;
+  $('#gateExp').textContent = gateExplain[gate];
+}
+drawGateCanvas('NAND',1,1);
+$('#btnCalc').addEventListener('click', ()=>{
+  const g = $('#gateSel').value;
+  const a = +$('#inA').value, b = +$('#inB').value;
+  drawGateCanvas(g,a,b);
+});
+['gateSel','inA','inB'].forEach(id => $('#'+id).addEventListener('change', ()=>$('#btnCalc').click()));
+
+/* ---------- CELDA REGLA 110 (paso a paso) ---------- */
+const cvCell = document.getElementById('cvCell');
+const ctxC = cvCell.getContext('2d');
+const Wc = cvCell.width, Hc = cvCell.height;
+const rule110 = [0,1,1,1,0,1,1,0];
+let cellStep = 0, cellState = {A:1,B:1,C:1,X:0,Y:0,Z:0,P:0,Q:0,out:0};
+function drawCellGadget(step=-1){
+  ctxC.clearRect(0,0,Wc,Hc);
+  ctxC.fillStyle='rgba(255,255,255,.05)'; ctxC.fillRect(40,40,Wc-80,Hc-80);
+  ctxC.strokeStyle='rgba(110,168,254,.25)'; ctxC.lineWidth=2; ctxC.strokeRect(40,40,Wc-80,Hc-80);
+  ctxC.fillStyle=colors.accent; ctxC.font='bold 20px system-ui'; ctxC.textAlign='center';
+  ctxC.fillText('Celda Regla 110 — Paso a paso', Wc/2, 70);
+
+  const A=cellState.A, B=cellState.B, C=cellState.C;
+  const notb = B^1, notc = C^1;
+  const X = A | notb;
+  const Y = notb & C;
+  const Z = B & notc;
+  const P = X;
+  const Q = (Y | Z) ^ 1;
+  const out = (P & Q) ^ 1;
+
+  // wires entrada
+  drawWire(ctxC, 160, 120, 110, true, A);
+  drawWire(ctxC, Wc/2-12, 120, 110, true, B);
+  drawWire(ctxC, Wc-160-16, 120, 110, true, C);
+  ctxC.fillStyle = colors.mountain; ctxC.font='bold 14px system-ui';
+  ctxC.fillText('A', 160+10, 114);
+  ctxC.fillText('B', Wc/2, 114);
+  ctxC.fillText('C', Wc-160, 114);
+
+  // boxes util
+  function box(x,y,w,h,label,active=false){
+    ctxC.fillStyle = active? 'rgba(110,168,254,.30)' : 'rgba(110,168,254,.14)'; ctxC.fillRect(x,y,w,h);
+    ctxC.strokeStyle = active? colors.accent : 'rgba(110,168,254,.35)'; ctxC.lineWidth= active? 3:2; ctxC.strokeRect(x,y,w,h);
+    ctxC.fillStyle = colors.ink; ctxC.font='bold 16px system-ui'; ctxC.textAlign='center'; ctxC.fillText(label, x+w/2, y+h/2+6);
+  }
+  const cx = Wc/2, cy = Hc/2+10;
+  // positions
+  const pos = {
+    OR:{x:cx-240,y:cy-110,w:120,h:60},
+    ANDY:{x:cx-60,y:cy-110,w:120,h:60},
+    ANDZ:{x:cx+120,y:cy-110,w:120,h:60},
+    BUF:{x:cx-140,y:cy-20,w:120,h:60},
+    NOR:{x:cx+20,y:cy-20,w:120,h:60},
+    NAND:{x:cx-60,y:cy+70,w:120,h:60}
+  };
+  // highlight depending on step
+  const stepActive = [ 'OR', 'ANDY', 'ANDZ', 'BUF', 'NOR', 'NAND' ];
+  for(const k of stepActive){
+    const s = stepActive.indexOf(k)+1;
+    box(pos[k].x,pos[k].y,pos[k].w,pos[k].h,k, step===s);
+  }
+
+  // conexiones
+  ctxC.strokeStyle=colors.wire; ctxC.lineWidth=2;
+  ctxC.beginPath(); ctxC.moveTo(160+8, 230); ctxC.lineTo(pos.OR.x, pos.OR.y+20); ctxC.stroke(); // A→OR
+  // NOT de B
+  const bx = Wc/2-12+8, by = 230;
+  ctxC.fillStyle=colors.warn; ctxC.beginPath(); ctxC.moveTo(bx,by-12); ctxC.lineTo(bx+12,by); ctxC.lineTo(bx,by+12); ctxC.lineTo(bx-12,by); ctxC.closePath(); ctxC.fill();
+  ctxC.fillStyle=colors.ink; ctxC.font='12px system-ui'; ctxC.textAlign='center'; ctxC.fillText('¬', bx, by+4);
+  // ¬B hacia OR/ANDY/NOR
+  ctxC.strokeStyle=colors.wire;
+  ctxC.beginPath(); ctxC.moveTo(bx+12,by); ctxC.lineTo(pos.OR.x+pos.OR.w, pos.OR.y+20); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(bx+12,by); ctxC.lineTo(pos.ANDY.x+20, pos.ANDY.y+20); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(bx+12,by); ctxC.lineTo(pos.NOR.x+10, pos.NOR.y+10); ctxC.stroke();
+
+  // C→ANDY y ¬C→ANDZ
+  const cxin = Wc-160, cyin = 230;
+  // NOT C
+  ctxC.fillStyle=colors.warn; ctxC.beginPath(); ctxC.moveTo(cxin,cyin-12); ctxC.lineTo(cxin+12,cyin); ctxC.lineTo(cxin,cyin+12); ctxC.lineTo(cxin-12,cyin); ctxC.closePath(); ctxC.fill();
+  ctxC.fillStyle=colors.ink; ctxC.fillText('¬', cxin, cyin+4);
+
+  ctxC.strokeStyle=colors.wire;
+  ctxC.beginPath(); ctxC.moveTo(cxin-20,cyin); ctxC.lineTo(pos.ANDY.x+80, pos.ANDY.y+20); ctxC.stroke(); // C→ANDY
+  ctxC.beginPath(); ctxC.moveTo(cxin+12,cyin); ctxC.lineTo(pos.ANDZ.x+20, pos.ANDZ.y+20); ctxC.stroke(); // ¬C→ANDZ
+
+  // P = X (BUF): OR → BUF
+  ctxC.beginPath(); ctxC.moveTo(pos.OR.x+pos.OR.w/2, pos.OR.y+pos.OR.h); ctxC.lineTo(pos.BUF.x+pos.BUF.w/2, pos.BUF.y); ctxC.stroke();
+  // Q = NOR(Y,Z)
+  ctxC.beginPath(); ctxC.moveTo(pos.ANDY.x+pos.ANDY.w/2, pos.ANDY.y+pos.ANDY.h); ctxC.lineTo(pos.NOR.x+pos.NOR.w/3, pos.NOR.y); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.ANDZ.x+pos.ANDZ.w/2, pos.ANDZ.y+pos.ANDZ.h); ctxC.lineTo(pos.NOR.x+2*pos.NOR.w/3, pos.NOR.y); ctxC.stroke();
+  // salida NAND(P,Q)
+  ctxC.beginPath(); ctxC.moveTo(pos.BUF.x+pos.BUF.w/2, pos.BUF.y+pos.BUF.h); ctxC.lineTo(pos.NAND.x+pos.NAND.w/3, pos.NAND.y); ctxC.stroke();
+  ctxC.beginPath(); ctxC.moveTo(pos.NOR.x+pos.NOR.w/2, pos.NOR.y+pos.NOR.h); ctxC.lineTo(pos.NAND.x+2*pos.NAND.w/3, pos.NAND.y); ctxC.stroke();
+
+  // muestra salida
+  const outNow = (step>=6)? out : (step>=5? ((P & Q) ^ 1) : (step>=4? Q : (step>=3? P : (step>=2? (Y) : (step>=1? (X) : null)))));
+  const showOut = outNow!==null && outNow!==undefined ? outNow : out;
+  drawWire(ctxC, cx-16, pos.NAND.y+pos.NAND.h+20, 160, true, showOut);
+  ctxC.fillStyle=colors.accent; ctxC.font='bold 16px system-ui'; ctxC.textAlign='center';
+  ctxC.fillText(`A=${A}  B=${B}  C=${C}  →  salida=${out}`, cx, pos.NAND.y+pos.NAND.h+200);
+
+  // texto paso
+  const exp = [
+    `X = A ∨ ¬B = ${A} ∨ ${notb} = ${X}`,
+    `Y = ¬B ∧ C = ${notb} ∧ ${C} = ${Y}`,
+    `Z = B ∧ ¬C = ${B} ∧ ${notc} = ${Z}`,
+    `P = X = ${X}`,
+    `Q = ¬(Y ∨ Z) = ¬(${Y} ∨ ${Z}) = ${Q}`,
+    `out = ¬(P ∧ Q) = ¬(${P} ∧ ${Q}) = ${out}`
+  ];
+  $('#cellExplain').textContent = (step>=1 && step<=6)? exp[step-1] : '—';
+  $('#cellOut').textContent = out;
+}
+function updateCellInputs(){
+  cellState.A = +$('#cA').value;
+  cellState.B = +$('#cB').value;
+  cellState.C = +$('#cC').value;
+  cellStep = 0; $('#cellStepIdx').textContent = 0;
+  drawCellGadget(cellStep);
+}
+$('#btnCell').addEventListener('click', updateCellInputs);
+['cA','cB','cC'].forEach(id => $('#'+id).addEventListener('change', updateCellInputs));
+$('#cellPrev').addEventListener('click', ()=>{ cellStep = Math.max(0, cellStep-1); $('#cellStepIdx').textContent = cellStep; drawCellGadget(cellStep); });
+$('#cellNext').addEventListener('click', ()=>{ cellStep = Math.min(6, cellStep+1); $('#cellStepIdx').textContent = cellStep; drawCellGadget(cellStep); });
+// init
+updateCellInputs();
+
+/* ---------- REGLA 110 GRID con paso+/− ---------- */
+const cvInit = document.getElementById('cvInit');
+const ix = cvInit.getContext('2d');
+const cvGrid = document.getElementById('cvGrid');
+const gx = cvGrid.getContext('2d');
+let width = +document.getElementById('width').value | 0;
+let steps = +document.getElementById('steps').value | 0;
+let cellSize = +document.getElementById('cellSize').value | 0;
+let row = new Array(width).fill(0);
+let grid = [];
+let shownGen = 0;
+function resizeCanvases(){
+  width = Math.max(21, Math.min(401, (+document.getElementById('width').value|0)));
+  steps = Math.max(10, Math.min(300, (+document.getElementById('steps').value|0)));
+  cellSize = Math.max(5, Math.min(18, (+document.getElementById('cellSize').value|0)));
+  cvInit.width = width * cellSize;
+  cvInit.height = 3 * cellSize + 8;
+  cvGrid.width = width * cellSize;
+  cvGrid.height = steps * cellSize;
+  drawRow();
+  if(grid.length===0){ gx.clearRect(0,0,cvGrid.width,cvGrid.height); }
+}
+function drawRow(){
+  ix.clearRect(0,0,cvInit.width,cvInit.height);
+  ix.fillStyle = '#0c1422'; ix.fillRect(0,0,cvInit.width,cvInit.height);
+  for(let i=0;i<width;i++){
+    const x = i*cellSize, y = 8;
+    const v = row[i];
+    ix.fillStyle = 'rgba(255,255,255,.03)'; ix.fillRect(x,y,cellSize,cellSize*2);
+    ix.strokeStyle = 'rgba(110,168,254,.15)'; ix.strokeRect(x,y,cellSize,cellSize*2);
+    ix.strokeStyle = 'rgba(110,168,254,.12)';
+    ix.beginPath(); ix.moveTo(x,y+cellSize*2); ix.lineTo(x+cellSize,y); ix.stroke();
+    ix.fillStyle = v? '#ff8ab3':'#7ee7d7';
+    ix.fillRect(x+1,y+1,cellSize-2,cellSize*2-2);
+  }
+}
+cvInit.addEventListener('click', e=>{
+  const rect = cvInit.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const i = Math.floor(x / cellSize);
+  if(i>=0 && i<width){ row[i] ^= 1; drawRow(); }
+});
+function evolve(){
+  grid = new Array(steps);
+  grid[0] = row.slice();
+  for(let y=1;y<steps;y++){
+    const prev = grid[y-1];
+    const next = new Array(width).fill(0);
+    for(let i=0;i<width;i++){
+      const L = prev[(i-1+width)%width];
+      const C = prev[i];
+      const R = prev[(i+1)%width];
+      const idx = (L<<2)|(C<<1)|R;
+      next[i] = rule110[idx];
+    }
+    grid[y] = next;
+  }
+  shownGen = 0;
+  drawGridUpTo(shownGen);
+}
+function drawGridUpTo(gen){
+  gx.clearRect(0,0,cvGrid.width,cvGrid.height);
+  gx.fillStyle='#0c1422'; gx.fillRect(0,0,cvGrid.width,cvGrid.height);
+  const maxY = Math.min(gen, grid.length-1);
+  for(let y=0;y<=maxY;y++){
+    const arr = grid[y];
+    for(let i=0;i<width;i++){
+      const x = i*cellSize, yy = y*cellSize;
+      gx.fillStyle='rgba(255,255,255,.02)'; gx.fillRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.12)'; gx.strokeRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.08)';
+      gx.beginPath(); gx.moveTo(x,yy+cellSize); gx.lineTo(x+cellSize,yy); gx.stroke();
+      gx.fillStyle = arr[i]? '#ff8ab3':'#7ee7d7'; gx.fillRect(x+1,yy+1,cellSize-2,cellSize-2);
+    }
+  }
+  $('#gen').textContent = maxY;
+}
+document.getElementById('btnRun').addEventListener('click', ()=>{ resizeCanvases(); evolve(); });
+document.getElementById('btnCenter').addEventListener('click', ()=>{ row = new Array(width).fill(0); row[Math.floor(width/2)] = 1; drawRow(); });
+document.getElementById('btnRandom').addEventListener('click', ()=>{ row = row.map(()=> Math.random()<0.5?0:1); drawRow(); });
+document.getElementById('btnClear').addEventListener('click', ()=>{ row = new Array(width).fill(0); drawRow(); grid=[]; gx.clearRect(0,0,cvGrid.width,cvGrid.height); $('#gen').textContent=0; });
+['width','steps','cellSize'].forEach(id => document.getElementById(id).addEventListener('change', resizeCanvases));
+
+let anim=null, frame=0;
+function stepAnim(){
+  if(frame===0){ evolve(); gx.clearRect(0,0,cvGrid.width,cvGrid.height); }
+  if(frame<steps){
+    const arr = grid[frame];
+    for(let i=0;i<width;i++){
+      const x = i*cellSize, yy = frame*cellSize;
+      gx.fillStyle='rgba(255,255,255,.02)'; gx.fillRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.12)'; gx.strokeRect(x,yy,cellSize,cellSize);
+      gx.strokeStyle='rgba(110,168,254,.08)'; gx.beginPath(); gx.moveTo(x,yy+cellSize); gx.lineTo(x+cellSize,yy); gx.stroke();
+      gx.fillStyle = arr[i]? '#ff8ab3':'#7ee7d7'; gx.fillRect(x+1,yy+1,cellSize-2,cellSize-2);
+    }
+    $('#gen').textContent = frame;
+    frame++;
+    anim = requestAnimationFrame(stepAnim);
+  }else{
+    cancelAnimationFrame(anim); anim=null; frame=0;
+  }
+}
+function toggleAnim(){ if(anim){ cancelAnimationFrame(anim); anim=null; } else { frame=0; stepAnim(); } }
+document.getElementById('btnAnimate').addEventListener('click', toggleAnim);
+document.getElementById('btnStep').addEventListener('click', ()=>{
+  if(grid.length===0) evolve();
+  shownGen = Math.min(steps-1, shownGen+1);
+  drawGridUpTo(shownGen);
+});
+document.getElementById('btnStepBack').addEventListener('click', ()=>{
+  if(grid.length===0) return;
+  shownGen = Math.max(0, shownGen-1);
+  drawGridUpTo(shownGen);
+});
+window.addEventListener('keydown', (e)=>{
+  if(e.code==='Space'){ e.preventDefault(); toggleAnim(); }
+  if(e.code==='ArrowRight'){ e.preventDefault(); $('#btnStep').click(); }
+  if(e.code==='ArrowLeft'){ e.preventDefault(); $('#btnStepBack').click(); }
+});
+resizeCanvases();
+
+/* ---------- MODO GADGETS ---------- */
+const cvG = document.getElementById('cvGad');
+const gxg = cvG.getContext('2d');
+function clearGad(){
+  gxg.clearRect(0,0,cvG.width,cvG.height);
+  gxg.fillStyle='rgba(255,255,255,.05)'; gxg.fillRect(20,20,cvG.width-40,cvG.height-40);
+  gxg.strokeStyle='rgba(110,168,254,.25)'; gxg.lineWidth=2; gxg.strokeRect(20,20,cvG.width-40,cvG.height-40);
+}
+function drawLabel(txt,x,y){
+  gxg.fillStyle=colors.accent; gxg.font='bold 18px system-ui'; gxg.textAlign='center'; gxg.fillText(txt,x,y);
+}
+let pulse=null;
+function stopPulse(){ if(pulse){ cancelAnimationFrame(pulse); pulse=null; } }
+function drawPolyline(ctx, pts, bit){
+  for(let i=0;i<pts.length-1;i++){
+    const [x1,y1]=pts[i], [x2,y2]=pts[i+1];
+    drawPleatLine(ctx, x1,y1,x2,y2,'V');
+    drawPleatLine(ctx, x1,y1+8,x2,y2+8,'M');
+    drawPleatLine(ctx, x1,y1+16,x2,y2+16,'V');
+  }
+  // arrow
+  ctx.fillStyle = bit? colors.mountain : colors.valley;
+  const [xa,ya] = pts[0], [xb,yb] = pts[1];
+  ctx.beginPath();
+  const ang = Math.atan2(yb-ya, xb-xa);
+  ctx.moveTo(xa+18*Math.cos(ang), ya+8+18*Math.sin(ang));
+  ctx.lineTo(xa+8*Math.cos(ang+Math.PI/2), ya+8+8*Math.sin(ang+Math.PI/2));
+  ctx.lineTo(xa+8*Math.cos(ang-Math.PI/2), ya+8+8*Math.sin(ang-Math.PI/2));
+  ctx.closePath(); ctx.fill();
+}
+function animatePulse(ctx, pathPts, bit, effect='normal'){
+  let seg = 0, t = 0;
+  function step(){
+    ctx.save();
+    // redraw background each frame
+    clearGad();
+    currentGadgetDrawStatic();
+    ctx.restore();
+
+    const [x1,y1] = pathPts[seg];
+    const [x2,y2] = pathPts[seg+1];
+    const x = x1 + (x2-x1)*t;
+    const y = y1 + (y2-y1)*t;
+    ctx.fillStyle = bit? colors.mountain : colors.valley;
+    ctx.beginPath(); ctx.arc(x, y+8, 8, 0, Math.PI*2); ctx.fill();
+
+    t += 0.02;
+    if(t>=1){
+      t=0; seg++;
+      // efectos
+      if(effect==='invert' && seg===Math.floor(pathPts.length/2)) bit ^= 1;
+      if(effect==='eat' && seg===Math.floor(pathPts.length/2)){
+        // detener a mitad
+        stopPulse(); return;
+      }
+    }
+    if(seg < pathPts.length-1){ pulse = requestAnimationFrame(step); }
+    else { stopPulse(); }
+  }
+  pulse = requestAnimationFrame(step);
+}
+let currentGadgetDrawStatic = ()=>{};
+function drawGadget(){
+  stopPulse(); clearGad();
+  const type = $('#gadgetSel').value;
+  const A = +$('#gadA').value;
+  const B = +$('#gadB').value;
+  // show/hide B controls
+  $$('.gadBRow').forEach(el => el.style.display = (type==='cross') ? '' : 'none');
+
+  if(type==='wire'){
+    drawLabel('Wire recto', cvG.width/2, 50);
+    const pts = [[140,200],[760,200]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  }
+  if(type==='bend'){
+    drawLabel('Wire con curva', cvG.width/2, 50);
+    const pts = [[140,260],[420,260],[760,160]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  }
+  if(type==='delay'){
+    drawLabel('Delay (zig-zag)', cvG.width/2, 50);
+    const pts = [[140,220],[300,180],[460,260],[620,180],[760,220]];
+    drawPolyline(gxg, pts, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); };
+  }
+  if(type==='split'){
+    drawLabel('Splitter (fan-out)', cvG.width/2, 50);
+    const inPts = [[140,220],[360,220]];
+    drawPolyline(gxg, inPts, A);
+    const out1 = [[360,220],[700,160]];
+    const out2 = [[360,220],[700,280]];
+    drawPolyline(gxg, out1, A); drawPolyline(gxg, out2, A);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, inPts, A); drawPolyline(gxg, out1, A); drawPolyline(gxg, out2, A); };
+  }
+  if(type==='cross'){
+    drawLabel('Crossing (cruce sin interferencia)', cvG.width/2, 50);
+    const pathA = [[140,260],[420,200],[760,260]]; // diagonal
+    const pathB = [[220,140],[420,260],[620,140]]; // otra diagonal
+    drawPolyline(gxg, pathA, A);
+    drawPolyline(gxg, pathB, B);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pathA, A); drawPolyline(gxg, pathB, B); };
+  }
+  if(type==='not'){
+    drawLabel('Inverter (NOT)', cvG.width/2, 50);
+    const pts = [[140,220],[480,220],[760,220]]; // NOT al medio (rombo)
+    drawPolyline(gxg, pts, A);
+    // rombo
+    gxg.fillStyle=colors.warn; gxg.beginPath(); gxg.moveTo(480,208); gxg.lineTo(492,220); gxg.lineTo(480,232); gxg.lineTo(468,220); gxg.closePath(); gxg.fill();
+    gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('¬', 480, 226);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.fillStyle=colors.warn; gxg.beginPath(); gxg.moveTo(480,208); gxg.lineTo(492,220); gxg.lineTo(480,232); gxg.lineTo(468,220); gxg.closePath(); gxg.fill(); gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('¬', 480, 226); };
+  }
+  if(type==='twist'){
+    drawLabel('Twist (cambia fase)', cvG.width/2, 50);
+    // representamos twist como cruce helicoidal
+    const pts = [[140,240],[360,180],[540,300],[760,240]];
+    drawPolyline(gxg, pts, A);
+    // marca twist
+    gxg.strokeStyle=colors.accent; gxg.lineWidth=2;
+    gxg.beginPath(); gxg.arc(450,240,26,0,Math.PI*2); gxg.stroke();
+    gxg.fillStyle=colors.accent; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('twist', 450, 246);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.strokeStyle=colors.accent; gxg.lineWidth=2; gxg.beginPath(); gxg.arc(450,240,26,0,Math.PI*2); gxg.stroke(); gxg.fillStyle=colors.accent; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('twist', 450, 246); };
+  }
+  if(type==='eater'){
+    drawLabel('Eater (sumidero de señal)', cvG.width/2, 50);
+    const pts = [[140,220],[500,220]];
+    drawPolyline(gxg, pts, A);
+    // sumidero
+    gxg.fillStyle='rgba(255,255,255,.12)'; gxg.fillRect(500,200,90,40);
+    gxg.strokeStyle=colors.accent; gxg.strokeRect(500,200,90,40);
+    gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('EATER', 545, 224);
+    currentGadgetDrawStatic = ()=>{ drawPolyline(gxg, pts, A); gxg.fillStyle='rgba(255,255,255,.12)'; gxg.fillRect(500,200,90,40); gxg.strokeStyle=colors.accent; gxg.strokeRect(500,200,90,40); gxg.fillStyle=colors.ink; gxg.font='12px system-ui'; gxg.textAlign='center'; gxg.fillText('EATER', 545, 224); };
+  }
+}
+$('#gadgetSel').addEventListener('change', drawGadget);
+$('#gadA').addEventListener('change', drawGadget);
+$('#gadB').addEventListener('change', drawGadget);
+$('#btnPulse').addEventListener('click', ()=>{
+  const type = $('#gadgetSel').value;
+  const A = +$('#gadA').value; const B = +$('#gadB').value;
+  if(type==='wire'){
+    animatePulse(gxg, [[140,200],[760,200]], A);
+  }else if(type==='bend'){
+    animatePulse(gxg, [[140,260],[420,260],[760,160]], A);
+  }else if(type==='delay'){
+    animatePulse(gxg, [[140,220],[300,180],[460,260],[620,180],[760,220]], A);
+  }else if(type==='split'){
+    animatePulse(gxg, [[140,220],[360,220]], A);
+    // ramas en paralelo
+    setTimeout(()=>animatePulse(gxg, [[360,220],[700,160]], A), 400);
+    setTimeout(()=>animatePulse(gxg, [[360,220],[700,280]], A), 400);
+  }else if(type==='cross'){
+    animatePulse(gxg, [[140,260],[420,200],[760,260]], A);
+    setTimeout(()=>animatePulse(gxg, [[220,140],[420,260],[620,140]], B), 200);
+  }else if(type==='not'){
+    animatePulse(gxg, [[140,220],[480,220],[760,220]], A, 'invert');
+  }else if(type==='twist'){
+    animatePulse(gxg, [[140,240],[360,180],[540,300],[760,240]], A, 'invert');
+  }else if(type==='eater'){
+    animatePulse(gxg, [[140,220],[500,220],[545,220]], A, 'eat');
+  }
+});
+function initGadgets(){ drawGadget(); }
+initGadgets();
+
+/* ---------- DESCARGA ---------- */
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'origami-turing-demo-v2.html';
+  document.body.appendChild(a); a.click(); a.remove();
+});
+</script>
+</body>
+</html>
