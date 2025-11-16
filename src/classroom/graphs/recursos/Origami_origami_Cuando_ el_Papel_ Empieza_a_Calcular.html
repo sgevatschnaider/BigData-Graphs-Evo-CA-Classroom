@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuando el Papel Empieza a Calcular | Origami Turing-Completo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ==================================== */
+    /* VARIABLES Y CONFIGURACIÓN GLOBAL */
+    /* ==================================== */
+    :root {
+      --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --bg-secondary: rgba(255, 255, 255, 0.95);
+      --bg-tertiary: rgba(248, 250, 252, 0.9);
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --text-accent: #2b6cb0;
+      --accent-primary: #4299e1;
+      --accent-secondary: #3182ce;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      --border-color: rgba(0, 0, 0, 0.08);
+      --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 30px 60px rgba(0, 0, 0, 0.15);
+      --border-radius: 24px;
+      --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --bg-secondary: rgba(26, 32, 44, 0.95);
+      --bg-tertiary: rgba(45, 55, 72, 0.8);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --text-accent: #90cdf4;
+      --accent-primary: #43cea2;
+      --accent-secondary: #185a9d;
+      --border-color: rgba(255, 255, 255, 0.15);
+      --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: clamp(14px, 2vw, 18px); }
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.8;
+      background: var(--bg-primary);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      transition: var(--transition);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ==================================== */
+    /* ANIMACIÓN DE FONDO (PARTÍCULAS) */
+    /* ==================================== */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0px) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100px) translateX(100px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ==================================== */
+    /* TOGGLE DE TEMA */
+    /* ==================================== */
+    .theme-toggle {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      width: 70px;
+      height: 70px;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: var(--accent-primary);
+      transition: var(--transition);
+      z-index: 1000;
+      animation: pulse 2s infinite;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.2) rotate(180deg);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2), 0 0 30px rgba(66, 153, 225, 0.4);
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: var(--shadow-card); }
+      50% { box-shadow: 0 0 0 10px rgba(66, 153, 225, 0.1); }
+    }
+
+    /* ==================================== */
+    /* HERO SECTION */
+    /* ==================================== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+    .main-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 1s ease-out;
+      letter-spacing: -0.03em;
+    }
+    .subtitle {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      font-size: 2rem;
+      color: var(--accent-primary);
+      animation: bounce 2s infinite;
+      cursor: pointer;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    /* ==================================== */
+    /* CONTENIDO PRINCIPAL */
+    /* ==================================== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .lesson-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    /* ==================================== */
+    /* TARJETAS DE TEMA */
+    /* ==================================== */
+    .topic-card {
+      background: var(--bg-secondary);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      transition: var(--transition);
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    .topic-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      animation: slideIn 0.6s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(50px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .topic-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-hover);
+    }
+    .topic-header {
+      cursor: pointer;
+      padding: 2.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-tertiary);
+      transition: var(--transition);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topic-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .topic-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--accent-primary);
+      opacity: 0.3;
+      line-height: 1;
+    }
+    .expand-icon {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+    }
+    .topic-card.open .expand-icon {
+      transform: rotate(180deg);
+      background: var(--accent-primary);
+      color: white;
+    }
+    .topic-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 1.5s cubic-bezier(0.25, 0.8, 0.25, 1), padding 1.5s ease;
+      background: var(--bg-tertiary);
+    }
+    .topic-card.open .topic-content {
+      max-height: 5000px;
+      padding: 3rem;
+      border-top: 1px solid var(--border-color);
+    }
+    .topic-content p {
+      color: var(--text-secondary);
+      margin-bottom: 1.8rem;
+      font-size: 1.1rem;
+    }
+    .topic-content h4 {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 3rem 0 1.5rem;
+      font-weight: 700;
+      border-left: 5px solid var(--accent-primary);
+      padding-left: 1rem;
+    }
+    .topic-content ul {
+      padding-left: 2rem;
+      margin-bottom: 2rem;
+    }
+    .topic-content li {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      position: relative;
+    }
+    .topic-content li::before {
+      content: "▸";
+      color: var(--accent-primary);
+      position: absolute;
+      left: -1.5rem;
+      font-weight: 700;
+    }
+    .topic-content strong {
+      color: var(--text-primary);
+      font-weight: 600;
+      background: linear-gradient(120deg, var(--accent-primary), var(--accent-secondary));
+      background-size: 100% 0.2em;
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      padding: 0 0.2em;
+    }
+
+    /* ==================================== */
+    /* BOTONES CTA Y ENLACES */
+    /* ==================================== */
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      text-align: center;
+      padding: 1.2rem 2rem;
+      margin: 2rem 0.5rem;
+      border-radius: 16px;
+      background: var(--accent-gradient);
+      color: white !important;
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      font-size: 1.1rem;
+      min-width: 280px;
+    }
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.7s;
+    }
+    .cta-button:hover::before { left: 100%; }
+    .cta-button:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    }
+    .cta-button i { font-size: 1.3rem; }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .external-links-section {
+      background: var(--bg-tertiary);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 3rem 0;
+      border: 1px dashed var(--accent-primary);
+    }
+    .external-links-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+    }
+
+    /* ==================================== */
+    /* DIAGRAMAS Y SIMULADORES */
+    /* ==================================== */
+    .diagram-container, .code-container {
+      background: rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin: 3rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    [data-theme="dark"] .diagram-container, [data-theme="dark"] .code-container {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .diagram-container::before, .code-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-gradient);
+      opacity: 0.5;
+    }
+    .diagram-title {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2.5rem;
+      color: var(--text-primary);
+      font-size: 1.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.8;
+    }
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      align-items: stretch;
+      gap: 2rem;
+    }
+    .diagram-box {
+      border: 2px solid var(--border-color);
+      padding: 1.8rem;
+      border-radius: 12px;
+      text-align: center;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: var(--transition);
+      transform-style: preserve-3d;
+    }
+    .diagram-box:hover {
+      transform: rotateX(5deg) translateY(-5px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--accent-primary);
+    }
+    .diagram-box strong {
+      display: block;
+      font-size: 1.1em;
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+    }
+    .diagram-box span {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+    .diagram-arrow.down::after {
+      content: '↓';
+      display: block;
+      margin: 1rem 0;
+      font-size: 3rem;
+      color: var(--accent-primary);
+      animation: pulse 1.5s infinite;
+    }
+    .diagram-section {
+      padding: 1.5rem;
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
+      width: 100%;
+      transition: var(--transition);
+    }
+    .diagram-section:hover {
+      border-style: solid;
+      border-color: var(--accent-primary);
+    }
+    .diagram-section-title {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.1em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ==================================== */
+    /* SIMULADORES INTERACTIVOS */
+    /* ==================================== */
+    .simulator-container {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      margin: 3rem 0;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-color);
+    }
+    .simulator-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+    }
+    .rule110-grid {
+      display: grid;
+      grid-template-columns: repeat(31, 1fr);
+      gap: 2px;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+    }
+    .rule110-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-color);
+    }
+    .rule110-cell:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px var(--accent-primary);
+    }
+    .rule110-cell.active {
+      background: var(--accent-gradient);
+    }
+    .rule110-cell.inactive {
+      background: var(--bg-secondary);
+    }
+
+    /* ==================================== */
+    /* EFECTOS DE TEXTO */
+    /* ==================================== */
+    .math-formula {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-tertiary);
+      padding: 1.2rem 1.8rem;
+      border-radius: 8px;
+      margin: 2rem 0;
+      border-left: 4px solid var(--accent-primary);
+      font-size: 1.1rem;
+      overflow-x: auto;
+      text-align: center;
+      font-weight: 600;
+    }
+    .highlight {
+      background: linear-gradient(120deg, rgba(66, 153, 225, 0.3) 0%, rgba(49, 130, 206, 0.3) 100%);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* ==================================== */
+    /* FOOTER */
+    /* ==================================== */
+    footer {
+      text-align: center;
+      margin-top: 6rem;
+      padding: 3rem 0;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+    footer p {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .academic-citation {
+      font-style: italic;
+      background: rgba(66, 153, 225, 0.1);
+      padding: 1.2rem;
+      border-radius: 8px;
+      margin: 2rem auto 0;
+      font-size: 0.9rem;
+      max-width: 700px;
+    }
+
+    /* ==================================== */
+    /* RESPONSIVE */
+    /* ==================================== */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .topic-card.open .topic-content { padding: 1.8rem; }
+      .topic-header { padding: 1.8rem; }
+      .button-group { justify-content: center; }
+      .cta-button { min-width: 100%; margin: 0.5rem 0; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- Partículas de fondo -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Toggle de tema -->
+  <button class="theme-toggle" id="themeToggleButton" title="Cambiar tema">
+    <i class="fas fa-moon" id="theme-icon"></i>
+  </button>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1 class="main-title">Cuando el Papel Empieza a Calcular</h1>
+    <p class="subtitle">Del origami tradicional a la idea de que cada pliegue es una instrucción y cada figura, un programa geométrico.</p>
+    <div class="scroll-indicator" onclick="scrollToContent()">
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- Contenido Principal -->
+  <div class="container" id="main-content">
+    <div class="lesson-container">
+        
+        <!-- SECCIÓN I -->
+        <div class="topic-card fade-in" data-section="1">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">I</span>
+                Del Arte al Algoritmo: Origami como Computación
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>El punto de partida es de la máxima simplicidad: una hoja cuadrada de papel y un par de manos que la pliegan. La propia palabra origami remite a ese gesto simple: viene del japonés <strong>ori</strong> (plegar) y <strong>kami</strong> (papel). Durante siglos, el origami fue entendido como un arte ligado a rituales, decoración y juego. En todas esas versiones, el papel aparece como un soporte estético y simbólico, algo que se pliega para crear formas, no para realizar cálculos.</p>
+
+                <!-- Demo Interactivo Origami Computer + Enlace Externo -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-play-circle"></i> Demo Interactiva: Ordenador Origami</h3>
+                  <div class="diagram-grid" style="grid-template-columns: 1fr;">
+                    <div class="diagram-box">
+                      <strong>Simulación Visual</strong>
+                      <span>Explora cómo una secuencia de pliegues ejecuta un "programa" geométrico</span>
+                    </div>
+                  </div>
+                  <div class="button-group">
+                    <button class="cta-button" onclick="runOrigamiDemo()">
+                      <i class="fas fa-play"></i> Ejecutar Programa Local
+                    </button>
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/orgigami-origami_computer" target="_blank" class="cta-button">
+                      <i class="fas fa-external-link-alt"></i> Explorar Demo Completa
+                    </a>
+                  </div>
+                  <div id="origami-demo" style="height: 200px; background: var(--bg-tertiary); border-radius: 12px; margin-top: 1rem; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <p style="color: var(--text-secondary);">Usa los botones para interactuar</p>
+                  </div>
+                </div>
+
+                <p>Sin embargo, cuando dejamos de mirar sólo el resultado final y prestamos atención a los pasos, la escena cambia por completo. Cada modelo de origami viene acompañado de una secuencia precisa de instrucciones. Esa secuencia no es muy distinta de un <strong class="highlight">algoritmo</strong>: una serie ordenada de operaciones que transforman un estado inicial en un estado final.</p>
+                
+                <div class="math-formula">
+                  Estado Inicial → [Instrucción₁, Instrucción₂, ..., Instrucciónₙ] → Estado Final
+                </div>
+
+                <!-- Links externos organizados -->
+                <div class="external-links-section fade-in">
+                  <h3 class="external-links-title">
+                    <i class="fas fa-link"></i> Recursos Visuales Externos
+                  </h3>
+                  <div class="button-group">
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_origami_euclides" target="_blank" class="cta-button">
+                      <i class="fas fa-ruler-combined"></i> Comparar: Regla y Compás vs Origami
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Continuación del contenido -->
+                <p>Desde la perspectiva geométrica, esa intuición se hace más nítida. Un pliegue es una transformación concreta del plano (una isometría por partes). Esa perspectiva introduce una idea central: <strong>el estado del papel no es sólo una forma bonita, es información</strong>. Una hoja perfectamente plana tiene un "estado" trivial; una hoja con pliegues acumulados tiene un estado geométricamente mucho más rico.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">Dos Perspectivas del Origami</div>
+                    <div class="diagram-grid">
+                         <div class="diagram-section">
+                            <div class="diagram-section-title">Visión Artística</div>
+                            <div class="diagram-box"><strong>Soporte</strong><span>Hoja de Papel</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Proceso</strong><span>Pliegues (Pasos manuales)</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Resultado</strong><span>Figura Final (Estética)</span></div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Visión Computacional</div>
+                            <div class="diagram-box"><strong>Entrada</strong><span>Estado Inicial (Datos)</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Programa</strong><span>Algoritmo (Operaciones)</span></div>
+                            <div class="diagram-arrow down"></div>
+                            <div class="diagram-box"><strong>Salida</strong><span>Estado Final (Resultado)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>La afirmación que guía este análisis deja de sonar poética y empieza a ser literal: una hoja de papel, equipada con el patrón adecuado de pliegues, puede comportarse como una computadora universal.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN II -->
+        <div class="topic-card fade-in" data-section="2">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">II</span>
+                De la hoja al modelo geométrico: qué es un origami plano
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>Hasta ahora hablamos del origami en términos bastante intuitivos: pliegues, montañas, valles, capas que se cruzan. Para poder conectar todo esto con la computación, hace falta dar un paso más formal y responder una pregunta muy concreta: ¿qué significa, en lenguaje matemático, “un plegado de origami”? La respuesta típica en la literatura es que un modelo de origami plano puede describirse como un <strong>mapa isométrico por partes</strong>, acompañado de un <strong>grafo de pliegues</strong> y un <strong>orden de capas coherente</strong>.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">Componentes Formales de un Origami Plano</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-shapes"></i> Mapa Isométrico por Partes</strong>
+                            <span>Cada cara se transforma rígidamente (rota, traslada) conservando distancias, sin estirarse ni comprimirse.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-project-diagram"></i> Grafo de Pliegues</strong>
+                            <span>La red de líneas de pliegue (aristas) y sus intersecciones (vértices) que definen la estructura.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-layer-group"></i> Orden de Capas Coherente</strong>
+                            <span>Define qué parte del papel está arriba y cuál abajo en las zonas de solapamiento, sin contradicciones.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p>La idea del <strong>mapa isométrico por partes</strong> es la siguiente. Imaginamos la hoja de papel como una región del plano, por ejemplo un cuadrado. Esa región se divide en trozos, llamados <strong>caras</strong>, que se comportan rígidamente: cada cara es un polígono (triángulo, cuadrilátero, etc.) sobre el que el papel no se estira ni se comprime. Sobre cada una de esas caras, el plegado se describe mediante una isometría del plano: una traslación, una rotación o una reflexión. Lo único “no suave” del modelo ocurre en las fronteras entre caras, que son justamente las <strong>líneas de pliegue</strong>.</p>
+                <p>Visto así, un plegado de origami es una aplicación que toma cada punto de la hoja inicial y lo envía a otra posición del espacio, con dos condiciones importantes. Primero, que dentro de cada cara las distancias se conserven: lo que era un segmento de cierta longitud sigue siendo un segmento de la misma longitud. Segundo, que la unión de todas esas caras plegadas se pueda realizar sin que el papel se atraviese a sí mismo de manera inconsistente. Esa segunda condición es la que vuelve interesante el problema: no basta con pegar isometrías al azar, hay que hacerlo de forma que el objeto final pueda existir físicamente.</p>
+                <p>En este esquema, las <strong>líneas de pliegue</strong> juegan el papel de fronteras entre caras. Cada línea separa dos regiones sobre las que la isometría puede ser distinta (por ejemplo, una cara está rotada y la otra reflejada), pero ambas encajan exactamente a lo largo de la línea común. Si miramos sólo la “proyección” de esas líneas sobre la hoja, lo que obtenemos es un <strong>diagramas de pliegues</strong>: un conjunto de segmentos y curvas que indican dónde se dobló el papel. Ese diagrama puede verse como un <strong>grafo</strong>: los puntos donde se cruzan varias líneas son vértices, los tramos de pliegue entre esos vértices son aristas, y las caras poligonales aparecen como regiones delimitadas por ese grafo.</p>
+                <p>Las <strong>caras poligonales</strong> son importantes por dos motivos. En primer lugar, son las unidades rígidas básicas del modelo: dentro de cada una, la geometría es sencilla (una isometría pura). En segundo lugar, su forma y cómo se conectan entre sí determinan la estructura combinatoria del plegado: qué pieza del papel queda pegada con cuál, cómo se pueden “cerrar” los pliegues y qué configuraciones son físicamente realizables. En la práctica, esto permite pasar de una descripción puramente visual (“veo muchas rayas en la hoja”) a una descripción matemática precisa (“tengo un grafo plano con tales vértices, tales aristas y tales caras”).</p>
+                <p>Pero todavía falta un ingrediente clave: el <strong>orden de capas</strong>. Cuando plegamos papel, no sólo importa dónde termina cada punto en el plano, sino también <strong>qué queda arriba y qué queda abajo</strong> cuando varias capas coinciden en la misma posición. Dos puntos distintos de la hoja pueden acabar en el mismo lugar del espacio, pero uno puede estar físicamente por encima del otro. Para capturar esa información, el modelo incorpora un orden vertical local: en cada zona donde se superponen capas, hay una relación de “estar por encima de” que debe ser coherente en toda la hoja. Esa coherencia es la que evita paradojas del tipo “esta capa está arriba de aquella, que a su vez está arriba de la primera”.</p>
+                <p>Esta formalización tiene dos ventajas. Por un lado, permite traducir el lenguaje del origami al de la geometría y la topología, haciendo posible enunciar y demostrar teoremas sobre qué pliegues se pueden o no se pueden realizar. Por otro, abre la puerta a leer ese mismo objeto como una <strong>estructura de información</strong>: el grafo de pliegues codifica “posibilidades de transición”, el mapa isométrico por partes describe el estado geométrico actual y el orden de capas actúa como memoria. Es justamente este puente entre geometría, combinatoria y estado lo que hará posible, en las secciones siguientes, reinterpretar una hoja plegada como un dispositivo capaz de implementar lógica, autómatas celulares y, finalmente, computación universal.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN III -->
+        <div class="topic-card fade-in" data-section="3">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">III</span>
+                El pliegue no lineal: el axioma H6
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>Hay un axioma en particular que lleva al origami a un nivel de potencia superior: el <strong class="highlight">axioma H6</strong>.</p>
+                
+                <!-- Demo Visualizador H6 + Enlace Externo -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-flask"></i> Visualizador del Axioma H6</h3>
+                  <div style="position: relative; text-align: center;">
+                    <svg width="100%" height="250" viewBox="0 0 500 250" style="max-width: 500px; margin: 0 auto;">
+                      <circle cx="150" cy="80" r="6" fill="#e53e3e"/>
+                      <circle cx="350" cy="120" r="6" fill="#3182ce"/>
+                      <text x="150" y="60" fill="var(--text-primary)" font-size="14" font-weight="bold">P</text>
+                      <text x="350" y="105" fill="var(--text-primary)" font-size="14" font-weight="bold">Q</text>
+                      <line x1="50" y1="200" x2="450" y2="200" stroke="var(--text-secondary)" stroke-width="2" stroke-dasharray="5,5"/>
+                      <line x1="200" y1="30" x2="300" y2="220" stroke="var(--text-secondary)" stroke-width="2" stroke-dasharray="5,5"/>
+                      <text x="250" y="195" fill="var(--text-secondary)" font-size="12">L₁</text>
+                      <text x="180" y="125" fill="var(--text-secondary)" font-size="12">L₂</text>
+                      <line id="fold-h6" x1="250" y1="20" x2="250" y2="230" stroke="var(--accent-primary)" stroke-width="4" opacity="0" stroke-linecap="round"/>
+                    </svg>
+                    <div class="button-group">
+                      <button class="cta-button" onclick="animateH6()">
+                        <i class="fas fa-atom"></i> Animar Construcción H6
+                      </button>
+                      <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_orgiami-folding-lab-h6-explicado" target="_blank" class="cta-button">
+                        <i class="fas fa-graduation-cap"></i> Experimentar: Folding Lab H6
+                      </a>
+                    </div>
+                  </div>
+                  <div class="math-formula">
+                    ∃ pliegue f: f(P) ∈ L₁ ∧ f(Q) ∈ L₂ (Sistema de ecuaciones cúbicas)
+                  </div>
+                </div>
+
+                <p>Formulado de manera informal, H6 dice: dadas dos puntos (P, Q) y dos rectas (L₁, L₂), existe un pliegue que lleva el punto P a la recta L₁ y, simultáneamente, el punto Q a la recta L₂.</p>
+                <p>En términos algebraicos, esto implica que los parámetros que definen el pliegue deben satisfacer dos condiciones a la vez. El sistema de ecuaciones resultante no es lineal ni cuadrático: en los casos generales, <strong>aparece una ecuación de tercer grado</strong>. Encontrar el pliegue H6 equivale, formalmente, a resolver una ecuación cúbica.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">El Salto en Complejidad Geométrica</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-pencil-ruler"></i> Geometría de Euclides</strong>
+                            <span>Sus construcciones equivalen a resolver ecuaciones de hasta 2º grado.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-scroll"></i> Origami (Axioma H6)</strong>
+                            <span>Una sola operación equivale a resolver ecuaciones de 3er grado.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p>Desde esta perspectiva, H6 es el "hack" no lineal del origami. Es la puerta por la que entran operaciones que Euclides jamás podría ejecutar. Incorporar un axioma capaz de resolver cúbicas cambia las reglas del juego: el origami pasa a ser, formalmente, más expresivo.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN IV -->
+        <div class="topic-card fade-in" data-section="4">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">IV</span>
+                Del pliegue al bit: información en el papel
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>Para conectar el origami con la computación, es clave entender cómo un pliegue puede convertirse en un bit y una hoja en una memoria. Es el tránsito donde la geometría comienza a hablar el lenguaje de la información.</p>
+                
+                <!-- Demo Codificación Binaria + Enlace Externo -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-memory"></i> Codificación Binaria en Pliegues</h3>
+                  <div class="diagram-grid" style="grid-template-columns: repeat(3, 1fr); max-width: 600px; margin: 0 auto;">
+                    <div class="diagram-box" id="fold-mountain">
+                      <strong>Montaña</strong>
+                      <span>Bit = <span class="highlight">1</span></span>
+                      <div style="width: 60px; height: 40px; margin: 1rem auto; background: var(--accent-primary); clip-path: polygon(20% 100%, 50% 0%, 80% 100%);"></div>
+                    </div>
+                    <div class="diagram-box" id="fold-valley">
+                      <strong>Valle</strong>
+                      <span>Bit = <span class="highlight">0</span></span>
+                      <div style="width: 60px; height: 40px; margin: 1rem auto; background: var(--text-secondary); clip-path: polygon(20% 0%, 50% 100%, 80% 0%);"></div>
+                    </div>
+                    <div class="diagram-box" id="fold-memory">
+                      <strong>Memoria</strong>
+                      <span>Orden de capas</span>
+                      <div style="margin-top: 1rem;">
+                        <div style="width: 80px; height: 8px; background: var(--border-color); margin: 2px auto; border-radius: 2px;"></div>
+                        <div style="width: 80px; height: 8px; background: var(--accent-primary); margin: 2px auto; border-radius: 2px;"></div>
+                        <div style="width: 80px; height: 8px; background: var(--border-color); margin: 2px auto; border-radius: 2px;"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="button-group">
+                    <button class="cta-button" onclick="toggleBinaryDemo()">
+                      <i class="fas fa-sync-alt"></i> Alternar Estados
+                    </button>
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_origami%20turing%E2%80%91completo%20%E2%80%94%20demo%20visual%20interactiva" target="_blank" class="cta-button">
+                      <i class="fas fa-cogs"></i> Ver Gadgets Lógicos en Acción
+                    </a>
+                  </div>
+                </div>
+
+                <p>El punto de partida es una convención simple: un pliegue <strong>montaña</strong> puede representar un <strong>1</strong>, y un pliegue <strong>valle</strong> un <strong>0</strong>. Una tira de papel con una secuencia de estos pliegues se convierte en una cinta de bits, análoga a la de una Máquina de Turing.</p>
+                <p>Pero la información no está solo en las líneas, sino también en el <strong>orden de las capas</strong>. Qué región queda por encima de cuál después de un pliegue es información adicional. El papel "recuerda" la historia de plegados, actuando como una memoria geométrica.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">Traducción de lo Físico a lo Lógico</div>
+                    <div class="diagram-grid">
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-mountain"></i> Pliegue Montaña/Valle</strong>
+                            <span>Codifica un estado binario: <strong>Bit (1 / 0)</strong>.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-layer-group"></i> Orden de Capas</strong>
+                            <span>Almacena el estado del sistema: <strong>Memoria</strong>.</span>
+                        </div>
+                        <div class="diagram-box">
+                            <strong><i class="fas fa-question-circle"></i> Pliegues Opcionales</strong>
+                            <span>Compatibilidad física → Operación condicional: <strong>Compuerta Lógica</strong>.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p>Un patrón de papel donde la configuración de pliegues posibles/imposibles reproduce la tabla de verdad de una compuerta OR, AND o NOT no es una metáfora, es una <strong>realidad física</strong>.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN V -->
+        <div class="topic-card fade-in" data-section="5">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">V</span>
+                De la lógica al cálculo universal: Regla 110 y Máquina de Turing
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>Si podemos diseñar "gadgets" de origami que funcionen como compuertas lógicas, podemos combinarlos para crear circuitos. La salida de un gadget (un pliegue) se convierte en la entrada del siguiente. El cómputo se vuelve una cuestión de consistencia física: el papel "se niega" a adoptar configuraciones que no respetan el programa.</p>
+                
+                <!-- Simulador Regla 110 + Enlaces Externos -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-border-all"></i> Simulador: Regla 110 (Turing-Completo)</h3>
+                  <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Haz clic en las celdas para cambiar el estado. La Regla 110 puede simular cualquier máquina de Turing.
+                  </p>
+                  <div class="rule110-grid" id="rule110-grid"></div>
+                  <div class="button-group">
+                    <button class="cta-button" onclick="stepRule110()">
+                      <i class="fas fa-step-forward"></i> Siguiente Generación
+                    </button>
+                    <button class="cta-button" onclick="randomizeRule110()">
+                      <i class="fas fa-random"></i> Aleatorio
+                    </button>
+                    <button class="cta-button" onclick="clearRule110()">
+                      <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_origami-turing-demo-v2" target="_blank" class="cta-button">
+                      <i class="fas fa-external-link-alt"></i> Visualizar Demo Extendida
+                    </a>
+                  </div>
+                  <div class="math-formula" id="rule110-status">
+                    Generaciones: 0 | Estado: Listo
+                  </div>
+                </div>
+
+                <p>Aquí entra en escena la <strong>Regla 110</strong>, un autómata celular muy simple que es, sorprendentemente, <strong>Turing-completo</strong>. Esto significa que puede simular cualquier cómputo que una Máquina de Turing pueda realizar.</p>
+                
+                <div class="math-formula">
+                  Regla 110: σᵢ(t+1) = f(σᵢ₋₁(t), σᵢ(t), σᵢ₊₁(t))
+                </div>
+
+                <p>La conexión es directa: si podemos construir un patrón de pliegues que reproduzca la dinámica de la Regla 110, entonces el origami es Turing-completo. La hoja se organiza en bloques repetidos (celdas), donde la geometría implementa la tabla de actualización del autómata.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">El Camino hacia la Universalidad</div>
+                     <div class="diagram-grid" style="grid-template-columns: 1fr;">
+                        <div class="diagram-box">
+                          <strong><i class="fas fa-microchip"></i> Paso 1: Compuertas Lógicas</strong>
+                          <span>Pequeños patrones de pliegues que implementan AND, OR, NOT usando pliegues opcionales.</span>
+                        </div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-box">
+                          <strong><i class="fas fa-project-diagram"></i> Paso 2: Circuitos y Autómatas</strong>
+                          <span>Se encadenan las compuertas para simular reglas locales, como las de la Regla 110.</span>
+                        </div>
+                        <div class="diagram-arrow down"></div>
+                        <div class="diagram-box">
+                          <strong><i class="fas fa-infinity"></i> Paso 3: Cómputo Universal</strong>
+                          <span>Dado que la Regla 110 es Turing-completa, el sistema de origami que la implementa también lo es.</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <p>La hoja de papel se convierte en un soporte físico para un autómata universal, donde la cinta es una tira de celdas plegadas y la dinámica está escrita en el patrón de pliegues opcionales.</p>
+                
+                <!-- Demo Máquina de Turing + Enlace Externo (CORREGIDO) -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-robot"></i> Concepto: Máquina de Turing de Origami</h3>
+                  <div class="diagram-grid" style="grid-template-columns: 1fr;">
+                    <div class="diagram-box">
+                      <strong>Implementación Física</strong>
+                      <span>Cada celda del autómata corresponde a un "gadget" geométrico que implementa la lógica de transición de la Regla 110. El cómputo ocurre al encontrar la única configuración plana consistente.</span>
+                    </div>
+                  </div>
+                  <div class="button-group">
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_origami_m%C3%A1quina%20de%20turing%20de%20origami%20-%20simulaci%C3%B3n%20computacional" target="_blank" class="cta-button">
+                      <i class="fas fa-external-link-alt"></i> Simulación Computacional Completa
+                    </a>
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN VI -->
+        <div class="topic-card fade-in" data-section="6">
+            <div class="topic-header">
+              <span class="topic-title">
+                <span class="topic-number">VI</span>
+                El teorema y sus consecuencias: origami Turing-completo
+              </span>
+              <i class="fas fa-chevron-down expand-icon"></i>
+            </div>
+            <div class="topic-content">
+                <p>El trabajo matemático formaliza esta intuición en un teorema preciso: <strong>existe un modelo riguroso de origami plano, con pliegues opcionales definidos de manera local, que es Turing-completo</strong>. El cálculo está "cableado" en la geometría del patrón.</p>
+                
+                <!-- Teorema + Demo Extendida -->
+                <div class="simulator-container fade-in">
+                  <h3 class="simulator-title"><i class="fas fa-theorem"></i> Teorema Principal</h3>
+                  <div class="math-formula">
+                    Theorem: Flat-Foldable Origami with Optional Creases is Turing-Complete
+                  </div>
+                  <div class="diagram-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="diagram-box">
+                      <strong><i class="fas fa-puzzle-piece"></i> Gadgets</strong>
+                      <span>AND, OR, NOT, NAND, NOR implementados geométricamente</span>
+                    </div>
+                    <div class="diagram-box">
+                      <strong><i class="fas fa-th"></i> Tessellation</strong>
+                      <span>Patrón periódico infinito que simula celdas de autómata</span>
+                    </div>
+                    <div class="diagram-box">
+                      <strong><i class="fas fa-cogs"></i> Computación</strong>
+                      <span>El proceso de plegado encuentra la configuración consistente = resultado</span>
+                    </div>
+                  </div>
+                  <div class="button-group">
+                    <a href="https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/origami_origami%20_turing-completo%20%E2%80%94%20demo%20visual%20interactiva" target="_blank" class="cta-button">
+                      <i class="fas fa-external-link-alt"></i> Explorar Demo Extendida
+                    </a>
+                  </div>
+                </div>
+
+                <p>La demostración se apoya en construir "gadgets" geométricos que emulan la Regla 110. El paso decisivo es mostrar que este es un procedimiento sistemático: para cualquier cómputo expresable en una Máquina de Turing, existe un patrón de pliegues que lo reproduce.</p>
+                
+                <div class="diagram-container fade-in">
+                    <div class="diagram-title">Implicaciones del Teorema</div>
+                    <div class="diagram-grid" style="grid-template-columns: 1fr;">
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Fundamento Teórico</div>
+                            <div class="diagram-box">
+                              <strong>Computación Geométrica</strong>
+                              <span>Sistemas físicos basados en transformaciones rígidas pueden alcanzar complejidad universal.</span>
+                            </div>
+                        </div>
+                        <div class="diagram-section">
+                            <div class="diagram-section-title">Aplicaciones Potenciales</div>
+                             <div class="diagram-box">
+                              <strong>Robótica y Metamateriales</strong>
+                              <span>Estructuras que no solo se despliegan, sino que implementan lógicas de control en la propia materia.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>El teorema invita a cambiar nuestra perspectiva: la hoja deja de ser un objeto pasivo para convertirse en un <strong>lenguaje de programación físico</strong>. Cada diagrama de origami es más que una receta; es un fragmento de código geométrico que manipula información, y cada pliegue es una instrucción que ejecuta un cálculo.</p>
+                
+                <div class="academic-citation">
+                  <strong>Cita Académica:</strong> Hull, T. C., & Zakharevich, I. (2025). Flat Origami is Turing Complete. arXiv:2309.07932. 
+                  Este trabajo demuestra formalmente que el problema de flat-foldability con pliegues opcionales es Turing-completo mediante la simulación de la Regla 110.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+      <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+      <p>Basado en análisis y visualización del paper "Flat Origami is Turing Complete" de Thomas C. Hull e Inna Zakharevich</p>
+      <p style="margin-top: 1.5rem;">
+        <a href="https://arxiv.org/abs/2309.07932" target="_blank" class="cta-button" style="margin: 0; padding: 0.8rem 1.5rem; font-size: 1rem;">
+          <i class="fas fa-file-pdf"></i> Leer Paper Original en arXiv
+        </a>
+      </p>
+    </footer>
+
+  </div>
+  
+  <!-- Scripts -->
+  <script>
+    // ====================================
+    // SISTEMA DE TEMA
+    // ====================================
+    (function() {
+        const themeToggleButton = document.getElementById('themeToggleButton');
+        const themeIcon = document.getElementById('theme-icon');
+        const bodyEl = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+
+        function setTheme(theme) {
+            bodyEl.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (themeIcon) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        setTheme(savedTheme);
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = bodyEl.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        // Expandir tarjetas
+        document.querySelectorAll('.topic-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const card = header.parentElement;
+                const isOpen = card.classList.contains('open');
+                
+                // Cerrar todas las demás
+                document.querySelectorAll('.topic-card').forEach(c => {
+                    if (c !== card) c.classList.remove('open');
+                });
+                
+                // Toggle esta
+                card.classList.toggle('open');
+                
+                // Scroll suave
+                if (!isOpen) {
+                    setTimeout(() => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                }
+            });
+        });
+    })();
+
+    // ====================================
+    // ANIMACIÓN EN SCROLL
+    // ====================================
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.topic-card, .fade-in').forEach(el => {
+        observer.observe(el);
+    });
+
+    // ====================================
+    // FUNCIONES DE SIMULACIÓN
+    // ====================================
+    
+    // Simulador Origami Computer
+    function runOrigamiDemo() {
+        const container = document.getElementById('origami-demo');
+        container.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; gap: 1rem;">
+                <div style="width: 150px; height: 100px; background: var(--accent-primary); clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transition: all 0.5s ease;" id="origami-shape"></div>
+            </div>
+        `;
+        
+        const shape = document.getElementById('origami-shape');
+        const sequence = [
+            'polygon(50% 0%, 0% 100%, 100% 100%)',
+            'polygon(50% 0%, 20% 50%, 50% 100%, 80% 50%)',
+            'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)',
+            'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'
+        ];
+        
+        let step = 0;
+        const interval = setInterval(() => {
+            shape.style.clipPath = sequence[step % sequence.length];
+            step++;
+            if (step > sequence.length) clearInterval(interval);
+        }, 800);
+    }
+
+    // Simulador Regla 110
+    let rule110Grid = [];
+    const gridSize = 31;
+    let rule110History = [];
+
+    function initializeRule110() {
+        const grid = document.getElementById('rule110-grid');
+        grid.innerHTML = '';
+        rule110Grid = new Array(gridSize).fill(false);
+        
+        // Estado inicial con patrón central
+        rule110Grid[Math.floor(gridSize/2)] = true;
+        
+        renderRule110();
+    }
+
+    function renderRule110() {
+        const grid = document.getElementById('rule110-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        rule110Grid.forEach((cell, index) => {
+            const cellEl = document.createElement('div');
+            cellEl.className = `rule110-cell ${cell ? 'active' : 'inactive'}`;
+            cellEl.onclick = () => toggleRule110Cell(index);
+            grid.appendChild(cellEl);
+        });
+        
+        updateRule110Status();
+    }
+
+    function toggleRule110Cell(index) {
+        rule110Grid[index] = !rule110Grid[index];
+        renderRule110();
+    }
+
+    function stepRule110() {
+        const newGrid = [...rule110Grid];
+        
+        for (let i = 1; i < gridSize - 1; i++) {
+            const left = rule110Grid[i-1];
+            const center = rule110Grid[i];
+            const right = rule110Grid[i+1];
+            
+            if (left && center && right) newGrid[i] = false;
+            else if (left && center && !right) newGrid[i] = true;
+            else if (left && !center && right) newGrid[i] = true;
+            else if (left && !center && !right) newGrid[i] = false;
+            else if (!left && center && right) newGrid[i] = true;
+            else if (!left && center && !right) newGrid[i] = true;
+            else if (!left && !center && right) newGrid[i] = true;
+            else if (!left && !center && !right) newGrid[i] = false;
+        }
+        
+        rule110Grid = newGrid;
+        rule110History.push([...newGrid]);
+        renderRule110();
+    }
+
+    function randomizeRule110() {
+        rule110Grid = rule110Grid.map(() => Math.random() > 0.6);
+        rule110History = [];
+        renderRule110();
+    }
+
+    function clearRule110() {
+        rule110Grid = new Array(gridSize).fill(false);
+        rule110History = [];
+        renderRule110();
+    }
+
+    function updateRule110Status() {
+        const status = document.getElementById('rule110-status');
+        if (status) {
+            status.textContent = `Generaciones: ${rule110History.length} | Complejidad: ${rule110History.length > 5 ? 'Emergente' : 'Básica'}`;
+        }
+    }
+
+    // Animación H6
+    function animateH6() {
+        const foldLine = document.getElementById('fold-h6');
+        if (!foldLine) return;
+        foldLine.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+        foldLine.style.opacity = '0';
+        foldLine.style.transform = 'scaleY(0)';
+        
+        setTimeout(() => {
+            foldLine.style.opacity = '1';
+            foldLine.style.transform = 'scaleY(1)';
+        }, 100);
+    }
+
+    // Demo binario
+    function toggleBinaryDemo() {
+        const mountain = document.getElementById('fold-mountain');
+        const valley = document.getElementById('fold-valley');
+        if (!mountain || !valley) return;
+        
+        mountain.style.transition = 'all 0.3s ease';
+        valley.style.transition = 'all 0.3s ease';
+        
+        const isToggled = mountain.style.transform === 'scale(0.9)';
+        
+        mountain.style.transform = isToggled ? 'scale(1)' : 'scale(0.9)';
+        valley.style.transform = isToggled ? 'scale(1)' : 'scale(0.9)';
+        mountain.style.opacity = isToggled ? '1' : '0.5';
+        valley.style.opacity = isToggled ? '0.5' : '1';
+    }
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+        // Partículas
+        const particlesContainer = document.getElementById('particles');
+        if (particlesContainer) {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        if (document.getElementById('rule110-grid')) {
+            initializeRule110();
+        }
+    });
+
+    // Utilidades
+    function scrollToContent() {
+        document.getElementById('main-content').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
