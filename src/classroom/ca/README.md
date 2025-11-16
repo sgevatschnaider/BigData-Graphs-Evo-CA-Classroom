@@ -743,6 +743,6 @@ BACKEND = "numba"  # numpy, numba, cupy
 ---
 
 <p align="center">
-  <em>Desarrollado con ❤️ para la comunidad de ciencias de la computación</em><br>
+  <em>Desarrollado con  para la comunidad de ciencias de la computación</em><br>
   <em>¿Preguntas? Abre un issue o contacta: <a href="mailto:contact@example.com">contact@example.com</a></em>
 </p>
