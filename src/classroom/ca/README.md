@@ -567,6 +567,4 @@ Representa la tabla de 8 patrones (111..000) como entero 0–255.
 
 ```
 
-Si luego querés, podemos hacer una versión más corta tipo “landing” para el README principal y dejar esta versión extendida como `docs/README_full.md` o similar.
-::contentReference[oaicite:0]{index=0}
-```
+
