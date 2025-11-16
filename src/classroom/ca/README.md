@@ -26,9 +26,26 @@
 
 **AutoCell** te guía desde la definición básica de celdas, vecindades y reglas de transición hasta temas avanzados: **clases de Wolfram (I–IV)**, **universalidad** (p.ej., Regla 110 y Juego de la Vida), **AC reversibles** (Margolus), **estocásticos** (ruido/temperatura), **outer/totalistic** y **AC en grafos** (vecindad no-regular). Incluye APIs limpias en Python, notebooks demostrativos y herramientas para reproducibilidad y benchmarking.
 
-### Demo — Evolución de patrones (Conway)
+## 🧮 Origami Turing Machine — Cómputo inscrito en el papel
 
-![life demo](images/game_of_life.gif)
+<p align="center">
+  <img src="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/ca/recursos/Origami_Turing_Machine.gif?raw=true" width="400" alt="Origami Turing Machine">
+</p>
+
+La animación muestra un patrón de origami diseñado para implementar una **Máquina de Turing** mediante geometría pura.  
+Cada pliegue actúa como una **instrucción**, cada región del papel como un **estado**, y las capas que se superponen funcionan como **memoria física**.
+
+En este modelo, el cómputo no ocurre en un circuito electrónico sino en la propia materia:  
+la hoja "elige" la única configuración plana consistente, y esa solución geométrica **equivale al resultado del cálculo**.
+
+Este enfoque se apoya en tres ideas centrales:
+
+- **Montaña = 1, Valle = 0:** los pliegues codifican bits.  
+- **Compatibilidad física = lógica:** pliegues opcionales implementan compuertas como AND, OR y NOT.  
+- **Teselación = autómata:** replicando estos “gadgets” se obtiene una simulación completa de la **Regla 110**, un sistema Turing-completo.
+
+El GIF ilustra cómo una teselación de pliegues transmite información local y cómo esa geometría puede ejecutar cualquier algoritmo describible por una Máquina de Turing. Una hoja de papel, con el patrón adecuado, se convierte en una computadora universal.
+
 
 ---
 ## 📂 Estructura del Repositorio
