@@ -29,7 +29,7 @@
 
 ---
 
-## 🚀 Empieza Aquí (Modo Clases)
+##  Empieza Aquí (Modo Clases)
 
 <div align="center">
 
