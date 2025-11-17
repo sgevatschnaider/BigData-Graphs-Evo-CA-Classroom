@@ -719,29 +719,25 @@ BACKEND = "numba"  # numpy, numba, cupy
 - Qué funcionó y límites encontrados
 - Trabajo futuro
 ```
-
 ---
-
-## 📚 Referencias y Recursos Clave
 
 ## 📚 Referencias y Recursos Clave
 
 ### 📄 Bibliografía Fundamental
 
-- **S. Wolfram**, *A New Kind of Science* (2002) — Clases de comportamiento
-- **A. Ilachinski**, *Cellular Automata: A Discrete Universe* (2001) — Fundamentos matemáticos
-- **A. Adamatzky** (Ed.), *Game of Life Cellular Automata* (2010) — Life avanzado
-- **T. Toffoli & N. Margolus**, *Cellular Automata Machines* (1987) — Reversibilidad
-- **B. Chopard & M. Droz**, *Cellular Automata Modeling of Physical Systems* (1998) — Aplicaciones físicas
+- S. Wolfram, *A New Kind of Science* (2002) — Clases de comportamiento
+- A. Ilachinski, *Cellular Automata: A Discrete Universe* (2001) — Fundamentos matemáticos
+- A. Adamatzky (Ed.), *Game of Life Cellular Automata* (2010) — Life avanzado
+- T. Toffoli & N. Margolus, *Cellular Automata Machines* (1987) — Reversibilidad
+- B. Chopard & M. Droz, *Cellular Automata Modeling of Physical Systems* (1998) — Aplicaciones físicas
 
 ### 🔗 Enlaces Adicionales
 
-- [ConwayLife.com](http://conwaylife.com) — Base de datos de patrones Life
-- [Catagolue](https://catagolue.appspot.com) — Censo de objetos en Life
-- [Wolfram Atlas](http://atlas.wolfram.com) — Reglas elementales 1D
+- ConwayLife.com — Base de datos de patrones Life (http://conwaylife.com)
+- Catagolue — Censo de objetos en Life (https://catagolue.appspot.com)
+- Wolfram Atlas — Reglas elementales 1D (http://atlas.wolfram.com)
 
-&gt; 🎯**Cita este trabajo**: Si usas AutoCell en tu investigación, por favor cita usando el archivo [`CITATION.cff`](../CITATION.cff).
-
+&gt; 🎯 **Cita este trabajo**: Si usas AutoCell en tu investigación, por favor cita usando el archivo CITATION.cff.
 ---
 
 &lt;p align="center"&gt;
