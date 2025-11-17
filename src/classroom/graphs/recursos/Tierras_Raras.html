@@ -1,135 +1,1635 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <title>Mapa REE — Minas, Separación, Metales, Imanes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    html, body, #map { height: 100%; margin: 0; }
-    .panel {
-      position: absolute; top: 10px; left: 10px; z-index: 1000;
-      background: rgba(255,255,255,.95); padding: 10px 12px; border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.12); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      max-width: 320px;
-    }
-    .panel h1 { font-size: 16px; margin: 0 0 6px; }
-    .panel label { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 13px; }
-    .legend { position: absolute; bottom: 12px; left: 10px; background: rgba(255,255,255,.95); padding: 8px 10px; border-radius: 8px; font-size: 12px; }
-    .pill { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; font-size:11px; }
-    .mine { background:#a855f7; } .sep { background:#16a34a; } .metal { background:#ea580c; } .magnet { background:#2563eb; }
-    .reset { margin-top: 6px; font-size: 12px; border: none; padding: 6px 10px; border-radius: 8px; background: #1262BC; color: #fff; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-  <div class="panel">
-    <h1>Capas</h1>
-    <label><input type="checkbox" id="chkMine" checked> Minas <span class="pill mine">MIN</span></label>
-    <label><input type="checkbox" id="chkSep" checked> Separación <span class="pill sep">SEP</span></label>
-    <label><input type="checkbox" id="chkMetal" checked> Metales <span class="pill metal">MET</span></label>
-    <label><input type="checkbox" id="chkMagnet" checked> Imanes <span class="pill magnet">MAG</span></label>
-    <hr>
-    <label><input type="checkbox" id="onlyChina"> Solo China</label>
-    <button class="reset" id="resetView">Recentrar</button>
-  </div>
-  <div class="legend">
-    Pulsá marcadores para ver <b>capacidad</b> y <b>propietario</b> · Doble clic o rueda para zoom.
-  </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Dataset mínimo de ejemplo (ampliable con un archivo JSON externo)
-    const data = [
-      // Minas
-      {type:'mine', name:'Bayan Obo', country:'China', owner:'Baotou Steel', capacity_tpa: 120000, lat:41.8, lon:109.98},
-      {type:'mine', name:'Mountain Pass', country:'Estados Unidos', owner:'MP Materials', capacity_tpa: 40000, lat:35.43, lon:-115.51},
-      // Separación
-      {type:'sep', name:'Ganzhou Separation Cluster', country:'China', owner:'Varias', capacity_tpa: 80000, lat:25.87, lon:114.94},
-      {type:'sep', name:'Lynas Malaysia Plant', country:'Malasia', owner:'Lynas', capacity_tpa: 22000, lat:3.64, lon:103.36},
-      // Metales
-      {type:'metal', name:'Baotou Metals', country:'China', owner:'Baotou Steel', capacity_tpa: 50000, lat:40.62, lon:109.84},
-      {type:'metal', name:'JX Metals Pilot', country:'Japón', owner:'JX', capacity_tpa: 3000, lat:35.68, lon:139.77},
-      // Imanes
-      {type:'magnet', name:'Ningbo Permanent Magnet Factory', country:'China', owner:'Varias', capacity_tpa: 45000, lat:29.87, lon:121.55},
-      {type:'magnet', name:'Hitachi Metals (Aichi)', country:'Japón', owner:'Proterial (ex Hitachi Metals)', capacity_tpa: 8000, lat:35.03, lon:137.15},
-    ];
-
-    const map = L.map('map').setView([25, 105], 3);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 10, attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    const iconColors = {
-      mine: '#a855f7',
-      sep: '#16a34a',
-      metal: '#ea580c',
-      magnet: '#2563eb'
-    };
-
-    function circle(color) {
-      return L.circleMarker([0,0], {
-        radius: 8, weight: 2, color: color, fillColor: color, fillOpacity: 0.8
-      });
-    }
-
-    const layers = {
-      mine: L.layerGroup().addTo(map),
-      sep: L.layerGroup().addTo(map),
-      metal: L.layerGroup().addTo(map),
-      magnet: L.layerGroup().addTo(map)
-    };
-
-    const markers = [];
-
-    function addPoint(pt) {
-      const m = L.circleMarker([pt.lat, pt.lon], {
-        radius: 8, weight: 2, color: iconColors[pt.type], fillColor: iconColors[pt.type], fillOpacity: 0.85
-      });
-      const cap = pt.capacity_tpa ? `${pt.capacity_tpa.toLocaleString('es-AR')} t/año` : '—';
-      m.bindTooltip(`<b>${pt.name}</b><br>${pt.country} · ${pt.owner}<br>Capacidad: ${cap}`);
-      m.bindPopup(`<b>${pt.name}</b><br>País: ${pt.country}<br>Propietario: ${pt.owner}<br>Capacidad: ${cap}<br>Etapa: ${pt.type.toUpperCase()}`);
-      m.pt = pt; // attach data for filtering
-      layers[pt.type].addLayer(m);
-      markers.push(m);
-    }
-
-    data.forEach(addPoint);
-
-    // Layer toggles
-    const chkMine = document.getElementById('chkMine');
-    const chkSep = document.getElementById('chkSep');
-    const chkMetal = document.getElementById('chkMetal');
-    const chkMagnet = document.getElementById('chkMagnet');
-    const onlyChina = document.getElementById('onlyChina');
-
-    function updateVisibility() {
-      const show = {
-        mine: chkMine.checked,
-        sep: chkSep.checked,
-        metal: chkMetal.checked,
-        magnet: chkMagnet.checked
-      };
-      Object.keys(layers).forEach(k => layers[k].clearLayers());
-      markers.forEach(m => {
-        const okType = show[m.pt.type];
-        const okCountry = !onlyChina.checked || m.pt.country === 'China';
-        if (okType && okCountry) {
-          layers[m.pt.type].addLayer(m);
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Elementos de Tierras Raras: El Dominio Estratégico de China y sus Implicaciones Globales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #64748b;
+            --accent: #0f172a;
+            --muted: #f8fafc;
+            --border: #e2e8f0;
         }
-      });
-    }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            color: var(--primary);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .serif {
+            font-family: 'Crimson Text', serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        
+        .toc-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(8px);
+            border-right: 1px solid var(--border);
+            z-index: 40;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        
+        .section-anchor {
+            scroll-margin-top: 2rem;
+        }
+        
+        .citation-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted #3b82f6;
+            transition: all 0.2s ease;
+        }
+        
+        .citation-link:hover {
+            color: #1d4ed8;
+            border-bottom-style: solid;
+        }
+        
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 1.5rem;
+            height: 70vh;
+        }
+        
+        .bento-main {
+            grid-row: 1 / -1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bento-stat {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+        }
+        
+        .pull-quote {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            font-style: italic;
+            color: var(--secondary);
+            border-left: 4px solid var(--primary);
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 1024px) {
+            .toc-fixed {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .bento-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .mermaid-control-btn:not(.reset-zoom) {
+                display: none;
+            }
+            .mermaid-controls {
+                top: auto;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+        
+        /* Mermaid diagram styling */
+        .mermaid-container {
+            display: flex;
+            justify-content: center;
+            min-height: 300px;
+            max-height: 800px;
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
 
-    [chkMine, chkSep, chkMetal, chkMagnet, onlyChina].forEach(el => el.addEventListener('change', updateVisibility));
+        .mermaid-container .mermaid {
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            cursor: grab;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none; /* 防止触摸设备上的默认行为 */
+            -webkit-user-select: none; /* 防止文本选择 */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-    // Reset view
-    document.getElementById('resetView').addEventListener('click', () => {
-      map.setView([25, 105], 3);
-    });
+        .mermaid-container .mermaid svg {
+            max-width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
 
-    // Initial render
-    updateVisibility();
-  </script>
+        .mermaid-container .mermaid:active {
+            cursor: grabbing;
+        }
+
+        .mermaid-container.zoomed .mermaid {
+            height: 100%;
+            width: 100%;
+            cursor: grab;
+        }
+
+        .mermaid-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .mermaid-control-btn {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #374151;
+            font-size: 14px;
+            min-width: 36px;
+            height: 36px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mermaid-control-btn:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .mermaid-control-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .mermaid-title {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-family: 'Crimson Text', serif;
+        }
+        
+        /* Enhanced mermaid theme for better contrast */
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node ellipse,
+        .mermaid .node polygon {
+            stroke-width: 2px;
+            stroke: var(--primary) !important;
+        }
+        
+        /* Specific node color overrides for better contrast */
+        .mermaid .node[style*="fill:#f8fafc"] rect,
+        .mermaid .node[style*="fill:#f8fafc"] circle,
+        .mermaid .node[style*="fill:#f8fafc"] ellipse,
+        .mermaid .node[style*="fill:#f8fafc"] polygon {
+            fill: #f8fafc !important;
+            stroke: #1e293b !important;
+        }
+        
+        .mermaid .node[style*="fill:#e2e8f0"] rect,
+        .mermaid .node[style*="fill:#e2e8f0"] circle,
+        .mermaid .node[style*="fill:#e2e8f0"] ellipse,
+        .mermaid .node[style*="fill:#e2e8f0"] polygon {
+            fill: #e2e8f0 !important;
+            stroke: #1e293b !important;
+        }
+        
+        .mermaid .node[style*="fill:#cbd5e1"] rect,
+        .mermaid .node[style*="fill:#cbd5e1"] circle,
+        .mermaid .node[style*="fill:#cbd5e1"] ellipse,
+        .mermaid .node[style*="fill:#cbd5e1"] polygon {
+            fill: #cbd5e1 !important;
+            stroke: #1e293b !important;
+        }
+        
+        .mermaid .node[style*="fill:#94a3b8"] rect,
+        .mermaid .node[style*="fill:#94a3b8"] circle,
+        .mermaid .node[style*="fill:#94a3b8"] ellipse,
+        .mermaid .node[style*="fill:#94a3b8"] polygon {
+            fill: #94a3b8 !important;
+            stroke: #1e293b !important;
+        }
+        
+        .mermaid .node[style*="fill:#64748b"] rect,
+        .mermaid .node[style*="fill:#64748b"] circle,
+        .mermaid .node[style*="fill:#64748b"] ellipse,
+        .mermaid .node[style*="fill:#64748b"] polygon {
+            fill: #64748b !important;
+            stroke: #f8fafc !important;
+        }
+        
+        .mermaid .node[style*="fill:#475569"] rect,
+        .mermaid .node[style*="fill:#475569"] circle,
+        .mermaid .node[style*="fill:#475569"] ellipse,
+        .mermaid .node[style*="fill:#475569"] polygon {
+            fill: #475569 !important;
+            stroke: #f8fafc !important;
+        }
+        
+        .mermaid .node[style*="fill:#334155"] rect,
+        .mermaid .node[style*="fill:#334155"] circle,
+        .mermaid .node[style*="fill:#334155"] ellipse,
+        .mermaid .node[style*="fill:#334155"] polygon {
+            fill: #334155 !important;
+            stroke: #f8fafc !important;
+        }
+        
+        .mermaid .node[style*="fill:#1e293b"] rect,
+        .mermaid .node[style*="fill:#1e293b"] circle,
+        .mermaid .node[style*="fill:#1e293b"] ellipse,
+        .mermaid .node[style*="fill:#1e293b"] polygon {
+            fill: #1e293b !important;
+            stroke: #f8fafc !important;
+        }
+        
+        /* Text styling with high contrast */
+        .mermaid .node .label,
+        .mermaid .nodeLabel,
+        .mermaid .label text {
+            fill: var(--primary) !important;
+            color: var(--primary) !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* Specific text color overrides for dark backgrounds */
+        .mermaid .node[style*="fill:#64748b"] .label,
+        .mermaid .node[style*="fill:#64748b"] .nodeLabel,
+        .mermaid .node[style*="fill:#64748b"] text,
+        .mermaid .node[style*="fill:#475569"] .label,
+        .mermaid .node[style*="fill:#475569"] .nodeLabel,
+        .mermaid .node[style*="fill:#475569"] text,
+        .mermaid .node[style*="fill:#334155"] .label,
+        .mermaid .node[style*="fill:#334155"] .nodeLabel,
+        .mermaid .node[style*="fill:#334155"] text,
+        .mermaid .node[style*="fill:#1e293b"] .label,
+        .mermaid .node[style*="fill:#1e293b"] .nodeLabel,
+        .mermaid .node[style*="fill:#1e293b"] text {
+            fill: #f8fafc !important;
+            color: #f8fafc !important;
+        }
+        
+        /* Edge styling for better visibility */
+        .mermaid .edgePath .path {
+            stroke: var(--secondary) !important;
+            stroke-width: 2px !important;
+            fill: none !important;
+        }
+        
+        .mermaid .edgeLabel {
+            background-color: rgba(248, 250, 252, 0.95) !important;
+            color: var(--primary) !important;
+            font-weight: 500 !important;
+            font-size: 12px !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            border: 1px solid var(--border) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* Arrow styling */
+        .mermaid .arrowheadPath {
+            fill: var(--secondary) !important;
+            stroke: var(--secondary) !important;
+        }
+        
+        /* Subgraph styling */
+        .mermaid .cluster rect {
+            fill: rgba(248, 250, 252, 0.5) !important;
+            stroke: var(--border) !important;
+            stroke-width: 1px !important;
+        }
+        
+        .mermaid .cluster .label {
+            color: var(--primary) !important;
+            font-weight: 600 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        @media (max-width: 640px) {
+            .bento-stat {
+                word-break: break-word;
+            }
+        }
+    </style>
+  <base target="_blank">
+</head>
+
+  <body>
+    <!-- Tabla de Contenidos Fija -->
+    <nav class="toc-fixed">
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold serif text-gray-800 mb-4">Tabla de Contenidos</h3>
+        <ul class="space-y-3 text-sm">
+          <li>
+            <a href="#executive-summary" class="block text-gray-600 hover:text-blue-600 transition-colors">Resumen Ejecutivo</a>
+          </li>
+          <li>
+            <a href="#chinas-pivotal-role" class="block text-gray-600 hover:text-blue-600 transition-colors">El Rol Pivotal de China</a>
+            <ul class="ml-4 mt-2 space-y-2 text-xs">
+              <li>
+                <a href="#dominance-production" class="block text-gray-500 hover:text-blue-500">Dominio en Producción</a>
+              </li>
+              <li>
+                <a href="#downstream-control" class="block text-gray-500 hover:text-blue-500">Control de la Cadena de Suministro</a>
+              </li>
+              <li>
+                <a href="#export-policies" class="block text-gray-500 hover:text-blue-500">Políticas de Exportación</a>
+              </li>
+              <li>
+                <a href="#geopolitical-implications" class="block text-gray-500 hover:text-blue-500">Implicaciones Geopolíticas</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#emerging-technologies" class="block text-gray-600 hover:text-blue-600 transition-colors">Tecnologías Emergentes</a>
+            <ul class="ml-4 mt-2 space-y-2 text-xs">
+              <li>
+                <a href="#ai-applications" class="block text-gray-500 hover:text-blue-500">Aplicaciones de IA</a>
+              </li>
+              <li>
+                <a href="#battery-technologies" class="block text-gray-500 hover:text-blue-500">Tecnologías de Baterías</a>
+              </li>
+              <li>
+                <a href="#energy-ai-boom" class="block text-gray-500 hover:text-blue-500">Boom de Energía e IA</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#ree-absorbing-ferns" class="block text-gray-600 hover:text-blue-600 transition-colors">Helechos que Absorben ETR</a>
+            <ul class="ml-4 mt-2 space-y-2 text-xs">
+              <li>
+                <a href="#fern-discovery" class="block text-gray-500 hover:text-blue-500">Descubrimiento y Proceso</a>
+              </li>
+              <li>
+                <a href="#sustainable-implications" class="block text-gray-500 hover:text-blue-500">Implicaciones Sostenibles</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#overview-ree" class="block text-gray-600 hover:text-blue-600 transition-colors">Visión General de ETR</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+      <!-- Sección Principal con Bento Grid -->
+      <section class="hero-gradient relative overflow-hidden">
+        <div class="container mx-auto px-6 py-16">
+          <div class="bento-grid">
+            <!-- Área de Contenido Principal -->
+            <div class="bento-main relative flex flex-col justify-center text-white">
+              <div class="absolute inset-0 opacity-20">
+                <img src="https://kimi-web-img.moonshot.cn/img/cdn.mos.cms.futurecdn.net/fd579d5cbea365f17eaa079af26d87c32afc0632.jpg" alt="Vista aérea de operaciones mineras de tierras raras en China" class="w-full h-full object-cover" size="wallpaper" aspect="wide" style="photo" query="vista aérea mina tierras raras china" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+              </div>
+              <div class="relative z-10 p-6 md:p-12">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold serif mb-6 leading-tight">
+                  <span class="italic text-blue-300">Elementos de Tierras Raras:</span>
+                  <br/>
+                  El Dominio Estratégico de China y sus Implicaciones Globales
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed">
+                  Explorando la intersección crítica de los elementos de tierras raras, la influencia geopolítica y las tecnologías emergentes en el siglo XXI
+                </p>
+              </div>
+              <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 to-transparent"></div>
+            </div>
+
+            <!-- Paneles de Estadísticas -->
+            <div class="bento-stat rounded-lg p-6 flex flex-col justify-center">
+              <div class="text-3xl font-bold text-blue-600 mb-2">69%</div>
+              <div class="text-sm text-gray-600 font-medium">Producción Minera Global</div>
+              <div class="text-xs text-gray-500 mt-1">Participación de China en óxido de tierras raras equivalente</div>
+            </div>
+
+            <div class="bento-stat rounded-lg p-6 flex flex-col justify-center">
+              <div class="text-3xl font-bold text-green-600 mb-2">98%</div>
+              <div class="text-sm text-gray-600 font-medium">Procesamiento de ETR Pesados</div>
+              <div class="text-xs text-gray-500 mt-1">Control de China sobre los elementos de tierras raras pesados</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resumen Ejecutivo -->
+      <section id="executive-summary" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-6 max-w-4xl">
+          <div class="mb-12">
+            <h2 class="text-4xl font-bold serif text-gray-900 mb-6">Resumen Ejecutivo</h2>
+            <div class="w-24 h-1 bg-blue-600 mb-8"></div>
+          </div>
+
+          <div class="prose prose-lg max-w-none">
+            <p class="text-xl text-gray-700 leading-relaxed mb-8">
+              Los elementos de tierras raras (ETR) son un grupo de 17 metales químicamente similares que se han vuelto indispensables para la tecnología moderna, ganándose el apodo de <strong>"vitaminas de la industria".</strong> China ha establecido un cuasi-monopolio sobre la cadena de suministro global de ETR, controlando aproximadamente el <strong>69% de la minería, más del 90% del procesamiento y más del 90% de la fabricación de imanes permanentes</strong>.
+            </p>
+
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-6 my-8">
+              <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-blue-400 mt-1 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold text-blue-900 mb-2">Influencia Estratégica</h4>
+                  <p class="text-blue-800">Este dominio otorga a Pekín una inmensa influencia estratégica, que ha utilizado cada vez más a través de controles y regulaciones de exportación, creando vulnerabilidades significativas para otras naciones.</p>
+                </div>
+              </div>
+            </div>
+
+            <p class="mb-6">
+              Los desarrollos recientes incluyen la expansión de los controles de exportación de China en 2025 y un descubrimiento científico revolucionario de un helecho, <em>Blechnum orientale</em>, que puede absorber y cristalizar ETR, ofreciendo un camino potencial hacia la "minería verde" sostenible.
+            </p>
+
+            <p class="mb-6">
+              La demanda de ETR está aumentando debido a su papel crítico en las tecnologías emergentes, particularmente en el hardware para la inteligencia artificial (IA) y los motores y baterías para vehículos eléctricos (VE), lo que convierte la seguridad de su suministro en un tema geopolítico y económico central.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- El Rol Pivotal de China -->
+      <section id="chinas-pivotal-role" class="section-anchor py-16 bg-gray-50">
+        <div class="container mx-auto px-6 max-w-6xl">
+          <div class="mb-12">
+            <h2 class="text-4xl font-bold serif text-gray-900 mb-6">El Rol Pivotal de China en la Cadena de Suministro Global de Tierras Raras</h2>
+            <div class="w-24 h-1 bg-blue-600 mb-8"></div>
+          </div>
+
+          <div class="grid lg:grid-cols-3 gap-8 mb-12">
+            <div class="lg:col-span-2">
+              <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                La posición de China en la cadena de suministro global de elementos de tierras raras (ETR) no es simplemente dominante; es estructuralmente fundamental, extendiéndose desde la extracción de materia prima hasta las aplicaciones más avanzadas tecnológicamente. Este control integral ha sido cultivado durante décadas a través de una planificación estatal estratégica, una inversión significativa y el desarrollo de un ecosistema industrial altamente integrado.
+              </p>
+
+              <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                A partir de 2025, este dominio se manifiesta en varias áreas críticas: una participación dominante en la minería y reservas globales, un cuasi-monopolio en los complejos procesos de refinación y separación, y el liderazgo en la fabricación de componentes esenciales basados en ETR, como los imanes permanentes.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-lg p-6 shadow-sm border">
+              <h4 class="font-semibold text-gray-900 mb-4">Estadísticas Clave</h4>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Producción Minera</span>
+                  <span class="font-bold text-blue-600">69.2%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Capacidad de Procesamiento</span>
+                  <span class="font-bold text-green-600">85-95%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Procesamiento de ETR Pesados</span>
+                  <span class="font-bold text-purple-600">98%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Fabricación de Imanes</span>
+                  <span class="font-bold text-red-600">>90%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="dominance-production" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Dominio en la Producción y Reservas Globales</h3>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+              <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h4 class="font-semibold text-gray-900 mb-4">Cuotas de Producción</h4>
+                <p class="text-gray-700 mb-4">
+                  En 2024, la cuota oficial de producción minera de China se fijó en <strong>270,000 toneladas métricas de óxido de tierras raras (OTR) equivalente</strong>, lo que representa aproximadamente el <strong>69.2% de la producción minera total del mundo</strong>
+                  <a href="https://www.china-briefing.com/news/chinas-rare-earth-elements-dominance-in-global-supply-chains/" class="citation-link">[266]</a>.
+                </p>
+                <div class="bg-gray-50 p-4 rounded">
+                  <div class="text-2xl font-bold text-blue-600">270,000</div>
+                  <div class="text-sm text-gray-600">Toneladas métricas de OTR equivalente</div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h4 class="font-semibold text-gray-900 mb-4">Reservas Globales</h4>
+                <p class="text-gray-700 mb-4">
+                  Se estima que las reservas de China son de aproximadamente <strong>44 millones de toneladas métricas de óxido de tierras raras (OTR) equivalente</strong>, constituyendo alrededor del <strong>48% de las reservas totales del mundo</strong>
+                  <a href="https://www.china-briefing.com/news/chinas-rare-earth-elements-dominance-in-global-supply-chains/" class="citation-link">[266]</a>.
+                </p>
+                <div class="bg-gray-50 p-4 rounded">
+                  <div class="text-2xl font-bold text-green-600">44M</div>
+                  <div class="text-sm text-gray-600">Toneladas métricas de OTR equivalente</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pull-quote">
+              "El verdadero poder de China reside en su control sobre los segmentos intermedios y finales de la cadena de suministro, comandando un estimado del 85-95% de la capacidad global de procesamiento y refinación."
+            </div>
+          </div>
+
+          <div id="downstream-control" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Control sobre el Procesamiento y la Fabricación en la Cadena de Suministro</h3>
+
+            <div class="bg-white rounded-lg p-8 shadow-sm mb-8">
+              <h4 class="font-semibold text-gray-900 mb-6">Dominio en el Procesamiento</h4>
+              <p class="text-gray-700 mb-6">
+                China controla un estimado del <strong>90-94% de la capacidad global</strong> para separar y purificar ETR, un proceso esencial para transformar minerales de tierras raras mezclados en elementos individuales de alta pureza <a href="https://moderndiplomacy.eu/2025/10/18/chinas-strategic-move-on-rare-earth-metals-and-critical-mineral/" class="citation-link">[273]</a>.
+              </p>
+
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                  <h5 class="font-medium text-blue-900 mb-2">Imanes Permanentes</h5>
+                  <p class="text-sm text-blue-800">China produce más del 90% de los imanes permanentes de tierras raras del mundo, en particular los imanes de neodimio-hierro-boro (NdFeB)</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg">
+                  <h5 class="font-medium text-green-900 mb-2">ETR Pesados</h5>
+                  <p class="text-sm text-green-800">La capacidad de procesamiento para tierras raras pesadas alcanza el 98%, haciendo a China indispensable para aplicaciones de alta tecnología</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-8">
+              <h4 class="font-semibold text-gray-900 mb-4">Puntos Críticos Estratégicos</h4>
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-industry text-blue-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-gray-900 mb-2">Procesamiento</h5>
+                  <p class="text-sm text-gray-600">Tecnologías complejas de separación y purificación</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-magnet text-green-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-gray-900 mb-2">Imanes</h5>
+                  <p class="text-sm text-gray-600">Componentes esenciales para VE y turbinas eólicas</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-cogs text-purple-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-gray-900 mb-2">Integración</h5>
+                  <p class="text-sm text-gray-600">Control vertical desde la minería hasta la fabricación</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="export-policies" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Políticas de Exportación Recientes y Medidas Regulatorias</h3>
+
+            <div class="mb-8">
+              <div class="mermaid-title">Cronología del Control de Exportación de ETR de China - 2025</div>
+              <div class="mermaid-container">
+                <div class="mermaid-controls">
+                  <button class="mermaid-control-btn zoom-in" title="Ampliar">
+                    <i class="fas fa-search-plus"></i>
+                  </button>
+                  <button class="mermaid-control-btn zoom-out" title="Reducir">
+                    <i class="fas fa-search-minus"></i>
+                  </button>
+                  <button class="mermaid-control-btn reset-zoom" title="Restablecer">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                  </button>
+                  <button class="mermaid-control-btn fullscreen" title="Pantalla Completa">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+                <div class="mermaid">
+                  timeline
+                  title "Cronología del Control de Exportación de ETR de China - 2025"
+                  Abril 2025 : "Controles Iniciales"
+                  : "7 ETR medianos/pesados"
+                  : "Samario, Gadolinio, Terbio"
+                  : "Disprosio, Lutecio"
+                  : "Escandio, Itrio"
+                  Julio 2025 : "Medidas de Monitoreo"
+                  : "Seguimiento mensual de producción"
+                  : "Plataforma nacional de trazabilidad"
+                  : "Aplicación de cuotas"
+                  Octubre 2025 : "Controles Ampliados"
+                  : "5 ETR adicionales"
+                  : "Holmio, Erbio, Tulio"
+                  : "Europio, Iterbio"
+                  : "Disposiciones extraterritoriales"
+                  Noviembre 2025 : "Suspensión"
+                  : "Suspensión de 1 año"
+                  : "Implementación condicional"
+                  : "Negociaciones diplomáticas"
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto mb-8">
+              <table class="w-full bg-white rounded-lg shadow-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Fecha</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Elementos Controlados</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Disposiciones Clave</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="px-6 py-4 text-sm text-gray-900">Abril 2025</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">Samario, Gadolinio, Terbio, Disprosio, Lutecio, Escandio, Itrio</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">Se requieren licencias de exportación para elementos y productos derivados</td>
+                  </tr>
+                  <tr>
+                    <td class="px-6 py-4 text-sm text-gray-900">Octubre 2025</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">Holmio, Erbio, Tulio, Europio, Iterbio</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">Jurisdicción extraterritorial sobre productos fabricados con materiales o tecnología china</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6">
+              <div class="flex items-start">
+                <i class="fas fa-info-circle text-yellow-400 mt-1 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold text-yellow-900 mb-2">Suspensión Temporal</h4>
+                  <p class="text-yellow-800">Tras negociaciones comerciales de alto nivel, China <strong>suspendió oficialmente la implementación de nuevos controles por un período de un año</strong>, hasta el 10 de noviembre de 2026 <a href="https://www.jdsupra.com/legalnews/china-suspends-export-controls-on-3699228/" class="citation-link">[281]</a>. Sin embargo, el marco legal sigue vigente.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="geopolitical-implications" class="section-anchor">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Implicaciones Estratégicas y Consideraciones Geopolíticas</h3>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+              <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h4 class="font-semibold text-gray-900 mb-4">Influencia Económica</h4>
+                <p class="text-gray-700 mb-4">
+                  El dominio de China proporciona una influencia económica y estratégica significativa, permitiéndole influir en la oferta y los precios como una poderosa herramienta de negociación en disputas comerciales y negociaciones diplomáticas <a href="https://www.china-briefing.com/news/chinas-rare-earth-elements-dominance-in-global-supply-chains/" class="citation-link">[266]</a>.
+                </p>
+                <div class="bg-red-50 p-4 rounded">
+                  <div class="text-lg font-bold text-red-600 mb-1">92%</div>
+                  <div class="text-sm text-red-800">de los imanes permanentes de Alemania importados de China</div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h4 class="font-semibold text-gray-900 mb-4">Vulnerabilidad de la Cadena de Suministro</h4>
+                <p class="text-gray-700 mb-4">
+                  La extrema concentración crea una vulnerabilidad estructural que puede ser explotada para obtener ventajas geopolíticas, con cualquier interrupción causando efectos en cascada en las industrias globales <a href="https://www.globalxetfs.com/articles/rare-earths-the-innovation-economy-s-critical-chokepoint" class="citation-link">[275]</a>.
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-8 shadow-sm">
+              <h4 class="font-semibold text-gray-900 mb-6">Respuesta Internacional</h4>
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                  <h5 class="font-medium text-blue-900 mb-2">Estados Unidos</h5>
+                  <p class="text-sm text-blue-800">Ley de Producción de Defensa y Ley de Reducción de la Inflación para financiar proyectos nacionales de ETR</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg">
+                  <h5 class="font-medium text-green-900 mb-2">Unión Europea</h5>
+                  <p class="text-sm text-green-800">Alianza Europea de Materias Primas y Ley de Materias Primas Críticas</p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg">
+                  <h5 class="font-medium text-purple-900 mb-2">Fuentes Alternativas</h5>
+                  <p class="text-sm text-purple-800">Desarrollo en Australia, Canadá y Namibia</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tecnologías Emergentes -->
+      <section id="emerging-technologies" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+          <div class="mb-12">
+            <h2 class="text-4xl font-bold serif text-gray-900 mb-6">La Intersección de las Tierras Raras y las Tecnologías Emergentes</h2>
+            <div class="w-24 h-1 bg-blue-600 mb-8"></div>
+          </div>
+
+          <div class="mb-12">
+            <p class="text-lg text-gray-700 leading-relaxed">
+              Los elementos de tierras raras son los facilitadores silenciosos de la revolución tecnológica moderna, proporcionando las propiedades físicas y químicas únicas que son esenciales para una vasta gama de aplicaciones de alta tecnología. Sus notables características magnéticas, luminiscentes y electroquímicas los convierten en componentes indispensables en todo, desde los potentes motores de los vehículos eléctricos hasta los sofisticados procesadores que impulsan la inteligencia artificial.
+            </p>
+          </div>
+
+          <div id="ai-applications" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Elementos de Tierras Raras en la Inteligencia Artificial (IA)</h3>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h4 class="text-xl font-semibold text-gray-900 mb-4">Componentes Críticos en el Hardware de IA</h4>
+                <p class="text-gray-700 mb-6">
+                  El rápido avance de la inteligencia artificial está intrínsecamente ligado a la disponibilidad de elementos de tierras raras. Aunque a menudo se piensa en la IA como un fenómeno puramente digital, su manifestación física en el hardware depende críticamente de las propiedades únicas de estos metales <a href="https://www.metal.com/en/newscontent/103259776" class="citation-link">[272]</a>.
+                </p>
+
+                <div class="space-y-4">
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Actuadores Robóticos</h5>
+                      <p class="text-sm text-gray-600">Imanes permanentes de neodimio-hierro-boro (NdFeB) en motores potentes</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Pantallas de Alta Resolución</h5>
+                      <p class="text-sm text-gray-600">Fósforos de europio e itrio para colores vibrantes</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Almacenamiento de Datos</h5>
+                      <p class="text-sm text-gray-600">Imanes de neodimio en discos duros de alta capacidad</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.citigroup.com/71b845fa470d1bce85f365d250be8b4fc321b257.jpg" alt="Componentes de hardware de inteligencia artificial" class="w-full h-48 object-cover rounded-lg mb-4" size="medium" aspect="wide" style="photo" query="Componentes hardware IA" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+                <h4 class="font-semibold text-gray-900 mb-2">Dependencia del Hardware de IA</h4>
+                <p class="text-sm text-gray-700">Los ETR permiten la infraestructura física que impulsa los sistemas de IA, desde centros de datos hasta robótica</p>
+              </div>
+            </div>
+
+            <div class="bg-white border rounded-lg overflow-hidden mb-8">
+              <div class="bg-gray-50 px-6 py-4">
+                <h4 class="font-semibold text-gray-900">ETR Específicos y sus Funciones en Sistemas de IA</h4>
+              </div>
+              <div class="p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h5 class="font-medium text-gray-900 mb-3">Funciones Primarias</h5>
+                    <ul class="space-y-2 text-sm">
+                      <li><strong>Neodimio (Nd):</strong> Componente principal de los imanes NdFeB</li>
+                      <li><strong>Praseodimio (Pr):</strong> Mejora las propiedades magnéticas</li>
+                      <li><strong>Disprosio (Dy):</strong> Mejora la coercitividad a altas temperaturas</li>
+                      <li><strong>Terbio (Tb):</strong> Aumenta la resistencia a la desmagnetización</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-medium text-gray-900 mb-3">Aplicaciones Especializadas</h5>
+                    <ul class="space-y-2 text-sm">
+                      <li><strong>Itrio (Y):</strong> Superconductores para sistemas informáticos</li>
+                      <li><strong>Gadolinio (Gd):</strong> Resistencia al calor para GPUs y TPUs</li>
+                      <li><strong>Lantano (La):</strong> Baterías de Ni-MH para energía de respaldo</li>
+                      <li><strong>Europio (Eu):</strong> Fósforos para tecnologías de visualización</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="battery-technologies" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Elementos de Tierras Raras en Tecnologías de Baterías</h3>
+
+            <div class="grid lg:grid-cols-3 gap-8 mb-8">
+              <div class="lg:col-span-2">
+                <h4 class="text-xl font-semibold text-gray-900 mb-4">Baterías de Níquel-Hidruro Metálico (Ni-MH)</h4>
+                <p class="text-gray-700 mb-6">
+                  Los ETR desempeñan un papel multifacético y cada vez más crítico en las tecnologías de baterías. Las baterías de níquel-hidruro metálico utilizan mischmetal (una mezcla de elementos de tierras raras, principalmente cerio, lantano, neodimio y praseodimio) en el electrodo negativo <a href="https://www.sciencedirect.com/science/article/abs/pii/S1002072120304099" class="citation-link">[306]</a>.
+                </p>
+
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                  <h5 class="font-medium text-green-900 mb-2">Aplicaciones en Vehículos Eléctricos</h5>
+                  <p class="text-sm text-green-800 mb-3">
+                    Los motores eléctricos de alto rendimiento dependen casi exclusivamente de potentes imanes permanentes hechos de aleaciones de neodimio-hierro-boro (NdFeB).
+                  </p>
+                  <div class="flex items-center space-x-4 text-xs">
+                    <span class="bg-green-100 px-2 py-1 rounded">Neodimio (Nd)</span>
+                    <span class="bg-green-100 px-2 py-1 rounded">Disprosio (Dy)</span>
+                    <span class="bg-green-100 px-2 py-1 rounded">Terbio (Tb)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6">
+                <div class="text-center mb-4">
+                  <i class="fas fa-car-battery text-4xl text-green-600"></i>
+                </div>
+                <h4 class="font-semibold text-gray-900 text-center mb-2">Dependencia del Motor de VE</h4>
+                <p class="text-sm text-gray-700 text-center">Cada VE producido requiere cantidades significativas de ETR, vinculando directamente el crecimiento del mercado de VE con el suministro de estos metales críticos</p>
+              </div>
+            </div>
+
+            <div class="bg-red-50 border-l-4 border-red-400 p-6 mb-8">
+              <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-3"></i>
+                <div>
+                  <h4 class="font-semibold text-red-900 mb-2">Controles Estratégicos de China</h4>
+                  <p class="text-red-800">En octubre de 2025, China anunció controles de exportación dirigidos a <strong>baterías de litio y materiales de ánodo de grafito sintético</strong>, impactando directamente la cadena de suministro global de baterías <a href="https://english.news.cn/20251009/893a040549404260a556c762f6bf3c70/c.html" class="citation-link">[300]</a>.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="energy-ai-boom" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">El "Boom de Energía e IA" y el Liderazgo de Mercado de China</h3>
+
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 mb-8">
+              <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 class="text-xl font-semibold text-gray-900 mb-4">Crecimiento Convergente</h4>
+                  <p class="text-gray-700 mb-4">
+                    China está experimentando una poderosa convergencia de crecimiento en sus sectores de energía e inteligencia artificial, creando un ciclo virtuoso para las empresas chinas que se benefician tanto del impulso de la política nacional hacia la energía limpia como de la demanda global de hardware relacionado con la IA <a href="https://nai500.com/blog/2025/11/china-s-energy-ai-boom-mints-new-market-leaders/" class="citation-link">[304]</a>.
+                  </p>
+                  <div class="bg-white p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600 mb-1">500%</div>
+                    <div class="text-sm text-gray-600">Aumento de las acciones de HyperStrong Technology en lo que va de 2025</div>
+                  </div>
+                </div>
+                <div>
+                  <img src="https://kimi-web-img.moonshot.cn/img/scx2.b-cdn.net/f8a7a96b90ce247d48691515790198eac8953024.jpg" alt="Instalación de almacenamiento de energía impulsada por IA e infraestructura de centro de datos" class="w-full h-48 object-cover rounded-lg" size="medium" aspect="wide" style="photo" query="Instalación almacenamiento energía centro datos IA" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4">Líderes del Mercado</h4>
+                <div class="space-y-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span class="text-sm text-gray-700"><strong>CATL:</strong> El mayor fabricante de baterías del mundo</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-gray-700"><strong>HyperStrong:</strong> Proveedor de soluciones de almacenamiento de energía</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span class="text-sm text-gray-700"><strong>BYD:</strong> Experiencia integrada en baterías y VE</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4">Ventajas Competitivas</h4>
+                <ul class="space-y-2 text-sm text-gray-700">
+                  <li class="flex items-start space-x-2">
+                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                    <span>Integración vertical desde materias primas hasta productos terminados</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                    <span>Ventajas de costo y escala en la fabricación</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                    <span>Apoyo de políticas nacionales a la energía limpia</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                    <span>Liderazgo global en infraestructura de IA</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Helechos que Absorben ETR -->
+      <section id="ree-absorbing-ferns" class="section-anchor py-16 bg-gray-50">
+        <div class="container mx-auto px-6 max-w-6xl">
+          <div class="mb-12">
+            <h2 class="text-4xl font-bold serif text-gray-900 mb-6">Avance Reciente: El Descubrimiento de Helechos que Absorben ETR en China</h2>
+            <div class="w-24 h-1 bg-green-600 mb-8"></div>
+          </div>
+
+          <div id="fern-discovery" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">El Descubrimiento de <em>Blechnum orientale</em></h3>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+              <div>
+                <div class="bg-white rounded-lg p-6 shadow-sm mb-6">
+                  <h4 class="font-semibold text-gray-900 mb-4">Descubrimiento Revolucionario</h4>
+                  <p class="text-gray-700 mb-4">
+                    Investigadores chinos han descubierto el fenómeno de la biomineralización de elementos de tierras raras en <em>Blechnum orientale</em> (乌毛蕨), un helecho perenne que hiperacumula ETR del suelo y los autoensambla en minerales cristalinos dentro de sus tejidos <a href="https://www.ctia.com.cn/en/news/45570.html" class="citation-link">[284]</a>
+                    <a href="https://en.people.cn/n3/2025/1107/c90000-20387622.html" class="citation-link">[286]</a>.
+                  </p>
+                  <div class="bg-green-50 p-4 rounded">
+                    <div class="text-sm text-green-800">
+                      <i class="fas fa-flask mr-2"></i>
+                      Publicado en Environmental Science & Technology, 5 de noviembre de 2025
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Equipo de Investigación</h5>
+                      <p class="text-sm text-gray-600">Liderado por el Dr. Zhu Jianxi del Instituto de Geoquímica de Guangzhou, Academia China de Ciencias</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Ubicación</h5>
+                      <p class="text-sm text-gray-600">Depósitos ricos en ETR cerca de Guangzhou, sur de China</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start space-x-3">
+                    <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                    <div>
+                      <h5 class="font-medium text-gray-900">Primer Descubrimiento Mundial</h5>
+                      <p class="text-sm text-gray-600">Primera instancia documentada de una planta natural creando un mineral de tierras raras</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <img src="https://kimi-web-img.moonshot.cn/img/news.sustainability-directory.com/8538f2c263ea93f7410d0974ee2ca268ee3d7ba2.jpeg" alt="Helecho Blechnum orientale con cristales minerales" class="w-full h-64 object-cover rounded-lg mb-4" size="medium" aspect="wide" style="photo" query="Helecho Blechnum orientale cristales minerales" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+
+                <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6">
+                  <h4 class="font-semibold text-gray-900 mb-3">Proceso de Biomineralización</h4>
+                  <p class="text-sm text-gray-700 mb-4">
+                    El helecho absorbe ETR del suelo, que precipitan como nanopartículas y se autoensamblan en <strong>monacita-(La)</strong> cristalina, un mineral de fosfato rico en lantano <a href="https://www.ctia.com.cn/en/news/45570.html" class="citation-link">[284]</a>.
+                  </p>
+                  <div class="bg-white p-3 rounded">
+                    <div class="text-xs text-gray-600">El proceso ocurre en condiciones ambientales, a diferencia de los procesos geológicos extremos normalmente requeridos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pull-quote">
+              "Este descubrimiento representa un salto significativo en la búsqueda de métodos sostenibles y respetuosos con el medio ambiente para obtener estos materiales críticos."
+            </div>
+          </div>
+
+          <div id="sustainable-implications" class="section-anchor mb-16">
+            <h3 class="text-3xl font-bold serif text-gray-900 mb-8">Implicaciones para la Extracción Sostenible de ETR</h3>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+              <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h4 class="font-semibold text-gray-900 mb-4">Avance en Fitominería</h4>
+                <p class="text-gray-700 mb-4">
+                  Este descubrimiento es un avance importante para la <strong>fitominería</strong>, una tecnología verde que utiliza plantas para extraer metales del suelo. La formación de monacita cristalina y estable hace que la recuperación de ETR sea potencialmente mucho más eficiente <a href="https://en.people.cn/n3/2025/1107/c90000-20387622.html" class="citation-link">[286]</a>.
+                </p>
+
+                <div class="space-y-3">
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-leaf text-green-500"></i>
+                    <span class="text-sm text-gray-700">Cultivo en suelos ricos en metales</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-cut text-green-500"></i>
+                    <span class="text-sm text-gray-700">Cosecha de biomasa</span>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-recycle text-green-500"></i>
+                    <span class="text-sm text-gray-700">Recuperación de metales de la materia vegetal</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4">Potencial de Minería Verde</h4>
+                <p class="text-gray-700 mb-4">
+                  La minería tradicional de ETR implica la lixiviación in situ con soluciones químicas que pueden llevar a la contaminación de las aguas subterráneas. La fitominería ofrece una alternativa mucho más benigna.
+                </p>
+
+                <div class="bg-white p-4 rounded">
+                  <h5 class="font-medium text-gray-900 mb-2">Beneficios Ambientales</h5>
+                  <ul class="text-sm text-gray-700 space-y-1">
+                    <li>• Recuperación de minerales de baja ley y residuos</li>
+                    <li>• Restauración de sistemas de suelo y agua</li>
+                    <li>• Reducción de la contaminación química</li>
+                    <li>• Sistema de procesamiento de ciclo cerrado</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-8">
+              <h4 class="font-semibold text-blue-900 mb-4">Modelo Circular "Restaurar Mientras se Recicla"</h4>
+              <p class="text-blue-800 mb-6">
+                Este descubrimiento proporciona un modelo convincente para una economía circular donde la extracción de recursos está directamente vinculada a la restauración ambiental.
+              </p>
+
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-seedling text-blue-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-blue-900 mb-2">Cultivo</h5>
+                  <p class="text-xs text-blue-700">Cultivar helechos en tierras degradadas o contaminadas</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-recycle text-green-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-green-900 mb-2">Recuperación</h5>
+                  <p class="text-xs text-green-700">Cosechar biomasa y extraer ETR</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-leaf text-purple-600 text-xl"></i>
+                  </div>
+                  <h5 class="font-medium text-purple-900 mb-2">Restauración</h5>
+                  <p class="text-xs text-purple-700">Mejorar la salud ecológica del sitio</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Visión General de ETR -->
+      <section id="overview-ree" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+          <div class="mb-12">
+            <h2 class="text-4xl font-bold serif text-gray-900 mb-6">Visión General de los Elementos de Tierras Raras (ETR)</h2>
+            <div class="w-24 h-1 bg-blue-600 mb-8"></div>
+          </div>
+
+          <div class="mb-12">
+            <p class="text-lg text-gray-700 leading-relaxed">
+              Los elementos de tierras raras (ETR) son un grupo de 17 elementos metálicos que, a pesar de su nombre, son relativamente abundantes en la corteza terrestre. Sin embargo, rara vez se encuentran en depósitos concentrados y económicamente explotables, lo que los hace "raros". Estos elementos poseen una combinación única de propiedades químicas y físicas que los hacen indispensables en una vasta gama de tecnologías modernas.
+            </p>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-8 mb-16">
+            <div>
+              <h3 class="text-2xl font-semibold serif text-gray-900 mb-6">Propiedades y Clasificación</h3>
+
+              <div class="bg-white border rounded-lg overflow-hidden mb-6">
+                <div class="bg-gray-50 px-6 py-4">
+                  <h4 class="font-semibold text-gray-900">Los 17 Elementos de Tierras Raras</h4>
+                </div>
+                <div class="p-6">
+                  <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <h5 class="font-medium text-gray-900 mb-2">ETR Ligeros</h5>
+                      <ul class="space-y-1 text-gray-700">
+                        <li>• Lantano (La)</li>
+                        <li>• Cerio (Ce)</li>
+                        <li>• Praseodimio (Pr)</li>
+                        <li>• Neodimio (Nd)</li>
+                        <li>• Prometio (Pm)</li>
+                        <li>• Samario (Sm)</li>
+                        <li>• Europio (Eu)</li>
+                        <li>• Gadolinio (Gd)</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 class="font-medium text-gray-900 mb-2">ETR Pesados</h5>
+                      <ul class="space-y-1 text-gray-700">
+                        <li>• Terbio (Tb)</li>
+                        <li>• Disprosio (Dy)</li>
+                        <li>• Holmio (Ho)</li>
+                        <li>• Erbio (Er)</li>
+                        <li>• Tulio (Tm)</li>
+                        <li>• Iterbio (Yb)</li>
+                        <li>• Lutecio (Lu)</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 class="font-medium text-gray-900 mb-2">Otros</h5>
+                      <ul class="space-y-1 text-gray-700">
+                        <li>• Escandio (Sc)</li>
+                        <li>• Itrio (Y)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-blue-50 border-l-4 border-blue-400 p-6">
+                <h4 class="font-semibold text-blue-900 mb-2">Propiedades Únicas</h4>
+                <ul class="text-sm text-blue-800 space-y-1">
+                  <li>• <strong>Propiedades Magnéticas:</strong> Fuertes momentos magnéticos de los electrones 4f no apareados</li>
+                  <li>• <strong>Propiedades Luminiscentes:</strong> Excelentes fósforos para iluminación y pantallas</li>
+                  <li>• <strong>Propiedades Catalíticas:</strong> Facilitan reacciones químicas en procesos industriales</li>
+                  <li>• <strong>Propiedades Electroquímicas:</strong> Absorción de hidrógeno para tecnologías de baterías</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <img src="https://kimi-web-img.moonshot.cn/img/energy.virginia.gov/78d81d2d777f8acd54ce9edb6adad482a0891b84.jpg" alt="Tabla periódica mostrando los elementos de tierras raras resaltados" class="w-full h-64 object-cover rounded-lg mb-6" size="medium" aspect="wide" color="blue" style=" photo" query="tabla periódica elementos tierras raras" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+
+              <div class="pull-quote">
+                "Debido a su papel esencial pero a menudo invisible en una vasta gama de productos, los elementos de tierras raras han sido acertadamente descritos como las 'vitaminas de la industria'."
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-16">
+            <h3 class="text-2xl font-semibold serif text-gray-900 mb-6">Aplicaciones y Usos Clave</h3>
+
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-magnet text-red-500 mr-2"></i>
+                  Imanes Permanentes
+                </h4>
+                <p class="text-gray-700 mb-4">Los imanes de neodimio-hierro-boro (NdFeB) son el tipo más fuerte disponible, esenciales para:</p>
+                <ul class="text-sm text-gray-700 space-y-1">
+                  <li>• Motores de vehículos eléctricos</li>
+                  <li>• Turbinas eólicas</li>
+                  <li>• Electrónica de consumo</li>
+                  <li>• Discos duros de ordenador</li>
+                </ul>
+              </div>
+
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-flask text-blue-500 mr-2"></i>
+                  Catalizadores
+                </h4>
+                <p class="text-gray-700 mb-4">Los ETR facilitan reacciones químicas en diversas aplicaciones:</p>
+                <ul class="text-sm text-gray-700 space-y-1">
+                  <li>• Convertidores catalíticos automotrices</li>
+                  <li>• Procesos de refinación de petróleo</li>
+                  <li>• Procesamiento químico</li>
+                  <li>• Control de emisiones industriales</li>
+                </ul>
+              </div>
+
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                  Fósforos e Iluminación
+                </h4>
+                <p class="text-gray-700 mb-4">Las propiedades luminiscentes permiten diversas tecnologías de iluminación:</p>
+                <ul class="text-sm text-gray-700 space-y-1">
+                  <li>• Iluminación y pantallas LED</li>
+                  <li>• Lámparas fluorescentes</li>
+                  <li>• Imágenes médicas</li>
+                  <li>• Pantallas de color de alta calidad</li>
+                </ul>
+              </div>
+
+              <div class="bg-white border rounded-lg p-6">
+                <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-fighter-jet text-gray-600 mr-2"></i>
+                  Defensa y Aeroespacial
+                </h4>
+                <p class="text-gray-700 mb-4">Aplicaciones críticas donde el rendimiento es primordial:</p>
+                <ul class="text-sm text-gray-700 space-y-1">
+                  <li>• Misiles guiados y bombas inteligentes</li>
+                  <li>• Motores a reacción y actuadores</li>
+                  <li>• Comunicaciones por satélite</li>
+                  <li>• Sistemas de sonar y radar</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Importancia Estratégica</h3>
+            <p class="text-gray-700 mb-6">
+              El papel único e indispensable de los elementos de tierras raras en la tecnología moderna los ha elevado de materiales industriales oscuros a recursos estratégicos críticos de importancia global. A menudo no existen sustitutos viables para los ETR en muchas aplicaciones, o los sustitutos resultan en una pérdida significativa de rendimiento.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-exclamation-triangle text-purple-600 text-xl"></i>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Vulnerabilidad del Suministro</h4>
+                <p class="text-xs text-gray-600">La alta concentración crea un único punto de fallo</p>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-globe text-pink-600 text-xl"></i>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Impacto Global</h4>
+                <p class="text-xs text-gray-600">Esencial para la transición energética y la revolución digital</p>
+              </div>
+              <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-chess text-indigo-600 text-xl"></i>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">Recurso Estratégico</h4>
+                <p class="text-xs text-gray-600">Central para la política industrial y la planificación nacional</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Conclusión -->
+      <section class="py-16 bg-gray-900 text-white">
+        <div class="container mx-auto px-6 max-w-4xl text-center">
+          <h2 class="text-3xl font-bold serif mb-6">El Futuro de los Elementos de Tierras Raras</h2>
+          <p class="text-xl text-gray-300 leading-relaxed mb-8">
+            A medida que el mundo se vuelve cada vez más dependiente de las tecnologías emergentes, la importancia estratégica de los elementos de tierras raras continúa creciendo. El dominio de China en la cadena de suministro, combinado con los recientes avances en la extracción sostenible y la convergencia de las tecnologías de energía e IA, posiciona a estos materiales críticos en el centro de la geopolítica y la innovación del siglo XXI.
+          </p>
+          <div class="inline-flex items-center space-x-2 text-gray-400 text-sm">
+            <i class="fas fa-globe"></i>
+            <span>Implicaciones globales para la tecnología, la seguridad y la sostenibilidad</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+        // Initialize Mermaid with enhanced configuration
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#f8fafc',
+                primaryTextColor: '#1e293b',
+                primaryBorderColor: '#1e293b',
+                lineColor: '#64748b',
+                secondaryColor: '#e2e8f0',
+                tertiaryColor: '#f1f5f9',
+                background: '#ffffff',
+                mainBkg: '#f8fafc',
+                secondBkg: '#e2e8f0',
+                tertiaryBkg: '#f1f5f9',
+                // Timeline specific colors
+                cScale0: '#f8fafc',
+                cScale1: '#e2e8f0',
+                cScale2: '#cbd5e1',
+                cScale3: '#94a3b8',
+                cScale4: '#64748b',
+                // Text colors for better contrast
+                taskBkgColor: '#f8fafc',
+                taskTextColor: '#1e293b',
+                taskTextLightColor: '#1e293b',
+                taskTextOutsideColor: '#1e293b',
+                taskTextClickableColor: '#1e293b',
+                activeTaskBkgColor: '#e2e8f0',
+                activeTaskBorderColor: '#1e293b',
+                gridColor: '#e2e8f0',
+                section0: '#f8fafc',
+                section1: '#e2e8f0',
+                section2: '#cbd5e1',
+                section3: '#94a3b8'
+            },
+            timeline: {
+                numberSectionStyles: 4,
+                axisFormat: '%Y-%m-%d'
+            },
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                useMaxWidth: false
+            },
+            gantt: {
+                useMaxWidth: false
+            }
+        });
+        
+        // Initialize Mermaid Controls for zoom and pan
+        function initializeMermaidControls() {
+            const containers = document.querySelectorAll('.mermaid-container');
+
+            containers.forEach(container => {
+            const mermaidElement = container.querySelector('.mermaid');
+            let scale = 1;
+            let isDragging = false;
+            let startX, startY, translateX = 0, translateY = 0;
+
+            // 触摸相关状态
+            let isTouch = false;
+            let touchStartTime = 0;
+            let initialDistance = 0;
+            let initialScale = 1;
+            let isPinching = false;
+
+            // Zoom controls
+            const zoomInBtn = container.querySelector('.zoom-in');
+            const zoomOutBtn = container.querySelector('.zoom-out');
+            const resetBtn = container.querySelector('.reset-zoom');
+            const fullscreenBtn = container.querySelector('.fullscreen');
+
+            function updateTransform() {
+                mermaidElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+
+                if (scale > 1) {
+                container.classList.add('zoomed');
+                } else {
+                container.classList.remove('zoomed');
+                }
+
+                mermaidElement.style.cursor = isDragging ? 'grabbing' : 'grab';
+            }
+
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                scale = Math.min(scale * 1.25, 4);
+                updateTransform();
+                });
+            }
+
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', () => {
+                scale = Math.max(scale / 1.25, 0.3);
+                if (scale <= 1) {
+                    translateX = 0;
+                    translateY = 0;
+                }
+                updateTransform();
+                });
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                scale = 1;
+                translateX = 0;
+                translateY = 0;
+                updateTransform();
+                });
+            }
+
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', () => {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+                });
+            }
+
+            // Mouse Events
+            mermaidElement.addEventListener('mousedown', (e) => {
+                if (isTouch) return; // 如果是触摸设备，忽略鼠标事件
+
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                mermaidElement.style.cursor = 'grabbing';
+                updateTransform();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging && !isTouch) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging && !isTouch) {
+                isDragging = false;
+                mermaidElement.style.cursor = 'grab';
+                updateTransform();
+                }
+            });
+
+            document.addEventListener('mouseleave', () => {
+                if (isDragging && !isTouch) {
+                isDragging = false;
+                mermaidElement.style.cursor = 'grab';
+                updateTransform();
+                }
+            });
+
+            // 获取两点之间的距离
+            function getTouchDistance(touch1, touch2) {
+                return Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+                );
+            }
+
+            // Touch Events - 触摸事件处理
+            mermaidElement.addEventListener('touchstart', (e) => {
+                isTouch = true;
+                touchStartTime = Date.now();
+
+                if (e.touches.length === 1) {
+                // 单指拖动
+                isPinching = false;
+                isDragging = true;
+
+                const touch = e.touches[0];
+                startX = touch.clientX - translateX;
+                startY = touch.clientY - translateY;
+
+                } else if (e.touches.length === 2) {
+                // 双指缩放
+                isPinching = true;
+                isDragging = false;
+
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                initialDistance = getTouchDistance(touch1, touch2);
+                initialScale = scale;
+                }
+
+                e.preventDefault();
+            }, { passive: false });
+
+            mermaidElement.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && isDragging && !isPinching) {
+                // 单指拖动
+                const touch = e.touches[0];
+                translateX = touch.clientX - startX;
+                translateY = touch.clientY - startY;
+                updateTransform();
+
+                } else if (e.touches.length === 2 && isPinching) {
+                // 双指缩放
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = getTouchDistance(touch1, touch2);
+
+                if (initialDistance > 0) {
+                    const newScale = Math.min(Math.max(
+                    initialScale * (currentDistance / initialDistance),
+                    0.3
+                    ), 4);
+                    scale = newScale;
+                    updateTransform();
+                }
+                }
+
+                e.preventDefault();
+            }, { passive: false });
+
+            mermaidElement.addEventListener('touchend', (e) => {
+                // 重置状态
+                if (e.touches.length === 0) {
+                isDragging = false;
+                isPinching = false;
+                initialDistance = 0;
+
+                // 延迟重置isTouch，避免鼠标事件立即触发
+                setTimeout(() => {
+                    isTouch = false;
+                }, 100);
+                } else if (e.touches.length === 1 && isPinching) {
+                // 从双指变为单指，切换为拖动模式
+                isPinching = false;
+                isDragging = true;
+
+                const touch = e.touches[0];
+                startX = touch.clientX - translateX;
+                startY = touch.clientY - translateY;
+                }
+
+                updateTransform();
+            });
+
+            mermaidElement.addEventListener('touchcancel', (e) => {
+                isDragging = false;
+                isPinching = false;
+                initialDistance = 0;
+
+                setTimeout(() => {
+                isTouch = false;
+                }, 100);
+
+                updateTransform();
+            });
+
+            // Enhanced wheel zoom with better center point handling
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const rect = container.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                const newScale = Math.min(Math.max(scale * delta, 0.3), 4);
+
+                // Adjust translation to zoom towards center
+                if (newScale !== scale) {
+                const scaleDiff = newScale / scale;
+                translateX = translateX * scaleDiff;
+                translateY = translateY * scaleDiff;
+                scale = newScale;
+
+                if (scale <= 1) {
+                    translateX = 0;
+                    translateY = 0;
+                }
+
+                updateTransform();
+                }
+            });
+
+            // Initialize display
+            updateTransform();
+            });
+        }
+
+        // Initialize mermaid interactions after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMermaidControls();
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Highlight active section in TOC
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -80% 0px',
+            threshold: 0
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Remove active class from all TOC links
+                    document.querySelectorAll('.toc-fixed a').forEach(link => {
+                        link.classList.remove('text-blue-600', 'font-semibold');
+                        link.classList.add('text-gray-600');
+                    });
+                    
+                    // Add active class to current section
+                    const activeLink = document.querySelector(`.toc-fixed a[href="#${entry.target.id}"]`);
+                    if (activeLink) {
+                        activeLink.classList.remove('text-gray-600');
+                        activeLink.classList.add('text-blue-600', 'font-semibold');
+                    }
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all sections
+        document.querySelectorAll('.section-anchor').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+  
+<footer class="py-4 bg-gray-900 text-white">
+  <div class="container mx-auto px-6 max-w-4xl text-center">
+    <p class="text-sm text-gray-400">Material elaborado por el profesor Sergio Gevatschnaider</p>
+  </div>
+</footer>
+
 </body>
 </html>
