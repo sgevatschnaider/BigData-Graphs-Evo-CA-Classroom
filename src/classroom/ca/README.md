@@ -285,7 +285,11 @@ results = run_from_config(config)
 | Descripción | Acceso |
 |-------------|--------|
 | **Origami origami Cuando el Papel Empieza a Calcular (HTML interactivo)** | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Origami_origami_Cuando_%20el_Papel_%20Empieza_a_Calcular.html) |
+| **Origami origami When Paper Starts to Calculate (Interactive HTML)** | [![View Interactive Lesson](https://img.shields.io/badge/View-Interactive%20Lesson-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/ca/recursos/Origami_origami_When%20Paper%20Starts%20to%20Calculate.html) |
 
+**Resumen:**
+
+La tabla ahora incluye dos versiones de la lección interactiva que explora la conexión entre el antiguo arte del origami y los conceptos computacionales de los autómatas celulares. Ambas lecciones, una en español y otra en inglés, demuestran cómo el simple acto de doblar papel puede ser utilizado para realizar cálculos y simular sistemas complejos.
 <details>
 <summary><strong>¿Qué contiene esta lección?</strong></summary>
 
