@@ -718,8 +718,6 @@ BACKEND = "numba"  # numpy, numba, cupy
 ## 6. Conclusiones
 - Qué funcionó y límites encontrados
 - Trabajo futuro
-```
----
 
 ## 📚 Referencias y Recursos Clave
 
@@ -737,13 +735,6 @@ BACKEND = "numba"  # numpy, numba, cupy
 - Catagolue — Censo de objetos en Life (https://catagolue.appspot.com)
 - Wolfram Atlas — Reglas elementales 1D (http://atlas.wolfram.com)
 
-&gt; 🎯 **Cita este trabajo**: Si usas AutoCell en tu investigación, por favor cita usando el archivo CITATION.cff.
----
-
-&lt;p align="center"&gt;
-  &lt;em&gt;Desarrollado con ❤️ para la comunidad de ciencias de la computación&lt;/em&gt;&lt;br&gt;
-  &lt;em&gt;¿Preguntas? Abre un issue o contacta: &lt;a href="mailto:contact@example.com"&gt;contact@example.com&lt;/a&gt;&lt;/em&gt;
-&lt;/p&gt;
 
 > 🎯 **Cita este trabajo**: Si usas AutoCell en tu investigación, por favor cita usando el archivo [`CITATION.cff`](../CITATION.cff).
 
