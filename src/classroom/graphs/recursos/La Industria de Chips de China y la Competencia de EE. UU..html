@@ -1,0 +1,1647 @@
+<!DOCTYPE html><html lang="es"><head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>La Industria de Chips de China y la Competencia de EE. UU.: Un Análisis de IA, Tecnología y Estrategia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Canela:wght@300;400;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'canela': ['Canela', 'serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#1a1a1a',
+                        'secondary': '#2d2d2d',
+                        'accent': '#3b82f6',
+                        'muted': '#6b7280',
+                        'background': '#fafafa',
+                        'surface': '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .font-canela { font-family: 'Canela', serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        
+        /* Estilos de fondo de Vanta.js */
+        .vanta-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* Estilos de la Tabla de Contenidos Fija */
+        .toc-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid #e5e7eb;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .toc-content {
+            padding-top: 2rem;
+        }
+        
+        .toc-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+        }
+        
+        .toc-link:hover {
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .toc-link.active {
+            color: #1a1a1a;
+            font-weight: 500;
+            border-left-color: #3b82f6;
+        }
+        
+        .toc-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .toc-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Estilos del contenido principal */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        
+        /* Estilos de la sección de héroe */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 2rem;
+            align-items: center;
+            min-height: 70vh;
+        }
+        
+        .hero-title {
+            grid-column: 1 / -1;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            line-height: 1.1;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-visual {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* Estilos de sección */
+        .section {
+            padding: 4rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        /* Estilos del contenedor de gráficos */
+        .chart-container {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        .citation {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .citation:hover {
+            text-decoration: underline;
+        }
+        
+        /* Diseño responsivo */
+        @media (max-width: 1024px) {
+            .toc-fixed {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .toc-fixed.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+        
+        /* Desplazamiento suave */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Mejoras tipográficas */
+        .prose h1, .prose h2, .prose h3 {
+            font-family: 'Canela', serif;
+            color: #1a1a1a;
+        }
+        
+        .prose p {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            color: #374151;
+        }
+        
+        /* Estilos de visualización de datos */
+        .data-point {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .data-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            font-family: 'Canela', serif;
+        }
+        
+        /* Estilos de tabla de comparación */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .comparison-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        /* Estilos de línea de tiempo */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3b82f6;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.25rem;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+        
+        .timeline-date {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+  <base target="_blank">
+</head>
+
+  <body class="bg-background font-inter">
+    <!-- Tabla de Contenidos Fija -->
+    <nav class="toc-fixed">
+      <div class="toc-content">
+        <div class="toc-title">Contenidos</div>
+
+        <div class="toc-section">
+          <a href="#executive-summary" class="toc-link">Resumen Ejecutivo</a>
+          <a href="#strategic-importance" class="toc-link">Importancia Estratégica de los Semiconductores</a>
+          <a href="#technical-dimensions" class="toc-link">Dimensiones Técnicas</a>
+          <a href="#china-ecosystem" class="toc-link">Ecosistema de Semiconductores de China</a>
+          <a href="#us-china-comparison" class="toc-link">Panorama EE. UU. vs China</a>
+          <a href="#key-companies" class="toc-link">Empresas Clave y Desarrollos</a>
+          <a href="#state-policies" class="toc-link">Políticas Estatales y Estrategia</a>
+          <a href="#research-growth" class="toc-link">Crecimiento en Investigación y Capital Humano</a>
+          <a href="#recent-trends" class="toc-link">Tendencias y Avances Recientes</a>
+          <a href="#geopolitical-implications" class="toc-link">Implicaciones Geopolíticas</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+      <!-- Sección de Héroe -->
+      <section class="relative min-h-screen bg-gradient-to-br from-background to-surface overflow-hidden">
+        <div id="vanta-bg" class="vanta-background"></div>
+
+        <div class="relative z-10 container mx-auto px-8 py-16">
+          <div class="hero-grid">
+            <h1 class="hero-title font-canela italic">
+              La Industria de Chips de China y la Competencia de EE. UU.
+            </h1>
+
+            <div class="hero-content">
+              <div class="space-y-6">
+                <div class="data-point">
+                  <div class="data-value">20%</div>
+                  <div class="text-sm text-muted">Cuota de los aceleradores de IA en el valor del mercado mundial de semiconductores en 2024</div>
+                </div>
+
+                <div class="data-point">
+                  <div class="data-value">+50 mil millones de dólares</div>
+                  <div class="text-sm text-muted">Fondo Nacional de Inversión en la Industria de Circuitos Integrados de China</div>
+                </div>
+
+                <div class="data-point">
+                  <div class="data-value">70%</div>
+                  <div class="text-sm text-muted">Objetivo de autosuficiencia en semiconductores de China para 2025</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-visual">
+              <img src="https://kimi-web-img.moonshot.cn/img/scx2.b-cdn.net/ad1aa9f2dce169d61fa96a8d4f30ca19fc6aa994.jpg" alt="Visualización abstracta de la tecnología de semiconductores" class="w-full h-full object-cover opacity-80" size="large" aspect="wide" query="semiconductor abstract visualization" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resumen Ejecutivo -->
+      <section id="executive-summary" class="section">
+        <div class="container mx-auto px-8 max-w-4xl">
+          <h2 class="text-4xl font-canela font-bold mb-8 text-primary">Resumen Ejecutivo</h2>
+
+          <div class="prose prose-lg max-w-none">
+            <div class="bg-surface rounded-lg p-8 shadow-sm border border-gray-100 mb-8">
+              <p class="text-xl leading-relaxed mb-6">
+                La competencia entre Estados Unidos y China en la industria de semiconductores representa la lucha geopolítica y tecnológica definitoria del siglo XXI, centrada en el control de los chips avanzados que impulsan la inteligencia artificial con profundas implicaciones para la competitividad económica, la seguridad nacional y el poder militar.
+              </p>
+
+              <p class="mb-6">
+                Actualmente, EE. UU. y sus aliados dominan segmentos críticos de la cadena de suministro global de chips, incluido el software de diseño, la propiedad intelectual central y los equipos de fabricación de vanguardia. Sin embargo, China está llevando a cabo una estrategia masiva, liderada por el estado, para construir una industria nacional autosuficiente, invirtiendo cientos de miles de millones de dólares para superar los controles de exportación de EE. UU. y lograr la "soberanía de los semiconductores".
+              </p>
+
+              <div class="grid md:grid-cols-2 gap-6 mt-8">
+                <div class="bg-blue-50 p-6 rounded-lg">
+                  <h3 class="font-bold text-lg mb-3 text-blue-900">Ventajas Clave de EE. UU.</h3>
+                  <ul class="text-sm space-y-2">
+                    <li>• +50% de los ingresos mundiales de chips</li>
+                    <li>• Casi monopolio en software EDA</li>
+                    <li>• Equipos de fabricación de vanguardia</li>
+                    <li>• Dominio de aceleradores de IA</li>
+                  </ul>
+                </div>
+
+                <div class="bg-red-50 p-6 rounded-lg">
+                  <h3 class="font-bold text-lg mb-3 text-red-900">Respuesta Estratégica de China</h3>
+                  <ul class="text-sm space-y-2">
+                    <li>• Iniciativa Made in China 2025</li>
+                    <li>• Inversión de +50 mil millones de dólares del Gran Fondo</li>
+                    <li>• Dominio en la fabricación de nodos maduros</li>
+                    <li>• Desarrollo de chips de IA autóctonos</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Importancia Estratégica -->
+      <section id="strategic-importance" class="section">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Importancia Estratégica de los Semiconductores para la IA</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div class="prose prose-lg">
+              <h3 class="text-2xl font-canela font-bold mb-6">Dominio del Mercado de Aceleradores de IA</h3>
+              <p>
+                Los aceleradores de IA se han convertido en una fuerza dominante en el mercado de semiconductores, representando aproximadamente el <strong>20% del valor total del mercado en 2024</strong>
+                <a href="https://manufacturing.asia/in-focus/ai-drives-20-global-semiconductor-market-demand-surges-report" class="citation" target="_blank">[11]</a>. Este aumento es impulsado por los proveedores de nube a hiperescala que despliegan chips de próxima generación a nivel de rack para construir infraestructura de IA.
+              </p>
+
+              <div class="bg-blue-50 p-6 rounded-lg mt-6">
+                <h4 class="font-bold mb-3">Imperativo de Seguridad Nacional</h4>
+                <p class="text-sm">
+                  El gobierno de EE. UU. clasifica los chips de IA avanzados como un <strong>"imperativo de seguridad nacional"</strong> y un <strong>"multiplicador de fuerza"</strong> con profundas implicaciones para la competitividad económica y la superioridad militar <a href="https://www.csis.org/analysis/limits-chip-export-controls-meeting-china-challenge" class="citation" target="_blank">[63]</a>.
+                </p>
+              </div>
+            </div>
+
+            <div class="prose prose-lg">
+              <h3 class="text-2xl font-canela font-bold mb-6">Tipos de Aceleradores de IA</h3>
+              <div class="space-y-4">
+                <div class="bg-surface p-4 rounded-lg border border-gray-100">
+                  <h4 class="font-bold text-blue-600">GPUs (Unidades de Procesamiento Gráfico)</h4>
+                  <p class="text-sm">Las series H100 y Blackwell de NVIDIA son estándares de la industria para el entrenamiento de IA, diseñadas para cálculos paralelos masivos.</p>
+                </div>
+                <div class="bg-surface p-4 rounded-lg border border-gray-100">
+                  <h4 class="font-bold text-green-600">NPUs (Unidades de Procesamiento Neuronal)</h4>
+                  <p class="text-sm">Especializadas para cargas de trabajo de redes neuronales, optimizadas para tareas de inferencia con baja latencia y eficiencia energética.</p>
+                </div>
+                <div class="bg-surface p-4 rounded-lg border border-gray-100">
+                  <h4 class="font-bold text-purple-600">TPUs (Unidades de Procesamiento Tensorial)</h4>
+                  <p class="text-sm">ASICs personalizados de Google diseñados para TensorFlow, que representan circuitos integrados de aplicación específica.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Requisitos de Carga de Trabajo de IA: Entrenamiento vs. Inferencia</h3>
+              <a href="https://semiengineering.com/china-genai-who-will-fill-the-vacuum/" class="citation" target="_blank">[22]</a>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-blue-50 p-6 rounded-lg">
+                <h4 class="font-bold text-blue-900 mb-4">Fase de Entrenamiento</h4>
+                <ul class="space-y-2 text-sm">
+                  <li>• Se requiere <strong>paralelismo masivo</strong></li>
+                  <li>• <strong>Aritmética de alta precisión</strong> (punto flotante de 32/16 bits)</li>
+                  <li>• <strong>Ancho de banda de memoria enorme</strong> para grandes conjuntos de datos</li>
+                  <li>• Se prioriza el <strong>rendimiento bruto</strong> sobre la eficiencia</li>
+                  <li>• <strong>Semanas o meses</strong> de operación continua</li>
+                </ul>
+              </div>
+              <div class="bg-green-50 p-6 rounded-lg">
+                <h4 class="font-bold text-green-900 mb-4">Fase de Inferencia</h4>
+                <ul class="space-y-2 text-sm">
+                  <li>• <strong>Baja latencia</strong> crítica para aplicaciones en tiempo real</li>
+                  <li>• <strong>Alta eficiencia energética</strong> primordial</li>
+                  <li>• <strong>Aritmética de menor precisión</strong> (enteros de 8 bits)</li>
+                  <li>• Requisitos de <strong>despliegue en el borde (edge)</strong></li>
+                  <li>• Se requieren <strong>tiempos de respuesta de milisegundos</strong></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">La Economía de la IA: Rendimiento por Vatio</h3>
+            <div class="prose prose-lg max-w-none">
+              <p>
+                En los centros de datos de IA, el <strong>rendimiento por vatio</strong> se ha convertido en la principal métrica económica. Los costos de energía para operar y enfriar miles de aceleradores de IA a menudo superan el gasto de capital inicial en hardware durante la vida útil del sistema <a href="https://semiengineering.com/china-genai-who-will-fill-the-vacuum/" class="citation" target="_blank">[22]</a>. Esto hace que la eficiencia energética sea crítica para el costo total de propiedad (TCO).
+              </p>
+              <div class="bg-yellow-50 p-6 rounded-lg mt-6">
+                <h4 class="font-bold mb-3">Impacto del Nodo de Proceso</h4>
+                <p class="text-sm">
+                  Un chip construido en un <strong>proceso de 5nm</strong> ofrece un rendimiento significativamente mayor y un menor consumo de energía que los chips equivalentes en procesos de 7nm o 10nm. Esta realidad económica impulsa la búsqueda incesante de tecnologías de fabricación más avanzadas.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dimensiones Técnicas -->
+      <section id="technical-dimensions" class="section bg-gray-50">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Dimensiones Técnicas del Ecosistema de Chips de IA</h2>
+
+          <div class="grid lg:grid-cols-3 gap-8 mb-12">
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-microchip text-blue-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Lógica y Nodos de Proceso</h3>
+              <p class="text-sm text-muted mb-4">La base del rendimiento de los chips, desde transistores planares hasta arquitecturas 3D avanzadas.</p>
+              <ul class="text-sm space-y-1">
+                <li>• Evolución Planar → FinFET → GAA</li>
+                <li>• Litografía EUV crítica para 7nm e inferiores</li>
+                <li>• Innovaciones en la arquitectura de transistores</li>
+              </ul>
+            </div>
+
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-memory text-green-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Tecnologías de Memoria</h3>
+              <p class="text-sm text-muted mb-4">Críticas para el acceso a datos de IA y la eficiencia del procesamiento en diferentes jerarquías.</p>
+              <ul class="text-sm space-y-1">
+                <li>• HBM: Memoria de Alto Ancho de Banda</li>
+                <li>• GDDR: Variantes de DDR para gráficos</li>
+                <li>• Tecnologías emergentes MRAM y RRAM</li>
+              </ul>
+            </div>
+
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-layer-group text-purple-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Empaquetado Avanzado</h3>
+              <p class="text-sm text-muted mb-4">Integración heterogénea que permite arquitecturas de chiplets y apilamiento 2.5D/3D.</p>
+              <ul class="text-sm space-y-1">
+                <li>• Tecnologías CoWoS e InFO</li>
+                <li>• Integración de sistemas basada en chiplets</li>
+                <li>• Soluciones de apilamiento 2.5D/3D</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Evolución de la Arquitectura de Transistores</h3>
+              <a href="https://www.csis.org/analysis/limits-chip-export-controls-meeting-china-challenge" class="citation" target="_blank">[63]</a>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-date">1990s-2010s</div>
+                <h4 class="font-bold mb-2">Transistores Planares</h4>
+                <p class="text-sm text-muted">Diseño tradicional de canal plano con compuerta en la parte superior, finalmente limitado por problemas de corriente de fuga a medida que los transistores se encogían.</p>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2010s-Presente</div>
+                <h4 class="font-bold mb-2">FinFET (Transistores 3D)</h4>
+                <p class="text-sm text-muted">La compuerta envuelve el canal por tres lados, proporcionando un mejor control y permitiendo la continuación de la escala hasta los nodos de 5nm.</p>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2020s-Futuro</div>
+                <h4 class="font-bold mb-2">Gate-All-Around (GAA)</h4>
+                <p class="text-sm text-muted">La compuerta rodea completamente el canal, ofreciendo un control superior para nodos de 3nm e inferiores. El MBCFET de Samsung y los futuros nodos de TSMC adoptan esta arquitectura.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12 grid lg:grid-cols-2 gap-8">
+            <div class="bg-red-50 p-8 rounded-lg">
+              <h3 class="text-xl font-bold mb-4 text-red-900">Punto de Estrangulamiento de la Litografía EUV</h3>
+              <p class="text-sm mb-4">
+                El <strong>monopolio de ASML</strong> en las máquinas de litografía EUV (que cuestan más de 200 millones de dólares cada una) crea un cuello de botella crítico para la fabricación de chips avanzados <a href="https://www.csis.org/analysis/limits-chip-export-controls-meeting-china-challenge" class="citation" target="_blank">[63]</a>.
+              </p>
+              <div class="bg-white p-4 rounded">
+                <h4 class="font-bold mb-2">Impacto en China</h4>
+                <p class="text-xs text-muted">Los controles de exportación de EE. UU. que bloquean las ventas de EUV a China impiden efectivamente la producción nacional de chips de 7nm e inferiores, creando un techo tecnológico para SMIC y otras fundiciones chinas.</p>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 p-8 rounded-lg">
+              <h3 class="text-xl font-bold mb-4 text-blue-900">Vulnerabilidad de la Cadena de Suministro de HBM</h3>
+              <p class="text-sm mb-4">
+                Las ambiciones de IA de China están limitadas por la falta de suministro doméstico de HBM, con el mercado dominado por <strong>SK Hynix, Samsung y Micron</strong>
+                <a href="https://cetas.turing.ac.uk/publications/chinas-quest-semiconductor-self-sufficiency" class="citation" target="_blank">[58]</a>.
+              </p>
+              <div class="bg-white p-4 rounded">
+                <h4 class="font-bold mb-2">Crecimiento del Mercado</h4>
+                <p class="text-xs text-muted">La cuota de HBM en el mercado de DRAM aumentó del 6% en 2023 al 20% en 2024, impulsada por la demanda de aceleradores de IA <a href="https://manufacturing.asia/in-focus/ai-drives-20-global-semiconductor-market-demand-surges-report" class="citation" target="_blank">[11]</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ecosistema de China -->
+      <section id="china-ecosystem" class="section">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Ecosistema de Semiconductores de China</h2>
+
+          <div class="grid lg:grid-cols-4 gap-6 mb-12">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg">
+              <h3 class="font-bold text-lg mb-3 text-blue-900">Diseño (Fabless)</h3>
+              <ul class="text-sm space-y-1">
+                <li>• Huawei HiSilicon (Ascend AI)</li>
+                <li>• Alibaba T-Head (RISC-V)</li>
+                <li>• Baidu (Kunlun AI)</li>
+                <li>• Cambricon, Biren, Moore Threads</li>
+              </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg">
+              <h3 class="font-bold text-lg mb-3 text-green-900">Fabricación</h3>
+              <ul class="text-sm space-y-1">
+                <li>• SMIC (capaz de 7nm)</li>
+                <li>• Hua Hong Semiconductor</li>
+                <li>• Fundiciones campeonas nacionales</li>
+                <li>• Dominio de nodos maduros</li>
+              </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
+              <h3 class="font-bold text-lg mb-3 text-purple-900">Empaquetado y Pruebas</h3>
+              <ul class="text-sm space-y-1">
+                <li>• JCET (Líder mundial de OSAT)</li>
+                <li>• TFME (Empaquetado avanzado)</li>
+                <li>• Fuertes capacidades domésticas</li>
+                <li>• Enfoque en la integración de chiplets</li>
+              </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-lg">
+              <h3 class="font-bold text-lg mb-3 text-red-900">Memoria y Materiales</h3>
+              <ul class="text-sm space-y-1">
+                <li>• CXMT (DRAM, HBM)</li>
+                <li>• YMTC (flash NAND)</li>
+                <li>• AMEC, Naura (Equipos)</li>
+                <li>• Brechas en la cadena de suministro de materiales</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Centros Regionales de Semiconductores en China</h3>
+              <a href="https://cdn.prod.website-files.com/6475a05784c07e8593f22af4/68a280c338266f98f77e2479_SMIC%20Final%20-%20Dated%20August%2018th.pdf" class="citation" target="_blank">[25]</a>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="text-center p-6 bg-blue-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-blue-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-2">Shanghái y Delta del Yangtze</h4>
+                <p class="text-sm text-muted">Corazón de los semiconductores con la sede de SMIC, un fuerte ecosistema de diseño e instalaciones de empaquetado/pruebas.</p>
+              </div>
+              <div class="text-center p-6 bg-green-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-green-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-2">Shenzhen y Delta del Río de las Perlas</h4>
+                <p class="text-sm text-muted">Enfoque en electrónica de consumo con las divisiones de diseño de chips de Huawei, ZTE y Tencent. Ecosistema de startups vibrante.</p>
+              </div>
+              <div class="text-center p-6 bg-purple-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-purple-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-2">Pekín y Borde de Bohai</h4>
+                <p class="text-sm text-muted">Centro de I+D con la Universidad de Tsinghua, la Universidad de Pekín y el desarrollo de chips de IA de Baidu.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Empresas Chinas Clave de Chips de IA</h3>
+            <div class="overflow-x-auto">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Productos Principales</th>
+                    <th>Enfoque Tecnológico</th>
+                    <th>Desarrollos Recientes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-bold">Huawei (HiSilicon)</td>
+                    <td>Acelerador de IA Ascend 910B, clústeres Atlas</td>
+                    <td>Chips de IA de 7nm, sistemas a escala de rack</td>
+                    <td>CloudMatrix 384 con 384 chips Ascend 910C <a href="https://www.cnbc.com/2025/11/07/chinas-strategy-in-ai-race-with-us-big-chip-clusters-cheap-energy.html" class="citation" target="_blank">[1]</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Alibaba (T-Head)</td>
+                    <td>Hanguang 800, chips PPU, servidores Panjiu</td>
+                    <td>Arquitectura RISC-V, inferencia de IA</td>
+                    <td>Despliegue de 16,000 PPU en el centro de datos de China Unicom <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Baidu</td>
+                    <td>Aceleradores de IA Kunlun (P800)</td>
+                    <td>Chips de entrenamiento e inferencia</td>
+                    <td>Clúster de 30,000 chips para modelos tipo DeepSeek <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Cambricon</td>
+                    <td>Chips de IA de la serie MLU</td>
+                    <td>Aceleración de IA dedicada</td>
+                    <td>MLU 590 competitivo con NVIDIA H20 en ciertos escenarios <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparación EE. UU. vs China -->
+      <section id="us-china-comparison" class="section bg-gray-50">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">China vs. Estados Unidos: Panorama Tecnológico</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div class="bg-blue-50 p-8 rounded-lg">
+              <h3 class="text-2xl font-bold mb-6 text-blue-900">Dominio de EE. UU. y sus Aliados</h3>
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-blue-700 mb-2">Capacidades de Diseño</h4>
+                  <ul class="text-sm space-y-1">
+                    <li>• +50% de los ingresos mundiales de chips <a href="https://semiconductors.materiell.net/2025-state-of-the-u-s-semiconductor-industry/" class="citation" target="_blank">[10]</a>
+                    </li>
+                    <li>• Monopolio de software EDA (Synopsys, Cadence)</li>
+                    <li>• Control de licencias de arquitectura ARM</li>
+                    <li>• Liderazgo de GPU de NVIDIA/AMD</li>
+                  </ul>
+                </div>
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-blue-700 mb-2">Equipos de Fabricación</h4>
+                  <ul class="text-sm space-y-1">
+                    <li>• Monopolio de litografía EUV (ASML)</li>
+                    <li>• Herramientas avanzadas de grabado y deposición</li>
+                    <li>• Sistemas de metrología e inspección</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-red-50 p-8 rounded-lg">
+              <h3 class="text-2xl font-bold mb-6 text-red-900">Respuesta Estratégica de China</h3>
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-red-700 mb-2">Enfoque en Nodos Maduros</h4>
+                  <ul class="text-sm space-y-1">
+                    <li>• Dominio en la fabricación de 28nm+ <a href="https://cetas.turing.ac.uk/publications/chinas-quest-semiconductor-self-sufficiency" class="citation" target="_blank">[58]</a>
+                    </li>
+                    <li>• Ventaja estratégica en chips maduros</li>
+                    <li>• Enfoque en los mercados automotriz e industrial</li>
+                  </ul>
+                </div>
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-red-700 mb-2">Desarrollo Autóctono</h4>
+                  <ul class="text-sm space-y-1">
+                    <li>• Adopción de la arquitectura RISC-V <a href="https://itif.org/publications/2024/07/19/the-us-china-tech-conflict-fractures-global-technical-standards/" class="citation" target="_blank">[62]</a>
+                    </li>
+                    <li>• Diseño de chips de IA domésticos (Huawei, Alibaba)</li>
+                    <li>• Capacidades de empaquetado avanzado</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Impacto de los Controles de Exportación de EE. UU. en China</h3>
+              <a href="https://www.csis.org/analysis/limits-chip-export-controls-meeting-china-challenge" class="citation" target="_blank">[63]</a>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="space-y-6">
+                <div class="bg-red-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-red-900 mb-3">Restricciones de GPU de Gama Alta</h4>
+                  <ul class="text-sm space-y-2">
+                    <li>• Prohibiciones de exportación de NVIDIA H100/A100</li>
+                    <li>• Dependencia forzada de chips más antiguos/menos potentes</li>
+                    <li>• Estímulo para el desarrollo de chips de IA domésticos <a href="https://semiengineering.com/china-genai-who-will-fill-the-vacuum/" class="citation" target="_blank">[22]</a>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="bg-orange-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-orange-900 mb-3">Bloqueo de la Litografía EUV</h4>
+                  <ul class="text-sm space-y-2">
+                    <li>• Prohibición de venta de máquinas EUV de ASML a China</li>
+                    <li>• Limitación de la capacidad de fabricación de 7nm+</li>
+                    <li>• Dependencia forzada de complejos patrones múltiples con DUV</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="space-y-6">
+                <div class="bg-purple-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-purple-900 mb-3">Controles de Software EDA</h4>
+                  <ul class="text-sm space-y-2">
+                    <li>• Restricciones de acceso a herramientas EDA avanzadas</li>
+                    <li>• Impacto en las capacidades de diseño de chips de vanguardia</li>
+                    <li>• Estímulo para el desarrollo de EDA doméstico</li>
+                  </ul>
+                </div>
+
+                <div class="bg-yellow-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-yellow-900 mb-3">Vulnerabilidades de la Cadena de Suministro de HBM</h4>
+                  <ul class="text-sm space-y-2">
+                    <li>• Dependencia de proveedores extranjeros de HBM</li>
+                    <li>• CXMT desarrollando capacidad de HBM doméstica</li>
+                    <li>• Esfuerzos de diversificación de la cadena de suministro de memoria</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Análisis de la Brecha Tecnológica</h3>
+            <div class="overflow-x-auto">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Área Tecnológica</th>
+                    <th>Posición de EE. UU. y Aliados</th>
+                    <th>Posición de China</th>
+                    <th>Evaluación de la Brecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-bold">Lógica de Vanguardia</td>
+                    <td>Producción de 3nm de TSMC/Samsung</td>
+                    <td>7nm de SMIC (basado en DUV)</td>
+                    <td>2-3 generaciones por detrás <a href="https://cdn.prod.website-files.com/6475a05784c07e8593f22af4/68a280c338266f98f77e2479_SMIC%20Final%20-%20Dated%20August%2018th.pdf" class="citation" target="_blank">[25]</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Herramientas EDA</td>
+                    <td>Monopolio de Synopsys, Cadence</td>
+                    <td>Desarrollando alternativas domésticas</td>
+                    <td>Brecha de capacidad significativa</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Memoria HBM</td>
+                    <td>SK Hynix, Samsung, Micron</td>
+                    <td>CXMT desarrollando HBM de 2ª generación</td>
+                    <td>2-3 generaciones por detrás <a href="https://cetas.turing.ac.uk/publications/chinas-quest-semiconductor-self-sufficiency" class="citation" target="_blank">[58]</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Aceleradores de IA</td>
+                    <td>NVIDIA H100/Blackwell</td>
+                    <td>Huawei Ascend 910B, Alibaba PPU</td>
+                    <td>1-2 generaciones por detrás</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Nodos Maduros</td>
+                    <td>Capacidad limitada</td>
+                    <td>Expansión masiva de capacidad</td>
+                    <td>China liderando en volumen</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Empresas Clave -->
+      <section id="key-companies" class="section">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Empresas Clave y Últimos Desarrollos (2023-2025)</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div>
+              <h3 class="text-2xl font-canela font-bold mb-6">Principales Empresas Chinas de Chips de IA</h3>
+              <div class="space-y-6">
+                <div class="bg-gradient-to-r from-red-50 to-red-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-red-900">Huawei (HiSilicon)</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Ascend 910C</h5>
+                      <p class="text-xs text-muted">Acelerador de IA de próxima generación con rendimiento mejorado, parte del sistema CloudMatrix 384 que enlaza 384 chips</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Atlas 900 A3 SuperPoD</h5>
+                      <p class="text-xs text-muted">Clúster de supercomputación a escala de rack para superar las brechas de rendimiento de un solo chip <a href="https://www.cnbc.com/2025/11/07/chinas-strategy-in-ai-race-with-us-big-chip-clusters-cheap-energy.html" class="citation" target="_blank">[1]</a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-blue-900">Alibaba (T-Head)</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Chip PPU</h5>
+                      <p class="text-xs text-muted">Competidor directo de NVIDIA H20, desplegado en el centro de datos de China Unicom de 16,000 unidades</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Servidor Panjiu</h5>
+                      <p class="text-xs text-muted">Supernodo con 128 chips de IA por rack y sistema de refrigeración líquida <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-green-900">Baidu</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Kunlun P800</h5>
+                      <p class="text-xs text-muted">Procesador de IA de tercera generación competitivo con NVIDIA A100</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Clúster de 30,000 Chips</h5>
+                      <p class="text-xs text-muted">Infraestructura masiva de entrenamiento de IA para grandes modelos de lenguaje <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-2xl font-canela font-bold mb-6">Empresas Clave de EE. UU. y Aliados</h3>
+              <div class="space-y-6">
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-purple-900">NVIDIA</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">H100 y H20</h5>
+                      <p class="text-xs text-muted">Aceleradores de IA líderes en la industria con la variante H20 para cumplir con el mercado chino</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Arquitectura Blackwell</h5>
+                      <p class="text-xs text-muted">Arquitectura de próxima generación que promete mejoras significativas en rendimiento y eficiencia</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-indigo-900">AMD</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">GPUs de la Serie Instinct</h5>
+                      <p class="text-xs text-muted">Competidores directos de las ofertas de NVIDIA, ganando cuota de mercado</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Arquitectura CDNA</h5>
+                      <p class="text-xs text-muted">Enfocada en cargas de trabajo de IA y HPC con fuertes métricas de rendimiento</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-yellow-900">TSMC y Ecosistema de Fabricación</h4>
+                  <div class="space-y-3">
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Producción de 3nm</h5>
+                      <p class="text-xs text-muted">Fabricación de vanguardia con más del 50% de la cuota de mercado de fundición</p>
+                    </div>
+                    <div class="bg-white p-4 rounded">
+                      <h5 class="font-bold text-sm mb-2">Empaquetado CoWoS</h5>
+                      <p class="text-xs text-muted">Empaquetado avanzado 2.5D crítico para los aceleradores de IA</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Cronología de Desarrollos Clave 2023-2025</h3>
+              <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-date">2023</div>
+                <h4 class="font-bold mb-2">Escalada de Controles de Exportación</h4>
+                <p class="text-sm text-muted">Nuevas restricciones de EE. UU. sobre GPUs avanzadas y equipos de fabricación a China</p>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2024</div>
+                <h4 class="font-bold mb-2">Auge de Chips de IA Chinos</h4>
+                <p class="text-sm text-muted">Lanzamientos de Huawei Ascend 910B, Alibaba PPU, Baidu P800 con mejoras significativas de rendimiento</p>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2025</div>
+                <h4 class="font-bold mb-2">Ampliación de Infraestructura</h4>
+                <p class="text-sm text-muted">Clústeres masivos de chips domésticos: más de 16,000 PPUs en China Unicom, clúster de Baidu de 30,000 chips</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Políticas Estatales -->
+      <section id="state-policies" class="section bg-gray-50">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Políticas Estatales y Estrategia Industrial en China</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div class="bg-surface p-8 rounded-lg shadow-sm">
+              <h3 class="text-2xl font-canela font-bold mb-6">Marcos de Política Nacional</h3>
+              <div class="space-y-6">
+                <div class="border-l-4 border-red-500 pl-6">
+                  <h4 class="font-bold text-lg mb-2">Made in China 2025</h4>
+                  <p class="text-sm text-muted mb-3">Plan estratégico nacional lanzado en 2015 para transformar a China en un líder mundial en industrias de alta tecnología.</p>
+                  <div class="bg-red-50 p-3 rounded">
+                    <p class="text-xs"><strong>Objetivo:</strong> Satisfacer el 70% de la demanda doméstica de semiconductores para 2025</p>
+                  </div>
+                </div>
+
+                <div class="border-l-4 border-blue-500 pl-6">
+                  <h4 class="font-bold text-lg mb-2">"Gran Fondo" Nacional</h4>
+                  <p class="text-sm text-muted mb-3">Fondo Nacional de Inversión en la Industria de Circuitos Integrados con un masivo respaldo estatal.</p>
+                  <div class="bg-blue-50 p-3 rounded">
+                    <p class="text-xs"><strong>Tamaño:</strong> +50 mil millones de dólares recaudados para invertir en empresas de semiconductores nacionales</p>
+                  </div>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-6">
+                  <h4 class="font-bold text-lg mb-2">Planes de Desarrollo de IA</h4>
+                  <p class="text-sm text-muted mb-3">Plan de Desarrollo de IA de Nueva Generación con una estrategia de tres pasos para alcanzar el liderazgo mundial en 2030.</p>
+                  <div class="bg-green-50 p-3 rounded">
+                    <p class="text-xs"><strong>Objetivo:</strong> Industria de IA doméstica de 150 mil millones de dólares con suministro de chips autóctono</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-surface p-8 rounded-lg shadow-sm">
+              <h3 class="text-2xl font-canela font-bold mb-6">Estrategia de Implementación</h3>
+              <div class="space-y-6">
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-purple-900">Modelo de Campeones Nacionales</h4>
+                  <p class="text-sm text-muted mb-3">Empresas designadas como SMIC, Huawei, YMTC reciben trato preferencial y apoyo estatal.</p>
+                  <ul class="text-xs space-y-1">
+                    <li>• Acceso a financiación y mercados domésticos protegidos</li>
+                    <li>• Apoyo a la I+D y ventajas de infraestructura</li>
+                    <li>• Coordinación estratégica de la industria</li>
+                  </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-lg">
+                  <h4 class="font-bold text-lg mb-3 text-yellow-900">Asociaciones Universidad-Industria</h4>
+                  <p class="text-sm text-muted mb-3">La Universidad de Tsinghua, la Universidad de Pekín y los institutos de la CAS colaboran con la industria.</p>
+                  <ul class="text-xs space-y-1">
+                    <li>• Laboratorios de investigación conjuntos y cantera de talentos</li>
+                    <li>• Puente entre la investigación básica y la aplicación comercial</li>
+                    <li>• Expansión de la educación en semiconductores</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">El Camino hacia la "Soberanía de los Semiconductores"</h3>
+              <a href="https://merics.org/en/report/chinas-drive-toward-self-reliance-artificial-intelligence-chips-large-language-models" class="citation" target="_blank">[65]</a>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="text-center p-6 bg-blue-50 rounded-lg">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-3">Imperativo de Seguridad Nacional</h4>
+                <p class="text-sm text-muted">Reducir la dependencia de semiconductores extranjeros, vista como una vulnerabilidad estratégica crítica</p>
+              </div>
+              <div class="text-center p-6 bg-green-50 rounded-lg">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-cogs text-green-600 text-xl"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-3">Cadena de Suministro Doméstica</h4>
+                <p class="text-sm text-muted">Ecosistema completo desde el diseño hasta la fabricación, empaquetado y materiales</p>
+              </div>
+              <div class="text-center p-6 bg-purple-50 rounded-lg">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-globe text-purple-600 text-xl"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-3">Competitividad Global</h4>
+                <p class="text-sm text-muted">No solo autosuficiencia, sino liderazgo global en áreas tecnológicas clave</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Desafíos de Implementación</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-red-50 p-6 rounded-lg">
+                <h4 class="font-bold text-red-900 mb-4">Brechas Tecnológicas</h4>
+                <ul class="text-sm space-y-2">
+                  <li>• Fabricación de vanguardia: brecha de 3nm vs 7nm <a href="https://cdn.prod.website-files.com/6475a05784c07e8593f22af4/68a280c338266f98f77e2479_SMIC%20Final%20-%20Dated%20August%2018th.pdf" class="citation" target="_blank">[25]</a>
+                  </li>
+                  <li>• Herramientas EDA: dependencia extranjera completa</li>
+                  <li>• Litografía EUV: bloqueo del monopolio de ASML</li>
+                  <li>• Memoria HBM: 2-3 generaciones por detrás</li>
+                </ul>
+              </div>
+
+              <div class="bg-orange-50 p-6 rounded-lg">
+                <h4 class="font-bold text-orange-900 mb-4">Obstáculos Estratégicos</h4>
+                <ul class="text-sm space-y-2">
+                  <li>• Escasez de talento cualificado a pesar del impulso educativo</li>
+                  <li>• Dificultades para evadir los controles de exportación <a href="https://www.wsj.com/tech/ai/china-us-ai-chip-restrictions-effect-275a311e" class="citation" target="_blank">[5]</a>
+                  </li>
+                  <li>• Restricciones a la colaboración internacional</li>
+                  <li>• Presión de tiempo para una rápida puesta al día</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Crecimiento en Investigación -->
+      <section id="research-growth" class="section">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Crecimiento de la Investigación en Semiconductores y Capital Humano</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div>
+              <h3 class="text-2xl font-canela font-bold mb-6">Tendencias en I+D e Investigación Académica</h3>
+              <div class="space-y-6">
+                <div class="bg-blue-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-blue-900 mb-3">Aumento de Publicaciones Científicas</h4>
+                  <p class="text-sm text-muted mb-3">
+                    China lidera el mundo en artículos de investigación relacionados con semiconductores, representando más del <strong>30% del total mundial</strong>
+                    <a href="#" class="citation">[Informe CSET]</a>.
+                  </p>
+                  <div class="bg-white p-3 rounded">
+                    <div class="text-xs text-muted">Impulsores del Crecimiento:</div>
+                    <ul class="text-xs space-y-1 mt-2">
+                      <li>• Inversión masiva del gobierno en I+D</li>
+                      <li>• Expansión de la investigación corporativa</li>
+                      <li>• Colaboración universidad-industria</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="bg-green-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-green-900 mb-3">Crecimiento de la Cartera de Patentes</h4>
+                  <p class="text-sm text-muted mb-3">
+                    Las empresas chinas están aumentando significativamente las solicitudes de patentes de semiconductores, centrándose en arquitecturas de chips de IA y procesos de fabricación.
+                  </p>
+                  <div class="bg-white p-3 rounded">
+                    <div class="text-xs text-muted">Áreas Clave:</div>
+                    <ul class="text-xs space-y-1 mt-2">
+                      <li>• Diseños de aceleradores de IA</li>
+                      <li>• Tecnologías de empaquetado avanzado</li>
+                      <li>• Innovaciones en procesos de fabricación</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-2xl font-canela font-bold mb-6">Estrategia de Desarrollo de Talento</h3>
+              <div class="space-y-6">
+                <div class="bg-purple-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-purple-900 mb-3">Cantera de Talento Doméstico</h4>
+                  <p class="text-sm text-muted mb-3">
+                    Expansión de programas de educación en semiconductores y asociaciones universitarias con la industria para construir una reserva de talento nacional.
+                  </p>
+                  <div class="bg-white p-3 rounded">
+                    <div class="text-xs text-muted">Iniciativas:</div>
+                    <ul class="text-xs space-y-1 mt-2">
+                      <li>• Expansión de programas universitarios</li>
+                      <li>• Asociaciones de investigación industria-academia</li>
+                      <li>• Formación práctica y prácticas profesionales</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="bg-yellow-50 p-6 rounded-lg">
+                  <h4 class="font-bold text-yellow-900 mb-3">Programa de Talento Retornado</h4>
+                  <p class="text-sm text-muted mb-3">
+                    Investigadores e ingenieros chinos que regresan de EE. UU. y otros países aportan una valiosa experiencia y conexiones.
+                  </p>
+                  <div class="bg-white p-3 rounded">
+                    <div class="text-xs text-muted">Beneficios:</div>
+                    <ul class="text-xs space-y-1 mt-2">
+                      <li>• Experiencia y conocimiento internacional</li>
+                      <li>• Conexiones con la industria global</li>
+                      <li>• Contribución al ecosistema de startups</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Instituciones de Investigación Clave y Asociaciones Universitarias</h3>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="text-center p-6 bg-blue-50 rounded-lg">
+                <i class="fas fa-university text-blue-600 text-2xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Universidad de Tsinghua</h4>
+                <p class="text-sm text-muted">Investigación líder en semiconductores con fuertes alianzas industriales</p>
+              </div>
+              <div class="text-center p-6 bg-green-50 rounded-lg">
+                <i class="fas fa-university text-green-600 text-2xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Universidad de Pekín</h4>
+                <p class="text-sm text-muted">Excelencia en microelectrónica e ingeniería informática</p>
+              </div>
+              <div class="text-center p-6 bg-purple-50 rounded-lg">
+                <i class="fas fa-flask text-purple-600 text-2xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Academia China de Ciencias</h4>
+                <p class="text-sm text-muted">Investigación básica y desarrollo de tecnología aplicada</p>
+              </div>
+              <div class="text-center p-6 bg-yellow-50 rounded-lg">
+                <i class="fas fa-industry text-yellow-600 text-2xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Asociaciones Industriales</h4>
+                <p class="text-sm text-muted">Colaboraciones con Huawei, SMIC, Alibaba para la comercialización</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Comparación de la Dinámica del Talento</h3>
+            <div class="overflow-x-auto">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Aspecto</th>
+                    <th>Fortalezas de China</th>
+                    <th>Fortalezas de EE. UU. y Aliados</th>
+                    <th>Análisis de Brecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-bold">Escala Educativa</td>
+                    <td>Producción masiva de graduados en ingeniería</td>
+                    <td>Investigación universitaria de primer nivel</td>
+                    <td>Equilibrio entre cantidad y calidad</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Experiencia en la Industria</td>
+                    <td>Talento retornado que aporta experiencia internacional</td>
+                    <td>Profunda historia y experiencia en la industria</td>
+                    <td>Poniéndose al día rápidamente</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Ecosistema de Innovación</td>
+                    <td>Iniciativas de I+D apoyadas por el gobierno</td>
+                    <td>Capital de riesgo y cultura de startups</td>
+                    <td>Diferentes enfoques, resultados convergentes</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Atracción de Talento Global</td>
+                    <td>Mejorando pero aún limitado</td>
+                    <td>El principal imán de talento del mundo</td>
+                    <td>Ventaja significativa para EE. UU.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tendencias Recientes -->
+      <section id="recent-trends" class="section bg-gray-50">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Tendencias y Avances Recientes (2023-2025)</h2>
+
+          <div class="grid lg:grid-cols-3 gap-8 mb-12">
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-microchip text-blue-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Lanzamientos de Nuevos Chips</h3>
+              <div class="space-y-3">
+                <div class="border-l-4 border-blue-500 pl-3">
+                  <h4 class="font-bold text-sm">Huawei Ascend 910C</h4>
+                  <p class="text-xs text-muted">Acelerador de IA avanzado para el sistema CloudMatrix 384</p>
+                </div>
+                <div class="border-l-4 border-green-500 pl-3">
+                  <h4 class="font-bold text-sm">Alibaba PPU</h4>
+                  <p class="text-xs text-muted">Competidor directo de NVIDIA H20 con 96GB de HBM</p>
+                </div>
+                <div class="border-l-4 border-purple-500 pl-3">
+                  <h4 class="font-bold text-sm">Baidu P800</h4>
+                  <p class="text-xs text-muted">Competitivo con NVIDIA A100 para entrenamiento de modelos grandes</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-industry text-green-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Progreso en Fabricación</h3>
+              <div class="space-y-3">
+                <div class="border-l-4 border-red-500 pl-3">
+                  <h4 class="font-bold text-sm">Capacidad de 7nm de SMIC</h4>
+                  <p class="text-xs text-muted">Producción ampliada utilizando patrones múltiples DUV</p>
+                </div>
+                <div class="border-l-4 border-yellow-500 pl-3">
+                  <h4 class="font-bold text-sm">Empaquetado Avanzado</h4>
+                  <p class="text-xs text-muted">Inversiones de JCET y TFME en apilamiento 2.5D/3D</p>
+                </div>
+                <div class="border-l-4 border-orange-500 pl-3">
+                  <h4 class="font-bold text-sm">HBM Doméstico</h4>
+                  <p class="text-xs text-muted">CXMT comienza la producción de HBM de 2ª generación</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-surface p-6 rounded-lg shadow-sm">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-4">Conflicto Tecnológico EE. UU.-China</h3>
+              <div class="space-y-3">
+                <div class="border-l-4 border-red-500 pl-3">
+                  <h4 class="font-bold text-sm">Endurecimiento de los Controles de Exportación</h4>
+                  <p class="text-xs text-muted">Nuevas restricciones sobre chips de IA y equipos de fabricación</p>
+                </div>
+                <div class="border-l-4 border-yellow-500 pl-3">
+                  <h4 class="font-bold text-sm">Contramedidas de China</h4>
+                  <p class="text-xs text-muted">Controles de exportación de galio y germanio</p>
+                </div>
+                <div class="border-l-4 border-orange-500 pl-3">
+                  <h4 class="font-bold text-sm">Acción Legal en la OMC</h4>
+                  <p class="text-xs text-muted">China desafía los controles de EE. UU. como violaciones comerciales</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Proyectos Notables de Infraestructura de IA en China</h3>
+              <a href="https://spectrum.ieee.org/china-ai-chip" class="citation" target="_blank">[31]</a>
+            </div>
+            <div class="space-y-6">
+              <div class="bg-blue-50 p-6 rounded-lg">
+                <h4 class="font-bold text-blue-900 mb-4">Centro de Datos de China Unicom</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <ul class="text-sm space-y-2">
+                      <li>• <strong>Más de 16,000 chips PPU de Alibaba</strong> desplegados</li>
+                      <li>• Infraestructura de IA completamente nacional</li>
+                      <li>• Capacidades de inferencia a gran escala</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div class="bg-white p-4 rounded">
+                      <div class="text-2xl font-bold text-blue-600">16,000+</div>
+                      <div class="text-sm text-muted">Chips de IA Nacionales</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-green-50 p-6 rounded-lg">
+                <h4 class="font-bold text-green-900 mb-4">Clúster de Entrenamiento de IA de Baidu</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <ul class="text-sm space-y-2">
+                      <li>• <strong>30,000 procesadores P800 de Baidu</strong></li>
+                      <li>• Capacidad de entrenamiento de modelos tipo DeepSeek</li>
+                      <li>• Cientos de miles de millones de parámetros</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div class="bg-white p-4 rounded">
+                      <div class="text-2xl font-bold text-green-600">30,000</div>
+                      <div class="text-sm text-muted">Procesadores de IA</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-purple-50 p-6 rounded-lg">
+                <h4 class="font-bold text-purple-900 mb-4">Huawei CloudMatrix 384</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <ul class="text-sm space-y-2">
+                      <li>• <strong>384 chips Ascend 910C</strong> enlazados</li>
+                      <li>• Enfoque de supercomputación a escala de rack</li>
+                      <li>• Competitivo con sistemas NVIDIA</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div class="bg-white p-4 rounded">
+                      <div class="text-2xl font-bold text-purple-600">384</div>
+                      <div class="text-sm text-muted">Chips por Sistema</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Comparación de Infraestructura: China vs. EE. UU.</h3>
+            <div class="overflow-x-auto">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Métrica</th>
+                    <th>Infraestructura Doméstica de China</th>
+                    <th>Infraestructura Basada en EE. UU.</th>
+                    <th>Análisis de Brecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-bold">Escala</td>
+                    <td>Clústeres de 30,000 chips emergentes</td>
+                    <td>Supercomputadoras de más de 100,000 GPUs</td>
+                    <td>Diferencia de escala de 3-4x</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Tecnología de Chip</td>
+                    <td>7nm doméstico, rendimiento competitivo</td>
+                    <td>GPUs de vanguardia de 4nm/3nm</td>
+                    <td>1-2 generaciones por detrás</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Tasa de Crecimiento</td>
+                    <td>Escalamiento rápido, apoyo gubernamental</td>
+                    <td>Crecimiento comercial constante</td>
+                    <td>China acelera más rápido</td>
+                  </tr>
+                  <tr>
+                    <td class="font-bold">Madurez del Ecosistema</td>
+                    <td>En desarrollo, foco en la autosuficiencia</td>
+                    <td>Maduro, dominante a nivel mundial</td>
+                    <td>Brecha de experiencia significativa</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Implicaciones Geopolíticas -->
+      <section id="geopolitical-implications" class="section">
+        <div class="container mx-auto px-8 max-w-6xl">
+          <h2 class="text-4xl font-canela font-bold mb-12 text-primary">Implicaciones Geopolíticas y Estratégicas</h2>
+
+          <div class="grid lg:grid-cols-2 gap-12 mb-12">
+            <div class="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-lg">
+              <h3 class="text-2xl font-bold mb-6 text-red-900">Aplicaciones Militares y de Doble Uso</h3>
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-red-700 mb-2">Sistemas Autónomos</h4>
+                  <p class="text-sm text-muted">Los chips de IA son críticos para armas autónomas, sistemas de vigilancia y análisis de inteligencia con aplicaciones militares directas.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-red-700 mb-2">Análisis de Inteligencia</h4>
+                  <p class="text-sm text-muted">Modelos de IA a gran escala para inteligencia de señales, reconocimiento de imágenes y sistemas de apoyo a decisiones estratégicas.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-red-700 mb-2">Mando y Control</h4>
+                  <p class="text-sm text-muted">Sistemas C2 impulsados por IA con análisis del campo de batalla en tiempo real y capacidades de respuesta automatizada.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-lg">
+              <h3 class="text-2xl font-bold mb-6 text-blue-900">Competitividad Económica</h3>
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-blue-700 mb-2">Transformación de la Industria</h4>
+                  <p class="text-sm text-muted">La IA está revolucionando los sectores de manufactura, salud, finanzas y transporte, con la tecnología de chips como base.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-blue-700 mb-2">Liderazgo en Innovación</h4>
+                  <p class="text-sm text-muted">El control sobre los chips de IA avanzados determina el liderazgo en tecnologías y aplicaciones de próxima generación.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded">
+                  <h4 class="font-bold text-blue-700 mb-2">Influencia en la Cadena de Suministro</h4>
+                  <p class="text-sm text-muted">El dominio de la cadena de suministro de semiconductores proporciona ventajas económicas y estratégicas.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Puntos de Control de la Cadena de Suministro Global</h3>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="text-center p-6 bg-blue-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-blue-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Taiwán (TSMC)</h4>
+                <p class="text-sm text-muted">Más del 50% de la cuota del mercado mundial de fundición, monopolio en fabricación de vanguardia</p>
+              </div>
+              <div class="text-center p-6 bg-green-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-green-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Corea del Sur</h4>
+                <p class="text-sm text-muted">Dominio de Samsung en fundición y memoria, liderazgo de SK Hynix en HBM</p>
+              </div>
+              <div class="text-center p-6 bg-purple-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-purple-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">Países Bajos</h4>
+                <p class="text-sm text-muted">Monopolio de ASML en litografía EUV, punto de estrangulamiento crítico de la fabricación</p>
+              </div>
+              <div class="text-center p-6 bg-red-50 rounded-lg">
+                <i class="fas fa-map-marker-alt text-red-600 text-3xl mb-4"></i>
+                <h4 class="font-bold text-lg mb-3">China</h4>
+                <p class="text-sm text-muted">Dominio de nodos maduros, control de materiales críticos (galio, germanio)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-2xl font-canela font-bold mb-6">Escenarios Futuros para la Industria Global de Semiconductores</h3>
+            <div class="grid md:grid-cols-3 gap-8">
+              <div class="bg-red-50 p-6 rounded-lg">
+                <h4 class="font-bold text-red-900 mb-4">Profundización de Bloques Tecnológicos</h4>
+                <p class="text-sm text-muted mb-4">Mayor desacoplamiento con ecosistemas tecnológicos separados de EE. UU. y China, fragmentación de la cadena de suministro y menor eficiencia global.</p>
+                <div class="bg-white p-3 rounded">
+                  <div class="text-xs font-bold text-red-700">Impacto: Probable</div>
+                  <div class="text-xs text-muted mt-1">Velocidad de innovación reducida, costos más altos, tensiones geopolíticas</div>
+                </div>
+              </div>
+
+              <div class="bg-yellow-50 p-6 rounded-lg">
+                <h4 class="font-bold text-yellow-900 mb-4">Cooperación Selectiva</h4>
+                <p class="text-sm text-muted mb-4">Regionalización con bloques competidores pero cooperación en áreas no sensibles, manteniendo cierta integración global.</p>
+                <div class="bg-white p-3 rounded">
+                  <div class="text-xs font-bold text-yellow-700">Impacto: Posible</div>
+                  <div class="text-xs text-muted mt-1">Competencia gestionada, cadenas de suministro estables, colaboración limitada</div>
+                </div>
+              </div>
+
+              <div class="bg-green-50 p-6 rounded-lg">
+                <h4 class="font-bold text-green-900 mb-4">Nuevo Equilibrio Global</h4>
+                <p class="text-sm text-muted mb-4">Competencia gestionada con coexistencia, cooperación donde sea mutuamente beneficiosa y comercio tecnológico estable.</p>
+                <div class="bg-white p-3 rounded">
+                  <div class="text-xs font-bold text-green-700">Impacto: Óptimo pero desafiante</div>
+                  <div class="text-xs text-muted mt-1">Competencia equilibrada, innovación mantenida, tensiones reducidas</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-lg">
+            <h3 class="text-2xl font-canela font-bold mb-6">Recomendaciones Estratégicas</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="font-bold text-lg mb-4">Para Estados Unidos y sus Aliados:</h4>
+                <ul class="space-y-2 text-sm">
+                  <li>• Fortalecer la fabricación nacional a través de la implementación de la Ley CHIPS <a href="https://aimagazine.com/news/pwc-semiconductor-fab-investment-to-hit-us-1-5tn-by-2030" class="citation" target="_blank">[15]</a>
+                  </li>
+                  <li>• Mantener la ventaja tecnológica a través de una inversión sostenida en I+D</li>
+                  <li>• Construir cadenas de suministro resilientes con naciones aliadas</li>
+                  <li>• Desarrollar tecnologías de próxima generación más allá de los nodos actuales</li>
+                  <li>• Abordar la escasez de talento a través de la educación y la inmigración</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-lg mb-4">Para China:</h4>
+                <ul class="space-y-2 text-sm">
+                  <li>• Acelerar el desarrollo de tecnología autóctona</li>
+                  <li>• Construir la resiliencia de la cadena de suministro nacional</li>
+                  <li>• Centrarse en innovaciones disruptivas más allá de los paradigmas actuales</li>
+                  <li>• Desarrollar arquitecturas alternativas (RISC-V, empaquetado avanzado)</li>
+                  <li>• Cerrar las brechas de talento a través de la educación y la colaboración internacional</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+        // Inicializar fondo Vanta.js
+        VANTA.WAVES({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x1a1a1a,
+            shininess: 30.00,
+            waveHeight: 15.00,
+            waveSpeed: 0.75,
+            zoom: 0.75
+        });
+
+        // Funcionalidad de la Tabla de Contenidos
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocLinks = document.querySelectorAll('.toc-link');
+            const sections = document.querySelectorAll('section[id]');
+            
+            // Desplazamiento suave para los enlaces de la TdC
+            tocLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Resaltar la sección activa en la TdC
+            function updateActiveTocLink() {
+                let currentActive = '';
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    const sectionHeight = section.offsetHeight;
+                    
+                    if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+                        currentActive = section.getAttribute('id');
+                    }
+                });
+                
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + currentActive) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveTocLink);
+            updateActiveTocLink(); // Llamada inicial
+        });
+
+        // Alternar TdC móvil (si es necesario)
+        function toggleMobileTOC() {
+            const toc = document.querySelector('.toc-fixed');
+            toc.classList.toggle('open');
+        }
+    </script>
+  
+<p style="text-align: center; margin-top: 2rem;">Material elaborado por el profesor Sergio Gevatschnaider</p>
+</body></html>
