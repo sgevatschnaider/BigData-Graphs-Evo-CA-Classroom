@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Panorama regulatorio de la IA y la robótica en China: una visión general de 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            /* Paleta de colores ajustada: Rojo de la Bandera China como acento */
+            --primary: #2c3e50; /* Azul oscuro */
+            --secondary: #34495e; /* Gris-azul */
+            --accent: #dc2626; /* Rojo de China */
+            --muted: #95a5a6; /* Gris apagado */
+            --background: #fefefe;
+            --surface: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border: #ecf0f1;
+            --toc-width: 300px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background-color: var(--background);
+            line-height: 1.7;
+            overflow-x: hidden;
+            scroll-behavior: smooth; /* Smooth scroll para anclas */
+        }
+
+        .serif-heading {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* 1. TOC responsive */
+        .fixed-toc {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--toc-width);
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+
+        /* 2. margin-left dinámico y ancho de contenido */
+        .main-content {
+            margin-left: var(--toc-width);
+            min-height: 100vh;
+        }
+        
+        /* Contenedor central con ancho ideal para lectura */
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            min-height: 60vh;
+        }
+
+        .citation {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dotted var(--accent);
+        }
+
+        .citation:hover {
+            background-color: rgba(220, 38, 38, 0.1); /* Usar accent */
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            margin: 3rem 0;
+        }
+
+        .pull-quote {
+            font-size: 1.25rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            border-left: 4px solid var(--accent);
+            padding-left: 2rem;
+            margin: 2rem 0;
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1.2rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background: var(--border);
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        .comparison-table th {
+            background: var(--surface);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(52, 73, 94, 0.05);
+        }
+
+        .process-flow {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .process-step {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .process-step::before {
+            content: '▶';
+            position: absolute;
+            left: -2.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .process-step:first-child::before {
+            content: '';
+        }
+
+        /* Estilo del diagrama de Mermaid simplificado y estable */
+        .mermaid-container {
+            display: flex;
+            justify-content: center;
+            min-height: 300px;
+            max-height: 800px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow-x: auto; /* Permite el scroll horizontal nativo si el diagrama es muy ancho */
+        }
+        
+        .mermaid-container .mermaid {
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            touch-action: pan-y; /* Permite pan en y, el scroll horizontal es por overflow-x */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .mermaid-controls {
+            display: none; /* Eliminar controles complejos de zoom manual */
+        }
+        
+        /* Botón de menú en móvil */
+        .menu-toggle-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1010;
+            background: var(--accent);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 1.25rem;
+            display: none; /* Ocultar por defecto */
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+
+        /* Media Queries para Responsividad */
+        @media (max-width: 1024px) {
+            :root {
+                --toc-width: 260px; /* Reducir ancho del TOC en tabletas */
+            }
+            .main-content {
+                margin-left: var(--toc-width);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            /* Ocultar TOC por defecto en móvil */
+            .fixed-toc {
+                transform: translateX(-100%);
+                width: 100%;
+            }
+            
+            /* Mostrar TOC cuando esté activo */
+            .fixed-toc.active {
+                transform: translateX(0);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            
+            /* 2. Eliminar margen fijo en móvil */
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-container {
+                padding: 1rem; /* Reducir padding en móvil */
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            
+            .comparison-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* 6. Mostrar botón de menú en móvil */
+            .menu-toggle-btn {
+                display: block;
+            }
+            
+            .hero-text {
+                margin-top: 3rem; /* Espacio para el botón de menú */
+            }
+        }
+    </style>
+  <base target="_blank">
+</head>
+
+<body>
+
+    <button class="menu-toggle-btn" aria-label="Abrir Menú de Contenidos">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="fixed-toc">
+        <div class="mb-8">
+            <h3 class="serif-heading text-lg mb-4">Contenidos</h3>
+            <ul class="space-y-2 text-sm">
+                <li class="md:hidden">
+                    <button class="text-gray-600 hover:text-red-600 transition-colors w-full text-left py-2 mb-4" id="close-toc-btn">
+                        <i class="fas fa-times mr-2"></i> Cerrar Menú
+                    </button>
+                </li>
+                <li>
+                    <a href="#executive-summary" class="text-gray-600 hover:text-red-600 transition-colors">Resumen Ejecutivo</a>
+                </li>
+                <li>
+                    <a href="#regulatory-framework" class="text-gray-600 hover:text-red-600 transition-colors">1. Marco Regulatorio</a>
+                </li>
+                <li class="ml-4">
+                    <a href="#key-laws" class="text-gray-500 hover:text-red-600 transition-colors">1.1 Leyes Nacionales Clave</a>
+                </li>
+                <li class="ml-4">
+                    <a href="#regulatory-bodies" class="text-gray-500 hover:text-red-600 transition-colors">1.2 Organismos Reguladores</a>
+                </li>
+                <li class="ml-4">
+                    <a href="#ai-lifecycle" class="text-gray-500 hover:text-red-600 transition-colors">1.3 Ciclo de Vida Regulatorio de la IA</a>
+                </li>
+                <li>
+                    <a href="#core-requirements" class="text-gray-600 hover:text-red-600 transition-colors">2. Requisitos Fundamentales</a>
+                </li>
+                <li>
+                    <a href="#specific-technologies" class="text-gray-600 hover:text-red-600 transition-colors">3. Tecnologías Específicas</a>
+                </li>
+                <li>
+                    <a href="#ethical-principles" class="text-gray-600 hover:text-red-600 transition-colors">4. Principios Éticos</a>
+                </li>
+                <li>
+                    <a href="#timeline" class="text-gray-600 hover:text-red-600 transition-colors">5. Cronología Regulatoria</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="border-t pt-6">
+            <h4 class="font-semibold text-sm mb-3">Perspectivas Clave</h4>
+            <div class="space-y-3 text-xs text-gray-600">
+                <div class="bg-red-50 p-3 rounded">
+                    <strong class="text-red-700">Marco Multinivel</strong>
+                    <p>Combina leyes fundacionales con medidas específicas de IA</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded">
+                    <strong class="text-blue-700">Gobernanza Estatal</strong>
+                    <p>Énfasis en la estabilidad social y el bienestar colectivo</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded">
+                    <strong class="text-green-700">Integración Ética</strong>
+                    <p>Comités de ética obligatorios para el desarrollo de la IA</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <section class="py-12 bg-gradient-to-br from-slate-50 to-red-50">
+            <div class="content-container">
+                <div class="hero-grid">
+                    <div class="hero-text">
+                        <h1 class="serif-heading text-5xl leading-tight mb-6">
+                            <span class="italic text-gray-700">El Panorama</span>
+                            <br/>
+                            <span class="text-gray-900">Regulatorio de IA y Robótica</span>
+                            <br/>
+                            <span class="text-red-600">de China</span>
+                        </h1>
+                        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                            Un análisis exhaustivo del enfoque multinivel de China para la gobernanza de la inteligencia artificial, que equilibra la innovación con el control estatal, la estabilidad social y la supervisión ética.
+                        </p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-500">
+                            <span><i class="fas fa-calendar mr-2"></i>Visión General 2025</span>
+                            <span><i class="fas fa-globe mr-2"></i>Gobernanza Global</span>
+                            <span><i class="fas fa-balance-scale mr-2"></i>Ética y Cumplimiento</span>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="https://kimi-web-img.moonshot.cn/img/media.springernature.com/c93242d36515528df3b048db89b755256bb6cc3b.png" alt="Visualización abstracta de la regulación de la IA en China" class="w-full h-80 object-cover rounded-lg shadow-xl" size="medium" aspect="wide" query="abstract technology regulation china" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="executive-summary" class="py-16 bg-white">
+            <div class="content-container">
+                <h2 class="serif-heading text-3xl mb-8">Resumen Ejecutivo</h2>
+
+                <div class="bg-gradient-to-r from-red-50 to-blue-50 p-8 rounded-2xl mb-12">
+                    <p class="text-lg leading-relaxed text-gray-800">
+                        El marco regulatorio de China para la inteligencia artificial y la robótica es un sistema sofisticado y multinivel que refleja un equilibrio estratégico entre el fomento de la innovación y el mantenimiento de un estricto control estatal. Construido sobre una base de sólidas leyes de seguridad de datos (PIPL, DSL, CSL), el marco ha evolucionado rápidamente para abordar aplicaciones específicas de IA a través de un enfoque legislativo de "pequeña escala", dirigido a algoritmos, deepfakes e IA generativa. El modelo de gobernanza se caracteriza por una estructura multiagencia, liderada por <a href="#ref-5" class="citation">MIIT, CAC y MOST</a>, que aplican de forma colaborativa un ciclo de vida regulatorio integral para los sistemas de IA. Este ciclo de vida exige una revisión ética proactiva y una evaluación de riesgos, una gobernanza de datos estricta, pruebas rigurosas y un monitoreo continuo posterior al despliegue. Los principios éticos de China, formalizados en un <a href="#ref-7" class="citation">proyecto de medida de 2025</a>, enfatizan la "IA para el bien social", la equidad, la seguridad y la responsabilidad, aplicados a través de un sistema de comités de ética obligatorios. Si bien el marco de China comparte puntos en común con estándares globales como los de la OCDE, se distingue por su mayor énfasis en el bienestar colectivo, la estabilidad social y la supervisión estatal, posicionando a China como un arquitecto clave del emergente panorama global de gobernanza de la IA.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mr-3"></div>
+                            <h3 class="font-semibold text-lg">Leyes Fundamentales</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">PIPL, DSL y CSL forman la base del entorno regulatorio de IA de China, estableciendo requisitos integrales de gobernanza y seguridad de datos.</p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                            <h3 class="font-semibold text-lg">Gobernanza Multiagencia</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">MIIT, CAC y MOST coordinan la supervisión de la IA, asegurando la alineación con los objetivos estratégicos nacionales y los objetivos de estabilidad social.</p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                            <h3 class="font-semibold text-lg">Integración Ética</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">Los comités de ética obligatorios y los procesos de revisión por niveles aseguran que el desarrollo de la IA se alinee con los principios de "IA para el bien social".</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="regulatory-framework" class="py-16">
+            <div class="content-container">
+                <h2 class="serif-heading text-4xl mb-12">1. Marco Regulatorio Principal: Leyes, Organismos y Procesos</h2>
+
+                <div id="key-laws" class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">1.1 Leyes y Regulaciones Nacionales Clave</h3>
+
+                    <p class="text-lg mb-8">
+                        El enfoque de China para regular la inteligencia artificial se caracteriza por un marco multinivel que combina leyes fundamentales de datos y ciberseguridad con medidas administrativas emergentes específicas de IA y estándares sectoriales. Esta estructura refleja un esfuerzo estratégico y de arriba hacia abajo para fomentar la innovación mientras se mantiene un control estricto sobre la seguridad, la estabilidad social y los riesgos éticos.
+                    </p>
+
+                    <div class="bg-slate-50 p-8 rounded-xl mb-8">
+                        <h4 class="font-semibold text-xl mb-6 flex items-center">
+                            <i class="fas fa-shield-alt text-slate-600 mr-3"></i>
+                            Leyes Fundamentales de Datos y Ciberseguridad
+                        </h4>
+
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-lg border-l-4 border-red-500">
+                                <h5 class="font-semibold mb-2">Ley de Ciberseguridad (CSL)</h5>
+                                <p class="text-gray-600 text-sm mb-2">Vigente: 1 de junio de 2017</p>
+                                <p>Establece el marco general para la seguridad de la red, la protección de datos y la gobernanza de los servicios de información de internet. Impone obligaciones de seguridad a los operadores de red e introduce la "infraestructura de información crítica" (CII) sujeta a requisitos de seguridad más estrictos.</p>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg border-l-4 border-blue-500">
+                                <h5 class="font-semibold mb-2">Ley de Seguridad de Datos (DSL)</h5>
+                                <p class="text-gray-600 text-sm mb-2">Vigente: 1 de septiembre de 2021</p>
+                                <p>Introduce la clasificación de datos según su importancia para la economía nacional y el interés público. Establece controles estrictos sobre la exportación de "datos importantes", incluidos los grandes conjuntos de datos utilizados para el entrenamiento de modelos de IA.</p>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg border-l-4 border-green-500">
+                                <h5 class="font-semibold mb-2">Ley de Protección de Información Personal (PIPL)</h5>
+                                <p class="text-gray-600 text-sm mb-2">Vigente: 1 de noviembre de 2021</p>
+                                <p>Equivalente al GDPR de China, proporciona un marco integral para la protección de datos personales. Otorga a los individuos derechos sobre la toma de decisiones automatizada y requiere transparencia en los procesos algorítmicos <a href="#ref-101" class="citation">[101]</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 p-8 rounded-xl">
+                        <h4 class="font-semibold text-xl mb-6 flex items-center">
+                            <i class="fas fa-robot text-red-600 mr-3"></i>
+                            Medidas Administrativas Específicas de IA y Proyectos de Normas
+                        </h4>
+
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-lg">
+                                <h5 class="font-semibold mb-3 text-red-700">Proyecto de Medidas Administrativas para la Gestión Ética de la Tecnología de IA</h5>
+                                <p class="text-gray-600 text-sm mb-3">Emitido: Agosto de 2025 por el MIIT y otros nueve reguladores <a href="#ref-5" class="citation">[5]</a>
+                                </p>
+                                <ul class="text-sm space-y-2">
+                                    <li>• Ordena el establecimiento de comités de ética independientes</li>
+                                    <li>• Introduce un plazo de 30 días para la decisión en las revisiones éticas</li>
+                                    <li>• Requiere revisiones de seguimiento en intervalos no superiores a 12 meses</li>
+                                    <li>• Se enfoca en aplicaciones de alto riesgo, incluidos los sistemas de integración hombre-máquina</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg">
+                                <h5 class="font-semibold mb-3 text-red-700">Medidas para el Etiquetado de Contenido Sintético Generado por IA</h5>
+                                <p class="text-gray-600 text-sm mb-3">Vigente: Septiembre de 2025 <a href="#ref-7" class="citation">[7]</a>
+                                </p>
+                                <p>Requiere el etiquetado explícito e implícito del contenido generado por IA para combatir la desinformación y mantener la estabilidad social en el ámbito digital.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="regulatory-bodies" class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">1.2 Principales Organismos Reguladores y sus Funciones</h3>
+
+                    <p class="text-lg mb-8">
+                        La gobernanza de la inteligencia artificial en China está orquestada por una red de organismos reguladores clave, cada uno con responsabilidades distintas pero superpuestas. Esta estructura multiagencia asegura que el desarrollo de la IA se alinee con los objetivos estratégicos nacionales, incluido el crecimiento económico, la soberanía tecnológica y la estabilidad social.
+                    </p>
+
+                    <div class="overflow-x-auto mb-8">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Organismo Regulador</th>
+                                    <th>Función Principal y Ámbito de Autoridad</th>
+                                    <th>Dominios Clave Relevantes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ministerio de Industria y Tecnología de la Información (MIIT)</strong></td>
+                                    <td>Lidera la política industrial, formula estándares técnicos y supervisa el desarrollo de la industria de la IA. Coemitió el proyecto de medidas de ética de la IA e impulsa la iniciativa "AI Plus" <a href="#ref-5" class="citation">[5]</a>.</td>
+                                    <td>Política Industrial de IA, Estándares Técnicos, Robótica, Vehículos Autónomos, IA Industrial</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Administración del Ciberespacio de China (CAC)</strong></td>
+                                    <td>Principal regulador de internet responsable del control de contenido, seguridad de datos y supervisión algorítmica. Aplica CSL, DSL y PIPL. Regula el contenido de IA generativa y el etiquetado <a href="#ref-7" class="citation">[7]</a>.</td>
+                                    <td>Seguridad de Datos, Moderación de Contenido, IA Generativa, Recomendaciones Algorítmicas, Gobernanza del Ciberespacio</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ministerio de Ciencia y Tecnología (MOST)</strong></td>
+                                    <td>Guía la estrategia nacional de I+D y establece marcos éticos fundamentales. Emitió las Medidas Administrativas para la Revisión de la Ética en Ciencia y Tecnología <a href="#ref-5" class="citation">[5]</a>.</td>
+                                    <td>Investigación y Desarrollo de IA, Ética en Ciencia y Tecnología, Estrategia Nacional de Innovación</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Otros Organismos Clave</strong></td>
+                                    <td>
+                                        <strong>Ministerio de Transporte (MOT):</strong> Regula los vehículos autónomos y el transporte a baja altitud <a href="#ref-87" class="citation">[87]</a>.
+                                        <br/>
+                                        <strong>Ministerio de Seguridad Pública (MPS):</strong> Garantiza la seguridad pública y el orden social.
+                                        <br/>
+                                        <strong>NDRC:</strong> Establece la estrategia económica nacional para la IA.
+                                        <br/>
+                                        <strong>SAMR:</strong> Emite estándares nacionales <a href="#ref-32" class="citation">[32]</a>.
+                                    </td>
+                                    <td>Aplicaciones Específicas del Sector (Transporte, Finanzas, Salud), Planificación Económica, Estandarización</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-blue-700">Liderazgo del MIIT</h4>
+                            <p class="text-sm text-gray-700">Toma la iniciativa en la configuración del panorama ético a través de proyectos de medidas y promueve la innovación mediante la iniciativa "AI Plus", con el objetivo de una <a href="#ref-7" class="citation">tasa de penetración del 70% de terminales inteligentes para 2027</a>.</p>
+                        </div>
+
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-green-700">Supervisión de la CAC</h4>
+                            <p class="text-sm text-gray-700">Asegura que los sistemas de IA se adhieran a las leyes nacionales y defiendan los "valores socialistas fundamentales". Regula las recomendaciones algorítmicas y aplica los requisitos de etiquetado de contenido.</p>
+                        </div>
+
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-purple-700">Marco del MOST</h4>
+                            <p class="text-sm text-gray-700">Publicó un marco unificado para la revisión ética en la investigación científica, estableciendo un precedente para las reglas específicas de la IA e integrando la ética en todo el ciclo de vida de la IA.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ai-lifecycle" class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">1.3 El Ciclo de Vida Regulatorio de la IA en China</h3>
+
+                    <p class="text-lg mb-8">
+                        El ciclo de vida regulatorio para desarrollar e implementar sistemas de IA en China es un proceso estructurado y de múltiples etapas diseñado para garantizar que la innovación proceda de manera controlada y ética. Este ciclo de vida se rige por una combinación de leyes generales y medidas específicas como el Proyecto de Medidas Administrativas para la Gestión Ética de la Tecnología de IA.
+                    </p>
+
+                    <div class="process-flow">
+                        <div class="mermaid-container">
+                            <div class="mermaid">
+                                graph TD
+                                A["Etapa 1: Revisión Ética y Evaluación de Riesgos"] --&gt; B["Etapa 2: Recopilación de Datos y Entrenamiento del Modelo"]
+                                B --&gt; C["Etapa 3: Evaluación, Pruebas y Certificación"]
+                                C --&gt; D["Etapa 4: Despliegue y Monitoreo Continuo"]
+                                D --&gt; E["Bucle de Retroalimentación a la Etapa 1"]
+
+                                A1["Revisión del Comité de Ética"] --&gt; A
+                                A2["Evaluación de Riesgos"] --&gt; A
+                                A3["Segunda Revisión de Expertos si es de Alto Riesgo"] --&gt; A
+
+                                B1["Cumplimiento de PIPL"] --&gt; B
+                                B2["Medidas de Seguridad de Datos"] --&gt; B
+                                B3["Filtrado y Anotación de Datos"] --&gt; B
+
+                                C1["Pruebas de Seguridad"] --&gt; C
+                                C2["Validación de Rendimiento"] --&gt; C
+                                C3["Certificación si es Requerida"] --&gt; C
+
+                                D1["Plazo de Decisión de 30 Días"] --&gt; D
+                                D2["Revisiones de Seguimiento ≤12 Meses"] --&gt; D
+                                D3["Monitoreo Continuo"] --&gt; D
+
+                                E --&gt; A
+
+                                style A fill:#dc2626,stroke:#b91c1c,stroke-width:3px,color:#fff
+                                style B fill:#3498db,stroke:#2980b9,stroke-width:3px,color:#fff
+                                style C fill:#2ecc71,stroke:#27ae60,stroke-width:3px,color:#fff
+                                style D fill:#f39c12,stroke:#d68910,stroke-width:3px,color:#fff
+                                style E fill:#95a5a6,stroke:#7f8c8d,stroke-width:3px,color:#fff
+                                style A1 fill:#fff,stroke:#b91c1c,stroke-width:2px,color:#2c3e50
+                                style A2 fill:#fff,stroke:#b91c1c,stroke-width:2px,color:#2c3e50
+                                style A3 fill:#fff,stroke:#b91c1c,stroke-width:2px,color:#2c3e50
+                                style B1 fill:#fff,stroke:#2980b9,stroke-width:2px,color:#2c3e50
+                                style B2 fill:#fff,stroke:#2980b9,stroke-width:2px,color:#2c3e50
+                                style B3 fill:#fff,stroke:#2980b9,stroke-width:2px,color:#2c3e50
+                                style C1 fill:#fff,stroke:#27ae60,stroke-width:2px,color:#2c3e50
+                                style C2 fill:#fff,stroke:#27ae60,stroke-width:2px,color:#2c3e50
+                                style C3 fill:#fff,stroke:#27ae60,stroke-width:2px,color:#2c3e50
+                                style D1 fill:#fff,stroke:#d68910,stroke-width:2px,color:#2c3e50
+                                style D2 fill:#fff,stroke:#d68910,stroke-width:2px,color:#2c3e50
+                                style D3 fill:#fff,stroke:#d68910,stroke-width:2px,color:#2c3e50
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="process-step">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <span class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                                Revisión Ética y Evaluación de Riesgos
+                            </h4>
+                            <p class="text-sm text-gray-700 mb-3">Etapa inicial obligatoria que requiere que las organizaciones establezcan comités de ética de IA independientes <a href="#ref-7" class="citation">[7]</a>.</p>
+                            <ul class="text-sm space-y-1">
+                                <li>• Presentar un plan de actividad detallado y una evaluación de riesgos éticos</li>
+                                <li>• Enfoque en equidad, robustez, transparencia, responsabilidad</li>
+                                <li>• Segunda revisión por expertos para actividades de alto riesgo</li>
+                                <li>• Plazo de decisión de 30 días</li>
+                            </ul>
+                        </div>
+
+                        <div class="process-step">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                                Recopilación de Datos y Entrenamiento del Modelo
+                            </h4>
+                            <p class="text-sm text-gray-700 mb-3">Regido por DSL y PIPL con estrictos requisitos de seguridad y cumplimiento <a href="#ref-130" class="citation">[130]</a>.</p>
+                            <ul class="text-sm space-y-1">
+                                <li>• Recopilación transparente de datos con consentimiento claro</li>
+                                <li>• Estándares de seguridad para el almacenamiento y procesamiento de datos</li>
+                                <li>• Protocolos de filtrado y ajuste fino de datos</li>
+                                <li>• Mínimo de 200 anotaciones de seguridad por riesgo identificado</li>
+                            </ul>
+                        </div>
+
+                        <div class="process-step">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                                Evaluación, Pruebas y Certificación
+                            </h4>
+                            <p class="text-sm text-gray-700 mb-3">Protocolos de prueba rigurosos para validar el rendimiento, la seguridad y el cumplimiento <a href="#ref-130" class="citation">[130]</a>.</p>
+                            <ul class="text-sm space-y-1">
+                                <li>• Pruebas de seguridad contra 31 riesgos de seguridad definidos</li>
+                                <li>• Validación de rendimiento y certificación</li>
+                                <li>• Estándares de seguridad específicos de la industria</li>
+                                <li>• Documentación para auditoría y supervisión</li>
+                            </ul>
+                        </div>
+
+                        <div class="process-step">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <span class="w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm mr-3">4</span>
+                                Despliegue y Monitoreo Continuo
+                            </h4>
+                            <p class="text-sm text-gray-700 mb-3">Supervisión continua con responsabilidad a lo largo de la vida operativa <a href="#ref-7" class="citation">[7]</a>.</p>
+                            <ul class="text-sm space-y-1">
+                                <li>• Revisiones de seguimiento en intervalos ≤12 meses</li>
+                                <li>• Autoridad de suspensión o terminación por riesgos significativos</li>
+                                <li>• Transparencia continua a través del etiquetado de contenido</li>
+                                <li>• Bucle de retroalimentación para futuras mejoras de desarrollo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="core-requirements" class="py-16 bg-gray-50">
+            <div class="content-container">
+                <h2 class="serif-heading text-4xl mb-12">2. Requisitos Fundamentales para los Sistemas de IA</h2>
+
+                <div class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">2.1 Gobernanza y Seguridad de los Datos</h3>
+
+                    <p class="text-lg mb-8">
+                        La gobernanza y la seguridad de los datos forman la piedra angular del marco regulatorio de China para la inteligencia artificial. El enfoque del país se basa en tres leyes clave: la Ley de Ciberseguridad (CSL), la Ley de Seguridad de Datos (DSL) y la Ley de Protección de Información Personal (PIPL).
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-sm">
+                            <h4 class="font-semibold text-xl mb-6 flex items-center">
+                                <i class="fas fa-database text-blue-600 mr-3"></i>
+                                Cumplimiento de PIPL, DSL y CSL
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-blue-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Ley de Protección de Información Personal</h5>
+                                    <p class="text-sm text-gray-700">El equivalente al GDPR de China que requiere una base legal clara para el uso de datos personales y otorga a los individuos derechos sobre la toma de decisiones automatizada <a href="#ref-101" class="citation">[101]</a>.</p>
+                                </div>
+                                <div class="border-l-4 border-green-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Ley de Seguridad de Datos</h5>
+                                    <p class="text-sm text-gray-700">Introduce la clasificación de datos con mayor seguridad para "datos importantes" y controles estrictos sobre transferencias transfronterizas.</p>
+                                </div>
+                                <div class="border-l-4 border-red-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Ley de Ciberseguridad</h5>
+                                    <p class="text-sm text-gray-700">Establece un marco general de ciberseguridad con requisitos de CII y mandatos de localización de datos.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-sm">
+                            <h4 class="font-semibold text-xl mb-6 flex items-center">
+                                <i class="fas fa-map-marker-alt text-red-600 mr-3"></i>
+                                Requisitos de Localización de Datos
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold text-sm mb-2 text-red-700">Infraestructura de Información Crítica</h5>
+                                    <p class="text-sm text-gray-700">Los operadores deben almacenar la información personal y los datos importantes recopilados en China a nivel nacional.</p>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold text-sm mb-2 text-yellow-700">Exportación de Datos Importantes</h5>
+                                    <p class="text-sm text-gray-700">Se requiere una evaluación de seguridad por parte de las autoridades antes de exportar "datos importantes" utilizados en el entrenamiento de IA.</p>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold text-sm mb-2 text-blue-700">Transferencias Transfronterizas</h5>
+                                    <p class="text-sm text-gray-700">Múltiples mecanismos legales disponibles, incluidas evaluaciones de seguridad y cláusulas contractuales estándar.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">2.2 Transparencia y Responsabilidad Algorítmica</h3>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-sm">
+                            <h4 class="font-semibold text-xl mb-6">Etiquetado de Contenido Generado por IA</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-tag text-red-500"></i>
+                                    <span class="font-semibold">Etiquetas Explícitas</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Indicadores visibles como marcas de agua o texto que informan a los usuarios sobre el contenido generado por IA <a href="#ref-89" class="citation">[89]</a>.</p>
+
+                                <div class="flex items-center space-x-3 mt-4">
+                                    <i class="fas fa-fingerprint text-blue-500"></i>
+                                    <span class="font-semibold">Etiquetas Implícitas</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Metadatos incrustados para la trazabilidad legible por máquina del origen y el historial del contenido generado por IA.</p>
+
+                                <div class="bg-red-50 p-4 rounded-lg mt-4">
+                                    <p class="text-sm text-gray-700"><strong>Alcance:</strong> Se aplica a contenido de texto, imágenes, audio y video durante todo el ciclo de vida, desde la creación hasta el uso.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-sm">
+                            <h4 class="font-semibold text-xl mb-6">Explicabilidad y Trazabilidad</h4>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-green-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Requisitos de PIPL</h5>
+                                    <p class="text-sm text-gray-700">Los individuos tienen derecho a una explicación de las decisiones tomadas únicamente por medios automatizados <a href="#ref-101" class="citation">[101]</a>.</p>
+                                </div>
+
+                                <div class="border-l-4 border-blue-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Estándares de Documentación</h5>
+                                    <p class="text-sm text-gray-700">Documentación detallada que cubre el diseño del sistema, los datos de entrenamiento, los algoritmos y los procedimientos de prueba.</p>
+                                </div>
+
+                                <div class="border-l-4 border-purple-500 pl-4">
+                                    <h5 class="font-semibold text-sm mb-1">Mecanismos de Registro</h5>
+                                    <p class="text-sm text-gray-700">Registro robusto de entradas de datos, procesos algorítmicos y salidas del sistema para auditoría y supervisión.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="specific-technologies" class="py-16">
+            <div class="content-container">
+                <h2 class="serif-heading text-4xl mb-12">3. Regulaciones para Tecnologías Específicas</h2>
+
+                <div class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">3.1 Robots Industriales y de Servicio</h3>
+
+                    <p class="text-lg mb-8">
+                        El marco regulatorio de China para la robótica impulsada por IA está diseñado para abordar los desafíos únicos que plantean estas tecnologías, incluida la interacción hombre-robot, la protección de datos y la mitigación de riesgos en sectores como la manufactura, la atención médica y los servicios de ciudades inteligentes.
+                    </p>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-blue-700">
+                                <i class="fas fa-industry mr-2"></i>
+                                Manufactura
+                            </h4>
+                            <p class="text-sm text-gray-700">Los robots colaborativos (cobots) en las líneas de montaje deben cumplir con estándares de seguridad específicos y monitorear las interacciones hombre-robot <a href="#ref-10" class="citation">[10]</a>.</p>
+                        </div>
+
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-green-700">
+                                <i class="fas fa-hospital mr-2"></i>
+                                Atención Médica
+                            </h4>
+                            <p class="text-sm text-gray-700">Los sistemas robóticos asistidos por IA para diagnósticos y cirugía deben cumplir con estrictos requisitos de precisión y fiabilidad para garantizar la seguridad del paciente.</p>
+                        </div>
+
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h4 class="font-semibold mb-3 text-purple-700">
+                                <i class="fas fa-city mr-2"></i>
+                                Ciudades Inteligentes
+                            </h4>
+                            <p class="text-sm text-gray-700">Los robots de servicio en entornos urbanos deben equilibrar la funcionalidad con la seguridad pública y las consideraciones de privacidad de datos.</p>
+                        </div>
+                    </div>
+
+                    <div class="pull-quote">
+                        "Las empresas que desarrollan robots impulsados por IA deben implementar protocolos de prueba rigurosos, mantener registros operativos detallados e incorporar mecanismos a prueba de fallos para mitigar los riesgos potenciales."
+                        <cite class="block text-sm mt-2 not-italic">— Regulaciones del MIIT, octubre de 2025 <a href="#ref-10" class="citation">[10]</a>
+                        </cite>
+                    </div>
+                </div>
+
+                <div class="mb-16">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">3.2 Sistemas Autónomos</h3>
+
+                    <div class="mb-12">
+                        <h4 class="font-semibold text-xl mb-6">Vehículos Autónomos (Regulaciones L3/L4)</h4>
+
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                                <h5 class="font-semibold mb-3">Estrategia Nacional</h5>
+                                <p class="text-sm text-gray-700 mb-3">La Estrategia para el Desarrollo Innovador de Vehículos Inteligentes tiene como objetivo la producción en masa de vehículos L3 para 2025 y la expansión del uso comercial de L4 <a href="#ref-37" class="citation">[37]</a>.</p>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs text-gray-600"><strong>Objetivos Clave:</strong> Producción en masa de L3 para 2025, expansión comercial de L4</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                                <h5 class="font-semibold mb-3">Programas Piloto Locales</h5>
+                                <p class="text-sm text-gray-700 mb-3">Beijing, Shanghái y Shenzhen están desarrollando regulaciones locales para pruebas en carretera y operaciones comerciales dentro de zonas designadas <a href="#ref-38" class="citation">[38]</a>.</p>
+                                <div class="bg-green-50 p-3 rounded">
+                                    <p class="text-xs text-gray-600"><strong>Ciudades Pioneras:</strong> Beijing, Shanghái, Shenzhen con marcos experimentales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <h4 class="font-semibold text-xl mb-6">Drones y Transporte a Baja Altitud</h4>
+
+                        <div class="bg-gradient-to-r from-sky-50 to-blue-50 p-8 rounded-xl">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h5 class="font-semibold mb-4">Crecimiento del Mercado</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">Tamaño del Mercado 2020</span>
+                                            <span class="font-semibold">27.18 mil millones de yuanes</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">Tamaño del Mercado 2023</span>
+                                            <span class="font-semibold">58.18 mil millones de yuanes</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm">Proyección 2025</span>
+                                            <span class="font-semibold text-blue-700">120-150 mil millones de yuanes</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600 mt-2">
+                                            <a href="#ref-63" class="citation">Fuente: Proyecciones del Ministerio de Transporte [63]</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 class="font-semibold mb-4">Infraestructura Regulatoria</h5>
+                                    <div class="space-y-3">
+                                        <div class="bg-white p-3 rounded">
+                                            <p class="text-sm font-semibold">1.2 millones de drones registrados</p>
+                                            <p class="text-xs text-gray-600">Gestión integral de la plataforma UOM <a href="#ref-77" class="citation">[77]</a>
+                                            </p>
+                                        </div>
+                                        <div class="bg-white p-3 rounded">
+                                            <p class="text-sm font-semibold">270,000 licencias de piloto emitidas</p>
+                                            <p class="text-xs text-gray-600">Infraestructura regulatoria robusta para operaciones de drones</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-xl shadow-sm">
+                        <h4 class="font-semibold text-xl mb-6">Directrices Éticas para la Conducción Autónoma</h4>
+                        <p class="text-sm text-gray-600 mb-4">Directriz de Ética de la Investigación y Desarrollo de Tecnología de Automatización de la Conducción, MOST, julio de 2025 <a href="#ref-46" class="citation">[46]</a>
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h5 class="font-semibold mb-3 text-red-700">Prioridad a la Preservación de la Vida</h5>
+                                <p class="text-sm text-gray-700 mb-3">"Respetar profundamente la vida y buscar activamente medidas efectivas para minimizar el daño a los individuos" en accidentes inevitables <a href="#ref-47" class="citation">[47]</a>.</p>
+
+                                <h5 class="font-semibold mb-3 text-blue-700 mt-6">Requisitos de Transparencia</h5>
+                                <p class="text-sm text-gray-700">Documentación clara y accesibilidad pública de algoritmos, modelos y componentes principales.</p>
+                            </div>
+
+                            <div>
+                                <h5 class="font-semibold mb-3 text-green-700">Marco de Responsabilidad por Niveles</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>L2 (Asistencia al Conductor)</span>
+                                        <span class="font-semibold">Conductor Humano</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>L3 (Automatización Condicional)</span>
+                                        <span class="font-semibold">Compartida</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>L4/L5 (Automatización Completa)</span>
+                                        <span class="font-semibold">Sistema</span>
+                                    </div>
+                                </div>
+
+                                <h5 class="font-semibold mb-3 text-purple-700 mt-6">Protección de la Privacidad</h5>
+                                <p class="text-sm text-gray-700">Protección integral de la privacidad para todo el ciclo de vida de los datos, desde la recopilación hasta el almacenamiento y uso <a href="#ref-74" class="citation">[74]</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="ethical-principles" class="py-16 bg-gray-50">
+            <div class="content-container">
+                <h2 class="serif-heading text-4xl mb-12">4. Principios Éticos de China para la IA</h2>
+
+                <p class="text-lg mb-8">
+                    El enfoque de China hacia la ética de la IA está codificado en un conjunto de principios que enfatizan el bien social, los valores centrados en el ser humano y la supervisión estatal. Estos principios se están integrando en un marco regulatorio concreto, especialmente en el <a href="#ref-5" class="citation">Proyecto de Medidas Administrativas para la Gestión Ética de la Tecnología de IA (Prueba) emitido en agosto de 2025</a>.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-heart text-red-500 mr-3"></i>
+                                Mejorar el Bienestar Humano
+                            </h4>
+                            <p class="text-sm text-gray-700">La investigación y aplicación de la IA deben estar orientadas a beneficiar a la humanidad y contribuir al bien social, enfatizando la "IA para el bien social" <a href="#ref-5" class="citation">[5]</a>.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-shield-alt text-blue-500 mr-3"></i>
+                                Respetar los Derechos y la Propiedad Intelectual
+                            </h4>
+                            <p class="text-sm text-gray-700">Las actividades de IA deben respetar la vida humana, la dignidad, la privacidad y los derechos legítimos, al tiempo que protegen los derechos de propiedad intelectual.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-balance-scale text-green-500 mr-3"></i>
+                                Defender la Equidad
+                            </h4>
+                            <p class="text-sm text-gray-700">Los sistemas de IA deben ser justos y no discriminatorios, con medidas proactivas para identificar y mitigar posibles sesgos en datos y algoritmos.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-red-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-lock text-red-500 mr-3"></i>
+                                Garantizar la Seguridad y el Control
+                            </h4>
+                            <p class="text-sm text-gray-700">Los sistemas de IA deben ser robustos, fiables y seguros, con mecanismos eficaces para la supervisión y el control humanos.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-gavel text-purple-500 mr-3"></i>
+                                Fortalecer la Responsabilidad
+                            </h4>
+                            <p class="text-sm text-gray-700">Una cadena de responsabilidad clara con organizaciones responsables de los resultados de los sistemas de IA a través de comités de ética y requisitos de trazabilidad <a href="#ref-7" class="citation">[7]</a>.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-users text-yellow-500 mr-3"></i>
+                                Comités de Ética de la IA
+                            </h4>
+                            <p class="text-sm text-gray-700">Establecimiento obligatorio de comités de ética independientes con experiencia multidisciplinaria para realizar revisiones y supervisión continua.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm mb-12">
+                    <h4 class="font-semibold text-xl mb-6">El Proceso de Revisión Ética</h4>
+                    <div class="grid md:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-file-alt text-red-600 text-xl"></i>
+                            </div>
+                            <h5 class="font-semibold text-sm mb-2">Presentación de la Solicitud</h5>
+                            <p class="text-xs text-gray-600">Plan de actividad detallado, evaluación de riesgos, plan de mitigación y compromiso de cumplimiento</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-search text-blue-600 text-xl"></i>
+                            </div>
+                            <h5 class="font-semibold text-sm mb-2">Revisión del Comité</h5>
+                            <p class="text-xs text-gray-600">Evaluación basada en criterios de equidad, robustez, transparencia y responsabilidad</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-clock text-green-600 text-xl"></i>
+                            </div>
+                            <h5 class="font-semibold text-sm mb-2">Decisión en 30 Días</h5>
+                            <p class="text-xs text-gray-600">Plazo claro para la decisión del proceso de revisión con revisiones de seguimiento ≤12 meses <a href="#ref-7" class="citation">[7]</a>
+                            </p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-user-check text-purple-600 text-xl"></i>
+                            </div>
+                            <h5 class="font-semibold text-sm mb-2">Segunda Revisión por Expertos</h5>
+                            <p class="text-xs text-gray-600">Obligatoria para actividades de alto riesgo que afecten la salud humana o moldeen la conciencia social</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h4 class="font-semibold text-xl mb-6">Comparación con los Principios de IA de la OCDE</h4>
+                    <div class="overflow-x-auto">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Principio</th>
+                                    <th>China (Proyecto de Medidas, 2025)</th>
+                                    <th>Principios de IA de la OCDE (2019)</th>
+                                    <th>Principal Similitud / Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Bienestar Humano</strong></td>
+                                    <td><strong>Mejorar el Bienestar Humano:</strong> La IA debe promover el bienestar de la humanidad y contribuir al bien social <a href="#ref-5" class="citation">[5]</a>.</td>
+                                    <td><strong>Crecimiento Inclusivo, Desarrollo Sostenible y Bienestar:</strong> La IA debe contribuir al bienestar humano, al crecimiento inclusivo y al desarrollo sostenible <a href="#ref-145" class="citation">[145]</a>.</td>
+                                    <td><strong>Similitud:</strong> Ambos marcos priorizan el uso de la IA para el beneficio de la humanidad y la sociedad.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Derechos Humanos y Equidad</strong></td>
+                                    <td><strong>Respetar la Vida y los Derechos; Defender la Equidad y la Justicia:</strong> La IA debe respetar la vida humana, la dignidad y los derechos, y garantizar la equidad y la no discriminación <a href="#ref-5" class="citation">[5]</a>.</td>
+                                    <td><strong>Valores Centrados en el Ser Humano y Equidad:</strong> La IA debe respetar los derechos humanos, los valores democráticos y el estado de derecho, y promover la equidad y la no discriminación <a href="#ref-145" class="citation">[145]</a>.</td>
+                                    <td><strong>Similitud:</strong> Ambos enfatizan el respeto por los derechos humanos y la necesidad de equidad y no discriminación.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transparencia y Explicabilidad</strong></td>
+                                    <td><strong>Mantener la Apertura y la Transparencia:</strong> Los sistemas de IA deben ser transparentes y sus procesos de toma de decisiones deben ser explicables <a href="#ref-7" class="citation">[7]</a>.</td>
+                                    <td><strong>Transparencia y Explicabilidad:</strong> Los sistemas de IA deben ser transparentes y sus resultados deben ser explicables <a href="#ref-145" class="citation">[145]</a>.</td>
+                                    <td><strong>Similitud:</strong> Ambos marcos subrayan la importancia de la transparencia y la explicabilidad como componentes clave de una IA confiable.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Estabilidad Social</strong></td>
+                                    <td><em>Implícito en el contexto regulatorio general y el énfasis en los "valores socialistas fundamentales" y la supervisión estatal.</em></td>
+                                    <td><em>No es un principio explícito, pero la seguridad y el bienestar contribuyen a la estabilidad social.</em></td>
+                                    <td><strong>Diferencia:</strong> El enfoque de China pone un mayor énfasis en el bienestar colectivo y la estabilidad social.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="timeline" class="py-16">
+            <div class="content-container">
+                <h2 class="serif-heading text-4xl mb-12">5. Cronología de la Regulación de IA y Robótica en China</h2>
+
+                <p class="text-lg mb-12">
+                    La evolución del marco regulatorio de China para la IA y la robótica ha estado marcada por una rápida transición desde la planificación estratégica de alto nivel a reglas detalladas y aplicables. Esta cronología destaca los hitos clave en este proceso.
+                </p>
+
+                <div class="mb-12">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">Fundamentos Iniciales (2020-2022)</h3>
+                    <p class="text-gray-600 mb-6">Establecimiento de leyes fundamentales de datos y ciberseguridad que sustentan toda la regulación posterior de la IA.</p>
+
+                    <div class="space-y-6">
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Plan de Desarrollo de IA de Nueva Generación</h4>
+                                    <span class="text-sm text-gray-500">2020</span>
+                                </div>
+                                <p class="text-sm text-gray-700">El Consejo de Estado emite un plan estratégico que establece el objetivo de que China se convierta en líder mundial en IA para 2030.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Ley de Ciberseguridad (CSL)</h4>
+                                    <span class="text-sm text-gray-500">1 de junio de 2017</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Establece la base para la seguridad de la red y la protección de datos, introduciendo el concepto de CII.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Ley de Seguridad de Datos (DSL)</h4>
+                                    <span class="text-sm text-gray-500">1 de septiembre de 2021</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Introduce la clasificación de datos y controles estrictos sobre la exportación de "datos importantes".</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Ley de Protección de Información Personal (PIPL)</h4>
+                                    <span class="text-sm text-gray-500">1 de noviembre de 2021</span>
+                                </div>
+                                <p class="text-sm text-gray-700">El equivalente al GDPR de China que proporciona un marco integral para la protección de datos personales.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Disposiciones sobre Recomendaciones Algorítmicas</h4>
+                                    <span class="text-sm text-gray-500">31 de diciembre de 2021</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Primera regulación directa de los algoritmos de recomendación, que exige transparencia y control del usuario.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">La Fase de Legislación de "Pequeña Escala" (2022-2024)</h3>
+                    <p class="text-gray-600 mb-6">Dirigida a aplicaciones específicas de IA de alto impacto con reglas dedicadas, mientras se gana experiencia para un marco integral.</p>
+
+                    <div class="space-y-6">
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Disposiciones sobre Servicios de Información de Internet de Síntesis Profunda</h4>
+                                    <span class="text-sm text-gray-500">10 de enero de 2023</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Regula los deepfakes y los medios sintéticos, exigiendo un etiquetado claro del contenido generado por IA.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Medidas Provisionales sobre IA Generativa</h4>
+                                    <span class="text-sm text-gray-500">15 de agosto de 2023</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Establece reglas para la IA generativa de cara al público, incluidas evaluaciones de seguridad y alineación con los "valores socialistas fundamentales".</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Medidas de Revisión de Ética en Ciencia y Tecnología</h4>
+                                    <span class="text-sm text-gray-500">1 de diciembre de 2023</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Marco unificado para la revisión ética en la investigación científica, sentando las bases para las reglas de ética específicas de la IA.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <h3 class="serif-heading text-2xl mb-8 text-gray-800">El Impulso Regulatorio de 2025: Ética y Gobernanza Global</h3>
+                    <p class="text-gray-600 mb-6">Aceleración significativa en los esfuerzos de gobernanza de la IA con un enfoque en la formalización de un marco ético integral y una visión de gobernanza global de la IA.</p>
+
+                    <div class="space-y-6">
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Medidas de Etiquetado de Contenido Generado por IA</h4>
+                                    <span class="text-sm text-gray-500">Marzo de 2025</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Ampliación y formalización de los requisitos de etiquetado para todas las formas de contenido sintético generado por IA, con vigencia a partir de septiembre de 2025.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Plan de Acción de Gobernanza Global de la IA</h4>
+                                    <span class="text-sm text-gray-500">Julio de 2025</span>
+                                </div>
+                                <p class="text-sm text-gray-700">La visión estratégica de China para la cooperación internacional en IA, enfatizando la innovación, la seguridad y la gobernanza ética.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-red-50 p-6 rounded-xl shadow-sm border-l-4 border-red-500">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold text-red-700">Proyecto de Medidas de Gestión Ética de la Tecnología de IA</h4>
+                                    <span class="text-sm text-gray-500">Agosto de 2025</span>
+                                </div>
+                                <p class="text-sm text-gray-700">El intento más completo de crear un sistema de gobernanza ética unificado para la IA, incluidos comités de ética obligatorios y un proceso de revisión por niveles <a href="#ref-5" class="citation">[5]</a>.</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-semibold">Regulaciones de Robótica Impulsada por IA</h4>
+                                    <span class="text-sm text-gray-500">Octubre de 2025</span>
+                                </div>
+                                <p class="text-sm text-gray-700">Nuevas regulaciones que cubren la seguridad técnica, la fiabilidad operativa y la protección de datos para robots industriales y de servicio <a href="#ref-10" class="citation">[10]</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section class="py-16 bg-gray-100">
+            <div class="content-container">
+                <h3 class="serif-heading text-2xl mb-8">Referencias</h3>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div class="space-y-3">
+                        <div id="ref-5" class="bg-white p-4 rounded">
+                            <strong>[5]</strong>
+                            <a href="https://www.geopolitechs.org/p/china-releases-draft-technology-ethics" class="citation">China Publica Proyecto de Normas de Ética Tecnológica</a> - Geopolitics &amp; Technology
+                        </div>
+                        <div id="ref-7" class="bg-white p-4 rounded">
+                            <strong>[7]</strong>
+                            <a href="https://www.mayerbrown.com/en/insights/publications/2025/10/artificial-intelligence-a-brave-new-world-china-formulates-new-ai-global--governance-action-plan-and-issues-draft-ethics-rules-and-ai-labelling-rules" class="citation">Marco de Gobernanza de IA de China</a> - Mayer Brown
+                        </div>
+                        <div id="ref-10" class="bg-white p-4 rounded">
+                            <strong>[10]</strong>
+                            <a href="https://chinacrunch.nestech360.net/china-announces-new-regulations-for-ai-driven-robotics-2/" class="citation">China Anuncia Nuevas Regulaciones para la Robótica Impulsada por IA</a> - ChinaCrunch
+                        </div>
+                        <div id="ref-32" class="bg-white p-4 rounded">
+                            <strong>[32]</strong>
+                            <a href="https://www.chinesestandard.net/PDF/English.aspx/GBT45654-2025" class="citation">Estándar GB/T 45654-2025</a> - Chinese Standard
+                        </div>
+                        <div id="ref-37" class="bg-white p-4 rounded">
+                            <strong>[37]</strong>
+                            <a href="https://law.asia/autonomous-vehicles-china-taiwan-regulation-comparison/" class="citation">Comparación de la Regulación de Vehículos Autónomos</a> - Law.asia
+                        </div>
+                        <div id="ref-38" class="bg-white p-4 rounded">
+                            <strong>[38]</strong>
+                            <a href="https://www.tsinghuachinalawreview.law.tsinghua.edu.cn/UploadFiles/2025-01-31/ibauyyl7yc2zt3nm.pdf" class="citation">Regulación de Vehículos Autónomos en Beijing</a> - Tsinghua China Law Review
+                        </div>
+                        <div id="ref-46" class="bg-white p-4 rounded">
+                            <strong>[46]</strong>
+                            <a href="https://global.chinadaily.com.cn/a/202507/25/WS6882d548a310ad07b5d91e02.html" class="citation">Directrices Éticas para la Conducción Autónoma</a> - China Daily
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div id="ref-47" class="bg-white p-4 rounded">
+                            <strong>[47]</strong>
+                            <a href="https://www.globaltimes.cn/page/202507/1339111.shtml" class="citation">Ética de la Tecnología de Automatización de la Conducción</a> - Global Times
+                        </div>
+                        <div id="ref-63" class="bg-white p-4 rounded">
+                            <strong>[63]</strong>
+                            <a href="https://english.www.gov.cn/news/202502/08/content_WS67a716a2c6d0868f4e8ef7c5.html" class="citation">Estándares de Transporte a Baja Altitud</a> - Gov.cn
+                        </div>
+                        <div id="ref-74" class="bg-white p-4 rounded">
+                            <strong>[74]</strong>
+                            <a href="https://www.globaltimes.cn/page/202507/1339111.shtml" class="citation">Marco Ético de la Conducción Autónoma</a> - Global Times
+                        </div>
+                        <div id="ref-77" class="bg-white p-4 rounded">
+                            <strong>[77]</strong>
+                            <a href="https://www.ourchinastory.com/en/15179/A-1.5-trillion-RMB-industry:-Why-are-China's-drones-soaring-high?" class="citation">Análisis de la Industria de Drones de China</a> - Our China Story
+                        </div>
+                        <div id="ref-87" class="bg-white p-4 rounded">
+                            <strong>[87]</strong>
+                            <a href="https://news.cgtn.com/news/2025-02-08/China-prioritizes-AI-low-altitude-transport-standards-for-2025-1APkrPf85fW/p.html" class="citation">China Prioriza Estándares de IA para Transporte a Baja Altitud</a> - CGTN
+                        </div>
+                        <div id="ref-89" class="bg-white p-4 rounded">
+                            <strong>[89]</strong>
+                            <a href="https://aichronicle.co/chinas-draft-ethics-rules-and-ai-labeling-measures-a-comprehensive-guide-to-the-worlds-most-ambitious-ai-governance-framework/" class="citation">Proyecto de Normas de Ética y Etiquetado de IA de China</a> - AI Chronicle
+                        </div>
+                        <div id="ref-101" class="bg-white p-4 rounded">
+                            <strong>[101]</strong>
+                            <a href="https://practiceguides.chambers.com/practice-guides/artificial-intelligence-2025/china" class="citation">Guía Práctica de IA de China</a> - Chambers
+                        </div>
+                        <div id="ref-130" class="bg-white p-4 rounded">
+                            <strong>[130]</strong>
+                            <a href="https://concordia-ai.com/wp-content/uploads/2025/07/State-of-AI-Safety-in-China-2025.pdf" class="citation">Estado de la Seguridad de la IA en China 2025</a> - Concordia AI
+                        </div>
+                        <div id="ref-145" class="bg-white p-4 rounded">
+                            <strong>[145]</strong>
+                            <a href="https://www.oecd.org/content/dam/oecd/en/publications/reports/2023/10/the-state-of-implementation-of-the-oecd-ai-principles-four-years-on_b9f13b5c/835641c9-en.pdf" class="citation">Implementación de los Principios de IA de la OCDE</a> - OECD
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 px-4 text-gray-600 bg-gray-100">
+        <div class="content-container flex flex-col md:flex-row items-center justify-center gap-6">
+            <div class="text-left md:text-center">
+                <p class="font-semibold">Material elaborado por el profesor Sergio Gevatschnaider.</p>
+                <p class="text-sm mt-1">Escanee el código para acceder a la versión en línea.</p>
+            </div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://chinai.link/regulaciones" alt="Código QR para la versión en línea" class="rounded-lg shadow-md"/>
+        </div>
+    </footer>
+
+    <script>
+        // Inicializar Mermaid con estilo mejorado
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#dc2626', // Rojo de China
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#b91c1c',
+                lineColor: '#34495e',
+                secondaryColor: '#f39c12',
+                tertiaryColor: '#2c3e50',
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                secondBkg: '#f8f9fa',
+                tertiaryBkg: '#e9ecef',
+                nodeBorder: '#2c3e50',
+                clusterBkg: '#f8f9fa',
+                clusterBorder: '#6c757d',
+                defaultLinkColor: '#34495e',
+                titleColor: '#2c3e50',
+                edgeLabelBackground: '#ffffff',
+                nodeTextColor: '#2c3e50'
+            },
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 20,
+                nodeSpacing: 50,
+                rankSpacing: 50,
+                diagramPadding: 20
+            },
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 13
+        });
+
+        // 7. Implementación del botón de menú y cierre para móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const toc = document.querySelector('.fixed-toc');
+            const menuToggleBtn = document.querySelector('.menu-toggle-btn');
+            const closeTocBtn = document.querySelector('#close-toc-btn');
+            const tocLinks = document.querySelectorAll('.fixed-toc a[href^="#"]');
+
+            function toggleToc() {
+                toc.classList.toggle('active');
+            }
+
+            menuToggleBtn.addEventListener('click', toggleToc);
+            closeTocBtn.addEventListener('click', toggleToc);
+
+            // Cierra el menú en móvil al hacer click en un enlace
+            tocLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 768) {
+                        setTimeout(() => { // Pequeño delay para permitir el scroll suave antes de cerrar
+                            toc.classList.remove('active');
+                        }, 300);
+                    }
+                });
+            });
+
+            // Desplazamiento suave para los enlaces de anclaje
+            tocLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // IntersectionObserver para resaltar la tabla de contenidos (Mejora 10)
+            const sections = document.querySelectorAll('section[id]');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        tocLinks.forEach(link => {
+                            link.classList.remove('text-red-600', 'font-semibold');
+                            link.classList.add('text-gray-600');
+                        });
+                        
+                        const activeLink = document.querySelector(`.fixed-toc a[href="#${entry.target.id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.remove('text-gray-600');
+                            activeLink.classList.add('text-red-600', 'font-semibold');
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '-20% 0px -70% 0px' // Ajuste para que se active al 20% de la parte superior de la vista
+            });
+            
+            sections.forEach(section => observer.observe(section));
+            
+        });
+    </script>
+
+</body>
+</html>
