@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Centros de Datos, IA y la Estrategia China de “Datos del Este, Cómputo del Oeste”</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Esta línea causaba que todos los links se abrieran en una nueva pestaña -->
+  <base target="_blank">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-yH8V0n1uF8E9SmG9b1CwC6WoX3N9kTu1Lk0aN6qVHv4srygZV/5Vd7J5X6vSPaI9++0sW+Hq3P5hQ7K0BO1wA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <!-- Mermaid -->
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      flowchart: { curve: "basis" }
+    });
+  </script>
+
+  <style>
+    :root {
+      --primary: #1f2937;
+      --secondary: #374151;
+      --accent: #f97316;
+      --muted: #9ca3af;
+      --background: #fefefe;
+      --surface: #f8fafc;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    /* Estilos para el tema oscuro */
+    .dark {
+      --primary: #e5e7eb;
+      --secondary: #9ca3af;
+      --accent: #fb923c;
+      --muted: #6b7280;
+      --background: #111827;
+      --surface: #1f2937;
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --border: #374151;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background-color: var(--background);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .serif-heading {
+      font-family: "Playfair Display", "Times New Roman", serif;
+    }
+
+    /* Layout con TOC fijo */
+    .fixed-toc {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 280px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.5rem 1.25rem;
+      overflow-y: auto;
+      z-index: 40;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 1024px) {
+      .fixed-toc {
+        display: none;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      margin: 3rem 0;
+    }
+
+    .shadow-soft {
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+    .dark .shadow-soft {
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Timeline */
+    .timeline-item::before {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .timeline-item::after {
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    /* Pull quote */
+    .pull-quote {
+      border-left: 4px solid var(--accent);
+      color: var(--text-secondary);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      border-radius: 0.5rem;
+    }
+
+    /* Contenedor Mermaid y controles */
+    .mermaid-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .mermaid-control-btn {
+      background: color-mix(in srgb, var(--surface) 90%, transparent);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .mermaid-control-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Flujo de proceso */
+    .process-flow {
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 8%, transparent) 0, var(--background) 50%, color-mix(in srgb, var(--accent) 5%, transparent) 100%);
+    }
+    .process-step {
+      background: color-mix(in srgb, var(--surface) 95%, transparent);
+      border: 1px solid var(--border);
+    }
+    .process-step::before {
+      color: var(--accent);
+    }
+
+    /* Tabla de comparación */
+    .comparison-table td, .comparison-table th {
+      border-bottom: 1px solid var(--border);
+    }
+    .comparison-table th {
+      color: var(--text-secondary);
+      background: color-mix(in srgb, var(--border) 20%, transparent);
+    }
+    .comparison-table tbody tr:hover {
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+    }
+    .dark .comparison-table tbody {
+        background-color: var(--surface);
+    }
+
+    /* Insignias */
+    .badge-soft {
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      color: var(--accent);
+    }
+
+    /* ESTILOS PARA EL BOTÓN DE TEMA */
+    .theme-toggle-btn {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+    .theme-toggle-btn .fa-sun { display: none; }
+    .dark .theme-toggle-btn .fa-sun { display: inline-block; }
+    .dark .theme-toggle-btn .fa-moon { display: none; }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Barra lateral TOC fija -->
+  <nav class="fixed-toc">
+    <div class="flex items-start justify-between mb-4">
+        <div>
+            <p class="text-xs font-semibold tracking-[0.18em] text-orange-500 uppercase mb-1">
+                INFRAESTRUCTURA DE IA Y GEOPOLÍTICA
+            </p>
+            <h1 class="serif-heading text-xl font-semibold text-slate-900 dark:text-slate-100 leading-snug">
+                Centros de Datos, IA y la Estrategia China de “Datos del Este, Cómputo del Oeste”
+            </h1>
+        </div>
+        <!-- BOTÓN DE CAMBIO DE TEMA -->
+        <button id="theme-toggle" class="theme-toggle-btn ml-2 flex-shrink-0" title="Cambiar tema">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+        </button>
+    </div>
+     <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Cómo el cómputo, las redes y las políticas se combinan para remodelar la geografía de la IA.
+    </p>
+
+    <div class="space-y-4 text-sm mt-4">
+      <div>
+        <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-1">
+          Contenido
+        </p>
+        <!-- SECCIÓN CORREGIDA: Se añadió target="_self" a cada enlace del índice -->
+        <ul class="space-y-1.5">
+          <li><a href="#executive-summary" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">01</span>Resumen ejecutivo</a></li>
+          <li><a href="#ai-data-centers" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">02</span>Cómo los centros de datos potencian la IA</a></li>
+          <li><a href="#china-landscape" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">03</span>Panorama de IA y centros de datos en China</a></li>
+          <li><a href="#edwc-strategy" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">04</span>“Datos del Este, Cómputo del Oeste”</a></li>
+          <li><a href="#maps-visualizations" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">05</span>Mapas y visualizaciones</a></li>
+          <li><a href="#policy-investment" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">06</span>Dinámicas de políticas e inversión</a></li>
+          <li><a href="#strategic-implications" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">07</span>Implicaciones estratégicas</a></li>
+          <li><a href="#key-takeaways" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">08</span>Puntos clave</a></li>
+          <li><a href="#appendix" target="_self" class="text-slate-700 dark:text-slate-300 hover:text-orange-500 flex items-center gap-2"><span class="text-[0.6rem] text-slate-400">09</span>Apéndice: métricas y glosario</a></li>
+        </ul>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+        <p class="text-[0.7rem] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-2">
+          Ideas rápidas
+        </p>
+        <div class="space-y-2">
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+            <p class="text-[0.65rem] uppercase font-semibold text-orange-500 tracking-[0.18em] mb-1">Escala</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+              El plan EDWC de China organiza <span class="font-semibold">8 centros de computación</span> y
+              <span class="font-semibold">10 clústeres de mega centros de datos</span> en una única red nacional de cómputo.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+            <p class="text-[0.65rem] uppercase font-semibold text-emerald-600 tracking-[0.18em] mb-1">Energía</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+              Las nuevas instalaciones en los centros occidentales apuntan a un <span class="font-semibold">PUE cercano a 1.1</span> y dependen en gran medida de energías renovables y redes bajas en carbono.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+            <p class="text-[0.65rem] uppercase font-semibold text-sky-600 tracking-[0.18em] mb-1">Latencia</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+              Las actualizaciones de la red troncal mantienen la latencia de red este-oeste en torno a
+              <span class="font-semibold">20 ms</span>, permitiendo servicios de IA en tiempo real vinculados a cómputo remoto.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-[0.65rem] text-slate-500 dark:text-slate-400 leading-relaxed">
+      <p class="font-semibold mb-1">Público objetivo</p>
+      <p>Ejecutivos, inversores y legisladores que buscan una guía técnica pero accesible sobre la infraestructura de IA y la estrategia EDWC de China.</p>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    
+    <!-- (El resto del contenido HTML permanece exactamente igual que en la respuesta anterior) -->
+    
+    <!-- HERO -->
+    <section class="px-6 lg:px-10 pt-10 lg:pt-12 pb-10">
+      <div class="hero-grid grid lg:grid-cols-2 gap-8 items-center">
+        <!-- Text -->
+        <div class="hero-text">
+          <div class="inline-flex items-center gap-2 rounded-full bg-slate-900 dark:bg-slate-800 text-slate-50 px-3 py-1 mb-4">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-[0.7rem] uppercase tracking-[0.2em] font-semibold">
+              Informe para líderes de IA, infraestructura y políticas
+            </span>
+          </div>
+
+          <h1 class="serif-heading text-3xl md:text-4xl lg:text-[2.6rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100 leading-tight mb-4">
+            Centros de Datos, IA y la Estrategia de China
+            <span class="text-orange-500 dark:text-orange-400">“Datos del Este, Cómputo del Oeste”</span>
+          </h1>
+
+          <p class="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-5">
+            Este informe explica cómo los centros de datos modernos hacen posible la IA a gran escala, y cómo el proyecto de China
+            <span class="font-semibold">Datos del Este, Cómputo del Oeste (东数西算, Dōng shù xī suàn)</span> está remodelando la geografía
+            del cómputo, la energía y la inversión. Combina conocimientos técnicos con análisis de políticas y destaca mapas y
+            visualizaciones que ayudan a los responsables a comprender dónde se está desarrollando la carrera de la infraestructura de IA.
+          </p>
+
+          <div class="flex flex-wrap gap-3 items-center mb-5 text-xs text-slate-500 dark:text-slate-400">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 dark:bg-slate-800 text-slate-50">
+              <i class="fa-solid fa-microchip text-[0.7rem]"></i>
+              <span>Infraestructura de IA</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
+              <i class="fa-solid fa-database text-[0.7rem]"></i>
+              <span>Centros de datos</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <i class="fa-solid fa-scale-balanced text-[0.7rem]"></i>
+              <span>Políticas e inversión</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 shadow-soft">
+              <p class="text-[0.7rem] uppercase font-semibold tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Alcance</p>
+              <p class="text-slate-700 dark:text-slate-300">
+                Desde chips, racks y latencia hasta energía verde, incentivos y estrategias nacionales de cómputo.
+              </p>
+            </div>
+            <div class="bg-slate-900 dark:bg-slate-800 text-slate-50 rounded-lg p-3 shadow-soft">
+              <p class="text-[0.7rem] uppercase font-semibold tracking-[0.18em] text-amber-300 mb-1">Use este informe para</p>
+              <ul class="space-y-1 list-disc list-inside text-slate-100/90 dark:text-slate-200/90">
+                <li>Interpretar mapas de centros de datos para IA.</li>
+                <li>Entender los hubs y clústeres de EDWC.</li>
+                <li>Evaluar oportunidades y riesgos para proyectos intensivos en IA.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual -->
+        <div class="hero-visual relative">
+          <div class="relative rounded-2xl overflow-hidden shadow-soft bg-slate-900 dark:bg-slate-800 min-h-[260px] flex items-stretch">
+            <div
+              class="absolute inset-0"
+              style="
+                background-image:
+                  radial-gradient(circle at 10% 20%, rgba(56,189,248,0.35) 0, transparent 55%),
+                  radial-gradient(circle at 80% 0%, rgba(249,115,22,0.45) 0, transparent 55%),
+                  radial-gradient(circle at 10% 80%, rgba(34,197,94,0.4) 0, transparent 55%);
+              "
+            ></div>
+            <div class="relative flex-1 flex flex-col justify-between p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="text-[0.7rem] text-slate-200">
+                  <p class="uppercase tracking-[0.22em] text-slate-300/90">China · Red de Centros de Datos</p>
+                  <p class="text-slate-300/80 mt-0.5">Flujo conceptual de cargas de trabajo de IA en los hubs de EDWC</p>
+                </div>
+                <div class="flex gap-1.5">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"></span>
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                  <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+                </div>
+              </div>
+
+              <div class="relative flex-1 flex items-center justify-center">
+                <!-- Mini layout tipo mapa (abstracto) -->
+                <div class="grid grid-cols-3 gap-3 w-full max-w-sm">
+                  <div class="col-span-2 bg-slate-950/70 dark:bg-slate-900/70 rounded-xl border border-sky-400/40 p-2">
+                    <p class="text-[0.65rem] text-sky-200 mb-1 font-semibold uppercase tracking-[0.18em]">Hubs del Este</p>
+                    <div class="flex flex-wrap gap-1.5 text-[0.6rem]">
+                      <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-100 border border-sky-300/40">Beijing–Tianjin–Hebei</span>
+                      <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-100 border border-sky-300/40">Delta del Río Yangtze</span>
+                      <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-100 border border-sky-300/40">Gran Área de la Bahía</span>
+                    </div>
+                  </div>
+                  <div class="bg-slate-950/70 dark:bg-slate-900/70 rounded-xl border border-emerald-400/40 p-2">
+                    <p class="text-[0.65rem] text-emerald-200 mb-1 font-semibold uppercase tracking-[0.18em]">Hubs del Oeste</p>
+                    <ul class="space-y-0.5 text-[0.6rem] text-emerald-100">
+                      <li>Mongolia Interior</li>
+                      <li>Guizhou</li>
+                      <li>Ningxia</li>
+                      <li>Gansu</li>
+                    </ul>
+                  </div>
+                  <div class="col-span-3 flex items-center justify-between text-[0.65rem] text-slate-100/80 mt-1">
+                    <span class="inline-flex items-center gap-1">
+                      <i class="fa-solid fa-circle-dot text-emerald-400 text-[0.55rem]"></i>
+                      <span>Entrenamiento de IA en el oeste</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                      <i class="fa-solid fa-wave-square text-sky-300 text-[0.55rem]"></i>
+                      <span>Servicios de baja latencia en el este</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="relative mt-3 text-[0.65rem] text-slate-300 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center gap-1 bg-slate-950/70 dark:bg-slate-900/70 px-2 py-0.5 rounded-full border border-slate-700/80">
+                    <i class="fa-solid fa-network-wired text-[0.6rem] text-sky-300"></i>
+                    <span>Latencia de red troncal ≈ 20 ms</span>
+                  </span>
+                </div>
+                <div class="text-slate-400">
+                  <span class="font-semibold text-sky-200">EDWC</span> · visualización conceptual
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="mt-2 text-[0.65rem] text-slate-500 dark:text-slate-400">
+            Ilustración: diseño abstracto de los hubs este-oeste y los flujos de trabajo de IA bajo la estrategia Datos del Este, Cómputo del Oeste.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 1. Resumen Ejecutivo -->
+    <section id="executive-summary" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">01 · Resumen ejecutivo</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Por qué los centros de datos – y dónde se ubican – son ahora una cuestión central para la estrategia de IA
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 shadow-soft">
+            <p class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Técnico</p>
+            <p class="text-sm text-slate-700 dark:text-slate-300">
+              La IA de vanguardia depende de clústeres densos de GPUs/aceleradores, redes ultrarrápidas y sistemas de energía y refrigeración cuidadosamente diseñados. Los centros de datos modernos son "fábricas de IA" construidas a medida.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 shadow-soft">
+            <p class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Geográfico</p>
+            <p class="text-sm text-slate-700 dark:text-slate-300">
+              La ubicación física del cómputo – cerca de los usuarios para baja latencia, o cerca de energía limpia y barata – ahora define el costo, rendimiento y resiliencia de los ecosistemas de IA.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 shadow-soft">
+            <p class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Político</p>
+            <p class="text-sm text-slate-700 dark:text-slate-300">
+              Los gobiernos tratan cada vez más el cómputo como infraestructura estratégica. La estrategia china de Datos del Este, Cómputo del Oeste (EDWC) es uno de los intentos más ambiciosos de planificar centros de datos para IA a escala nacional.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-5 gap-6 items-start">
+          <div class="md:col-span-3 space-y-3 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p>
+              Este informe tiene dos objetivos. Primero, explica cómo los centros de datos hacen posible la IA a gran escala: desde el hardware (GPUs, aceleradores, almacenamiento) y la red, hasta la energía, refrigeración y limitaciones de fiabilidad.
+              Segundo, examina cómo la estrategia EDWC de China reordena la lógica espacial del cómputo, canalizando datos desde economías costeras densas hacia provincias occidentales ricas en recursos, manteniendo al mismo tiempo presupuestos de latencia ajustados para los servicios de IA.
+            </p>
+            <p>
+              Para ejecutivos y legisladores, EDWC no es solo un plan de infraestructura nacional. Es un modelo de cómo un estado puede:
+            </p>
+            <ul class="list-disc list-inside space-y-1">
+              <li>Alinear los centros de datos de IA con la descarbonización de la red y la política industrial.</li>
+              <li>Usar redes troncales nacionales para unificar mercados fragmentados de la nube y centros de datos.</li>
+              <li>Implementar incentivos financieros para que las empresas más pequeñas puedan acceder a cómputo de IA avanzado.</li>
+            </ul>
+            <p>
+              Las secciones siguientes combinan explicaciones técnicas, mapas y análisis de políticas para que tanto ingenieros como responsables no técnicos puedan leer el mismo documento y sacar conclusiones prácticas.
+            </p>
+          </div>
+
+          <aside class="md:col-span-2 space-y-3">
+            <div class="pull-quote text-sm">
+              <p class="mb-2">
+                “Los centros de datos se están convirtiendo en lo que los puertos, los nudos ferroviarios y las centrales eléctricas fueron en épocas anteriores: nodos ancla que definen la geografía económica. En IA, quien orquesta estos nodos de manera efectiva puede moverse más rápido que aquellos que solo optimizan algoritmos.”
+              </p>
+              <p class="text-[0.7rem] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-[0.18em]">
+                Enfoque utilizado en este informe
+              </p>
+            </div>
+            <div class="bg-slate-900 dark:bg-slate-800 text-slate-50 rounded-xl p-3.5 space-y-2 shadow-soft">
+              <p class="text-[0.65rem] uppercase tracking-[0.18em] text-amber-300">Cómo leer este informe</p>
+              <ul class="text-xs space-y-1.5">
+                <li><span class="font-semibold">Secciones 2–3</span>: fundamentos técnicos y geográficos.</li>
+                <li><span class="font-semibold">Sección 4</span>: análisis profundo de los hubs, clústeres y flujos de EDWC.</li>
+                <li><span class="font-semibold">Secciones 5–7</span>: mapas, instrumentos de política y escenarios estratégicos.</li>
+                <li><span class="font-semibold">Apéndice</span>: métricas y glosario para referencia rápida.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 2. Cómo los centros de datos potencian la IA -->
+    <section id="ai-data-centers" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">02 · Cómo los centros de datos potencian la IA</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            De algoritmos a infraestructura: lo que la IA necesita de los centros de datos
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-microchip text-orange-500 text-xs"></i>
+              Cómputo: GPUs, aceleradores y topología
+            </h3>
+            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+              Entrenar y servir modelos de IA a escala de frontera requiere miles de GPUs u otros aceleradores de IA estrechamente interconectados. La topología de cómo se conectan estos chips – usando redes de alta velocidad como NVLink, Infiniband o interconexiones personalizadas – es tan importante como su rendimiento individual.
+            </p>
+            <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <li>Los <span class="font-semibold">clústeres de entrenamiento</span> pueden superar las decenas de miles de aceleradores, llevando el consumo de energía a cientos de megavatios.</li>
+              <li>Los <span class="font-semibold">clústeres de inferencia</span> están optimizados para el rendimiento y la latencia, sirviendo millones de consultas de usuarios por segundo.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-database text-sky-600 text-xs"></i>
+              Almacenamiento y pipelines de datos
+            </h3>
+            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+              Los sistemas de IA dependen de un acceso de alto rendimiento a conjuntos de datos masivos: registros, imágenes, video, datos estructurados y datos sintéticos. Las arquitecturas de almacenamiento combinan almacenamiento de objetos, sistemas de archivos distribuidos y SSD locales rápidos cerca de los chips de entrenamiento.
+            </p>
+            <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <li>Los pipelines de ingesta de datos extraen de dispositivos de borde, sistemas empresariales y fuentes públicas.</li>
+              <li>Conjuntos de datos "dorados" curados y almacenes de características (feature stores) apoyan el entrenamiento y la evaluación reproducibles.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-network-wired text-emerald-600 text-xs"></i>
+              Redes y latencia
+            </h3>
+            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+              Dentro del centro de datos, las redes sin bloqueo y los protocolos de control de congestión son críticos para el entrenamiento multi-nodo y la inferencia distribuida. Externamente, los enlaces troncales y las redes de entrega de contenido determinan cuán rápido llegan los servicios de IA a los usuarios o dispositivos de borde.
+            </p>
+            <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <li>El <span class="font-semibold">entrenamiento</span> es sensible al ancho de banda entre máquinas y al jitter.</li>
+              <li>La <span class="font-semibold">inferencia</span> es sensible a la latencia de extremo a extremo, especialmente para agentes conversacionales, trading o control industrial.</li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-yellow-500 text-xs"></i>
+              Energía, refrigeración y sostenibilidad
+            </h3>
+            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+              Los racks de IA de alta densidad pueden superar los 30–60 kW cada uno, forzando un cambio de la refrigeración por aire tradicional a soluciones líquidas e híbridas. La Eficacia del Uso de la Energía (PUE) y la intensidad de carbono de la red influyen fuertemente en la economía a largo plazo y el impacto climático de la IA.
+            </p>
+            <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
+              <li>Las decisiones de ubicación siguen cada vez más el acceso a energía baja en carbono, estable y asequible.</li>
+              <li>Las instalaciones con alta carga de IA a menudo se ubican junto a plantas de energía renovable, recursos hídricos o energía nuclear de base.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="process-flow mt-4">
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-diagram-project text-sky-600 text-xs"></i>
+            Cadena de valor de IA de extremo a extremo dentro de una red de centros de datos
+          </h3>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="space-y-2 md:col-span-2">
+              <div class="process-step">
+                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 mb-0.5">1. Captura y agregación de datos</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Registros, interacciones de usuarios, flujos de sensores y datos empresariales se ingieren a través de pipelines seguros en áreas de preparación y lagos de datos.
+                </p>
+              </div>
+              <div class="process-step">
+                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 mb-0.5">2. Curación e ingeniería de características</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Los datos se limpian, etiquetan, deduplican y transforman en formatos adecuados para el entrenamiento, incluyendo corpus listos para tokenizadores y características vectorizadas.
+                </p>
+              </div>
+              <div class="process-step">
+                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 mb-0.5">3. Entrenamiento y evaluación</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Los trabajos de entrenamiento distribuido se ejecutan en clústeres de aceleradores, mientras que los conjuntos de evaluación y los pipelines de "red-teaming" prueban el rendimiento, el sesgo y la seguridad.
+                </p>
+              </div>
+              <div class="process-step">
+                <p class="text-xs font-semibold text-slate-900 dark:text-slate-100 mb-0.5">4. Despliegue y monitoreo</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Los modelos se despliegan en pilas de inferencia, con un monitoreo continuo de la latencia, el costo por consulta y la deriva (drift). Los bucles de retroalimentación introducen nuevos datos en el ciclo.
+                </p>
+              </div>
+            </div>
+            <div class="bg-white/75 dark:bg-slate-800/75 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-300 space-y-2 shadow-soft">
+              <p class="text-[0.65rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Por qué esto importa</p>
+              <p>
+                Entender este pipeline aclara por qué los centros de datos centrados en IA requieren decisiones de diseño diferentes a las de las instalaciones de nube genéricas, y por qué estrategias nacionales como EDWC enfatizan tanto las redes troncales como la planificación energética, no solo el número de racks.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 3. Panorama de IA y centros de datos en China -->
+    <section id="china-landscape" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">03 · Panorama de IA y centros de datos en China</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            De la expansión de la nube costera a una red de cómputo nacional integrada
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-5">
+          <div class="md:col-span-2 text-sm text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed">
+            <p>
+              Las primeras olas de expansión de la nube y los centros de datos en China se concentraron en las regiones de megaciudades costeras como Beijing, Shanghai, Shenzhen y Guangzhou. Estos centros ofrecían una fuerte conectividad de fibra, proximidad a los usuarios y una densa demanda empresarial, ideal para servicios sensibles a la latencia, comercio electrónico y redes sociales.
+            </p>
+            <p>
+              Sin embargo, con el tiempo, este patrón se encontró con limitaciones: el terreno, la energía y la capacidad de refrigeración en las ciudades del este se volvieron más caros y difíciles de expandir, mientras que provincias occidentales como Mongolia Interior, Guizhou, Ningxia y Gansu tenían tierra abundante y energía más limpia, pero menos demanda local. EDWC es la respuesta política insignia diseñada para reequilibrar esta geografía a escala nacional.
+            </p>
+            <p>
+              Paralelamente, el ecosistema de IA de China ha madurado rápidamente: grandes proveedores de nube nacionales, diseñadores de chips y desarrolladores de modelos ahora operan a escala global. Para ellos, la pregunta clave ya no es solo "¿cuántas GPUs?" sino "¿dónde están y cómo están conectadas a la red eléctrica y a la red troncal?"
+            </p>
+          </div>
+          <aside class="md:col-span-1 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft text-xs space-y-2">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Indicadores clave</p>
+            <ul class="space-y-1">
+              <li>
+                <span class="badge badge-soft mr-1">Escala</span>
+                Cientos de centros de datos a gran escala, con "centros de computación inteligente" en expansión para cargas de trabajo de IA.
+              </li>
+              <li>
+                <span class="badge badge-soft mr-1">Política</span>
+                Planes nacionales para un sistema integrado de centros de big data y objetivos para completar la infraestructura de datos central para finales de la década.
+              </li>
+              <li>
+                <span class="badge badge-soft mr-1">Demanda de IA</span>
+                Uso creciente de grandes modelos, sistemas de recomendación e IA industrial, impulsando el cambio de la nube general a redes de cómputo específicas para IA.
+              </li>
+            </ul>
+          </aside>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="comparison-table min-w-full">
+            <thead>
+              <tr>
+                <th>Dimensión</th>
+                <th>Regiones metropolitanas del Este</th>
+                <th>Regiones occidentales e interiores</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white">
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Rol principal</td>
+                <td>Servicios sensibles a la latencia, entrega de contenido, SaaS empresarial y mercados financieros.</td>
+                <td>Entrenamiento de IA, análisis por lotes, respaldo y capacidad de recuperación ante desastres.</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Energía y terreno</td>
+                <td>Terreno y energía más limitados, mayores costos inmobiliarios y energéticos.</td>
+                <td>Terreno más barato, acceso a recursos hidroeléctricos, eólicos y otros de bajas emisiones; objetivos de PUE promedio más bajos.</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Características de la red</td>
+                <td>Redes de fibra locales densas, IXPs y puntos de interconexión; críticos para la latencia de cara al usuario.</td>
+                <td>Integración profunda en redes troncales; optimizadas para flujos masivos de datos y parámetros de modelos.</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Implicaciones para la IA</td>
+                <td>Albergan front-ends de inferencia, moderación de contenido, personalización y bucles de control de baja latencia.</td>
+                <td>Albergan grandes clústeres de entrenamiento y "centros de computación inteligente" con grandes capacidades de energía y refrigeración.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+    
+    <!-- 4. Datos del Este, Cómputo del Oeste -->
+    <section id="edwc-strategy" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">04 · Datos del Este, Cómputo del Oeste</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Dentro de la estrategia EDWC de China: 8 hubs, 10 clústeres y enlaces troncales listos para la IA
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-5">
+          <div class="md:col-span-2 text-sm text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed">
+            <p>
+              Datos del Este, Cómputo del Oeste (东数西算, Dōng shù xī suàn) es el esfuerzo insignia de China para coordinar los recursos de centros de datos y cómputo a nivel nacional. La idea central es simple: <span class="font-semibold">mantener los datos y servicios cerca de la gente en el este, pero mover las cargas de trabajo de IA más intensivas en energía al oeste</span>, donde las redes eléctricas son más limpias o baratas, y la tierra es más abundante.
+            </p>
+            <p>
+              Concretamente, EDWC organiza el país en ocho centros nacionales de computación – que abarcan provincias costeras e interiores – y diez grandes clústeres de centros de datos. Los reguladores nacionales establecen estándares comunes para la interconexión, la latencia y la eficiencia, mientras que los gobiernos locales compiten para atraer "centros de computación inteligente" y la industria relacionada.
+            </p>
+            <p>
+              Las actualizaciones de la red troncal apuntan a una latencia de extremo a extremo de decenas de milisegundos entre las ciudades del este y los parques de cómputo del oeste, permitiendo que los servicios de IA interactivos en el este invoquen grandes modelos que se ejecutan en el interior sin afectar las expectativas de la experiencia del usuario.
+            </p>
+          </div>
+          <aside class="md:col-span-1 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft text-xs space-y-2">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Principios de diseño</p>
+            <ul class="space-y-1">
+              <li><span class="font-semibold">Equilibrar</span> la demanda costera con los recursos del oeste.</li>
+              <li><span class="font-semibold">Estandarizar</span> los requisitos técnicos en todos los hubs y clústeres.</li>
+              <li><span class="font-semibold">Ecologizar</span> la economía digital mediante mandatos más estrictos de PUE y energía limpia.</li>
+              <li><span class="font-semibold">Integrar</span> plataformas de IA, nube y big data en una red nacional única.</li>
+            </ul>
+          </aside>
+        </div>
+
+        <!-- Timeline -->
+        <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl shadow-soft p-4">
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-timeline text-sky-600 text-xs"></i>
+            Hitos y evolución de EDWC
+          </h3>
+          <div class="space-y-3 text-xs text-slate-700 dark:text-slate-300">
+            <div class="timeline-item">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="font-semibold text-slate-900 dark:text-slate-100">Conceptualización de redes de poder de cómputo</p>
+                <span class="badge badge-soft">Pre-2021</span>
+              </div>
+              <p>
+                Documentos de políticas introducen "redes de poder de cómputo" a nivel nacional y enfatizan la necesidad de coordinar la infraestructura de nube, borde y red troncal bajo una planificación unificada.
+              </p>
+            </div>
+            <div class="timeline-item">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="font-semibold text-slate-900 dark:text-slate-100">Lanzamiento formal de EDWC como proyecto a nivel nacional</p>
+                <span class="badge badge-soft">2021–2022</span>
+              </div>
+              <p>
+                Los planificadores nacionales aprueban un plan construido en torno a ocho hubs de computación y diez grandes clústeres de centros de datos, enmarcando EDWC como un pilar central de la estrategia de economía digital del país.
+              </p>
+            </div>
+            <div class="timeline-item">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="font-semibold text-slate-900 dark:text-slate-100">Construcción de hubs, clústeres y centros de computación inteligente</p>
+                <span class="badge badge-soft">2022–2025</span>
+              </div>
+              <p>
+                Ubicaciones occidentales como Guizhou, Mongolia Interior, Ningxia y Gansu expanden centros de datos a gran escala y "centros de computación inteligente" orientados a la IA. Se actualizan los enlaces troncales para cumplir con los objetivos de latencia y PUE asociados con EDWC.
+              </p>
+            </div>
+            <div class="timeline-item">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="font-semibold text-slate-900 dark:text-slate-100">Consolidación de infraestructura de datos y cupones de IA</p>
+                <span class="badge badge-soft">2024–2029</span>
+              </div>
+              <p>
+                El enfoque pasa de la mera construcción a la orquestación del uso: integrar plataformas de datos, mejorar la eficiencia energética y lanzar "cupones de poder de cómputo" y otros incentivos para que los laboratorios de investigación y las pymes puedan consumir la nueva capacidad de IA.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mermaid diagram -->
+        <div class="mermaid-container mt-4">
+          <div class="mermaid-controls">
+            <button class="mermaid-control-btn" onclick="alert('El zoom y el desplazamiento se controlan directamente en el diagrama Mermaid con el zoom y el scroll de su navegador.')">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Consejo de zoom</span>
+            </button>
+          </div>
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1.5">
+            Flujo conceptual de datos y cómputo bajo EDWC
+          </h3>
+          <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">
+            El siguiente diagrama muestra, de forma estilizada, cómo los datos de los centros económicos del este pueden procesarse en los hubs de cómputo del oeste y devolverse como servicios mejorados por IA.
+          </p>
+
+          <div class="mermaid text-xs">
+graph LR
+  %% Eastern hubs
+  subgraph Eastern_Hubs["Hubs de datos del Este"]
+    BJ["Beijing–Tianjin–Hebei"]
+    YRD["Delta del Río Yangtze"]
+    GBA["Gran Área de la Bahía"]
+    CCQ["Chengdu–Chongqing (borde este)"]
+  end
+
+  %% Western hubs
+  subgraph Western_Hubs["Hubs de cómputo del Oeste"]
+    IM["Mongolia Interior"]
+    GZ["Guizhou"]
+    NX["Ningxia"]
+    GS["Gansu"]
+  end
+
+  %% Data flows east -> west
+  BJ -- "flujos de datos masivos" --> IM
+  YRD -- "conjuntos de datos de entrenamiento" --> GZ
+  GBA -- "cargas de trabajo de IA" --> NX
+  CCQ -- "análisis por lotes" --> GS
+
+  %% Results back
+  IM -- "modelos y servicios de IA" --> BJ
+  GZ -- "APIs de inferencia" --> YRD
+  NX -- "personalización, LLMs" --> GBA
+  GS -- "perspectivas de IA industrial" --> CCQ
+
+  classDef east fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px;
+  classDef west fill:#ecfdf5,stroke:#10b981,stroke-width:2px;
+
+  class BJ,YRD,GBA,CCQ east;
+  class IM,GZ,NX,GS west;
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <div class="section-divider"></div>
+
+    <!-- 5. Mapas y visualizaciones -->
+    <section id="maps-visualizations" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">05 · Mapas y visualizaciones</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Leyendo la geografía de la IA: mapas recomendados y herramientas interactivas
+          </h2>
+        </header>
+
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          Un número creciente de recursos públicos ahora mapean centros de datos, cómputo de IA y la red EDWC. Las siguientes tarjetas destacan un conjunto de herramientas autorizadas o de uso común que puede explorar junto con este informe. Complementan el diagrama conceptual anterior mostrando ubicaciones reales, estimaciones de capacidad y huellas energéticas.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-earth-asia text-sky-600 text-xs"></i>
+                Atlas global de centros de datos de IA
+              </h3>
+              <span class="badge badge-soft">Interactivo</span>
+            </div>
+            <p class="text-xs text-slate-700 dark:text-slate-300 mb-3">
+              Varias bases de datos abiertas ahora rastrean centros de datos relevantes para la IA utilizando imágenes satelitales, permisos y divulgaciones públicas. Estos mapas a menudo incluyen sitios chinos, lo que le permite comparar los hubs de EDWC con los clústeres de IA de EE. UU. y Europa.
+            </p>
+            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 mb-3 list-disc list-inside">
+              <li>Filtre instalaciones por región, capacidad y operador.</li>
+              <li>Superponga infraestructura eléctrica, líneas de transmisión y proyectos de energías renovables donde estén disponibles.</li>
+              <li>Identifique dónde es probable que se concentren grandes clústeres de GPU en los próximos años.</li>
+            </ul>
+            <a href="https://epoch.ai/data/data-centers" class="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:text-sky-900 dark:hover:text-sky-200 mt-auto">
+              <span>Mapa abierto de centros de datos de IA de frontera</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[0.7rem]"></i>
+            </a>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
+                Superposición de energía e infraestructura de IA
+              </h3>
+              <span class="badge badge-soft">Interactivo</span>
+            </div>
+            <p class="text-xs text-slate-700 dark:text-slate-300 mb-3">
+              Observatorios centrados en la energía proporcionan mapas interactivos que combinan centros de datos, líneas de transmisión y centrales eléctricas. Son útiles para entender por qué ciertos hubs de EDWC, especialmente en el oeste, son favorecidos para el cómputo de IA desde una perspectiva energética.
+            </p>
+            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 mb-3 list-disc list-inside">
+              <li>Visualice clústeres de centros de datos cerca de activos hidroeléctricos, eólicos o nucleares.</li>
+              <li>Estime posibles limitaciones en la capacidad de la red para grandes ejecuciones de entrenamiento de IA.</li>
+              <li>Compare la intensidad de carbono regional y su evolución a lo largo del tiempo.</li>
+            </ul>
+            <a href="https://www.iea.org/data-and-statistics/data-tools/energy-and-ai-observatory" class="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:text-sky-900 dark:hover:text-sky-200 mt-auto">
+              <span>Explore el observatorio de energía e IA</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[0.7rem]"></i>
+            </a>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-emerald-600 text-xs"></i>
+                Mapa de hubs y clústeres de EDWC (visualización de investigación)
+              </h3>
+              <span class="badge badge-soft">Mapa estático</span>
+            </div>
+            <p class="text-xs text-slate-700 dark:text-slate-300 mb-3">
+              Análisis académicos del Proyecto de Transmisión de Recursos de Computación Este-Oeste (EWCRT, estrechamente alineado con EDWC) a menudo reproducen mapas que muestran los ocho hubs de centros de datos a nivel nacional y sus diez mega-clústeres. Estos mapas distinguen los "hubs de datos" del este de los "hubs de cómputo" del oeste e indican las direcciones típicas de los flujos.
+            </p>
+            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 mb-3 list-disc list-inside">
+              <li>Confirme qué provincias pertenecen a cada hub.</li>
+              <li>Identifique la ubicación aproximada de los principales parques de centros de datos del interior.</li>
+              <li>Relacione los hubs con clústeres industriales, como bases de nuevos materiales, manufactura o servicios digitales.</li>
+            </ul>
+            <a href="https://www.nature.com/articles/s41599-024-02963-0" class="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:text-sky-900 dark:hover:text-sky-200 mt-auto">
+              <span>Ver mapa de hubs EWCRT / EDWC (figura de artículo)</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[0.7rem]"></i>
+            </a>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-database text-slate-700 dark:text-slate-300 text-xs"></i>
+                Directorios de centros de datos específicos de China
+              </h3>
+              <span class="badge badge-soft">Directorio</span>
+            </div>
+            <p class="text-xs text-slate-700 dark:text-slate-300 mb-3">
+              Directorios comerciales y mapas de la industria listan cientos de centros de datos en China, con filtros por ciudad, proveedor y tipo de servicio. Aunque no se centran exclusivamente en EDWC, ofrecen una vista granular de dónde se está construyendo realmente la capacidad de coubicación e hiperescala.
+            </p>
+            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 mb-3 list-disc list-inside">
+              <li>Busque instalaciones en provincias asociadas con los hubs de cómputo occidentales de EDWC.</li>
+              <li>Compare los clústeres metropolitanos costeros con los "valles de datos" del interior.</li>
+              <li>Rastree cómo los proveedores de hiperescala están distribuyendo la capacidad compatible con IA en las regiones.</li>
+            </ul>
+            <a href="https://www.datacenters.com/locations/china" class="inline-flex items-center gap-2 text-xs font-semibold text-sky-700 dark:text-sky-400 hover:text-sky-900 dark:hover:text-sky-200 mt-auto">
+              <span>Explorar ubicaciones de centros de datos en China</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[0.7rem]"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 6. Dinámicas de políticas e inversión -->
+    <section id="policy-investment" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">06 · Dinámicas de políticas e inversión</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Alineando el cómputo de IA con la política industrial, la energía y las finanzas
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-5">
+          <div class="md:col-span-2 text-sm text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed">
+            <p>
+              EDWC no es solo un plan técnico. Está integrado en la estrategia industrial y de economía digital más amplia de China, que trata la capacidad de cómputo como un factor de producción junto con el trabajo, el capital y los datos. Como tal, moviliza un amplio conjunto de herramientas: concesiones de terrenos, acuerdos de precios de energía, incentivos fiscales e inversión directa en mejoras de la red troncal.
+            </p>
+            <p>
+              En los últimos años, las autoridades también han experimentado con <span class="font-semibold">"cupones de poder de cómputo"</span> y esquemas similares que subsidian el cómputo de IA para pequeñas y medianas empresas (pymes) y organizaciones de investigación. El objetivo es asegurar que los centros de computación inteligente recién construidos no permanezcan inactivos, sino que alimenten un ecosistema de innovación más amplio, incluidas las startups y las industrias provinciales.
+            </p>
+          </div>
+          <aside class="md:col-span-1 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft text-xs space-y-1.5">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Instrumentos de política a observar</p>
+            <ul class="space-y-1">
+              <li>Terrenos e infraestructura subsidiados en hubs de computación designados.</li>
+              <li>Mandatos de adquisición de energía limpia para nuevas instalaciones con alta carga de IA.</li>
+              <li>Cupones o créditos para el acceso a clústeres de IA públicos o semipúblicos.</li>
+              <li>Estándares de latencia, seguridad y residencia de datos bajo EDWC.</li>
+            </ul>
+          </aside>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="comparison-table min-w-full">
+            <thead>
+              <tr>
+                <th>Actor</th>
+                <th>Incentivos y objetivos</th>
+                <th>Implicaciones para los centros de datos de IA</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white">
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Gobierno central</td>
+                <td>
+                  Mejorar la capacidad de cómputo nacional, reducir los desequilibrios regionales, apoyar el liderazgo en IA y ecologizar la economía digital.
+                </td>
+                <td>
+                  Establece la estructura de hubs/clústeres y los objetivos de eficiencia; coordina las mejoras de la red troncal y los estándares interregionales para EDWC.
+                </td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Gobiernos provinciales y municipales</td>
+                <td>
+                  Atraer inversiones relacionadas con la IA, crear empleos cualificados y aprovechar las ventajas energéticas o los clústeres industriales locales.
+                </td>
+                <td>
+                  Ofrecen terrenos, conexiones a la red e incentivos a los operadores; desarrollan "valles de datos" y parques de computación inteligente alineados con EDWC.
+                </td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Proveedores de nube e IA</td>
+                <td>
+                  Minimizar el costo por unidad de cómputo mientras se cumplen los requisitos de rendimiento y cumplimiento para las cargas de trabajo de IA.
+                </td>
+                <td>
+                  Deciden cómo distribuir los clústeres de entrenamiento e inferencia entre los hubs; negocian acuerdos de energía e interconexión; diseñan arquitecturas de IA multirregionales.
+                </td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-slate-900 dark:text-slate-100">Empresas y pymes</td>
+                <td>
+                  Acceder a servicios de IA competitivos sin construir sus propios clústeres; cumplir con las reglas de gobernanza de datos; gestionar el costo y la latencia.
+                </td>
+                <td>
+                  Consumen cómputo a través de APIs de nube, cupones o plataformas de IA regionales alojadas en hubs de EDWC; adaptan las estrategias de productos a la latencia y capacidades disponibles.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 7. Implicaciones estratégicas -->
+    <section id="strategic-implications" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">07 · Implicaciones estratégicas</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Cómo EDWC cambia el mapa estratégico para la IA, la energía y la geopolítica
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-5">
+          <div class="md:col-span-2 text-sm text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed">
+            <p>
+              Para las empresas con uso intensivo de IA, EDWC significa que <span class="font-semibold">la "unidad de cómputo" marginal en China probablemente residirá en provincias occidentales, incluso si el usuario marginal vive en las megaciudades del este</span>. Las arquitecturas, los SLAs y los modelos de costos deben reflejar esto. Las estrategias de conmutación por error entre regiones y de replicación de modelos deben diseñarse en torno a la red este-oeste en lugar de un único hub costero.
+            </p>
+            <p>
+              Para los planificadores energéticos, la IA crea una nueva clase de carga ancla cuya ubicación puede influir materialmente en el ritmo y la localización de la inversión en la red. EDWC conecta explícitamente la planificación de centros de datos con el desarrollo de líneas de transmisión de alto voltaje y energías renovables en las provincias del interior, convirtiendo efectivamente los clústeres de IA en centros de demanda de energía limpia.
+            </p>
+            <p>
+              Para los legisladores y socios internacionales, EDWC es parte de un impulso más amplio por la <span class="font-semibold">
+              soberanía digital</span>: al orquestar el cómputo, los estándares y las exportaciones de centros de datos (por ejemplo, a través de proyectos de centros de datos en el extranjero), China puede profundizar los lazos tecnológicos con otras regiones mientras moldea las dependencias en la infraestructura de IA.
+            </p>
+          </div>
+          <aside class="md:col-span-1 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft text-xs space-y-2">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">Preguntas para los responsables</p>
+            <ul class="space-y-1">
+              <li>¿Dónde están ubicadas físicamente mis cargas de trabajo críticas de IA hoy?</li>
+              <li>¿Qué tan expuesto estoy a riesgos regionales de energía, agua o regulación?</li>
+              <li>¿Puedo diversificar entre hubs o proveedores respetando las reglas de gobernanza de datos?</li>
+              <li>¿Qué alianzas o estándares pueden reducir la dependencia y aumentar la resiliencia?</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 8. Puntos clave -->
+    <section id="key-takeaways" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-4">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">08 · Puntos clave</p>
+          <h2 class="serif-heading text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100">
+            Lo que los inversores y legisladores deberían recordar
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-slate-900 dark:bg-slate-800 text-slate-50 rounded-xl p-4 shadow-soft">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-amber-300 mb-1">1. IA ≠ solo algoritmos</p>
+            <p>
+              La IA a escala de frontera está fundamentalmente limitada por dónde y cómo se construyen los centros de datos. Los chips, las redes, la energía y la refrigeración son tan estratégicos como las arquitecturas de los modelos.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">2. EDWC como modelo</p>
+            <p class="text-slate-700 dark:text-slate-300">
+              EDWC muestra cómo un estado puede rediseñar su geografía digital: desplazando el cómputo hacia el interior mientras mantiene los servicios de cara al usuario en el borde, y alineando la IA con los objetivos de política energética e industrial.
+            </p>
+          </div>
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft">
+            <p class="text-[0.7rem] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">3. Los mapas importan</p>
+            <p class="text-slate-700 dark:text-slate-300">
+              Los mapas interactivos y los directorios son ahora herramientas centrales para la estrategia de IA. Los líderes deben revisar regularmente dónde se ubican los centros de datos, las redes troncales y los activos energéticos, en China y a nivel mundial.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 9. Apéndice -->
+    <section id="appendix" class="px-6 lg:px-10 pb-10">
+      <div class="max-w-5xl mx-auto space-y-4">
+        <header class="flex flex-col gap-2 mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase">09 · Apéndice</p>
+          <h2 class="serif-heading text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            Métricas y glosario para centros de datos centrados en IA
+          </h2>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-5 text-xs text-slate-700 dark:text-slate-300">
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft space-y-1.5">
+            <p><span class="font-semibold">PUE (Power Usage Effectiveness)</span>: relación entre la energía total de la instalación y la energía de los equipos de TI. Cuanto más bajo, mejor; las instalaciones de vanguardia pueden acercarse a ~1.1.</p>
+            <p><span class="font-semibold">Latencia</span>: tiempo que tarda un paquete en viajar entre dos puntos. Para los enlaces este-oeste de EDWC, decenas de milisegundos son un objetivo de diseño típico.</p>
+            <p><span class="font-semibold">EFLOPS</span>: exa-operaciones de punto flotante por segundo; se utiliza para describir la capacidad de cómputo agregada de grandes clústeres de entrenamiento o hubs.</p>
+            <p><span class="font-semibold">Clúster de GPU / acelerador de IA</span>: grupo de GPUs, TPUs o chips personalizados diseñados para entrenar o servir modelos de IA a escala.</p>
+          </div>
+          <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-soft space-y-1.5">
+            <p><span class="font-semibold">Centro de computación inteligente</span>: término comúnmente usado en China para centros de datos orientados a la IA, optimizados para entrenamiento/inferencia a gran escala.</p>
+            <p><span class="font-semibold">Red troncal (Backbone network)</span>: red de alta capacidad y larga distancia que conecta regiones y centros de datos; crítica para los flujos de datos este-oeste de EDWC.</p>
+            <p><span class="font-semibold">Cupones de poder de cómputo</span>: instrumentos de política que subsidian el acceso al cómputo de IA para pymes o instituciones de investigación.</p>
+            <p><span class="font-semibold">Hub / Clúster</span>: en EDWC, los hubs son grandes nodos de coordinación regional; los clústeres son concentraciones más localizadas de centros de datos.</p>
+          </div>
+        </div>
+
+        <p class="text-[0.7rem] text-slate-500 dark:text-slate-400 mt-2">
+          Este apéndice es deliberadamente conciso. Para análisis técnicos profundos sobre redes, arquitecturas de chips o tecnologías de refrigeración, debe complementarse con documentación especializada en infraestructura y hardware.
+        </p>
+      </div>
+    </section>
+
+    <footer class="text-center py-8 px-6 lg:px-10">
+        <p class="text-sm text-slate-600 dark:text-slate-400">Material elaborado por el profesor Sergio Gevatschnaider</p>
+    </footer>
+
+  </main>
+
+  <!-- JAVASCRIPT PARA EL CAMBIO DE TEMA -->
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+
+    // Función para aplicar el tema
+    const applyTheme = (theme) => {
+      if (theme === 'dark') {
+        htmlEl.classList.add('dark');
+      } else {
+        htmlEl.classList.remove('dark');
+      }
+    };
+
+    // Al cargar la página, comprobar la preferencia guardada o la del sistema
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else {
+        applyTheme(prefersDark ? 'dark' : 'light');
+    }
+
+
+    // Manejador del evento de clic
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = htmlEl.classList.contains('dark');
+      const newTheme = isDark ? 'light' : 'dark';
+      applyTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  </script>
+</body>
+</html>
