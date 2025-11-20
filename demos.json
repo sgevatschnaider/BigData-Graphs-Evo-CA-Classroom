@@ -791,6 +791,13 @@
     "mtime": "2025-10-12T17:50:29-03:00"
   },
   {
+    "title": "Simulador ZKP: SNARK vs STARK",
+    "path": "/src/classroom/graphs/recursos/ZKP_Simulador.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-20T20:54:00-03:00"
+  },
+  {
     "title": "Suite Visual de Programación Genética — Clase",
     "path": "/src/classroom/graphs/recursos/Programacion _Genetica_Simulacion.html",
     "tag": "Demo",
