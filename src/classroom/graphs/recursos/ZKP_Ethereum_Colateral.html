@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transición: Cripto especulativa → Digitalización de valor (Palancas P&L)</title>
+
+  <!-- Chart.js (sin SRI para evitar bloqueo por mismatch) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --panel: #171a2b;
+      --ink: #e8eaf6;
+      --muted: #a1a6c3;
+      --accent: #7dd3fc;
+      --accent2: #a78bfa;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #f87171;
+      --card-radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 20% -10%, #1f2440 0%, var(--bg) 60%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header { display: grid; gap: 8px; margin-bottom: 20px; }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 1.1rem + 1.5vw, 2.2rem);
+      letter-spacing: .3px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sub { color: var(--muted); font-size: .98rem; line-height: 1.5; }
+    .grid { display: grid; gap: 16px; }
+    .g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 900px){ .g-2, .g-3 { grid-template-columns: 1fr; } }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+    .card:hover { border-color: rgba(125, 211, 252, 0.2); box-shadow: 0 15px 40px rgba(0,0,0,.4); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .kpi { display: grid; gap: 4px; }
+    .kpi .v { font-weight: 700; font-size: 1.3rem; }
+    .kpi .l { color: var(--muted); font-size: .86rem; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); color: var(--muted); font-size: .82rem; background: rgba(255,255,255,.02); }
+    .pill b { color: var(--ink); }
+    .panel-title { font-weight: 700; margin-bottom: 10px; letter-spacing: .2px; font-size: 1.1rem; }
+    .note { color: var(--muted); font-size: .85rem; line-height: 1.4; }
+    .muted { color: var(--muted); }
+    .slider-row { display: grid; grid-template-columns: 1fr 130px; gap: 12px; align-items: center; margin: 8px 0; }
+    .slider-row label { font-size: 0.9rem; color: var(--ink); }
+    input[type="range"] { width: 100%; accent-color: var(--accent2); background: rgba(255,255,255,.05); border-radius: 10px; height: 8px; }
+    input[type="number"] { width: 100%; padding: 8px 10px; background: rgba(13,16,32,.8); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; color: var(--ink); font-size: 0.9rem; transition: all 0.2s ease; }
+    input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.1); outline: none; }
+    .tag { font-size: .75rem; color: var(--muted); }
+    .hl { color: var(--good); font-weight: 600; }
+    .warn { color: var(--warn); font-weight: 600; }
+    .bad { color: var(--bad); font-weight: 600; }
+    .footer { margin-top: 22px; color: var(--muted); font-size: .85rem; text-align: center; padding: 20px 0; border-top: 1px solid rgba(255,255,255,.06); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip { background: rgba(125, 211, 252, .12); border: 1px solid rgba(125, 211, 252, .35); color: #c2e9ff; border-radius: 999px; padding: 6px 12px; font-size: .78rem; transition: all 0.2s ease; }
+    .chip:hover { background: rgba(125, 211, 252, .2); }
+    .list { display: grid; gap: 10px; padding-left:0; margin:0;}
+    .list li { line-height: 1.5; list-style: none; position: relative; padding-left: 20px; }
+    .list li::before { content: "→"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); margin: 16px 0; }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    button { background: linear-gradient(180deg, rgba(167,139,250,.3), rgba(167,139,250,.15)); color: white; border: 1px solid rgba(167,139,250,.4); border-radius: 12px; padding: 10px 16px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s ease; }
+    button:hover { background: linear-gradient(180deg, rgba(167,139,250,.4), rgba(167,139,250,.2)); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(167,139,250,.2); }
+    .mini { font-size: .82rem; }
+    .chart-container { position: relative; height: 280px; margin: 16px 0; }
+    .total-impact { background: linear-gradient(135deg, rgba(52, 211, 153, 0.1), rgba(167, 139, 250, 0.1)); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 16px; text-align: center; margin: 16px 0; }
+    .total-impact .value { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--good), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .section-header { background: linear-gradient(135deg, rgba(125, 211, 252, 0.1), rgba(167, 139, 250, 0.1)); border-left: 4px solid var(--accent); padding: 12px 16px; margin: 16px 0 12px 0; border-radius: 0 8px 8px 0; }
+    .section-header h3 { margin: 0; color: var(--accent); font-size: 1rem; font-weight: 600; }
+    .error {
+      display:none; margin:16px 0; padding:12px 16px; border-radius:12px;
+      border:1px solid rgba(248, 113, 113, .35);
+      background: linear-gradient(180deg, rgba(248, 113, 113, .15), rgba(248, 113, 113, .05));
+      color:#fecaca; font-size:.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Transición: <span class="muted">Cripto especulativa</span> → Digitalización de valor con métricas de negocio</h1>
+      <div class="sub">Comparador didáctico (últimos 24–36 meses) con <b>palancas de P&amp;L</b>: Capital y liquidez, Coste operativo, Nuevos ingresos.</div>
+      <div class="chips">
+        <span class="chip">Movilización de colateral en minutos</span>
+        <span class="chip">Settlement con stablecoins</span>
+        <span class="chip">Fondos tokenizados con AUM</span>
+      </div>
+    </header>
+
+    <!-- Estado Antes vs Después -->
+    <section class="grid g-3">
+      <div class="card">
+        <div class="panel-title">Antes (≈2023)</div>
+        <ul class="list">
+          <li>Movilización de colateral: <b>horas–días</b>.</li>
+          <li>Settlement entre redes: <b>lento</b>, múltiples intermediarios.</li>
+          <li>Proceso: <b>reconciliación manual</b>, cierres rígidos.</li>
+          <li>Ingresos: productos limitados, <span class="muted">poca programabilidad</span>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="panel-title">Después (2025)</div>
+        <ul class="list">
+          <li>Colateral &amp; efectivo en <b>tiempo real</b>.</li>
+          <li>Liquidación con <b>stablecoins</b> en redes públicas.</li>
+          <li>Operación: menor fricción, <b>autenticidad compartida</b>.</li>
+          <li>Nuevos ingresos: <b>depósitos tokenizados</b>, cut-offs extendidos, <b>eBL</b> financiables.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="panel-title">Adopción industrial</div>
+        <ul class="list">
+          <li><b>BUIDL (BlackRock)</b>: superó <b>USD 1.000M AUM</b> (2025). <span class="tag"><a target="_blank" href="https://www.marketsmedia.com/blackrock-tokenized-fund-surpasses-1bn-in-aum/">fuente</a></span></li>
+          <li><b>Visa</b>: amplía settlement con stablecoins e incorpora <b>EURC</b> (2025). <span class="tag"><a target="_blank" href="https://investor.visa.com/news/news-details/2025/Visa-Expands-Stablecoin-Settlement-Support/default.aspx">fuente</a></span></li>
+        </ul>
+        <div class="note">Indicadores para contexto de clase, no asesoramiento financiero.</div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Palancas de P&L -->
+    <section class="grid g-2">
+      <div class="card">
+        <div class="panel-title">Parámetros (ajusta y observa el impacto mensual)</div>
+        <div class="row">
+          <span class="pill">Horizonte: <b>30</b> días</span>
+          <span class="pill">Moneda: <b>USD</b></span>
+        </div>
+        <div class="divider"></div>
+
+        <div class="section-header"><h3>Capital y liquidez</h3></div>
+        <div class="slider-row">
+          <label>Volumen diario de colateral (USD)</label>
+          <input id="volDiario" type="number" min="0" step="1000000" value="500000000" />
+        </div>
+        <div class="slider-row">
+          <label>Haircut antes (%): <span id="hcAntesVal">5.0</span></label>
+          <input id="hcAntes" type="range" min="0" max="15" step="0.1" value="5" />
+        </div>
+        <div class="slider-row">
+          <label>Haircut después (%): <span id="hcDespVal">2.0</span></label>
+          <input id="hcDesp" type="range" min="0" max="15" step="0.1" value="2" />
+        </div>
+        <div class="slider-row">
+          <label>Tiempo de exposición antes (h): <span id="expAntesVal">24.0</span></label>
+          <input id="expAntes" type="range" min="0" max="48" step="0.5" value="24" />
+        </div>
+        <div class="slider-row">
+          <label>Tiempo de exposición después (min): <span id="expDespMinVal">10</span></label>
+          <input id="expDespMin" type="range" min="0" max="240" step="5" value="10" />
+        </div>
+        <div class="slider-row">
+          <label>Coste de capital anual (%): <span id="cocAnualVal">8.0</span></label>
+          <input id="cocAnual" type="range" min="0" max="20" step="0.1" value="8" />
+        </div>
+        <div class="slider-row">
+          <label>Coste financiación intradía (bps/día): <span id="intradiaBpsVal">10</span></label>
+          <input id="intradiaBps" type="range" min="0" max="50" step="0.5" value="10" />
+        </div>
+
+        <div class="section-header"><h3>Coste operativo</h3></div>
+        <div class="slider-row">
+          <label>Reconciliaciones/día</label>
+          <input id="reconsDia" type="number" min="0" step="1" value="1200" />
+        </div>
+        <div class="slider-row">
+          <label>Coste por reconciliación (USD)</label>
+          <input id="costoRecon" type="number" min="0" step="1" value="10" />
+        </div>
+        <div class="slider-row">
+          <label>Reducción de fricción (%): <span id="reduccionReconPctVal">60</span></label>
+          <input id="reduccionReconPct" type="range" min="0" max="100" step="1" value="60" />
+        </div>
+
+        <div class="section-header"><h3>Nuevos ingresos</h3></div>
+        <div class="slider-row">
+          <label>AUM base (USD)</label>
+          <input id="aumBase" type="number" min="0" step="1000000" value="1000000000" />
+        </div>
+        <div class="slider-row">
+          <label>AUM incremental por cut-offs (%): <span id="aumUpliftPctVal">3.0</span></label>
+          <input id="aumUpliftPct" type="range" min="0" max="20" step="0.5" value="3" />
+        </div>
+        <div class="slider-row">
+          <label>Fee anual sobre AUM (bps): <span id="feeBpsVal">25</span></label>
+          <input id="feeBps" type="range" min="0" max="100" step="1" value="25" />
+        </div>
+        <div class="slider-row">
+          <label>Depósitos tokenizados (USD)</label>
+          <input id="depositos" type="number" min="0" step="1000000" value="100000000" />
+        </div>
+        <div class="slider-row">
+          <label>Margen sobre depósitos (%): <span id="margenDepVal">1.5</span></label>
+          <input id="margenDep" type="range" min="0" max="10" step="0.1" value="1.5" />
+        </div>
+        <div class="slider-row">
+          <label>Volumen eBL financiables (USD/mes)</label>
+          <input id="eblVol" type="number" min="0" step="1000000" value="250000000" />
+        </div>
+        <div class="slider-row">
+          <label>Spread eBL (bps): <span id="eblBpsVal">15</span></label>
+          <input id="eblBps" type="range" min="0" max="100" step="1" value="15" />
+        </div>
+
+        <div class="divider"></div>
+        <div class="cta-row">
+          <button id="resetBtn" class="mini">🔄 Reset</button>
+          <button id="ejemplosBtn" class="mini">📊 Ejemplo conservador</button>
+        </div>
+
+        <div id="chartError" class="error">No se pudo cargar Chart.js. Revisa tu conexión o bloqueadores. (El resto del panel seguirá funcionando.)</div>
+      </div>
+
+      <div class="card">
+        <div class="panel-title">Impacto mensual estimado (USD)</div>
+        <div class="grid g-3">
+          <div class="kpi"><div class="l">Capital y liquidez</div><div id="kpiCap" class="v hl">$0</div></div>
+          <div class="kpi"><div class="l">Coste operativo</div><div id="kpiOpex" class="v hl">$0</div></div>
+          <div class="kpi"><div class="l">Nuevos ingresos</div><div id="kpiRev" class="v hl">$0</div></div>
+        </div>
+        <div class="total-impact"><div class="l">Total P&L mensual</div><div id="kpiTotal" class="value">$0</div></div>
+        <div id="hfPill" class="pill" style="margin: 10px 0; width: 100%; justify-content: center;">HF educativo: <b>Calculando…</b></div>
+
+        <div class="panel-title" style="margin-top: 20px;">Distribución del Impacto</div>
+        <div class="chart-container"><canvas id="barChart"></canvas></div>
+        <div class="chart-container"><canvas id="pieChart"></canvas></div>
+
+        <div class="panel-title" style="margin-top: 20px;">Evolución del Impacto Total (últimos 30 cambios)</div>
+        <div class="chart-container"><canvas id="lineChart"></canvas></div>
+
+        <div class="note" style="margin-top:10px">Modelo simplificado (didáctico). Ajusta supuestos para tu operación.</div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="card">
+      <div class="panel-title">Hitos recientes (24–36 meses)</div>
+      <div class="grid g-3">
+        <div class="kpi"><div class="l">2023</div><div class="v">Pilotos de stablecoins / tokenización</div></div>
+        <div class="kpi"><div class="l">2024</div><div class="v">Lanzan fondos tokenizados (ej. BUIDL)</div></div>
+        <div class="kpi"><div class="l">2025</div><div class="v">AUM &gt; $1.0B y settlement con EURC</div></div>
+      </div>
+    </section>
+
+    <div class="footer">© 2025 · Demo educativa. Citas enlazadas en "Adopción industrial". · <b>Material elaborado por el profesor Sergio Gevatschnaider</b>.</div>
+  </div>
+
+  <script>
+    // Espera a que Chart.js (defer) y el DOM estén listos
+    window.addEventListener('DOMContentLoaded', () => {
+      const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+      const fmt2 = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+      const $ = (id) => document.getElementById(id);
+      let barChart, pieChart, lineChart;
+      const impactHistory = [];
+      const MAX_HISTORY_LENGTH = 30;
+
+      function val(id) {
+        const el = $(id);
+        if (!el) return 0;
+        const n = Number(el.value);
+        return Number.isFinite(n) ? n : 0;
+      }
+      function monthFactor(days = 30) { return days / 365; }
+
+      function updateSliderValues() {
+        const sliders = ['hcAntes', 'hcDesp', 'expAntes', 'expDespMin', 'cocAnual', 'intradiaBps', 'reduccionReconPct', 'aumUpliftPct', 'feeBps', 'margenDep', 'eblBps'];
+        sliders.forEach(id => {
+          const slider = $(id);
+          const disp = $(id + 'Val');
+          if (slider && disp) {
+            let v = slider.value;
+            if (['expDespMin', 'reduccionReconPct', 'feeBps', 'eblBps'].includes(id)) { v = Math.round(v); }
+            else { v = parseFloat(v).toFixed(1); }
+            disp.textContent = v;
+          }
+        });
+      }
+
+      function compute() {
+        const days = 30;
+        const volDiario = val('volDiario'), hcAntes = val('hcAntes')/100, hcDesp = val('hcDesp')/100,
+              expAntesH = val('expAntes'), expDespH = val('expDespMin')/60, coc = val('cocAnual')/100,
+              intraBps = val('intradiaBps')/10000, reconsDia = val('reconsDia'), costoRecon = val('costoRecon'),
+              reduccionRecon = val('reduccionReconPct')/100, aumBase = val('aumBase'), aumUplift = val('aumUpliftPct')/100,
+              feeBps = val('feeBps')/10000, depositos = val('depositos'), margenDep = val('margenDep')/100,
+              eblVol = val('eblVol'), eblBps = val('eblBps')/10000;
+
+        const freedCapital = volDiario * Math.max(0, hcAntes - hcDesp);
+        const haircutsSaving = freedCapital * coc * monthFactor(days);
+
+        const expDelta = Math.max(0, expAntesH - expDespH);
+        const intradiaSaving = volDiario * (intraBps / 24) * expDelta * days;
+
+        const pnlCap = Math.max(0, haircutsSaving + intradiaSaving);
+
+        const pnlOpex = Math.max(0, reconsDia * costoRecon * reduccionRecon * days);
+
+        const upliftAUM = aumBase * aumUplift;
+        const feeIngresos = upliftAUM * feeBps * monthFactor(days);
+        const depoIngresos = depositos * margenDep * monthFactor(days);
+        const eblIngresos = eblVol * eblBps;
+
+        const pnlRev = feeIngresos + depoIngresos + eblIngresos;
+        const total = pnlCap + pnlOpex + pnlRev;
+
+        return { pnlCap, pnlOpex, pnlRev, total, diagnostics: { intradiaSaving }, inputs: { expAntesH, expDespH, hcAntes, hcDesp } };
+      }
+
+      function setKpis(r) {
+        $('kpiCap').textContent = fmt.format(Math.round(r.pnlCap));
+        $('kpiOpex').textContent = fmt.format(Math.round(r.pnlOpex));
+        $('kpiRev').textContent = fmt.format(Math.round(r.pnlRev));
+        $('kpiTotal').textContent = fmt.format(Math.round(r.total));
+      }
+
+      function setHFPill(r) {
+        const expH = r.inputs.expAntesH, expMin = r.inputs.expDespH * 60;
+        const red = expH > 0 ? Math.max(0, 100 * (1 - (r.inputs.expDespH / expH))) : 0;
+        const hcA = (r.inputs.hcAntes * 100).toFixed(1), hcD = (r.inputs.hcDesp * 100).toFixed(1);
+        const intra = r.diagnostics.intradiaSaving;
+        const txt = `HF educativo: <b>${expH.toFixed(1)}h → ${Math.round(expMin)}min (−${Math.round(red)}%) · Haircut: ${hcA}% → ${hcD}% · Ahorro intradía ≈ ${fmt.format(Math.round(intra))}</b>`;
+        $('hfPill').innerHTML = txt;
+      }
+
+      function updateCharts(r) {
+        if (!barChart || !pieChart || !lineChart) return;
+        const newData = [r.pnlCap, r.pnlOpex, r.pnlRev];
+        barChart.data.datasets[0].data = newData;
+        pieChart.data.datasets[0].data = newData;
+        lineChart.data.labels = Array(impactHistory.length).fill('');
+        lineChart.data.datasets[0].data = impactHistory;
+        barChart.update();
+        pieChart.update();
+        lineChart.update();
+      }
+
+      function update() {
+        const r = compute();
+        if (impactHistory.length >= MAX_HISTORY_LENGTH) impactHistory.shift();
+        impactHistory.push(r.total);
+        setKpis(r);
+        setHFPill(r);
+        updateSliderValues();
+        updateCharts(r);
+      }
+
+      function reset() {
+        const defaults = {
+          volDiario: 500000000, hcAntes: 5, hcDesp: 2, expAntes: 24, expDespMin: 10,
+          cocAnual: 8, intradiaBps: 10, reconsDia: 1200, costoRecon: 10, reduccionReconPct: 60,
+          aumBase: 1000000000, aumUpliftPct: 3, feeBps: 25, depositos: 100000000,
+          margenDep: 1.5, eblVol: 250000000, eblBps: 15,
+        };
+        Object.entries(defaults).forEach(([k,v]) => { const el = $(k); if(el) el.value = v; });
+        impactHistory.length = 0;
+        update();
+      }
+
+      function ejemploConservador() {
+        const ex = {
+          volDiario: 200000000, hcAntes: 4, hcDesp: 2.5, expAntes: 12, expDespMin: 30,
+          cocAnual: 6, intradiaBps: 5, reconsDia: 600, costoRecon: 7, reduccionReconPct: 45,
+          aumBase: 600000000, aumUpliftPct: 1.5, feeBps: 18, depositos: 80000000,
+          margenDep: 0.9, eblVol: 100000000, eblBps: 9,
+        };
+        Object.entries(ex).forEach(([k,v]) => { const el = $(k); if(el) el.value = v; });
+        update();
+      }
+
+      function initializeCharts() {
+        const barCtx = $('barChart'), pieCtx = $('pieChart'), lineCtx = $('lineChart');
+        if (!barCtx || !pieCtx || !lineCtx) return;
+
+        try {
+          const initialData = [0, 0, 0];
+          const chartLabels = ['Capital & liquidez', 'Coste operativo', 'Nuevos ingresos'];
+          const chartColors = ['rgba(52, 211, 153, 0.7)', 'rgba(251, 191, 36, 0.7)', 'rgba(167, 139, 250, 0.7)'];
+
+          // BARRAS
+          barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+              labels: chartLabels,
+              datasets: [{
+                label: 'Impacto mensual',
+                data: initialData,
+                backgroundColor: chartColors,
+                borderColor: ['rgba(52, 211, 153, 1)', 'rgba(251, 191, 36, 1)', 'rgba(167, 139, 250, 1)'],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: { label: ctx => fmt2.format(ctx.parsed.y) },
+                  backgroundColor: 'rgba(23, 26, 43, 0.95)',
+                  titleColor: '#e8eaf6', bodyColor: '#e8eaf6',
+                  borderColor: 'rgba(125, 211, 252, 0.3)', borderWidth: 1
+                }
+              },
+              scales: {
+                x: { ticks: { color: '#c9d4ff', font: { size: 11 } }, grid: { display: false } },
+                y: { ticks: { color: '#c9d4ff', callback: v => fmt.format(Math.round(v)) }, grid: { color: 'rgba(255,255,255,.06)' } }
+              }
+            }
+          });
+
+          // DONA
+          pieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+              labels: chartLabels,
+              datasets: [{
+                data: initialData,
+                backgroundColor: chartColors,
+                borderColor: '#171a2b',
+                borderWidth: 3
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              cutout: '62%',
+              plugins: {
+                legend: { position: 'bottom', labels: { color: '#c9d4ff' } },
+                tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmt2.format(ctx.parsed)}` } }
+              }
+            }
+          });
+
+          // LÍNEA
+          const gradient = lineCtx.getContext('2d').createLinearGradient(0, 0, 0, 280);
+          gradient.addColorStop(0, 'rgba(125, 211, 252, 0.4)');
+          gradient.addColorStop(1, 'rgba(125, 211, 252, 0.05)');
+          lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [{
+              label: 'Impacto Total',
+              data: [],
+              borderColor: 'rgba(125, 211, 252, 1)',
+              backgroundColor: gradient,
+              fill: true,
+              pointRadius: 2,
+              pointBackgroundColor: '#e8eaf6',
+              tension: 0.4
+            }]},
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `Impacto: ${fmt.format(ctx.parsed.y)}` } } },
+              scales: {
+                y: { ticks: { color: '#c9d4ff', callback: v => fmt.format(v) }, grid: { color: 'rgba(255,255,255,.06)' } },
+                x: { display: false }
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('Chart init error:', e);
+          const err = document.getElementById('chartError');
+          if (err) err.style.display = 'block';
+        }
+      }
+
+      function bindInputs() {
+        const inputIds = ['volDiario','hcAntes','hcDesp','expAntes','expDespMin','cocAnual','intradiaBps','reconsDia','costoRecon','reduccionReconPct','aumBase','aumUpliftPct','feeBps','depositos','margenDep','eblVol','eblBps'];
+        inputIds.forEach(id => {
+          const el = $(id);
+          if (!el) return;
+          // 'input' para sliders y 'change' para number evita floods en algunos navegadores
+          el.addEventListener(el.type === 'number' ? 'change' : 'input', update);
+        });
+        $('resetBtn')?.addEventListener('click', reset);
+        $('ejemplosBtn')?.addEventListener('click', ejemploConservador);
+      }
+
+      // Si por alguna razón Chart aún no está disponible (bloqueadores), mostramos aviso
+      if (typeof window.Chart === 'undefined') {
+        const err = document.getElementById('chartError');
+        if (err) err.style.display = 'block';
+      }
+
+      // Inicializa
+      initializeCharts();
+      bindInputs();
+
+      // Lanza con defaults y refresca labels visibles
+      setTimeout(() => {
+        reset();
+        updateSliderValues();
+      }, 50);
+    });
+  </script>
+</body>
+</html>
