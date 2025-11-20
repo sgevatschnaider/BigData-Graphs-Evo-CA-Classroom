@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZKP: The Mathematical Circuit</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #050505; 
+            font-family: 'Share Tech Mono', 'Courier New', monospace; 
+            color: #e0e0e0;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        canvas { display: block; width: 100%; height: 100%; position: absolute; z-index: 1; }
+
+        #ui-layer {
+            position: absolute; z-index: 2; width: 100%; height: 100%;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 80px 1fr 150px;
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none; 
+        }
+
+        .hud-panel {
+            background: rgba(10, 15, 30, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+            padding: 15px;
+            backdrop-filter: blur(8px);
+            display: flex; flex-direction: column; gap: 8px;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .hud-title { 
+            font-size: 0.8rem; color: #8b5cf6; 
+            border-bottom: 1px solid #8b5cf6; 
+            padding-bottom: 5px; margin-bottom: 5px; 
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        .data-row { display: flex; justify-content: space-between; font-size: 0.85rem; }
+        .data-val { color: #fff; font-weight: bold; text-shadow: 0 0 5px rgba(139, 92, 246, 0.5); }
+        
+        #center-stage {
+            grid-column: 2; grid-row: 2;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center;
+        }
+
+        #witness-box {
+            background: rgba(0,0,0,0.8);
+            border: 1px dashed #8b5cf6;
+            padding: 20px; width: 300px;
+            font-size: 1.2rem; color: #10b981; 
+            transition: all 0.5s ease;
+            opacity: 0; transform: scale(0.8);
+        }
+        
+        #witness-box.visible { opacity: 1; transform: scale(1); }
+        
+        /* Estado Encriptado (ZKP) */
+        #witness-box.encrypted { 
+            color: #ec4899; 
+            border-color: #ec4899;
+            filter: blur(4px); 
+            text-shadow: 0 0 10px #ec4899;
+        }
+        
+        /* Estado Expuesto (Sin ZKP) */
+        #witness-box.exposed {
+            color: #ef4444;
+            border-color: #ef4444;
+            border-style: solid;
+            background: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        #proof-hash {
+            margin-top: 20px; font-size: 1.5rem; letter-spacing: 2px;
+            background: linear-gradient(90deg, #ec4899, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0;
+        }
+
+        #controls {
+            grid-column: 2; grid-row: 3;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            pointer-events: auto;
+        }
+
+        select, button {
+            background: rgba(0,0,0,0.7); border: 1px solid #8b5cf6; color: #8b5cf6;
+            padding: 10px 20px; font-family: inherit; font-size: 1rem;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.2s;
+        }
+        button:hover { background: #8b5cf6; color: #000; box-shadow: 0 0 20px #8b5cf6; }
+        button:disabled { border-color: #444; color: #444; cursor: not-allowed; box-shadow: none; }
+
+        #terminal {
+            grid-column: 1 / span 3; grid-row: 3;
+            margin-top: 60px; 
+            font-size: 0.8rem; color: #64748b;
+            border-top: 1px solid #333; padding-top: 10px;
+            height: 100%; overflow: hidden;
+        }
+        .log-line { margin-bottom: 2px; }
+        .log-line.success { color: #10b981; }
+        .log-line.warn { color: #f59e0b; }
+        .log-line.danger { color: #ef4444; }
+
+        #footer {
+            position: absolute; bottom: 10px; right: 20px;
+            font-size: 0.7rem; color: #444; z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="circuitCanvas"></canvas>
+
+    <div id="ui-layer">
+        <div class="hud-panel" style="grid-column: 1; grid-row: 1 / span 2;">
+            <div class="hud-title">Parámetros del Circuito</div>
+            <div class="data-row"><span>CURVA:</span> <span class="data-val" id="val-curve">N/A</span></div>
+            <div class="data-row"><span>FIELD SIZE:</span> <span class="data-val">2^254</span></div>
+            <div class="data-row"><span>CONSTRAINTS:</span> <span class="data-val" id="val-constraints">0</span></div>
+            <br>
+            <div class="hud-title">Métricas en Vivo</div>
+            <div class="data-row"><span>ENTROPÍA:</span> <span class="data-val" id="val-entropy">--</span></div>
+            <div class="data-row"><span>GAS EST:</span> <span class="data-val" id="val-gas">--</span></div>
+            
+            <div style="margin-top: 20px; height: 100px; border: 1px solid #333; position: relative; overflow: hidden;">
+                <canvas id="polyCanvas" width="268" height="100"></canvas>
+            </div>
+            <div style="font-size: 0.7rem; text-align: center; color: #666;">Interpolación Polinomial P(x)</div>
+        </div>
+
+        <div class="hud-panel" style="grid-column: 3; grid-row: 1 / span 2;">
+            <div class="hud-title">Configuración ZK</div>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 0.8rem; color:#888;">ALGORITMO</label>
+                <select id="algo-select" style="width: 100%; margin-top:5px;">
+                    <option value="none">Sin ZK (L1 Pública)</option>
+                    <option value="snark">zk-SNARK (Groth16)</option>
+                    <option value="stark">zk-STARK (FRI)</option>
+                </select>
+            </div>
+            <div id="tech-desc" style="font-size: 0.8rem; color: #aaa; line-height: 1.4;">
+                Transacción estándar sin privacidad. Los datos son visibles en la Mempool pública.
+            </div>
+            <div class="hud-title" style="margin-top: 20px;">Estado</div>
+            <div class="data-row"><span>SETUP:</span> <span class="data-val" id="status-setup">N/A</span></div>
+            <div class="data-row"><span>PROVER:</span> <span class="data-val" id="status-prover">IDLE</span></div>
+            <div class="data-row"><span>VERIFIER:</span> <span class="data-val" id="status-verifier">IDLE</span></div>
+        </div>
+
+        <div id="center-stage">
+            <div id="witness-box">
+                <div style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">PRIVATE WITNESS</div>
+                <span id="witness-data">SECRET_KEY_123</span>
+            </div>
+            <div id="proof-hash">0x...</div>
+        </div>
+
+        <div id="controls">
+            <button id="btn-prove">INICIAR PROCESO</button>
+        </div>
+
+        <div id="terminal">
+            <div class="log-line">> Sistema inicializado.</div>
+            <div class="log-line">> Esperando selección de protocolo...</div>
+        </div>
+    </div>
+
+    <div id="footer">Material elaborado por el profesor Sergio Gevatschnaider</div>
+
+    <script>
+        // --- VISUAL ENGINE ---
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let nodes = [];
+        let animationState = 'idle'; // idle, aligning, proving, verified, exposed
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        class Node {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.targetX = null;
+                this.targetY = null;
+                this.isGate = Math.random() > 0.8; 
+            }
+
+            update() {
+                if (animationState === 'aligning' || animationState === 'proving') {
+                    this.x += (this.targetX - this.x) * 0.05;
+                    this.y += (this.targetY - this.y) * 0.05;
+                } else {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.isGate ? 3 : 1.5, 0, Math.PI*2);
+                
+                // Color logic
+                if(animationState === 'verified') ctx.fillStyle = '#10b981'; // Green
+                else if(animationState === 'exposed') ctx.fillStyle = '#ef4444'; // Red
+                else ctx.fillStyle = this.isGate ? '#8b5cf6' : '#444';
+                
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<150; i++) nodes.push(new Node());
+
+        function drawCircuit() {
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Stroke logic
+            if(animationState === 'verified') ctx.strokeStyle = 'rgba(16, 185, 129, 0.1)';
+            else if(animationState === 'exposed') ctx.strokeStyle = 'rgba(239, 68, 68, 0.15)';
+            else ctx.strokeStyle = 'rgba(139, 92, 246, 0.15)';
+            
+            ctx.lineWidth = 1;
+            
+            for(let i=0; i<nodes.length; i++) {
+                let n1 = nodes[i];
+                n1.update();
+                n1.draw();
+                for(let j=i+1; j<nodes.length; j++) {
+                    let n2 = nodes[j];
+                    let dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(n1.x, n1.y);
+                        ctx.lineTo(n2.x, n2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawCircuit);
+        }
+        drawCircuit();
+
+
+        // --- AUDIO ENGINE ---
+        let audioCtx;
+        function playTone(freq, type, duration) {
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+        }
+
+
+        // --- LOGIC ---
+        const btnProve = document.getElementById('btn-prove');
+        const terminal = document.getElementById('terminal');
+        const witnessBox = document.getElementById('witness-box');
+        const witnessData = document.getElementById('witness-data');
+        const proofHash = document.getElementById('proof-hash');
+        const polyCanvas = document.getElementById('polyCanvas');
+        const polyCtx = polyCanvas.getContext('2d');
+        const algoSelect = document.getElementById('algo-select');
+
+        const SPECS = {
+            none: { curve: "N/A", constraints: "N/A", gas: "$45.00", desc: "Transacción estándar. Datos públicos en Mempool. Sin privacidad." },
+            snark: { curve: "BN-254", constraints: "Low", gas: "$0.25", desc: "Requiere Trusted Setup. Pruebas pequeñas (288 bytes)." },
+            stark: { curve: "StarkCurve", constraints: "High", gas: "$0.45", desc: "Transparent (No setup). Pruebas grandes, resistente a Quantum." }
+        };
+
+        // Poly visualizer
+        let polyOffset = 0;
+        function drawPoly() {
+            polyCtx.clearRect(0,0, 268, 100);
+            polyCtx.strokeStyle = (animationState === 'exposed') ? '#ef4444' : '#8b5cf6';
+            polyCtx.lineWidth = 2;
+            polyCtx.beginPath();
+            for(let x=0; x<268; x++) {
+                let y = 50 + Math.sin((x + polyOffset) * 0.05) * 20 + Math.cos((x + polyOffset * 2) * 0.02) * 10;
+                // Flat line if no ZK
+                if(animationState === 'exposed' || animationState === 'idle' && algoSelect.value === 'none') {
+                    y = 50 + (Math.random()-0.5)*5; // Static noise
+                }
+                if(x==0) polyCtx.moveTo(x,y); else polyCtx.lineTo(x,y);
+            }
+            polyCtx.stroke();
+            if(animationState !== 'idle') polyOffset += 2;
+            requestAnimationFrame(drawPoly);
+        }
+        drawPoly();
+
+        function log(msg, type='') {
+            const div = document.createElement('div');
+            div.className = `log-line ${type}`;
+            div.innerText = `> ${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function updateUI() {
+            const val = algoSelect.value;
+            const s = SPECS[val];
+            document.getElementById('val-curve').innerText = s.curve;
+            document.getElementById('val-gas').innerText = s.gas;
+            document.getElementById('tech-desc').innerText = s.desc;
+            
+            const setupEl = document.getElementById('status-setup');
+            
+            if(val === 'none') {
+                log("Seleccionado L1 Pública. PRIVACIDAD DESACTIVADA.", 'danger');
+                setupEl.innerText = "N/A";
+                setupEl.style.color = "#aaa";
+            } else if(val === 'snark') {
+                log("Seleccionado zk-SNARK. Advertencia: Requiere Trusted Setup.", 'warn');
+                setupEl.innerText = "REQUIRED";
+                setupEl.style.color = "#f59e0b";
+            } else {
+                log("Seleccionado zk-STARK. Setup Transparente.", 'success');
+                setupEl.innerText = "TRANSPARENT";
+                setupEl.style.color = "#10b981";
+            }
+        }
+
+        algoSelect.addEventListener('change', updateUI);
+        // Init default
+        updateUI();
+
+
+        // MAIN SEQUENCE
+        btnProve.addEventListener('click', async () => {
+            if(!audioCtx) initAudio();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const mode = algoSelect.value;
+            btnProve.disabled = true;
+            animationState = 'aligning';
+            
+            // RESET UI
+            witnessBox.className = ''; 
+            witnessData.innerText = "SECRET_KEY_123";
+            proofHash.style.opacity = 0;
+
+            // 1. INIT
+            if(mode === 'none') {
+                log("Iniciando Transacción Pública...");
+                playTone(150, 'sawtooth', 0.2);
+            } else {
+                log("Inicializando Circuito Aritmético...");
+                playTone(440, 'sine', 0.1);
+            }
+            
+            nodes.forEach(n => {
+                n.targetX = Math.random() * (canvas.width * 0.4) + (canvas.width * 0.3);
+                n.targetY = Math.random() * (canvas.height * 0.4) + (canvas.height * 0.3);
+            });
+            
+            await wait(2000);
+
+            // 2. WITNESS
+            log(mode === 'none' ? "Cargando Datos en Texto Plano..." : "Generando Private Witness...");
+            witnessBox.classList.add('visible');
+            
+            if(mode === 'none') {
+                 playTone(100, 'square', 0.5); // Harsh sound
+            } else {
+                 playTone(200, 'square', 0.3);
+            }
+
+            await wait(2000);
+
+            // 3. PROCESSING (The Split)
+            if(mode === 'none') {
+                log("⚠️ ADVERTENCIA: DATOS EXPUESTOS EN MEMPOOL", 'danger');
+                witnessBox.classList.add('exposed');
+                witnessData.innerText = "SECRET_KEY_123"; // No encryption
+                animationState = 'exposed';
+                playTone(80, 'sawtooth', 1.0); // Alarm sound
+            } else {
+                log("Encriptando & Generando Prueba...");
+                witnessBox.classList.add('encrypted');
+                animationState = 'proving';
+                
+                let scrambler = setInterval(() => {
+                    witnessData.innerText = Math.random().toString(36).substring(2, 15);
+                    playTone(800 + Math.random()*200, 'sawtooth', 0.05);
+                }, 100);
+                
+                await wait(3000);
+                clearInterval(scrambler);
+                witnessData.innerText = "************"; 
+            }
+
+            document.getElementById('status-prover').innerText = "COMPLETE";
+            
+            // 4. FINAL STATE
+            if(mode === 'none') {
+                proofHash.innerText = "RAW_DATA_LEAKED";
+                proofHash.style.background = "none";
+                proofHash.style.webkitTextFillColor = "#ef4444";
+                proofHash.style.color = "#ef4444";
+                proofHash.style.opacity = 1;
+                
+                document.getElementById('status-verifier').innerText = "PUBLIC";
+                document.getElementById('status-verifier').style.color = "#ef4444";
+                log("TX CONFIRMADA. PRIVACIDAD COMPROMETIDA.", 'danger');
+            } else {
+                const finalHash = "0x" + Math.random().toString(16).substr(2, 64) + "...";
+                proofHash.innerText = finalHash;
+                proofHash.style.background = "linear-gradient(90deg, #ec4899, #06b6d4)";
+                proofHash.style.webkitTextFillColor = "transparent";
+                proofHash.style.opacity = 1;
+                
+                playTone(1200, 'sine', 1.0);
+                animationState = 'verified';
+                document.getElementById('status-verifier').innerText = "VALID";
+                document.getElementById('status-verifier').style.color = "#10b981";
+                log("PRUEBA VÁLIDA. Zero Knowledge garantizado.", 'success');
+            }
+
+            btnProve.disabled = false;
+            btnProve.innerText = "REINICIAR";
+        });
+
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    </script>
+</body>
+</html>
