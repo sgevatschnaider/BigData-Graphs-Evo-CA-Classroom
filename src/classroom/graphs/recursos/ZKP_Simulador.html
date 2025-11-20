@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulador ZKP: SNARK vs STARK</title>
+  <style>
+    :root {
+      --bg: #090b10;
+      --panel: #11141f;
+      --border: #2d3748;
+      --text: #e2e8f0;
+      --accent: #8b5cf6;
+      --snark: #ec4899;
+      --stark: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #fbbf24;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0; 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); 
+      color: var(--text);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      min-height: 100vh; 
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container { 
+      width: 100%; 
+      max-width: 1200px; 
+    }
+    
+    /* Header */
+    header { 
+      margin-bottom: 40px; 
+      text-align: center; 
+    }
+    
+    h1 { 
+      background: linear-gradient(135deg, var(--snark) 0%, var(--accent) 50%, var(--stark) 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 12px 0; 
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    
+    .subtitle { 
+      color: #94a3b8; 
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-weight: 500;
+    }
+    
+    /* Dashboard Layout */
+    .dashboard { 
+      display: grid; 
+      grid-template-columns: 380px 1fr; 
+      gap: 24px; 
+    }
+    
+    @media(max-width: 900px) { 
+      .dashboard { 
+        grid-template-columns: 1fr; 
+      } 
+    }
+
+    /* Cards */
+    .card {
+      background: var(--panel); 
+      border: 1px solid var(--border);
+      border-radius: 16px; 
+      padding: 24px; 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    
+    .card:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    
+    .card-title { 
+      font-weight: 700; 
+      font-size: 1.1rem;
+      margin-bottom: 20px; 
+      color: #fff; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    /* Form Elements */
+    label { 
+      display: block; 
+      color: #cbd5e1; 
+      font-size: 0.85rem; 
+      margin-bottom: 8px; 
+      margin-top: 18px; 
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    
+    select, input { 
+      width: 100%; 
+      padding: 12px 14px; 
+      border-radius: 10px; 
+      border: 1.5px solid var(--border); 
+      background: #1a202c; 
+      color: white; 
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    
+    select:hover, input:hover {
+      border-color: #4a5568;
+    }
+    
+    select:focus, input:focus { 
+      border-color: var(--accent); 
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    button.primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #6d28d9); 
+      border: none; 
+      font-weight: 700; 
+      cursor: pointer; 
+      margin-top: 24px;
+      padding: 14px;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button.primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    button.primary:hover::before {
+      left: 100%;
+    }
+    
+    button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px -2px rgba(139, 92, 246, 0.5);
+    }
+    
+    button.primary:active { 
+      transform: translateY(0);
+    }
+    
+    button.primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Alert Box */
+    .alert-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      display: none;
+      align-items: start;
+      gap: 10px;
+    }
+    
+    .alert-box.warning {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--warning);
+      display: flex;
+    }
+    
+    .alert-box.info {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--stark);
+      display: flex;
+    }
+    
+    .alert-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Visualization Area */
+    .circuit-container {
+      position: relative; 
+      height: 320px; 
+      background: linear-gradient(135deg, #0d1117 0%, #11141f 100%);
+      border-radius: 12px; 
+      border: 2px solid var(--border);
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 0 40px;
+      overflow: visible;
+    }
+    
+    .connection-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      z-index: 1;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .node {
+      width: 160px; 
+      padding: 18px; 
+      background: linear-gradient(135deg, #1e293b 0%, #1a202c 100%);
+      border: 2px solid var(--border); 
+      border-radius: 12px;
+      text-align: center; 
+      z-index: 2; 
+      position: relative; 
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    
+    .node:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.4);
+    }
+    
+    .node-title { 
+      font-size: 0.75rem; 
+      color: #94a3b8; 
+      text-transform: uppercase; 
+      letter-spacing: 1.2px; 
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .node-content { 
+      font-family: 'Courier New', monospace; 
+      font-size: 0.9rem; 
+      color: var(--success);
+      font-weight: 600;
+      padding: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 6px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .node.secret .node-content { 
+      color: var(--warning);
+      background: rgba(251, 191, 36, 0.1);
+    }
+    
+    .node.secret.hidden .node-content { 
+      filter: blur(8px); 
+      user-select: none;
+      position: relative;
+    }
+    
+    .node.secret.hidden .node-content::after {
+      content: '🔒';
+      position: absolute;
+      font-size: 1.5rem;
+      filter: blur(0);
+      animation: pulse 2s infinite;
+    }
+    
+    .node.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    /* Particle Animation */
+    .particle {
+      position: absolute; 
+      top: 50%; 
+      left: 15%; 
+      width: 14px; 
+      height: 14px;
+      background: radial-gradient(circle, var(--accent), var(--accent) 60%, transparent);
+      border-radius: 50%; 
+      transform: translate(-50%, -50%); 
+      opacity: 0; 
+      z-index: 3;
+      box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+    }
+    
+    @keyframes traverse {
+      0% { 
+        left: 15%; 
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      10% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% { 
+        background: radial-gradient(circle, #fff, var(--accent));
+        transform: translate(-50%, -50%) scale(1.3);
+        box-shadow: 0 0 30px #fff, 0 0 60px var(--accent);
+      }
+      90% {
+        opacity: 1;
+      }
+      100% { 
+        left: 85%; 
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+    }
+
+    /* Tech Specs Panel */
+    .tech-specs {
+      margin-top: 24px; 
+      padding: 18px; 
+      border-radius: 10px; 
+      background: rgba(0,0,0,0.4); 
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      font-family: 'Courier New', monospace; 
+      font-size: 0.85rem; 
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+    
+    .tech-specs.visible { 
+      display: block; 
+      animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+    
+    .spec-header {
+      color: #fff; 
+      margin-bottom: 12px; 
+      border-bottom: 1px solid #444; 
+      padding-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .spec-row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin-bottom: 10px; 
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .spec-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    
+    .spec-key { 
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    
+    .spec-val { 
+      color: #e2e8f0; 
+      font-weight: 700;
+      text-align: right;
+    }
+    
+    /* Tooltips */
+    .tooltip-trigger { 
+      border-bottom: 1.5px dotted #64748b; 
+      cursor: help; 
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    
+    .tooltip-trigger:hover {
+      border-bottom-color: var(--accent);
+    }
+    
+    .tooltip-box {
+      visibility: hidden; 
+      width: 240px; 
+      background: linear-gradient(135deg, #2d3748 0%, #1e293b 100%);
+      color: #fff; 
+      text-align: left;
+      border-radius: 8px; 
+      padding: 12px; 
+      position: absolute; 
+      z-index: 100; 
+      bottom: 140%; 
+      left: 50%; 
+      margin-left: -120px; 
+      opacity: 0; 
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: -apple-system, system-ui, sans-serif; 
+      font-size: 0.8rem;
+      line-height: 1.5;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+      border: 1px solid #4a5568;
+      pointer-events: none;
+    }
+    
+    .tooltip-box::after {
+      content: ""; 
+      position: absolute; 
+      top: 100%; 
+      left: 50%; 
+      margin-left: -6px;
+      border-width: 6px; 
+      border-style: solid; 
+      border-color: #2d3748 transparent transparent transparent;
+    }
+    
+    .tooltip-trigger:hover .tooltip-box { 
+      visibility: visible; 
+      opacity: 1;
+      bottom: 130%;
+    }
+
+    /* Metrics Grid */
+    .metrics { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 12px; 
+      margin-top: 24px; 
+    }
+    
+    .metric { 
+      background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 16px; 
+      border-radius: 10px; 
+      text-align: center;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    
+    .metric:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .metric-val { 
+      font-size: 1.4rem; 
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    
+    .metric-lbl { 
+      font-size: 0.75rem; 
+      color: #94a3b8; 
+      margin-top: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Console */
+    .console {
+      margin-top: 20px;
+      padding: 14px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      height: 100px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    
+    .console::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .console::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }
+    
+    .console::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    
+    .console::-webkit-scrollbar-thumb:hover {
+      background: #4a5568;
+    }
+    
+    .console-line {
+      margin-bottom: 4px;
+      animation: fadeInConsole 0.3s;
+    }
+    
+    @keyframes fadeInConsole {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .console-line.success { color: var(--success); }
+    .console-line.error { color: var(--danger); }
+    .console-line.warning { color: var(--warning); }
+    .console-line.info { color: #e2e8f0; }
+    
+    /* Status Badge */
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    
+    .status-badge.standby {
+      background: rgba(100, 116, 139, 0.2);
+      color: #64748b;
+    }
+    
+    .status-badge.processing {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--accent);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-badge.complete {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    
+    /* Comparison Table */
+    .comparison-section {
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    
+    .comparison-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .comparison-item {
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .comparison-item-title {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .comparison-item-value {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    
+    @media(max-width: 600px) {
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+      
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .circuit-container {
+        height: auto;
+        min-height: 400px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 30px;
+        padding: 30px 20px;
+      }
+      
+      .connection-line {
+        width: 2px;
+        height: 100%;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, transparent, var(--border), transparent);
+      }
+      
+      .node {
+        width: 100%;
+        max-width: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🔬 ZK-Proof Laboratory</h1>
+    <div class="subtitle">Comparativa Técnica Interactiva: SNARKs vs STARKs para Colateral Privado</div>
+  </header>
+
+  <div class="dashboard">
+    <div class="card">
+      <div class="card-title">
+        <span>⚙️ Configuración del Circuito</span>
+      </div>
+      
+      <label>Selecciona Algoritmo ZK</label>
+      <select id="algoSelect" onchange="updateTechSpecs()" aria-label="Seleccionar algoritmo ZK">
+        <option value="none">Sin ZK (L1 Pública)</option>
+        <option value="snark">zk-SNARK (Groth16/Plonk)</option>
+        <option value="stark">zk-STARK (FRI Protocol)</option>
+      </select>
+
+      <div id="setupWarning" class="alert-box warning">
+        <span class="alert-icon">⚠️</span>
+        <span><strong>Trusted Setup requerido:</strong> Ceremonia de llaves criptográficas. Riesgo de backdoor si se compromete.</span>
+      </div>
+      
+      <div id="quantumInfo" class="alert-box info">
+        <span class="alert-icon">🛡️</span>
+        <span><strong>Quantum-resistant:</strong> Seguro contra computadoras cuánticas futuras gracias al uso de hashes en vez de curvas elípticas.</span>
+      </div>
+
+      <label>Activo a Tokenizar</label>
+      <select id="assetSelect" aria-label="Seleccionar activo">
+        <option value="bonds">Bonos del Tesoro (RWA)</option>
+        <option value="equity">Acciones Privadas</option>
+        <option value="realestate">Bienes Raíces</option>
+        <option value="commodities">Commodities (Oro/Plata)</option>
+      </select>
+
+      <label>Monto (USD)</label>
+      <input type="number" id="amountInput" value="1000000" min="1000" step="1000" aria-label="Monto en USD">
+
+      <button class="primary" onclick="runSimulation()" id="proveButton">
+        <span>⚡ Generar Prueba (Prove)</span>
+      </button>
+
+      <div id="techPanel" class="tech-specs">
+        <div class="spec-header">🔬 ESPECIFICACIONES TÉCNICAS</div>
+        <div class="spec-row">
+          <span class="spec-key">Criptografía:</span> 
+          <span class="spec-val" id="specCrypto">--</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Compromiso:</span> 
+          <span class="spec-val" id="specCommit">--</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Setup:</span> 
+          <span class="spec-val" id="specSetup">--</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Resistencia Quantum:</span> 
+          <span class="spec-val" id="specQuantum">--</span>
+        </div>
+      </div>
+      
+      <div class="comparison-section" id="comparisonSection" style="display:none;">
+        <div class="comparison-title">
+          <span>📊</span>
+          <span>Ventajas Clave</span>
+        </div>
+        <div class="comparison-grid" id="comparisonGrid"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>🎯 Visualizador de Flujo ZK</span>
+        <span id="statusBadge" class="status-badge standby">Standby</span>
+      </div>
+
+      <div class="circuit-container">
+        <div class="connection-line"></div>
+        <div id="particle" class="particle"></div>
+
+        <div class="node secret" id="nodeWitness">
+          <div class="node-title">🔒 WITNESS (Privado)</div>
+          <div class="node-content" id="witnessText">DATA OFF-CHAIN</div>
+          <div style="margin-top:8px;">
+            <span class="tooltip-trigger" style="font-size:0.7rem; color:#94a3b8;">
+              ¿Qué es esto?
+              <span class="tooltip-box">
+                El "Witness" incluye los datos sensibles (saldo real, identificación del activo, claves privadas) que satisfacen el circuito matemático pero que NUNCA se revelan públicamente al verificador.
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="node" id="nodeCircuit" style="border-color:var(--accent);">
+          <div class="node-title">⚡ ZK CIRCUIT</div>
+          <div class="node-content">C(x, w) = 0</div>
+          <div style="margin-top:8px;">
+            <span class="tooltip-trigger" style="font-size:0.7rem; color:#94a3b8;">
+              Polinomios
+              <span class="tooltip-box">
+                El problema computacional se traduce a ecuaciones polinomiales. Demostrar que tienes la solución equivale a probar propiedades de estos polinomios sin revelar los valores secretos.
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="node" id="nodeProof">
+          <div class="node-title">📜 PROOF (Público)</div>
+          <div class="node-content" id="proofText">Awaiting...</div>
+          <div style="margin-top:8px;">
+            <span class="tooltip-trigger" style="font-size:0.7rem; color:#94a3b8;">
+              Verificación
+              <span class="tooltip-trigger">
+                Un hash criptográfico compacto que certifica matemáticamente la validez de la operación. El Smart Contract en blockchain solo ve esta prueba, nunca los datos originales sensibles.
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-val" id="mGas">--</div>
+          <div class="metric-lbl">Costo Gas</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val" id="mSize">--</div>
+          <div class="metric-lbl">Tamaño Prueba</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val" id="mTime">--</div>
+          <div class="metric-lbl">Tiempo Prover</div>
+        </div>
+      </div>
+      
+      <div id="console" class="console">
+        <div class="console-line">> Sistema listo. Selecciona un algoritmo y presiona "Generar Prueba".</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Material elaborado por el profesor Sergio Gevatschnaider
+  </div>
+
+</div>
+
+<script>
+  // UI Elements Cache
+  const UI = {
+    algo: document.getElementById('algoSelect'),
+    warning: document.getElementById('setupWarning'),
+    quantumInfo: document.getElementById('quantumInfo'),
+    techPanel: document.getElementById('techPanel'),
+    particle: document.getElementById('particle'),
+    witnessNode: document.getElementById('nodeWitness'),
+    circuitNode: document.getElementById('nodeCircuit'),
+    proofNode: document.getElementById('nodeProof'),
+    proofText: document.getElementById('proofText'),
+    console: document.getElementById('console'),
+    statusBadge: document.getElementById('statusBadge'),
+    proveButton: document.getElementById('proveButton'),
+    comparisonSection: document.getElementById('comparisonSection'),
+    comparisonGrid: document.getElementById('comparisonGrid')
+  };
+
+  // Technical Specifications
+  const SPECS = {
+    none: { 
+      crypto: "N/A", 
+      commit: "N/A", 
+      setup: "N/A", 
+      quantum: "No" 
+    },
+    snark: { 
+      crypto: "Curvas Elípticas (BN254)", 
+      commit: "KZG Polynomial Commitment", 
+      setup: "Trusted (Ceremonia)", 
+      quantum: "Vulnerable",
+      advantages: [
+        { title: "Gas Barato", value: "Verificar cuesta ~200k gas" },
+        { title: "Tamaño", value: "Pruebas de solo 288 bytes" }
+      ]
+    },
+    stark: { 
+      crypto: "Funciones Hash (SHA-256/Blake)", 
+      commit: "FRI Protocol (Merkle Paths)", 
+      setup: "Transparent (Público)", 
+      quantum: "Resistente (Post-Quantum)",
+      advantages: [
+        { title: "Setup", value: "No requiere ceremonia" },
+        { title: "Escalabilidad", value: "Prover muy rápido" },
+        { title: "Seguridad", value: "Futuro-proof (Quantum)" }
+      ]
+    }
+  };
+
+  // --- Core Functions ---
+
+  function log(msg, type = 'info') {
+    const div = document.createElement('div');
+    div.className = `console-line ${type}`;
+    div.innerHTML = `> ${msg}`;
+    UI.console.appendChild(div);
+    UI.console.scrollTop = UI.console.scrollHeight;
+  }
+
+  function updateTechSpecs() {
+    const type = UI.algo.value;
+    
+    // 1. UI Reset
+    UI.warning.style.display = 'none';
+    UI.quantumInfo.style.display = 'none';
+    UI.techPanel.classList.remove('visible');
+    UI.comparisonSection.style.display = 'none';
+    
+    // CORRECCIÓN: Antes deshabilitaba el botón si type == 'none'
+    // UI.proveButton.disabled = (type === 'none'); <-- ELIMINADO
+    UI.proveButton.disabled = false;
+
+    if(type === 'none') {
+        log("Seleccionada red pública (L1). Sin privacidad. Presiona 'Generar' para simular costo.", 'warning');
+        return;
+    }
+
+    // 2. Load Data
+    const data = SPECS[type];
+    
+    // 3. Update Text
+    document.getElementById('specCrypto').innerText = data.crypto;
+    document.getElementById('specCommit').innerText = data.commit;
+    document.getElementById('specSetup').innerText = data.setup;
+    document.getElementById('specQuantum').innerText = data.quantum;
+    
+    // 4. Handle Alerts & Colors
+    const setupVal = document.getElementById('specSetup');
+    
+    if(type === 'snark') {
+      UI.warning.style.display = 'flex'; // Trusted Setup Warning
+      setupVal.style.color = 'var(--snark)';
+    } else if (type === 'stark') {
+      UI.quantumInfo.style.display = 'flex'; // Quantum Info
+      setupVal.style.color = 'var(--success)';
+    }
+
+    // 5. Show Panel
+    UI.techPanel.classList.add('visible');
+    log(`Algoritmo seleccionado: ${type.toUpperCase()}. Listo para compilar circuito.`);
+  }
+
+  function runSimulation() {
+    const type = UI.algo.value;
+    const amount = document.getElementById('amountInput').value;
+    
+    // CORRECCIÓN: Se eliminó el bloque que bloqueaba 'none'
+
+    // Reset States
+    UI.statusBadge.className = 'status-badge processing';
+    UI.statusBadge.innerText = 'GENERANDO PRUEBA...';
+    UI.particle.style.animation = 'none';
+    void UI.particle.offsetWidth; // Trigger reflow
+    
+    UI.witnessNode.classList.remove('hidden'); // Show data initially
+    UI.proofText.innerText = "Calculando...";
+    UI.proofText.style.color = "#94a3b8";
+    
+    log(`Iniciando PROVER... Activo: $${parseInt(amount).toLocaleString()}`, 'info');
+
+    // Start Animation
+    UI.particle.style.animation = 'traverse 3s cubic-bezier(0.45, 0, 0.55, 1) forwards';
+
+    // Phase 1: Witness Obfuscation (The "Magic" Moment)
+    setTimeout(() => {
+        if(type === 'none') {
+            log("⚠️ DATOS PÚBLICOS: Enviando activos en texto plano a la Mempool...", 'warning');
+            // No ocultamos el nodo witness para simular falta de privacidad
+        } else {
+            UI.witnessNode.classList.add('hidden');
+            log("🔒 ENCRIPTANDO WITNESS: Datos ofuscados. Generando traza de ejecución...", 'warning');
+        }
+    }, 1000);
+
+    // Phase 2: Polynomial Commitment
+    setTimeout(() => {
+        UI.circuitNode.classList.add('active');
+        if(type === 'none') {
+             log("⚙️ VALIDACIÓN EVM: Ejecutando Smart Contract estándar...", 'info');
+        } else {
+             log("⚡ CALCULANDO POLINOMIOS: " + (type === 'snark' ? "Aplicando KZG Commitment..." : "Construyendo Merkle Paths (FRI)..."), 'info');
+        }
+    }, 1800);
+
+    // Phase 3: Final Proof
+    setTimeout(() => {
+        UI.circuitNode.classList.remove('active');
+        showResults(type);
+    }, 3000);
+  }
+
+  function showResults(type) {
+    let gas, size, time, proofHash, color;
+
+    if (type === 'none') {
+      gas = "$45.50"; // Caro
+      size = "14 KB"; // Pesado
+      time = "0.1s"; // Rápido (pero inseguro en privacidad)
+      proofHash = "RAW DATA";
+      color = "var(--danger)";
+      log("❌ TRANSACCIÓN PÚBLICA: Privacidad NULA. Costo alto.", 'error');
+      
+      // Reset visual para 'none'
+      UI.statusBadge.className = 'status-badge standby';
+      UI.statusBadge.innerText = 'CONFIRMADO (PÚBLICO)';
+
+    } else if (type === 'snark') {
+      gas = "$0.25";
+      size = "288 Bytes"; // Tiny!
+      time = "3.2s"; // Slower prover
+      proofHash = "0x7f...3a (Groth16)";
+      color = "var(--snark)";
+      log("✅ PRUEBA SNARK GENERADA: Extremadamente ligera.", 'success');
+      UI.statusBadge.className = 'status-badge complete';
+      UI.statusBadge.innerText = 'VERIFICADO ON-CHAIN';
+
+    } else {
+      gas = "$0.45";
+      size = "45 KB"; // Larger
+      time = "0.9s"; // Fast prover
+      proofHash = "0x1b...9c (STARK)";
+      color = "var(--stark)";
+      log("✅ PRUEBA STARK GENERADA: Rápida y transparente.", 'success');
+      UI.statusBadge.className = 'status-badge complete';
+      UI.statusBadge.innerText = 'VERIFICADO ON-CHAIN';
+    }
+
+    // Update Metrics
+    document.getElementById('mGas').innerText = gas;
+    document.getElementById('mGas').style.color = (type === 'none') ? "var(--danger)" : "var(--success)";
+    
+    document.getElementById('mSize').innerText = size;
+    document.getElementById('mSize').style.color = (type === 'snark') ? "var(--success)" : (type === 'stark' ? "var(--warning)" : "var(--danger)");
+    
+    document.getElementById('mTime').innerText = time;
+    
+    UI.proofText.innerText = proofHash;
+    UI.proofText.style.color = color;
+    UI.proofNode.style.borderColor = color;
+
+    if (type !== 'none') {
+        renderComparison(type);
+    }
+  }
+
+  function renderComparison(type) {
+    const data = SPECS[type];
+    UI.comparisonGrid.innerHTML = '';
+    
+    if(data.advantages) {
+        data.advantages.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'comparison-item';
+            div.innerHTML = `
+                <div class="comparison-item-title">${item.title}</div>
+                <div class="comparison-item-value">${item.value}</div>
+            `;
+            UI.comparisonGrid.appendChild(div);
+        });
+        UI.comparisonSection.style.display = 'block';
+    }
+  }
+
+  // Initialize
+  updateTechSpecs();
+</script>
+
+</body>
+</html>
