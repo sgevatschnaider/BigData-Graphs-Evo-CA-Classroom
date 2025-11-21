@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard: Tradicional vs Tokenización vs ZKP</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --panel: #171a2b;
+      --ink: #e8eaf6;
+      --muted: #94a3b8;
+      
+      /* Colores Semánticos */
+      --c-trad: #64748b; 
+      --c-token: #38bdf8; 
+      --c-zkp: #d946ef;  
+      
+      --accent-current: var(--c-trad);
+      --card-radius: 16px;
+      --shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      /* Fondo Fijo */
+      background: radial-gradient(1200px 800px at 50% 0%, #1e293b 0%, var(--bg) 100%);
+      background-attachment: fixed;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      transition: background 0.6s ease;
+      padding-bottom: 100px;
+    }
+
+    /* Modificadores de fondo */
+    body.mode-trad { background: radial-gradient(1200px 800px at 50% 0%, #334155 0%, var(--bg) 100%); background-attachment: fixed; }
+    body.mode-token { background: radial-gradient(1200px 800px at 50% 0%, #0c4a6e 0%, var(--bg) 100%); background-attachment: fixed; }
+    body.mode-zkp { background: radial-gradient(1200px 800px at 50% 0%, #4a044e 0%, var(--bg) 100%); background-attachment: fixed; }
+
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+    /* HEADER */
+    header { margin-bottom: 25px; display: grid; gap: 8px; }
+    h1 {
+      margin: 0; font-size: 1.8rem;
+      background: linear-gradient(90deg, white, #cbd5e1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sub { color: var(--muted); font-size: 0.95rem; }
+
+    /* STEPPER */
+    .stepper {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;
+    }
+    @media(max-width:768px){ .stepper { grid-template-columns: 1fr; } }
+
+    .step-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 15px; border-radius: 12px;
+      cursor: pointer; text-align: left; transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .step-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+    
+    .step-btn.active {
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+      border-color: var(--accent-current);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .step-btn.active::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+      background: var(--accent-current);
+    }
+    .step-title { display: block; font-weight: 700; font-size: 1rem; margin-bottom: 4px; color: white; }
+    .step-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.3; }
+
+    /* GRID */
+    .dashboard-grid { 
+        display: grid; grid-template-columns: 420px 1fr; gap: 20px; align-items: start; 
+    }
+    @media(max-width:1100px){ .dashboard-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--card-radius);
+      padding: 20px; box-shadow: var(--shadow);
+      height: auto;
+    }
+
+    /* INPUTS */
+    .input-section { margin-bottom: 20px; border-left: 3px solid rgba(255,255,255,0.1); padding-left: 15px; }
+    .section-title {
+      color: var(--accent-current); font-weight: bold; text-transform: uppercase;
+      font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 15px;
+    }
+    
+    .control-group { margin-bottom: 12px; }
+    .label-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; color: var(--muted); }
+    .val-disp { font-weight: bold; color: white; font-family: monospace; }
+
+    input[type="number"] {
+        background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+        color: white; border-radius: 6px; padding: 4px 8px; width: 100%;
+        font-family: monospace; margin-bottom: 5px;
+    }
+    input[type="range"] {
+      width: 100%; height: 6px; border-radius: 3px; appearance: none;
+      background: rgba(0,0,0,0.4); outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: white; cursor: pointer; transition: 0.2s;
+      border: 2px solid var(--panel);
+    }
+    body.mode-trad input[type=range]::-webkit-slider-thumb { background: var(--c-trad); }
+    body.mode-token input[type=range]::-webkit-slider-thumb { background: var(--c-token); }
+    body.mode-zkp input[type=range]::-webkit-slider-thumb { background: var(--c-zkp); }
+
+    /* KPIS & CHARTS */
+    .kpi-container {
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      border-radius: 12px; padding: 20px; text-align: center;
+      margin-bottom: 20px; border: 1px solid var(--accent-current);
+      transition: border-color 0.5s; position: relative;
+    }
+    .kpi-main-val {
+      font-size: 2.8rem; font-weight: 800; margin: 10px 0;
+      background: linear-gradient(90deg, white, var(--accent-current));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .kpi-sub { font-size: 0.9rem; color: var(--muted); }
+    .kpi-context { font-size: 0.75rem; color: #6b7280; margin-top: 5px; font-style: italic; }
+    
+    .zkp-badge {
+      display: inline-block; margin-top: 8px;
+      padding: 4px 10px; border-radius: 12px;
+      background: rgba(217, 70, 239, 0.15); border: 1px solid var(--c-zkp);
+      color: #f5d0fe; font-size: 0.75rem; font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(217,70,239,0.4);} 70% {box-shadow: 0 0 0 10px rgba(0,0,0,0);} 100% {box-shadow: 0 0 0 0 rgba(0,0,0,0);} }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .chart-box { 
+      position: relative; height: 260px; width: 100%;
+      background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;
+    }
+    .chart-title { 
+      font-size: 0.85rem; color: var(--muted); text-align: center; 
+      margin-bottom: 5px; position: absolute; top: 10px; left: 0; right: 0;
+    }
+    .chart-box canvas { margin-top: 20px; }
+
+    .history-container {
+      margin-top: 20px; height: 200px; border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 20px; position: relative;
+    }
+
+    .footer {
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center; color: var(--muted); font-size: 0.85rem;
+    }
+    
+    /* --- CAMBIO 1: Fix para el QR con !important --- */
+    #qr-fixed {
+      position: fixed !important; 
+      bottom: 20px !important; 
+      right: 20px !important;
+      background: #0f172a; padding: 8px; border-radius: 10px;
+      border: 1px solid var(--accent-current);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      transition: border-color 0.5s; z-index: 999;
+    }
+    #qrcode { background: white; padding: 5px; border-radius: 4px; }
+
+  </style>
+</head>
+<body class="mode-trad">
+
+<div class="wrap">
+  <header>
+    <h1>Dashboard: <span id="header-status" style="color:var(--c-trad)">Tradicional vs Tokenización vs ZKP</span></h1>
+    <div class="sub">Impacto financiero detallado: Capital, Operaciones y Nuevos Negocios</div>
+  </header>
+
+  <div class="stepper">
+    <div class="step-btn active" id="btn-trad" onclick="setMode('trad')">
+      <span class="step-title">1. Tradicional</span>
+      <span class="step-desc">Status Quo. Procesos manuales, T+24h, altos costos de capital.</span>
+    </div>
+    <div class="step-btn" id="btn-token" onclick="setMode('token')">
+      <span class="step-title">2. Tokenizado (L1)</span>
+      <span class="step-desc">Smart Contracts. Reducción fricción, T+1h, nuevos productos básicos.</span>
+    </div>
+    <div class="step-btn" id="btn-zkp" onclick="setMode('zkp')">
+      <span class="step-title">3. ZKP Privacy</span>
+      <span class="step-desc">Privacidad Institucional. Solvencia matemática, T+Minutos, Dark Pools.</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    
+    <div class="card">
+      
+      <div class="input-section" style="border-left-color: #34d399;">
+        <div class="section-title" style="color:#34d399">Capital y Liquidez</div>
+        
+        <div class="control-group">
+            <div class="label-row"><span>Volumen Diario (USD)</span></div>
+            <input type="number" id="volDiario" value="500000000">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Haircut Después (%)</span> <span id="v-hc" class="val-disp">5.0%</span></div>
+            <input type="range" id="hcDesp" min="0" max="6" step="0.1" value="5.0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Tiempo Expo (Horas)</span> <span id="v-time" class="val-disp">24.0h</span></div>
+            <input type="range" id="timeDesp" min="0" max="24" step="0.1" value="24.0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Coste Capital Anual (%)</span> <span id="v-coc" class="val-disp">8.0%</span></div>
+            <input type="range" id="coc" min="0" max="15" step="0.5" value="8.0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Financiación Intradía (bps)</span> <span id="v-intra" class="val-disp">10.0</span></div>
+            <input type="range" id="intraBps" min="0" max="50" step="1" value="10.0">
+        </div>
+      </div>
+
+      <div class="input-section" style="border-left-color: #fbbf24;">
+        <div class="section-title" style="color:#fbbf24">Coste Operativo</div>
+        
+        <div class="control-group">
+            <div class="label-row"><span>Reconciliaciones/Día</span></div>
+            <input type="number" id="recons" value="1200">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Coste por Recon (USD)</span></div>
+            <input type="number" id="costRecon" value="10">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Reducción Fricción (%)</span> <span id="v-fric" class="val-disp">0%</span></div>
+            <input type="range" id="fricRed" min="0" max="100" step="5" value="0">
+        </div>
+      </div>
+
+      <div class="input-section" style="border-left-color: #a78bfa;">
+        <div class="section-title" style="color:#a78bfa">Nuevos Ingresos</div>
+
+        <div class="control-group">
+            <div class="label-row"><span>AUM Base (USD)</span></div>
+            <input type="number" id="aumBase" value="1000000000">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>AUM Incremental (%)</span> <span id="v-aumInc" class="val-disp">0.0%</span></div>
+            <input type="range" id="aumInc" min="0" max="30" step="0.5" value="0.0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Depósitos Token (USD)</span></div>
+            <input type="number" id="depoTok" value="0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Volumen eBL (USD)</span></div>
+            <input type="number" id="eblVol" value="0">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Spread eBL (bps)</span> <span id="v-eblSpr" class="val-disp">15</span></div>
+            <input type="range" id="eblSpread" min="0" max="50" step="1" value="15">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      
+      <div class="kpi-container">
+        <div class="kpi-sub">P&L TOTAL ESTIMADO (MENSUAL)</div>
+        <div class="kpi-main-val" id="kpi-total">$0</div>
+        <div class="kpi-sub" id="kpi-detail">Escenario Base</div>
+        
+        <div class="kpi-context">(vs. Escenario Base: Haircut 5%, T+24h, Sin Tokenización)</div>
+        
+        <div id="zkp-badge" class="zkp-badge" style="display:none;">🔒 ZKP Proofs: Solvencia Matemática</div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-box">
+          <div class="chart-title">Distribución del Valor (USD)</div>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Impacto Relativo</div>
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+
+      <div class="history-container">
+        <div class="chart-title">Trayectoria del P&L (Simulación)</div>
+        <div style="height: 100%; width: 100%;">
+            <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2025 · Modelo Financiero Digital · <b>Material elaborado por el profesor Sergio Gevatschnaider</b>
+  </div>
+
+  <div id="qr-fixed">
+    <div id="qr-label" style="font-size:0.6rem; color:#aaa; text-align:center; margin-bottom:4px;">ACCESS</div>
+    <div id="qrcode"></div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+
+      // --- CONSTANTES ---
+      const THEME = {
+        trad:  { color: '#64748b' },
+        token: { color: '#38bdf8' },
+        zkp:   { color: '#d946ef' }
+      };
+      let currentMode = 'trad';
+      let historyData = Array(12).fill(0); 
+      let chartBar, chartPie, chartLine;
+
+      // --- REFERENCIAS DOM ---
+      const els = {
+        volDiario: document.getElementById('volDiario'),
+        hcDesp: document.getElementById('hcDesp'),
+        timeDesp: document.getElementById('timeDesp'),
+        coc: document.getElementById('coc'),
+        intraBps: document.getElementById('intraBps'),
+        recons: document.getElementById('recons'),
+        costRecon: document.getElementById('costRecon'),
+        fricRed: document.getElementById('fricRed'),
+        aumBase: document.getElementById('aumBase'),
+        aumInc: document.getElementById('aumInc'),
+        depoTok: document.getElementById('depoTok'),
+        eblVol: document.getElementById('eblVol'),
+        eblSpread: document.getElementById('eblSpread'),
+        
+        v_hc: document.getElementById('v-hc'),
+        v_time: document.getElementById('v-time'),
+        v_coc: document.getElementById('v-coc'),
+        v_intra: document.getElementById('v-intra'),
+        v_fric: document.getElementById('v-fric'),
+        v_aumInc: document.getElementById('v-aumInc'),
+        v_eblSpr: document.getElementById('v-eblSpr'),
+
+        kpiTotal: document.getElementById('kpi-total'),
+        kpiDetail: document.getElementById('kpi-detail'),
+        zkpBadge: document.getElementById('zkp-badge'),
+        headerStatus: document.getElementById('header-status')
+      };
+
+      const fmtUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+      // --- CÁLCULOS P&L ---
+      function calculate() {
+        const vol = parseFloat(els.volDiario.value) || 0;
+        const hc = parseFloat(els.hcDesp.value);
+        const timeH = parseFloat(els.timeDesp.value);
+        const costCap = parseFloat(els.coc.value) / 100;
+        const intra = parseFloat(els.intraBps.value);
+        
+        const nRecons = parseFloat(els.recons.value) || 0;
+        const cRecon = parseFloat(els.costRecon.value) || 0;
+        const fric = parseFloat(els.fricRed.value) / 100;
+        
+        const aumB = parseFloat(els.aumBase.value) || 0;
+        const aumI = parseFloat(els.aumInc.value) / 100;
+        const depo = parseFloat(els.depoTok.value) || 0;
+        const ebl = parseFloat(els.eblVol.value) || 0;
+        const eblSpr = parseFloat(els.eblSpread.value);
+
+        // Baseline (Peor escenario)
+        const baseHc = 5.0; 
+        const baseTime = 24.0;
+        
+        // 1. Capital Saving
+        const capitalFreed = vol * Math.max(0, baseHc - hc) / 100;
+        const savCap = capitalFreed * (costCap / 12);
+        
+        const deltaHours = Math.max(0, baseTime - timeH);
+        const savLiq = vol * (intra/10000) * (deltaHours/24) * 30;
+        const totalCap = savCap + savLiq;
+
+        // 2. Ops Saving
+        const totalOpsCostMonth = nRecons * cRecon * 30;
+        const totalOps = totalOpsCostMonth * fric;
+
+        // 3. New Revenue
+        const feeMonthly = (25 / 10000) / 12; 
+        const newAumVal = aumB * aumI;
+        const revAum = newAumVal * feeMonthly;
+        const revDepo = depo * (0.015 / 12);
+        const revEbl = ebl * (eblSpr / 10000) / 12;
+        const totalRev = revAum + revDepo + revEbl;
+        
+        const grandTotal = totalCap + totalOps + totalRev;
+
+        return { cap: totalCap, ops: totalOps, rev: totalRev, total: grandTotal };
+      }
+
+      // --- UI UPDATE ---
+      window.updateUI = function() {
+        els.v_hc.textContent = els.hcDesp.value + '%';
+        els.v_time.textContent = els.timeDesp.value + 'h';
+        els.v_coc.textContent = els.coc.value + '%';
+        els.v_intra.textContent = els.intraBps.value;
+        els.v_fric.textContent = els.fricRed.value + '%';
+        els.v_aumInc.textContent = els.aumInc.value + '%';
+        els.v_eblSpr.textContent = els.eblSpread.value;
+
+        const r = calculate();
+
+        els.kpiTotal.textContent = fmtUSD.format(r.total);
+
+        if(currentMode === 'trad') {
+            els.kpiDetail.textContent = "Sin mejoras aplicadas";
+            els.zkpBadge.style.display = 'none';
+        } else if(currentMode === 'token') {
+            els.kpiDetail.textContent = `Eficiencia + Nuevos Productos`;
+            els.zkpBadge.style.display = 'none';
+        } else {
+            els.kpiDetail.textContent = `Privacidad Máxima + Volumen Inst.`;
+            els.zkpBadge.style.display = 'inline-block';
+        }
+
+        updateCharts(r);
+      };
+
+      // --- PRESETS ---
+      window.setMode = function(mode) {
+        currentMode = mode;
+        const body = document.body;
+        const root = document.documentElement;
+
+        body.className = `mode-${mode}`;
+        document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-${mode}`).classList.add('active');
+        
+        // Reset Historia
+        historyData = Array(12).fill(0);
+
+        if (mode === 'trad') {
+          els.hcDesp.value = 5.0; els.timeDesp.value = 24.0;
+          els.fricRed.value = 0; els.aumInc.value = 0;
+          els.depoTok.value = 0; els.eblVol.value = 0;
+          root.style.setProperty('--accent-current', '#64748b');
+          els.headerStatus.textContent = "Modelo Tradicional";
+          els.headerStatus.style.color = "#64748b";
+
+        } else if (mode === 'token') {
+          els.hcDesp.value = 2.5; els.timeDesp.value = 1.0;
+          els.fricRed.value = 50; els.aumInc.value = 5.0;
+          els.depoTok.value = 100000000; els.eblVol.value = 100000000;
+          root.style.setProperty('--accent-current', '#38bdf8');
+          els.headerStatus.textContent = "Tokenización (L1)";
+          els.headerStatus.style.color = "#38bdf8";
+
+        } else if (mode === 'zkp') {
+          els.hcDesp.value = 0.5; els.timeDesp.value = 0.2;
+          els.fricRed.value = 95; els.aumInc.value = 20.0;
+          els.depoTok.value = 500000000; els.eblVol.value = 500000000;
+          root.style.setProperty('--accent-current', '#d946ef');
+          els.headerStatus.textContent = "Privacidad ZKP";
+          els.headerStatus.style.color = "#d946ef";
+        }
+
+        updateUI();
+      };
+
+      // --- CHARTS ---
+      function initCharts() {
+        if(typeof Chart === 'undefined') return;
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        chartBar = new Chart(ctxBar, {
+          type: 'bar',
+          data: {
+            labels: ['Ahorro Cap', 'Ahorro Ops', 'Ingresos'],
+            datasets: [{
+              label: 'USD',
+              data: [0,0,0],
+              backgroundColor: ['#34d399', '#fbbf24', '#a78bfa'],
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '$'+v/1000+'k' } } }
+          }
+        });
+
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        chartPie = new Chart(ctxPie, {
+          type: 'doughnut',
+          data: {
+            labels: ['Capital', 'Operativo', 'Ingresos'],
+            datasets: [{
+              data: [1, 1, 1],
+              backgroundColor: ['#34d399', '#fbbf24', '#a78bfa'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } }
+          }
+        });
+
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        chartLine = new Chart(ctxLine, {
+          type: 'line',
+          data: {
+            labels: Array(12).fill(''),
+            datasets: [{
+              label: 'Evolución',
+              data: historyData,
+              borderColor: '#64748b',
+              backgroundColor: 'rgba(100, 116, 139, 0.1)',
+              fill: true, tension: 0.4, pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { display: false }, x: { display: false } }
+          }
+        });
+      }
+
+      function updateCharts(r) {
+        if(!chartBar) return;
+        const color = THEME[currentMode].color;
+
+        chartBar.data.datasets[0].data = [r.cap, r.ops, r.rev];
+        chartBar.update();
+
+        chartPie.data.datasets[0].data = [r.cap, r.ops, r.rev];
+        if(r.total <= 0) chartPie.data.datasets[0].data = [1,1,1]; 
+        chartPie.update();
+
+        historyData.shift();
+        historyData.push(r.total);
+        chartLine.data.datasets[0].data = historyData;
+        chartLine.data.datasets[0].borderColor = color;
+        chartLine.data.datasets[0].backgroundColor = color + '20';
+        chartLine.update();
+      }
+
+      // --- INIT ---
+      // --- CAMBIO 2: URL actualizada ---
+      new QRCode(document.getElementById("qrcode"), {
+        text: "https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/dashboard_tradicional_tokenizacion_zkp",
+        width: 60, height: 60, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L
+      });
+
+      const allInputs = [
+        els.volDiario, els.hcDesp, els.timeDesp, els.coc, els.intraBps,
+        els.recons, els.costRecon, els.fricRed,
+        els.aumBase, els.aumInc, els.depoTok, els.eblVol, els.eblSpread
+      ];
+      allInputs.forEach(inp => inp.addEventListener('input', updateUI));
+
+      initCharts();
+      setMode('trad');
+  });
+</script>
+</body>
+</html>
