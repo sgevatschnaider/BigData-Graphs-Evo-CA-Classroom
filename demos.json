@@ -218,6 +218,13 @@
   },
   {
     "title": "Dashboard: Tradicional vs Tokenización vs ZKP",
+    "path": "/src/classroom/graphs/recursos/Dashboard_Tokenizacion_ZK.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2025-11-21T12:50:31-03:00"
+  },
+  {
+    "title": "Dashboard: Tradicional vs Tokenización vs ZKP",
     "path": "/src/classroom/graphs/recursos/Dashboard_Tradicional_Tokenizacion_ZKP.html",
     "tag": "Demo",
     "desc": "",
