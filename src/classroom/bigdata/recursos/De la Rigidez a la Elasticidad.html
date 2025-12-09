@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Hashing: Modular vs. Consistente</title>
+    <style>
+        /* --- ESTILOS GENERALES Y TEMATIZACIÓN (ADAPTADOS) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #22c55e; /* Verde para 'Bueno' */
+            --accent-secondary: #3b82f6; /* Azul para Info */
+            --error-color: #ef4444; /* Rojo para 'Malo' */
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            min-height: 100vh; line-height: 1.7;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .main-title { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; margin-bottom: 1rem; }
+        .subtitle { font-size: 1.2rem; max-width: 800px; margin: 0 auto; color: var(--text-secondary); }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color); border-radius: 20px; padding: 2.5rem;
+            margin-bottom: 2.5rem; box-shadow: var(--shadow);
+        }
+        h2 { font-size: 2rem; color: var(--text-primary); margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;}
+        h3 { font-size: 1.5rem; color: var(--text-secondary); margin: 2rem 0 1rem; }
+        code {
+            background-color: rgba(59, 130, 246, 0.1); color: #93c5fd;
+            padding: 0.2em 0.4em; border-radius: 5px; font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        strong.good { color: var(--accent-primary); }
+        strong.bad { color: var(--error-color); }
+
+        /* --- VISUALIZADOR INTERACTIVO --- */
+        .viz-container {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .viz-svg { width: 100%; height: 100%; position: absolute; }
+        .viz-svg .node, .viz-svg .data-point, .viz-svg .edge { transition: var(--transition); }
+        .viz-svg .node-circle { stroke: #fff; stroke-width: 2px; }
+        .viz-svg .data-point { transition: var(--transition); }
+        .viz-svg .edge { stroke-width: 1.5; stroke-opacity: 0.8; }
+        .viz-svg .comm-edge { stroke: var(--accent-secondary); stroke-dasharray: 4 4; stroke-opacity: 0.5; }
+        .viz-svg .text-label { fill: #fff; font-size: 14px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+        .viz-svg .ring-circle { stroke: var(--border-color); stroke-width: 2px; fill: none; }
+        
+        #explanation-box {
+            margin-top: 1.5rem; padding: 1.5rem; border-radius: 15px;
+            background: rgba(0,0,0,0.2); text-align: center;
+            font-size: 1.1rem; color: var(--text-secondary); transition: var(--transition);
+        }
+        
+        .controls { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 8px;
+            background-color: var(--accent-secondary); color: white;
+            cursor: pointer; transition: var(--transition); font-weight: bold;
+        }
+        .btn:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.1); }
+        .btn:disabled { background-color: #4b5563; cursor: not-allowed; }
+        .btn.bad-action { background-color: var(--error-color); }
+        .btn.good-action { background-color: var(--accent-primary); }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">De la Rigidez a la Elasticidad</h1>
+            <p class="subtitle">Un viaje interactivo desde el sharding frágil con aritmética modular hasta la robusta arquitectura de anillo de Cassandra, modelado con Teoría de Grafos.</p>
+        </header>
+
+        <section class="card">
+            <h2>Visualizador de Arquitecturas Distribuidas</h2>
+            <p>Usa los botones para avanzar en la historia y observa cómo las decisiones de arquitectura afectan la estabilidad del sistema. Los puntos pequeños son datos y los círculos grandes son servidores (nodos).</p>
+            
+            <div class="viz-container">
+                <svg id="main-viz" class="viz-svg"></svg>
+            </div>
+
+            <div id="explanation-box">
+                Presiona "1. Iniciar con Aritmética Modular" para comenzar.
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="btn-step1">1. Iniciar (Aritmética Modular)</button>
+                <button class="btn bad-action" id="btn-step2" disabled>2. Añadir Nodo (El Desastre)</button>
+                <button class="btn" id="btn-step3" disabled>3. Cambiar a Hashing Consistente</button>
+                <button class="btn good-action" id="btn-step4" disabled>4. Añadir Nodo (Elástico)</button>
+                <button class="btn" id="btn-step5" disabled>5. Revelar Grafos: Lógico vs. Real</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>El Primer Intento: Sharding con Aritmética Modular</h2>
+            <p>El método más intuitivo es usar la fórmula <code>servidor = hash(clave) % N</code>, donde <code>N</code> es el número de servidores. Desde la teoría de grafos, esto particiona el grafo de datos en <code>N</code> subgrafos. El problema es su <strong class="bad">rigidez</strong>: la fórmula depende de <code>N</code>. Si <code>N</code> cambia, casi todas las claves deben reasignarse, provocando una <strong class="bad">reorganización masiva</strong>.</p>
+        </section>
+        
+        <section class="card">
+            <h2>La Solución Elegante: El Anillo de Hashing Consistente</h2>
+            <p>Sistemas como Cassandra usan un anillo. Todo el rango de hashes se mapea a un círculo. Tanto servidores como datos se posicionan en él, y un dato pertenece al primer servidor que se encuentra en sentido horario. La asignación ya no depende de <code>N</code>, sino del <strong class="good">vecino más cercano</strong>. Al añadir un nodo, solo los datos de su rango inmediato se mueven desde un único vecino, minimizando la reorganización y permitiendo una <strong class="good">escalabilidad elástica</strong>.</p>
+            <p>Para mejorar esto, Cassandra usa <strong>nodos virtuales (vnodes)</strong>. Cada servidor físico obtiene múltiples posiciones (ej. 256) en el anillo. Al unirse un nuevo servidor, toma pequeñas porciones de datos de <strong class="good">todos los demás nodos</strong>, distribuyendo la carga de rebalanceo uniformemente.</p>
+        </section>
+        
+        <section class="card">
+            <h2>La Perspectiva del Grafo: Una Arquitectura Dual</h2>
+            <p>La genialidad de Cassandra se modela con dos grafos coexistiendo:</p>
+            <ol>
+                <li><strong>El Anillo como Overlay Lógico (Grafo Circular, C<sub>n</sub>):</strong> Es un mapa conceptual para la <strong class="good">partición y replicación</strong> de datos. Define la propiedad de los datos de forma ordenada y escalable. No representa la comunicación real.</li>
+                <li><strong>La Comunicación como un Grafo Completo (K<sub>n</sub>):</strong> La red real es una malla densa. Gracias al protocolo <em>gossip</em>, todos los nodos conocen a todos los demás. Cualquier nodo puede coordinar una petición y hablar directamente con los nodos responsables. Esto asegura que no haya puntos únicos de fallo.</li>
+            </ol>
+            <p>Es la combinación de un mapa de datos ordenado sobre una red de comunicación totalmente conectada lo que otorga a Cassandra su <strong class="good">robustez y escalabilidad legendarias</strong>.</p>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const svg = document.getElementById('main-viz');
+        const explanationBox = document.getElementById('explanation-box');
+        const width = svg.parentElement.clientWidth;
+        const height = 500;
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+        const buttons = {
+            step1: document.getElementById('btn-step1'),
+            step2: document.getElementById('btn-step2'),
+            step3: document.getElementById('btn-step3'),
+            step4: document.getElementById('btn-step4'),
+            step5: document.getElementById('btn-step5'),
+        };
+
+        const NUM_DATA_POINTS = 50;
+        const NODE_RADIUS = 25;
+        const DATA_RADIUS = 5;
+        const SVG_NS = 'http://www.w3.org/2000/svg'; // Correct Namespace
+
+        let nodes = [];
+        let dataPoints = [];
+        let edges = [];
+        let currentState = 0;
+        
+        // --- MOTOR DE VISUALIZACIÓN ---
+        function render() {
+            svg.innerHTML = '';
+            
+            const edgeGroup = document.createElementNS(SVG_NS, 'g');
+            edges.forEach(edge => {
+                const source = edge.source.id.startsWith('d') ? dataPoints.find(d => d.id === edge.source.id) : nodes.find(n => n.id === edge.source.id);
+                const target = nodes.find(n => n.id === edge.target.id);
+                if (!source || !target) return;
+                
+                const line = document.createElementNS(SVG_NS, 'line');
+                line.setAttribute('x1', source.x);
+                line.setAttribute('y1', source.y);
+                line.setAttribute('x2', target.x);
+                line.setAttribute('y2', target.y);
+                line.classList.add('edge');
+                line.style.stroke = source.color || '#9ca3af';
+                if (edge.isComm) {
+                    line.classList.add('comm-edge');
+                }
+                edgeGroup.appendChild(line);
+            });
+            svg.appendChild(edgeGroup);
+
+            if (currentState >= 2) { // Draw ring for consistent hashing states
+                const ring = document.createElementNS(SVG_NS, 'circle');
+                ring.setAttribute('cx', width/2);
+                ring.setAttribute('cy', height/2);
+                ring.setAttribute('r', height * 0.4);
+                ring.classList.add('ring-circle');
+                svg.appendChild(ring);
+            }
+            
+            const dataGroup = document.createElementNS(SVG_NS, 'g');
+            dataPoints.forEach(dp => {
+                const circle = document.createElementNS(SVG_NS, 'circle');
+                circle.setAttribute('cx', dp.x);
+                circle.setAttribute('cy', dp.y);
+                circle.setAttribute('r', DATA_RADIUS);
+                circle.setAttribute('fill', dp.color);
+                circle.classList.add('data-point');
+                dataGroup.appendChild(circle);
+            });
+            svg.appendChild(dataGroup);
+
+            const nodeGroup = document.createElementNS(SVG_NS, 'g');
+            nodes.forEach(node => {
+                const g = document.createElementNS(SVG_NS, 'g');
+                g.classList.add('node');
+                g.setAttribute('transform', `translate(${node.x},${node.y})`);
+                
+                const circle = document.createElementNS(SVG_NS, 'circle');
+                circle.setAttribute('r', NODE_RADIUS);
+                circle.setAttribute('fill', node.color);
+                circle.classList.add('node-circle');
+                
+                const text = document.createElementNS(SVG_NS, 'text');
+                text.textContent = node.label;
+                text.classList.add('text-label');
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                nodeGroup.appendChild(g);
+            });
+            svg.appendChild(nodeGroup);
+        }
+
+        function updateButtonStates() {
+            Object.values(buttons).forEach(b => b.disabled = true);
+            if (currentState === 0) buttons.step1.disabled = false;
+            if (currentState === 1) buttons.step2.disabled = false;
+            if (currentState === 1.5) buttons.step3.disabled = false;
+            if (currentState === 2) buttons.step4.disabled = false;
+            if (currentState === 3) buttons.step5.disabled = false;
+        }
+
+        // --- LÓGICA DE CADA PASO ---
+
+        function pseudoHash(id) {
+            return (parseInt(id.substring(1)) * 29 + 7) % 1000;
+        }
+
+        function setupModular(N) {
+            const nodeColors = ['#f87171', '#fb923c', '#34d399', '#60a5fa', '#a78bfa'];
+            nodes = [];
+            for (let i = 0; i < N; i++) {
+                nodes.push({
+                    id: `n${i}`, label: `N${i}`,
+                    x: (width / (N + 1)) * (i + 1),
+                    y: height / 2,
+                    color: nodeColors[i],
+                });
+            }
+
+            if (dataPoints.length === 0) { // Only create data points once
+                for (let i = 0; i < NUM_DATA_POINTS; i++) {
+                    dataPoints.push({
+                        id: `d${i}`, hash: pseudoHash(`d${i}`),
+                        x: width * 0.1 + Math.random() * width * 0.8,
+                        y: height * 0.1 + Math.random() * height * 0.2
+                    });
+                }
+            }
+
+            edges = [];
+            dataPoints.forEach(dp => {
+                const targetNode = nodes[dp.hash % N];
+                dp.color = targetNode.color;
+                edges.push({ source: dp, target: targetNode });
+            });
+        }
+
+        buttons.step1.addEventListener('click', () => {
+            currentState = 1;
+            explanationBox.innerHTML = `<strong>Estado Inicial:</strong> Sistema con 3 servidores (N=3). Los datos se distribuyen usando <code>hash(clave) % 3</code>. Cada color de dato corresponde a su servidor. El sistema está balanceado.`;
+            dataPoints = []; // Reset data points for fresh layout
+            setupModular(3);
+            render();
+            updateButtonStates();
+        });
+
+        buttons.step2.addEventListener('click', () => {
+            currentState = 1.5;
+            explanationBox.innerHTML = `<strong style="color:var(--error-color)">¡REORGANIZACIÓN MASIVA!</strong> Al añadir un servidor (N=4), la fórmula cambia a <code>% 4</code>. Casi todos los datos deben moverse a un nuevo servidor. Observa el caos y el cambio de colores.`;
+            setupModular(4);
+            render();
+            updateButtonStates();
+        });
+
+        function setupConsistent(N) {
+             const nodeColors = ['#f87171', '#fb923c', '#34d399', '#60a5fa', '#a78bfa'];
+             const ringRadius = height * 0.4;
+             const centerX = width/2;
+             const centerY = height/2;
+
+             nodes = [];
+             for(let i=0; i<N; ++i){
+                 const angle = (i/N) * 2 * Math.PI;
+                 nodes.push({
+                     id: `n${i}`, label: `N${i}`,
+                     angle: angle,
+                     x: centerX + ringRadius * Math.cos(angle - Math.PI/2),
+                     y: centerY + ringRadius * Math.sin(angle - Math.PI/2),
+                     color: nodeColors[i]
+                 });
+             }
+             nodes.sort((a,b) => a.angle - b.angle);
+
+             edges = []; // Clear old edges
+             dataPoints.forEach(dp => {
+                 const dataAngle = (dp.hash / 1000) * 2 * Math.PI;
+                 dp.x = centerX + (ringRadius - 50) * Math.cos(dataAngle - Math.PI/2);
+                 dp.y = centerY + (ringRadius - 50) * Math.sin(dataAngle - Math.PI/2);
+
+                 let targetNode = nodes[0];
+                 for(const node of nodes){
+                     if(node.angle >= dataAngle) {
+                         targetNode = node;
+                         break;
+                     }
+                 }
+                 dp.color = targetNode.color;
+                 edges.push({source: dp, target: targetNode});
+             });
+        }
+
+        buttons.step3.addEventListener('click', () => {
+            currentState = 2;
+            explanationBox.innerHTML = `<strong>Hashing Consistente:</strong> Volvemos a N=3, pero ahora en un anillo. Un dato pertenece al primer nodo en sentido horario. La asignación depende de la <strong style="color:var(--accent-primary)">posición</strong>, no del número total de nodos.`;
+            setupConsistent(3);
+            render();
+            updateButtonStates();
+        });
+        
+        buttons.step4.addEventListener('click', () => {
+            currentState = 3;
+            explanationBox.innerHTML = `<strong style="color:var(--accent-primary)">Escalabilidad Elástica:</strong> Añadimos N=4. ¡Observa! Solo una pequeña porción de datos (los del nuevo rango) cambian de dueño, moviéndose desde un único vecino. El resto del sistema permanece intacto.`;
+            setupConsistent(4);
+            render();
+            updateButtonStates();
+        });
+        
+        buttons.step5.addEventListener('click', () => {
+            currentState = 4;
+            explanationBox.innerHTML = `<strong>Arquitectura Dual:</strong> El anillo es el <strong style="color:var(--accent-primary)">mapa lógico</strong> para los datos (C<sub>n</sub>). La <strong style="color:var(--accent-secondary)">red de comunicación real</strong> es un grafo completo (K<sub>n</sub>) donde todos los nodos hablan con todos. Esta es la clave de la resiliencia.`;
+            edges = edges.filter(e => !e.isComm); // Limpiar aristas de comunicación viejas
+            for(let i=0; i<nodes.length; ++i){
+                for(let j=i+1; j<nodes.length; ++j){
+                    edges.push({source: nodes[i], target: nodes[j], isComm: true});
+                }
+            }
+            render();
+            updateButtonStates();
+        });
+
+        // Init
+        updateButtonStates();
+    });
+    </script>
+</body>
+</html>
