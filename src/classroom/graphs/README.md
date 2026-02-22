@@ -2,13 +2,28 @@
   <h1>📘 Teoría de los grafos — README</h1>
   <p>Teoría y práctica aplicada de <b>Teoría de Grafos</b> para docencia y desarrollo.</p>
 
-## Recurso visual — Hipercubo 4D (Tesseracto)
+  <h2>🧊 Recurso visual — Hipercubo 4D (Tesseracto)</h2>
+  <p>
+    Esta animación ilustra la <b>proyección y rotación</b> de un hipercubo 4D.<br/>
+    Es útil para conectar el grafo hipercubo <code>Q<sub>n</sub></code> con <b>distancia de Hamming</b>, capas de <b>BFS</b> y propiedades de <b>regularidad</b>.
+  </p>
 
-Esta animación ilustra la **proyección y rotación** de un hipercubo 4D.  
-Es útil para conectar el grafo hipercubo \(Q_n\) con **distancia de Hamming**, capas de **BFS** y propiedades de **regularidad**.
+  <img
+    alt="Animación de Hipercubo 4D"
+    src="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/3d633951f2fb4ad9860c9de3be9bf62800192b4e/src/classroom/graphs/recursos/hipercubo.gif?raw=1"
+    width="560"
+  />
 
-![Animación de Hipercubo 4D](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/3d633951f2fb4ad9860c9de3be9bf62800192b4e/src/classroom/graphs/recursos/hipercubo.gif?raw=1)
+  <br/><br/>
 
+  <h2>🌀 Nuevo recurso — Árbol hiperbólico y embeddings (Disco de Poincaré)</h2>
+  <p>
+    Recurso interactivo para comparar <b>Euclídeo vs Hiperbólico</b> en grafos jerárquicos (árboles/taxonomías).<br/>
+    Introduce <b>geometría hiperbólica</b> y <b>Poincaré embeddings</b> para representaciones jerárquicas.
+  </p>
+  <p>
+    <a href="./recursos/arbol_hiperbolico.html"><b>Abrir recurso interactivo</b>: <code>recursos/arbol_hiperbolico.html</code></a>
+  </p>
 
   <p>
     <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10%20|%203.11-blue"></a>
@@ -21,24 +36,61 @@ Es útil para conectar el grafo hipercubo \(Q_n\) con **distancia de Hamming**, 
     <a href="./data/"><img alt="Data" src="https://img.shields.io/badge/🗂️%20Data-CSV|GML|GraphML-lightgrey"></a>
     <a href="./images/"><img alt="Images" src="https://img.shields.io/badge/🖼️%20Images-diagrams|figures-lightgrey"></a>
     <a href="./references/"><img alt="References" src="https://img.shields.io/badge/📚%20References-papers|books-lightgrey"></a>
+    <a href="./recursos/"><img alt="Recursos" src="https://img.shields.io/badge/🧪%20Recursos-HTML|Simulaciones-lightgrey"></a>
   </p>
 </div>
 
 ---
 
+## 🧭 Mapa del curso (temas y rutas)
+
+### A) Fundamentos y visualizaciones iniciales
+- Puentes de Königsberg, teoremas fundamentales, handshaking.
+- Introducción general a grafos + grafo de cuadrícula (talleres interactivos).
+
+### B) Irregularidad, complemento y secuencias de grados
+- Grafos regulares / irregulares / cuasi-irregulares.
+- Complemento de un grafo.
+- Secuencias gráficas: Havel–Hakimi y Teorema de Erdős–Gallai.
+- Principio del Palomar (herramienta de demostración).
+
+### C) Perspectiva algebraica: Cayley, hipercubos y distancia de Hamming
+- Grafos de Cayley (explorador).
+- Hipercubo Qₙ, tesseracto (GIF), relación con Hamming y BFS por capas.
+- Recursos HTML: C₄, Q₃, Q₄, Hamming, Gossip + Havel-Hakimi.
+
+### D) Algoritmos clásicos y Big Data
+- BFS/DFS, caminos mínimos (Dijkstra/Bellman–Ford), MST, etc.
+- Dijkstra aplicado a escalabilidad (Big Data / vertex-centric).
+
+### E) Complejidad y NP: Hamilton y TSP
+- Caminos/ciclos hamiltonianos, reducción a TSP (decisión).
+- Fuerza bruta vs Held–Karp, explosión combinatoria.
+- Visualizaciones y cuestionarios.
+
+### F) Aplicaciones avanzadas
+- GPU/HPC: cuellos de botella en grafos irregulares (BFS frontera, divergencia, memoria).
+- Blockchain: Lightning Network como grafo ponderado + Dijkstra.
+- ZKP / ZK-Rollups: simuladores, guías y dashboards conectados a grafos/isomorfismos.
+
+### G) Geometría hiperbólica y embeddings (Poincaré)
+- Jerarquías en grafos (árboles/taxonomías) y por qué hiperbólico ayuda.
+- Recurso interactivo: `recursos/arbol_hiperbolico.html`
+- Notebook/script: `notebooks/06_hyperbolic_embeddings_poincare.(ipynb|py)`
+- Referencias: `references/README.md`
+
+---
+
 ## Estructura local
 
-```
-
-Graph/
+```text
+graphs/
 ├── README.md
 ├── notebooks/
 ├── data/
 ├── images/
+├── recursos/
 └── references/
-
-````
-
 ---
 
 ## Objetivos de aprendizaje
