@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árbol: Euclídeo vs Hiperbólico</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+    background: linear-gradient(90deg, #22d3ee, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #canvases-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .canvas-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  canvas {
+    border: 2px solid #334155;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(34,211,238,0.15);
+    background: #0a0e1a;
+    cursor: crosshair;
+  }
+  .canvas-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+  }
+  #controls {
+    margin: 24px auto;
+    width: 100%;
+    max-width: 900px;
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 20px 28px;
+    border: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stats {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: #94a3b8;
+  }
+  .stats span { color: #22d3ee; font-weight: 700; }
+  .sliders {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+  }
+  .slider-group label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+  }
+  .slider-group label span { color: #22d3ee; font-weight: 700; }
+  input[type=range] {
+    width: 100%;
+    accent-color: #22d3ee;
+    cursor: pointer;
+  }
+  .buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 9px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  #btn-add { background: #0891b2; color: white; }
+  #btn-add:hover { background: #06b6d4; }
+  #btn-reset { background: #475569; color: white; }
+  #btn-reset:hover { background: #64748b; }
+  #btn-auto { background: #c2410c; color: white; }
+  #btn-auto:hover { background: #ea580c; }
+  #btn-pause { background: #4338ca; color: white; }
+  #btn-pause:hover { background: #6366f1; }
+  #tooltip {
+    position: fixed;
+    background: #1e293b;
+    border: 1px solid #22d3ee;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+    line-height: 1.6;
+  }
+  #explanation {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto 20px;
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 18px 24px;
+    border-left: 4px solid #22d3ee;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+  #explanation strong { color: #fb923c; }
+  
+  /* Estilo del Footer agregado */
+  footer {
+    text-align: center;
+    margin-top: auto; /* Empuja el footer al fondo si hay espacio */
+    padding-top: 30px;
+    padding-bottom: 10px;
+    border-top: 1px solid #334155;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 500;
+    width: 100%;
+    max-width: 900px;
+    align-self: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Crecimiento de un Árbol: Euclídeo vs Hiperbólico</h1>
+
+<div id="canvases-container">
+  <div class="canvas-wrapper">
+    <canvas id="euclidean" width="580" height="580"></canvas>
+    <div class="canvas-title" style="color:#22d3ee">Espacio Euclídeo</div>
+  </div>
+  <div class="canvas-wrapper">
+    <canvas id="hyperbolic" width="580" height="580"></canvas>
+    <div class="canvas-title" style="color:#fb923c">Disco de Poincaré (Hiperbólico)</div>
+  </div>
+</div>
+
+<div id="controls">
+  <div class="stats">
+    Nivel actual: <span id="stat-level">0</span>&nbsp;&nbsp;|&nbsp;&nbsp;
+    Nodos totales: <span id="stat-nodes">1</span>
+  </div>
+  <div class="sliders">
+    <div class="slider-group">
+      <label>Factor de ramificación <span id="val-branch">3</span></label>
+      <input type="range" id="sl-branch" min="2" max="6" value="3" step="1">
+    </div>
+    <div class="slider-group">
+      <label>Distancia por nivel <span id="val-dist">0.70</span></label>
+      <input type="range" id="sl-dist" min="0.3" max="1.5" value="0.7" step="0.05">
+    </div>
+  </div>
+  <div class="buttons">
+    <button id="btn-add">➕ Agregar Nivel</button>
+    <button id="btn-reset">🔄 Resetear</button>
+    <button id="btn-auto">▶ Animación Automática</button>
+    <button id="btn-pause">⏸ Pausar</button>
+  </div>
+</div>
+
+<div id="explanation">
+  <strong>¿Por qué importa el espacio?</strong><br>
+  En el <strong>Espacio Euclídeo</strong>, el "volumen" disponible a distancia <em>r</em> crece como <em>r²</em> (polinomialmente). 
+  Un árbol con factor de ramificación <em>k</em> necesita espacio exponencial (kⁿ nodos en el nivel n), 
+  pero el espacio disponible crece solo polinomialmente → las hojas se <strong>apiñan y solapan</strong> inevitablemente.<br><br>
+  En el <strong>Disco de Poincaré (Hiperbólico)</strong>, el volumen crece <em>exponencialmente</em> con la distancia al centro. 
+  Un árbol exponencialmente ramificado encaja perfectamente: cada nivel ocupa el anillo cercano al borde, 
+  y <strong>"siempre hay espacio de sobra"</strong> porque el borde del disco representa el infinito hiperbólico.
+</div>
+
+<footer>
+  Material elaborado por el profesor Sergio Gevatschnaider
+</footer>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── Estado global ───────────────────────────────────────────────────────────
+const state = {
+  maxLevel: 0,
+  branchFactor: 3,
+  distFactor: 0.7,
+  nodes: [],       // { id, depth, parent, angle, children }
+  autoInterval: null,
+  hoveredId: null,
+};
+
+const CE = document.getElementById('euclidean');
+const CH = document.getElementById('hyperbolic');
+const ctxE = CE.getContext('2d');
+const ctxH = CH.getContext('2d');
+const W = CE.width, H = CE.height;
+const CX = W/2, CY = H/2;
+const DISK_R = W * 0.46; // radio del disco en px
+
+// ─── Árbol ──────────────────────────────────────────────────────────────────
+function buildTree(maxDepth, k, dist) {
+  const nodes = [];
+  let id = 0;
+
+  function addNode(depth, parent, angle, minAngle, maxAngle) {
+    const nodeId = id++;
+    nodes.push({ id: nodeId, depth, parent, angle, minAngle, maxAngle, children: [] });
+    if (parent !== null) nodes[parent].children.push(nodeId);
+    if (depth < maxDepth) {
+      const span = (maxAngle - minAngle);
+      const childSpan = span / k;
+      for (let i = 0; i < k; i++) {
+        const childMin = minAngle + i * childSpan;
+        const childMax = childMin + childSpan;
+        const childAngle = (childMin + childMax) / 2;
+        addNode(depth + 1, nodeId, childAngle, childMin, childMax);
+      }
+    }
+    return nodeId;
+  }
+
+  addNode(0, null, -Math.PI/2, -Math.PI, Math.PI);
+  return nodes;
+}
+
+// ─── Coordenadas Euclídeas ───────────────────────────────────────────────────
+function euclidPos(node, dist) {
+  if (node.depth === 0) return { x: CX, y: CY };
+  const r = node.depth * dist * (W * 0.12);
+  return {
+    x: CX + r * Math.cos(node.angle),
+    y: CY + r * Math.sin(node.angle)
+  };
+}
+
+// ─── Coordenadas Hiperbólicas (Disco de Poincaré) ───────────────────────────
+function hyperPos(node, dist) {
+  if (node.depth === 0) return { x: CX, y: CY };
+  // Radio euclídeo en el disco: tanh(depth * dist / 2), clampeado < 0.99
+  const rHyp = Math.min(0.985, Math.tanh(node.depth * dist * 0.55));
+  return {
+    x: CX + rHyp * DISK_R * Math.cos(node.angle),
+    y: CY + rHyp * DISK_R * Math.sin(node.angle)
+  };
+}
+
+// ─── Color por profundidad ───────────────────────────────────────────────────
+function euclidColor(depth, maxDepth) {
+  const t = maxDepth > 0 ? depth / maxDepth : 0;
+  const r = Math.round(30 + t * 100);
+  const g = Math.round(100 + t * 120);
+  const b = Math.round(200 + t * 55);
+  return `rgb(${r},${g},${b})`;
+}
+function hyperColor(depth, maxDepth) {
+  const t = maxDepth > 0 ? depth / maxDepth : 0;
+  const r = Math.round(251 - t * 80);
+  const g = Math.round(140 - t * 110);
+  const b = Math.round(60 - t * 40);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ─── Obtener ancestros de un nodo ────────────────────────────────────────────
+function getAncestorSet(nodes, nodeId) {
+  const set = new Set();
+  let cur = nodeId;
+  while (cur !== null && cur !== undefined) {
+    set.add(cur);
+    cur = nodes[cur].parent;
+  }
+  return set;
+}
+function getDescendantSet(nodes, nodeId) {
+  const set = new Set([nodeId]);
+  const queue = [nodeId];
+  while (queue.length) {
+    const cur = queue.shift();
+    for (const c of nodes[cur].children) {
+      set.add(c);
+      queue.push(c);
+    }
+  }
+  return set;
+}
+function getBranchSet(nodes, nodeId) {
+  const anc = getAncestorSet(nodes, nodeId);
+  const desc = getDescendantSet(nodes, nodeId);
+  return new Set([...anc, ...desc]);
+}
+
+// ─── Dibujar ─────────────────────────────────────────────────────────────────
+function draw() {
+  const { nodes, maxLevel, distFactor, hoveredId } = state;
+  const maxDepth = maxLevel;
+  const highlightSet = hoveredId !== null ? getBranchSet(nodes, hoveredId) : null;
+
+  // Limpiar
+  ctxE.clearRect(0, 0, W, H);
+  ctxH.clearRect(0, 0, W, H);
+
+  // Fondo
+  ctxE.fillStyle = '#0a0e1a'; ctxE.fillRect(0,0,W,H);
+  ctxH.fillStyle = '#0a0e1a'; ctxH.fillRect(0,0,W,H);
+
+  // Disco de Poincaré
+  ctxH.beginPath();
+  ctxH.arc(CX, CY, DISK_R, 0, Math.PI*2);
+  ctxH.strokeStyle = '#475569';
+  ctxH.lineWidth = 2;
+  ctxH.stroke();
+  // Grid hiperbólico sutil (círculos)
+  [0.33, 0.66, 0.85, 0.95].forEach(r => {
+    ctxH.beginPath();
+    ctxH.arc(CX, CY, r * DISK_R, 0, Math.PI*2);
+    ctxH.strokeStyle = 'rgba(71,85,105,0.3)';
+    ctxH.lineWidth = 1;
+    ctxH.stroke();
+  });
+
+  // Ejes euclídeos suaves
+  ctxE.strokeStyle = 'rgba(71,85,105,0.3)';
+  ctxE.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1.0].forEach(r => {
+    ctxE.beginPath();
+    ctxE.arc(CX, CY, r * W*0.48, 0, Math.PI*2);
+    ctxE.stroke();
+  });
+
+  // Dibujar aristas primero
+  for (const node of nodes) {
+    if (node.parent === null) continue;
+    const parent = nodes[node.parent];
+    const isHighlighted = highlightSet && highlightSet.has(node.id) && highlightSet.has(parent.id);
+    const alpha = highlightSet ? (isHighlighted ? 1 : 0.12) : 0.6;
+
+    // Euclídeo
+    const ep = euclidPos(node, distFactor);
+    const epp = euclidPos(parent, distFactor);
+    ctxE.beginPath();
+    ctxE.moveTo(epp.x, epp.y);
+    ctxE.lineTo(ep.x, ep.y);
+    ctxE.strokeStyle = `rgba(34,211,238,${alpha * 0.7})`;
+    ctxE.lineWidth = isHighlighted ? 2 : 1;
+    ctxE.stroke();
+
+    // Hiperbólico
+    const hp = hyperPos(node, distFactor);
+    const hpp = hyperPos(parent, distFactor);
+    ctxH.beginPath();
+    ctxH.moveTo(hpp.x, hpp.y);
+    ctxH.lineTo(hp.x, hp.y);
+    ctxH.strokeStyle = `rgba(251,146,60,${alpha * 0.7})`;
+    ctxH.lineWidth = isHighlighted ? 2 : 1;
+    ctxH.stroke();
+  }
+
+  // Dibujar nodos
+  const NODE_R = 6;
+  for (const node of nodes) {
+    const isHighlighted = highlightSet ? highlightSet.has(node.id) : false;
+    const alpha = highlightSet ? (isHighlighted ? 1 : 0.2) : 1;
+
+    // Euclídeo
+    const ep = euclidPos(node, distFactor);
+    ctxE.beginPath();
+    ctxE.arc(ep.x, ep.y, NODE_R, 0, Math.PI*2);
+    const eColor = euclidColor(node.depth, maxDepth);
+    ctxE.fillStyle = eColor.replace('rgb', 'rgba').replace(')', `,${alpha})`);
+    ctxE.fill();
+    if (isHighlighted) { ctxE.strokeStyle = '#fff'; ctxE.lineWidth = 2; ctxE.stroke(); }
+
+    // Número de nivel
+    if (NODE_R > 4) {
+      ctxE.fillStyle = `rgba(255,255,255,${alpha * 0.9})`;
+      ctxE.font = `bold 7px sans-serif`;
+      ctxE.textAlign = 'center';
+      ctxE.textBaseline = 'middle';
+      ctxE.fillText(node.depth, ep.x, ep.y);
+    }
+
+    // Hiperbólico
+    const hp = hyperPos(node, distFactor);
+    ctxH.beginPath();
+    ctxH.arc(hp.x, hp.y, NODE_R, 0, Math.PI*2);
+    const hColor = hyperColor(node.depth, maxDepth);
+    ctxH.fillStyle = hColor.replace('rgb', 'rgba').replace(')', `,${alpha})`);
+    ctxH.fill();
+    if (isHighlighted) { ctxH.strokeStyle = '#fff'; ctxH.lineWidth = 2; ctxH.stroke(); }
+
+    ctxH.fillStyle = `rgba(255,255,255,${alpha * 0.9})`;
+    ctxH.font = `bold 7px sans-serif`;
+    ctxH.textAlign = 'center';
+    ctxH.textBaseline = 'middle';
+    ctxH.fillText(node.depth, hp.x, hp.y);
+  }
+}
+
+// ─── Actualizar stats ─────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-level').textContent = state.maxLevel;
+  document.getElementById('stat-nodes').textContent = state.nodes.length;
+}
+
+// ─── Rebuild tree ─────────────────────────────────────────────────────────────
+function rebuild() {
+  state.nodes = buildTree(state.maxLevel, state.branchFactor, state.distFactor);
+  updateStats();
+  draw();
+}
+
+// ─── Controles ───────────────────────────────────────────────────────────────
+document.getElementById('btn-add').addEventListener('click', () => {
+  state.maxLevel++;
+  rebuild();
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  state.maxLevel = 0;
+  if (state.autoInterval) { clearInterval(state.autoInterval); state.autoInterval = null; }
+  rebuild();
+});
+
+document.getElementById('btn-auto').addEventListener('click', () => {
+  if (state.autoInterval) return;
+  state.autoInterval = setInterval(() => {
+    if (state.maxLevel >= 8) { clearInterval(state.autoInterval); state.autoInterval = null; return; }
+    state.maxLevel++;
+    rebuild();
+  }, 900);
+});
+
+document.getElementById('btn-pause').addEventListener('click', () => {
+  if (state.autoInterval) { clearInterval(state.autoInterval); state.autoInterval = null; }
+});
+
+// Sliders
+document.getElementById('sl-branch').addEventListener('input', function() {
+  state.branchFactor = parseInt(this.value);
+  document.getElementById('val-branch').textContent = this.value;
+  rebuild();
+});
+document.getElementById('sl-dist').addEventListener('input', function() {
+  state.distFactor = parseFloat(this.value);
+  document.getElementById('val-dist').textContent = parseFloat(this.value).toFixed(2);
+  rebuild();
+});
+
+// ─── Hover / Tooltip ──────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function findHoveredNode(canvas, mx, my, posFunc) {
+  for (let i = state.nodes.length - 1; i >= 0; i--) {
+    const n = state.nodes[i];
+    const p = posFunc(n, state.distFactor);
+    const dx = p.x - mx, dy = p.y - my;
+    if (dx*dx + dy*dy < 64) return n;
+  }
+  return null;
+}
+
+function onMouseMove(e, canvas, posFunc, label) {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const node = findHoveredNode(canvas, mx, my, posFunc);
+  if (node) {
+    state.hoveredId = node.id;
+    const p = posFunc(node, state.distFactor);
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY - 10) + 'px';
+    const nx = ((p.x - CX)/DISK_R).toFixed(3);
+    const ny = ((p.y - CY)/DISK_R).toFixed(3);
+    tooltip.innerHTML = `<b>${label}</b><br>Profundidad: ${node.depth}<br>Ángulo: ${(node.angle*180/Math.PI).toFixed(1)}°<br>Coord: (${nx}, ${ny})`;
+  } else {
+    state.hoveredId = null;
+    tooltip.style.display = 'none';
+  }
+  draw();
+}
+
+CE.addEventListener('mousemove', e => onMouseMove(e, CE, euclidPos, 'Euclídeo'));
+CH.addEventListener('mousemove', e => onMouseMove(e, CH, hyperPos, 'Poincaré'));
+CE.addEventListener('mouseleave', () => { state.hoveredId = null; tooltip.style.display = 'none'; draw(); });
+CH.addEventListener('mouseleave', () => { state.hoveredId = null; tooltip.style.display = 'none'; draw(); });
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+rebuild();
+</script>
+</body>
+</html>
