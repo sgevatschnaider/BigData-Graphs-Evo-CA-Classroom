@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grafos Masivos · Técnicas de Reducción</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060810;
+    --bg2: #0c1020;
+    --bg3: #111828;
+    --cyan: #00e5cc;
+    --amber: #ffb800;
+    --coral: #ff5e5e;
+    --violet: #9b6dff;
+    --text: #c8d4e8;
+    --muted: #5a6a84;
+    --border: rgba(0,229,204,0.15);
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom cursor ── */
+  #cursor {
+    position: fixed; pointer-events:none; z-index:9999;
+    width:12px; height:12px; border-radius:50%;
+    background: var(--cyan); mix-blend-mode:screen;
+    transform:translate(-50%,-50%);
+    transition: transform .1s, width .2s, height .2s;
+  }
+  #cursor-ring {
+    position:fixed; pointer-events:none; z-index:9998;
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid rgba(0,229,204,0.5);
+    transform:translate(-50%,-50%);
+    transition: transform .15s ease-out, width .2s, height .2s;
+  }
+
+  /* ── Grid noise overlay ── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
+    background-image:
+      linear-gradient(rgba(0,229,204,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,204,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:18px 40px;
+    display:flex; align-items:center; gap:32px;
+    background:linear-gradient(var(--bg), transparent);
+    backdrop-filter: blur(2px);
+  }
+  nav .logo {
+    font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--cyan); font-family:var(--mono); margin-right:auto;
+  }
+  nav a {
+    font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); text-decoration:none; font-family:var(--mono);
+    transition:color .2s;
+  }
+  nav a:hover { color:var(--cyan); }
+
+  /* ── Hero ── */
+  #hero {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center;
+    position:relative; overflow:hidden; padding:80px 40px 60px;
+    text-align:center;
+  }
+  #hero-canvas {
+    position:absolute; inset:0; opacity:.35;
+  }
+  .hero-label {
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.25em;
+    text-transform:uppercase; color:var(--cyan); margin-bottom:24px;
+    opacity:0; animation: fadeUp .8s .2s forwards;
+  }
+  #hero h1 {
+    font-size:clamp(2.8rem,7vw,6rem); font-weight:800; line-height:1.05;
+    letter-spacing:-.03em; margin-bottom:24px;
+    opacity:0; animation: fadeUp .9s .35s forwards;
+  }
+  #hero h1 em { font-style:normal; color:var(--cyan); }
+  #hero h1 span { color:var(--amber); }
+  .hero-sub {
+    max-width:640px; font-size:1.05rem; color:var(--muted);
+    line-height:1.7; margin-bottom:48px;
+    opacity:0; animation: fadeUp .9s .5s forwards;
+  }
+  .complexity-pill {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:.85rem;
+    background:rgba(0,229,204,.07); border:1px solid var(--border);
+    padding:8px 20px; border-radius:40px; color:var(--cyan);
+    opacity:0; animation: fadeUp .9s .65s forwards;
+  }
+  .complexity-pill .dot { width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite; }
+
+  /* ── Section layout ── */
+  section {
+    position:relative; z-index:2;
+    padding:100px 40px;
+  }
+  .section-inner {
+    max-width:1100px; margin:0 auto;
+  }
+  .section-tag {
+    font-family:var(--mono); font-size:.65rem; letter-spacing:.25em;
+    text-transform:uppercase; margin-bottom:16px;
+  }
+  .section-title {
+    font-size:clamp(2rem,4vw,3.2rem); font-weight:800; line-height:1.1;
+    letter-spacing:-.02em; margin-bottom:20px;
+  }
+  .section-body {
+    font-size:1rem; line-height:1.8; color:var(--muted); max-width:640px;
+    margin-bottom:48px;
+  }
+
+  /* ── Problem Section ── */
+  #problema { background:var(--bg); }
+  #problema .section-tag { color:var(--coral); }
+
+  .bottleneck-viz {
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    gap:24px; margin-top:40px;
+  }
+  .bv-box {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:12px; padding:28px 24px; text-align:center;
+  }
+  .bv-box .bv-label { font-family:var(--mono); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .bv-box .bv-val { font-size:1.4rem; font-weight:700; }
+  .bv-box.bad .bv-val { color:var(--coral); }
+  .bv-box.ok .bv-val { color:var(--cyan); }
+  .bv-arrow { font-size:1.8rem; color:var(--muted); }
+
+  .complexity-table {
+    width:100%; border-collapse:collapse; margin-top:32px;
+    font-family:var(--mono); font-size:.82rem;
+  }
+  .complexity-table th {
+    text-align:left; padding:10px 16px;
+    border-bottom:1px solid var(--border); color:var(--muted);
+    font-weight:400; letter-spacing:.1em; text-transform:uppercase; font-size:.68rem;
+  }
+  .complexity-table td {
+    padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .complexity-table tr:hover td { background:rgba(0,229,204,.03); }
+  .tag-bad { color:var(--coral); }
+  .tag-ok { color:var(--cyan); }
+  .tag-warn { color:var(--amber); }
+
+  /* ── Tool sections ── */
+  .tool-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;
+  }
+  @media(max-width:800px){
+    .tool-grid { grid-template-columns:1fr; }
+    .bottleneck-viz { grid-template-columns:1fr; }
+    .bv-arrow { transform:rotate(90deg); }
+  }
+
+  .canvas-box {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; position:relative;
+  }
+  .canvas-box canvas { display:block; width:100%; height:340px; }
+  .canvas-label {
+    position:absolute; bottom:12px; left:16px;
+    font-family:var(--mono); font-size:.65rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .canvas-btn {
+    position:absolute; bottom:12px; right:16px;
+    background:rgba(0,229,204,.1); border:1px solid var(--cyan);
+    color:var(--cyan); font-family:var(--mono); font-size:.68rem;
+    letter-spacing:.1em; text-transform:uppercase; padding:6px 14px;
+    border-radius:6px; cursor:none; transition:background .2s;
+  }
+  .canvas-btn:hover { background:rgba(0,229,204,.2); }
+
+  /* key-value insight cards */
+  .insight-list { list-style:none; display:flex; flex-direction:column; gap:16px; }
+  .insight-list li {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:18px 20px;
+    display:flex; gap:14px; align-items:flex-start;
+    transition:border-color .2s;
+  }
+  .insight-list li:hover { border-color:rgba(0,229,204,.4); }
+  .insight-icon { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
+  .insight-text { font-size:.9rem; line-height:1.65; color:var(--text); }
+  .insight-text strong { color:var(--cyan); display:block; margin-bottom:4px; font-size:.8rem; letter-spacing:.05em; text-transform:uppercase; }
+
+  .math { font-family:var(--mono); color:var(--amber); font-size:.95em; }
+
+  /* ── Tool 1: Muestreo ── */
+  #muestreo { background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%); }
+  #muestreo .section-tag { color:var(--cyan); }
+  #muestreo .section-title em { color:var(--cyan); }
+
+  /* ── Tool 2: Sketching ── */
+  #sketching { background: var(--bg2); }
+  #sketching .section-tag { color:var(--violet); }
+  #sketching .section-title em { color:var(--violet); }
+
+  /* ── Tool 3: Sparsificación ── */
+  #sparsificacion { background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%); }
+  #sparsificacion .section-tag { color:var(--amber); }
+  #sparsificacion .section-title em { color:var(--amber); }
+
+  /* ── Comparison ── */
+  #comparacion { background:var(--bg); }
+  .compare-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:40px;
+  }
+  @media(max-width:700px){ .compare-grid{ grid-template-columns:1fr; } }
+  .compare-card {
+    border:1px solid var(--border); border-radius:16px;
+    padding:32px 24px; background:var(--bg3);
+    transition:transform .25s, border-color .25s;
+  }
+  .compare-card:hover { transform:translateY(-4px); }
+  .compare-card.c1:hover { border-color:var(--cyan); }
+  .compare-card.c2:hover { border-color:var(--violet); }
+  .compare-card.c3:hover { border-color:var(--amber); }
+  .compare-card .cc-num {
+    font-size:2.8rem; font-weight:800; margin-bottom:12px;
+  }
+  .c1 .cc-num { color:var(--cyan); }
+  .c2 .cc-num { color:var(--violet); }
+  .c3 .cc-num { color:var(--amber); }
+  .compare-card h3 { font-size:1.2rem; margin-bottom:8px; letter-spacing:-.01em; }
+  .compare-card p { font-size:.85rem; color:var(--muted); line-height:1.65; margin-bottom:16px; }
+  .cc-tag {
+    display:inline-block; font-family:var(--mono); font-size:.65rem;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:4px 10px; border-radius:20px;
+  }
+  .c1 .cc-tag { background:rgba(0,229,204,.1); color:var(--cyan); }
+  .c2 .cc-tag { background:rgba(155,109,255,.1); color:var(--violet); }
+  .c3 .cc-tag { background:rgba(255,184,0,.1); color:var(--amber); }
+  .cc-row { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+  .cc-item { font-size:.82rem; color:var(--text); display:flex; gap:8px; }
+  .cc-item::before { content:"→"; color:var(--muted); flex-shrink:0; }
+
+  /* ── Footer ── */
+  footer {
+    padding:40px; text-align:center;
+    font-family:var(--mono); font-size:.65rem; color:var(--muted);
+    letter-spacing:.12em; text-transform:uppercase; border-top:1px solid var(--border);
+    z-index:2; position:relative; line-height: 1.8;
+  }
+  .autor {
+    color: var(--cyan);
+    font-size: .75rem;
+    display: block;
+    margin-top: 8px;
+    font-weight: bold;
+    letter-spacing: .15em;
+  }
+
+  /* ── Progress bar ── */
+  #progress {
+    position:fixed; top:0; left:0; height:2px; z-index:200;
+    background:linear-gradient(90deg,var(--cyan),var(--violet));
+    transition:width .1s;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1} 50%{opacity:.3}
+  }
+  @keyframes spin {
+    from{transform:rotate(0deg)} to{transform:rotate(360deg)}
+  }
+  .reveal {
+    opacity:0; transform:translateY(30px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* ── Sketch flow diagram ── */
+  .sketch-flow {
+    display:flex; align-items:center; gap:0; margin:40px 0; flex-wrap:wrap;
+    justify-content:center;
+  }
+  .sf-node {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:16px 20px; text-align:center; min-width:110px;
+  }
+  .sf-node .sf-icon { font-size:1.6rem; margin-bottom:6px; }
+  .sf-node .sf-label { font-family:var(--mono); font-size:.65rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+  .sf-node .sf-val { font-size:.9rem; font-weight:700; margin-top:4px; }
+  .sf-arrow {
+    font-family:var(--mono); font-size:1.5rem; color:var(--muted);
+    padding:0 8px; flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="progress"></div>
+
+<nav>
+  <div class="logo">⬡ Grafos Masivos</div>
+  <a href="#problema">Problema</a>
+  <a href="#muestreo">Muestreo</a>
+  <a href="#sketching">Sketching</a>
+  <a href="#sparsificacion">Sparsificación</a>
+  <a href="#comparacion">Resumen</a>
+</nav>
+
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div style="position:relative;z-index:2;">
+    <p class="hero-label">Algoritmos · Grafos a Escala</p>
+    <h1>Cuando el grafo no <em>cabe</em><br>en <span>memoria</span></h1>
+    <p class="hero-sub">
+      Cuando |V| y |E| crecen a miles de millones, el problema deja de ser
+      "qué algoritmo uso" y pasa a ser "cómo leo el grafo". 
+      Tres herramientas transforman lo imposible en factible.
+    </p>
+    <div class="complexity-pill">
+      <span class="dot"></span>
+      O(|V| + |E|) se convierte en cuello de botella de I/O
+    </div>
+  </div>
+</section>
+
+<section id="problema">
+  <div class="section-inner">
+    <p class="section-tag reveal">El problema de escala</p>
+    <h2 class="section-title reveal">No es el algoritmo.<br>Es <span style="color:var(--coral)">mover los datos.</span></h2>
+    <p class="section-body reveal">
+      Una sola pasada completa sobre el grafo, teóricamente <span class="math">O(|V|+|E|)</span>, 
+      puede volverse un cuello de botella puramente logístico: el grafo está en disco, 
+      distribuido en red, o partido en varias máquinas. <strong>El costo de I/O domina el tiempo total.</strong>
+    </p>
+
+    <div class="bottleneck-viz reveal">
+      <div class="bv-box bad">
+        <div class="bv-label">Matriz de adyacencia</div>
+        <div class="bv-val">Θ(|V|²)</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:6px;">Inusable para grafos grandes</div>
+      </div>
+      <div class="bv-arrow">→</div>
+      <div class="bv-box ok">
+        <div class="bv-label">Lista de adyacencia</div>
+        <div class="bv-val">Θ(|V|+|E|)</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:6px;">Óptima… pero aun puede ser enorme</div>
+      </div>
+    </div>
+
+    <table class="complexity-table reveal" style="margin-top:40px;">
+      <thead>
+        <tr>
+          <th>Estructura</th>
+          <th>Memoria</th>
+          <th>Problema a escala</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Matriz de adyacencia</td>
+          <td class="math">Θ(|V|²)</td>
+          <td>10⁹ nodos → 10¹⁸ celdas</td>
+          <td class="tag-bad">✗ Imposible</td>
+        </tr>
+        <tr>
+          <td>Lista de adyacencia</td>
+          <td class="math">Θ(|V|+|E|)</td>
+          <td>Puede no caber en RAM</td>
+          <td class="tag-warn">⚠ Límite</td>
+        </tr>
+        <tr>
+          <td>Representación comprimida</td>
+          <td class="math">≪ O(|E|)</td>
+          <td>Sacrifica detalle, gana velocidad</td>
+          <td class="tag-ok">✓ Factible</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:48px;padding:24px 28px;background:var(--bg3);border-left:3px solid var(--coral);border-radius:0 10px 10px 0;" class="reveal">
+      <p style="font-size:.85rem;line-height:1.8;color:var(--text);">
+        <strong style="color:var(--coral);">La tesis central:</strong><br>
+        No siempre es imprescindible lograr tiempo sublineal <em>total</em>. 
+        Lo que sí se vuelve imprescindible es <strong>reducir la cantidad de información 
+        que almacenás o que recorrés más de una vez</strong>. 
+        Tres herramientas responden a este desafío: <span style="color:var(--cyan)">Muestreo</span>, 
+        <span style="color:var(--violet)">Sketching</span> y 
+        <span style="color:var(--amber)">Sparsificación</span>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="muestreo">
+  <div class="section-inner">
+    <p class="section-tag reveal">Herramienta 01</p>
+    <h2 class="section-title reveal"><em>Muestreo</em><br>No veas todo, estima inteligente</h2>
+
+    <div class="tool-grid">
+      <div>
+        <p class="section-body" style="margin-bottom:24px;">
+          En lugar de explorar exhaustivamente, tomás una <strong>muestra de aristas o vértices</strong>, 
+          o generás recorridos aleatorios. Con re-pesado adecuado, 
+          las propiedades globales del grafo se estiman con <span class="math">error controlado</span>.
+        </p>
+        <ul class="insight-list">
+          <li>
+            <span class="insight-icon">🎯</span>
+            <div class="insight-text">
+              <strong>Objetivo</strong>
+              Parámetros agregados: grados promedio, densidades, conteos de patrones, medidas de cohesión.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">⚖️</span>
+            <div class="insight-text">
+              <strong>El problema del sesgo</strong>
+              Los hubs (nodos de alto grado) aparecen con mucho más frecuencia. 
+              El muestreo ingenuo sobrerrepresenta nodos centrales.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">🔬</span>
+            <div class="insight-text">
+              <strong>Solución: muestreo diseñado</strong>
+              Se controla la varianza y se corrige el sesgo de heterogeneidad de grados. 
+              Los estimadores estadísticos reemplazan el cálculo exacto.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">🎲</span>
+            <div class="insight-text">
+              <strong>Random Walks</strong>
+              Recorridos aleatorios sobre el grafo permiten estimar distribuciones 
+              sin cargar toda la estructura en memoria.
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="canvas-box">
+          <canvas id="canvas-muestreo"></canvas>
+          <span class="canvas-label">Simulación: muestreo de aristas</span>
+          <button class="canvas-btn" id="btn-muestreo">↺ Resamplear</button>
+        </div>
+        <div style="margin-top:16px;padding:16px 20px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Idea clave</div>
+          <p style="font-size:.88rem;line-height:1.7;">Tomás una fracción <span class="math">p</span> de aristas y ponderás cada una con <span class="math">1/p</span>. En expectativa, la suma ponderada iguala la suma total real.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sketching">
+  <div class="section-inner">
+    <p class="section-tag reveal" style="color:var(--violet)">Herramienta 02</p>
+    <h2 class="section-title reveal"><em style="color:var(--violet)">Sketching</em><br>Un resumen que no olvida lo esencial</h2>
+
+    <div class="sketch-flow reveal">
+      <div class="sf-node">
+        <div class="sf-icon">📡</div>
+        <div class="sf-label">Stream de aristas</div>
+        <div class="sf-val" style="color:var(--text);">|E| = 10⁹</div>
+      </div>
+      <div class="sf-arrow">→</div>
+      <div class="sf-node" style="border-color:var(--violet)">
+        <div class="sf-icon">🔀</div>
+        <div class="sf-label">Hash / proyección</div>
+        <div class="sf-val" style="color:var(--violet);">φ(G)</div>
+      </div>
+      <div class="sf-arrow">→</div>
+      <div class="sf-node">
+        <div class="sf-icon">📦</div>
+        <div class="sf-label">Sketch compacto</div>
+        <div class="sf-val" style="color:var(--cyan);">polylog(n)</div>
+      </div>
+      <div class="sf-arrow">→</div>
+      <div class="sf-node" style="border-color:var(--cyan)">
+        <div class="sf-icon">💬</div>
+        <div class="sf-label">Respuesta aproximada</div>
+        <div class="sf-val" style="color:var(--cyan);">±ε</div>
+      </div>
+    </div>
+
+    <div class="tool-grid">
+      <div>
+        <p class="section-body" style="margin-bottom:24px;">
+          No guardás un subgrafo sino un <strong>resumen comprimido <span class="math">φ(G)</span></strong> 
+          actualizable en <em>streaming</em>. Cada arista se procesa una sola vez 
+          mediante funciones hash o proyecciones lineales.
+        </p>
+        <ul class="insight-list">
+          <li>
+            <span class="insight-icon">📏</span>
+            <div class="insight-text">
+              <strong>Tamaño del sketch</strong>
+              Depende de <span class="math">ε</span> (error) y <span class="math">δ</span> (prob. de fallo), 
+              más factores <em>polilogarítmicos</em> en el tamaño del grafo. 
+              No de <span class="math">|E|</span> linealmente.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">🔗</span>
+            <div class="insight-text">
+              <strong>Combinabilidad (mergeable)</strong>
+              Si dos máquinas procesan partes distintas del stream, 
+              sus sketches se <em>combinan</em> para obtener el resumen del total. 
+              Natural para cómputo distribuido.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">🌊</span>
+            <div class="insight-text">
+              <strong>Modelo de streaming</strong>
+              Cada arista se observa una vez. No se requiere almacenar el grafo completo. 
+              El sketch se actualiza incrementalmente.
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="canvas-box">
+          <canvas id="canvas-sketch"></canvas>
+          <span class="canvas-label">Simulación: hash de aristas en buckets</span>
+          <button class="canvas-btn" id="btn-sketch" style="border-color:var(--violet);color:var(--violet);">↺ Nuevo stream</button>
+        </div>
+        <div style="margin-top:16px;padding:16px 20px;background:var(--bg3);border-radius:10px;border:1px solid rgba(155,109,255,.3);">
+          <div style="font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Fórmula del tamaño</div>
+          <p style="font-size:.88rem;line-height:1.7;font-family:var(--mono);color:var(--violet);">O( (1/ε²) · log(1/δ) · polylog(|V|) )</p>
+          <p style="font-size:.8rem;color:var(--muted);margin-top:6px;font-family:var(--sans);">
+            vs. almacenar todo: <span class="math" style="color:var(--coral)">O(|E|)</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sparsificacion">
+  <div class="section-inner">
+    <p class="section-tag reveal" style="color:var(--amber)">Herramienta 03</p>
+    <h2 class="section-title reveal"><em style="color:var(--amber)">Sparsificación</em><br>Un grafo más pequeño, mismo comportamiento</h2>
+
+    <div class="tool-grid">
+      <div>
+        <p class="section-body" style="margin-bottom:24px;">
+          Construís un grafo nuevo <span class="math">H</span> con los mismos vértices de <span class="math">G</span> 
+          pero con <strong>muchas menos aristas y pesos ajustados</strong>, 
+          de modo que <span class="math">H</span> se comporte casi igual que <span class="math">G</span> 
+          para la propiedad que importa.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+          <div style="padding:20px;background:var(--bg3);border:1px solid rgba(255,184,0,.2);border-radius:10px;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px;">Sparsificación de Cortes</div>
+            <p style="font-size:.82rem;line-height:1.65;color:var(--text);">
+              Para todo <span class="math">S⊆V</span>, el peso del corte <span class="math">δ(S)</span> 
+              en <span class="math">H</span> aproxima al de <span class="math">G</span> dentro de <span class="math">1±ε</span>.
+            </p>
+            <div style="margin-top:10px;font-size:.75rem;color:var(--muted);">→ Preserva conectividad global, clustering, flujo</div>
+          </div>
+          <div style="padding:20px;background:var(--bg3);border:1px solid rgba(155,109,255,.2);border-radius:10px;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--violet);margin-bottom:10px;">Sparsificación Espectral</div>
+            <p style="font-size:.82rem;line-height:1.65;color:var(--text);">
+              Para todo vector <span class="math">x</span>: la energía <span class="math">xᵀLx</span> 
+              se preserva aproximadamente en <span class="math">H</span>.
+            </p>
+            <div style="margin-top:10px;font-size:.75rem;color:var(--muted);">→ Preserva difusión, random walks, muchos cortes a la vez</div>
+          </div>
+        </div>
+
+        <ul class="insight-list">
+          <li>
+            <span class="insight-icon">✂️</span>
+            <div class="insight-text">
+              <strong>Tamaño objetivo</strong>
+              <span class="math">O(|V| log |V| / ε²)</span> aristas — 
+              órdenes de magnitud menor que <span class="math">|E|</span> original.
+            </div>
+          </li>
+          <li>
+            <span class="insight-icon">🔭</span>
+            <div class="insight-text">
+              <strong>Laplaciano L</strong>
+              La sparsificación espectral preserva el Laplaciano, 
+              que codifica la estructura de difusión y conectividad del grafo completo.
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="canvas-box">
+          <canvas id="canvas-sparse"></canvas>
+          <span class="canvas-label">Simulación: G denso → H sparse</span>
+          <button class="canvas-btn" id="btn-sparse" style="border-color:var(--amber);color:var(--amber);">↺ Nuevo grafo</button>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:12px;">
+          <div style="flex:1;padding:12px 16px;background:var(--bg3);border-radius:8px;border:1px solid rgba(255,94,94,.2);text-align:center;">
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--coral);">ORIGINAL G</div>
+            <div id="edges-G" style="font-size:1.4rem;font-weight:700;color:var(--coral);margin-top:4px;">—</div>
+            <div style="font-size:.72rem;color:var(--muted);">aristas</div>
+          </div>
+          <div style="flex:1;padding:12px 16px;background:var(--bg3);border-radius:8px;border:1px solid rgba(255,184,0,.2);text-align:center;">
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--amber);">SPARSE H</div>
+            <div id="edges-H" style="font-size:1.4rem;font-weight:700;color:var(--amber);margin-top:4px;">—</div>
+            <div style="font-size:.72rem;color:var(--muted);">aristas</div>
+          </div>
+          <div style="flex:1;padding:12px 16px;background:var(--bg3);border-radius:8px;border:1px solid rgba(0,229,204,.2);text-align:center;">
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--cyan);">REDUCCIÓN</div>
+            <div id="reduction" style="font-size:1.4rem;font-weight:700;color:var(--cyan);margin-top:4px;">—</div>
+            <div style="font-size:.72rem;color:var(--muted);">%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="comparacion">
+  <div class="section-inner">
+    <p class="section-tag reveal">Síntesis</p>
+    <h2 class="section-title reveal">Tres respuestas a un solo hecho</h2>
+    <p class="section-body reveal">
+      En grafos masivos el costo de acceder a todos los datos puede ser tan alto 
+      que la única estrategia viable es reemplazar el grafo por una <strong>representación más pequeña</strong>, 
+      diseñada para preservar exactamente la información que realmente necesitás.
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-card c1 reveal">
+        <div class="cc-num">01</div>
+        <h3>Muestreo</h3>
+        <p>Vista parcial del grafo con re-pesado estadístico para estimar propiedades globales con error controlado.</p>
+        <span class="cc-tag">Probabilístico</span>
+        <div class="cc-row">
+          <div class="cc-item">No necesitás todas las aristas</div>
+          <div class="cc-item">Controla sesgo por heterogeneidad de grados</div>
+          <div class="cc-item">Útil para parámetros agregados</div>
+        </div>
+      </div>
+      <div class="compare-card c2 reveal" style="transition-delay:.1s">
+        <div class="cc-num">02</div>
+        <h3>Sketching</h3>
+        <p>Resumen comprimido φ(G) actualizable en streaming. Combinable entre máquinas. Tamaño polylog(|V|).</p>
+        <span class="cc-tag">Streaming</span>
+        <div class="cc-row">
+          <div class="cc-item">Una sola pasada por los datos</div>
+          <div class="cc-item">Tamaño independiente de |E|</div>
+          <div class="cc-item">Merge distribuido nativo</div>
+        </div>
+      </div>
+      <div class="compare-card c3 reveal" style="transition-delay:.2s">
+        <div class="cc-num">03</div>
+        <h3>Sparsificación</h3>
+        <p>Nuevo grafo H con los mismos vértices, muchas menos aristas y pesos ajustados. Preserva cortes o espectro.</p>
+        <span class="cc-tag">Estructural</span>
+        <div class="cc-row">
+          <div class="cc-item">O(|V| log|V| / ε²) aristas</div>
+          <div class="cc-item">Garantías por corte o por Laplaciano</div>
+          <div class="cc-item">Hace factibles algoritmos posteriores</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:56px;padding:32px;background:var(--bg3);border-radius:16px;border:1px solid var(--border);text-align:center;" class="reveal">
+      <p style="font-size:1rem;line-height:1.85;color:var(--text);max-width:700px;margin:0 auto;">
+        Las tres técnicas son <strong style="color:var(--cyan)">complementarias</strong> y pueden combinarse. 
+        Muestreo, sketching y sparsificación son respuestas distintas al mismo problema: 
+        <em>cómo obtener información útil de un grafo que es demasiado grande para ver completo.</em>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Grafos Masivos · Algoritmos Aproximados y Probabilísticos<br>
+  <span class="autor">Material elaborado por el profesor Sergio Gevatschnaider</span>
+</footer>
+
+<script>
+// ── Cursor ──────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+  ring.style.left   = e.clientX + 'px';
+  ring.style.top    = e.clientY + 'px';
+});
+
+// ── Progress bar ─────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ── Scroll reveal ─────────────────────────────────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ── Helpers ───────────────────────────────────────────────
+const rnd = (a,b) => a + Math.random()*(b-a);
+const lerp = (a,b,t) => a + (b-a)*t;
+
+// ═══════════════════════════════════════════════════════════
+// HERO canvas – animated graph
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('hero-canvas');
+  const ctx = cv.getContext('2d');
+  let W, H, nodes, edges;
+
+  function init(){
+    W = cv.width  = cv.offsetWidth;
+    H = cv.height = cv.offsetHeight;
+    nodes = Array.from({length:90}, () => ({
+      x: rnd(0,W), y: rnd(0,H),
+      vx: rnd(-0.3,0.3), vy: rnd(-0.2,0.2),
+      r: rnd(1.5,3.5)
+    }));
+    edges = [];
+    nodes.forEach((a,i) => {
+      nodes.forEach((b,j) => {
+        if(j<=i) return;
+        const d = Math.hypot(a.x-b.x, a.y-b.y);
+        if(d < W*0.14) edges.push({a:i,b:j});
+      });
+    });
+  }
+
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+    });
+    // rebuild edges occasionally
+    edges = [];
+    nodes.forEach((a,i) => {
+      nodes.forEach((b,j) => {
+        if(j<=i) return;
+        const d = Math.hypot(a.x-b.x, a.y-b.y);
+        if(d < W*0.13) edges.push({a:i,b:j,d});
+      });
+    });
+    edges.forEach(e => {
+      const a=nodes[e.a], b=nodes[e.b];
+      const alpha = 1 - e.d/(W*0.13);
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle = `rgba(0,229,204,${alpha*0.4})`;
+      ctx.lineWidth = .5;
+      ctx.stroke();
+    });
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(0,229,204,0.7)';
+      ctx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('resize', init);
+  init(); frame();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// MUESTREO canvas
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('canvas-muestreo');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  let animFrame, nodes, allEdges, sampledEdges;
+  const N = 28;
+
+  function buildGraph(){
+    cv.width = cv.offsetWidth;
+    cv.height = cv.offsetHeight || 340;
+    const W = cv.width, H = cv.height;
+    nodes = Array.from({length:N}, (_,i) => ({
+      x: rnd(30, W-30), y: rnd(30, H-30),
+      deg: 0
+    }));
+    allEdges = [];
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const d = Math.hypot(nodes[i].x-nodes[j].x, nodes[i].y-nodes[j].y);
+        if(d < W*0.28 && allEdges.length < 120) allEdges.push({a:i,b:j});
+      }
+    }
+    allEdges.forEach(e=>{ nodes[e.a].deg++; nodes[e.b].deg++; });
+    sample();
+  }
+
+  function sample(){
+    const p = 0.35;
+    sampledEdges = allEdges.filter(() => Math.random() < p);
+    draw();
+  }
+
+  function draw(){
+    const W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    // all edges (faded)
+    allEdges.forEach(e => {
+      const a=nodes[e.a],b=nodes[e.b];
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle='rgba(90,106,132,0.2)'; ctx.lineWidth=1; ctx.stroke();
+    });
+    // sampled edges
+    sampledEdges.forEach(e => {
+      const a=nodes[e.a],b=nodes[e.b];
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle='rgba(0,229,204,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    // nodes
+    nodes.forEach((n,i)=>{
+      const isSampled = sampledEdges.some(e=>e.a===i||e.b===i);
+      ctx.beginPath(); ctx.arc(n.x,n.y,4,0,Math.PI*2);
+      ctx.fillStyle = isSampled ? '#00e5cc' : 'rgba(90,106,132,0.5)';
+      ctx.fill();
+    });
+    // stats
+    ctx.font = '11px Space Mono, monospace';
+    ctx.fillStyle = 'rgba(90,106,132,0.9)';
+    ctx.fillText(`Total: ${allEdges.length} aristas`, 12, 18);
+    ctx.fillStyle = 'rgba(0,229,204,0.9)';
+    ctx.fillText(`Muestra: ${sampledEdges.length} (${Math.round(sampledEdges.length/allEdges.length*100)}%)`, 12, 34);
+  }
+
+  document.getElementById('btn-muestreo').addEventListener('click', () => { buildGraph(); });
+  window.addEventListener('resize', buildGraph);
+  buildGraph();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// SKETCH canvas – streaming hash buckets
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('canvas-sketch');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  let particles = [], buckets = [], animId, tick=0;
+  const NBUCKETS = 8;
+
+  function init(){
+    cv.width = cv.offsetWidth;
+    cv.height = cv.offsetHeight || 340;
+    buckets = Array.from({length:NBUCKETS}, () => ({ count:0, heat:0 }));
+    particles = [];
+    tick = 0;
+    cancelAnimationFrame(animId);
+    loop();
+  }
+
+  function spawnParticle(){
+    const W=cv.width, H=cv.height;
+    const bucket = Math.floor(Math.random()*NBUCKETS);
+    particles.push({
+      x: rnd(20, W-20),
+      y: rnd(20, H/2-20),
+      tx: (bucket+0.5)*(W/NBUCKETS),
+      ty: H-60,
+      t: 0,
+      bucket,
+      color: `hsl(${260+bucket*12},70%,65%)`
+    });
+  }
+
+  function loop(){
+    const W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    tick++;
+    if(tick%4===0 && particles.length < 80) spawnParticle();
+
+    // update + draw particles
+    particles = particles.filter(p => p.t <= 1.05);
+    particles.forEach(p => {
+      p.t = Math.min(p.t + 0.025, 1);
+      const cx = lerp(p.x, p.tx, p.t);
+      const cy = lerp(p.y, p.ty, p.t) - Math.sin(p.t*Math.PI)*40;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI*2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 1 - p.t*0.5;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if(p.t >= 1 && !p.counted){
+        p.counted = true;
+        buckets[p.bucket].count++;
+        buckets[p.bucket].heat = 1;
+      }
+    });
+
+    // buckets
+    const bw = W/NBUCKETS;
+    buckets.forEach((b,i)=>{
+      b.heat = Math.max(0, b.heat - 0.03);
+      const alpha = 0.15 + b.heat*0.5;
+      const h = Math.min(b.count * 2.5, H-100);
+      ctx.fillStyle = `rgba(155,109,255,${alpha})`;
+      ctx.fillRect(i*bw+4, H-60-h, bw-8, h);
+      ctx.strokeStyle = `rgba(155,109,255,${0.3+b.heat*0.5})`;
+      ctx.lineWidth=1;
+      ctx.strokeRect(i*bw+4, H-60-h, bw-8, h);
+
+      ctx.font='10px Space Mono';
+      ctx.fillStyle=`rgba(155,109,255,${0.6+b.heat*0.4})`;
+      ctx.textAlign='center';
+      ctx.fillText(`h${i}`, i*bw+bw/2, H-42);
+      ctx.fillText(b.count, i*bw+bw/2, H-28);
+    });
+
+    // label
+    ctx.textAlign='left';
+    ctx.font='11px Space Mono';
+    ctx.fillStyle='rgba(90,106,132,0.8)';
+    ctx.fillText(`Aristas procesadas: ${particles.filter(p=>p.counted).length + buckets.reduce((s,b)=>s+b.count,0)}`, 12, 18);
+
+    animId = requestAnimationFrame(loop);
+  }
+
+  document.getElementById('btn-sketch').addEventListener('click', init);
+  window.addEventListener('resize', init);
+  init();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// SPARSIFICACIÓN canvas
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const cv = document.getElementById('canvas-sparse');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  let nodes, allEdges, sparseEdges;
+  const N = 24;
+
+  function buildGraph(){
+    cv.width = cv.offsetWidth;
+    cv.height = cv.offsetHeight || 340;
+    const W=cv.width, H=cv.height;
+    // place nodes in two halves
+    nodes = Array.from({length:N}, (_,i) => ({
+      x: i < N/2 ? rnd(30,W/2-10) : rnd(W/2+10,W-30),
+      y: rnd(30, H-30)
+    }));
+    allEdges = [];
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const d=Math.hypot(nodes[i].x-nodes[j].x,nodes[i].y-nodes[j].y);
+        if(d<W*0.4 && allEdges.length<160){
+          allEdges.push({a:i,b:j,w:1/d});
+        }
+      }
+    }
+    sparsify();
+  }
+
+  function sparsify(){
+    // Weighted sampling proportional to effective resistance (approx by 1/degree)
+    const deg = new Array(N).fill(0);
+    allEdges.forEach(e=>{deg[e.a]++;deg[e.b]++;});
+    const total = allEdges.reduce((s,e)=>s+e.w,0);
+    const target = Math.floor(allEdges.length * 0.28);
+    // sample with replacement, keep unique by prob
+    sparseEdges = [];
+    allEdges.forEach(e => {
+      const prob = Math.min(1, e.w / total * allEdges.length * 0.3 + 0.1);
+      if(Math.random() < prob) sparseEdges.push(e);
+    });
+    document.getElementById('edges-G').textContent = allEdges.length;
+    document.getElementById('edges-H').textContent = sparseEdges.length;
+    document.getElementById('reduction').textContent = Math.round((1-sparseEdges.length/allEdges.length)*100);
+    draw();
+  }
+
+  function draw(){
+    const W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    // divider
+    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H);
+    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.font='10px Space Mono'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,94,94,0.5)'; ctx.fillText('G  (denso)',W/4,H-10);
+    ctx.fillStyle='rgba(255,184,0,0.5)'; ctx.fillText('H  (sparse)',3*W/4,H-10);
+
+    // draw all edges on left half (mirrored from right)
+    allEdges.forEach(e=>{
+      const a=nodes[e.a], b=nodes[e.b];
+      // only draw if both in left half
+      if(a.x < W/2 && b.x < W/2){
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle='rgba(255,94,94,0.25)'; ctx.lineWidth=.7; ctx.stroke();
+      }
+    });
+    // draw sparse on right
+    sparseEdges.forEach(e=>{
+      const a=nodes[e.a], b=nodes[e.b];
+      if(a.x > W/2 && b.x > W/2){
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle='rgba(255,184,0,0.6)'; ctx.lineWidth=1.2; ctx.stroke();
+      }
+    });
+    // nodes
+    nodes.forEach(n=>{
+      const inLeft = n.x < W/2;
+      ctx.beginPath(); ctx.arc(n.x,n.y,3.5,0,Math.PI*2);
+      ctx.fillStyle = inLeft ? 'rgba(255,94,94,0.8)' : 'rgba(255,184,0,0.8)';
+      ctx.fill();
+    });
+  }
+
+  document.getElementById('btn-sparse').addEventListener('click', buildGraph);
+  window.addEventListener('resize', buildGraph);
+  buildGraph();
+})();
+</script>
+</body>
+</html>
