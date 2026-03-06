@@ -343,6 +343,13 @@
     "mtime": "2025-11-17T17:22:18-03:00"
   },
   {
+    "title": "ER vs BA — Teoría de Grafos",
+    "path": "/src/classroom/graphs/recursos/Big_Data_Erdős–Rényi VS Barabási–Albert.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-06T14:03:00-03:00"
+  },
+  {
     "title": "Espacio de Búsqueda y Complejidad en Programación Genética",
     "path": "/src/classroom/graphs/recursos/ProgamacionGenetica_Espaciodebusqueda.html",
     "tag": "Demo",
