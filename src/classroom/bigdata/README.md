@@ -93,6 +93,12 @@ DataGraphX/
 | **Preguntas Big Data** | [![📄 Descargar PDF](https://img.shields.io/badge/📄%20Descargar-Preguntas%20Big%20Data-red?style=for-the-badge)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/9b93a3f622c3d4a544fe593d8ede12f4f1de2f14/Preguntas_Big_Data.pdf) |
 | **Preguntas y Respuestas sobre Sistemas de Recomendación** | [![📄 Descargar PDF](https://img.shields.io/badge/📄%20Descargar-Preguntas%20y%20Respuestas%20sobre%20Sistemas%20de%20Recomendación-red?style=for-the-badge)](https://github.com/sgevatschnaider/GraphAI-Data-Science-ML/blob/ed7eb3145a0f91d14dd5e450886e9f876d626ab2/Preguntas%20y%20Respuestas%20sobre%20Sistemas%20de%20Recomendaci%C3%B3n.pdf) |
 
+## 📝 Erdős–Rényi vs Barabási–Albert: Visualización Interactiva
+
+| 📄 **Recurso** | 📥 **Acceso** |
+|---------------|---------------|
+| **Big Data: Erdős–Rényi vs Barabási–Albert** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Visualización interactiva que compara dos modelos fundamentales de generación de redes: Erdős–Rényi, basado en conexiones aleatorias, y Barabási–Albert, basado en crecimiento con adjunción preferencial. La lección permite observar cómo estas reglas producen estructuras radicalmente distintas: redes más homogéneas en el caso de ER frente a redes libres de escala con hubs dominantes en BA. Ideal para comprender distribución de grados, emergencia de nodos altamente conectados, robustez ante fallos aleatorios, vulnerabilidad frente a ataques dirigidos y su relación con sistemas complejos reales como Internet, redes sociales y plataformas digitales.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/91cc783ad0ab675364626e4bdc91c743ab664925/src/classroom/graphs/recursos/Big_Data_Erd%C5%91s%E2%80%93R%C3%A9nyi%20VS%20Barab%C3%A1si%E2%80%93Albert.html) |
+
 ## 📝 Sharding: Visualización Interactiva
 
 | 📄 **Recurso** | 📥 **Acceso** |
