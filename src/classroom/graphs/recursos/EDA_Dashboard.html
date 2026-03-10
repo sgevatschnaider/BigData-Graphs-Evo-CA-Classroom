@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Personality Analysis — Ficha Analítica</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&family=DM+Mono:wght@400;500&family=Source+Serif+4:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ───────────────────────────────────────────
+       TOKENS — Paleta editorial más rica
+    ─────────────────────────────────────────── */
+    :root {
+      --ink:          #0d0c0a;
+      --paper:        #f6f2eb;
+      --paper2:       #ece6dc;
+      --amber:        #c07830;
+      --amber-light:  #e09a50;
+      --amber-pale:   rgba(192,120,48,.10);
+      --gold:         #a87d20;
+      --crimson:      #962c2c;
+      --crimson-pale: rgba(150,44,44,.10);
+      --teal:         #226e62;
+      --teal-light:   #34a090;
+      --teal-pale:    rgba(34,110,98,.10);
+      --indigo:       #3a4f72;
+      --slate:        #4a5a6e;
+      --muted:        #7a6f63;
+      --rule:         #cdc4b6;
+      --card-bg:      #ffffff;
+      --card-border:  var(--rule);
+      --p-color:      #2a2520;
+      --nav-bg:       var(--paper2);
+      --main-bg:      var(--paper);
+      --shadow:       0 6px 24px rgba(30,22,10,.07), 0 1px 4px rgba(30,22,10,.04);
+      --shadow-lg:    0 16px 48px rgba(30,22,10,.10);
+      --radius:       20px;
+      --radius-sm:    14px;
+      --maxw:         1320px;
+    }
+
+    html.dark {
+      --ink:          #e4ddd3;
+      --paper:        #111009;
+      --paper2:       #1a1814;
+      --amber:        #e0a050;
+      --amber-light:  #f0c070;
+      --amber-pale:   rgba(224,160,80,.12);
+      --gold:         #d0a040;
+      --crimson:      #e06060;
+      --crimson-pale: rgba(224,96,96,.12);
+      --teal:         #46b8a6;
+      --teal-light:   #5ad0bc;
+      --teal-pale:    rgba(70,184,166,.12);
+      --indigo:       #7a9cc8;
+      --slate:        #8aa0b8;
+      --muted:        #9a9080;
+      --rule:         #2c2924;
+      --card-bg:      #1a1814;
+      --card-border:  #2c2924;
+      --p-color:      #d4cdc3;
+      --nav-bg:       #151310;
+      --main-bg:      #111009;
+      --shadow:       0 6px 24px rgba(0,0,0,.30);
+      --shadow-lg:    0 16px 48px rgba(0,0,0,.40);
+    }
+
+    html.sepia {
+      --ink:          #281c0c;
+      --paper:        #f0e6d0;
+      --paper2:       #e6d9be;
+      --amber:        #a86820;
+      --amber-light:  #cc8840;
+      --amber-pale:   rgba(168,104,32,.10);
+      --gold:         #8a6c18;
+      --crimson:      #7c1c1c;
+      --crimson-pale: rgba(124,28,28,.10);
+      --teal:         #245e50;
+      --teal-light:   #348070;
+      --teal-pale:    rgba(36,94,80,.10);
+      --indigo:       #2e3e58;
+      --slate:        #3a2e1e;
+      --muted:        #6a5a3c;
+      --rule:         #c0aa88;
+      --card-bg:      #f8f0e0;
+      --card-border:  #c0aa88;
+      --p-color:      #281c0c;
+      --nav-bg:       #e6d9be;
+      --main-bg:      #f0e6d0;
+      --shadow:       0 6px 24px rgba(60,40,10,.09);
+      --shadow-lg:    0 16px 48px rgba(60,40,10,.14);
+    }
+
+    /* ───────────────────────────────────────────
+       RESET & BASE
+    ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--main-bg);
+      color: var(--ink);
+      font-family: "Source Serif 4", serif;
+      line-height: 1.68;
+      transition: background .28s ease, color .28s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ───────────────────────────────────────────
+       SCROLL PROGRESS BAR (FIX: nuevo elemento)
+    ─────────────────────────────────────────── */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber), var(--amber-light), var(--teal-light));
+      z-index: 9999;
+      transition: width .08s linear;
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* ───────────────────────────────────────────
+       LAYOUT
+    ─────────────────────────────────────────── */
+    .page {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ───────────────────────────────────────────
+       SIDEBAR
+    ─────────────────────────────────────────── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--nav-bg);
+      border-right: 1px solid var(--rule);
+      padding: 28px 20px 28px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule) transparent;
+    }
+
+    .brand {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .brand .eyebrow {
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 10px;
+    }
+
+    .brand h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.65rem;
+      line-height: 1.10;
+      margin: 0 0 8px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .94rem;
+      line-height: 1.55;
+    }
+
+    /* ── Theme box ── */
+    .theme-box, .quick-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .theme-box label,
+    .quick-box .title,
+    .nav-title {
+      display: block;
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      color: var(--amber);
+      margin-bottom: 10px;
+    }
+
+    /* ── Custom select ── */
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--amber);
+      pointer-events: none;
+      font-size: 12px;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: var(--radius-sm);
+      padding: 10px 32px 10px 12px;
+      font-family: "DM Mono", monospace;
+      font-size: .85rem;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition: border-color .18s ease;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--amber);
+    }
+
+    /* ── Nav lists ── */
+    .quick-box ul,
+    .sidebar nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .quick-box li,
+    .sidebar nav li {
+      margin-bottom: 4px;
+    }
+
+    .sidebar nav a,
+    .quick-box a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--p-color);
+      transition: all .18s ease;
+      border: 1px solid transparent;
+      font-size: .95rem;
+    }
+
+    .sidebar nav a:hover,
+    .quick-box a:hover {
+      background: var(--amber-pale);
+      border-color: var(--rule);
+      transform: translateX(3px);
+      color: var(--ink);
+    }
+
+    /* FIX: Estado activo de navegación */
+    .sidebar nav a.active,
+    .quick-box a.active {
+      background: var(--amber-pale);
+      border-color: var(--amber);
+      color: var(--amber);
+      font-weight: 600;
+      transform: translateX(3px);
+    }
+
+    /* ───────────────────────────────────────────
+       CONTENT AREA
+    ─────────────────────────────────────────── */
+    .content { min-width: 0; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 48px 40px 28px;
+      border-bottom: 1px solid var(--rule);
+      background:
+        radial-gradient(ellipse at top right, rgba(192,120,48,.18), transparent 42%),
+        radial-gradient(ellipse at bottom left, rgba(34,110,98,.13), transparent 36%),
+        radial-gradient(ellipse at center, rgba(58,79,114,.05), transparent 60%),
+        var(--main-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c07830' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: .6;
+    }
+
+    .hero-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .kicker {
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: var(--amber-pale);
+      border: 1px solid rgba(192,120,48,.20);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+
+    .hero h2 {
+      margin: 0 0 14px;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 4.2vw, 3.5rem);
+      line-height: 1.05;
+      max-width: 860px;
+    }
+
+    .hero p.lead {
+      margin: 0;
+      max-width: 960px;
+      font-size: 1.12rem;
+      color: var(--p-color);
+      line-height: 1.72;
+    }
+
+    .hero-actions {
+      margin-top: 26px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .97rem;
+      border: 1px solid var(--rule);
+      transition: all .22s ease;
+      box-shadow: var(--shadow);
+      font-family: "Source Serif 4", serif;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--amber) 0%, var(--amber-light) 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(192,120,48,.30);
+    }
+
+    .btn.secondary {
+      background: var(--card-bg);
+      color: var(--ink);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 8px 28px rgba(192,120,48,.40);
+    }
+
+    /* ── Stat cards ── */
+    .stats {
+      max-width: var(--maxw);
+      margin: 28px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber), var(--amber-light));
+      opacity: .7;
+    }
+
+    .stat-card .label {
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-family: "Playfair Display", serif;
+      font-size: 1.75rem;
+      line-height: 1.10;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    /* FIX: Valor largo no desborda */
+    .stat-card .value.small-text {
+      font-size: 1.20rem;
+    }
+
+    .stat-card .sub {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+    }
+
+    /* ───────────────────────────────────────────
+       MAIN CONTENT
+    ─────────────────────────────────────────── */
+    main { padding: 32px 40px 56px; }
+
+    .container {
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+
+    section {
+      margin-bottom: 26px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 26px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-end; /* FIX: era 'end', debe ser 'flex-end' */
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .section-head .overline {
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.40rem, 2.2vw, 1.95rem);
+      line-height: 1.14;
+    }
+
+    .section-head .note {
+      color: var(--muted);
+      max-width: 440px;
+      text-align: right;
+      font-size: .94rem;
+      line-height: 1.55;
+    }
+
+    /* ── Grids ── */
+    .grid-2, .grid-3, .grid-4 {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    /* ── Info / mini / viz cards ── */
+    /* FIX: Gradiente adaptativo al tema (eliminado blanco hardcodeado) */
+    .info-box, .viz-card, .mini-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      min-width: 0;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .info-box:hover,
+    .mini-card:hover {
+      border-color: rgba(192,120,48,.35);
+      box-shadow: 0 4px 16px rgba(192,120,48,.08);
+    }
+
+    .info-box h4,
+    .viz-card h4,
+    .mini-card h4 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      font-family: "Playfair Display", serif;
+    }
+
+    .info-box p,
+    .viz-card p,
+    .mini-card p {
+      margin: 0;
+      color: var(--p-color);
+      font-size: .97rem;
+      line-height: 1.65;
+    }
+
+    /* ── Pills ── */
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border: 1px solid var(--rule);
+      background: var(--amber-pale);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: .88rem;
+      font-family: "DM Mono", monospace;
+      letter-spacing: .04em;
+      transition: all .18s ease;
+    }
+
+    .pill:hover {
+      border-color: var(--amber);
+      background: rgba(192,120,48,.16);
+    }
+
+    /* ── Table ── */
+    .vars-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      /* FIX: overflow: hidden para que el border-radius recorte el contenido */
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: var(--card-bg);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--rule);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      font-family: "DM Mono", monospace;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--amber);
+      background: rgba(192,120,48,.07);
+      position: sticky;
+      top: 0;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td {
+      background: rgba(192,120,48,.04);
+    }
+
+    /* ── Chart containers ── */
+    .viz-card canvas {
+      margin-top: 16px;
+      width: 100% !important;
+      height: 300px !important;
+    }
+
+    .viz-card.tall canvas { height: 360px !important; }
+
+    .viz-card.full canvas { height: 260px !important; }
+
+    /* ── Callout & Warning — con íconos (mejorado) ── */
+    .callout {
+      margin-top: 20px;
+      background: var(--teal-pale);
+      border: 1px solid rgba(34,110,98,.22);
+      border-left: 4px solid var(--teal);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .callout::before {
+      content: "ℹ";
+      font-size: 1rem;
+      color: var(--teal);
+      margin-top: 1px;
+      flex-shrink: 0;
+      font-style: normal;
+    }
+
+    .callout strong { color: var(--teal); }
+
+    .warning {
+      margin-top: 20px;
+      background: var(--crimson-pale);
+      border: 1px solid rgba(150,44,44,.20);
+      border-left: 4px solid var(--crimson);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .warning::before {
+      content: "⚠";
+      font-size: 1rem;
+      color: var(--crimson);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .warning strong { color: var(--crimson); }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 38px;
+      padding-top: 22px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: .93rem;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .footer strong { color: var(--ink); }
+
+    /* ── Mono utility ── */
+    .mono { font-family: "DM Mono", monospace; font-size: .90em; }
+
+    /* ── Tag badge ── */
+    .tag {
+      display: inline-block;
+      font-family: "DM Mono", monospace;
+      font-size: .78rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--amber-pale);
+      border: 1px solid rgba(192,120,48,.20);
+      color: var(--amber);
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 1180px) {
+      .page { grid-template-columns: 1fr; }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .stats,
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .hero, main { padding-left: 18px; padding-right: 18px; }
+
+      .stats,
+      .grid-2,
+      .grid-3,
+      .grid-4 { grid-template-columns: 1fr; }
+
+      .section-card { padding: 20px; }
+
+      .section-head .note { text-align: left; }
+
+      .hero h2 { font-size: 1.8rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      .sidebar { display: none; }
+      .page { grid-template-columns: 1fr; }
+      #scroll-progress { display: none; }
+      .btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- FIX NUEVO: Barra de progreso de scroll -->
+  <div id="scroll-progress" role="progressbar" aria-label="Progreso de lectura"></div>
+
+  <div class="page">
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar" role="complementary" aria-label="Navegación y opciones">
+      <div class="brand">
+        <div class="eyebrow">Ficha Analítica</div>
+        <h1>Customer<br>Personality<br>Analysis</h1>
+        <p>Dataset para segmentación, marketing analytics, EDA y modelado de comportamiento de clientes.</p>
+      </div>
+
+      <div class="theme-box">
+        <label for="themeSelect">Tema visual</label>
+        <div class="select-wrap">
+          <select id="themeSelect" aria-label="Seleccionar tema visual">
+            <option value="light">☀ Light</option>
+            <option value="dark">◑ Dark</option>
+            <option value="sepia">◕ Sepia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quick-box">
+        <div class="title">Acceso rápido</div>
+        <ul role="list">
+          <li><a href="#ficha">Ficha general</a></li>
+          <li><a href="#contexto">Contexto</a></li>
+          <li><a href="#variables">Variables</a></li>
+          <li><a href="#objetivo">Objetivo analítico</a></li>
+          <li><a href="#usos">Posibles usos</a></li>
+          <li><a href="#graficos">Gráficos didácticos</a></li>
+          <li><a href="#lectura">Lectura estratégica</a></li>
+        </ul>
+      </div>
+
+      <nav aria-label="Secciones del documento">
+        <div class="nav-title">Secciones</div>
+        <ul role="list">
+          <li><a href="#ficha">01. Ficha descriptiva</a></li>
+          <li><a href="#contexto">02. Contexto del dataset</a></li>
+          <li><a href="#variables">03. Variables principales</a></li>
+          <li><a href="#objetivo">04. Objetivo analítico</a></li>
+          <li><a href="#usos">05. Posibles aplicaciones</a></li>
+          <li><a href="#graficos">06. Visualizaciones sugeridas</a></li>
+          <li><a href="#lectura">07. Cómo leerlo estratégicamente</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ─── CONTENT ─── -->
+    <div class="content">
+      <header class="hero">
+        <div class="hero-inner">
+          <div class="hero-top">
+            <div class="kicker">Marketing Analytics · Segmentación · Customer Intelligence</div>
+          </div>
+
+          <h2>Customer Personality Analysis</h2>
+          <p class="lead">
+            Una ficha visual y analítica del dataset <strong>Customer Personality Analysis</strong>,
+            ampliamente utilizado para explorar perfiles de clientes, comportamiento de compra,
+            respuesta a campañas y patrones de consumo. Recurso ideal para
+            <em>Exploratory Data Analysis (EDA)</em>, segmentación, clustering,
+            modelos de propensión y diseño de estrategias de marketing basadas en datos.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary"
+               href="https://www.kaggle.com/datasets/imakash3011/customer-personality-analysis"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Ir al dataset en Kaggle (abre en pestaña nueva)">
+              ↗ Ir al dataset en Kaggle
+            </a>
+            <a class="btn secondary" href="#graficos" aria-label="Ir a la sección de gráficos integrados">
+              ↓ Ver gráficos integrados
+            </a>
+          </div>
+
+          <!-- Stat cards con counter animado -->
+          <div class="stats">
+            <div class="stat-card">
+              <div class="label">Naturaleza</div>
+              <div class="value small-text">Dataset público</div>
+              <div class="sub">No es una competencia con leaderboard.</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="label">Observaciones</div>
+              <div class="value" data-count="2240" data-suffix="">0</div>
+              <div class="sub">Clientes registrados en el archivo.</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="label">Variables</div>
+              <div class="value" data-count="29" data-suffix="">0</div>
+              <div class="sub">Demografía, gasto, campañas y canales.</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="label">Uso típico</div>
+              <div class="value small-text">EDA + Clustering</div>
+              <div class="sub">Marketing analytics y modelos de respuesta.</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div class="container">
+
+          <!-- ─── 01. FICHA ─── -->
+          <section id="ficha">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">01. Ficha general</div>
+                  <h3>Descripción general del recurso</h3>
+                </div>
+                <div class="note">
+                  Resumen del dataset, su naturaleza y su utilidad analítica.
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="info-box">
+                  <h4>¿Qué es?</h4>
+                  <p>
+                    <strong>Customer Personality Analysis</strong> es un dataset tabular que reúne
+                    información sobre clientes con el objetivo de estudiar su perfil demográfico,
+                    comportamiento de compra, gasto por categorías de productos, interacción
+                    con campañas de marketing y hábitos por canal.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>¿Para qué sirve?</h4>
+                  <p>
+                    Permite analizar segmentos de clientes, detectar patrones de consumo,
+                    estudiar la efectividad de promociones, evaluar canales de compra y construir
+                    modelos orientados a retención, cross-selling, personalización
+                    y optimización comercial.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>¿Qué lo hace interesante?</h4>
+                  <p>
+                    Combina variables de naturaleza muy útil en ciencia de datos aplicada:
+                    demografía, gasto monetario, conducta transaccional, interacción digital
+                    y aceptación de campañas. Esto lo convierte en un excelente caso para EDA,
+                    feature engineering y machine learning.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>Tipo de análisis que habilita</h4>
+                  <p>
+                    Análisis descriptivo, segmentación no supervisada, clasificación,
+                    scoring de campañas, análisis de canales, customer profiling
+                    y diseño de dashboards interactivos.
+                  </p>
+                </div>
+              </div>
+
+              <div class="callout">
+                <div>
+                  <strong>Nota conceptual:</strong>
+                  el enlace de Kaggle corresponde a un <strong>dataset</strong> público.
+                  No es una competencia formal con reglas de envío, leaderboard ni métrica oficial de evaluación.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 02. CONTEXTO ─── -->
+          <section id="contexto">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">02. Contexto</div>
+                  <h3>Contexto del dataset</h3>
+                </div>
+                <div class="note">
+                  Qué representa, qué tipo de negocio sugiere y cómo debe interpretarse.
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="mini-card">
+                  <h4>Unidad de observación</h4>
+                  <p>
+                    Cada fila representa un cliente. Sobre esa unidad se concentran
+                    atributos sociodemográficos, comportamiento histórico de compra,
+                    gasto acumulado por categorías y respuesta a campañas previas.
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Perspectiva empresarial</h4>
+                  <p>
+                    El dataset se interpreta naturalmente desde la lógica de
+                    <strong>customer analytics</strong>: permite responder quién compra,
+                    cuánto compra, por qué canal y qué tan receptivo es a acciones de marketing.
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Problemas típicos que aborda</h4>
+                  <p>
+                    Segmentación de clientes, diseño de campañas, predicción de respuesta,
+                    identificación de perfiles de alto valor, análisis de abandono indirecto
+                    y priorización comercial.
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Valor didáctico</h4>
+                  <p>
+                    Reúne variables de distinta naturaleza: categóricas, numéricas, binarias
+                    y temporales, lo que lo hace ideal para ilustrar limpieza de datos,
+                    visualización, ingeniería de variables y modelado en contextos académicos.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pill-list" style="margin-top:20px;">
+                <span class="pill">Customer Segmentation</span>
+                <span class="pill">Campaign Analysis</span>
+                <span class="pill">Channel Behavior</span>
+                <span class="pill">EDA</span>
+                <span class="pill">Clustering</span>
+                <span class="pill">Response Modeling</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 03. VARIABLES ─── -->
+          <section id="variables">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">03. Variables</div>
+                  <h3>Estructura principal de variables</h3>
+                </div>
+                <div class="note">
+                  Organización temática de las variables más relevantes para el análisis.
+                </div>
+              </div>
+
+              <!-- FIX: overflow: hidden aplicado en CSS para que el border-radius funcione -->
+              <div class="vars-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Bloque</th>
+                      <th>Variables</th>
+                      <th>Qué describen</th>
+                      <th>Utilidad analítica</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Demografía</strong> <span class="tag">6 vars</span></td>
+                      <td class="mono">Year_Birth, Education, Marital_Status, Income, Kidhome, Teenhome</td>
+                      <td>Edad aproximada, nivel educativo, estado civil, ingreso y composición del hogar.</td>
+                      <td>Perfilado de clientes, segmentación por nivel socioeconómico y estructura familiar.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Relación temporal</strong> <span class="tag">2 vars</span></td>
+                      <td class="mono">Dt_Customer, Recency</td>
+                      <td>Antigüedad como cliente y días desde la última compra.</td>
+                      <td>Análisis de actividad reciente, señales de engagement o inactividad.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Gasto por producto</strong> <span class="tag">6 vars</span></td>
+                      <td class="mono">MntWines, MntFruits, MntMeatProducts, MntFishProducts, MntSweetProducts, MntGoldProds</td>
+                      <td>Monto gastado en distintas categorías de productos.</td>
+                      <td>Construcción de cesta de consumo, segmentación por preferencias y valor monetario.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Campañas</strong> <span class="tag">6 vars</span></td>
+                      <td class="mono">AcceptedCmp1 … AcceptedCmp5, Response</td>
+                      <td>Indicadores binarios de aceptación de campañas previas y de la última campaña.</td>
+                      <td>Modelado de propensión, evaluación de efectividad comercial y targeting.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Canales</strong> <span class="tag">4 vars</span></td>
+                      <td class="mono">NumWebPurchases, NumCatalogPurchases, NumStorePurchases, NumWebVisitsMonth</td>
+                      <td>Frecuencia de compra por web, catálogo, tienda física y visitas web mensuales.</td>
+                      <td>Análisis omnicanal, comportamiento digital y optimización comercial por canal.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Promociones y fricción</strong> <span class="tag">2 vars</span></td>
+                      <td class="mono">NumDealsPurchases, Complain</td>
+                      <td>Compras bajo oferta/promoción y existencia de reclamos formales.</td>
+                      <td>Detección de sensibilidad al precio y señales de insatisfacción del cliente.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="callout">
+                <div>
+                  <strong>Lectura clave:</strong>
+                  una de las mayores fortalezas del dataset es que no solo muestra
+                  <em>quién es el cliente</em>, sino también <em>cómo compra</em>,
+                  <em>qué compra</em> y <em>cómo responde a estímulos comerciales</em>.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 04. OBJETIVO ─── -->
+          <section id="objetivo">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">04. Objetivo analítico</div>
+                  <h3>Qué se puede responder con este dataset</h3>
+                </div>
+                <div class="note">
+                  Preguntas de negocio y de ciencia de datos que este recurso habilita.
+                </div>
+              </div>
+
+              <div class="grid-3">
+                <div class="mini-card">
+                  <h4>Segmentación</h4>
+                  <p>
+                    ¿Existen perfiles de clientes claramente diferenciados según ingreso,
+                    estructura familiar, recencia, gasto y canales de compra?
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Campañas</h4>
+                  <p>
+                    ¿Qué características están asociadas con mayor probabilidad de
+                    aceptar una campaña o responder positivamente a una oferta?
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Valor del cliente</h4>
+                  <p>
+                    ¿Qué perfiles concentran mayor gasto total o muestran mayor afinidad
+                    con determinadas categorías de producto?
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Canales</h4>
+                  <p>
+                    ¿Qué grupos compran más por web, cuáles prefieren tienda física
+                    y cuáles exhiben una lógica genuinamente multicanal?
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Sensibilidad a promociones</h4>
+                  <p>
+                    ¿Qué tipos de clientes reaccionan más ante descuentos o compras
+                    activadas por deals y ofertas especiales?
+                  </p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Diseño de features</h4>
+                  <p>
+                    ¿Cómo sintetizar señales útiles como gasto total, hijos totales,
+                    edad, antigüedad y actividad reciente para modelos posteriores?
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 05. USOS ─── -->
+          <section id="usos">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">05. Aplicaciones</div>
+                  <h3>Posibles usos en análisis y modelado</h3>
+                </div>
+                <div class="note">
+                  Casos de uso típicos para dashboards, notebooks, trabajos prácticos y proyectos.
+                </div>
+              </div>
+
+              <div class="grid-4">
+                <div class="mini-card">
+                  <h4>EDA</h4>
+                  <p>Distribuciones, correlaciones, outliers, patrones de gasto y comportamiento por canal.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Clustering</h4>
+                  <p>Segmentación con K-Means, clustering jerárquico o reducción de dimensión (PCA / UMAP).</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Clasificación</h4>
+                  <p>Predicción de <span class="mono">Response</span> o aceptación de campañas mediante modelos supervisados.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Scoring comercial</h4>
+                  <p>Construcción de scores de valor, propensión y sensibilidad promocional por segmento.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Dashboards</h4>
+                  <p>Paneles interactivos para marketing, CRM, customer intelligence y priorización de acciones.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Feature engineering</h4>
+                  <p>Variables derivadas: edad estimada, gasto total, hijos totales, tenure y afinidad por categoría.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Docencia</h4>
+                  <p>Caso excelente para enseñar limpieza, tipado, visualización, encoding y análisis estratégico.</p>
+                </div>
+
+                <div class="mini-card">
+                  <h4>Negocio</h4>
+                  <p>Diseño de campañas más precisas, personalización, asignación de presupuesto y priorización.</p>
+                </div>
+              </div>
+
+              <div class="warning">
+                <div>
+                  <strong>Importante:</strong>
+                  para usarlo en un proyecto real, conviene revisar la limpieza de datos,
+                  el tratamiento de faltantes, la coherencia temporal y la definición de métricas
+                  agregadas antes de extraer conclusiones de negocio.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 06. GRÁFICOS ─── -->
+          <section id="graficos">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">06. Gráficos integrados</div>
+                  <h3>Visualizaciones sugeridas para representar la información</h3>
+                </div>
+                <div class="note">
+                  Los valores mostrados son ilustrativos y pedagógicos.
+                  Sirven para explicar qué tipo de lectura permite el dataset.
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="viz-card">
+                  <h4>Composición temática del dataset</h4>
+                  <p>
+                    Agrupación conceptual de las variables: demografía, gasto,
+                    campañas, canales y actividad/relación.
+                  </p>
+                  <canvas id="chartBlocks" aria-label="Gráfico de composición del dataset"></canvas>
+                </div>
+
+                <div class="viz-card">
+                  <h4>Ejemplo didáctico de gasto por categoría</h4>
+                  <p>
+                    Comparación de categorías de gasto y detección del peso relativo
+                    de cada una en el consumo total del cliente.
+                  </p>
+                  <canvas id="chartSpend" aria-label="Gráfico de gasto por categoría"></canvas>
+                </div>
+
+                <div class="viz-card tall">
+                  <h4>Canales de compra: lectura comparativa</h4>
+                  <p>
+                    Intensidad relativa de compra por canal y el rol de las visitas web
+                    dentro del comportamiento digital del cliente.
+                  </p>
+                  <canvas id="chartChannels" aria-label="Gráfico radar de canales de compra"></canvas>
+                </div>
+
+                <div class="viz-card tall">
+                  <h4>Respuesta a campañas: esquema analítico</h4>
+                  <p>
+                    Aceptación relativa de campañas previas frente a la respuesta final.
+                    No representa resultados oficiales del archivo.
+                  </p>
+                  <canvas id="chartCampaigns" aria-label="Gráfico de respuesta a campañas"></canvas>
+                </div>
+              </div>
+
+              <!-- NUEVO: 5° gráfico — Relevancia relativa de bloques de variables -->
+              <div class="viz-card full" style="margin-top:18px;">
+                <h4>Relevancia relativa de bloques de variables para modelado</h4>
+                <p>
+                  Estimación pedagógica de qué grupos de variables suelen aportar mayor poder explicativo
+                  en modelos de segmentación y respuesta a campañas.
+                </p>
+                <canvas id="chartImportance" aria-label="Gráfico de relevancia de bloques de variables"></canvas>
+              </div>
+
+              <div class="callout">
+                <div>
+                  <strong>Uso recomendado:</strong>
+                  estos gráficos pueden funcionar como primera capa narrativa en un dashboard.
+                  Luego, sobre el dataset real, conviene reemplazarlos por métricas calculadas
+                  directamente desde Python, R o JavaScript.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── 07. LECTURA ESTRATÉGICA ─── -->
+          <section id="lectura">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <div class="overline">07. Lectura estratégica</div>
+                  <h3>Cómo interpretar este dataset con mirada de negocio</h3>
+                </div>
+                <div class="note">
+                  No se trata solo de describir clientes: se trata de convertir datos en decisiones.
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="info-box">
+                  <h4>De datos a segmentos</h4>
+                  <p>
+                    La combinación de ingreso, estructura familiar, recencia y gasto permite
+                    pasar de una lectura descriptiva a una lógica de segmentación accionable.
+                    Eso habilita distinguir clientes premium, sensibles a promociones,
+                    compradores frecuentes, digitales o inactivos.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>De segmentos a campañas</h4>
+                  <p>
+                    Una vez identificados los perfiles, el dataset permite pensar estrategias
+                    comerciales diferenciadas: campañas por canal, promociones por categoría,
+                    remarketing para clientes con alta visita web y baja conversión,
+                    o retención para perfiles con baja recencia.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>De campañas a modelos</h4>
+                  <p>
+                    Las variables binarias de aceptación son útiles para construir modelos
+                    supervisados de propensión. El objetivo no es solo predecir, sino
+                    priorizar acciones sobre clientes con mayor retorno esperado.
+                  </p>
+                </div>
+
+                <div class="info-box">
+                  <h4>De modelos a decisión</h4>
+                  <p>
+                    El valor real surge cuando el análisis se integra a una hoja de ruta:
+                    a quién contactar, por qué canal, con qué oferta, en qué momento
+                    y con qué intensidad comercial.
+                  </p>
+                </div>
+              </div>
+
+              <div class="footer">
+                Material elaborado para presentación didáctica sobre el dataset
+                <strong>Customer Personality Analysis</strong>.
+                <br>
+                Elaborado por el profesor <strong>Sergio Gevatschnaider</strong>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div><!-- /.content -->
+  </div><!-- /.page -->
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       TEMA — Persistencia en localStorage
+    ═══════════════════════════════════════════════════════ */
+    const root = document.documentElement;
+    const themeSelect = document.getElementById("themeSelect");
+    let chartsInitialized = false;
+
+    function setTheme(theme) {
+      root.classList.remove("dark", "sepia");
+      if (theme === "dark")  root.classList.add("dark");
+      if (theme === "sepia") root.classList.add("sepia");
+      localStorage.setItem("customer-personality-theme", theme);
+      // FIX: Solo refrescar si ya fueron creados; evita doble creación al cargar
+      if (chartsInitialized) refreshCharts();
+    }
+
+    const savedTheme = localStorage.getItem("customer-personality-theme") || "light";
+    themeSelect.value = savedTheme;
+    setTheme(savedTheme);
+
+    themeSelect.addEventListener("change", (e) => setTheme(e.target.value));
+
+    /* ═══════════════════════════════════════════════════════
+       BARRA DE PROGRESO DE SCROLL
+    ═══════════════════════════════════════════════════════ */
+    const progressBar = document.getElementById("scroll-progress");
+
+    window.addEventListener("scroll", () => {
+      const scrollTop    = document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      progressBar.style.width = pct + "%";
+    }, { passive: true });
+
+    /* ═══════════════════════════════════════════════════════
+       SCROLL SPY — Links activos en nav
+    ═══════════════════════════════════════════════════════ */
+    const sections  = document.querySelectorAll("section[id]");
+    const allLinks  = document.querySelectorAll(".sidebar nav a, .quick-box a");
+
+    function activateLink(id) {
+      allLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        link.classList.toggle("active", href === "#" + id);
+      });
+    }
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) activateLink(entry.target.id);
+      });
+    }, { rootMargin: "-25% 0px -65% 0px" });
+
+    sections.forEach(s => sectionObserver.observe(s));
+
+    /* ═══════════════════════════════════════════════════════
+       CONTADORES ANIMADOS en stat cards
+    ═══════════════════════════════════════════════════════ */
+    function animateCounter(el, target, suffix) {
+      const duration = 1400;
+      const start    = performance.now();
+
+      function update(now) {
+        const elapsed  = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased    = 1 - Math.pow(1 - progress, 4);
+        const current  = Math.round(eased * target);
+        el.textContent = current.toLocaleString("es-AR") + (suffix || "");
+        if (progress < 1) requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Observar las stat cards para disparar el contador al ser visibles
+    const counterObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el     = entry.target;
+          const target = parseInt(el.dataset.count, 10);
+          const suffix = el.dataset.suffix || "";
+          if (!isNaN(target)) animateCounter(el, target, suffix);
+          counterObs.unobserve(el);
+        }
+      });
+    }, { threshold: .5 });
+
+    document.querySelectorAll("[data-count]").forEach(el => counterObs.observe(el));
+
+    /* ═══════════════════════════════════════════════════════
+       HELPERS CSS VARS
+    ═══════════════════════════════════════════════════════ */
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function gridColor()  { return cssVar("--rule"); }
+    function tickColor()  { return cssVar("--muted"); }
+    function cardBg()     { return cssVar("--card-bg"); }
+
+    /* ═══════════════════════════════════════════════════════
+       CHART.JS — Configuración global
+    ═══════════════════════════════════════════════════════ */
+    Chart.defaults.font.family = "DM Mono";
+    Chart.defaults.animation.duration = 900;
+    Chart.defaults.animation.easing   = "easeOutQuart";
+
+    let charts = [];
+
+    function destroyCharts() {
+      charts.forEach(ch => { try { ch.destroy(); } catch(_) {} });
+      charts = [];
+    }
+
+    function palette() {
+      return {
+        amber:      cssVar("--amber"),
+        amberLight: cssVar("--amber-light"),
+        gold:       cssVar("--gold"),
+        teal:       cssVar("--teal"),
+        tealLight:  cssVar("--teal-light"),
+        crimson:    cssVar("--crimson"),
+        slate:      cssVar("--slate"),
+        indigo:     cssVar("--indigo"),
+      };
+    }
+
+    function baseTooltip() {
+      return {
+        backgroundColor: "rgba(12,11,9,0.92)",
+        titleColor:       "#f0ebe0",
+        bodyColor:        "#b8b0a4",
+        titleFont:  { family: "DM Mono", size: 12 },
+        bodyFont:   { family: "Source Serif 4", size: 13 },
+        padding:    12,
+        cornerRadius: 10,
+        borderColor: "rgba(192,120,48,.25)",
+        borderWidth: 1,
+      };
+    }
+
+    function baseLegend() {
+      return {
+        labels: {
+          color: tickColor(),
+          font: { family: "DM Mono", size: 11 },
+          padding: 16,
+          usePointStyle: true,
+          pointStyleWidth: 10,
+        }
+      };
+    }
+
+    function baseScales() {
+      return {
+        x: {
+          ticks: { color: tickColor(), font: { family: "DM Mono", size: 11 } },
+          grid:  { color: gridColor() },
+        },
+        y: {
+          ticks: { color: tickColor(), font: { family: "DM Mono", size: 11 } },
+          grid:  { color: gridColor() },
+        }
+      };
+    }
+
+    /* ── Gradiente lineal helper ── */
+    function makeGradient(canvas, color, alpha0 = 0.38, alpha1 = 0.04, vertical = true) {
+      const ctx = canvas.getContext("2d");
+      const grad = vertical
+        ? ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 300)
+        : ctx.createLinearGradient(0, 0, canvas.offsetWidth || 400, 0);
+
+      // Color: hex → rgb
+      const hex = color.replace("#", "");
+      const r   = parseInt(hex.slice(0,2), 16);
+      const g   = parseInt(hex.slice(2,4), 16);
+      const b   = parseInt(hex.slice(4,6), 16);
+
+      grad.addColorStop(0, `rgba(${r},${g},${b},${alpha0})`);
+      grad.addColorStop(1, `rgba(${r},${g},${b},${alpha1})`);
+      return grad;
+    }
+
+    function createCharts() {
+      const p = palette();
+
+      /* ────────────────────────────────────
+         1. DOUGHNUT — Composición temática
+      ──────────────────────────────────── */
+      charts.push(
+        new Chart(document.getElementById("chartBlocks"), {
+          type: "doughnut",
+          data: {
+            labels: ["Demografía", "Gasto", "Campañas", "Canales", "Actividad / Relación"],
+            datasets: [{
+              data: [6, 6, 6, 4, 3],
+              backgroundColor: [p.amber, p.teal, p.crimson, p.slate, p.gold],
+              hoverBackgroundColor: [p.amberLight, p.tealLight, "#c04040", "#6a7a8e", "#d0a030"],
+              borderWidth: 2,
+              borderColor: cardBg(),
+              hoverOffset: 8,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+              legend: { position: "bottom", ...baseLegend() },
+              tooltip: { ...baseTooltip(), callbacks: {
+                label: ctx => ` ${ctx.label}: ${ctx.parsed} variables`
+              }}
+            }
+          }
+        })
+      );
+
+      /* ────────────────────────────────────
+         2. BAR — Gasto por categoría (con gradiente)
+      ──────────────────────────────────── */
+      const barCanvas  = document.getElementById("chartSpend");
+      const barColors  = [p.amber, p.teal, p.crimson, p.slate, p.gold, p.amberLight];
+
+      charts.push(
+        new Chart(barCanvas, {
+          type: "bar",
+          data: {
+            labels: ["Wines", "Fruits", "Meat", "Fish", "Sweets", "Gold"],
+            datasets: [{
+              label: "Peso relativo ilustrativo",
+              data: [92, 34, 81, 46, 28, 52],
+              backgroundColor: barColors,
+              hoverBackgroundColor: barColors.map(c => c + "cc"),
+              borderRadius: 10,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { ...baseTooltip(), callbacks: {
+                label: ctx => ` Peso relativo: ${ctx.parsed.y}`
+              }}
+            },
+            scales: {
+              ...baseScales(),
+              y: { ...baseScales().y, beginAtZero: true }
+            }
+          }
+        })
+      );
+
+      /* ────────────────────────────────────
+         3. RADAR — Canales de compra
+      ──────────────────────────────────── */
+      charts.push(
+        new Chart(document.getElementById("chartChannels"), {
+          type: "radar",
+          data: {
+            labels: ["Web Purchases", "Catalog Purchases", "Store Purchases", "Web Visits/Month", "Deals Purchases"],
+            datasets: [
+              {
+                label: "Cliente digital",
+                data: [82, 48, 36, 88, 41],
+                borderColor:            p.teal,
+                backgroundColor:        `rgba(34,110,98,0.18)`,
+                pointBackgroundColor:   p.teal,
+                pointBorderColor:       cardBg(),
+                pointRadius:            5,
+                pointHoverRadius:       7,
+                borderWidth:            2,
+              },
+              {
+                label: "Cliente tradicional",
+                data: [34, 30, 86, 26, 44],
+                borderColor:            p.amber,
+                backgroundColor:        `rgba(192,120,48,0.14)`,
+                pointBackgroundColor:   p.amber,
+                pointBorderColor:       cardBg(),
+                pointRadius:            5,
+                pointHoverRadius:       7,
+                borderWidth:            2,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom", ...baseLegend() },
+              tooltip: baseTooltip(),
+            },
+            scales: {
+              r: {
+                min: 0,
+                max: 100,
+                angleLines: { color: gridColor() },
+                grid:        { color: gridColor() },
+                pointLabels: { color: tickColor(), font: { family: "DM Mono", size: 10 } },
+                ticks: {
+                  color:           tickColor(),
+                  backdropColor:   "transparent",
+                  font:            { family: "DM Mono", size: 9 },
+                  stepSize:        25,
+                }
+              }
+            }
+          }
+        })
+      );
+
+      /* ────────────────────────────────────
+         4. LINE — Respuesta a campañas (con gradiente)
+      ──────────────────────────────────── */
+      const lineCanvas = document.getElementById("chartCampaigns");
+      const lineGrad   = makeGradient(lineCanvas, p.crimson.replace(" ", ""), 0.30, 0.02);
+
+      charts.push(
+        new Chart(lineCanvas, {
+          type: "line",
+          data: {
+            labels: ["Cmp 1", "Cmp 2", "Cmp 3", "Cmp 4", "Cmp 5", "Última"],
+            datasets: [{
+              label: "Tasa relativa de aceptación",
+              data: [12, 18, 10, 21, 16, 24],
+              borderColor:          p.crimson,
+              backgroundColor:      lineGrad,
+              fill:                 true,
+              tension:              0.40,
+              pointRadius:          5,
+              pointHoverRadius:     8,
+              pointBackgroundColor: p.crimson,
+              pointBorderColor:     cardBg(),
+              pointBorderWidth:     2,
+              borderWidth:          2.5,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { ...baseTooltip(), callbacks: {
+                label: ctx => ` Aceptación relativa: ${ctx.parsed.y}%`
+              }}
+            },
+            scales: {
+              ...baseScales(),
+              y: { ...baseScales().y, beginAtZero: true, suggestedMax: 30 }
+            }
+          }
+        })
+      );
+
+      /* ────────────────────────────────────
+         5. HORIZONTAL BAR — Relevancia por bloque
+         NUEVO: gráfico adicional de importancia de features
+      ──────────────────────────────────── */
+      const importCanvas = document.getElementById("chartImportance");
+
+      charts.push(
+        new Chart(importCanvas, {
+          type: "bar",
+          data: {
+            labels: ["Gasto por producto", "Demografía / Ingreso", "Campañas previas", "Canales de compra", "Actividad / Recencia"],
+            datasets: [{
+              label: "Relevancia estimada (escala pedagógica)",
+              data: [87, 78, 65, 58, 44],
+              backgroundColor: [p.teal, p.amber, p.crimson, p.slate, p.gold],
+              hoverBackgroundColor: [p.tealLight, p.amberLight, "#c04040", "#6a7a8e", "#c8a030"],
+              borderRadius: 10,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            indexAxis: "y",           // barras horizontales
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { ...baseTooltip(), callbacks: {
+                label: ctx => ` Relevancia estimada: ${ctx.parsed.x}/100`
+              }}
+            },
+            scales: {
+              x: {
+                ...baseScales().x,
+                beginAtZero: true,
+                max: 100,
+              },
+              y: {
+                ...baseScales().y,
+                grid: { display: false },
+              }
+            }
+          }
+        })
+      );
+
+      chartsInitialized = true;
+    }
+
+    function refreshCharts() {
+      destroyCharts();
+      createCharts();
+    }
+
+    /* FIX CRÍTICO: Solo se llama UNA VEZ al cargar.
+       Antes llamaba setTheme → refreshCharts → createCharts
+       Y luego createCharts() otra vez al final → doble instancia en cada canvas */
+    createCharts();
+  </script>
+</body>
+</html>
