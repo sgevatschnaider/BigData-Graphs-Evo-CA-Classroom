@@ -152,7 +152,7 @@ Abre los cuadernos en `notebooks/` para la ruta guiada.
 
 ---
 
-## 📝 Fundamentos de la Teoría de Grafos
+##📝 Fundamentos de la Teoría de Grafos
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
