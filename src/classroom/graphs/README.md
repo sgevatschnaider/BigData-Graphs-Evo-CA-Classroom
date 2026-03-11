@@ -98,11 +98,11 @@ graphs/
 Al completar esta sección podrás:
 
 - Modelar problemas como grafos (no dirigidos, dirigidos, ponderados, multigrafos).
-- Elegir **representaciones** adecuadas (lista de adyacencia, matriz, lista de aristas).
-- Analizar **complejidad** y aplicar algoritmos (BFS/DFS, caminos mínimos, MST, flujo, emparejamientos).
-- Medir redes con **métricas** estructurales y de **centralidad**.
-- Usar **herramientas** prácticas para cargar, procesar y visualizar grafos.
-- Diseñar **experimentos reproducibles** con notebooks.
+- Elegir representaciones adecuadas (lista de adyacencia, matriz, lista de aristas).
+- Analizar complejidad y aplicar algoritmos (BFS/DFS, caminos mínimos, MST, flujo, emparejamientos).
+- Medir redes con métricas estructurales y de centralidad.
+- Usar herramientas prácticas para cargar, procesar y visualizar grafos.
+- Diseñar experimentos reproducibles con notebooks.
 
 ---
 
@@ -110,17 +110,23 @@ Al completar esta sección podrás:
 
 Requisitos sugeridos:
 
-- Python ≥ 3.10
+- Python >= 3.10
 - Paquetes: `networkx`, `numpy`, `pandas`, `matplotlib`, `scipy`, `jupyter`
-- *(opcionales)*: `pyvis` (visualización web), `python-igraph` (escala), `pygraphviz` (layouts)
+- Opcionales: `pyvis` (visualización web), `python-igraph` (escala), `pygraphviz` (layouts)
 
 ```bash
 # Desde Graph/
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m venv .venv
+
+# Activación en Linux/macOS
+source .venv/bin/activate
+
+# Activación en Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+
 pip install -U pip
 pip install networkx numpy pandas matplotlib scipy jupyter pyvis
 jupyter lab  # o jupyter notebook
-````
 
 Abre los cuadernos en `notebooks/` para la ruta guiada.
 
