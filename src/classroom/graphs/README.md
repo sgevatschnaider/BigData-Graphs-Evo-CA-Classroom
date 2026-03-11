@@ -127,10 +127,10 @@ source .venv/bin/activate
 pip install -U pip
 pip install networkx numpy pandas matplotlib scipy jupyter pyvis
 jupyter lab  # o jupyter notebook
-
+```
 Abre los cuadernos en `notebooks/` para la ruta guiada.
 
----
+
 
 ## Tabla de contenidos
 
@@ -150,7 +150,7 @@ Abre los cuadernos en `notebooks/` para la ruta guiada.
 * [Apéndice A — Pseudocódigo docente](#apéndice-a--pseudocódigo-docente)
 * [Apéndice B — Plantilla mínima de notebook](#apéndice-b--plantilla-mínima-de-notebook)
 
----
+
 
 ##📝 Fundamentos de la Teoría de Grafos
 
