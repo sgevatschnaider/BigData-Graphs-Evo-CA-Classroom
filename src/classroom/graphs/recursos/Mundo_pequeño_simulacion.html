@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mundo Pequeño — Watts–Strogatz</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root {
+  --bg:       #05080f;
+  --bg2:      #090e1c;
+  --bg3:      #0d1628;
+  --bg4:      #111e36;
+  --cyan:     #00d4ff;
+  --cyan2:    #0099cc;
+  --orange:   #ff6b2b;
+  --green:    #2dff8e;
+  --red:      #ff4466;
+  --text:     #c0d4f0;
+  --text-dim: #5a7090;
+  --border:   rgba(0,212,255,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 22px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+header .sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+.mode-badge {
+  margin-left: auto;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 3px;
+  border: 1px solid;
+  transition: all 0.4s;
+}
+.mode-badge.regular  { color:#5098f8; border-color:rgba(80,152,248,0.4); background:rgba(80,152,248,0.06); }
+.mode-badge.sw       { color:var(--cyan); border-color:rgba(0,212,255,0.5); background:rgba(0,212,255,0.07); box-shadow:0 0 12px rgba(0,212,255,0.12); }
+.mode-badge.random   { color:var(--text-dim); border-color:rgba(90,112,144,0.35); background:rgba(90,112,144,0.05); }
+
+/* ── LAYOUT ── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  flex-shrink: 0;
+  width: 200px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  gap: 14px;
+  overflow-y: auto;
+}
+.ctrl-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+.p-display {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 30px;
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(0,212,255,0.4);
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--bg4);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--cyan);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0,212,255,0.7);
+  transition: transform 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:active { transform: scale(1.3); }
+
+.num-row { display: flex; gap: 8px; }
+.num-group { flex: 1; }
+.num-group label {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+input[type=number] {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.18);
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  outline: none;
+  -moz-appearance: textfield;
+}
+input[type=number]:focus { border-color: var(--cyan); box-shadow: 0 0 6px rgba(0,212,255,0.2); }
+
+.btn {
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 3px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-c   { background:var(--bg3); border:1px solid rgba(0,212,255,0.4); color:var(--cyan); }
+.btn-c:hover { background:rgba(0,212,255,0.08); box-shadow:0 0 8px rgba(0,212,255,0.2); }
+.btn-o   { background:var(--bg3); border:1px solid rgba(255,107,43,0.5); color:var(--orange); }
+.btn-o:hover { background:rgba(255,107,43,0.08); box-shadow:0 0 8px rgba(255,107,43,0.2); }
+.btn-g   { background:var(--bg3); border:1px solid rgba(45,255,142,0.4); color:var(--green); }
+.btn-g:hover, .btn-g.active { background:rgba(45,255,142,0.07); box-shadow:0 0 8px rgba(45,255,142,0.2); }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+
+.legend { display: flex; flex-direction: column; gap: 7px; }
+.leg-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); }
+.leg-line { width: 22px; height: 2px; flex-shrink: 0; border-radius: 1px; }
+.leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── CENTER GRAPH ── */
+.center {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+#graph-svg { width: 100%; height: 100%; display: block; }
+
+.path-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  padding: 5px 14px;
+  border: 1px solid rgba(45,255,142,0.3);
+  border-radius: 3px;
+  background: rgba(45,255,142,0.04);
+  pointer-events: none;
+  white-space: nowrap;
+  display: none;
+}
+.path-hint.visible { display: block; }
+
+/* ── RIGHT PANEL ── */
+.right {
+  flex-shrink: 0;
+  width: 190px;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 13px;
+  gap: 10px;
+  overflow-y: auto;
+}
+.stat-block {
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.1);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+.stat-block .sl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.stat-block .sv {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 28px;
+  line-height: 1;
+  transition: color 0.4s;
+}
+.stat-block .ss {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.bar-wrap { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.bar-c { background: var(--cyan); }
+.bar-l { background: var(--orange); }
+
+.ratio-row { display: flex; gap: 8px; }
+.ratio-cell {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.08);
+  border-radius: 4px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.ratio-cell .rl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.ratio-cell .rv {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: var(--text);
+  margin-top: 3px;
+  transition: color 0.3s;
+}
+
+.sw-card {
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+}
+.sw-card .swl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.sw-card .swv {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 36px;
+  line-height: 1;
+  transition: color 0.4s, text-shadow 0.4s;
+}
+.sw-card .swt {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  margin-top: 4px;
+  transition: color 0.3s;
+}
+.sw-formula {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg3);
+  line-height: 1.7;
+}
+.sw-formula span { color: var(--cyan); }
+.desc-box {
+  background: var(--bg3);
+  border: 1px solid rgba(0,212,255,0.07);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  margin-top: auto;
+}
+.desc-box b { color: var(--cyan); font-weight: 400; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mundo Pequeño</h1>
+  <span class="sub">Modelo de Watts–Strogatz · Interactivo</span>
+  <div class="mode-badge sw" id="mode-badge">✦ MUNDO PEQUEÑO</div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div>
+      <div class="ctrl-label">Prob. de reconexión (p)</div>
+      <div class="p-display" id="p-disp">0.10</div>
+      <input type="range" id="p-slider" min="0" max="1" step="0.005" value="0.1">
+    </div>
+
+    <div class="num-row">
+      <div class="num-group">
+        <label>Nodos (n)</label>
+        <input type="number" id="n-in" value="24" min="8" max="50">
+      </div>
+      <div class="num-group">
+        <label>Grado (k)</label>
+        <input type="number" id="k-in" value="4" min="2" max="10">
+      </div>
+    </div>
+
+    <button class="btn btn-c" id="btn-regen">↺  Regenerar</button>
+    <button class="btn btn-o" id="btn-anim">▶  Animar reconexión</button>
+    <button class="btn btn-g" id="btn-path">◉  Buscar ruta mínima</button>
+
+    <hr class="divider">
+
+    <div class="legend">
+      <div class="leg-item">
+        <div class="leg-line" style="background:rgba(70,130,200,0.7)"></div>
+        Arista local
+      </div>
+      <div class="leg-item">
+        <div class="leg-line" style="background:#ff6b2b"></div>
+        Atajo (reconexión)
+      </div>
+      <div class="leg-item">
+        <div class="leg-line" style="background:#2dff8e"></div>
+        Ruta mínima
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="border:2px solid #2a6090;background:#0d1628"></div>
+        Nodo
+      </div>
+      <div class="leg-item">
+        <div class="leg-dot" style="border:2px solid #00d4ff;background:rgba(0,212,255,0.15)"></div>
+        Seleccionado / vecino
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER GRAPH -->
+  <div class="center" id="graph-wrap">
+    <svg id="graph-svg"></svg>
+    <div class="path-hint" id="path-hint">Haz clic en dos nodos para ver la ruta más corta</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+
+    <div class="stat-block">
+      <div class="sl">Clustering promedio</div>
+      <div class="sv" id="c-val" style="color:#00d4ff">—</div>
+      <div class="ss" id="c-rand-lbl">C_rand ≈ —</div>
+      <div class="bar-wrap"><div class="bar-fill bar-c" id="c-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="stat-block">
+      <div class="sl">Long. media de camino</div>
+      <div class="sv" id="l-val" style="color:#ff6b2b">—</div>
+      <div class="ss" id="l-rand-lbl">L_rand ≈ —</div>
+      <div class="bar-wrap"><div class="bar-fill bar-l" id="l-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="ratio-row">
+      <div class="ratio-cell">
+        <div class="rl">C / C_rand</div>
+        <div class="rv" id="c-ratio">—</div>
+      </div>
+      <div class="ratio-cell">
+        <div class="rl">L / L_rand</div>
+        <div class="rv" id="l-ratio">—</div>
+      </div>
+    </div>
+
+    <div class="sw-card">
+      <div class="swl">Índice Small-World</div>
+      <div class="swv" id="sw-val" style="color:#00d4ff">—</div>
+      <div class="swt" id="sw-verdict" style="color:#5a7090">calculando…</div>
+    </div>
+
+    <div class="sw-formula">
+      <span>S</span> = (C / C_rand) / (L / L_rand)<br>
+      <span>S &gt; 1</span> → evidencia mundo pequeño
+    </div>
+
+    <div class="desc-box" id="desc-box">
+      Mueve el slider de <b>p</b> para transformar la red.<br>Con <b>p ≈ 0.05–0.2</b> aparece el fenómeno de <b>mundo pequeño</b>.
+    </div>
+    
+    <!-- FIRMA / ATRIBUCIÓN AL FINAL -->
+    <div style="text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 4px; line-height: 1.3;">
+      Material elaborado por el profesor<br>Sergio Gevatschnaider
+    </div>
+
+  </div>
+</div>
+
+<div class="path-hint" id="path-hint-bottom"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────
+const S = {
+  n: 24, k: 4, p: 0.1,
+  seed: 42,
+  graph: null,
+  pathMode: false,
+  pendingNode: -1,    // first node clicked in path mode
+  hoveredNode: -1,
+  animating: false,
+  animStop: false
+};
+
+// ─────────────────────────────────────────────────────────────
+//  SEEDED RANDOM
+// ─────────────────────────────────────────────────────────────
+function makeRng(seed) {
+  let s = seed;
+  return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GRAPH CONSTRUCTION — Watts-Strogatz
+// ─────────────────────────────────────────────────────────────
+function buildGraph(n, k, p, seed) {
+  const rand = makeRng(seed);
+  const adj  = Array.from({length: n}, () => new Set());
+  const edges =[];
+
+  // 1. Ring lattice
+  for (let i = 0; i < n; i++) {
+    for (let j = 1; j <= Math.floor(k / 2); j++) {
+      const v = (i + j) % n;
+      if (!adj[i].has(v)) {
+        adj[i].add(v); adj[v].add(i);
+        edges.push({ u: i, v, shortcut: false });
+      }
+    }
+  }
+
+  // 2. Rewire with probability p
+  for (let e = 0; e < edges.length; e++) {
+    if (rand() < p) {
+      const { u, v: vOld } = edges[e];
+      const candidates =[];
+      for (let r = 0; r < n; r++)
+        if (r !== u && !adj[u].has(r)) candidates.push(r);
+      if (candidates.length > 0) {
+        const r = candidates[Math.floor(rand() * candidates.length)];
+        adj[u].delete(vOld); adj[vOld].delete(u);
+        adj[u].add(r);       adj[r].add(u);
+        edges[e] = { u, v: r, shortcut: true };
+      }
+    }
+  }
+  return { adj, edges, n, k, p };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ALGORITHMS
+// ─────────────────────────────────────────────────────────────
+function bfsDists(adj, n, src) {
+  const d = new Int32Array(n).fill(-1);
+  d[src] = 0;
+  const q = [src]; let h = 0;
+  while (h < q.length) {
+    const u = q[h++];
+    for (const v of adj[u]) if (d[v] < 0) { d[v] = d[u] + 1; q.push(v); }
+  }
+  return d;
+}
+
+function bfsShortestPath(adj, n, src, tgt) {
+  const prev = new Int32Array(n).fill(-1);
+  const vis  = new Uint8Array(n);
+  vis[src] = 1;
+  const q = [src]; let h = 0;
+  while (h < q.length) {
+    const u = q[h++];
+    if (u === tgt) break;
+    for (const v of adj[u]) if (!vis[v]) { vis[v] = 1; prev[v] = u; q.push(v); }
+  }
+  if (!vis[tgt]) return null;
+  const path =[]; let cur = tgt;
+  while (cur !== -1) { path.unshift(cur); cur = prev[cur]; }
+  return path;
+}
+
+function avgPathLength(adj, n) {
+  let tot = 0, cnt = 0;
+  for (let s = 0; s < n; s++) {
+    const d = bfsDists(adj, n, s);
+    for (let t = s + 1; t < n; t++) if (d[t] > 0) { tot += d[t]; cnt++; }
+  }
+  return cnt > 0 ? tot / cnt : 0;
+}
+
+function avgClustering(adj, n) {
+  let tot = 0;
+  for (let i = 0; i < n; i++) {
+    const nb = [...adj[i]], ki = nb.length;
+    if (ki < 2) continue;
+    let tri = 0;
+    for (let a = 0; a < ki; a++)
+      for (let b = a + 1; b < ki; b++)
+        if (adj[nb[a]].has(nb[b])) tri++;
+    tot += (2 * tri) / (ki * (ki - 1));
+  }
+  return tot / n;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GEOMETRY
+// ─────────────────────────────────────────────────────────────
+let W = 0, H = 0;
+
+function nodePos(n) {
+  const R = Math.min(W, H) * 0.37;
+  const cx = W / 2, cy = H / 2;
+  return Array.from({length: n}, (_, i) => ({
+    x: cx + R * Math.cos(2 * Math.PI * i / n - Math.PI / 2),
+    y: cy + R * Math.sin(2 * Math.PI * i / n - Math.PI / 2)
+  }));
+}
+
+function edgeD(u, v, pos, shortcut) {
+  const cx = W / 2, cy = H / 2;
+  const {x:x1,y:y1} = pos[u], {x:x2,y:y2} = pos[v];
+  if (shortcut) return `M${x1} ${y1}L${x2} ${y2}`;
+  // Regular edges: curve outward along ring
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  const dx = mx - cx, dy = my - cy;
+  const d  = Math.sqrt(dx*dx+dy*dy) || 1;
+  const R  = Math.min(W,H)*0.37;
+  const push = R * 0.20;
+  const cpx = cx + (dx/d)*(R+push);
+  const cpy = cy + (dy/d)*(R+push);
+  return `M${x1} ${y1}Q${cpx} ${cpy} ${x2} ${y2}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────────────────────
+const svg = d3.select('#graph-svg');
+
+function render(graph, pathArr, hovNode, selNode) {
+  svg.selectAll('*').remove();
+  if (!graph) return;
+
+  const {adj, edges, n} = graph;
+  const pos = nodePos(n);
+
+  // — Defs / filters —
+  const defs = svg.append('defs');
+  function mkGlow(id, dev, color) {
+    const f = defs.append('filter').attr('id', id).attr('x','-50%').attr('y','-50%').attr('width','200%').attr('height','200%');
+    f.append('feGaussianBlur').attr('stdDeviation', dev).attr('result','blur');
+    const cm = f.append('feColorMatrix').attr('type','matrix').attr('in','blur')
+      .attr('result','glow')
+      .attr('values', color === 'g' ? '0 0 0 0 0.18  0 0 0 0 1  0 0 0 0 0.55  0 0 0 0.8 0'
+                    : color === 'o' ? '0 0 0 0 1  0 0 0 0 0.42  0 0 0 0 0.17  0 0 0 0.7 0'
+                                    : '0 0 0 0 0  0 0 0 0 0.83  0 0 0 0 1  0 0 0 0.7 0');
+    const m = f.append('feMerge');
+    m.append('feMergeNode').attr('in','glow');
+    m.append('feMergeNode').attr('in','SourceGraphic');
+  }
+  mkGlow('glow-c','3','c');
+  mkGlow('glow-o','4','o');
+  mkGlow('glow-g','5','g');
+
+  // — Build helper sets —
+  const pathSet = new Set();
+  if (pathArr && pathArr.length >= 2)
+    for (let i = 0; i < pathArr.length-1; i++) {
+      const a = pathArr[i], b = pathArr[i+1];
+      pathSet.add(`${Math.min(a,b)}-${Math.max(a,b)}`);
+    }
+
+  const nbSet = new Set();
+  if (hovNode >= 0) {
+    nbSet.add(hovNode);
+    for (const v of adj[hovNode]) nbSet.add(v);
+  }
+  if (selNode >= 0) {
+    nbSet.add(selNode);
+    for (const v of adj[selNode]) nbSet.add(v);
+  }
+  const anyHov = hovNode >= 0 || selNode >= 0;
+
+  // — EDGES —
+  const eg = svg.append('g');
+
+  function drawEdges(filter, cls, strokeFn, widthFn, filterFn) {
+    eg.selectAll(null)
+      .data(edges.filter(filter))
+      .join('path')
+      .attr('class', cls)
+      .attr('d', e => edgeD(e.u, e.v, pos, e.shortcut))
+      .attr('fill', 'none')
+      .attr('stroke', strokeFn)
+      .attr('stroke-width', widthFn)
+      .attr('filter', filterFn)
+      .attr('stroke-linecap', 'round');
+  }
+
+  // Regular
+  drawEdges(
+    e => !e.shortcut,
+    'er',
+    e => {
+      const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`;
+      if (pathSet.has(k)) return '#2dff8e';
+      if (anyHov) return (nbSet.has(e.u)&&nbSet.has(e.v)) ? 'rgba(0,212,255,0.7)' : 'rgba(70,110,170,0.12)';
+      return 'rgba(70,130,200,0.42)';
+    },
+    e => { const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`; return pathSet.has(k)?3:1.5; },
+    e => { const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`; return pathSet.has(k)?'url(#glow-g)':'none'; }
+  );
+
+  // Shortcuts
+  drawEdges(
+    e => e.shortcut,
+    'es',
+    e => {
+      const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`;
+      if (pathSet.has(k)) return '#2dff8e';
+      if (anyHov) return (nbSet.has(e.u)&&nbSet.has(e.v)) ? 'rgba(0,212,255,0.9)' : 'rgba(255,107,43,0.15)';
+      return '#ff6b2b';
+    },
+    e => { const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`; return pathSet.has(k)?3:2; },
+    e => { const k = `${Math.min(e.u,e.v)}-${Math.max(e.u,e.v)}`; return pathSet.has(k)?'url(#glow-g)':'url(#glow-o)'; }
+  );
+
+  // — NODES —
+  const ng = svg.append('g');
+  const pathSet2 = new Set(pathArr ||[]);
+
+  ng.selectAll(null)
+    .data(d3.range(n))
+    .join('g')
+    .attr('transform', i => `translate(${pos[i].x},${pos[i].y})`)
+    .attr('cursor', 'pointer')
+    .each(function(i) {
+      const g = d3.select(this);
+      const inPath  = pathSet2.has(i);
+      const isSel   = i === selNode;
+      const isHov   = i === hovNode;
+      const isNb    = anyHov && nbSet.has(i) && i !== hovNode && i !== selNode;
+      const isDim   = anyHov && !nbSet.has(i);
+
+      let r = 5, fill = '#0d1628', stroke = '#2a6090', glow = 'none', op = 1;
+      if (inPath)       { r=8; fill='rgba(45,255,142,0.25)'; stroke='#2dff8e'; glow='url(#glow-g)'; }
+      else if (isSel)   { r=8; fill='rgba(0,212,255,0.2)';  stroke='#00d4ff'; glow='url(#glow-c)'; }
+      else if (isHov)   { r=7; fill='rgba(0,212,255,0.18)'; stroke='#00d4ff'; glow='url(#glow-c)'; }
+      else if (isNb)    { r=6; fill='rgba(0,212,255,0.1)';  stroke='rgba(0,212,255,0.55)'; }
+      else if (isDim)   { op=0.22; }
+
+      g.append('circle').attr('r',r).attr('fill',fill).attr('stroke',stroke)
+        .attr('stroke-width',1.5).attr('opacity',op).attr('filter',glow);
+
+      // Pulse ring for selected
+      if (isSel || inPath) {
+        g.append('circle').attr('r',r+4).attr('fill','none')
+          .attr('stroke', inPath ? 'rgba(45,255,142,0.3)' : 'rgba(0,212,255,0.25)')
+          .attr('stroke-width',1);
+      }
+
+      if (n <= 32) {
+        g.append('text')
+          .attr('dy', r + 9)
+          .attr('text-anchor','middle')
+          .attr('font-family','Share Tech Mono, monospace')
+          .attr('font-size','8px')
+          .attr('fill', isDim ? 'rgba(90,112,144,0.25)' : 'rgba(90,140,190,0.75)')
+          .attr('pointer-events','none')
+          .text(i);
+      }
+    })
+    .on('click', function(_, i) { handleClick(i); })
+    .on('mouseenter', function(_, i) {
+      if (!S.pathMode) { S.hoveredNode = i; render(S.graph, S.currentPath, S.hoveredNode, S.pendingNode); }
+    })
+    .on('mouseleave', function() {
+      if (!S.pathMode) { S.hoveredNode = -1; render(S.graph, S.currentPath, -1, S.pendingNode); }
+    });
+
+  // — PATH ANNOTATION —
+  if (pathArr && pathArr.length >= 2) {
+    const steps = pathArr.length - 1;
+    svg.append('text')
+      .attr('x', W/2).attr('y', H - 12)
+      .attr('text-anchor','middle')
+      .attr('font-family','Share Tech Mono, monospace')
+      .attr('font-size','11px')
+      .attr('fill','#2dff8e')
+      .attr('filter','url(#glow-g)')
+      .text(`${pathArr.join(' → ')}   ·   distancia = ${steps}`);
+  }
+
+  // — SHORTCUT COUNT LABEL —
+  const nShortcuts = edges.filter(e=>e.shortcut).length;
+  if (nShortcuts > 0) {
+    svg.append('text')
+      .attr('x', 10).attr('y', H - 8)
+      .attr('font-family','Share Tech Mono, monospace')
+      .attr('font-size','9px')
+      .attr('fill','rgba(255,107,43,0.6)')
+      .text(`${nShortcuts} atajo${nShortcuts>1?'s':''}`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INTERACTION
+// ─────────────────────────────────────────────────────────────
+S.currentPath = null;
+
+function handleClick(i) {
+  if (!S.pathMode) return;
+  if (S.pendingNode < 0) {
+    S.pendingNode = i;
+    document.getElementById('path-hint').textContent = `Nodo ${i} seleccionado · Clic en otro nodo`;
+    render(S.graph, null, -1, S.pendingNode);
+  } else {
+    if (S.pendingNode === i) { S.pendingNode = -1; render(S.graph, null, -1, -1); document.getElementById('path-hint').textContent = 'Haz clic en dos nodos para ver la ruta más corta'; return; }
+    const path = bfsShortestPath(S.graph.adj, S.graph.n, S.pendingNode, i);
+    S.currentPath = path;
+    S.pendingNode = -1;
+    if (path) {
+      document.getElementById('path-hint').textContent = `Distancia mínima: ${path.length-1} saltos`;
+      render(S.graph, path, -1, -1);
+      setTimeout(() => {
+        S.currentPath = null;
+        render(S.graph, null, -1, -1);
+        if (S.pathMode) document.getElementById('path-hint').textContent = 'Haz clic en dos nodos para ver la ruta más corta';
+      }, 4000);
+    } else {
+      document.getElementById('path-hint').textContent = 'Sin ruta (grafo desconectado)';
+      render(S.graph, null, -1, -1);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STATS UPDATE
+// ─────────────────────────────────────────────────────────────
+function updateStats(graph) {
+  if (!graph) return;
+  const {adj, n, k, p} = graph;
+  const C = avgClustering(adj, n);
+  const L = avgPathLength(adj, n);
+  const Cr = k / n;
+  const Lr = Math.log(n) / Math.log(Math.max(k, 2));
+  const cr = Cr > 0 ? C / Cr : 0;
+  const lr = Lr > 0 ? L / Lr : 0;
+  const Sv = lr > 0 ? cr / lr : 0;
+
+  const fmtC = C.toFixed(3), fmtL = L.toFixed(2);
+
+  // Color transitions
+  let cColor = '#00d4ff';
+  let lColor = C > 0.4 ? '#ff9944' : '#ff6b2b';
+
+  document.getElementById('c-val').textContent = fmtC;
+  document.getElementById('c-val').style.color = cColor;
+  document.getElementById('l-val').textContent = fmtL;
+  document.getElementById('l-val').style.color = lColor;
+  document.getElementById('c-rand-lbl').textContent = `C_rand ≈ ${Cr.toFixed(3)}`;
+  document.getElementById('l-rand-lbl').textContent = `L_rand ≈ ${Lr.toFixed(2)}`;
+  document.getElementById('c-ratio').textContent = `${cr.toFixed(1)}×`;
+  document.getElementById('l-ratio').textContent = `${lr.toFixed(2)}×`;
+  document.getElementById('c-ratio').style.color = cr > 3 ? '#00d4ff' : cr > 1.5 ? '#8ac0ff' : '#5a7090';
+  document.getElementById('l-ratio').style.color = lr < 1.3 ? '#2dff8e' : lr < 2 ? '#ffcc44' : '#ff6b2b';
+
+  const swv = document.getElementById('sw-val');
+  const swt = document.getElementById('sw-verdict');
+  swv.textContent = Sv.toFixed(2);
+  if (Sv > 3)       { swv.style.color='#00d4ff'; swv.style.textShadow='0 0 12px rgba(0,212,255,0.6)'; swt.textContent='✦ Small-world confirmado'; swt.style.color='#00d4ff'; }
+  else if (Sv > 1.5){ swv.style.color='#55aadd'; swv.style.textShadow='none'; swt.textContent='◆ Tendencia small-world';   swt.style.color='#55aadd'; }
+  else if (Sv > 1)  { swv.style.color='#8898bb'; swv.style.textShadow='none'; swt.textContent='· Leve efecto SW';            swt.style.color='#8898bb'; }
+  else              { swv.style.color='#5a7090'; swv.style.textShadow='none'; swt.textContent='· Sin efecto small-world';    swt.style.color='#5a7090'; }
+
+  document.getElementById('c-bar').style.width = Math.min(100, C * 100) + '%';
+  document.getElementById('l-bar').style.width = Math.min(100, (L / (n/2)) * 100) + '%';
+
+  // Mode badge & description
+  const badge = document.getElementById('mode-badge');
+  const desc  = document.getElementById('desc-box');
+  if (p === 0) {
+    badge.className='mode-badge regular'; badge.textContent='RED REGULAR';
+    desc.innerHTML='<b>p = 0</b>: Red anillo pura.<br>Clustering alto, caminos largos.<br>Orden perfecto, pero llegar lejos cuesta muchos saltos.';
+  } else if (p < 0.05) {
+    badge.className='mode-badge sw'; badge.textContent='✦ MUNDO PEQUEÑO';
+    desc.innerHTML=`<b>p = ${p.toFixed(3)}</b>: Apenas unos pocos atajos ya reducen drásticamente <b>L</b> mientras <b>C</b> permanece alto. La esencia del mundo pequeño.`;
+  } else if (p < 0.30) {
+    badge.className='mode-badge sw'; badge.textContent='✦ MUNDO PEQUEÑO';
+    desc.innerHTML=`<b>p = ${p.toFixed(2)}</b>: Zona de mundo pequeño. Los atajos naranjas conectan regiones distantes manteniendo comunidades locales.`;
+  } else if (p < 0.70) {
+    badge.className='mode-badge sw'; badge.textContent='TRANSICIÓN';
+    desc.innerHTML=`<b>p = ${p.toFixed(2)}</b>: Zona de transición. Pierde estructura local progresivamente. El clustering cae más rápido que L.`;
+  } else {
+    badge.className='mode-badge random'; badge.textContent='RED ALEATORIA';
+    desc.innerHTML=`<b>p ≈ ${p.toFixed(2)}</b>: Red casi aleatoria. <b>C</b> y <b>L</b> bajos. Sin comunidades claras. Cualquier estructura local se ha perdido.`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ANIMATE REWIRING
+// ─────────────────────────────────────────────────────────────
+async function animateRewire() {
+  S.animating = true; S.animStop = false;
+  document.getElementById('btn-anim').textContent = '■  Detener';
+
+  const {n, k, p, seed} = S;
+  const rand = makeRng(seed + 99);
+  const adj  = Array.from({length: n}, () => new Set());
+  const edges =[];
+
+  // Build ring lattice
+  for (let i = 0; i < n; i++)
+    for (let j = 1; j <= Math.floor(k/2); j++) {
+      const v = (i+j)%n;
+      if (!adj[i].has(v)) { adj[i].add(v); adj[v].add(i); edges.push({u:i,v,shortcut:false}); }
+    }
+
+  S.graph = { adj: adj.map(s=>new Set(s)), edges:[...edges], n, k, p:0 };
+  render(S.graph, null, -1, -1); updateStats(S.graph);
+
+  await pause(600);
+
+  for (let e = 0; e < edges.length; e++) {
+    if (S.animStop) break;
+    if (rand() < p) {
+      const {u, v:vO} = edges[e];
+      const cands =[]; for (let r=0;r<n;r++) if (r!==u&&!adj[u].has(r)) cands.push(r);
+      if (cands.length > 0) {
+        const r = cands[Math.floor(rand()*cands.length)];
+        adj[u].delete(vO); adj[vO].delete(u);
+        adj[u].add(r); adj[r].add(u);
+        edges[e] = {u, v:r, shortcut:true};
+        S.graph = { adj: adj.map(s=>new Set(s)), edges:[...edges], n, k, p: p*(e+1)/edges.length };
+        render(S.graph, null, -1, -1);
+        await pause(100);
+      }
+    }
+  }
+
+  S.graph = { adj, edges, n, k, p };
+  render(S.graph, null, -1, -1);
+  updateStats(S.graph);
+  S.animating = false;
+  document.getElementById('btn-anim').textContent = '▶  Animar reconexión';
+}
+
+const pause = ms => new Promise(r => setTimeout(r, ms));
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOOP
+// ─────────────────────────────────────────────────────────────
+function refresh() {
+  S.graph = buildGraph(S.n, S.k, S.p, S.seed);
+  S.currentPath = null; S.pendingNode = -1;
+  render(S.graph, null, S.hoveredNode, -1);
+  updateStats(S.graph);
+}
+
+function initSize() {
+  const el = document.getElementById('graph-wrap');
+  W = el.clientWidth; H = el.clientHeight;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────────────────────
+document.getElementById('p-slider').addEventListener('input', function() {
+  S.p = parseFloat(this.value);
+  document.getElementById('p-disp').textContent = S.p.toFixed(3);
+  refresh();
+});
+
+document.getElementById('n-in').addEventListener('change', function() {
+  const v = parseInt(this.value);
+  if (v >= 8 && v <= 50) { S.n = v; refresh(); }
+});
+
+document.getElementById('k-in').addEventListener('change', function() {
+  const v = parseInt(this.value);
+  if (v >= 2 && v <= Math.floor(S.n/2)) { S.k = v; refresh(); }
+});
+
+document.getElementById('btn-regen').addEventListener('click', () => {
+  S.seed = Math.floor(Math.random() * 999999);
+  refresh();
+});
+
+document.getElementById('btn-anim').addEventListener('click', function() {
+  if (S.animating) { S.animStop = true; S.animating = false; this.textContent='▶  Animar reconexión'; }
+  else animateRewire();
+});
+
+document.getElementById('btn-path').addEventListener('click', function() {
+  S.pathMode = !S.pathMode;
+  S.pendingNode = -1; S.currentPath = null;
+  this.classList.toggle('active', S.pathMode);
+  const hint = document.getElementById('path-hint');
+  if (S.pathMode) { hint.classList.add('visible'); hint.textContent='Haz clic en dos nodos para ver la ruta más corta'; }
+  else            { hint.classList.remove('visible'); }
+  render(S.graph, null, -1, -1);
+});
+
+window.addEventListener('resize', () => { initSize(); render(S.graph, S.currentPath, S.hoveredNode, S.pendingNode); });
+
+// ─────────────────────────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────────────────────────
+initSize();
+refresh();
+</script>
+</body>
+</html>

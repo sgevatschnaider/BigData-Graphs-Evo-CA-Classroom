@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cuestionario sobre Mundo Pequeño y Teoría de Redes</title>
+<style>
+:root{
+  --bg:#0f172a; --bg-soft:#111c34; --panel:#13213d; --panel-2:#17294b; --card:#182b4d;
+  --text:#e8eef8; --muted:#b8c4d9; --accent:#7cc5ff; --accent-2:#3fa7ff; --border:rgba(255,255,255,0.10);
+  --success:#6ee7b7; --warn:#f6d365; --shadow:0 12px 28px rgba(0,0,0,.22); --maxw:1200px;
+}
+html[data-theme="light"]{
+  --bg:#f6f9fc; --bg-soft:#eef4fb; --panel:#ffffff; --panel-2:#f8fbff; --card:#ffffff;
+  --text:#1d2a3a; --muted:#5b6676; --accent:#1d78d6; --accent-2:#0f5fb7; --border:rgba(20,40,80,0.10);
+  --success:#198754; --warn:#a26b00; --shadow:0 10px 24px rgba(29,42,58,.08);
+}
+html[data-theme="sepia"]{
+  --bg:#f4efe6; --bg-soft:#efe7da; --panel:#fbf6ee; --panel-2:#f7f0e5; --card:#fffaf2;
+  --text:#47392c; --muted:#7b6a59; --accent:#8f5c2c; --accent-2:#6e431e; --border:rgba(80,50,20,0.12);
+  --success:#4f7a42; --warn:#936300; --shadow:0 10px 22px rgba(70,50,30,.10);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at top left, rgba(124,197,255,.10), transparent 28%),radial-gradient(circle at top right, rgba(63,167,255,.07), transparent 24%),var(--bg);color:var(--text);line-height:1.72}
+.grain{position:fixed;inset:0;pointer-events:none;opacity:.05;background-image:radial-gradient(circle at 20% 30%, #fff .6px, transparent .7px),radial-gradient(circle at 80% 70%, #fff .6px, transparent .7px),radial-gradient(circle at 40% 80%, #fff .6px, transparent .7px);background-size:160px 160px,210px 210px,180px 180px;z-index:0}
+.wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:24px 20px 60px}
+.theme-switch{position:fixed;top:16px;right:16px;z-index:30;display:flex;gap:8px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:999px;padding:8px;box-shadow:var(--shadow)}
+html[data-theme="light"] .theme-switch,html[data-theme="sepia"] .theme-switch{background:rgba(255,255,255,.75)}
+.theme-btn{border:none;border-radius:999px;padding:8px 12px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.theme-btn.active{background:var(--accent);color:#082032}
+header.hero{background:linear-gradient(135deg, rgba(124,197,255,.16), rgba(63,167,255,.08));border:1px solid var(--border);border-radius:28px;padding:34px 28px 26px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+header.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 30%, transparent 60%);pointer-events:none}
+.eyebrow{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+h1{margin:0 0 10px;font-size:clamp(2rem, 4vw, 3.1rem);line-height:1.08;letter-spacing:-.02em}
+.hero p{margin:0;max-width:940px;color:var(--muted);font-size:1.05rem}
+.hero-meta,.tagline{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.chip,.micro{padding:8px 12px;border:1px solid var(--border);background:rgba(255,255,255,.06);border-radius:999px;font-size:.88rem;color:var(--muted)}
+.topbar{position:sticky;top:0;z-index:20;margin-top:18px;backdrop-filter:blur(14px);background:color-mix(in srgb, var(--bg) 72%, transparent);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:14px}
+.topbar-grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:12px;align-items:center}
+@media (max-width:880px){.topbar-grid{grid-template-columns:1fr}}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.tool-btn{border:none;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:12px 14px;border-radius:14px;cursor:pointer;font-weight:700;font-size:13px;letter-spacing:.02em}.tool-btn:hover{transform:translateY(-1px)}
+.search{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:14px}.search input{width:100%;border:none;background:transparent;color:var(--text);font-size:14px;outline:none}
+.progress-wrap{display:grid;gap:8px}.progress-meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}.progress-bar{height:12px;background:var(--panel);border:1px solid var(--border);border-radius:999px;overflow:hidden}.progress-inner{height:100%;width:0%;background:linear-gradient(90deg, var(--accent), var(--accent-2));transition:width .25s ease}
+main{margin-top:18px;display:grid;gap:18px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:20px 22px;background:var(--panel);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
+.section-head h2{margin:0;font-size:1.45rem;letter-spacing:-.01em}.section-head p{margin:6px 0 0;color:var(--muted);max-width:900px}.question-list{display:grid;gap:14px}
+.card{border:1px solid var(--border);border-radius:22px;background:linear-gradient(180deg, rgba(255,255,255,.03), transparent), var(--card);box-shadow:var(--shadow);overflow:hidden;opacity:0;transform:translateY(12px);animation:fadeUp .5s ease forwards}.card.hidden{display:none}
+@keyframes fadeUp{to{opacity:1;transform:none}}
+.q-trigger{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;text-align:left;border:none;background:transparent;color:inherit;padding:22px 22px 18px;cursor:pointer}
+.q-main{min-width:0;display:flex;gap:16px;align-items:flex-start}.q-num{flex:0 0 auto;min-width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:rgba(124,197,255,.08);border:1px solid var(--border);color:var(--accent);font-weight:900;font-size:15px;letter-spacing:.05em}
+.q-content h3{margin:0 0 6px;font-size:1.22rem;line-height:1.24;letter-spacing:-.01em}.q-subtitle{margin:0;color:var(--muted);font-size:.98rem;max-width:900px}.q-icon{flex:0 0 auto;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--border);background:var(--panel-2);font-size:18px;transition:transform .2s ease}.card.open .q-icon{transform:rotate(90deg)}
+.a-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease}.card.open .a-wrap{grid-template-rows:1fr}.a-inner{overflow:hidden}.a-body{padding:0 22px 22px;border-top:1px solid var(--border)}
+.answer-grid{margin-top:18px;display:grid;gap:14px}.row{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:start;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px}@media (max-width:760px){.row{grid-template-columns:1fr}}
+.k{font-size:12px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;color:var(--accent)}.v{color:var(--text)}.math-block{margin-top:10px;padding:14px 16px;border-radius:16px;background:rgba(124,197,255,.06);border:1px dashed rgba(124,197,255,.35);font-family:"Cambria Math","Times New Roman",serif;font-size:1.02rem}.highlight,.warn{margin-top:10px;padding:14px 16px;border-radius:16px}.highlight{background:rgba(110,231,183,.08);border-left:4px solid var(--success)}.warn{background:rgba(246,211,101,.08);border-left:4px solid var(--warn)}
+.empty{display:none;padding:28px;border:1px dashed var(--border);border-radius:18px;background:var(--panel);color:var(--muted);text-align:center}
+footer{margin-top:34px;padding:24px 12px 8px;text-align:center;color:var(--muted);border-top:1px solid var(--border);font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="theme-switch" aria-label="Selector de tema">
+  <button class="theme-btn active" data-theme-value="dark">Dark</button>
+  <button class="theme-btn" data-theme-value="light">Light</button>
+  <button class="theme-btn" data-theme-value="sepia">Sepia</button>
+</div>
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">Cuestionario académico</div>
+  <h1>Cuestionario completo sobre mundo pequeño y teoría de redes</h1>
+  <p>Este material reorganiza el cuestionario anterior en un formato editorial e interactivo. Cada pregunta funciona como una unidad de estudio: define el concepto, explica por qué importa y lo integra dentro de la lógica general del fenómeno small-world.</p>
+  <div class="hero-meta">
+    <span class="chip">Small World</span><span class="chip">Watts–Strogatz</span><span class="chip">Clustering</span><span class="chip">Distancia geodésica</span><span class="chip">Difusión</span><span class="chip">Barabási</span>
+  </div>
+</header>
+<section class="topbar">
+  <div class="topbar-grid">
+    <div class="tools">
+      <button class="tool-btn" id="expandAllBtn">Expandir todo</button>
+      <button class="tool-btn" id="collapseAllBtn">Colapsar todo</button>
+      <div class="search"><span>⌕</span><input id="searchInput" type="text" placeholder="Buscar por pregunta, concepto o respuesta" /></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span id="openCount">0 / 20 abiertas</span><span id="pctText">0%</span></div>
+      <div class="progress-bar"><div class="progress-inner" id="progInner"></div></div>
+    </div>
+  </div>
+</section>
+<main>
+  <section class="section-head">
+    <div>
+      <h2>Lógica del cuestionario</h2>
+      <p>La secuencia va desde la definición del mundo pequeño y sus métricas fundamentales hasta el modelo de Watts–Strogatz, el papel de los atajos, las aplicaciones en redes sociales, epidemias y difusión, y finalmente los límites del enfoque y la ampliación introducida por Barabási. La idea rectora es entender cómo una red puede ser simultáneamente <strong>localmente cohesiva</strong> y <strong>globalmente accesible</strong>.</p>
+      <div class="tagline"><span class="micro">20 preguntas desarrolladas</span><span class="micro">Prosa continua</span><span class="micro">Con fórmulas clave</span><span class="micro">Lectura de estudio</span></div>
+    </div>
+  </section>
+  <section class="question-list" id="questionList">
+<article class="card" id="c01">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">01</div>
+    <div class="q-content">
+      <h3>¿Qué significa que una red sea un “mundo pequeño”?</h3>
+      <p class="q-subtitle">Definición general del fenómeno y articulación entre cohesión local y accesibilidad global.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Una red es un mundo pequeño cuando combina dos propiedades que, a primera vista, parecen difíciles de conciliar. La primera es que la distancia típica entre dos nodos cualesquiera es baja, de modo que se puede pasar de un punto a otro en pocos pasos. La segunda es que existe un alto grado de agrupamiento local, es decir, los vecinos de un nodo tienden a estar conectados entre sí.</div></div>
+<div class="row"><div class="k">Interpretación</div><div class="v">Esto significa que la red no es un agregado caótico de enlaces, sino un sistema formado por comunidades densas o círculos locales muy cohesionados, aunque esas comunidades no quedan aisladas porque existen conexiones que permiten llegar rápidamente a otras zonas de la red.</div></div>
+<div class="row"><div class="k">Idea central</div><div class="v">El concepto no alude a que la red tenga pocos nodos, sino a que esté encogida topológicamente. Puede ser enorme y, aun así, mantener separaciones promedio muy pequeñas.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: un small world combina caminos globales cortos con clustering local alto.</div>
+</div></div></div></div></article>
+<article class="card" id="c02">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">02</div>
+    <div class="q-content">
+      <h3>¿Por qué el fenómeno de mundo pequeño fue importante para la teoría de redes?</h3>
+      <p class="q-subtitle">Importancia histórica y teórica del concepto dentro de la ciencia de redes complejas.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Fue importante porque resolvió una tensión central en el estudio de redes complejas. Antes del enfoque small-world, parecían existir solo dos imágenes extremas: redes regulares, con mucha cohesión local pero caminos largos, y redes aleatorias, con caminos cortos pero escaso agrupamiento.</div></div>
+<div class="row"><div class="k">Aporte conceptual</div><div class="v">La teoría del mundo pequeño mostró que no era necesario elegir entre esos extremos. Había una región intermedia donde una red podía conservar estructura local densa y, al mismo tiempo, tener distancias globales pequeñas.</div></div>
+<div class="row"><div class="k">Consecuencia</div><div class="v">Esto cambió la comprensión de redes sociales, biológicas y tecnológicas, porque explicó por qué muchos sistemas reales no eran ni puramente regulares ni puramente aleatorios. También reveló que pequeños cambios estructurales podían producir efectos globales enormes.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Idea clave: el small world abrió una zona intermedia entre orden completo y desorden completo.</div>
+</div></div></div></div></article>
+<article class="card" id="c03">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">03</div>
+    <div class="q-content">
+      <h3>¿Cómo se representa matemáticamente una red en teoría de grafos?</h3>
+      <p class="q-subtitle">Formalización de una red mediante nodos, aristas y estructura global.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Representación</div><div class="v">Una red se representa mediante un grafo, escrito como G=(V,E), donde V es el conjunto de vértices o nodos y E es el conjunto de aristas o enlaces.</div></div>
+<div class="row"><div class="k">Interpretación</div><div class="v">Cada nodo representa una entidad y cada arista una relación entre dos entidades. En una red social, los nodos pueden ser personas y las aristas amistad o conocimiento. En una red biológica, los nodos pueden ser neuronas o proteínas y las aristas sinapsis o interacciones químicas.</div></div>
+<div class="row"><div class="k">Importancia</div><div class="v">Esta formalización abstrae la naturaleza concreta del sistema y permite estudiar propiedades estructurales generales como distancia, agrupamiento, conectividad y distribución de grados.</div></div>
+<div class="math-block">G=(V,E)</div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: el grafo convierte una red empírica en un objeto matemático analizable.</div>
+</div></div></div></div></article>
+<article class="card" id="c04">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">04</div>
+    <div class="q-content">
+      <h3>¿Qué es la distancia geodésica y por qué es tan importante en este tema?</h3>
+      <p class="q-subtitle">Medida estructural de separación y base matemática de los grados de separación.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Definición</div><div class="v">La distancia geodésica entre dos nodos u y v, denotada por d(u,v), es la longitud del camino más corto que los conecta.</div></div>
+<div class="row"><div class="k">Por qué importa</div><div class="v">Es crucial porque traduce a lenguaje matemático la idea de grados de separación. Dos personas pueden no conocerse directamente y, sin embargo, estar a muy pocos intermediarios de distancia.</div></div>
+<div class="row"><div class="k">Relación con small world</div><div class="v">A partir de estas distancias se calcula la longitud media de camino de toda la red. El fenómeno de mundo pequeño sorprende precisamente porque esas distancias promedio suelen ser muy bajas, incluso cuando la red es grande.</div></div>
+<div class="math-block">d(u,v)</div>
+<div class="highlight"><strong>Resumen:</strong> Idea central: la distancia geodésica mide cercanía estructural, no cercanía física.</div>
+</div></div></div></div></article>
+<article class="card" id="c05">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">05</div>
+    <div class="q-content">
+      <h3>¿Cómo se calcula la longitud media de camino de una red?</h3>
+      <p class="q-subtitle">Promedio de distancias geodésicas y compactación global del sistema.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Definición</div><div class="v">La longitud media de camino se calcula promediando la distancia geodésica entre todos los pares de nodos distintos de la red.</div></div>
+<div class="row"><div class="k">Interpretación</div><div class="v">Esta cantidad mide cuántos pasos hacen falta, en promedio, para ir de un nodo a otro. Si el valor es pequeño, la red es globalmente accesible.</div></div>
+<div class="row"><div class="k">Comparación</div><div class="v">En una red regular tipo anillo, esta longitud puede crecer casi linealmente con el tamaño de la red. En una red aleatoria, suele crecer mucho más lentamente, aproximadamente como log n. En un small world se comporta más cerca del caso aleatorio que del regular.</div></div>
+<div class="math-block">L(G)=∑_{u≠v} d(u,v) / [n(n-1)]</div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: la red small-world se reconoce porque L(G) es sorprendentemente pequeña para su tamaño.</div>
+</div></div></div></div></article>
+<article class="card" id="c06">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">06</div>
+    <div class="q-content">
+      <h3>¿Qué es el coeficiente de agrupamiento y qué mide exactamente?</h3>
+      <p class="q-subtitle">Cohesión local, triángulos y densidad de conexiones entre vecinos.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Definición</div><div class="v">El coeficiente de agrupamiento mide la tendencia de los vecinos de un nodo a estar conectados entre sí.</div></div>
+<div class="row"><div class="k">Lectura local</div><div class="v">Si un nodo u tiene grado k_u y entre sus vecinos existen e_u aristas, entonces el clustering local compara el número real de enlaces entre vecinos con el número máximo posible. Si todos los vecinos están conectados entre sí, el valor es 1. Si ninguno lo está, el valor es 0.</div></div>
+<div class="row"><div class="k">Importancia</div><div class="v">Esta medida es esencial porque capta la cohesión local, la tendencia a formar triángulos y la existencia de comunidades. Una red small-world no solo tiene caminos cortos; también mantiene agrupamiento alto.</div></div>
+<div class="math-block">c(u)=2e_u / [k_u(k_u-1)]</div>
+<div class="highlight"><strong>Resumen:</strong> Idea clave: el clustering distingue al small world de una red aleatoria ordinaria.</div>
+</div></div></div></div></article>
+<article class="card" id="c07">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">07</div>
+    <div class="q-content">
+      <h3>¿Cuál es la diferencia entre una red regular y una red aleatoria?</h3>
+      <p class="q-subtitle">Contraste entre orden local, longitud de caminos y desorden estructural.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Red regular</div><div class="v">Es una red muy ordenada en la que cada nodo se conecta siguiendo un patrón fijo, normalmente con sus vecinos inmediatos. Esto produce agrupamiento alto, pero también caminos largos.</div></div>
+<div class="row"><div class="k">Red aleatoria</div><div class="v">Conecta pares de nodos de manera casi independiente, sin respetar vecindad local. Eso reduce mucho las distancias medias, pero hace que el agrupamiento sea muy bajo.</div></div>
+<div class="row"><div class="k">Síntesis</div><div class="v">La red regular favorece orden local y caminos largos; la red aleatoria favorece caminos cortos y desorden local. El small world aparece justamente como una solución intermedia entre ambos extremos.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: el mundo pequeño conserva parte del orden local sin resignar accesibilidad global.</div>
+</div></div></div></div></article>
+<article class="card" id="c08">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">08</div>
+    <div class="q-content">
+      <h3>¿En qué consiste el modelo de Watts–Strogatz?</h3>
+      <p class="q-subtitle">Modelo clásico del pequeño mundo y transición entre regularidad y aleatoriedad.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Construcción</div><div class="v">El modelo de Watts–Strogatz parte de una red regular, usualmente un anillo en el que cada nodo se conecta con sus vecinos más cercanos. Luego, con probabilidad p, algunas aristas se reconectan aleatoriamente hacia nodos lejanos.</div></div>
+<div class="row"><div class="k">Parámetros</div><div class="v">Se denota WS(n,k,p), donde n es el número de nodos, k el grado inicial y p la probabilidad de reconexión. Cuando p=0 la red es totalmente regular; cuando p es grande, la red se aproxima a una aleatoria.</div></div>
+<div class="row"><div class="k">Hallazgo</div><div class="v">Lo sorprendente es que para valores pequeños de p aparece un régimen intermedio en el que la longitud media cae rápidamente, pero el agrupamiento permanece alto. Esa es la región small-world.</div></div>
+<div class="math-block">WS(n,k,p)</div>
+<div class="highlight"><strong>Resumen:</strong> Idea central: bastan pocas reconexiones para transformar la conectividad global sin destruir la estructura local.</div>
+</div></div></div></div></article>
+<article class="card" id="c09">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">09</div>
+    <div class="q-content">
+      <h3>¿Qué papel cumplen los atajos o shortcuts en el fenómeno de mundo pequeño?</h3>
+      <p class="q-subtitle">Enlaces estratégicos y colapso de distancias entre comunidades lejanas.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Definición</div><div class="v">Los atajos son aristas que conectan regiones de la red que antes estaban muy separadas.</div></div>
+<div class="row"><div class="k">Efecto estructural</div><div class="v">Su papel es decisivo porque reducen abruptamente la longitud media de camino. Un atajo no solo acorta la distancia entre sus dos extremos directos; también acerca los vecindarios enteros que rodean a esos extremos.</div></div>
+<div class="row"><div class="k">Conclusión</div><div class="v">Unos pocos atajos producen un efecto no lineal: cambian la geometría global de la red con una perturbación mínima. No hacen falta muchísimas conexiones globales, sino unas pocas bien situadas.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: los shortcuts son la llave topológica del pequeño mundo.</div>
+</div></div></div></div></article>
+<article class="card" id="c10">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">10</div>
+    <div class="q-content">
+      <h3>¿Por qué se dice que la reducción de la distancia media es no lineal?</h3>
+      <p class="q-subtitle">Caída abrupta inicial de L(G) y rendimientos decrecientes de nuevos atajos.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Se dice que es no lineal porque el efecto de los primeros atajos es desproporcionadamente grande. Si una red regular incorpora unas pocas conexiones de largo alcance, la longitud media cae muy deprisa.</div></div>
+<div class="row"><div class="k">Asimetría</div><div class="v">A medida que se añaden más atajos, el beneficio adicional de cada nuevo enlace es menor. Los primeros enlaces globales producen casi todo el encogimiento de la red; luego aparecen rendimientos decrecientes.</div></div>
+<div class="row"><div class="k">Importancia</div><div class="v">Esta asimetría es clave para entender por qué existe una región amplia de small worlds: la distancia media colapsa antes de que el clustering se vea seriamente afectado.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Idea central: el encogimiento topológico ocurre temprano, antes de que se destruya la cohesión local.</div>
+</div></div></div></div></article>
+<article class="card" id="c11">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">11</div>
+    <div class="q-content">
+      <h3>¿Qué relación tiene el mundo pequeño con la idea de “seis grados de separación”?</h3>
+      <p class="q-subtitle">Versión sociológica popular del mismo problema estructural.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">La idea de seis grados de separación es una formulación popular del problema del mundo pequeño en redes sociales. Surgió a partir de experimentos de Stanley Milgram, que buscaban medir cuántos intermediarios hacían falta para conectar a dos personas mediante conocidos personales.</div></div>
+<div class="row"><div class="k">Interpretación</div><div class="v">Lo importante no fue fijar una cifra exacta universal, sino mostrar que la sociedad humana parece mucho más pequeña topológicamente de lo que el sentido común sugería.</div></div>
+<div class="row"><div class="k">Relación con la teoría</div><div class="v">En lenguaje de teoría de redes, la idea expresa que la distancia geodésica típica entre dos nodos de una red social humana es baja. El small world generaliza esa intuición y la extiende a otros sistemas no humanos.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: seis grados es la versión culturalmente famosa de la baja distancia geodésica en redes humanas.</div>
+</div></div></div></div></article>
+<article class="card" id="c12">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">12</div>
+    <div class="q-content">
+      <h3>¿Qué evidencia empírica mostró que el mundo pequeño no era solo un modelo teórico?</h3>
+      <p class="q-subtitle">Confirmación observacional en redes reales de naturaleza muy distinta.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Evidencia</div><div class="v">La evidencia empírica vino de varias redes reales estudiadas de manera sistemática, entre ellas la red de actores de cine, la red eléctrica y la red neuronal de C. elegans.</div></div>
+<div class="row"><div class="k">Patrón observado</div><div class="v">En todos esos casos se encontró el mismo patrón: la longitud media de camino era cercana a la de una red aleatoria comparable, pero el coeficiente de agrupamiento era mucho mayor.</div></div>
+<div class="row"><div class="k">Conclusión</div><div class="v">Eso demostró que el small world no era una simple curiosidad matemática, sino una propiedad real de sistemas complejos muy distintos entre sí. Más tarde se observaron rasgos parecidos en la Web, redes de colaboración científica, redes corporativas y muchas redes biológicas.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Idea central: el fenómeno small-world pasó del modelo abstracto a la observación empírica.</div>
+</div></div></div></div></article>
+<article class="card" id="c13">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">13</div>
+    <div class="q-content">
+      <h3>¿Por qué el mundo pequeño es importante en redes sociales humanas?</h3>
+      <p class="q-subtitle">Convivencia entre comunidades cerradas y sociedad globalmente conectada.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Es importante porque ayuda a entender cómo pueden coexistir comunidades muy cerradas con una sociedad globalmente conectada.</div></div>
+<div class="row"><div class="k">Estructura social</div><div class="v">En las redes humanas hay círculos de amistad, familias, barrios, profesiones, grupos ideológicos y comunidades de interés. Cada una de esas estructuras produce clustering alto.</div></div>
+<div class="row"><div class="k">Consecuencias</div><div class="v">Además existen conocidos, contactos débiles y relaciones puente que conectan comunidades diferentes. Gracias a ellos, una persona puede llegar a otra muy lejana en pocos pasos. Esto afecta búsqueda de empleo, difusión de rumores, circulación de modas, propagación de noticias y formación de movimientos colectivos.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: la vida social no es ni una suma de grupos aislados ni un caos aleatorio; es localmente densa y globalmente accesible.</div>
+</div></div></div></div></article>
+<article class="card" id="c14">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">14</div>
+    <div class="q-content">
+      <h3>¿Cuál es la diferencia entre lazos fuertes y lazos débiles en este contexto?</h3>
+      <p class="q-subtitle">Cohesión interna de grupos versus conexión entre comunidades distintas.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Lazos fuertes</div><div class="v">Son relaciones intensas o muy solapadas localmente. Suelen darse dentro de un mismo grupo y están rodeados de triángulos y contactos compartidos. Son importantes para cohesión, confianza y apoyo social.</div></div>
+<div class="row"><div class="k">Lazos débiles</div><div class="v">Suelen conectar personas que pertenecen a grupos distintos y comparten menos vecinos en común. Topológicamente son muy valiosos porque actúan como puentes entre comunidades.</div></div>
+<div class="row"><div class="k">Síntesis</div><div class="v">Los lazos fuertes refuerzan el interior de un grupo; los lazos débiles conectan grupos distintos. En el mundo pequeño, ambos son necesarios: sin lazos fuertes no habría estructura local; sin lazos débiles no habría caminos cortos entre comunidades lejanas.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Idea clave: la conectividad global depende mucho de vínculos que, localmente, parecen poco intensos.</div>
+</div></div></div></div></article>
+<article class="card" id="c15">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">15</div>
+    <div class="q-content">
+      <h3>¿Cómo influye la estructura small-world en la propagación de epidemias?</h3>
+      <p class="q-subtitle">Contagio, saltos entre comunidades y aceleración de la difusión global.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Influye de manera decisiva porque las epidemias no dependen solo del número de contactos, sino también de cómo está organizada la red de contactos.</div></div>
+<div class="row"><div class="k">Mecanismo</div><div class="v">En una red muy local, una infección puede expandirse dentro de una comunidad pero tardar mucho en alcanzar otras regiones. En una red small-world, los atajos permiten que el contagio salte rápidamente a comunidades lejanas.</div></div>
+<div class="row"><div class="k">Consecuencia</div><div class="v">Eso reduce el umbral necesario para que aparezca una epidemia global y acelera la propagación. El clustering local puede generar fases iniciales más lentas, hasta que la infección encuentra un puente o shortcut.</div></div>
+<div class="warn"><strong>Atención:</strong> Conclusión: una enfermedad puede parecer contenida localmente y, sin embargo, expandirse abruptamente cuando encuentra conexiones intercomunitarias.</div>
+</div></div></div></div></article>
+<article class="card" id="c16">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">16</div>
+    <div class="q-content">
+      <h3>¿Qué relación tiene el small world con la difusión de información e innovación?</h3>
+      <p class="q-subtitle">Alcance global y refuerzo local como condiciones complementarias.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">La estructura small-world favorece la difusión porque combina dos elementos complementarios: cercanía global y refuerzo local.</div></div>
+<div class="row"><div class="k">Alcance</div><div class="v">Si la longitud media es pequeña, una idea puede viajar a grandes distancias en pocos pasos.</div></div>
+<div class="row"><div class="k">Refuerzo</div><div class="v">Si el clustering es alto, una innovación puede consolidarse dentro de una comunidad antes de saltar a otras. Esto importa porque muchas innovaciones necesitan validación social, imitación repetida y presión de grupo, no solo exposición casual.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Resumen: el small world permite tanto la consolidación local de una novedad como su salto entre comunidades.</div>
+</div></div></div></div></article>
+<article class="card" id="c17">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">17</div>
+    <div class="q-content">
+      <h3>¿Cómo se relaciona el fenómeno con sincronización y coordinación en redes?</h3>
+      <p class="q-subtitle">Integración rápida entre módulos sin eliminar diferenciación local.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Sincronización</div><div class="v">Ocurre cuando muchos nodos dinámicos, como osciladores, neuronas o agentes, ajustan su comportamiento de forma colectiva.</div></div>
+<div class="row"><div class="k">Papel del small world</div><div class="v">En una red puramente local, las señales tardan más en propagarse y la coordinación global es más difícil. En una red small-world, los atajos reducen las distancias efectivas y permiten que regiones lejanas intercambien información mucho más rápido.</div></div>
+<div class="row"><div class="k">Resultado</div><div class="v">Esto reduce el umbral necesario para la sincronización y favorece la coordinación global sin que el sistema pierda por completo su organización modular.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Idea central: el pequeño mundo permite integración global sin borrar toda la diferenciación local.</div>
+</div></div></div></div></article>
+<article class="card" id="c18">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">18</div>
+    <div class="q-content">
+      <h3>¿Por qué el small world no basta para describir todas las redes reales?</h3>
+      <p class="q-subtitle">Alcance explicativo del concepto y límites frente a redes empíricas complejas.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Porque el small world explica muy bien la coexistencia entre caminos cortos y clustering alto, pero no agota otras propiedades importantes de las redes reales.</div></div>
+<div class="row"><div class="k">Límites</div><div class="v">Muchas redes empíricas, además de ser small-world, tienen distribuciones de grado muy desiguales, con hubs grandes. El modelo de Watts–Strogatz no reproduce bien esa heterogeneidad extrema.</div></div>
+<div class="row"><div class="k">Ampliaciones necesarias</div><div class="v">Tampoco incorpora de manera natural pesos, dirección, multiplexidad o crecimiento histórico. Por eso el small world es una propiedad estructural importante, pero no una descripción completa de toda la complejidad de una red real.</div></div>
+<div class="warn"><strong>Atención:</strong> Resumen: small-world es una pieza central, pero no la teoría total de las redes complejas.</div>
+</div></div></div></div></article>
+<article class="card" id="c19">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">19</div>
+    <div class="q-content">
+      <h3>¿Qué aportó Barabási a la discusión sobre small worlds?</h3>
+      <p class="q-subtitle">Heterogeneidad, hubs y redes libres de escala.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Aporte</div><div class="v">Barabási mostró que muchas redes reales no solo son pequeñas y agrupadas, sino también muy heterogéneas en su conectividad. No todos los nodos tienen grados parecidos: aparecen hubs con muchísimas más conexiones que el promedio.</div></div>
+<div class="row"><div class="k">Modelo</div><div class="v">Para explicar eso introdujo la idea de redes libres de escala, en las que la distribución de grados sigue una ley de potencia. Así completó la imagen que había dejado abierta Watts–Strogatz.</div></div>
+<div class="row"><div class="k">Importancia</div><div class="v">Su contribución fue decisiva porque mostró cómo esa desigualdad de conectividad influye en robustez, vulnerabilidad, difusión y centralidad, integrando el small world en una ciencia de redes más amplia.</div></div>
+<div class="math-block">P(k) ∝ k^{-α}</div>
+<div class="highlight"><strong>Resumen:</strong> Idea clave: Barabási añadió la dimensión de la heterogeneidad extrema y los hubs.</div>
+</div></div></div></div></article>
+<article class="card" id="c20">
+<button class="q-trigger">
+  <div class="q-main">
+    <div class="q-num">20</div>
+    <div class="q-content">
+      <h3>¿Por qué el concepto de mundo pequeño sigue siendo vigente hoy?</h3>
+      <p class="q-subtitle">Actualidad del concepto en redes digitales, biológicas, logísticas y organizacionales.</p>
+    </div>
+  </div>
+  <div class="q-icon">▸</div>
+</button>
+<div class="a-wrap"><div class="a-inner"><div class="a-body"><div class="answer-grid">
+<div class="row"><div class="k">Respuesta</div><div class="v">Sigue siendo vigente porque responde a una pregunta estructural que continúa apareciendo en sistemas contemporáneos muy distintos: cómo puede un sistema ser al mismo tiempo modular y conectado, localmente cohesivo y globalmente accesible.</div></div>
+<div class="row"><div class="k">Campos de aplicación</div><div class="v">Esa pregunta sigue siendo central en redes sociales digitales, Internet, sistemas biológicos, neurociencia, logística, finanzas, economía organizacional y ciencia de datos.</div></div>
+<div class="row"><div class="k">Vigencia teórica</div><div class="v">Aunque hoy sepamos que muchas redes reales también tienen hubs, pesos y direcciones, el principio de base sigue siendo válido: una pequeña cantidad de conexiones globales añadidas sobre una estructura local densa puede transformar radicalmente la eficiencia del sistema sin destruir su cohesión interna.</div></div>
+<div class="highlight"><strong>Resumen:</strong> Cierre: el small world sigue vigente porque captura un equilibrio estructural fundamental entre orden local y alcance global.</div>
+</div></div></div></div></article>
+</section>
+<div class="empty" id="emptyState">No hay coincidencias para la búsqueda actual.</div>
+</main>
+<footer>
+  Material elaborado por el profesor Sergio Gevatschnaider.
+</footer>
+</div>
+<script>
+const cards=[...document.querySelectorAll('.card')];
+const expandAllBtn=document.getElementById('expandAllBtn');
+const collapseAllBtn=document.getElementById('collapseAllBtn');
+const openCount=document.getElementById('openCount');
+const pctText=document.getElementById('pctText');
+const progInner=document.getElementById('progInner');
+const searchInput=document.getElementById('searchInput');
+const emptyState=document.getElementById('emptyState');
+const themeBtns=[...document.querySelectorAll('.theme-btn')];
+
+function updateProgress(){
+  const visible=cards.filter(c=>!c.classList.contains('hidden'));
+  const open=visible.filter(c=>c.classList.contains('open')).length;
+  const total=visible.length;
+  const pct=total?Math.round(open*100/total):0;
+  openCount.textContent=`${open} / ${total} abiertas`;
+  pctText.textContent=`${pct}%`;
+  progInner.style.width=`${pct}%`;
+}
+function setCard(card,open){card.classList.toggle('open',open);updateProgress();}
+cards.forEach(card=>{card.querySelector('.q-trigger').addEventListener('click',()=>setCard(card,!card.classList.contains('open')));});
+expandAllBtn.addEventListener('click',()=>cards.filter(c=>!c.classList.contains('hidden')).forEach(c=>c.classList.add('open'))||updateProgress());
+collapseAllBtn.addEventListener('click',()=>cards.forEach(c=>c.classList.remove('open'))||updateProgress());
+searchInput.addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim();
+  let visible=0;
+  cards.forEach(card=>{
+    const txt=card.innerText.toLowerCase();
+    const match=txt.includes(q);
+    card.classList.toggle('hidden',!match);
+    if(match) visible++;
+  });
+  emptyState.style.display=visible? 'none':'block';
+  updateProgress();
+});
+const savedTheme=localStorage.getItem('smallworld-question-theme')||'dark';
+document.documentElement.dataset.theme=savedTheme;
+themeBtns.forEach(btn=>{if(btn.dataset.themeValue===savedTheme) btn.classList.add('active');
+  btn.addEventListener('click',()=>{
+    themeBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const theme=btn.dataset.themeValue;
+    document.documentElement.dataset.theme=theme;
+    localStorage.setItem('smallworld-question-theme',theme);
+  });
+});
+updateProgress();
+</script>
+</body></html>

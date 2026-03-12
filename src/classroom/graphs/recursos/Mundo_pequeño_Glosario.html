@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glosario de Mundo Pequeño y Teoría de Redes</title>
+<style>
+:root {
+  --bg:#0f172a; --bg-soft:#111c34; --panel:#13213d; --panel-2:#17294b; --card:#182b4d;
+  --text:#e8eef8; --muted:#b8c4d9; --accent:#7cc5ff; --accent-2:#3fa7ff; --border:rgba(255,255,255,.10);
+  --shadow:0 12px 28px rgba(0,0,0,.22); --radius:18px; --radius-sm:12px; --maxw:1240px;
+}
+html[data-theme="light"] {
+  --bg:#f6f9fc; --bg-soft:#eef4fb; --panel:#ffffff; --panel-2:#f8fbff; --card:#ffffff;
+  --text:#1d2a3a; --muted:#5b6676; --accent:#1d78d6; --accent-2:#0f5fb7; --border:rgba(20,40,80,.10);
+  --shadow:0 10px 24px rgba(29,42,58,.08);
+}
+html[data-theme="sepia"] {
+  --bg:#f4efe6; --bg-soft:#efe7da; --panel:#fbf6ee; --panel-2:#f7f0e5; --card:#fffaf2;
+  --text:#47392c; --muted:#7b6a59; --accent:#8f5c2c; --accent-2:#6e431e; --border:rgba(80,50,20,.12);
+  --shadow:0 10px 22px rgba(70,50,30,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  background:linear-gradient(180deg,var(--bg) 0%, var(--bg-soft) 100%);
+  color:var(--text); line-height:1.6;
+}
+.wrapper{max-width:var(--maxw);margin:0 auto;padding:28px 20px 80px}
+.hero{
+  background:linear-gradient(135deg,var(--panel),var(--panel-2));
+  border:1px solid var(--border); border-radius:26px; padding:34px 30px; box-shadow:var(--shadow);
+}
+.eyebrow{display:inline-flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.04);font-size:.92rem;color:var(--muted)}
+.hero h1{font-size:clamp(2rem,3vw,3.2rem);line-height:1.08;margin:16px 0 10px}
+.hero .lead{font-size:1.06rem;max-width:920px;color:var(--muted);margin:0 0 18px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.chip{padding:8px 12px;border-radius:999px;background:rgba(124,197,255,.12);border:1px solid var(--border);color:var(--text);font-size:.92rem}
+.info-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin:20px 0 22px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 10px;font-size:1.2rem}
+.panel p{margin:0;color:var(--muted)}
+.controls{position:sticky; top:10px; z-index:20; margin:24px 0 18px; background:rgba(15,23,42,.72); backdrop-filter: blur(12px); border:1px solid var(--border); border-radius:20px; padding:14px; box-shadow:var(--shadow)}
+html[data-theme="light"] .controls, html[data-theme="sepia"] .controls{background:rgba(255,255,255,.78)}
+.controls-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.search-wrap{flex:1 1 420px; position:relative}
+.search-wrap input{width:100%; padding:14px 16px 14px 42px; border-radius:14px; border:1px solid var(--border); background:var(--panel); color:var(--text); font:inherit}
+.search-wrap .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button.ctrl, .alpha a{border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:12px; padding:11px 14px; font:inherit; cursor:pointer; text-decoration:none}
+.alpha{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.alpha a{padding:8px 11px;min-width:40px;text-align:center}
+.stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:.95rem}
+.letter-group{margin:24px 0 0}
+.letter-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px;padding:0 2px}
+.letter-head h2{margin:0;font-size:1.7rem}
+.letter-head p{margin:0;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.card{background:var(--card); border:1px solid var(--border); border-radius:20px; overflow:hidden; box-shadow:var(--shadow)}
+.card-head{width:100%; text-align:left; border:none; background:transparent; color:inherit; padding:18px 18px 14px; cursor:pointer}
+.card-topline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.badge{display:inline-flex; padding:6px 10px; border-radius:999px; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; border:1px solid var(--border); color:var(--accent)}
+.chev{font-size:1.1rem;color:var(--muted);transition:transform .2s ease}
+.card.open .chev{transform:rotate(180deg)}
+.card h3{margin:12px 0 8px; font-size:1.2rem; line-height:1.25}
+.summary{margin:0; color:var(--muted)}
+.card-body{display:none; padding:0 18px 18px}
+.card.open .card-body{display:block}
+.kv{padding:14px 0; border-top:1px solid var(--border)}
+.kv span{display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); margin-bottom:6px}
+.kv p{margin:0; color:var(--text)}
+.empty{display:none; margin:30px 0; background:var(--panel); border:1px dashed var(--border); border-radius:18px; padding:24px; text-align:center; color:var(--muted)}
+.footer{margin-top:34px; color:var(--muted); text-align:center; font-size:.94rem}
+@media (max-width:920px) {
+  .info-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header class="hero">
+    <span class="eyebrow">Glosario interactivo · teoría de redes · small world</span>
+    <h1>Glosario de Mundo Pequeño y Teoría de Redes</h1>
+    <p class="lead">Definiciones desarrolladas sobre small world, grafos y dinámica estructural. El material conserva la lógica didáctica del modelo original: portada editorial, lectura guiada, navegación alfabética, buscador y tarjetas expandibles con desarrollo conceptual consistente.</p>
+    <div class="chips">
+      <span class="chip">Caminos cortos</span>
+      <span class="chip">Clustering alto</span>
+      <span class="chip">Modelos de referencia</span>
+      <span class="chip">Difusión y robustez</span>
+      <span class="chip">Estructura y dinámica</span>
+    </div>
+  </header>
+
+  <section class="info-grid">
+    <article class="panel">
+      <h2>Cómo leer este glosario</h2>
+      <p>Cada término aparece en una tarjeta con una definición desarrollada, una idea clave que lo vincula con la teoría del mundo pequeño y una lectura aplicada. La intención no es ofrecer frases sueltas, sino una arquitectura conceptual compacta y reutilizable para estudio, docencia y redacción académica.</p>
+    </article>
+    <article class="panel">
+      <h2>Criterio conceptual</h2>
+      <p>El fenómeno de mundo pequeño se entiende aquí como una combinación de integración global y cohesión local. Por eso las entradas reúnen conceptos de teoría de grafos, redes empíricas, modelos aleatorios, crecimiento, difusión, vulnerabilidad y comparación con modelos nulos.</p>
+    </article>
+  </section>
+
+  <section class="controls">
+    <div class="controls-row">
+      <div class="search-wrap">
+        <span class="icon">⌕</span>
+        <input id="search" type="search" placeholder="Buscar término, idea o categoría..." />
+      </div>
+      <div class="btns">
+        <button class="ctrl" id="expandAll">Expandir todo</button>
+        <button class="ctrl" id="collapseAll">Colapsar todo</button>
+        <button class="ctrl theme" data-theme="dark">Oscuro</button>
+        <button class="ctrl theme" data-theme="light">Claro</button>
+        <button class="ctrl theme" data-theme="sepia">Sepia</button>
+      </div>
+    </div>
+    <nav class="alpha">
+      <a href="#letter-A">A</a><a href="#letter-C">C</a><a href="#letter-D">D</a><a href="#letter-E">E</a><a href="#letter-G">G</a><a href="#letter-H">H</a><a href="#letter-I">I</a><a href="#letter-L">L</a><a href="#letter-M">M</a><a href="#letter-N">N</a><a href="#letter-P">P</a><a href="#letter-R">R</a><a href="#letter-S">S</a><a href="#letter-T">T</a><a href="#letter-V">V</a>
+    </nav>
+    <div class="stats">
+      <span><strong id="visibleCount">69</strong> términos visibles</span>
+      <span><strong id="openCount">0</strong> tarjetas abiertas</span>
+      <span><strong>69</strong> términos totales</span>
+    </div>
+  </section>
+
+  <main id="glossary">
+    <div class="empty" id="emptyState">No hay coincidencias con esa búsqueda. Probá con otra palabra o limpiá el filtro.</div>
+    
+    <section id="letter-A" class="letter-group" data-letter="A">
+      <div class="letter-head">
+        <h2>A</h2>
+        <p>3 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="adjunción preferencial mecanismo de crecimiento regla por la cual los nodos nuevos tienden a conectarse con nodos ya muy conectados. es el mecanismo que asigna a cada nodo existente una probabilidad de recibir nuevas conexiones proporcional a su grado. cuanto más conectado está un nodo, más probable es que atraiga enlaces adicionales.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="adjuncion-preferencial">
+        <div class="card-topline">
+          <span class="badge">Mecanismo de crecimiento</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Adjunción preferencial</h3>
+        <p class="summary">Regla por la cual los nodos nuevos tienden a conectarse con nodos ya muy conectados.</p>
+      </button>
+      <div class="card-body" id="adjuncion-preferencial">
+        <div class="kv"><span>Definición</span><p>Es el mecanismo que asigna a cada nodo existente una probabilidad de recibir nuevas conexiones proporcional a su grado. Cuanto más conectado está un nodo, más probable es que atraiga enlaces adicionales.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Explica la formación de hubs y conecta la teoría de redes con la heterogeneidad extrema de muchas redes reales, algo que excede al small world homogéneo de Watts–Strogatz.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En la Web, páginas muy enlazadas tienden a recibir todavía más enlaces con el tiempo.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="arista o enlace relación elemental conexión entre dos nodos de la red. la arista representa la relación entre dos entidades. en un grafo no dirigido se escribe {u,v}; en uno dirigido se escribe (u,v), resaltando que la relación tiene orientación.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="arista-o-enlace">
+        <div class="card-topline">
+          <span class="badge">Relación elemental</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Arista o enlace</h3>
+        <p class="summary">Conexión entre dos nodos de la red.</p>
+      </button>
+      <div class="card-body" id="arista-o-enlace">
+        <div class="kv"><span>Definición</span><p>La arista representa la relación entre dos entidades. En un grafo no dirigido se escribe {u,v}; en uno dirigido se escribe (u,v), resaltando que la relación tiene orientación.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Sin aristas no hay caminos, ni distancias, ni clustering. Todo el fenómeno de mundo pequeño depende de cómo estén distribuidos los enlaces.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un vuelo directo entre dos aeropuertos puede modelarse como una arista.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="atajo o shortcut conexión de largo alcance enlace que une regiones antes lejanas y reduce drásticamente las distancias. es una arista cuyo efecto topológico supera a sus dos extremos inmediatos, porque acorta trayectorias entre bloques enteros de nodos o entre comunidades distintas.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="atajo-o-shortcut">
+        <div class="card-topline">
+          <span class="badge">Conexión de largo alcance</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Atajo o shortcut</h3>
+        <p class="summary">Enlace que une regiones antes lejanas y reduce drásticamente las distancias.</p>
+      </button>
+      <div class="card-body" id="atajo-o-shortcut">
+        <div class="kv"><span>Definición</span><p>Es una arista cuyo efecto topológico supera a sus dos extremos inmediatos, porque acorta trayectorias entre bloques enteros de nodos o entre comunidades distintas.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la pieza decisiva del small world: unos pocos atajos pueden derrumbar la longitud media de camino sin destruir el agrupamiento local.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un conocido que conecta dos círculos sociales distintos funciona como shortcut.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-C" class="letter-group" data-letter="C">
+      <div class="letter-head">
+        <h2>C</h2>
+        <p>13 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="camino secuencia estructural ruta formada por nodos conectados consecutivamente. un camino es una sucesión v0, v1, …, vℓ tal que cada par consecutivo está unido por una arista. su longitud es el número de pasos necesarios para ir del origen al destino.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="camino">
+        <div class="card-topline">
+          <span class="badge">Secuencia estructural</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Camino</h3>
+        <p class="summary">Ruta formada por nodos conectados consecutivamente.</p>
+      </button>
+      <div class="card-body" id="camino">
+        <div class="kv"><span>Definición</span><p>Un camino es una sucesión v0, v1, …, vℓ tal que cada par consecutivo está unido por una arista. Su longitud es el número de pasos necesarios para ir del origen al destino.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Permite formalizar la idea de alcance dentro de una red. Sin caminos no se puede hablar de separación estructural ni de conectividad.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una cadena de personas que transmite un mensaje de una a otra es un camino.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="camino simple restricción de recorrido camino que no repite nodos. se usa para estudiar conectividad y estructura evitando trayectorias redundantes o circulares que no agregan información sobre la relación entre regiones de la red.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="camino-simple">
+        <div class="card-topline">
+          <span class="badge">Restricción de recorrido</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Camino simple</h3>
+        <p class="summary">Camino que no repite nodos.</p>
+      </button>
+      <div class="card-body" id="camino-simple">
+        <div class="kv"><span>Definición</span><p>Se usa para estudiar conectividad y estructura evitando trayectorias redundantes o circulares que no agregan información sobre la relación entre regiones de la red.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Ayuda a analizar la posibilidad real de unir zonas del grafo sin caer en rodeos artificiales.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En un mapa de rutas, un itinerario que no vuelve a pasar por la misma ciudad es un camino simple.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="cascada difusión encadenada propagación en cadena de adopciones, fallos o activaciones. describe procesos donde una activación local desencadena otras sucesivamente hasta alcanzar una fracción significativa de la red.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="cascada">
+        <div class="card-topline">
+          <span class="badge">Difusión encadenada</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Cascada</h3>
+        <p class="summary">Propagación en cadena de adopciones, fallos o activaciones.</p>
+      </button>
+      <div class="card-body" id="cascada">
+        <div class="kv"><span>Definición</span><p>Describe procesos donde una activación local desencadena otras sucesivamente hasta alcanzar una fracción significativa de la red.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Las redes small-world reducen barreras topológicas, por lo que facilitan cascadas de información, contagio, innovación o colapso.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un rumor que pasa de grupo en grupo hasta volverse viral es una cascada.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="cierre triádico mecanismo de cohesión tendencia a que dos nodos conectados a un tercero terminen conectándose entre sí. si a se relaciona con b y b con c, aumenta la probabilidad de que a y c cierren el triángulo. es un patrón central en sociología y crecimiento de redes.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="cierre-triadico">
+        <div class="card-topline">
+          <span class="badge">Mecanismo de cohesión</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Cierre triádico</h3>
+        <p class="summary">Tendencia a que dos nodos conectados a un tercero terminen conectándose entre sí.</p>
+      </button>
+      <div class="card-body" id="cierre-triadico">
+        <div class="kv"><span>Definición</span><p>Si A se relaciona con B y B con C, aumenta la probabilidad de que A y C cierren el triángulo. Es un patrón central en sociología y crecimiento de redes.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Explica la formación natural de triángulos, clustering alto y comunidades densas, rasgos esenciales del small world.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Tres colegas de investigación que terminan colaborando entre sí ilustran cierre triádico.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="clustering o agrupamiento cohesión local tendencia de los vecinos de un nodo a conectarse entre sí. expresa el grado de cierre local, densidad de triángulos y cohesión del entorno inmediato de cada nodo.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="clustering-o-agrupamiento">
+        <div class="card-topline">
+          <span class="badge">Cohesión local</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Clustering o agrupamiento</h3>
+        <p class="summary">Tendencia de los vecinos de un nodo a conectarse entre sí.</p>
+      </button>
+      <div class="card-body" id="clustering-o-agrupamiento">
+        <div class="kv"><span>Definición</span><p>Expresa el grado de cierre local, densidad de triángulos y cohesión del entorno inmediato de cada nodo.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es una de las dos señales definitorias del small world, junto con la presencia de caminos globales cortos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En una red de amistad, un clustering alto implica que mis amigos también suelen conocerse.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="coeficiente de agrupamiento global promedio de cierre local promedio del clustering local en todos los nodos. se define como c(g)= (1/n) σ c(u) y resume cuánto cierre local tiene la red en promedio.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="coeficiente-de-agrupamiento-global">
+        <div class="card-topline">
+          <span class="badge">Promedio de cierre local</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Coeficiente de agrupamiento global</h3>
+        <p class="summary">Promedio del clustering local en todos los nodos.</p>
+      </button>
+      <div class="card-body" id="coeficiente-de-agrupamiento-global">
+        <div class="kv"><span>Definición</span><p>Se define como C(G)= (1/n) Σ c(u) y resume cuánto cierre local tiene la red en promedio.</p></div>
+        <div class="kv"><span>Idea clave</span><p>En redes aleatorias grandes suele ser bajo; en redes small-world se mantiene relativamente alto frente a la red de referencia.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Si muchas vecindades tienen triángulos, el coeficiente global será elevado.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="coeficiente de agrupamiento local cierre en la vecindad fracción de conexiones efectivas entre los vecinos de un nodo. para un nodo u con grado ku y eu enlaces entre sus vecinos, se define como c(u)=2eu/[ku(ku−1)].">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="coeficiente-de-agrupamiento-local">
+        <div class="card-topline">
+          <span class="badge">Cierre en la vecindad</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Coeficiente de agrupamiento local</h3>
+        <p class="summary">Fracción de conexiones efectivas entre los vecinos de un nodo.</p>
+      </button>
+      <div class="card-body" id="coeficiente-de-agrupamiento-local">
+        <div class="kv"><span>Definición</span><p>Para un nodo u con grado ku y eu enlaces entre sus vecinos, se define como c(u)=2eu/[ku(ku−1)].</p></div>
+        <div class="kv"><span>Idea clave</span><p>Mide cohesión local nodo por nodo y permite detectar entornos muy cerrados o muy abiertos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Si mis cinco amigos posibles entre sí tienen todas las conexiones, mi clustering local es 1.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="componente conexa subred conectada subconjunto máximo de nodos donde todos se alcanzan por caminos. dentro de una componente conexa cualquier par de nodos puede unirse siguiendo enlaces existentes. entre componentes distintas no existe camino alguno.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="componente-conexa">
+        <div class="card-topline">
+          <span class="badge">Subred conectada</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Componente conexa</h3>
+        <p class="summary">Subconjunto máximo de nodos donde todos se alcanzan por caminos.</p>
+      </button>
+      <div class="card-body" id="componente-conexa">
+        <div class="kv"><span>Definición</span><p>Dentro de una componente conexa cualquier par de nodos puede unirse siguiendo enlaces existentes. Entre componentes distintas no existe camino alguno.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Importa porque la longitud media de camino solo tiene sentido global en zonas conectadas de la red.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red fragmentada en varios grupos aislados tiene varias componentes conexas.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="componente gigante conectividad macroscópica componente conexa que contiene una fracción grande del sistema. marca el pasaje desde una red fragmentada a una estructura con conectividad global relevante.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="componente-gigante">
+        <div class="card-topline">
+          <span class="badge">Conectividad macroscópica</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Componente gigante</h3>
+        <p class="summary">Componente conexa que contiene una fracción grande del sistema.</p>
+      </button>
+      <div class="card-body" id="componente-gigante">
+        <div class="kv"><span>Definición</span><p>Marca el pasaje desde una red fragmentada a una estructura con conectividad global relevante.</p></div>
+        <div class="kv"><span>Idea clave</span><p>En muchos estudios empíricos del small world se mide la distancia y el clustering sobre la componente gigante, no sobre todo el grafo fragmentado.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En Internet o en una red social suele existir un bloque principal que reúne a la mayoría de los nodos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="comunidad bloque cohesivo conjunto de nodos con muchas conexiones internas y pocas externas. las comunidades son regiones densas de la red que concentran relaciones relativamente frecuentes o intensas en su interior.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="comunidad">
+        <div class="card-topline">
+          <span class="badge">Bloque cohesivo</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Comunidad</h3>
+        <p class="summary">Conjunto de nodos con muchas conexiones internas y pocas externas.</p>
+      </button>
+      <div class="card-body" id="comunidad">
+        <div class="kv"><span>Definición</span><p>Las comunidades son regiones densas de la red que concentran relaciones relativamente frecuentes o intensas en su interior.</p></div>
+        <div class="kv"><span>Idea clave</span><p>El small world suele combinar muchas comunidades locales con pocos enlaces puente entre ellas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En una universidad, cada carrera puede comportarse como comunidad dentro de la red general.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="conectividad propiedad global condición de poder unir nodos mediante caminos. una red es conexa cuando cualquier par de nodos puede unirse por alguna secuencia de aristas.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="conectividad">
+        <div class="card-topline">
+          <span class="badge">Propiedad global</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Conectividad</h3>
+        <p class="summary">Condición de poder unir nodos mediante caminos.</p>
+      </button>
+      <div class="card-body" id="conectividad">
+        <div class="kv"><span>Definición</span><p>Una red es conexa cuando cualquier par de nodos puede unirse por alguna secuencia de aristas.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es un requisito básico para interpretar distancias medias de manera global y evaluar si la red realmente está encogida topológicamente.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Si dos barrios de una red urbana no tienen ninguna vía entre sí, la red no es conexa.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="coordinación orden colectivo alineación de decisiones, ritmos o acciones entre nodos. es una forma amplia de comportamiento colectivo organizado que no exige identidad perfecta, sino compatibilidad funcional o temporal.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="coordinacion">
+        <div class="card-topline">
+          <span class="badge">Orden colectivo</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Coordinación</h3>
+        <p class="summary">Alineación de decisiones, ritmos o acciones entre nodos.</p>
+      </button>
+      <div class="card-body" id="coordinacion">
+        <div class="kv"><span>Definición</span><p>Es una forma amplia de comportamiento colectivo organizado que no exige identidad perfecta, sino compatibilidad funcional o temporal.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Las distancias cortas de una red small-world favorecen la integración rápida de información entre módulos y mejoran la coordinación.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Equipos que ajustan acciones en pocos pasos gracias a contactos intermedios muestran coordinación.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="crecimiento de red dinámica temporal proceso por el cual la red incorpora nuevos nodos y enlaces con el tiempo. muchas redes no son estáticas: cambian de tamaño y estructura a medida que evolucionan sus interacciones.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="crecimiento-de-red">
+        <div class="card-topline">
+          <span class="badge">Dinámica temporal</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Crecimiento de red</h3>
+        <p class="summary">Proceso por el cual la red incorpora nuevos nodos y enlaces con el tiempo.</p>
+      </button>
+      <div class="card-body" id="crecimiento-de-red">
+        <div class="kv"><span>Definición</span><p>Muchas redes no son estáticas: cambian de tamaño y estructura a medida que evolucionan sus interacciones.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es central en Barabási porque la topología final depende del historial de incorporación y no solo del estado actual.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>La Web crece cuando aparecen nuevos sitios y se crean nuevos hipervínculos.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-D" class="letter-group" data-letter="D">
+      <div class="letter-head">
+        <h2>D</h2>
+        <p>6 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="difusión propagación en red proceso por el cual algo se expande a través de la estructura relacional. puede tratarse de información, virus, rumores, innovación, señales o fallos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="difusion">
+        <div class="card-topline">
+          <span class="badge">Propagación en red</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Difusión</h3>
+        <p class="summary">Proceso por el cual algo se expande a través de la estructura relacional.</p>
+      </button>
+      <div class="card-body" id="difusion">
+        <div class="kv"><span>Definición</span><p>Puede tratarse de información, virus, rumores, innovación, señales o fallos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>La topología small-world favorece la difusión veloz porque reduce distancias y conecta comunidades separadas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una noticia que cruza rápidamente diferentes grupos sociales se difunde sobre la red.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="distancia geodésica separación estructural longitud del camino más corto entre dos nodos. se denota d(u,v) y no mide cercanía espacial sino topológica.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="distancia-geodesica">
+        <div class="card-topline">
+          <span class="badge">Separación estructural</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Distancia geodésica</h3>
+        <p class="summary">Longitud del camino más corto entre dos nodos.</p>
+      </button>
+      <div class="card-body" id="distancia-geodesica">
+        <div class="kv"><span>Definición</span><p>Se denota d(u,v) y no mide cercanía espacial sino topológica.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la base para definir longitud media de camino, diámetro, excentricidad y otras métricas centrales del small world.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Dos personas en países distintos pueden tener distancia 2 si comparten un intermediario.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="distancia social cercanía por atributos proximidad entre nodos según categorías, semejanzas o pertenencias. no coincide necesariamente con la distancia geodésica: dos nodos pueden ser socialmente próximos aunque no estén conectados.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="distancia-social">
+        <div class="card-topline">
+          <span class="badge">Cercanía por atributos</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Distancia social</h3>
+        <p class="summary">Proximidad entre nodos según categorías, semejanzas o pertenencias.</p>
+      </button>
+      <div class="card-body" id="distancia-social">
+        <div class="kv"><span>Definición</span><p>No coincide necesariamente con la distancia geodésica: dos nodos pueden ser socialmente próximos aunque no estén conectados.</p></div>
+        <div class="kv"><span>Idea clave</span><p>En redes humanas la búsqueda suele guiarse por pistas de distancia social más que por un mapa completo del grafo.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Compartir profesión, ciudad o idioma puede reducir la distancia social.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="distribución de grados perfil de conectividad función que indica qué proporción de nodos tiene cada grado k. se expresa como p(k)=pr(deg(u)=k). permite distinguir si la conectividad está repartida de forma homogénea o concentrada.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="distribucion-de-grados">
+        <div class="card-topline">
+          <span class="badge">Perfil de conectividad</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Distribución de grados</h3>
+        <p class="summary">Función que indica qué proporción de nodos tiene cada grado k.</p>
+      </button>
+      <div class="card-body" id="distribucion-de-grados">
+        <div class="kv"><span>Definición</span><p>Se expresa como P(k)=Pr(deg(u)=k). Permite distinguir si la conectividad está repartida de forma homogénea o concentrada.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es más informativa que el grado medio, porque dos redes con igual promedio pueden tener estructuras radicalmente distintas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red con pocos hubs grandes y muchos nodos pequeños tiene una distribución muy sesgada.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="distribución de poisson patrón clásico forma típica del grado en redes aleatorias homogéneas. describe situaciones donde la mayoría de los nodos tiene grados próximos al promedio y los extremos son raros.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="distribucion-de-poisson">
+        <div class="card-topline">
+          <span class="badge">Patrón clásico</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Distribución de Poisson</h3>
+        <p class="summary">Forma típica del grado en redes aleatorias homogéneas.</p>
+      </button>
+      <div class="card-body" id="distribucion-de-poisson">
+        <div class="kv"><span>Definición</span><p>Describe situaciones donde la mayoría de los nodos tiene grados próximos al promedio y los extremos son raros.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Sirve como contraste frente a redes libres de escala, donde los hubs son mucho más frecuentes de lo esperado bajo Poisson.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>El modelo de Erdős–Rényi genera distribuciones cercanas a Poisson en ciertos regímenes.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="diámetro extremo de la separación mayor distancia geodésica entre dos nodos del grafo. formalmente, diam(g)=max d(u,v). mide el peor caso de separación, no el caso típico.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="diametro">
+        <div class="card-topline">
+          <span class="badge">Extremo de la separación</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Diámetro</h3>
+        <p class="summary">Mayor distancia geodésica entre dos nodos del grafo.</p>
+      </button>
+      <div class="card-body" id="diametro">
+        <div class="kv"><span>Definición</span><p>Formalmente, diam(G)=max d(u,v). Mide el peor caso de separación, no el caso típico.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Aporta contexto al análisis del small world, pero no sustituye a la longitud media de camino.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red puede tener diámetro grande aunque la mayoría de los pares estén cerca.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-E" class="letter-group" data-letter="E">
+      <div class="letter-head">
+        <h2>E</h2>
+        <p>4 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="epidemia en red contagio sobre estructura propagación de una infección biológica o digital sobre una red. la dinámica depende tanto del agente contagioso como de la arquitectura de contactos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="epidemia-en-red">
+        <div class="card-topline">
+          <span class="badge">Contagio sobre estructura</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Epidemia en red</h3>
+        <p class="summary">Propagación de una infección biológica o digital sobre una red.</p>
+      </button>
+      <div class="card-body" id="epidemia-en-red">
+        <div class="kv"><span>Definición</span><p>La dinámica depende tanto del agente contagioso como de la arquitectura de contactos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>En redes small-world, los atajos permiten que el contagio escape de focos locales y alcance otras regiones con rapidez.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un brote puede dejar de ser local cuando cruza una comunidad mediante un enlace puente.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="equilibrio entre orden y azar idea síntesis fórmula conceptual que resume el fenómeno de mundo pequeño. el orden produce comunidades, triángulos y repetición local; el azar introduce puentes, shortcuts y reducción de distancias globales.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="equilibrio-entre-orden-y-azar">
+        <div class="card-topline">
+          <span class="badge">Idea síntesis</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Equilibrio entre orden y azar</h3>
+        <p class="summary">Fórmula conceptual que resume el fenómeno de mundo pequeño.</p>
+      </button>
+      <div class="card-body" id="equilibrio-entre-orden-y-azar">
+        <div class="kv"><span>Definición</span><p>El orden produce comunidades, triángulos y repetición local; el azar introduce puentes, shortcuts y reducción de distancias globales.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la mejor manera de interpretar la región intermedia entre red regular y red aleatoria.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red small-world no es puro desorden ni pura rigidez, sino mezcla estructural eficiente.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="escalabilidad viabilidad a gran tamaño capacidad de una medida o método para seguir siendo útil cuando la red crece mucho. no todas las técnicas son igual de eficientes en redes enormes; algunas métricas exactas se vuelven costosas.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="escalabilidad">
+        <div class="card-topline">
+          <span class="badge">Viabilidad a gran tamaño</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Escalabilidad</h3>
+        <p class="summary">Capacidad de una medida o método para seguir siendo útil cuando la red crece mucho.</p>
+      </button>
+      <div class="card-body" id="escalabilidad">
+        <div class="kv"><span>Definición</span><p>No todas las técnicas son igual de eficientes en redes enormes; algunas métricas exactas se vuelven costosas.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es crucial al medir small-worldness en sistemas grandes, donde calcular todas las distancias puede resultar inviable.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En redes con millones de nodos suele recurrirse a estimaciones en lugar de cómputos exhaustivos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="excentricidad periferia de un nodo mayor distancia entre un nodo y cualquier otro alcanzable. se define como ε(u)=max d(u,v). permite ver cuán lejos está un nodo del resto en el peor caso.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="excentricidad">
+        <div class="card-topline">
+          <span class="badge">Periferia de un nodo</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Excentricidad</h3>
+        <p class="summary">Mayor distancia entre un nodo y cualquier otro alcanzable.</p>
+      </button>
+      <div class="card-body" id="excentricidad">
+        <div class="kv"><span>Definición</span><p>Se define como ε(u)=max d(u,v). Permite ver cuán lejos está un nodo del resto en el peor caso.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Distingue posiciones centrales de posiciones periféricas dentro de la estructura global.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un nodo con baja excentricidad está relativamente cerca de todo el sistema.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-G" class="letter-group" data-letter="G">
+      <div class="letter-head">
+        <h2>G</h2>
+        <p>4 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="geometría topológica cercanía no espacial idea de que la proximidad depende de la estructura de conexiones y no del espacio físico. en redes importa quién está unido con quién, no solo dónde está ubicado cada nodo en el mapa.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="geometria-topologica">
+        <div class="card-topline">
+          <span class="badge">Cercanía no espacial</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Geometría topológica</h3>
+        <p class="summary">Idea de que la proximidad depende de la estructura de conexiones y no del espacio físico.</p>
+      </button>
+      <div class="card-body" id="geometria-topologica">
+        <div class="kv"><span>Definición</span><p>En redes importa quién está unido con quién, no solo dónde está ubicado cada nodo en el mapa.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la intuición profunda detrás del small world: la red puede estar topológicamente encogida aunque sus nodos estén lejos en el espacio.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un atajo digital puede volver vecinas a dos regiones geográficas muy distantes.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="grado conectividad local número de enlaces directos que posee un nodo. se denota ku o deg(u). mide cuántas relaciones inmediatas tiene un nodo con su entorno.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="grado">
+        <div class="card-topline">
+          <span class="badge">Conectividad local</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Grado</h3>
+        <p class="summary">Número de enlaces directos que posee un nodo.</p>
+      </button>
+      <div class="card-body" id="grado">
+        <div class="kv"><span>Definición</span><p>Se denota ku o deg(u). Mide cuántas relaciones inmediatas tiene un nodo con su entorno.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es una de las primeras medidas de centralidad local y condiciona muchas propiedades de la red.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En una red de vuelos, el grado de un aeropuerto es la cantidad de destinos directos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="grado medio promedio estructural promedio del número de conexiones por nodo. puede escribirse como ⟨k⟩=2|e|/|v| en grafos no dirigidos. resume la densidad relativa de enlaces.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="grado-medio">
+        <div class="card-topline">
+          <span class="badge">Promedio estructural</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Grado medio</h3>
+        <p class="summary">Promedio del número de conexiones por nodo.</p>
+      </button>
+      <div class="card-body" id="grado-medio">
+        <div class="kv"><span>Definición</span><p>Puede escribirse como ⟨k⟩=2|E|/|V| en grafos no dirigidos. Resume la densidad relativa de enlaces.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Interviene en fórmulas de caminos, umbrales de contagio y modelos aleatorios comparativos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red puede tener grado medio bajo y aun así ser small-world si sus enlaces están bien ubicados.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="grafo formalización matemática representación matemática de una red como g=(v,e). v es el conjunto de vértices o nodos y e el conjunto de aristas o enlaces. el grafo permite estudiar rutas, comunidades, centralidad, fragmentación y forma global.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="grafo">
+        <div class="card-topline">
+          <span class="badge">Formalización matemática</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Grafo</h3>
+        <p class="summary">Representación matemática de una red como G=(V,E).</p>
+      </button>
+      <div class="card-body" id="grafo">
+        <div class="kv"><span>Definición</span><p>V es el conjunto de vértices o nodos y E el conjunto de aristas o enlaces. El grafo permite estudiar rutas, comunidades, centralidad, fragmentación y forma global.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es el objeto central de análisis en teoría del mundo pequeño.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>La misma estructura formal puede modelar amistades, vuelos, sinapsis o hipervínculos.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-H" class="letter-group" data-letter="H">
+      <div class="letter-head">
+        <h2>H</h2>
+        <p>2 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="homofilia afinidad estructural tendencia de nodos similares a conectarse entre sí. las semejanzas en atributos, intereses, territorio o identidad aumentan la probabilidad de relación.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="homofilia">
+        <div class="card-topline">
+          <span class="badge">Afinidad estructural</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Homofilia</h3>
+        <p class="summary">Tendencia de nodos similares a conectarse entre sí.</p>
+      </button>
+      <div class="card-body" id="homofilia">
+        <div class="kv"><span>Definición</span><p>Las semejanzas en atributos, intereses, territorio o identidad aumentan la probabilidad de relación.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Favorece la formación de comunidades y clustering alto, porque agrupa a nodos parecidos en zonas densas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Personas de la misma profesión suelen conectarse más entre sí.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="hub nodo altamente conectado nodo cuyo número de enlaces supera ampliamente el promedio. concentra tráfico, reduce distancias y organiza gran parte de la conectividad de la red.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="hub">
+        <div class="card-topline">
+          <span class="badge">Nodo altamente conectado</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Hub</h3>
+        <p class="summary">Nodo cuyo número de enlaces supera ampliamente el promedio.</p>
+      </button>
+      <div class="card-body" id="hub">
+        <div class="kv"><span>Definición</span><p>Concentra tráfico, reduce distancias y organiza gran parte de la conectividad de la red.</p></div>
+        <div class="kv"><span>Idea clave</span><p>En redes libres de escala puede producir efectos super small world, pero también generar vulnerabilidades críticas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un gran aeropuerto internacional funciona como hub en la red aérea.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-I" class="letter-group" data-letter="I">
+      <div class="letter-head">
+        <h2>I</h2>
+        <p>1 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="inferencia de red reconstrucción empírica proceso de deducir la red a partir de datos observados. implica decidir qué cuenta como nodo, qué cuenta como enlace, qué umbrales usar y si la relación tiene peso o dirección.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="inferencia-de-red">
+        <div class="card-topline">
+          <span class="badge">Reconstrucción empírica</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Inferencia de red</h3>
+        <p class="summary">Proceso de deducir la red a partir de datos observados.</p>
+      </button>
+      <div class="card-body" id="inferencia-de-red">
+        <div class="kv"><span>Definición</span><p>Implica decidir qué cuenta como nodo, qué cuenta como enlace, qué umbrales usar y si la relación tiene peso o dirección.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es un límite central del diagnóstico small-world: una red puede parecerlo o dejar de parecerlo según cómo se la construya.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Cambiar la definición de interacción en datos biológicos puede alterar completamente la topología inferida.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-L" class="letter-group" data-letter="L">
+      <div class="letter-head">
+        <h2>L</h2>
+        <p>5 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="lazo débil puente social relación poco intensa o poco solapada, pero topológicamente estratégica. su importancia no depende del afecto sino de la capacidad de unir comunidades distintas.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="lazo-debil">
+        <div class="card-topline">
+          <span class="badge">Puente social</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Lazo débil</h3>
+        <p class="summary">Relación poco intensa o poco solapada, pero topológicamente estratégica.</p>
+      </button>
+      <div class="card-body" id="lazo-debil">
+        <div class="kv"><span>Definición</span><p>Su importancia no depende del afecto sino de la capacidad de unir comunidades distintas.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es fundamental para explicar cómo circula información novedosa y cómo se conectan mundos locales diferentes.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un conocido ocasional puede acercar oportunidades laborales de otro círculo social.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="lazo fuerte cohesión interna relación intensa y muy solapada dentro de una comunidad. suele aparecer en vecindades densas y redundantes, reforzando confianza y pertenencia.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="lazo-fuerte">
+        <div class="card-topline">
+          <span class="badge">Cohesión interna</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Lazo fuerte</h3>
+        <p class="summary">Relación intensa y muy solapada dentro de una comunidad.</p>
+      </button>
+      <div class="card-body" id="lazo-fuerte">
+        <div class="kv"><span>Definición</span><p>Suele aparecer en vecindades densas y redundantes, reforzando confianza y pertenencia.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Favorece clustering y robustez local, aunque no necesariamente amplia el alcance global.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Los vínculos familiares o de equipo cercano suelen funcionar como lazos fuertes.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="ley de potencia heterogeneidad extrema relación funcional donde una cantidad decrece como una potencia de otra. en redes aparece cuando p(k) ∝ k^-α, indicando ausencia de un tamaño típico dominante de conectividad.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="ley-de-potencia">
+        <div class="card-topline">
+          <span class="badge">Heterogeneidad extrema</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Ley de potencia</h3>
+        <p class="summary">Relación funcional donde una cantidad decrece como una potencia de otra.</p>
+      </button>
+      <div class="card-body" id="ley-de-potencia">
+        <div class="kv"><span>Definición</span><p>En redes aparece cuando P(k) ∝ k^-α, indicando ausencia de un tamaño típico dominante de conectividad.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la firma matemática de muchas redes libres de escala y del predominio de hubs.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>La probabilidad de grados muy altos cae lentamente en comparación con Poisson.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="longitud característica de camino separación típica robusta medida representativa de distancia que puede usar mediana u otra estadística robusta. se utiliza cuando el promedio resulta muy sensible a valores extremos o a distribuciones muy sesgadas.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="longitud-caracteristica-de-camino">
+        <div class="card-topline">
+          <span class="badge">Separación típica robusta</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Longitud característica de camino</h3>
+        <p class="summary">Medida representativa de distancia que puede usar mediana u otra estadística robusta.</p>
+      </button>
+      <div class="card-body" id="longitud-caracteristica-de-camino">
+        <div class="kv"><span>Definición</span><p>Se utiliza cuando el promedio resulta muy sensible a valores extremos o a distribuciones muy sesgadas.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Ayuda a describir la separación típica sin depender completamente de pocos nodos periféricos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En redes con outliers de distancia, la mediana puede ser más informativa que la media.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="longitud media de camino alcance promedio promedio de las distancias geodésicas entre todos los pares de nodos. se define como l(g)= [1/n(n−1)] σ d(u,v). mide cuántos pasos hacen falta, en promedio, para conectar dos nodos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="longitud-media-de-camino">
+        <div class="card-topline">
+          <span class="badge">Alcance promedio</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Longitud media de camino</h3>
+        <p class="summary">Promedio de las distancias geodésicas entre todos los pares de nodos.</p>
+      </button>
+      <div class="card-body" id="longitud-media-de-camino">
+        <div class="kv"><span>Definición</span><p>Se define como L(G)= [1/n(n−1)] Σ d(u,v). Mide cuántos pasos hacen falta, en promedio, para conectar dos nodos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es una de las dos magnitudes clave del small world y suele compararse con la de una red aleatoria equivalente.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Si casi todos los pares se conectan en pocos pasos, la longitud media es pequeña.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-M" class="letter-group" data-letter="M">
+      <div class="letter-head">
+        <h2>M</h2>
+        <p>5 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="matriz de adyacencia codificación algebraica matriz a que indica qué pares de nodos están conectados. la entrada aij vale 1 si existe enlace entre i y j, y 0 en caso contrario, o un peso si la red es ponderada.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="matriz-de-adyacencia">
+        <div class="card-topline">
+          <span class="badge">Codificación algebraica</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Matriz de adyacencia</h3>
+        <p class="summary">Matriz A que indica qué pares de nodos están conectados.</p>
+      </button>
+      <div class="card-body" id="matriz-de-adyacencia">
+        <div class="kv"><span>Definición</span><p>La entrada Aij vale 1 si existe enlace entre i y j, y 0 en caso contrario, o un peso si la red es ponderada.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Permite aplicar álgebra lineal, análisis espectral y técnicas computacionales sobre grafos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Con potencias de la matriz se pueden contar recorridos de distintas longitudes.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="modelo nulo referencia comparativa red de referencia usada para decidir si una propiedad observada es significativa. en small world suele ser una red aleatoria de tamaño y densidad semejantes, a veces preservando la secuencia de grados.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="modelo-nulo">
+        <div class="card-topline">
+          <span class="badge">Referencia comparativa</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Modelo nulo</h3>
+        <p class="summary">Red de referencia usada para decidir si una propiedad observada es significativa.</p>
+      </button>
+      <div class="card-body" id="modelo-nulo">
+        <div class="kv"><span>Definición</span><p>En small world suele ser una red aleatoria de tamaño y densidad semejantes, a veces preservando la secuencia de grados.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es indispensable para evitar diagnósticos intuitivos engañosos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red solo parece muy agrupada cuando se la compara con un referente apropiado.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="modularidad organización en grupos presencia o medida de la separación en comunidades o módulos. puede referirse de modo general a la estructura comunitaria o a un índice específico que la cuantifica.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="modularidad">
+        <div class="card-topline">
+          <span class="badge">Organización en grupos</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Modularidad</h3>
+        <p class="summary">Presencia o medida de la separación en comunidades o módulos.</p>
+      </button>
+      <div class="card-body" id="modularidad">
+        <div class="kv"><span>Definición</span><p>Puede referirse de modo general a la estructura comunitaria o a un índice específico que la cuantifica.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Las redes small-world suelen mostrar modularidad local junto con caminos cortos entre módulos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una modularidad alta indica grupos internos claros y relativamente poco mezclados.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="mundo pequeño concepto central red grande con caminos típicos cortos y agrupamiento local alto. no significa que tenga pocos nodos, sino que esté topológicamente encogida. la estructura conserva vecindades densas y, al mismo tiempo, permite alcanzar nodos lejanos en pocos pasos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="mundo-pequeno">
+        <div class="card-topline">
+          <span class="badge">Concepto central</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Mundo pequeño</h3>
+        <p class="summary">Red grande con caminos típicos cortos y agrupamiento local alto.</p>
+      </button>
+      <div class="card-body" id="mundo-pequeno">
+        <div class="kv"><span>Definición</span><p>No significa que tenga pocos nodos, sino que esté topológicamente encogida. La estructura conserva vecindades densas y, al mismo tiempo, permite alcanzar nodos lejanos en pocos pasos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la combinación de cohesión local e integración global que da nombre a toda la teoría.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En una red social, tus amigos forman círculos densos pero aun así llegas a desconocidos mediante pocos intermediarios.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="módulo subunidad funcional subred relativamente autónoma dentro de una red mayor. se usa a menudo como casi sinónimo de comunidad, aunque resalta más la especialización funcional.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="modulo">
+        <div class="card-topline">
+          <span class="badge">Subunidad funcional</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Módulo</h3>
+        <p class="summary">Subred relativamente autónoma dentro de una red mayor.</p>
+      </button>
+      <div class="card-body" id="modulo">
+        <div class="kv"><span>Definición</span><p>Se usa a menudo como casi sinónimo de comunidad, aunque resalta más la especialización funcional.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Ayuda a pensar el small world como articulación entre especialización local e integración global.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En neurociencia, un módulo puede corresponder a una función relativamente diferenciada.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-N" class="letter-group" data-letter="N">
+      <div class="letter-head">
+        <h2>N</h2>
+        <p>2 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="navegabilidad búsqueda local eficiente capacidad de encontrar rutas cortas usando solo información local. una red puede tener caminos cortos y aun así ser difícil de navegar si los nodos no saben a quién reenviar un mensaje.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="navegabilidad">
+        <div class="card-topline">
+          <span class="badge">Búsqueda local eficiente</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Navegabilidad</h3>
+        <p class="summary">Capacidad de encontrar rutas cortas usando solo información local.</p>
+      </button>
+      <div class="card-body" id="navegabilidad">
+        <div class="kv"><span>Definición</span><p>Una red puede tener caminos cortos y aun así ser difícil de navegar si los nodos no saben a quién reenviar un mensaje.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es clave en redes humanas y tecnológicas donde no existe un mapa completo disponible para cada nodo.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En experimentos sociales, las personas eligen destinatarios intermedios usando pistas sobre profesión, ciudad o estatus.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="nodo o vértice unidad elemental entidad básica representada en la red. puede corresponder a una persona, empresa, neurona, aeropuerto, molécula o cuenta digital. su significado depende del problema estudiado.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="nodo-o-vertice">
+        <div class="card-topline">
+          <span class="badge">Unidad elemental</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Nodo o vértice</h3>
+        <p class="summary">Entidad básica representada en la red.</p>
+      </button>
+      <div class="card-body" id="nodo-o-vertice">
+        <div class="kv"><span>Definición</span><p>Puede corresponder a una persona, empresa, neurona, aeropuerto, molécula o cuenta digital. Su significado depende del problema estudiado.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Toda interpretación estructural parte de decidir qué cuenta como nodo.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En una red metabólica, el nodo puede ser una sustancia química.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-P" class="letter-group" data-letter="P">
+      <div class="letter-head">
+        <h2>P</h2>
+        <p>3 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="parámetro de reconexión p control del modelo probabilidad de modificar una arista local en watts–strogatz. si p=0 la red es regular; si p aumenta mucho, la red se vuelve más aleatoria. para valores pequeños pero positivos aparece la región small-world.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="parametro-de-reconexion-p">
+        <div class="card-topline">
+          <span class="badge">Control del modelo</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Parámetro de reconexión p</h3>
+        <p class="summary">Probabilidad de modificar una arista local en Watts–Strogatz.</p>
+      </button>
+      <div class="card-body" id="parametro-de-reconexion-p">
+        <div class="kv"><span>Definición</span><p>Si p=0 la red es regular; si p aumenta mucho, la red se vuelve más aleatoria. Para valores pequeños pero positivos aparece la región small-world.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Permite mostrar matemáticamente el paso entre orden local y desorden global.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Con muy pocos rewires ya se observan caídas bruscas en la longitud media.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="percolación marco de conectividad teoría para estudiar propagación, robustez y aparición de componentes gigantes. analiza cuándo una señal, infección o conexión puede atravesar gran parte de la red y cuándo el sistema se fragmenta.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="percolacion">
+        <div class="card-topline">
+          <span class="badge">Marco de conectividad</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Percolación</h3>
+        <p class="summary">Teoría para estudiar propagación, robustez y aparición de componentes gigantes.</p>
+      </button>
+      <div class="card-body" id="percolacion">
+        <div class="kv"><span>Definición</span><p>Analiza cuándo una señal, infección o conexión puede atravesar gran parte de la red y cuándo el sistema se fragmenta.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Ayuda a entender transiciones críticas en redes small-world y el efecto de pequeños cambios en la conectividad.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un brote epidémico sostenido puede interpretarse como un proceso de percolación exitosa.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="puente enlace estratégico arista que conecta regiones o comunidades que de otro modo quedarían más separadas. su importancia es estructural: sostiene rutas entre bloques del sistema y puede ser crítica para la conectividad global.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="puente">
+        <div class="card-topline">
+          <span class="badge">Enlace estratégico</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Puente</h3>
+        <p class="summary">Arista que conecta regiones o comunidades que de otro modo quedarían más separadas.</p>
+      </button>
+      <div class="card-body" id="puente">
+        <div class="kv"><span>Definición</span><p>Su importancia es estructural: sostiene rutas entre bloques del sistema y puede ser crítica para la conectividad global.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Los puentes reducen distancias, facilitan difusión y también generan vulnerabilidades si son pocos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un lazo entre dos departamentos de una organización puede actuar como puente.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-R" class="letter-group" data-letter="R">
+      <div class="letter-head">
+        <h2>R</h2>
+        <p>12 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="radio centro posible menor excentricidad entre todos los nodos de la red. se define como rad(g)=min ε(u) y señala la mejor posición central posible dentro del grafo.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="radio">
+        <div class="card-topline">
+          <span class="badge">Centro posible</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Radio</h3>
+        <p class="summary">Menor excentricidad entre todos los nodos de la red.</p>
+      </button>
+      <div class="card-body" id="radio">
+        <div class="kv"><span>Definición</span><p>Se define como rad(G)=min ε(u) y señala la mejor posición central posible dentro del grafo.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Complementa al diámetro y ayuda a identificar zonas muy bien ubicadas estructuralmente.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>El nodo con excentricidad mínima suele estar cerca del centro topológico.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red sistema relacional conjunto de entidades conectadas por relaciones. es un concepto empírico amplio: puede referirse a personas, ciudades, proteínas, sitios web o cualquier sistema de interacciones.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red">
+        <div class="card-topline">
+          <span class="badge">Sistema relacional</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red</h3>
+        <p class="summary">Conjunto de entidades conectadas por relaciones.</p>
+      </button>
+      <div class="card-body" id="red">
+        <div class="kv"><span>Definición</span><p>Es un concepto empírico amplio: puede referirse a personas, ciudades, proteínas, sitios web o cualquier sistema de interacciones.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Cuando la red se formaliza matemáticamente se representa como grafo, lo que permite comparar fenómenos distintos bajo un mismo lenguaje.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>La red aérea mundial y una red social pueden estudiarse con herramientas comunes.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red aleatoria de erdős–rényi modelo de referencia modelo donde cada par de nodos se conecta con probabilidad p. genera caminos cortos con bastante facilidad, pero cuando la red es grande y dispersa el clustering tiende a ser bajo.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-aleatoria-de-erd-s-renyi">
+        <div class="card-topline">
+          <span class="badge">Modelo de referencia</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red aleatoria de Erdős–Rényi</h3>
+        <p class="summary">Modelo donde cada par de nodos se conecta con probabilidad p.</p>
+      </button>
+      <div class="card-body" id="red-aleatoria-de-erd-s-renyi">
+        <div class="kv"><span>Definición</span><p>Genera caminos cortos con bastante facilidad, pero cuando la red es grande y dispersa el clustering tiende a ser bajo.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Fue el gran contraste teórico frente al cual emergió el modelo small-world de Watts–Strogatz.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Dos nodos cualesquiera tienen igual chance independiente de quedar conectados.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red aleatoria equivalente comparación justa red de referencia con tamaño similar y conectividad comparable a la observada. se usa para evaluar si una red real tiene clustering anormalmente alto manteniendo caminos casi tan cortos como el azar.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-aleatoria-equivalente">
+        <div class="card-topline">
+          <span class="badge">Comparación justa</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red aleatoria equivalente</h3>
+        <p class="summary">Red de referencia con tamaño similar y conectividad comparable a la observada.</p>
+      </button>
+      <div class="card-body" id="red-aleatoria-equivalente">
+        <div class="kv"><span>Definición</span><p>Se usa para evaluar si una red real tiene clustering anormalmente alto manteniendo caminos casi tan cortos como el azar.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es la base del diagnóstico comparativo de small-worldness.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>No alcanza con medir L y C aisladamente; hay que contrastarlos con L(Grand) y C(Grand).</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red de watts–strogatz modelo small-world clásico modelo que parte de una red regular y reconecta aleatoriamente algunas aristas. muestra que basta una pequeña fracción de enlaces de largo alcance para reducir mucho la longitud media sin destruir enseguida el clustering.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-de-watts-strogatz">
+        <div class="card-topline">
+          <span class="badge">Modelo small-world clásico</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red de Watts–Strogatz</h3>
+        <p class="summary">Modelo que parte de una red regular y reconecta aleatoriamente algunas aristas.</p>
+      </button>
+      <div class="card-body" id="red-de-watts-strogatz">
+        <div class="kv"><span>Definición</span><p>Muestra que basta una pequeña fracción de enlaces de largo alcance para reducir mucho la longitud media sin destruir enseguida el clustering.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es el marco formal emblemático del fenómeno de mundo pequeño.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Comienza con un anillo regular y aplica una probabilidad p de reconexión.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red dirigida orientación de enlaces red donde las relaciones tienen dirección. importa distinguir entrada y salida, porque no es lo mismo recibir enlaces que emitirlos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-dirigida">
+        <div class="card-topline">
+          <span class="badge">Orientación de enlaces</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red dirigida</h3>
+        <p class="summary">Red donde las relaciones tienen dirección.</p>
+      </button>
+      <div class="card-body" id="red-dirigida">
+        <div class="kv"><span>Definición</span><p>Importa distinguir entrada y salida, porque no es lo mismo recibir enlaces que emitirlos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Complica el análisis de conectividad y del small world, ya que la alcanzabilidad puede diferir según el sentido.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En la Web, una página puede enlazar a otra sin ser enlazada de vuelta.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red libre de escala o scale-free estructura heterogénea red cuya distribución de grados sigue una ley de potencia. contiene muchos nodos de grado pequeño y unos pocos hubs enormes.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-libre-de-escala-o-scale-free">
+        <div class="card-topline">
+          <span class="badge">Estructura heterogénea</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red libre de escala o scale-free</h3>
+        <p class="summary">Red cuya distribución de grados sigue una ley de potencia.</p>
+      </button>
+      <div class="card-body" id="red-libre-de-escala-o-scale-free">
+        <div class="kv"><span>Definición</span><p>Contiene muchos nodos de grado pequeño y unos pocos hubs enormes.</p></div>
+        <div class="kv"><span>Idea clave</span><p>No surge típicamente en Watts–Strogatz puro, pero aparece en muchas redes reales y puede intensificar el acortamiento de distancias.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>La Web y ciertas redes de citación son ejemplos clásicos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red no dirigida simetría relacional red donde si u está conectado con v, entonces v lo está con u. representa relaciones mutuas o recíprocas sin orientación preferente.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-no-dirigida">
+        <div class="card-topline">
+          <span class="badge">Simetría relacional</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red no dirigida</h3>
+        <p class="summary">Red donde si u está conectado con v, entonces v lo está con u.</p>
+      </button>
+      <div class="card-body" id="red-no-dirigida">
+        <div class="kv"><span>Definición</span><p>Representa relaciones mutuas o recíprocas sin orientación preferente.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es el caso más simple para introducir caminos, clustering y distancia en small worlds.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Compartir una película o colaborar mutuamente puede modelarse con enlaces no dirigidos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red ponderada intensidad de enlaces red cuyas aristas llevan pesos que expresan intensidad, costo o capacidad. el peso puede representar tiempo, distancia, frecuencia, volumen o probabilidad.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-ponderada">
+        <div class="card-topline">
+          <span class="badge">Intensidad de enlaces</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red ponderada</h3>
+        <p class="summary">Red cuyas aristas llevan pesos que expresan intensidad, costo o capacidad.</p>
+      </button>
+      <div class="card-body" id="red-ponderada">
+        <div class="kv"><span>Definición</span><p>El peso puede representar tiempo, distancia, frecuencia, volumen o probabilidad.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Muchos sistemas reales son ponderados y requieren extender la intuición small-world más allá del caso binario clásico.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>En transporte, el peso puede ser el tiempo promedio de viaje entre dos ciudades.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="red regular orden local uniforme red donde todos los nodos siguen el mismo patrón de conexión. en el modelo clásico suele ser un anillo donde cada nodo se enlaza con sus vecinos cercanos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="red-regular">
+        <div class="card-topline">
+          <span class="badge">Orden local uniforme</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Red regular</h3>
+        <p class="summary">Red donde todos los nodos siguen el mismo patrón de conexión.</p>
+      </button>
+      <div class="card-body" id="red-regular">
+        <div class="kv"><span>Definición</span><p>En el modelo clásico suele ser un anillo donde cada nodo se enlaza con sus vecinos cercanos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Tiene alto clustering pero caminos relativamente largos, por eso es el punto de partida del small world.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Antes de introducir shortcuts, la red luce ordenada pero poco eficiente globalmente.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="rich get richer lectura intuitiva expresión informal del preferential attachment. resume la idea de que los nodos ya bien conectados atraen todavía más conexiones.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="rich-get-richer">
+        <div class="card-topline">
+          <span class="badge">Lectura intuitiva</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Rich get richer</h3>
+        <p class="summary">Expresión informal del preferential attachment.</p>
+      </button>
+      <div class="card-body" id="rich-get-richer">
+        <div class="kv"><span>Definición</span><p>Resume la idea de que los nodos ya bien conectados atraen todavía más conexiones.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Explica la desigualdad topológica y la emergencia de hubs en redes en crecimiento.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Las plataformas muy populares suelen concentrar todavía más usuarios y enlaces.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="robustez resistencia estructural capacidad de conservar conectividad o funcionalidad frente a fallos. una red robusta no colapsa fácilmente cuando se eliminan nodos o enlaces.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="robustez">
+        <div class="card-topline">
+          <span class="badge">Resistencia estructural</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Robustez</h3>
+        <p class="summary">Capacidad de conservar conectividad o funcionalidad frente a fallos.</p>
+      </button>
+      <div class="card-body" id="robustez">
+        <div class="kv"><span>Definición</span><p>Una red robusta no colapsa fácilmente cuando se eliminan nodos o enlaces.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es una dimensión clave para evaluar el costo del small world: eficiencia y vulnerabilidad pueden coexistir.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Una red con múltiples rutas alternativas suele ser más robusta.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-S" class="letter-group" data-letter="S">
+      <div class="letter-head">
+        <h2>S</h2>
+        <p>4 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="secuencia de grados huella de heterogeneidad lista de grados de todos los nodos del grafo. algunos modelos nulos preservan esta secuencia para comparar la red observada con una versión aleatorizada sin alterar su heterogeneidad básica.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="secuencia-de-grados">
+        <div class="card-topline">
+          <span class="badge">Huella de heterogeneidad</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Secuencia de grados</h3>
+        <p class="summary">Lista de grados de todos los nodos del grafo.</p>
+      </button>
+      <div class="card-body" id="secuencia-de-grados">
+        <div class="kv"><span>Definición</span><p>Algunos modelos nulos preservan esta secuencia para comparar la red observada con una versión aleatorizada sin alterar su heterogeneidad básica.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Permite distinguir efectos debidos a la estructura fina de aquellos explicables solo por la distribución de grados.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Dos redes con la misma secuencia pueden diferir mucho en modularidad o clustering.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="sincronización ajuste dinámico proceso por el cual nodos oscilatorios o dinámicos coordinan su comportamiento. puede aparecer en redes de neuronas, osciladores, sistemas eléctricos o agentes acoplados.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="sincronizacion">
+        <div class="card-topline">
+          <span class="badge">Ajuste dinámico</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Sincronización</h3>
+        <p class="summary">Proceso por el cual nodos oscilatorios o dinámicos coordinan su comportamiento.</p>
+      </button>
+      <div class="card-body" id="sincronizacion">
+        <div class="kv"><span>Definición</span><p>Puede aparecer en redes de neuronas, osciladores, sistemas eléctricos o agentes acoplados.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Los shortcuts suelen reducir el umbral para la sincronización global en redes small-world.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un conjunto de neuronas que termina disparando en fase muestra sincronización.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="small-worldness diagnóstico comparativo grado en que una red exhibe la firma del mundo pequeño. es alta cuando la longitud media es cercana a la de una red aleatoria equivalente, pero el clustering es mucho mayor.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="small-worldness">
+        <div class="card-topline">
+          <span class="badge">Diagnóstico comparativo</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Small-worldness</h3>
+        <p class="summary">Grado en que una red exhibe la firma del mundo pequeño.</p>
+      </button>
+      <div class="card-body" id="small-worldness">
+        <div class="kv"><span>Definición</span><p>Es alta cuando la longitud media es cercana a la de una red aleatoria equivalente, pero el clustering es mucho mayor.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Convierte la intuición small-world en una evaluación comparativa más rigurosa.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>No basta con decir que una red parece compacta; hay que comparar con un modelo nulo.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="super small world intensificación del efecto red donde las distancias medias son incluso menores que en redes aleatorias comparables. suele aparecer por efecto de hubs muy poderosos que comprimen todavía más la separación topológica.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="super-small-world">
+        <div class="card-topline">
+          <span class="badge">Intensificación del efecto</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Super small world</h3>
+        <p class="summary">Red donde las distancias medias son incluso menores que en redes aleatorias comparables.</p>
+      </button>
+      <div class="card-body" id="super-small-world">
+        <div class="kv"><span>Definición</span><p>Suele aparecer por efecto de hubs muy poderosos que comprimen todavía más la separación topológica.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Muestra que el small world puede ser superado por arquitecturas extremadamente centralizadas.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Algunas redes scale-free con hubs globales exhiben este comportamiento.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-T" class="letter-group" data-letter="T">
+      <div class="letter-head">
+        <h2>T</h2>
+        <p>2 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="transitividad cierre triádico global proporción de triples conectados que efectivamente forman triángulos. está relacionada con el clustering, pero se calcula desde una perspectiva más global.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="transitividad">
+        <div class="card-topline">
+          <span class="badge">Cierre triádico global</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Transitividad</h3>
+        <p class="summary">Proporción de triples conectados que efectivamente forman triángulos.</p>
+      </button>
+      <div class="card-body" id="transitividad">
+        <div class="kv"><span>Definición</span><p>Está relacionada con el clustering, pero se calcula desde una perspectiva más global.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Ayuda a resumir el grado de cierre triádico de toda la red.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Si muchos caminos de longitud dos se cierran en triángulos, la transitividad es alta.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="triángulo unidad mínima de cohesión subgrafo de tres nodos mutuamente conectados. es la célula elemental del agrupamiento local y de la cohesión social.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="triangulo">
+        <div class="card-topline">
+          <span class="badge">Unidad mínima de cohesión</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Triángulo</h3>
+        <p class="summary">Subgrafo de tres nodos mutuamente conectados.</p>
+      </button>
+      <div class="card-body" id="triangulo">
+        <div class="kv"><span>Definición</span><p>Es la célula elemental del agrupamiento local y de la cohesión social.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Cuantos más triángulos hay, más probable es observar clustering alto.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Tres colegas que se conocen entre sí forman un triángulo.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section id="letter-V" class="letter-group" data-letter="V">
+      <div class="letter-head">
+        <h2>V</h2>
+        <p>3 términos</p>
+      </div>
+      <div class="cards">
+        
+    <article class="card" data-term="vecindad entorno inmediato conjunto de nodos directamente conectados con un nodo dado. se denota n(u) y define el primer nivel relacional alrededor de u.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="vecindad">
+        <div class="card-topline">
+          <span class="badge">Entorno inmediato</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Vecindad</h3>
+        <p class="summary">Conjunto de nodos directamente conectados con un nodo dado.</p>
+      </button>
+      <div class="card-body" id="vecindad">
+        <div class="kv"><span>Definición</span><p>Se denota N(u) y define el primer nivel relacional alrededor de u.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Sobre la vecindad se construyen las medidas de clustering y cohesión local.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Los amigos directos de una persona conforman su vecindad.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="virus informático epidemia digital caso particular de difusión epidémica en redes digitales. se propaga a través de contactos entre dispositivos, cuentas o sistemas, aunque la susceptibilidad depende también del software y la configuración.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="virus-informatico">
+        <div class="card-topline">
+          <span class="badge">Epidemia digital</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Virus informático</h3>
+        <p class="summary">Caso particular de difusión epidémica en redes digitales.</p>
+      </button>
+      <div class="card-body" id="virus-informatico">
+        <div class="kv"><span>Definición</span><p>Se propaga a través de contactos entre dispositivos, cuentas o sistemas, aunque la susceptibilidad depende también del software y la configuración.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Sirve como ejemplo concreto de cómo la topología acelera o frena contagios técnicos.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Un malware puede cruzar subredes mediante pocos enlaces estratégicos.</p></div>
+      </div>
+    </article>
+    
+
+    <article class="card" data-term="vulnerabilidad estructural sensibilidad selectiva exposición de la red a perturbaciones específicas. una red puede ser eficiente y al mismo tiempo frágil si depende de pocos hubs o puentes críticos.">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="vulnerabilidad-estructural">
+        <div class="card-topline">
+          <span class="badge">Sensibilidad selectiva</span>
+          <span class="chev">▾</span>
+        </div>
+        <h3>Vulnerabilidad estructural</h3>
+        <p class="summary">Exposición de la red a perturbaciones específicas.</p>
+      </button>
+      <div class="card-body" id="vulnerabilidad-estructural">
+        <div class="kv"><span>Definición</span><p>Una red puede ser eficiente y al mismo tiempo frágil si depende de pocos hubs o puentes críticos.</p></div>
+        <div class="kv"><span>Idea clave</span><p>Es el reverso del small world: la rapidez de conexión puede implicar rapidez de fallo.</p></div>
+        <div class="kv"><span>Ejemplo o lectura</span><p>Quitar un puente clave puede fragmentar zonas enteras del sistema.</p></div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+  </main>
+
+  <p class="footer">Material elaborado por el profesor Sergio Gevatschnaider</p>
+</div>
+
+<script>
+const root = document.documentElement;
+const search = document.getElementById('search');
+const cards = [...document.querySelectorAll('.card')];
+const groups = [...document.querySelectorAll('.letter-group')];
+const visibleCount = document.getElementById('visibleCount');
+const openCount = document.getElementById('openCount');
+const emptyState = document.getElementById('emptyState');
+
+function updateOpenCount(){
+  openCount.textContent = document.querySelectorAll('.card.open').length;
+}
+
+cards.forEach(card => {
+  const head = card.querySelector('.card-head');
+  head.addEventListener('click', () => {
+    card.classList.toggle('open');
+    head.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
+    updateOpenCount();
+  });
+});
+
+document.getElementById('expandAll').addEventListener('click', () => {
+  cards.forEach(card => {
+    card.classList.add('open');
+    card.querySelector('.card-head').setAttribute('aria-expanded','true');
+  });
+  updateOpenCount();
+});
+
+document.getElementById('collapseAll').addEventListener('click', () => {
+  cards.forEach(card => {
+    card.classList.remove('open');
+    card.querySelector('.card-head').setAttribute('aria-expanded','false');
+  });
+  updateOpenCount();
+});
+
+search.addEventListener('input', () => {
+  const q = search.value.trim().toLowerCase();
+  let visible = 0;
+  groups.forEach(group => {
+    let any = false;
+    group.querySelectorAll('.card').forEach(card => {
+      const text = card.dataset.term;
+      const match = !q || text.includes(q);
+      card.style.display = match ? '' : 'none';
+      if(match) { any = true; visible += 1; }
+    });
+    group.style.display = any ? '' : 'none';
+  });
+  visibleCount.textContent = visible;
+  emptyState.style.display = visible ? 'none' : 'block';
+});
+
+document.querySelectorAll('.theme').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.theme;
+    root.setAttribute('data-theme', t);
+    localStorage.setItem('glosario-mundo-pequeno-theme', t);
+  });
+});
+
+const savedTheme = localStorage.getItem('glosario-mundo-pequeno-theme');
+if(savedTheme) root.setAttribute('data-theme', savedTheme);
+updateOpenCount();
+</script>
+</body>
+</html>
