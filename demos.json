@@ -231,6 +231,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Cuestionario sobre Mundo Pequeño y Teoría de Redes",
+    "path": "/src/classroom/graphs/recursos/Mundo_Pequeño_cuestionario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-12T18:10:04-03:00"
+  },
+  {
     "title": "Customer Personality Analysis — Ficha Analítica",
     "path": "/src/classroom/graphs/recursos/EDA_Dashboard.html",
     "tag": "Demo",
@@ -439,6 +446,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Glosario de Mundo Pequeño y Teoría de Redes",
+    "path": "/src/classroom/graphs/recursos/Mundo_pequeño_Glosario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-12T18:10:04-03:00"
   },
   {
     "title": "Glosario de Programación Genética",
@@ -747,6 +761,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Mundo Pequeño — Watts–Strogatz",
+    "path": "/src/classroom/graphs/recursos/Mundo_pequeño_simulacion.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-12T18:10:04-03:00"
   },
   {
     "title": "n! vs 2^n — visualización interactiva (con animación)",
