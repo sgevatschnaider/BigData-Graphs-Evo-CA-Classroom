@@ -833,6 +833,13 @@
     "mtime": "2025-11-18T06:24:45-03:00"
   },
   {
+    "title": "Paseo Aleatorio en ℤ² &amp; π — v2",
+    "path": "/src/classroom/graphs/recursos/paseo-aleatorio-pi.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-14T20:21:23-03:00"
+  },
+  {
     "title": "Perspectiva Algebraica: Grafos de Cayley",
     "path": "/src/classroom/graphs/recursos/Grafo_Cayley.html",
     "tag": "Demo",
