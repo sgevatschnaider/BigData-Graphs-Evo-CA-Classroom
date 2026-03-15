@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+
+<html data-theme="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Glosario · Dependencia lineal, independencia estadística, correlación y multicolinealidad</title>
+<script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      startup: {
+        ready() {
+          MathJax.startup.defaultReady();
+          MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise();
+          });
+        }
+      }
+    };
+  </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=IBM+Plex+Mono:wght@300;400;500&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+    /* ══════════════════════ TEMAS ══════════════════════ */
+    :root {
+      --bg:          #080d14;
+      --surface:     #0d1520;
+      --card:        #111c2a;
+      --card-open:   #0c1928;
+      --border:      #1e3048;
+      --accent1:     #2dd9b0;
+      --accent2:     #f5a623;
+      --accent3:     #e85d75;
+      --accent4:     #7ec8e3;
+      --text:        #dde6f0;
+      --muted:       #6a859e;
+      --body-text:   #b8cedd;
+      --answer-bg:   #0a1520;
+      --tag-bg:      rgba(45,217,176,0.10);
+      --tag-border:  rgba(45,217,176,0.30);
+      --hl-bg:       rgba(245,166,35,0.08);
+      --hl-border:   rgba(245,166,35,0.30);
+      --math-bg:     rgba(45,217,176,0.06);
+      --math-border: #2dd9b0;
+      --search-bg:   #0d1928;
+      --header-g1:   #0d1928;
+      --header-g2:   #080d14;
+      --pb-bg:       rgba(8,13,20,0.93);
+      --radius:      13px;
+      --tr:          0.44s cubic-bezier(.4,0,.2,1);
+    }
+    [data-theme="light"] {
+      --bg:          #eef2f7;
+      --surface:     #e4eaf3;
+      --card:        #ffffff;
+      --card-open:   #f5f8ff;
+      --border:      #c8d6e8;
+      --accent1:     #0e9e80;
+      --accent2:     #c87d00;
+      --accent3:     #c43055;
+      --accent4:     #2a7fa8;
+      --text:        #0f1d2e;
+      --muted:       #5a7490;
+      --body-text:   #2c4460;
+      --answer-bg:   #f0f5fc;
+      --tag-bg:      rgba(14,158,128,0.08);
+      --tag-border:  rgba(14,158,128,0.30);
+      --hl-bg:       rgba(200,125,0,0.07);
+      --hl-border:   rgba(200,125,0,0.28);
+      --math-bg:     rgba(14,158,128,0.05);
+      --math-border: #0e9e80;
+      --search-bg:   #fff;
+      --header-g1:   #dde7f4;
+      --header-g2:   #eef2f7;
+      --pb-bg:       rgba(238,242,247,0.94);
+    }
+    [data-theme="sepia"] {
+      --bg:          #f2ead8;
+      --surface:     #e8dfc6;
+      --card:        #fdf7ea;
+      --card-open:   #f8f0dc;
+      --border:      #c9b990;
+      --accent1:     #3d7d62;
+      --accent2:     #96600e;
+      --accent3:     #a03040;
+      --accent4:     #3a6e8a;
+      --text:        #221a08;
+      --muted:       #7a6540;
+      --body-text:   #3a2c14;
+      --answer-bg:   #ece3cc;
+      --tag-bg:      rgba(61,125,98,0.10);
+      --tag-border:  rgba(61,125,98,0.30);
+      --hl-bg:       rgba(150,96,14,0.08);
+      --hl-border:   rgba(150,96,14,0.28);
+      --math-bg:     rgba(61,125,98,0.07);
+      --math-border: #3d7d62;
+      --search-bg:   #f8f0dc;
+      --header-g1:   #e4dcc4;
+      --header-g2:   #f2ead8;
+      --pb-bg:       rgba(242,234,216,0.94);
+    }
+
+    /* ══════════════════════ BASE ══════════════════════ */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Source Serif 4', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background .35s ease, color .2s ease;
+    }
+
+    /* grain overlay */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:0;
+    }
+
+    /* ══════════════════════ HEADER ══════════════════════ */
+    header {
+      position:relative; z-index:10;
+      padding: 64px 24px 52px;
+      text-align:center;
+      background: linear-gradient(155deg, var(--header-g1) 0%, var(--header-g2) 65%);
+      border-bottom: 1px solid var(--border);
+      overflow:hidden;
+      transition: background .4s;
+    }
+    header::after {
+      content:'';
+      position:absolute; top:-100px; left:50%;
+      transform:translateX(-50%);
+      width:700px; height:350px;
+      background: radial-gradient(ellipse at center, rgba(45,217,176,0.09) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .header-tag {
+      display:inline-block;
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.68rem; letter-spacing:.22em; text-transform:uppercase;
+      color: var(--accent1);
+      border: 1px solid var(--tag-border);
+      background: var(--tag-bg);
+      padding: 5px 16px; border-radius:100px; margin-bottom:20px;
+    }
+    h1 {
+      font-family:'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5.5vw, 4rem);
+      font-weight:700; line-height:1.08;
+      background: linear-gradient(130deg, var(--accent1) 0%, var(--accent4) 55%, var(--accent1) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+      margin-bottom:14px;
+    }
+    .subtitle {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.82rem; color:var(--muted); letter-spacing:.05em;
+    }
+    .author-credit {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.85rem; color:var(--accent1); letter-spacing:.05em;
+      margin-top: 12px; font-weight: 500;
+    }
+    .count-badge {
+      display:inline-block; margin-top:14px;
+      font-family:'IBM Plex Mono', monospace; font-size:.7rem;
+      background: rgba(45,217,176,0.12); border:1px solid var(--tag-border);
+      color:var(--accent1); padding:4px 14px; border-radius:100px;
+    }
+
+    /* ══════════════════════ STICKY BAR ══════════════════════ */
+    #sticky-bar {
+      position:sticky; top:0; z-index:100;
+      background: var(--pb-bg);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      padding:10px 20px;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      transition: background .4s;
+    }
+    #search-wrap {
+      display:flex; align-items:center; gap:8px;
+      background: var(--search-bg);
+      border:1px solid var(--border);
+      border-radius:8px; padding:6px 12px;
+      flex:1; min-width:160px; max-width:320px;
+      transition: border-color .25s, background .35s;
+    }
+    #search-wrap:focus-within { border-color:var(--accent1); }
+    #search-wrap svg { flex-shrink:0; stroke:var(--muted); }
+    #search-input {
+      border:none; background:transparent; outline:none;
+      font-family:'IBM Plex Mono', monospace; font-size:.78rem;
+      color:var(--text); width:100%;
+    }
+    #search-input::placeholder { color:var(--muted); }
+    #prog-text {
+      font-family:'IBM Plex Mono', monospace; font-size:.72rem;
+      color:var(--accent1); white-space:nowrap; flex-shrink:0;
+    }
+    #prog-outer {
+      flex:1; height:3px; background:var(--border);
+      border-radius:10px; overflow:hidden; min-width:60px;
+    }
+    #prog-inner {
+      height:100%; width:0%;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border-radius:10px; transition:width .5s ease;
+    }
+    #open-count {
+      font-family:'IBM Plex Mono', monospace; font-size:.72rem;
+      color:var(--muted); white-space:nowrap; flex-shrink:0;
+    }
+
+    /* ══════════════════════ ALPHA INDEX ══════════════════════ */
+    #alpha-nav {
+      position:relative; z-index:1;
+      max-width:980px; margin:28px auto 0; padding:0 20px;
+      display:flex; flex-wrap:wrap; gap:6px 4px;
+    }
+    .alpha-btn {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.65rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+      padding:4px 9px; border-radius:6px; cursor:pointer;
+      border:1px solid var(--border); background:var(--card);
+      color:var(--muted); transition:all .2s;
+    }
+    .alpha-btn:hover, .alpha-btn.has-terms:hover {
+      background:var(--accent1); border-color:var(--accent1); color:#000;
+    }
+    .alpha-btn.has-terms { color:var(--accent1); border-color:var(--tag-border); }
+    .alpha-btn.dimmed { opacity:.3; pointer-events:none; }
+
+    /* ══════════════════════ MAIN ══════════════════════ */
+    main {
+      position:relative; z-index:1;
+      max-width:980px; margin:0 auto;
+      padding:24px 20px 100px;
+    }
+
+    /* Controls */
+    .controls {
+      display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;
+    }
+    .btn {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+      padding:9px 20px; border-radius:100px;
+      border:1px solid var(--border); background:var(--card);
+      color:var(--muted); cursor:pointer; transition:all .22s;
+    }
+    .btn:hover { background:var(--accent1); border-color:var(--accent1); color:#000; }
+    .btn-em { border-color:var(--tag-border); color:var(--accent1); }
+
+    /* Letter section */
+    .letter-group { margin-bottom:6px; }
+    .letter-anchor {
+      font-family:'Cormorant Garamond', serif;
+      font-size:1.6rem; font-weight:700; color:var(--accent1);
+      padding:28px 0 10px;
+      display:flex; align-items:center; gap:14px;
+      opacity:.7;
+    }
+    .letter-anchor::after {
+      content:''; flex:1; height:1px;
+      background: linear-gradient(90deg, var(--tag-border), transparent);
+    }
+
+    /* ══════════════════════ CARD ══════════════════════ */
+    .card {
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      margin-bottom:10px;
+      overflow:hidden;
+      transition: border-color .3s, box-shadow .3s, background .35s;
+      opacity:0; transform:translateY(16px);
+      animation: fadeUp .4s forwards;
+    }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+    .card:hover { border-color:rgba(45,217,176,.22); box-shadow:0 4px 30px rgba(0,0,0,.3); }
+    .card.open {
+      border-color:rgba(45,217,176,.4);
+      background: var(--card-open);
+      box-shadow:0 6px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(45,217,176,.08);
+    }
+    .card.hidden { display:none; }
+
+    /* Trigger */
+    .t-btn {
+      width:100%; background:none; border:none; cursor:pointer;
+      padding:18px 22px; display:grid;
+      grid-template-columns: auto 1fr auto;
+      align-items:center; gap:14px; text-align:left;
+    }
+    .t-letter {
+      font-family:'IBM Plex Mono', monospace; font-size:.62rem;
+      color:var(--accent1); background:var(--tag-bg);
+      border:1px solid var(--tag-border);
+      border-radius:5px; padding:3px 7px; white-space:nowrap;
+      text-transform:uppercase; letter-spacing:.1em;
+    }
+    .t-term {
+      font-family:'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      font-weight:700; color:var(--text); line-height:1.3;
+      transition:color .3s;
+    }
+    .t-term .term-sub {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.68rem; color:var(--muted); font-weight:400;
+      display:block; margin-top:2px; letter-spacing:.05em;
+    }
+    .card:hover .t-term, .card.open .t-term { color:var(--accent1); }
+    .t-icon {
+      width:28px; height:28px; border-radius:50%;
+      border:1px solid var(--border); display:flex;
+      align-items:center; justify-content:center; flex-shrink:0;
+      transition: all var(--tr);
+    }
+    .t-icon svg { transition:transform var(--tr); stroke:var(--muted); }
+    .card.open .t-icon { background:var(--accent1); border-color:var(--accent1); }
+    .card.open .t-icon svg { stroke:#000; transform:rotate(180deg); }
+
+    /* Answer panel */
+    .a-wrap { display:grid; grid-template-rows:0fr; transition:grid-template-rows var(--tr); }
+    .card.open .a-wrap { grid-template-rows:1fr; }
+    .a-inner { overflow:hidden; }
+    .a-body {
+      background:var(--answer-bg);
+      border-top:1px solid var(--border);
+      padding:0 22px 26px 60px;
+      transition: background .35s;
+    }
+    .card.open .a-body { padding-top:22px; }
+
+    .a-body p {
+      font-size:.96rem; line-height:1.88; color:var(--body-text);
+      margin-bottom:14px;
+    }
+    .a-body p:last-child { margin-bottom:0; }
+
+    .a-body strong { color:var(--accent1); font-weight:600; }
+    .a-body em { color:var(--muted); font-style:italic; }
+
+    /* Math block */
+    .math-block {
+      background:var(--math-bg);
+      border-left:3px solid var(--math-border);
+      border-radius:0 8px 8px 0;
+      padding:14px 18px; margin:16px 0;
+      overflow-x:auto; font-size:1.02rem;
+      transition: background .35s, border-color .35s;
+    }
+
+    /* Highlight box */
+    .hl {
+      background:var(--hl-bg);
+      border:1px solid var(--hl-border);
+      border-radius:8px; padding:14px 18px; margin:16px 0;
+      font-size:.93rem; line-height:1.78; color:var(--body-text);
+      transition: background .35s, border-color .35s;
+    }
+    .hl strong { color:var(--accent2); }
+
+    /* Example block */
+    .example {
+      border-left:3px solid var(--accent2);
+      background: rgba(245,166,35,.05);
+      border-radius:0 8px 8px 0;
+      padding:14px 18px; margin:18px 0;
+      transition: background .35s, border-color .35s;
+    }
+    .example-label {
+      font-family:'IBM Plex Mono', monospace;
+      font-size:.63rem; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--accent2); margin-bottom:8px; display:block;
+    }
+    .example p { font-size:.92rem; line-height:1.8; color:var(--body-text); margin:0; }
+
+    /* No results */
+    #no-results {
+      display:none; text-align:center; padding:60px 20px;
+      font-family:'IBM Plex Mono', monospace; font-size:.82rem;
+      color:var(--muted);
+    }
+
+    /* ══════════════════════ THEME TOGGLE ══════════════════════ */
+    #theme-btn {
+      position:fixed; bottom:26px; right:26px; z-index:999;
+      display:flex; align-items:center;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:100px; padding:5px;
+      box-shadow:0 4px 24px rgba(0,0,0,.35);
+      transition: box-shadow .3s, border-color .35s, background .35s;
+    }
+    #theme-btn:hover { border-color:var(--accent1); box-shadow:0 6px 32px rgba(0,0,0,.45); }
+    .th-opt {
+      display:flex; align-items:center; justify-content:center;
+      width:34px; height:34px; border-radius:100px;
+      border:none; background:transparent; cursor:pointer;
+      font-size:.95rem; transition:background .22s, transform .2s;
+      position:relative;
+    }
+    .th-opt:hover { transform:scale(1.15); }
+    .th-opt.active { background:var(--accent1); }
+    .th-opt .tip {
+      position:absolute; bottom:calc(100% + 8px); left:50%;
+      transform:translateX(-50%);
+      background:var(--card); border:1px solid var(--border);
+      color:var(--text); font-family:'IBM Plex Mono', monospace;
+      font-size:.6rem; letter-spacing:.08em; text-transform:uppercase;
+      padding:3px 8px; border-radius:5px; white-space:nowrap;
+      opacity:0; pointer-events:none; transition:opacity .2s;
+    }
+    .th-opt:hover .tip { opacity:1; }
+
+    /* Smooth theme transitions */
+    *, *::before, *::after {
+      transition: background-color .35s ease, border-color .35s ease,
+                  color .2s ease, box-shadow .3s ease;
+    }
+    .a-wrap  { transition: grid-template-rows var(--tr) !important; }
+    #prog-inner { transition: width .5s ease !important; }
+    .t-icon svg { transition: transform var(--tr) !important; }
+    .t-icon { transition: background var(--tr), border-color var(--tr), transform var(--tr) !important; }
+
+    /* MathJax rendering fix inside buttons and term-sub */
+    .t-btn mjx-container, .term-sub mjx-container {
+      display: inline !important;
+      vertical-align: middle;
+    }
+    mjx-container[jax="CHTML"] {
+      line-height: 0;
+    }
+    mjx-container[jax="CHTML"][display="true"] {
+      display: block !important;
+      text-align: center;
+      margin: 0.5em 0;
+    }
+
+    /* ══════════════════════ FOOTER ══════════════════════ */
+    footer {
+      text-align:center; padding:28px 20px 44px;
+      font-family:'IBM Plex Mono', monospace; font-size:.68rem;
+      color:var(--muted); border-top:1px solid var(--border); letter-spacing:.06em;
+    }
+    .footer-credit {
+      display:block; margin-top:12px; font-size:.75rem; color:var(--accent1);
+    }
+
+    /* ══════════════════════ RESPONSIVE ══════════════════════ */
+    @media (max-width:600px) {
+      .a-body { padding-left:16px; padding-right:16px; }
+      .t-btn { padding:14px 16px; gap:10px; }
+      h1 { font-size:2rem; }
+      #theme-btn { bottom:14px; right:14px; }
+      #sticky-bar { gap:8px; padding:8px 14px; }
+    }
+  </style>
+</head>
+<body>
+<div aria-label="Cambiar tema" id="theme-btn" role="group">
+<button class="th-opt active" id="opt-dark" onclick="setTheme('dark')">🌙<span class="tip">Oscuro</span></button>
+<button class="th-opt" id="opt-light" onclick="setTheme('light')">☀️<span class="tip">Claro</span></button>
+<button class="th-opt" id="opt-sepia" onclick="setTheme('sepia')">📜<span class="tip">Sepia</span></button>
+</div>
+<header>
+<div class="header-tag">Glosario Avanzado · Geometría de los Datos</div>
+<h1>Dependencia lineal,<br/>correlación y multicolinealidad</h1>
+<p class="subtitle">Geometría del diseño · Covarianza · Identificabilidad · Regresión</p>
+<p class="author-credit">Material elaborado por el profesor Sergio Gevatschnaider</p>
+<div class="count-badge">21 términos</div>
+</header>
+<div id="sticky-bar">
+<div id="search-wrap">
+<svg fill="none" height="14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+<input autocomplete="off" id="search-input" oninput="filterTerms()" placeholder="Buscar término..." type="text"/>
+</div>
+<span id="prog-text">0% ABIERTO</span>
+<div id="prog-outer"><div id="prog-inner"></div></div>
+<span id="open-count">0 / 21</span>
+</div>
+<nav aria-label="Índice alfabético" id="alpha-nav"></nav>
+<main><div class="controls"><button class="btn btn-em" onclick="expandAll()">Expandir todo</button><button class="btn" onclick="collapseAll()">Colapsar todo</button><button class="btn" onclick="clearSearch()">Limpiar búsqueda</button></div><div id="no-results">⊘  Ningún término coincide con la búsqueda.</div><div class="letter-group" data-letter="E"><div class="letter-anchor" id="letra-E">E</div><div class="card" data-term="Espacio de características \(\mathbb{R}^p\) y punto de datos" id="t-espacio-de-caracteristicas"><button class="t-btn" onclick="toggle('espacio-de-caracteristicas')"><span class="t-letter">Es</span><span class="t-term">Espacio de características<span class="term-sub">\(\mathbb{R}^p\) y punto de datos</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>En geometría de los datos, cada observación se representa como un vector en un espacio euclídeo de dimensión \(p\). Si se miden \(p\) variables, una observación se escribe como \(z=(z_1,\ldots,z_p)^\top\in\mathbb{R}^p\). Un conjunto de \(n\) observaciones se convierte entonces en una nube de puntos \(\{z^{(1)},\ldots,z^{(n)}\}\subset\mathbb{R}^p\).</p><p>Esta traducción no es meramente notacional. Permite interpretar la variación como dispersión en ciertas direcciones, la redundancia como colapso de dimensión y la estabilidad numérica como una propiedad geométrica asociada a formas cuadráticas y elipsoides que describen la nube de datos.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(p=2\), el punto \(z=(1.8,75)^\top\) puede representar \((\text{altura en m},\ \text{peso en kg})\). Si \(p=3\), un punto \((x_1,x_2,x_3)^\top\) puede codificar tres mediciones físicas. En dimensiones mayores, la visualización directa desaparece, pero la representación geométrica sigue siendo válida y suele estudiarse mediante autovalores y autovectores.</p></div></div></div></div></div><div class="card" data-term="Elipsoide de covarianza y distancia de Mahalanobis" id="t-elipsoide-de-covarianza"><button class="t-btn" onclick="toggle('elipsoide-de-covarianza')"><span class="t-letter">El</span><span class="t-term">Elipsoide de covarianza<span class="term-sub">y distancia de Mahalanobis</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Si \(\Sigma\) es invertible, el conjunto \(E(c)=\{x:(x-\mu)^\top\Sigma^{-1}(x-\mu)\le c\}\) describe un elipsoide centrado en \(\mu\). La cantidad \((x-\mu)^\top\Sigma^{-1}(x-\mu)\) es la distancia de Mahalanobis al cuadrado.</p><p>La descomposición espectral \(\Sigma=Q\Lambda Q^\top\) muestra que los autovectores determinan la orientación del elipsoide y los autovalores fijan la longitud de sus semiejes. Si algún autovalor es cero, el elipsoide colapsa sobre un subespacio de menor dimensión.</p><div class="math-block">$$E(c)=\left\{x:(x-\mu)^\top\Sigma^{-1}(x-\mu)\le c\right\}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>En \(\mathbb{R}^2\), si \(\lambda_2=0\), el elipsoide se degenera en un segmento alineado con el autovector asociado al autovalor positivo. La nube perdió grosor en una dirección.</p></div></div></div></div></div></div><div class="letter-group" data-letter="M"><div class="letter-anchor" id="letra-M">M</div><div class="card" data-term="Matriz de datos Matriz de diseño \(X\in\mathbb{R}^{n\times p}\)" id="t-matriz-de-datos"><button class="t-btn" onclick="toggle('matriz-de-datos')"><span class="t-letter">Ma</span><span class="t-term">Matriz de datos<span class="term-sub">Matriz de diseño \(X\in\mathbb{R}^{n\times p}\)</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La matriz \(X\in\mathbb{R}^{n\times p}\) organiza los datos de modo que la fila \(i\) es la observación \(z^{(i)}\) y la columna \(j\) es el vector \(x_j\in\mathbb{R}^n\) asociado a la variable \(j\) a través de las \(n\) observaciones.</p><p>Geométricamente, las filas viven en \(\mathbb{R}^p\) y forman la nube de puntos, mientras que las columnas viven en \(\mathbb{R}^n\) y generan el subespacio columna \(C(X)=\{X\beta:\beta\in\mathbb{R}^p\}\subset\mathbb{R}^n\). En regresión lineal, esta segunda lectura es fundamental porque el ajuste por mínimos cuadrados es una proyección del vector respuesta \(y\) sobre \(C(X)\).</p><div class="math-block">$$X=\begin{pmatrix}1&amp;2\\2&amp;4\\3&amp;6\\4&amp;8\end{pmatrix}$$</div><div class="example"><span class="example-label">Ejemplo</span><p>En este ejemplo hay dos columnas, pero ambas están alineadas: la segunda es el doble de la primera. Eso anticipa que la dimensión efectiva de \(C(X)\) no es \(2\), sino \(1\).</p></div></div></div></div></div><div class="card" data-term="Matriz de Gram \(G=X^\top X\) como registro geométrico del diseño" id="t-matriz-de-gram"><button class="t-btn" onclick="toggle('matriz-de-gram')"><span class="t-letter">Ma</span><span class="t-term">Matriz de Gram<span class="term-sub">\(G=X^\top X\) como registro geométrico del diseño</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La matriz de Gram se define por \(G=X^\top X\in\mathbb{R}^{p\times p}\), con entradas \(G_{ij}=x_i^\top x_j\). Es una matriz simétrica y semidefinida positiva que registra productos internos, ángulos y longitudes inducidas por el diseño.</p><p>La identidad \(\beta^\top X^\top X\beta=\lVert X\beta\rVert_2^2\) muestra que \(X^\top X\) mide longitudes en el espacio de parámetros a través del mapa \(\beta\mapsto X\beta\). Las direcciones \(v
+eq0\) tales que \(Xv=0\) son direcciones invisibles para el modelo: modifican \(\beta\), pero no cambian \(X\beta\).</p><div class="math-block">$$\beta^\top(X^\top X)\beta=\|X\beta\|_2^2.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \(x_2=2x_1\), entonces \(v=(2,-1)^\top
+eq0\) cumple \(Xv=2x_1-x_2=0\). Esa dirección en el espacio de parámetros no es identificable para el diseño.</p></div></div></div></div></div><div class="card" data-term="Matriz de covarianza \(\Sigma\) y varianza direccional" id="t-matriz-de-covarianza"><button class="t-btn" onclick="toggle('matriz-de-covarianza')"><span class="t-letter">Ma</span><span class="t-term">Matriz de covarianza<span class="term-sub">\(\Sigma\) y varianza direccional</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Para un vector aleatorio \(Z\in\mathbb{R}^p\), la matriz de covarianza es \(\Sigma=\operatorname{Cov}(Z)=\mathbb{E}[(Z-\mu)(Z-\mu)^\top]\), donde \(\mu=\mathbb{E}[Z]\).</p><p>Un hecho central es que para cualquier vector \(a\in\mathbb{R}^p\), se cumple \(a^\top\Sigma a=\operatorname{Var}(a^\top Z)\ge0\). Esto significa que \(\Sigma\) codifica la varianza de todas las proyecciones lineales del vector aleatorio y, por tanto, describe los ejes de dispersión de la nube.</p><div class="math-block">$$a^\top\Sigma a=\operatorname{Var}(a^\top Z)\ge 0.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \(Z=(X,2X)\) con \(\operatorname{Var}(X)&gt;0\), entonces \((2,-1)^\top Z=0\) siempre. Por ello, la dirección \(a=(2,-1)\) tiene varianza nula y \(\Sigma\) es singular.</p></div></div></div></div></div><div class="card" data-term="Multicolinealidad casi dependencia lineal y condicionamiento del Gram" id="t-multicolinealidad"><button class="t-btn" onclick="toggle('multicolinealidad')"><span class="t-letter">Mu</span><span class="t-term">Multicolinealidad<span class="term-sub">casi dependencia lineal y condicionamiento del Gram</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La multicolinealidad ocurre cuando las columnas de \(X\) son casi combinaciones lineales unas de otras. En ese caso, \(X^\top X\) sigue siendo invertible, pero presenta autovalores muy desbalanceados: existe un autovalor mínimo \(\lambda_{\min}\) muy pequeño en comparación con \(\lambda_{\max}\).</p><p>Geométricamente, el elipsoide \(\{\beta:\beta^\top(X^\top X)\beta\le c\}\) aparece extremadamente alargado o aplanado. Hay direcciones en el espacio de parámetros en las que el diseño casi no mide variación.</p><div class="math-block">$$\kappa(X^\top X)=\frac{\lambda_{\max}}{\lambda_{\min}}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \(x_2=x_1+\delta\) con \(\delta\) pequeño, la nube \((x_1,x_2)\) queda muy cerca de la diagonal. El Gram se vuelve casi singular y el problema numérico se vuelve inestable.</p></div></div></div></div></div><div class="card" data-term="Mínimos cuadrados ordinarios proyección y explosión de varianza" id="t-minimos-cuadrados-ordinarios"><button class="t-btn" onclick="toggle('minimos-cuadrados-ordinarios')"><span class="t-letter">Mí</span><span class="t-term">Mínimos cuadrados ordinarios<span class="term-sub">proyección y explosión de varianza</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>En el modelo lineal \(y=X\beta+\varepsilon\), el estimador OLS existe y es único si \(X^\top X\) es invertible, y se escribe \(\hat\beta=(X^\top X)^{-1}X^\top y\). Bajo errores con covarianza \(\sigma^2I\), se tiene \(\operatorname{Cov}(\hat\beta)=\sigma^2(X^\top X)^{-1}\).</p><p>Si \(X^\top X\) posee un autovalor muy pequeño, entonces \((X^\top X)^{-1}\) tendrá un autovalor enorme. Eso significa que el elipsoide de incertidumbre de \(\hat\beta\) se agranda violentamente en direcciones asociadas a predictores casi redundantes.</p><div class="math-block">$$\hat\beta=(X^\top X)^{-1}X^\top y,\qquad \operatorname{Cov}(\hat\beta)=\sigma^2(X^\top X)^{-1}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Con una columna que es casi duplicado de otra, pequeños cambios en los datos producen grandes oscilaciones en los coeficientes estimados, aun cuando las predicciones \(X\hat\beta\) cambien poco.</p></div></div></div></div></div></div><div class="letter-group" data-letter="C"><div class="letter-anchor" id="letra-C">C</div><div class="card" data-term="Combinación lineal \(\operatorname{span}\) y subespacio generado" id="t-combinacion-lineal"><button class="t-btn" onclick="toggle('combinacion-lineal')"><span class="t-letter">Co</span><span class="t-term">Combinación lineal<span class="term-sub">\(\operatorname{span}\) y subespacio generado</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Dados vectores \(x_1,\ldots,x_k\), una combinación lineal es una expresión de la forma \(\alpha_1x_1+\cdots+\alpha_kx_k\), con \(\alpha_i\) escalares. El conjunto de todas las combinaciones lineales forma el subespacio \(\operatorname{span}\{x_1,\ldots,x_k\}\).</p><p>Decir que un nuevo vector aporta información geométrica significa que añade una componente fuera del subespacio ya generado. Decir que no aporta información equivale a afirmar que cae dentro del subespacio existente. Por eso la noción de combinación lineal es el lenguaje natural de la redundancia.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(x_2=2x_1\), entonces \(\operatorname{span}\{x_1,x_2\}=\operatorname{span}\{x_1\}\). Agregar \(x_2\) no cambia la geometría del subespacio: sólo repite una dirección ya presente.</p></div></div></div></div></div><div class="card" data-term="Covarianza medias, varianzas y relación lineal conjunta" id="t-covarianza"><button class="t-btn" onclick="toggle('covarianza')"><span class="t-letter">Co</span><span class="t-term">Covarianza<span class="term-sub">medias, varianzas y relación lineal conjunta</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La esperanza \(\mathbb{E}[X]\) es el centro de masa probabilístico. La varianza \(\operatorname{Var}(X)=\mathbb{E}[(X-\mathbb{E}X)^2]\) mide dispersión. La covarianza entre dos variables se define como \(\operatorname{Cov}(X,Y)=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y]\).</p><p>Geométricamente, la covarianza mide la tendencia lineal conjunta promedio. Si \(X\) y \(Y\) tienden a crecer juntas, suele ser positiva; si una crece cuando la otra decrece, suele ser negativa. Pero sólo captura relación lineal, no toda la dependencia.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(X\sim\operatorname{Unif}(-1,1)\) y \(Y=X^2\), entonces \(\mathbb{E}[X]=0\) y \(\mathbb{E}[X^3]=0\), de modo que \(\operatorname{Cov}(X,Y)=0\). Sin embargo, \(Y\) está completamente determinado por \(X\).</p></div></div></div></div></div><div class="card" data-term="Correlación \(\rho_{XY}\) como covarianza normalizada" id="t-correlacion"><button class="t-btn" onclick="toggle('correlacion')"><span class="t-letter">Co</span><span class="t-term">Correlación<span class="term-sub">\(\rho_{XY}\) como covarianza normalizada</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La correlación se define como \(\rho_{XY}=\operatorname{Cov}(X,Y)/(\sigma_X\sigma_Y)\). Es una magnitud adimensional que elimina las unidades físicas y permite comparar intensidad de asociación lineal entre variables heterogéneas.</p><p>En el espacio \(L^2\), si se centran las variables, la covarianza se interpreta como producto interno entre \(X-\mathbb{E}X\) y \(Y-\mathbb{E}Y\), mientras que la correlación es el coseno del ángulo entre esos vectores aleatorios. Así, \(\rho=0\) significa ortogonalidad en promedio, no ausencia general de dependencia.</p><div class="math-block">$$\rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \(Y=X^2\) con \(X\) simétrica alrededor de cero, la correlación vale \(0\), aunque la dependencia entre ambas variables sea total.</p></div></div></div></div></div><div class="card" data-term="Caso gaussiano equivalencia entre incorrelación e independencia" id="t-caso-gaussiano"><button class="t-btn" onclick="toggle('caso-gaussiano')"><span class="t-letter">Ca</span><span class="t-term">Caso gaussiano<span class="term-sub">equivalencia entre incorrelación e independencia</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>En la familia normal multivariada, la geometría elipsoidal no es sólo un resumen: coincide con la forma exacta de las curvas de nivel de la densidad. Por eso, si \((X,Y)\) es normal bivariada y \(\operatorname{Cov}(X,Y)=0\), entonces \(X\) e \(Y\) son independientes.</p><p>En lenguaje matricial, que la matriz \(\Sigma\) sea diagonal —o por bloques— equivale a independencia —o independencia por bloques— en el modelo gaussiano.</p><div class="math-block">$$f_{X,Y}(x,y)=\frac{1}{2\pi}\exp\!\left(-\frac{x^2+y^2}{2}\right)=\left(\frac{1}{\sqrt{2\pi}}e^{-x^2/2}\right)\left(\frac{1}{\sqrt{2\pi}}e^{-y^2/2}\right).$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \((X,Y)\sim N_2(0,I)\), la densidad conjunta factoriza en el producto de dos densidades normales univariadas. La incorrelación coincide aquí con independencia genuina.</p></div></div></div></div></div></div><div class="letter-group" data-letter="D"><div class="letter-anchor" id="letra-D">D</div><div class="card" data-term="Dependencia lineal e independencia lineal" id="t-dependencia-lineal"><button class="t-btn" onclick="toggle('dependencia-lineal')"><span class="t-letter">De</span><span class="t-term">Dependencia lineal<span class="term-sub">e independencia lineal</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Los vectores \(x_1,\ldots,x_k\) son linealmente dependientes si existen escalares \(\alpha_1,\ldots,\alpha_k\), no todos nulos, tales que \(\alpha_1x_1+\cdots+\alpha_kx_k=0\). Son linealmente independientes si la única solución es \(\alpha_1=\cdots=\alpha_k=0\).</p><p>Geometricamente, la dependencia lineal significa que alguna dirección está repetida o puede reconstruirse a partir de las demás. La independencia lineal, en cambio, indica que cada vector añade una dirección nueva al subespacio generado.</p><div class="math-block">$$x_1=\begin{pmatrix}1\\2\\3\\4\end{pmatrix},\qquad x_2=\begin{pmatrix}2\\4\\6\\8\end{pmatrix},\qquad x_2-2x_1=0.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Como \(x_2-2x_1=0\), existe una combinación lineal no trivial que produce el vector nulo. Por lo tanto, \(x_1\) y \(x_2\) son dependientes y ambos viven sobre la misma recta en \(\mathbb{R}^4\).</p></div></div></div></div></div><div class="card" data-term="Dependencia lineal aleatoria y singularidad de \(\Sigma\)" id="t-dependencia-lineal-aleatoria"><button class="t-btn" onclick="toggle('dependencia-lineal-aleatoria')"><span class="t-letter">De</span><span class="t-term">Dependencia lineal aleatoria<span class="term-sub">y singularidad de \(\Sigma\)</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Decir que un vector aleatorio \(Z\) satisface una relación lineal exacta significa que existe \(a
+eq0\) tal que \(a^\top Z\) es constante casi seguramente. Entonces \(\operatorname{Var}(a^\top Z)=0\), y por tanto \(a^\top\Sigma a=0\).</p><p>Esto implica que \(a\) pertenece al núcleo de \(\Sigma\), de modo que la matriz de covarianza es singular y la distribución de \(Z\) vive en un subespacio afín de dimensión menor que \(p\). La nube de datos queda exactamente aplanada.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(Y=2X\) y \(Z=(X,Y)\), entonces todas las observaciones caen sobre una recta. La covarianza tiene rango uno y no puede ser invertida en \(\mathbb{R}^2\).</p></div></div></div></div></div></div><div class="letter-group" data-letter="R"><div class="letter-anchor" id="letra-R">R</div><div class="card" data-term="Rango \(\operatorname{rank}(X)\) y dimensión efectiva del diseño" id="t-rango"><button class="t-btn" onclick="toggle('rango')"><span class="t-letter">Ra</span><span class="t-term">Rango<span class="term-sub">\(\operatorname{rank}(X)\) y dimensión efectiva del diseño</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>El rango de \(X\) es la dimensión del subespacio generado por sus columnas: \(\operatorname{rank}(X)=\dim(C(X))\). Si \(\operatorname{rank}(X)=p\), las columnas son linealmente independientes. Si \(\operatorname{rank}(X)&lt;p\), existe dependencia lineal exacta y el diseño tiene menos grados de libertad reales que columnas.</p><p>El rango, por tanto, no cuenta solamente cuántas variables hay, sino cuántas direcciones efectivas introduce el diseño.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(X=[x_1\ x_2]\) y \(x_2=2x_1\), entonces \(\operatorname{rank}(X)=1\). Aunque haya dos columnas, sólo existe una dirección geométrica efectiva.</p></div></div></div></div></div><div class="card" data-term="Reparametrización ortogonal y control geométrico de la redundancia" id="t-reparametrizacion-ortogonal"><button class="t-btn" onclick="toggle('reparametrizacion-ortogonal')"><span class="t-letter">Re</span><span class="t-term">Reparametrización ortogonal<span class="term-sub">y control geométrico de la redundancia</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>En presencia de multicolinealidad, una estrategia consiste en reparametrizar el problema usando combinaciones que separen la dirección común de la dirección diferencial. Un ejemplo típico es \(u=(x_1+x_2)/2\) y \(v=(x_1-x_2)/2\).</p><p>Si \(x_1\approx x_2\), entonces \(v\) tiene muy poca variación y puede descartarse, mientras que \(u\) concentra la dirección realmente informativa. Geométricamente, esto equivale a conservar la dirección robusta y eliminar la dirección casi plana que genera inestabilidad.</p><div class="math-block">$$u=\frac{x_1+x_2}{2},\qquad v=\frac{x_1-x_2}{2}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Cuando dos predictores miden casi lo mismo, la combinación promedio \(u\) resume la señal compartida y la diferencia \(v\) actúa como componente ruidosa o mal informada. Esta lectura también justifica técnicas de regularización.</p></div></div></div></div></div></div><div class="letter-group" data-letter="S"><div class="letter-anchor" id="letra-S">S</div><div class="card" data-term="Singularidad invertibilidad y equivalencia fundamental" id="t-singularidad"><button class="t-btn" onclick="toggle('singularidad')"><span class="t-letter">Si</span><span class="t-term">Singularidad<span class="term-sub">invertibilidad y equivalencia fundamental</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Una matriz cuadrada es singular cuando no es invertible. En el caso del Gram, se cumple la equivalencia estructural \(X^\top X\) singular \(\Longleftrightarrow\) existe \(v
+eq0\) tal que \(Xv=0\) \(\Longleftrightarrow\) \(\operatorname{rank}(X)&lt;p\).</p><p>La razón profunda es que \(\|Xv\|_2^2=v^\top X^\top Xv\). Si existe una dirección no nula que el diseño envía al cero, entonces el Gram no puede ser definido positivo ni invertible.</p><div class="math-block">$$X^\top X=\begin{pmatrix}30&amp;60\\60&amp;120\end{pmatrix},\qquad \det(X^\top X)=30\cdot120-60^2=0.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>La singularidad del ejemplo no es un accidente algebraico. Refleja exactamente el hecho geométrico de que \(x_2=2x_1\): el diseño colapsó sobre una sola dirección.</p></div></div></div></div></div></div><div class="letter-group" data-letter="V"><div class="letter-anchor" id="letra-V">V</div><div class="card" data-term="Variable aleatoria y variable aleatoria vectorial" id="t-variable-aleatoria"><button class="t-btn" onclick="toggle('variable-aleatoria')"><span class="t-letter">Va</span><span class="t-term">Variable aleatoria<span class="term-sub">y variable aleatoria vectorial</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Una variable aleatoria real es una función \(X:\Omega\to\mathbb{R}\) definida sobre un espacio de probabilidad \((\Omega,\mathcal{F},\mathbb{P})\), con la propiedad de medibilidad que garantiza que eventos como \(\{X\le t\}\) sean medibles.</p><p>Un vector aleatorio \(Z:\Omega\to\mathbb{R}^p\) reúne \(p\) variables aleatorias en un único objeto. En geometría de los datos, \(Z\) representa un punto aleatorio en \(\mathbb{R}^p\).</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(Z=(X,Y)\), donde \(X\) es temperatura y \(Y\) presión, entonces cada realización de \(Z\) es un punto del plano. El comportamiento conjunto de ambas magnitudes queda representado como una nube aleatoria.</p></div></div></div></div></div><div class="card" data-term="VIF inflación de varianza por redundancia geométrica" id="t-vif"><button class="t-btn" onclick="toggle('vif')"><span class="t-letter">VI</span><span class="t-term">VIF<span class="term-sub">inflación de varianza por redundancia geométrica</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Para el predictor \(x_j\), se define \(R_j^2\) como el coeficiente de determinación de la regresión de \(x_j\) sobre el resto de predictores. El factor de inflación de varianza se define como \(\operatorname{VIF}_j=1/(1-R_j^2)\).</p><p>Si \(R_j^2\) está cerca de uno, entonces el predictor \(x_j\) yace casi dentro del subespacio generado por los demás. Su componente ortogonal es muy pequeña y el coeficiente asociado sufre una fuerte inflación de varianza.</p><div class="math-block">$$\operatorname{VIF}_j=\frac{1}{1-R_j^2}.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>Si \(R_j^2=0.99\), entonces \(\operatorname{VIF}_j=100\). La varianza del coeficiente asociado se multiplica aproximadamente por cien respecto de un escenario sin redundancia.</p></div></div></div></div></div></div><div class="letter-group" data-letter="I"><div class="letter-anchor" id="letra-I">I</div><div class="card" data-term="Independencia estadística factorización de la distribución conjunta" id="t-independencia-estadistica"><button class="t-btn" onclick="toggle('independencia-estadistica')"><span class="t-letter">In</span><span class="t-term">Independencia estadística<span class="term-sub">factorización de la distribución conjunta</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La independencia estadística es una propiedad de la distribución conjunta. En el caso discreto, \(X\) e \(Y\) son independientes si \(p_{X,Y}(x,y)=p_X(x)p_Y(y)\) para todo par \((x,y)\). En el caso continuo, la misma idea se expresa mediante la factorización de la densidad: \(f_{X,Y}(x,y)=f_X(x)f_Y(y)\).</p><p>De manera equivalente, para todo par de conjuntos medibles \(A\) y \(B\), debe cumplirse \(\mathbb{P}(X\in A, Y\in B)=\mathbb{P}(X\in A)\mathbb{P}(Y\in B)\). Conocer una variable no aporta información sobre la otra en ningún nivel, no sólo en promedio.</p><div class="example"><span class="example-label">Ejemplo</span><p>Si \(X\sim\operatorname{Bern}(1/2)\) y \(Y\sim\operatorname{Bern}(1/2)\) son independientes, entonces cada par \((i,j)\in\{0,1\}^2\) tiene probabilidad \(1/4\), y en particular \(\mathbb{P}(X=1,Y=1)=1/4\).</p></div></div></div></div></div><div class="card" data-term="Incorrelación independencia implica covarianza cero, pero no al revés" id="t-incorrelacion"><button class="t-btn" onclick="toggle('incorrelacion')"><span class="t-letter">In</span><span class="t-term">Incorrelación<span class="term-sub">independencia implica covarianza cero, pero no al revés</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>Si \(X\) y \(Y\) son independientes y tienen momentos finitos, entonces \(\mathbb{E}[XY]=\mathbb{E}[X]\mathbb{E}[Y]\), de donde \(\operatorname{Cov}(X,Y)=0\) y \(\rho_{XY}=0\).</p><p>La implicación inversa es falsa en general. La covarianza cero sólo descarta asociación lineal promedio. Puede subsistir una dependencia no lineal fuerte, e incluso determinista.</p><div class="math-block">$$\operatorname{Cov}(X,Y)=\mathbb{E}[X^3]-\mathbb{E}[X]\mathbb{E}[X^2]=0\quad\text{cuando}\quad X\sim\operatorname{Unif}(-1,1),\ Y=X^2.$$</div><div class="example"><span class="example-label">Ejemplo</span><p>El ejemplo \(Y=X^2\) con \(X\sim\operatorname{Unif}(-1,1)\) muestra que \(\operatorname{Cov}(X,Y)=0\), pero \(Y\) está completamente determinado por \(X\). Por ello no hay independencia.</p></div></div></div></div></div><div class="card" data-term="Identificabilidad y núcleo del diseño" id="t-identificabilidad"><button class="t-btn" onclick="toggle('identificabilidad')"><span class="t-letter">Id</span><span class="t-term">Identificabilidad<span class="term-sub">y núcleo del diseño</span></span><span class="t-icon"><svg fill="none" height="13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="13"><polyline points="6 9 12 15 18 9"></polyline></svg></span></button><div class="a-wrap"><div class="a-inner"><div class="a-body"><p>La identificabilidad del parámetro \(\beta\) con diseño fijo equivale a que el mapa \(\beta\mapsto X\beta\) sea inyectivo. Eso ocurre si y sólo si \(\ker(X)=\{0\}\).</p><p>Si existe \(v
+eq0\) tal que \(Xv=0\), entonces \(X(\beta+v)=X\beta\), lo que significa que el modelo no puede distinguir entre esos parámetros. Esta condición coincide exactamente con dependencia lineal exacta, singularidad de \(X^\top X\) y pérdida de unicidad del estimador.</p><div class="example"><span class="example-label">Ejemplo</span><p>Cuando \(x_2=2x_1\), el vector \(v=(2,-1)\) pertenece al núcleo de \(X\). Esa dirección revela que el parámetro no es identificable: distintos valores de \(\beta\) producen la misma señal observada.</p></div></div></div></div></div></div></main>
+<footer>Glosario Avanzado de Geometría de los Datos · 21 términos<span class="footer-credit">Material elaborado por el profesor Sergio Gevatschnaider</span>
+</footer>
+<script>
+  // ─── DATA ───
+  const TOTAL = 21;
+  let openSet = new Set();
+
+  // Build alpha index
+  const letters = ['E','M','C','D','R','S','V','I'];
+  const alphaNav = document.getElementById('alpha-nav');
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'alpha-btn' + (letters.includes(l) ? ' has-terms' : ' dimmed');
+    btn.textContent = l;
+    btn.setAttribute('aria-label', 'Ir a términos con ' + l);
+    if (letters.includes(l)) {
+      btn.onclick = () => {
+        const el = document.getElementById('letra-' + l);
+        if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+      };
+    }
+    alphaNav.appendChild(btn);
+  });
+
+  // ─── TOGGLE ───
+  function toggle(id) {
+    const card = document.getElementById('t-' + id);
+    if (!card) return;
+    const isOpen = card.classList.contains('open');
+    if (isOpen) {
+      card.classList.remove('open');
+      openSet.delete(id);
+    } else {
+      card.classList.add('open');
+      openSet.add(id);
+      if (window.MathJax) {
+        // Small delay to allow grid animation to start before typesetting
+        setTimeout(() => MathJax.typesetPromise([card]).catch(()=>{}), 50);
+      }
+    }
+    updateProgress();
+  }
+
+  function expandAll() {
+    document.querySelectorAll('.card:not(.hidden)').forEach(card => {
+      card.classList.add('open');
+      openSet.add(card.id.replace('t-',''));
+    });
+    updateProgress();
+    if (window.MathJax) {
+      setTimeout(() => MathJax.typesetPromise(Array.from(document.querySelectorAll('.card'))).catch(()=>{}), 50);
+    }
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('open'));
+    openSet.clear();
+    updateProgress();
+  }
+
+  // ─── PROGRESS ───
+  function updateProgress() {
+    const visible = document.querySelectorAll('.card:not(.hidden)').length;
+    const count   = openSet.size;
+    const pct = TOTAL > 0 ? Math.round(count / TOTAL * 100) : 0;
+    document.getElementById('prog-inner').style.width = pct + '%';
+    document.getElementById('open-count').textContent  = count + ' / ' + TOTAL;
+    document.getElementById('prog-text').textContent   = pct + '% ABIERTO';
+  }
+
+  // ─── SEARCH ───
+  function filterTerms() {
+    const q = document.getElementById('search-input').value.trim().toLowerCase();
+    let anyVisible = false;
+    document.querySelectorAll('.card').forEach(card => {
+      const term = (card.getAttribute('data-term') || '').toLowerCase();
+      const body = (card.querySelector('.a-body') || {innerText:''}).innerText.toLowerCase();
+      const match = !q || term.includes(q) || body.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) anyVisible = true;
+    });
+    // Hide letter groups if all children are hidden
+    document.querySelectorAll('.letter-group').forEach(grp => {
+      const visCards = grp.querySelectorAll('.card:not(.hidden)').length;
+      grp.style.display = visCards === 0 ? 'none' : '';
+    });
+    document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
+  }
+
+  function clearSearch() {
+    document.getElementById('search-input').value = '';
+    filterTerms();
+  }
+
+  // ─── THEME ───
+  const themes = ['dark','light','sepia'];
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    themes.forEach(th => {
+      document.getElementById('opt-' + th).classList.toggle('active', th === t);
+    });
+    try { localStorage.setItem('glosario-theme', t); } catch(e) {}
+  }
+  (function(){
+    try {
+      const saved = localStorage.getItem('glosario-theme');
+      if (saved && themes.includes(saved)) setTheme(saved);
+    } catch(e) {}
+  })();
+
+  // ─── STAGGER ANIMATION ───
+  document.querySelectorAll('.card').forEach((c, i) => {
+    c.style.animationDelay = (i * 0.025) + 's';
+  });
+
+  // ─── FORCE MATHJAX TYPESET after DOM ready ───
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise().catch(() => {});
+    }
+  });
+  // Also typeset when MathJax finishes loading if DOM already ready
+  window.addEventListener('load', () => {
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise().catch(() => {});
+    }
+  });
+
+  // ─── KEYBOARD ───
+  document.querySelectorAll('.t-btn').forEach(btn => {
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  });
+</script>
+</body>
+</html>
