@@ -644,6 +644,13 @@
     "mtime": "2025-10-11T23:22:05-03:00"
   },
   {
+    "title": "Hipercubos — Qₙ",
+    "path": "/src/classroom/graphs/recursos/Grafos Regulares_hipercubos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-19T21:47:44-03:00"
+  },
+  {
     "title": "Homeomorfismo: Proyección radial de S² al cubo",
     "path": "/src/classroom/graphs/recursos/Poliedro_homorfo.html",
     "tag": "Demo",
@@ -964,6 +971,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:20:08-03:00"
+  },
+  {
+    "title": "Teoría de Redes: Mundo Pequeño",
+    "path": "/src/classroom/graphs/recursos/Grafos_ regulares small_world_network.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-19T21:47:44-03:00"
   },
   {
     "title": "Teseracto 4D + Algoritmo Genético en vivo",
