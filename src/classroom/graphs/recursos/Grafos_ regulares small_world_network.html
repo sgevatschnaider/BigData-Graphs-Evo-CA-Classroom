@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teoría de Redes: Mundo Pequeño</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1420;
+    --surface2: #111c2e;
+    --border: #1e3050;
+    --accent1: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6b;
+    --text: #cdd8e8;
+    --text-dim: #5a7090;
+    --glow1: rgba(0,229,255,0.15);
+    --glow2: rgba(255,107,53,0.15);
+    --glow3: rgba(127,255,107,0.15);
+    --metric-bg: rgba(0,229,255,0.05);
+  }
+  /* Purple Theme */
+  .theme-purple {
+    --bg: #0d0814;
+    --surface: #130d20;
+    --surface2: #1a1230;
+    --border: #2e1e50;
+    --accent1: #c77dff;
+    --accent2: #ff4d8d;
+    --accent3: #f9c74f;
+    --text: #e0d0f0;
+    --text-dim: #7a5a90;
+    --glow1: rgba(199,125,255,0.18);
+    --glow2: rgba(255,77,141,0.18);
+    --glow3: rgba(249,199,79,0.18);
+    --metric-bg: rgba(199,125,255,0.07);
+  }
+  /* Ocean Theme */
+  .theme-ocean {
+    --bg: #040e18;
+    --surface: #071525;
+    --surface2: #0a1e34;
+    --border: #0f3055;
+    --accent1: #00cfb4;
+    --accent2: #ff9f1c;
+    --accent3: #a0f4ff;
+    --text: #b8dded;
+    --text-dim: #3d7090;
+    --glow1: rgba(0,207,180,0.18);
+    --glow2: rgba(255,159,28,0.18);
+    --glow3: rgba(160,244,255,0.18);
+    --metric-bg: rgba(0,207,180,0.07);
+  }
+  /* Sunset Theme */
+  .theme-sunset {
+    --bg: #120810;
+    --surface: #1e0f18;
+    --surface2: #2a1422;
+    --border: #4a1f38;
+    --accent1: #ff6b9d;
+    --accent2: #ffd166;
+    --accent3: #06d6a0;
+    --text: #f0d0e0;
+    --text-dim: #8a4060;
+    --glow1: rgba(255,107,157,0.18);
+    --glow2: rgba(255,209,102,0.18);
+    --glow3: rgba(6,214,160,0.18);
+    --metric-bg: rgba(255,107,157,0.07);
+  }
+  .light {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #e8eef5;
+    --border: #c5d3e0;
+    --accent1: #0070b8;
+    --accent2: #d44000;
+    --accent3: #1a7a00;
+    --text: #1a2535;
+    --text-dim: #7a9ab8;
+    --glow1: rgba(0,112,184,0.1);
+    --glow2: rgba(212,64,0,0.1);
+    --glow3: rgba(26,122,0,0.1);
+    --metric-bg: rgba(0,112,184,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .4s, color .4s;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .4;
+  }
+
+  header {
+    position: relative; z-index: 10;
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .logo-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .logo-sub {
+    font-size: 10px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase;
+  }
+  .logo-author {
+    font-size: 9px; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase;
+    margin-top: 2px; opacity: 0.85;
+  }
+
+  .header-controls {
+    display: flex; gap: 12px; align-items: center;
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 9px 18px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all .2s;
+    outline: none;
+    position: relative; overflow: hidden;
+  }
+  .btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    opacity: 0; transition: opacity .2s;
+  }
+  .btn:hover { border-color: var(--accent1); color: var(--accent1); box-shadow: 0 0 18px var(--glow1); }
+  .btn.primary {
+    border-color: var(--accent1);
+    background: linear-gradient(135deg, rgba(0,229,255,.12), rgba(255,107,53,.08));
+    color: var(--accent1);
+  }
+  .btn.primary:hover { box-shadow: 0 0 28px var(--glow1), 0 0 14px var(--glow2); }
+  .btn.running { border-color: var(--accent2); color: var(--accent2); animation: pulse-btn 1.2s infinite; }
+  @keyframes pulse-btn {
+    0%,100% { box-shadow: 0 0 10px var(--glow2); }
+    50% { box-shadow: 0 0 28px var(--glow2), 0 0 10px var(--glow1); }
+  }
+
+  .theme-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; padding: 0;
+  }
+  .theme-selector {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .theme-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: border-color .2s, transform .15s;
+  }
+  .theme-dot:hover, .theme-dot.active { border-color: var(--text); transform: scale(1.2); }
+  .theme-dot.td-dark    { background: linear-gradient(135deg,#00e5ff,#ff6b35); }
+  .theme-dot.td-purple  { background: linear-gradient(135deg,#c77dff,#ff4d8d); }
+  .theme-dot.td-ocean   { background: linear-gradient(135deg,#00cfb4,#ff9f1c); }
+  .theme-dot.td-sunset  { background: linear-gradient(135deg,#ff6b9d,#ffd166); }
+  .theme-dot.td-light   { background: linear-gradient(135deg,#0070b8,#d44000); }
+
+  .main {
+    position: relative; z-index: 5;
+    padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+
+  /* Control strip */
+  .controls-strip {
+    display: flex; align-items: center; gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 20px;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-group {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ctrl-label {
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .ctrl-val {
+    font-size: 13px; color: var(--accent1);
+    min-width: 36px; text-align: right;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 140px; height: 3px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: var(--accent1);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--glow1);
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, var(--accent1) calc(var(--pct,0%) ), var(--border) calc(var(--pct,0%) ));
+  }
+
+  /* 3-panel layout */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    transition: border-color .3s, box-shadow .3s;
+    position: relative; overflow: hidden;
+  }
+  .panel.active-panel {
+    border-color: var(--accent1);
+    box-shadow: 0 0 24px var(--glow1);
+  }
+  .panel::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--panel-color,var(--accent1)), transparent);
+  }
+
+  .panel-head {
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--panel-color, var(--accent1));
+  }
+  .panel-tag {
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim);
+    background: var(--surface2); padding: 2px 7px;
+  }
+
+  canvas {
+    display: block;
+    width: 100%; aspect-ratio: 1 / 1;
+    background: var(--surface2);
+    cursor: crosshair;
+  }
+
+  .metrics {
+    padding: 10px 14px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .metric {
+    background: var(--metric-bg);
+    border: 1px solid rgba(255,255,255,.04);
+    padding: 8px 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .metric-key {
+    font-size: 9px; color: var(--text-dim);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .metric-val {
+    font-size: 17px; font-weight: 700;
+    color: var(--panel-color, var(--accent1));
+    transition: color .3s;
+    font-family: 'Syne', sans-serif;
+  }
+  .metric-desc {
+    font-size: 9px; color: var(--text-dim); margin-top: 1px;
+  }
+
+  /* Bottom timeline */
+  .timeline-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+  .timeline-title {
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .timeline-track {
+    position: relative;
+    height: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .timeline-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+    width: 0%;
+    transition: width .1s linear;
+  }
+  .timeline-markers {
+    display: flex; justify-content: space-between;
+    margin-top: 8px;
+  }
+  .t-marker {
+    font-size: 9px; color: var(--text-dim); letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Step log */
+  .log {
+    font-size: 10px; color: var(--text-dim);
+    margin-top: 10px; min-height: 18px;
+    letter-spacing: .5px;
+    font-style: italic;
+    transition: color .3s;
+  }
+  .log.active { color: var(--accent1); }
+
+  /* Explanation cards */
+  .theory-row {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 14px;
+  }
+  @media (max-width: 900px) { .theory-row { grid-template-columns: 1fr; } }
+
+  .theory-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+  .theory-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--card-color, var(--text));
+  }
+  .theory-card p {
+    font-size: 10.5px; color: var(--text-dim);
+    line-height: 1.7; letter-spacing: .3px;
+  }
+  .formula {
+    margin-top: 10px;
+    padding: 7px 10px;
+    background: var(--surface2);
+    border-left: 2px solid var(--card-color, var(--accent1));
+    font-size: 10px; color: var(--text);
+    letter-spacing: .5px;
+  }
+
+  .status-bar {
+    display: flex; gap: 20px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .status-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-dim); letter-spacing: 1px;
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--dot-c, var(--accent1));
+    animation: blink-dot 2s infinite;
+  }
+  @keyframes blink-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* Extra concept cards */
+  .concepts-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+  }
+  .concepts-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 14px;
+  }
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .concept-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 13px 15px;
+    border-left: 3px solid var(--card-color, var(--accent1));
+  }
+  .concept-card-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--card-color, var(--accent1));
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .concept-card p {
+    font-size: 10px; color: var(--text-dim);
+    line-height: 1.75; letter-spacing: .3px;
+  }
+  .concept-formula {
+    margin-top: 8px; padding: 5px 8px;
+    background: var(--surface);
+    border-left: 2px solid var(--card-color, var(--accent1));
+    font-size: 9.5px; color: var(--text); letter-spacing: .5px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Footer attribution */
+  .footer-bar {
+    position: relative; z-index: 5;
+    padding: 14px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .footer-author {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .footer-sub {
+    font-size: 9px; color: var(--text-dim);
+    letter-spacing: 2px; text-transform: uppercase; margin-top: 2px;
+  }
+  .footer-copy {
+    font-size: 9px; color: var(--text-dim); letter-spacing: 1.5px;
+    text-transform: uppercase; text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-title">NETWORK TOPOLOGY SIM</div>
+    <div class="logo-sub">Watts–Strogatz · Erdős–Rényi · Teoría de Mundo Pequeño</div>
+    <div class="logo-author">Material elaborado por el Prof. Sergio Gevatschnaider</div>
+  </div>
+  <div class="header-controls">
+    <div class="status-bar">
+      <div class="status-item"><span class="status-dot" style="--dot-c:var(--accent3)"></span>SIM READY</div>
+    </div>
+    <div class="theme-selector" title="Seleccionar tema">
+      <div class="theme-dot td-dark active" onclick="setTheme('dark')" title="Noche Azul"></div>
+      <div class="theme-dot td-purple" onclick="setTheme('purple')" title="Púrpura"></div>
+      <div class="theme-dot td-ocean" onclick="setTheme('ocean')" title="Océano"></div>
+      <div class="theme-dot td-sunset" onclick="setTheme('sunset')" title="Atardecer"></div>
+      <div class="theme-dot td-light" onclick="setTheme('light')" title="Modo Claro"></div>
+    </div>
+    <button class="btn primary" id="autoBtn" onclick="autoPlay()">▶ AUTO PLAY</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Controls -->
+  <div class="controls-strip">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Nodos (N)</span>
+      <input type="range" id="nSlider" min="8" max="24" value="14" step="2"
+             oninput="onNChange(this.value)">
+      <span class="ctrl-val" id="nVal">14</span>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Rewire (p)</span>
+      <input type="range" id="pSlider" min="0" max="100" value="15" step="1"
+             oninput="onPChange(this.value)">
+      <span class="ctrl-val" id="pVal">0.15</span>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Vecinos (k)</span>
+      <input type="range" id="kSlider" min="2" max="6" value="3" step="1"
+             oninput="onKChange(this.value)">
+      <span class="ctrl-val" id="kVal">3</span>
+    </div>
+    <div class="ctrl-group" style="margin-left:auto">
+      <button class="btn" onclick="buildAll()">↺ REGENERAR</button>
+    </div>
+  </div>
+
+  <!-- 3 panels -->
+  <div class="panels">
+
+    <!-- Panel 1: Regular -->
+    <div class="panel" id="p1" style="--panel-color: var(--accent1)">
+      <div class="panel-head">
+        <span class="panel-name">Grafo Regular</span>
+        <span class="panel-tag">Retícula Anular</span>
+      </div>
+      <canvas id="c1" width="400" height="400"></canvas>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-key">L — Camino Medio</div>
+          <div class="metric-val" id="m1L">—</div>
+          <div class="metric-desc">↑ Distancias largas</div>
+        </div>
+        <div class="metric">
+          <div class="metric-key">C — Clustering</div>
+          <div class="metric-val" id="m1C">—</div>
+          <div class="metric-desc">↑ Alta cohesión local</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Small World -->
+    <div class="panel" id="p2" style="--panel-color: var(--accent2)">
+      <div class="panel-head">
+        <span class="panel-name">Mundo Pequeño</span>
+        <span class="panel-tag">Watts–Strogatz</span>
+      </div>
+      <canvas id="c2" width="400" height="400"></canvas>
+      <div class="metrics">
+        <div class="metric" style="--metric-bg: rgba(255,107,53,.05)">
+          <div class="metric-key">L — Camino Medio</div>
+          <div class="metric-val" id="m2L" style="color:var(--accent2)">—</div>
+          <div class="metric-desc">↓ Atajos globales</div>
+        </div>
+        <div class="metric" style="--metric-bg: rgba(255,107,53,.05)">
+          <div class="metric-key">C — Clustering</div>
+          <div class="metric-val" id="m2C" style="color:var(--accent2)">—</div>
+          <div class="metric-desc">↑ Cohesión conservada</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Erdős–Rényi -->
+    <div class="panel" id="p3" style="--panel-color: var(--accent3)">
+      <div class="panel-head">
+        <span class="panel-name">Grafo Aleatorio</span>
+        <span class="panel-tag">Erdős–Rényi G(n,p)</span>
+      </div>
+      <canvas id="c3" width="400" height="400"></canvas>
+      <div class="metrics">
+        <div class="metric" style="--metric-bg: rgba(127,255,107,.05)">
+          <div class="metric-key">L — Camino Medio</div>
+          <div class="metric-val" id="m3L" style="color:var(--accent3)">—</div>
+          <div class="metric-desc">↓ Rutas cortas</div>
+        </div>
+        <div class="metric" style="--metric-bg: rgba(127,255,107,.05)">
+          <div class="metric-key">C — Clustering</div>
+          <div class="metric-val" id="m3C" style="color:var(--accent3)">—</div>
+          <div class="metric-desc">↓ Sin estructura local</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline-section">
+    <div class="timeline-title">▸ Progreso de Simulación</div>
+    <div class="timeline-track">
+      <div class="timeline-fill" id="progressBar"></div>
+    </div>
+    <div class="timeline-markers">
+      <span class="t-marker">Grafo Regular</span>
+      <span class="t-marker">Rewiring Parcial</span>
+      <span class="t-marker">Mundo Pequeño</span>
+      <span class="t-marker">Erdős–Rényi</span>
+    </div>
+    <div class="log" id="logLine">← Presiona AUTO PLAY para iniciar la demostración completa</div>
+  </div>
+
+  <!-- Theory cards -->
+  <div class="theory-row">
+    <div class="theory-card" style="--card-color: var(--accent1)">
+      <div class="theory-card-title">Red Regular (Retícula)</div>
+      <p>Cada nodo conecta únicamente con sus k vecinos más próximos en el anillo. La red tiene estructura muy local: los vecinos de un nodo se conocen entre sí, generando alto clustering. Sin embargo, cruzar la red requiere muchos pasos.</p>
+      <div class="formula">C ≈ 3(k−2)/4(k−1) → alto&nbsp;&nbsp;|&nbsp;&nbsp;L ~ N/2k → grande</div>
+    </div>
+    <div class="theory-card" style="--card-color: var(--accent2)">
+      <div class="theory-card-title">Mundo Pequeño (WS)</div>
+      <p>Parte de la retícula regular y reconecta aristas con probabilidad p. Pocos atajos bastan para reducir L dramáticamente, mientras C permanece alto. Interpola entre el grafo regular (p≈0) y el aleatorio (p≈1).</p>
+      <div class="formula">C ≫ C_random&nbsp;&nbsp;|&nbsp;&nbsp;L ≈ L_random = O(log N)</div>
+    </div>
+    <div class="theory-card" style="--card-color: var(--accent3)">
+      <div class="theory-card-title">Erdős–Rényi G(n,p)</div>
+      <p>Cada arista existe con probabilidad p independiente. El grado sigue distribución binomial ≈ Poisson. Las distancias son logarítmicas en N, pero el clustering es muy bajo: los vecinos raramente se conocen entre sí.</p>
+      <div class="formula">C ≈ p ≈ k/n → bajo&nbsp;&nbsp;|&nbsp;&nbsp;L ~ log N / log(k) → corto</div>
+    </div>
+  </div>
+
+  <!-- Extended Concepts Section -->
+  <div class="concepts-section">
+    <div class="concepts-title">▸ Conceptos Clave de Teoría de Redes</div>
+    <div class="concepts-grid">
+      <div class="concept-card" style="--card-color: var(--accent1)">
+        <div class="concept-card-title">Coeficiente de Clustering (C)</div>
+        <p>Mide qué tan interconectados están los vecinos de un nodo. Un C alto indica que los nodos forman triángulos o "camarillas" locales, lo que refleja cohesión social o modularidad funcional.</p>
+        <div class="concept-formula">C_i = 2·e_i / (k_i·(k_i−1))</div>
+      </div>
+      <div class="concept-card" style="--card-color: var(--accent2)">
+        <div class="concept-card-title">Longitud Media de Camino (L)</div>
+        <p>Promedio de las distancias geodésicas entre todos los pares de nodos. Un L bajo permite que la información, enfermedades o influencia social se propaguen rápidamente por toda la red.</p>
+        <div class="concept-formula">L = 1/(n(n−1)) · Σ d(i,j)</div>
+      </div>
+      <div class="concept-card" style="--card-color: var(--accent3)">
+        <div class="concept-card-title">Distribución de Grado</div>
+        <p>Histograma de cuántas conexiones tiene cada nodo. Las redes regulares tienen distribución delta, Watts-Strogatz binomial y las redes libre de escala (Barabási) siguen ley de potencia.</p>
+        <div class="concept-formula">P(k) ~ k^−γ  (libre de escala)</div>
+      </div>
+      <div class="concept-card" style="--card-color: var(--accent1)">
+        <div class="concept-card-title">Fenómeno "Seis Grados"</div>
+        <p>Milgram (1967) demostró experimentalmente que cualquier par de personas en EE.UU. está separado por aproximadamente seis intermediarios. Watts y Strogatz (1998) formalizaron esto matemáticamente.</p>
+        <div class="concept-formula">L_mundo ≈ O(log N / log k)</div>
+      </div>
+      <div class="concept-card" style="--card-color: var(--accent2)">
+        <div class="concept-card-title">Centralidad de Intermediación</div>
+        <p>Mide cuántos caminos más cortos pasan a través de un nodo. Los nodos con alta intermediación son "puentes" críticos: su eliminación puede fragmentar la red y aislar comunidades.</p>
+        <div class="concept-formula">B(v) = Σ σ_st(v)/σ_st</div>
+      </div>
+      <div class="concept-card" style="--card-color: var(--accent3)">
+        <div class="concept-card-title">Robustez y Percolación</div>
+        <p>Una red es robusta si mantiene conectividad ante fallas aleatorias. Las redes libre de escala son robustas ante fallas pero vulnerables a ataques dirigidos a hubs (nodos de alto grado).</p>
+        <div class="concept-formula">p_c = 1 − 1/(κ−1)  κ=⟨k²⟩/⟨k⟩</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Footer -->
+<footer class="footer-bar">
+  <div>
+    <div class="footer-author">Prof. Sergio Gevatschnaider</div>
+    <div class="footer-sub">Teoría de Redes · Simulación de Topologías · Material Educativo</div>
+  </div>
+  <div class="footer-copy">
+    Watts–Strogatz Model · Erdős–Rényi G(n,p)<br>
+    Simulador interactivo · Uso académico
+  </div>
+</footer>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+let N = 14, K = 3, P = 0.15;
+let graphs = { g1: null, g2: null, g3: null };
+let animating = false, animFrame = null, autoPhase = 0;
+let isDark = true;
+
+// ─── Sliders ───────────────────────────────────────────────────────────────
+function onNChange(v){ N=+v; document.getElementById('nVal').textContent=v; buildAll(); }
+function onPChange(v){ P=v/100; document.getElementById('pVal').textContent=(v/100).toFixed(2);
+  updateSliderGradient('pSlider', v/100);
+  graphs.g2 = buildSmallWorld(N, K, P);
+  layoutCircle(graphs.g2, N);
+  drawGraph('c2', graphs.g2, getColor(2));
+  updateMetrics(2, graphs.g2);
+}
+function onKChange(v){ K=+v; document.getElementById('kVal').textContent=v; buildAll(); }
+
+function updateSliderGradient(id, ratio){
+  const el = document.getElementById(id);
+  el.style.setProperty('--pct', (ratio*100)+'%');
+}
+
+// ─── Graph builders ────────────────────────────────────────────────────────
+function buildRegularRing(n, k){
+  const adj = Array.from({length:n}, () => new Set());
+  for(let i=0;i<n;i++){
+    for(let j=1;j<=k;j++){
+      adj[i].add((i+j)%n);
+      adj[(i+j)%n].add(i);
+    }
+  }
+  return adj;
+}
+
+function buildSmallWorld(n, k, p){
+  const adj = buildRegularRing(n, k);
+  for(let i=0;i<n;i++){
+    for(let j=1;j<=k;j++){
+      const target = (i+j)%n;
+      if(Math.random() < p){
+        adj[i].delete(target);
+        adj[target].delete(i);
+        let newT;
+        let attempts = 0;
+        do{ newT = Math.floor(Math.random()*n); attempts++; }
+        while((newT===i || adj[i].has(newT) || newT===target) && attempts<n*2);
+        if(attempts < n*2){ adj[i].add(newT); adj[newT].add(i); }
+        else { adj[i].add(target); adj[target].add(i); } // restore
+      }
+    }
+  }
+  return adj;
+}
+
+function buildErdosRenyi(n, k){
+  const p = k / (n-1);
+  const adj = Array.from({length:n}, () => new Set());
+  for(let i=0;i<n;i++)
+    for(let j=i+1;j<n;j++)
+      if(Math.random()<p){ adj[i].add(j); adj[j].add(i); }
+  return adj;
+}
+
+// ─── Layout ────────────────────────────────────────────────────────────────
+function layoutCircle(adj, n){
+  const pts = [];
+  for(let i=0;i<n;i++){
+    const a = (2*Math.PI*i/n) - Math.PI/2;
+    pts.push({ x: Math.cos(a), y: Math.sin(a), i });
+  }
+  adj._pts = pts;
+}
+
+// ─── Metrics ───────────────────────────────────────────────────────────────
+function bfs(adj, src){
+  const n = adj.length, dist = new Array(n).fill(Infinity);
+  dist[src] = 0;
+  const q = [src];
+  while(q.length){
+    const u = q.shift();
+    for(const v of adj[u]){ if(dist[v]===Infinity){ dist[v]=dist[u]+1; q.push(v); } }
+  }
+  return dist;
+}
+
+function avgPathLength(adj){
+  const n = adj.length;
+  let total=0, cnt=0;
+  for(let i=0;i<n;i++){
+    const d = bfs(adj, i);
+    for(let j=i+1;j<n;j++){
+      if(d[j]!==Infinity){ total+=d[j]; cnt++; }
+    }
+  }
+  return cnt ? total/cnt : 0;
+}
+
+function clusteringCoeff(adj){
+  const n = adj.length;
+  let total=0;
+  for(let i=0;i<n;i++){
+    const nb = [...adj[i]];
+    const ki = nb.length;
+    if(ki<2){ total+=0; continue; }
+    let links=0;
+    for(let a=0;a<nb.length;a++)
+      for(let b=a+1;b<nb.length;b++)
+        if(adj[nb[a]].has(nb[b])) links++;
+    total += 2*links/(ki*(ki-1));
+  }
+  return total/n;
+}
+
+function computeMetrics(adj){
+  return { L: avgPathLength(adj).toFixed(2), C: clusteringCoeff(adj).toFixed(3) };
+}
+
+function updateMetrics(panel, adj){
+  const m = computeMetrics(adj);
+  document.getElementById('m'+panel+'L').textContent = m.L;
+  document.getElementById('m'+panel+'C').textContent = m.C;
+}
+
+// ─── Drawing ───────────────────────────────────────────────────────────────
+function getColor(panel){
+  const cs = getComputedStyle(document.documentElement);
+  if(panel===1) return cs.getPropertyValue('--accent1').trim();
+  if(panel===2) return cs.getPropertyValue('--accent2').trim();
+  return cs.getPropertyValue('--accent3').trim();
+}
+
+function hexAlpha(hex, a){
+  // crude approach: add alpha CSS
+  return hex; // we'll use globalAlpha
+}
+
+function drawGraph(id, adj, color, highlightEdge=null, phase=1){
+  const canvas = document.getElementById(id);
+  if(!canvas) return;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--surface2').trim();
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  if(!adj || !adj._pts) return;
+  const pts = adj._pts;
+  const cx = W/2, cy = H/2, R = W*0.38;
+
+  function px(p){ return { x: cx + p.x*R, y: cy + p.y*R }; }
+
+  const n = pts.length;
+
+  // Draw edges
+  for(let i=0;i<n;i++){
+    for(const j of adj[i]){
+      if(j<=i) continue;
+      const pi = px(pts[i]), pj = px(pts[j]);
+      const isHL = highlightEdge && ((highlightEdge[0]===i&&highlightEdge[1]===j)||(highlightEdge[0]===j&&highlightEdge[1]===i));
+      ctx.beginPath();
+      ctx.moveTo(pi.x, pi.y);
+      ctx.lineTo(pj.x, pj.y);
+      if(isHL){
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = 1;
+      } else {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = isDark ? 0.3 : 0.2;
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Draw nodes
+  for(let i=0;i<n;i++){
+    const p = px(pts[i]);
+    const r = 5.5;
+    // Glow
+    const gr = ctx.createRadialGradient(p.x,p.y,0, p.x,p.y,r*3.5);
+    gr.addColorStop(0, color+'88');
+    gr.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(p.x,p.y,r*3.5,0,2*Math.PI);
+    ctx.fillStyle = gr; ctx.fill();
+    // Node
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,2*Math.PI);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    // Label
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.55)';
+    ctx.font = '8px Space Mono, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(i, p.x, p.y);
+  }
+}
+
+// ─── Build All ─────────────────────────────────────────────────────────────
+function buildAll(){
+  const n = N, k = K, p = P;
+  graphs.g1 = buildRegularRing(n, k);
+  graphs.g2 = buildSmallWorld(n, k, p);
+  graphs.g3 = buildErdosRenyi(n, k*2);
+  [graphs.g1, graphs.g2, graphs.g3].forEach(g => layoutCircle(g, n));
+  drawGraph('c1', graphs.g1, getColor(1));
+  drawGraph('c2', graphs.g2, getColor(2));
+  drawGraph('c3', graphs.g3, getColor(3));
+  updateMetrics(1, graphs.g1);
+  updateMetrics(2, graphs.g2);
+  updateMetrics(3, graphs.g3);
+  updateSliderGradient('pSlider', P);
+  updateSliderGradient('nSlider', (N-8)/16);
+  updateSliderGradient('kSlider', (K-2)/4);
+  setProgress(0);
+  setLog('Grafos regenerados. Presiona AUTO PLAY para la demostración.', false);
+}
+
+// ─── Auto Play ─────────────────────────────────────────────────────────────
+let autoTimeout = null;
+function autoPlay(){
+  if(animating){ stopAuto(); return; }
+  animating = true;
+  const btn = document.getElementById('autoBtn');
+  btn.textContent = '■ DETENER'; btn.classList.add('running');
+  autoPhase = 0;
+  runPhase();
+}
+
+function stopAuto(){
+  animating = false;
+  clearTimeout(autoTimeout);
+  const btn = document.getElementById('autoBtn');
+  btn.textContent = '▶ AUTO PLAY'; btn.classList.remove('running');
+  [1,2,3].forEach(p => document.getElementById('p'+p).classList.remove('active-panel'));
+  setLog('Demostración detenida.', false);
+}
+
+async function runPhase(){
+  if(!animating) return;
+
+  const phases = [
+    { pct: 0,   msg: '① Construyendo red regular (anillo k-vecinos)...', panel: 1, p: 0 },
+    { pct: 15,  msg: '① Red regular lista. Alto clustering, caminos largos.', panel: 1, p: 0 },
+    { pct: 30,  msg: '② Iniciando rewiring con p=0.05 — primeros atajos...', panel: 2, p: 0.05 },
+    { pct: 45,  msg: '② p=0.10 — caminos se acortan, clustering se mantiene.', panel: 2, p: 0.10 },
+    { pct: 58,  msg: '② p=0.20 — zona óptima de mundo pequeño ★', panel: 2, p: 0.20 },
+    { pct: 70,  msg: '② p=0.50 — estructura local comienza a perderse...', panel: 2, p: 0.50 },
+    { pct: 82,  msg: '③ Erdős–Rényi: aristas completamente aleatorias.', panel: 3, p: 1 },
+    { pct: 92,  msg: '③ Clustering bajo, caminos cortos. Opuesto al regular.', panel: 3, p: 1 },
+    { pct: 100, msg: '✓ Demo completa: Regular → Mundo Pequeño → Aleatorio.', panel: 0, p: P },
+  ];
+
+  for(let i=0;i<phases.length;i++){
+    if(!animating) return;
+    const ph = phases[i];
+    setProgress(ph.pct);
+    setLog(ph.msg, true);
+    [1,2,3].forEach(p => document.getElementById('p'+p).classList.remove('active-panel'));
+    if(ph.panel>0) document.getElementById('p'+ph.panel).classList.add('active-panel');
+
+    if(ph.panel===2){
+      // Animate rewiring
+      const pNew = ph.p;
+      document.getElementById('pSlider').value = Math.round(pNew*100);
+      document.getElementById('pVal').textContent = pNew.toFixed(2);
+      updateSliderGradient('pSlider', pNew);
+      graphs.g2 = buildSmallWorld(N, K, pNew);
+      layoutCircle(graphs.g2, N);
+      drawGraph('c2', graphs.g2, getColor(2));
+      updateMetrics(2, graphs.g2);
+    } else if(ph.panel===3){
+      graphs.g3 = buildErdosRenyi(N, K*2);
+      layoutCircle(graphs.g3, N);
+      drawGraph('c3', graphs.g3, getColor(3));
+      updateMetrics(3, graphs.g3);
+    }
+
+    await wait(900 + i*120);
+  }
+
+  stopAuto();
+  // restore p slider
+  document.getElementById('pSlider').value = Math.round(P*100);
+  document.getElementById('pVal').textContent = P.toFixed(2);
+}
+
+function wait(ms){ return new Promise(r => { autoTimeout = setTimeout(r, ms); }); }
+
+function setProgress(pct){
+  document.getElementById('progressBar').style.width = pct+'%';
+}
+function setLog(msg, active){
+  const el = document.getElementById('logLine');
+  el.textContent = msg;
+  el.className = 'log' + (active?' active':'');
+}
+
+// ─── Theme ─────────────────────────────────────────────────────────────────
+const THEMES = ['dark','purple','ocean','sunset','light'];
+let currentTheme = 'dark';
+
+function setTheme(name){
+  currentTheme = name;
+  const body = document.body;
+  body.classList.remove('light','theme-purple','theme-ocean','theme-sunset');
+  if(name === 'light')   body.classList.add('light');
+  if(name === 'purple')  body.classList.add('theme-purple');
+  if(name === 'ocean')   body.classList.add('theme-ocean');
+  if(name === 'sunset')  body.classList.add('theme-sunset');
+  isDark = (name !== 'light');
+  // Update active dot
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  const map = { dark:'td-dark', purple:'td-purple', ocean:'td-ocean', sunset:'td-sunset', light:'td-light' };
+  document.querySelector('.'+map[name])?.classList.add('active');
+  // Redraw
+  drawGraph('c1', graphs.g1, getColor(1));
+  drawGraph('c2', graphs.g2, getColor(2));
+  drawGraph('c3', graphs.g3, getColor(3));
+}
+
+function toggleTheme(){
+  const idx = (THEMES.indexOf(currentTheme)+1) % THEMES.length;
+  setTheme(THEMES[idx]);
+}
+
+// ─── Resize canvases to actual pixel size ─────────────────────────────────
+function resizeCanvases(){
+  ['c1','c2','c3'].forEach(id => {
+    const c = document.getElementById(id);
+    const rect = c.getBoundingClientRect();
+    c.width = rect.width * devicePixelRatio;
+    c.height = rect.height * devicePixelRatio;
+    const ctx = c.getContext('2d');
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  });
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  resizeCanvases();
+  buildAll();
+});
+window.addEventListener('resize', () => {
+  resizeCanvases();
+  drawGraph('c1', graphs.g1, getColor(1));
+  drawGraph('c2', graphs.g2, getColor(2));
+  drawGraph('c3', graphs.g3, getColor(3));
+});
+</script>
+</body>
+</html>
