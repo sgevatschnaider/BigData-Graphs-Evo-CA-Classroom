@@ -177,7 +177,7 @@ Abre los cuadernos en `notebooks/` para la ruta guiada.
 ## 📝 Distribución, distancia, geometría y paseos aleatorios
 
 Esta sección reúne un **notebook base en Google Colab** y una serie de **materiales HTML interactivos** orientados a estudiar, de manera articulada, cómo se relacionan la **distribución de los datos**, la **noción de distancia**, la **geometría del espacio** y el **comportamiento asintótico de procesos aleatorios**.  
-El recorrido está organizado en una secuencia pedagógica: primero se presenta el mapa conceptual general del módulo; luego se explora cómo distintas métricas inducen distintas geometrías; después se analiza el papel de la covarianza y de la distancia de Mahalanobis en contextos aplicados; a continuación se introduce la geometría hiperbólica como alternativa al espacio euclídeo; y finalmente se estudian simulaciones de paseos aleatorios bidimensionales, tanto en su convergencia hacia una normal bivariada como en su vínculo con la constante π.
+El recorrido está organizado en una secuencia pedagógica: primero se presenta el mapa conceptual general del módulo; luego se explora cómo distintas métricas inducen distintas geometrías; a continuación se introduce la geometría hiperbólica como alternativa al espacio euclídeo; y finalmente se estudian simulaciones de paseos aleatorios bidimensionales, tanto en su convergencia hacia una normal bivariada como en su vínculo con la constante π.
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
