@@ -126,6 +126,13 @@
     "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
+    "title": "Caminante Aleatorio · Grafo de Malla",
+    "path": "/src/classroom/graphs/recursos/random_walk_3x3.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-25T14:26:01-03:00"
+  },
+  {
     "title": "Capital Humano en IA - El Ascenso de China",
     "path": "/src/classroom/graphs/recursos/China_capitalhumano.html",
     "tag": "Demo",
@@ -845,6 +852,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-18T06:24:45-03:00"
+  },
+  {
+    "title": "Paseo Aleatorio · Tres Actos",
+    "path": "/src/classroom/graphs/recursos/tres_actos_paseo_aleatorio.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-25T14:26:01-03:00"
   },
   {
     "title": "Paseo Aleatorio en ℤ² &amp; π — v2",
