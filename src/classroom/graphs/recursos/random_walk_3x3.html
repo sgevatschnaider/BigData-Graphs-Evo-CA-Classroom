@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caminante Aleatorio · Grafo de Malla</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e3a5f;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --walker: #ff4d6d;
+    --trail: rgba(0,229,255,0.18);
+    --node: #1e3a5f;
+    --node-visited: #0e4b6b;
+    --edge: #1e3a5f;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-bright: #f1f5f9;
+    --glow: 0 0 20px rgba(0,229,255,0.4);
+    --glow2: 0 0 30px rgba(0,229,255,0.2);
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Playfair Display', serif;
+  }
+  .theme-amber {
+    --bg: #0d0a00;
+    --surface: #1a1400;
+    --surface2: #241c00;
+    --border: #4a3800;
+    --accent: #fbbf24;
+    --accent2: #ef4444;
+    --accent3: #34d399;
+    --walker: #f87171;
+    --trail: rgba(251,191,36,0.15);
+    --node: #3d2e00;
+    --node-visited: #4a3800;
+    --edge: #3d2e00;
+    --text: #fef3c7;
+    --text-dim: #92400e;
+    --text-bright: #fffbeb;
+    --glow: 0 0 20px rgba(251,191,36,0.4);
+    --glow2: 0 0 30px rgba(251,191,36,0.15);
+  }
+  .theme-emerald {
+    --bg: #f0fdf4;
+    --surface: #ffffff;
+    --surface2: #f0fdf4;
+    --border: #bbf7d0;
+    --accent: #059669;
+    --accent2: #7c3aed;
+    --accent3: #0891b2;
+    --walker: #dc2626;
+    --trail: rgba(5,150,105,0.1);
+    --node: #d1fae5;
+    --node-visited: #a7f3d0;
+    --edge: #6ee7b7;
+    --text: #064e3b;
+    --text-dim: #6b7280;
+    --text-bright: #022c22;
+    --glow: 0 0 20px rgba(5,150,105,0.3);
+    --glow2: 0 0 30px rgba(5,150,105,0.1);
+  }
+  .theme-rose {
+    --bg: #0d0008;
+    --surface: #1a0012;
+    --surface2: #25001a;
+    --border: #6b0036;
+    --accent: #f472b6;
+    --accent2: #fbbf24;
+    --accent3: #a78bfa;
+    --walker: #facc15;
+    --trail: rgba(244,114,182,0.15);
+    --node: #4a0029;
+    --node-visited: #6b003b;
+    --edge: #4a0029;
+    --text: #fce7f3;
+    --text-dim: #9d174d;
+    --text-bright: #fdf2f8;
+    --glow: 0 0 20px rgba(244,114,182,0.5);
+    --glow2: 0 0 30px rgba(244,114,182,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    transition: background 0.4s, color 0.4s;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(0,229,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 10% 90%, rgba(124,58,237,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; width: 100%; max-width: 900px; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    color: var(--text-bright);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .header-left h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .header-left p {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .theme-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .theme-bar span {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 2px;
+  }
+  .theme-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    background: transparent;
+  }
+  .theme-btn:hover { transform: scale(1.2); }
+  .theme-btn.active { border-color: var(--text-bright); transform: scale(1.15); }
+  .theme-btn[data-theme="default"]   { background: linear-gradient(135deg,#0a0e17 50%,#00e5ff); }
+  .theme-btn[data-theme="amber"]     { background: linear-gradient(135deg,#0d0a00 50%,#fbbf24); }
+  .theme-btn[data-theme="emerald"]   { background: linear-gradient(135deg,#f0fdf4 50%,#059669); }
+  .theme-btn[data-theme="rose"]      { background: linear-gradient(135deg,#0d0008 50%,#f472b6); }
+
+  /* ── MAIN LAYOUT ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 680px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── CANVAS CARD ── */
+  .canvas-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .canvas-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20%; right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.7;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+  }
+  .canvas-label {
+    position: absolute;
+    bottom: 10px; right: 14px;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  /* ── SIDE PANEL ── */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .panel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .panel-card h3 {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  /* controls */
+  .ctrl-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ctrl-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .ctrl-item label {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ctrl-item .val {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: var(--glow);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  /* buttons */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--border);
+    color: var(--text-bright);
+    box-shadow: var(--glow2);
+  }
+  .btn.primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+  .btn.primary:hover { opacity: 0.85; }
+  .btn.danger {
+    border-color: var(--walker);
+    color: var(--walker);
+  }
+  .btn.danger:hover { background: rgba(255,77,109,0.15); }
+  .btn.active-run {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #fff;
+    animation: pulse-btn 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-btn {
+    0%,100% { box-shadow: 0 0 8px var(--accent2); }
+    50%      { box-shadow: 0 0 22px var(--accent2); }
+  }
+
+  /* stats */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 10px 8px;
+    transition: background 0.4s;
+  }
+  .stat-box .stat-val {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .stat-box .stat-lbl {
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+  .stat-box.wide { grid-column: span 2; }
+
+  /* position badge */
+  .pos-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--walker);
+    border-radius: 8px;
+    font-size: 0.72rem;
+    color: var(--text);
+    margin-top: 2px;
+  }
+  .pos-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--walker);
+    box-shadow: 0 0 8px var(--walker);
+    flex-shrink: 0;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity:1; } 50% { opacity:0.3; }
+  }
+
+  /* legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 0.62rem; color: var(--text-dim); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* info strip */
+  .info-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    transition: background 0.4s;
+  }
+  .info-strip strong { color: var(--accent); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  .footer-credit {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    padding: 10px 0 4px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    transition: color 0.4s, border-color 0.4s;
+  }
+  .footer-credit span {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* mode selector */
+  .mode-tabs { display: flex; gap: 6px; }
+  .mode-tab {
+    flex: 1;
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .mode-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.07);
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <h1>Caminante <em>Aleatorio</em> en Grafo de Malla</h1>
+      <p>Paseo estocástico · Estructura local · Decisión iterada</p>
+    </div>
+    <div class="theme-bar">
+      <span>Tema</span>
+      <button class="theme-btn active" data-theme="default" title="Cian oscuro"></button>
+      <button class="theme-btn" data-theme="amber"   title="Ámbar"></button>
+      <button class="theme-btn" data-theme="emerald" title="Esmeralda"></button>
+      <button class="theme-btn" data-theme="rose"    title="Rosa"></button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main-grid">
+
+    <!-- CANVAS -->
+    <div class="canvas-card">
+      <canvas id="graphCanvas"></canvas>
+      <div class="canvas-label">G = (V, E) · malla n×n</div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+
+      <!-- CONTROLS -->
+      <div class="panel-card">
+        <h3>Configuración</h3>
+        <div class="ctrl-row">
+          <div class="ctrl-item">
+            <label>Tamaño de malla: <span class="val" id="gridSizeVal">3 × 3</span></label>
+            <input type="range" id="gridSize" min="2" max="10" value="3">
+          </div>
+          <div class="ctrl-item">
+            <label>Velocidad: <span class="val" id="speedVal">medio</span></label>
+            <input type="range" id="speed" min="1" max="5" value="3">
+          </div>
+          <div class="ctrl-item">
+            <label>Estela de pasos</label>
+            <div class="mode-tabs">
+              <button class="mode-tab active" data-mode="heat">Mapa calor</button>
+              <button class="mode-tab" data-mode="trail">Trayecto</button>
+              <button class="mode-tab" data-mode="none">Limpio</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="panel-card">
+        <h3>Control</h3>
+        <div class="btn-row" style="margin-bottom:8px">
+          <button class="btn primary" id="btnAuto">▶ Auto</button>
+          <button class="btn" id="btnStep">Paso</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnReset">↺ Reset</button>
+          <button class="btn danger" id="btnClear">✕ Limpiar</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="panel-card">
+        <h3>Estadísticas</h3>
+        <div class="stat-grid" style="margin-bottom:10px">
+          <div class="stat-box">
+            <div class="stat-val" id="statSteps">0</div>
+            <div class="stat-lbl">pasos</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statVisited">1</div>
+            <div class="stat-lbl">nodos visit.</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statDegree">—</div>
+            <div class="stat-lbl">grado actual</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statCoverage">0%</div>
+            <div class="stat-lbl">cobertura</div>
+          </div>
+          <div class="stat-box wide">
+            <div class="stat-val" id="statMaxVisit">0</div>
+            <div class="stat-lbl">visitas máx. al nodo</div>
+          </div>
+        </div>
+        <div class="pos-badge">
+          <div class="dot"></div>
+          <span id="statPos">posición: (0, 0)</span>
+        </div>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="panel-card">
+        <h3>Leyenda</h3>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--walker)"></div>Caminante</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Visitado</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--node);border:1px solid var(--border)"></div>No visitado</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--accent3);border-radius:2px"></div>Arista</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INFO STRIP -->
+  <div class="info-strip">
+    <strong>Estructura local:</strong> En el <em>centro</em> de la malla, cada nodo tiene <strong>grado 4</strong>
+    (arriba, abajo, izquierda, derecha). En las <em>esquinas</em>, el grado es <strong>2</strong>; en los <em>bordes</em>, <strong>3</strong>.
+    El caminante elige uno de sus vecinos con <strong>probabilidad uniforme</strong> — el movimiento está determinado
+    tanto por el azar como por la <strong>estructura topológica</strong> del grafo.
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-credit">
+    Material elaborado por el profesor <span>Sergio Gevatschnaider</span>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+const canvas = document.getElementById('graphCanvas');
+const ctx    = canvas.getContext('2d');
+
+let gridN    = 3;
+let walkerX  = 0, walkerY = 0;
+let steps    = 0;
+let autoRun  = false;
+let autoTimer= null;
+let visitMap = [];   // visitMap[y][x] = count
+let trailArr = [];   // [{x,y}]
+let vizMode  = 'heat';
+let lastX = 0, lastY = 0;
+
+const speedMap = { 1:600, 2:300, 3:140, 4:60, 5:20 };
+const speedLbl = { 1:'muy lento', 2:'lento', 3:'medio', 4:'rápido', 5:'ultra' };
+let currentSpeed = 3;
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+function initGrid() {
+  walkerX = Math.floor(Math.random() * gridN);
+  walkerY = Math.floor(Math.random() * gridN);
+  steps   = 0;
+  trailArr = [{x: walkerX, y: walkerY}];
+  visitMap = Array.from({length: gridN}, () => new Array(gridN).fill(0));
+  visitMap[walkerY][walkerX] = 1;
+  updateStats();
+  sizeCanvas();
+  draw();
+}
+
+function sizeCanvas() {
+  const card = canvas.parentElement;
+  const W    = card.clientWidth - 40;
+  canvas.width  = W;
+  canvas.height = W;
+}
+
+// ─────────────────────────────────────────
+// DRAWING
+// ─────────────────────────────────────────
+function getCSSVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+function nodePos(x, y) {
+  const pad    = canvas.width * 0.1;
+  const usable = canvas.width - pad * 2;
+  const step   = usable / (gridN - 1 || 1);
+  return { cx: pad + x * step, cy: pad + y * step, r: Math.min(18, step * 0.22) };
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // background
+  ctx.fillStyle = getCSSVar('--surface');
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // subtle grid lines background
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  ctx.lineWidth = 1;
+  const gap = canvas.width / 12;
+  for (let i = 0; i < canvas.width; i += gap) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+  }
+
+  const accent  = getCSSVar('--accent');
+  const accent3 = getCSSVar('--accent3');
+  const walker  = getCSSVar('--walker');
+  const nodeBg  = getCSSVar('--node');
+  const border  = getCSSVar('--border');
+  const bg      = getCSSVar('--bg');
+
+  // max visits for heatmap
+  let maxVisit = 0;
+  for (let gy=0;gy<gridN;gy++) for (let gx=0;gx<gridN;gx++) if (visitMap[gy][gx] > maxVisit) maxVisit = visitMap[gy][gx];
+
+  // ── draw TRAIL (mode=trail) ──
+  if (vizMode === 'trail' && trailArr.length > 1) {
+    for (let i = 1; i < trailArr.length; i++) {
+      const a = trailArr[i-1], b = trailArr[i];
+      const pa = nodePos(a.x, a.y), pb = nodePos(b.x, b.y);
+      const alpha = 0.12 + 0.4 * (i / trailArr.length);
+      ctx.strokeStyle = accent;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth   = 3;
+      ctx.lineCap     = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pa.cx, pa.cy);
+      ctx.lineTo(pb.cx, pb.cy);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── draw EDGES ──
+  for (let gy = 0; gy < gridN; gy++) {
+    for (let gx = 0; gx < gridN; gx++) {
+      const p = nodePos(gx, gy);
+      // right edge
+      if (gx < gridN-1) {
+        const q = nodePos(gx+1, gy);
+        ctx.strokeStyle = accent3;
+        ctx.globalAlpha = 0.25;
+        ctx.lineWidth   = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(p.cx, p.cy);
+        ctx.lineTo(q.cx, q.cy);
+        ctx.stroke();
+      }
+      // down edge
+      if (gy < gridN-1) {
+        const q = nodePos(gx, gy+1);
+        ctx.strokeStyle = accent3;
+        ctx.globalAlpha = 0.25;
+        ctx.lineWidth   = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(p.cx, p.cy);
+        ctx.lineTo(q.cx, q.cy);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // ── draw NODES ──
+  for (let gy = 0; gy < gridN; gy++) {
+    for (let gx = 0; gx < gridN; gx++) {
+      const {cx, cy, r} = nodePos(gx, gy);
+      const visits = visitMap[gy][gx];
+      const isWalker = (gx === walkerX && gy === walkerY);
+
+      // heatmap fill
+      let fill = nodeBg;
+      if (vizMode === 'heat' && visits > 0 && maxVisit > 0) {
+        const t = Math.pow(visits / maxVisit, 0.5);
+        fill = heatColor(t, accent);
+      } else if (vizMode === 'trail' && visits > 0) {
+        fill = accent + '44';
+      }
+
+      // shadow for visited
+      if (visits > 0) {
+        ctx.shadowColor  = isWalker ? walker : accent;
+        ctx.shadowBlur   = isWalker ? 20 : 8;
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.fillStyle = isWalker ? walker : fill;
+      ctx.fill();
+      ctx.strokeStyle = isWalker ? walker : (visits > 0 ? accent : border);
+      ctx.lineWidth   = isWalker ? 3 : 1.5;
+      ctx.globalAlpha = isWalker ? 1 : (visits > 0 ? 0.9 : 0.5);
+      ctx.stroke();
+      ctx.shadowBlur  = 0;
+      ctx.globalAlpha = 1;
+
+      // walker pulse ring
+      if (isWalker) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 6, 0, Math.PI*2);
+        ctx.strokeStyle = walker;
+        ctx.lineWidth   = 1.5;
+        ctx.globalAlpha = 0.3;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // visit count label (only for heat)
+      if (vizMode === 'heat' && visits > 0 && r > 8) {
+        ctx.fillStyle   = isWalker ? bg : (visits / maxVisit > 0.6 ? bg : getCSSVar('--text'));
+        ctx.font        = `${Math.max(8, r * 0.75)}px JetBrains Mono`;
+        ctx.textAlign   = 'center';
+        ctx.textBaseline= 'middle';
+        ctx.globalAlpha = 0.9;
+        ctx.fillText(visits, cx, cy);
+        ctx.globalAlpha = 1;
+      }
+
+      // coordinate label (small grid)
+      if (gridN <= 5 && r > 10) {
+        ctx.fillStyle   = getCSSVar('--text-dim');
+        ctx.font        = `${Math.max(7, r*0.55)}px JetBrains Mono`;
+        ctx.textAlign   = 'center';
+        ctx.textBaseline= 'top';
+        ctx.globalAlpha = 0.5;
+        ctx.fillText(`(${gx},${gy})`, cx, cy + r + 3);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+}
+
+function heatColor(t, accentHex) {
+  // cold (dark) → medium (accent) → hot (warm)
+  const r = Math.round(20 + t * 235);
+  const g = Math.round(20 + t * 80);
+  const b = Math.round(80 + (1-t) * 120);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ─────────────────────────────────────────
+// WALK LOGIC
+// ─────────────────────────────────────────
+function neighbors(x, y) {
+  const ns = [];
+  if (x > 0)       ns.push({x: x-1, y});
+  if (x < gridN-1) ns.push({x: x+1, y});
+  if (y > 0)       ns.push({x, y: y-1});
+  if (y < gridN-1) ns.push({x, y: y+1});
+  return ns;
+}
+
+function step() {
+  lastX = walkerX; lastY = walkerY;
+  const ns = neighbors(walkerX, walkerY);
+  const chosen = ns[Math.floor(Math.random() * ns.length)];
+  walkerX = chosen.x;
+  walkerY = chosen.y;
+  visitMap[walkerY][walkerX]++;
+  steps++;
+  trailArr.push({x: walkerX, y: walkerY});
+  if (trailArr.length > 300) trailArr.shift();
+  updateStats();
+  draw();
+}
+
+// ─────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────
+function updateStats() {
+  const deg = neighbors(walkerX, walkerY).length;
+  let visited = 0, maxV = 0;
+  for (let gy=0;gy<gridN;gy++) for (let gx=0;gx<gridN;gx++) {
+    if (visitMap[gy][gx] > 0) visited++;
+    if (visitMap[gy][gx] > maxV) maxV = visitMap[gy][gx];
+  }
+  const coverage = Math.round(visited / (gridN*gridN) * 100);
+  document.getElementById('statSteps').textContent   = steps;
+  document.getElementById('statVisited').textContent = visited;
+  document.getElementById('statDegree').textContent  = deg;
+  document.getElementById('statCoverage').textContent= coverage + '%';
+  document.getElementById('statMaxVisit').textContent= maxV;
+  document.getElementById('statPos').textContent     = `posición: (${walkerX}, ${walkerY})`;
+}
+
+// ─────────────────────────────────────────
+// AUTO RUN
+// ─────────────────────────────────────────
+function startAuto() {
+  autoRun = true;
+  document.getElementById('btnAuto').textContent = '⏸ Pausa';
+  document.getElementById('btnAuto').classList.add('active-run');
+  function loop() {
+    if (!autoRun) return;
+    step();
+    autoTimer = setTimeout(loop, speedMap[currentSpeed]);
+  }
+  loop();
+}
+function stopAuto() {
+  autoRun = false;
+  clearTimeout(autoTimer);
+  document.getElementById('btnAuto').textContent = '▶ Auto';
+  document.getElementById('btnAuto').classList.remove('active-run');
+}
+
+// ─────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────
+document.getElementById('btnAuto').addEventListener('click', () => {
+  autoRun ? stopAuto() : startAuto();
+});
+document.getElementById('btnStep').addEventListener('click', () => {
+  stopAuto();
+  step();
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  stopAuto();
+  initGrid();
+});
+document.getElementById('btnClear').addEventListener('click', () => {
+  stopAuto();
+  visitMap = Array.from({length: gridN}, () => new Array(gridN).fill(0));
+  visitMap[walkerY][walkerX] = 1;
+  steps = 0;
+  trailArr = [{x: walkerX, y: walkerY}];
+  updateStats();
+  draw();
+});
+
+document.getElementById('gridSize').addEventListener('input', function() {
+  gridN = +this.value;
+  document.getElementById('gridSizeVal').textContent = `${gridN} × ${gridN}`;
+  stopAuto();
+  initGrid();
+});
+
+document.getElementById('speed').addEventListener('input', function() {
+  currentSpeed = +this.value;
+  document.getElementById('speedVal').textContent = speedLbl[currentSpeed];
+  if (autoRun) { stopAuto(); startAuto(); }
+});
+
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    vizMode = this.dataset.mode;
+    draw();
+  });
+});
+
+// Theme switcher
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const t = this.dataset.theme;
+    document.body.className = t === 'default' ? '' : `theme-${t}`;
+    setTimeout(draw, 50);
+  });
+});
+
+// Resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { sizeCanvas(); draw(); }, 100);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    autoRun ? stopAuto() : startAuto();
+  }
+  if (e.key === 'ArrowRight') { stopAuto(); step(); }
+  if (e.key === 'r' || e.key === 'R') { stopAuto(); initGrid(); }
+});
+
+// ─────────────────────────────────────────
+// START
+// ─────────────────────────────────────────
+window.addEventListener('load', () => {
+  sizeCanvas();
+  initGrid();
+});
+</script>
+</body>
+</html>
