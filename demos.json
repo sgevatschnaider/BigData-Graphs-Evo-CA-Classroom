@@ -644,6 +644,13 @@
     "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
+    "title": "Hipercubo Q_d = Cay(ℤ₂ᵈ, {e₁,…,e_d})",
+    "path": "/src/classroom/graphs/recursos/Grafo regular_hipercubo_cayley.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-03-27T13:28:14-03:00"
+  },
+  {
     "title": "Hipercubo y Distancia de Hamming",
     "path": "/src/classroom/graphs/recursos/hammigs.html",
     "tag": "Demo",
