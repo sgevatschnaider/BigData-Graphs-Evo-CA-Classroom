@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="midnight">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distancia de Hamming en el Cubo — Solución Interactiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; scroll-padding-top: 80px; }
+
+    /* ========================================
+       THEME SYSTEM — 6 themes
+       ======================================== */
+
+    /* 1) MIDNIGHT — deep blue-black, electric blue accent */
+    :root, [data-theme="midnight"] {
+      --color-bg: #0c0e14;
+      --color-surface: #12141c;
+      --color-surface-2: #181b25;
+      --color-surface-3: #1e2130;
+      --color-border: #2a2d3a;
+      --color-text: #e0e2ec;
+      --color-text-muted: #8b8fa3;
+      --color-text-faint: #555870;
+      --color-accent: #6c8cff;
+      --color-accent-hover: #8aa4ff;
+      --color-accent-glow: rgba(108, 140, 255, 0.15);
+      --color-green: #4ade80;
+      --color-green-dim: rgba(74, 222, 128, 0.12);
+      --color-red: #f87171;
+      --color-red-dim: rgba(248, 113, 113, 0.12);
+      --color-orange: #fbbf24;
+      --color-orange-dim: rgba(251, 191, 36, 0.12);
+      --color-purple: #a78bfa;
+      --color-purple-dim: rgba(167, 139, 250, 0.12);
+      --color-cyan: #22d3ee;
+      --color-cyan-dim: rgba(34, 211, 238, 0.12);
+      --color-plane-fill: rgba(108, 140, 255, 0.18);
+      --color-plane-stroke: rgba(108, 140, 255, 0.6);
+      --color-interior-dot: #fbbf24;
+      --shadow-glow: 0 0 40px rgba(108, 140, 255, 0.08);
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 2) SNOW — clean white, blue accent */
+    [data-theme="snow"] {
+      --color-bg: #f4f5f9;
+      --color-surface: #ffffff;
+      --color-surface-2: #f0f1f5;
+      --color-surface-3: #e8e9ef;
+      --color-border: #d0d2dc;
+      --color-text: #1a1c28;
+      --color-text-muted: #5c5f72;
+      --color-text-faint: #9295a5;
+      --color-accent: #4a6cf7;
+      --color-accent-hover: #3b5ce0;
+      --color-accent-glow: rgba(74, 108, 247, 0.1);
+      --color-green: #16a34a;
+      --color-green-dim: rgba(22, 163, 74, 0.08);
+      --color-red: #dc2626;
+      --color-red-dim: rgba(220, 38, 38, 0.08);
+      --color-orange: #d97706;
+      --color-orange-dim: rgba(217, 119, 6, 0.08);
+      --color-purple: #7c3aed;
+      --color-purple-dim: rgba(124, 58, 237, 0.08);
+      --color-cyan: #0891b2;
+      --color-cyan-dim: rgba(8, 145, 178, 0.08);
+      --color-plane-fill: rgba(74, 108, 247, 0.12);
+      --color-plane-stroke: rgba(74, 108, 247, 0.5);
+      --color-interior-dot: #d97706;
+      --shadow-glow: 0 0 40px rgba(74, 108, 247, 0.06);
+    }
+
+    /* 3) EMBER — warm dark, orange/amber accent */
+    [data-theme="ember"] {
+      --color-bg: #14100c;
+      --color-surface: #1c1612;
+      --color-surface-2: #241c16;
+      --color-surface-3: #2e241c;
+      --color-border: #3d3128;
+      --color-text: #ece2d8;
+      --color-text-muted: #a39282;
+      --color-text-faint: #6b5c4e;
+      --color-accent: #f59e0b;
+      --color-accent-hover: #fbbf24;
+      --color-accent-glow: rgba(245, 158, 11, 0.15);
+      --color-green: #4ade80;
+      --color-green-dim: rgba(74, 222, 128, 0.12);
+      --color-red: #f87171;
+      --color-red-dim: rgba(248, 113, 113, 0.12);
+      --color-orange: #fb923c;
+      --color-orange-dim: rgba(251, 146, 60, 0.12);
+      --color-purple: #c084fc;
+      --color-purple-dim: rgba(192, 132, 252, 0.12);
+      --color-cyan: #22d3ee;
+      --color-cyan-dim: rgba(34, 211, 238, 0.12);
+      --color-plane-fill: rgba(245, 158, 11, 0.18);
+      --color-plane-stroke: rgba(245, 158, 11, 0.6);
+      --color-interior-dot: #4ade80;
+      --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.08);
+    }
+
+    /* 4) AURORA — dark green-teal, emerald accent */
+    [data-theme="aurora"] {
+      --color-bg: #0a1210;
+      --color-surface: #101c18;
+      --color-surface-2: #142420;
+      --color-surface-3: #1a2e28;
+      --color-border: #283e36;
+      --color-text: #d8ece6;
+      --color-text-muted: #82a89c;
+      --color-text-faint: #4e6b62;
+      --color-accent: #34d399;
+      --color-accent-hover: #6ee7b7;
+      --color-accent-glow: rgba(52, 211, 153, 0.15);
+      --color-green: #4ade80;
+      --color-green-dim: rgba(74, 222, 128, 0.12);
+      --color-red: #fb7185;
+      --color-red-dim: rgba(251, 113, 133, 0.12);
+      --color-orange: #fbbf24;
+      --color-orange-dim: rgba(251, 191, 36, 0.12);
+      --color-purple: #a78bfa;
+      --color-purple-dim: rgba(167, 139, 250, 0.12);
+      --color-cyan: #22d3ee;
+      --color-cyan-dim: rgba(34, 211, 238, 0.12);
+      --color-plane-fill: rgba(52, 211, 153, 0.18);
+      --color-plane-stroke: rgba(52, 211, 153, 0.6);
+      --color-interior-dot: #fbbf24;
+      --shadow-glow: 0 0 40px rgba(52, 211, 153, 0.08);
+    }
+
+    /* 5) SAKURA — soft rose light theme */
+    [data-theme="sakura"] {
+      --color-bg: #fdf2f4;
+      --color-surface: #ffffff;
+      --color-surface-2: #fce8ec;
+      --color-surface-3: #f9dce2;
+      --color-border: #e8c4cc;
+      --color-text: #2c1018;
+      --color-text-muted: #7a4a58;
+      --color-text-faint: #b08494;
+      --color-accent: #e11d48;
+      --color-accent-hover: #be123c;
+      --color-accent-glow: rgba(225, 29, 72, 0.1);
+      --color-green: #16a34a;
+      --color-green-dim: rgba(22, 163, 74, 0.08);
+      --color-red: #dc2626;
+      --color-red-dim: rgba(220, 38, 38, 0.08);
+      --color-orange: #d97706;
+      --color-orange-dim: rgba(217, 119, 6, 0.08);
+      --color-purple: #9333ea;
+      --color-purple-dim: rgba(147, 51, 234, 0.08);
+      --color-cyan: #0891b2;
+      --color-cyan-dim: rgba(8, 145, 178, 0.08);
+      --color-plane-fill: rgba(225, 29, 72, 0.12);
+      --color-plane-stroke: rgba(225, 29, 72, 0.5);
+      --color-interior-dot: #d97706;
+      --shadow-glow: 0 0 40px rgba(225, 29, 72, 0.06);
+    }
+
+    /* 6) CYBERPUNK — neon purple on very dark */
+    [data-theme="cyberpunk"] {
+      --color-bg: #0d0a14;
+      --color-surface: #14101e;
+      --color-surface-2: #1a1428;
+      --color-surface-3: #221a32;
+      --color-border: #352a4a;
+      --color-text: #e4daf0;
+      --color-text-muted: #9a88b4;
+      --color-text-faint: #604e78;
+      --color-accent: #bf5af2;
+      --color-accent-hover: #d580ff;
+      --color-accent-glow: rgba(191, 90, 242, 0.15);
+      --color-green: #30d158;
+      --color-green-dim: rgba(48, 209, 88, 0.12);
+      --color-red: #ff453a;
+      --color-red-dim: rgba(255, 69, 58, 0.12);
+      --color-orange: #ff9f0a;
+      --color-orange-dim: rgba(255, 159, 10, 0.12);
+      --color-purple: #bf5af2;
+      --color-purple-dim: rgba(191, 90, 242, 0.12);
+      --color-cyan: #64d2ff;
+      --color-cyan-dim: rgba(100, 210, 255, 0.12);
+      --color-plane-fill: rgba(191, 90, 242, 0.2);
+      --color-plane-stroke: rgba(191, 90, 242, 0.65);
+      --color-interior-dot: #ff9f0a;
+      --shadow-glow: 0 0 40px rgba(191, 90, 242, 0.1);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.65;
+      font-size: 16px;
+      min-height: 100dvh;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .site-header h1 {
+      font-family: var(--font-mono);
+      font-size: clamp(0.8rem, 0.7rem + 0.5vw, 1rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--color-accent);
+    }
+    .header-controls { display: flex; gap: 8px; align-items: center; }
+
+    /* ===== THEME PICKER ===== */
+    .theme-picker-wrap { position: relative; }
+    .theme-picker-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .theme-picker-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .theme-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 6px;
+      min-width: 180px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+      z-index: 200;
+    }
+    .theme-dropdown.open { display: block; animation: fadeIn 0.2s ease; }
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--color-text);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: background var(--transition);
+    }
+    .theme-option:hover { background: var(--color-surface-2); }
+    .theme-option.active { background: var(--color-accent-glow); color: var(--color-accent); font-weight: 600; }
+    .theme-swatch {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(128,128,128,0.3);
+      flex-shrink: 0;
+    }
+
+    /* ===== LAYOUT ===== */
+    .main-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      text-align: center;
+      padding: 48px 0 40px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--color-accent-glow);
+      border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+    }
+    .hero h2 {
+      font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .hero p {
+      font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.1rem);
+      color: var(--color-text-muted);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .answer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      padding: 14px 28px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--color-accent-glow), var(--color-purple-dim));
+      border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+    }
+    .answer-box .answer-label {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .answer-box .answer-value {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-accent);
+    }
+
+    /* ===== STEP NAV ===== */
+    .step-nav {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      overflow-x: auto;
+      margin-bottom: 32px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .step-nav::-webkit-scrollbar { height: 0; }
+    .step-btn {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 8px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      text-align: center;
+    }
+    .step-btn:hover { color: var(--color-text); background: var(--color-surface-2); }
+    .step-btn.active {
+      background: var(--color-accent);
+      color: #fff;
+      box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+
+    /* ===== STEP CONTENT ===== */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: clamp(24px, 3vw, 40px);
+      box-shadow: var(--shadow-glow);
+    }
+    .step-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--color-accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: clamp(1.1rem, 1rem + 0.4vw, 1.35rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+    .step-body p { margin-bottom: 14px; max-width: 72ch; }
+    .step-body p:last-child { margin-bottom: 0; }
+    .step-body strong { color: var(--color-accent); font-weight: 600; }
+
+    /* ===== 3D CUBE ===== */
+    .cube-container {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 1;
+      margin: 24px auto;
+      position: relative;
+    }
+    .cube-canvas-wrap { position: relative; }
+    #cubeCanvas, #planeCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-lg);
+      cursor: grab;
+    }
+    #cubeCanvas { background: var(--color-surface-2); }
+    #planeCanvas {
+      background: var(--color-surface-2);
+    }
+    #cubeCanvas:active, #planeCanvas:active { cursor: grabbing; }
+    .cube-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ===== AUTOPLAY SECTION ===== */
+    .autoplay-section {
+      margin: 28px 0;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+    }
+    .autoplay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .autoplay-title {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .autoplay-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .auto-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .auto-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .auto-btn.playing {
+      background: var(--color-accent);
+      color: #fff;
+      border-color: var(--color-accent);
+    }
+    .auto-btn svg { width: 14px; height: 14px; }
+    .autoplay-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .autoplay-counter {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+    .autoplay-triple {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--color-accent-glow);
+    }
+    .autoplay-pattern {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--color-green-dim);
+      color: var(--color-green);
+    }
+    .autoplay-desc {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .plane-canvas-container {
+      width: 100%;
+      max-width: 460px;
+      aspect-ratio: 1;
+      margin: 16px auto 0;
+    }
+    #planeCanvas {
+      width: 100%;
+      height: 100%;
+    }
+    .plane-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    /* ===== HAMMING TABLE ===== */
+    .hamming-table-wrap {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+    .hamming-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .hamming-table th {
+      background: var(--color-surface-2);
+      padding: 10px 14px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .hamming-table td {
+      padding: 8px 14px;
+      text-align: center;
+      border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+    }
+    .hamming-table tr:last-child td { border-bottom: none; }
+    .dist-1 { color: var(--color-green); background: var(--color-green-dim); }
+    .dist-2 { color: var(--color-orange); background: var(--color-orange-dim); }
+    .dist-3 { color: var(--color-purple); background: var(--color-purple-dim); }
+
+    /* ===== PATTERN CARDS ===== */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .pattern-card {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .pattern-card.unfavorable { border-color: color-mix(in srgb, var(--color-red) 40%, transparent); }
+    .pattern-card.favorable { border-color: color-mix(in srgb, var(--color-green) 40%, transparent); }
+    .pattern-label { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+    .pattern-count {
+      font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px; display: inline-block; margin-bottom: 8px;
+    }
+    .pattern-card.unfavorable .pattern-count { background: var(--color-red-dim); color: var(--color-red); }
+    .pattern-card.favorable .pattern-count { background: var(--color-green-dim); color: var(--color-green); }
+    .pattern-desc { font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.55; }
+
+    /* ===== KEY CONCEPT ===== */
+    .concept-box {
+      margin: 24px 0; padding: 24px; border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--color-cyan-dim), var(--color-accent-glow));
+      border: 1px solid color-mix(in srgb, var(--color-cyan) 25%, transparent);
+    }
+    .concept-box h4 {
+      font-size: 0.9rem; font-weight: 700; color: var(--color-cyan); margin-bottom: 10px;
+      font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .concept-box p { font-size: 0.92rem; line-height: 1.65; }
+
+    /* ===== MATH ===== */
+    .math-block {
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: 18px 24px; margin: 16px 0;
+      text-align: center; overflow-x: auto;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar { margin: 20px 0; padding: 20px; border-radius: var(--radius-md); background: var(--color-surface-2); border: 1px solid var(--color-border); }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-label { font-family: var(--font-mono); font-size: 0.78rem; min-width: 70px; text-align: right; color: var(--color-text-muted); }
+    .bar-track { flex: 1; height: 28px; background: var(--color-surface-3); border-radius: var(--radius-sm); overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: #fff;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bar-fill.red { background: linear-gradient(90deg, var(--color-red), color-mix(in srgb, var(--color-red) 70%, transparent)); }
+    .bar-fill.green { background: linear-gradient(90deg, var(--color-green), color-mix(in srgb, var(--color-green) 70%, transparent)); }
+
+    /* ===== FINAL RESULT ===== */
+    .final-result {
+      text-align: center; padding: 40px 24px; border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface));
+      border: 1px solid var(--color-border); margin-top: 24px;
+    }
+    .final-fraction { font-family: var(--font-mono); font-size: clamp(2.5rem, 2rem + 2vw, 4rem); font-weight: 700; color: var(--color-accent); line-height: 1.1; }
+    .final-equals { font-family: var(--font-mono); font-size: 1.5rem; color: var(--color-text-faint); margin: 8px 0; }
+
+    /* ===== COMBO EXPLORER ===== */
+    .combo-explorer { margin: 20px 0; padding: 20px; border-radius: var(--radius-md); background: var(--color-surface-2); border: 1px solid var(--color-border); }
+    .combo-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .combo-btn {
+      padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
+      background: var(--color-surface); color: var(--color-text-muted); font-family: var(--font-mono);
+      font-size: 0.8rem; cursor: pointer; transition: all var(--transition);
+    }
+    .combo-btn:hover { border-color: var(--color-accent); color: var(--color-text); }
+    .combo-btn.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+    .combo-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
+      max-height: 320px; overflow-y: auto; padding-right: 8px;
+    }
+    .combo-list::-webkit-scrollbar { width: 4px; }
+    .combo-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+    .combo-item {
+      font-family: var(--font-mono); font-size: 0.8rem; padding: 8px 12px; border-radius: var(--radius-sm);
+      background: var(--color-surface); border: 1px solid var(--color-border); transition: all var(--transition);
+    }
+
+    /* ===== NAV ARROWS ===== */
+    .step-navigation { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-md);
+      border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text);
+      font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all var(--transition);
+    }
+    .nav-btn:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-glow); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .nav-btn:disabled:hover { border-color: var(--color-border); color: var(--color-text); background: var(--color-surface); }
+
+    /* ===== BITS DEMO ===== */
+    .bits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 16px 0; }
+    .bit-vertex {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm);
+      background: var(--color-surface-2); border: 1px solid var(--color-border); font-family: var(--font-mono);
+      font-size: 0.9rem; font-weight: 600; transition: all var(--transition); cursor: default;
+    }
+    .bit-vertex:hover { border-color: var(--color-accent); transform: translateY(-1px); }
+    .bit-vertex .idx { font-size: 0.7rem; color: var(--color-text-faint); min-width: 18px; }
+    .bit-vertex .bits { color: var(--color-accent); }
+    .bit-vertex.hl-edge { border-color: var(--color-green); background: var(--color-green-dim); }
+    .bit-vertex.hl-face { border-color: var(--color-orange); background: var(--color-orange-dim); }
+    .bit-vertex.hl-opp { border-color: var(--color-purple); background: var(--color-purple-dim); }
+
+    /* ===== LIST ===== */
+    .step-body ul, .step-body ol { margin: 10px 0 14px 20px; }
+    .step-body li { margin-bottom: 6px; max-width: 72ch; }
+
+    /* ===== KATEX ===== */
+    .katex { font-size: 1.05em; }
+    .math-block .katex { font-size: 1.2em; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .main-container { padding: 16px 14px 60px; }
+      .step-card { padding: 20px; }
+      .step-nav { gap: 2px; padding: 3px; }
+      .step-btn { padding: 8px 4px; font-size: 0.68rem; }
+      .pattern-grid { grid-template-columns: 1fr; }
+      .combo-list { grid-template-columns: 1fr; }
+      .autoplay-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <h1>&#123;0,1&#125;&sup3; &mdash; Cubo de Hamming</h1>
+  <div class="header-controls">
+    <div class="theme-picker-wrap">
+      <button class="theme-picker-btn" id="themeBtn" aria-label="Cambiar tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <div class="theme-dropdown" id="themeDropdown">
+        <button class="theme-option active" data-theme-id="midnight">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #0c0e14, #6c8cff)"></span>
+          Midnight
+        </button>
+        <button class="theme-option" data-theme-id="snow">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #f4f5f9, #4a6cf7)"></span>
+          Snow
+        </button>
+        <button class="theme-option" data-theme-id="ember">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #14100c, #f59e0b)"></span>
+          Ember
+        </button>
+        <button class="theme-option" data-theme-id="aurora">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #0a1210, #34d399)"></span>
+          Aurora
+        </button>
+        <button class="theme-option" data-theme-id="sakura">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #fdf2f4, #e11d48)"></span>
+          Sakura
+        </button>
+        <button class="theme-option" data-theme-id="cyberpunk">
+          <span class="theme-swatch" style="background: linear-gradient(135deg, #0d0a14, #bf5af2)"></span>
+          Cyberpunk
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">&#9670; Combinatoria + Geometr&iacute;a</div>
+    <h2>Tres v&eacute;rtices al azar en un cubo.<br>&iquest;El plano corta el interior?</h2>
+    <p>Resoluci&oacute;n paso a paso usando representaci&oacute;n binaria y distancia de Hamming.</p>
+    <div class="answer-box">
+      <span class="answer-label">Probabilidad</span>
+      <span class="answer-value">4/7</span>
+    </div>
+  </section>
+
+  <!-- STEP NAV -->
+  <nav class="step-nav" id="stepNav">
+    <button class="step-btn active" data-step="1">1 &middot; Bits</button>
+    <button class="step-btn" data-step="2">2 &middot; Hamming</button>
+    <button class="step-btn" data-step="3">3 &middot; Ternas</button>
+    <button class="step-btn" data-step="4">4 &middot; (1,1,2)</button>
+    <button class="step-btn" data-step="5">5 &middot; Otros</button>
+    <button class="step-btn" data-step="6">6 &middot; Contar</button>
+    <button class="step-btn" data-step="7">7 &middot; Resultado</button>
+  </nav>
+
+  <!-- ===== STEP 1 ===== -->
+  <div class="step-panel active" data-panel="1">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <h3 class="step-title">Representar los v&eacute;rtices del cubo con bits</h3>
+      </div>
+      <div class="step-body">
+        <p>A cada v&eacute;rtice del cubo le asignamos una <strong>cadena binaria de 3 bits</strong>. Esto funciona porque un cubo tiene 3 direcciones independientes, y en cada una puedes estar en 0 o en 1.</p>
+        <div class="bits-grid" id="bitsGrid"></div>
+        <p>Con esta codificaci&oacute;n:</p>
+        <ul>
+          <li><strong>Cambiar 1 bit</strong> = moverse por una arista</li>
+          <li><strong>Cambiar 2 bits</strong> = ir por una diagonal de cara</li>
+          <li><strong>Cambiar 3 bits</strong> = ir al v&eacute;rtice opuesto del cubo</li>
+        </ul>
+        <div class="cube-container">
+          <canvas id="cubeCanvas"></canvas>
+        </div>
+        <div class="cube-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-green)"></div>Arista (d=1)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-orange)"></div>Diagonal cara (d=2)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-purple)"></div>Diagonal cubo (d=3)</div>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" disabled>&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(2)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2 ===== -->
+  <div class="step-panel" data-panel="2">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <h3 class="step-title">Distancia de Hamming</h3>
+      </div>
+      <div class="step-body">
+        <p>La <strong>distancia de Hamming</strong> entre dos v&eacute;rtices es el n&uacute;mero de bits en que difieren.</p>
+        <div class="math-block">$d_H(000, 001) = 1, \quad d_H(000, 011) = 2, \quad d_H(000, 111) = 3$</div>
+        <p>Entre dos v&eacute;rtices del cubo, la distancia de Hamming solo puede ser <strong>1, 2 o 3</strong>.</p>
+        <div class="hamming-table-wrap">
+          <table class="hamming-table" id="hammingTable">
+            <thead><tr><th>Par</th><th>Bits</th><th>d<sub>H</sub></th><th>Significado</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(1)">&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(3)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3 ===== -->
+  <div class="step-panel" data-panel="3">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <h3 class="step-title">Qu&eacute; pasa cuando elegimos 3 v&eacute;rtices</h3>
+      </div>
+      <div class="step-body">
+        <p>Si elegimos tres v&eacute;rtices $A, B, C$, miramos sus tres distancias de Hamming por parejas:</p>
+        <div class="math-block">$d_H(A,B), \quad d_H(A,C), \quad d_H(B,C)$</div>
+        <p>Ordenando esas tres distancias, <strong>solo pueden aparecer estos 3 patrones</strong>:</p>
+        <div class="pattern-grid">
+          <div class="pattern-card unfavorable">
+            <div class="pattern-label" style="color:var(--color-red)">(1, 1, 2)</div>
+            <div class="pattern-count">24 ternas</div>
+            <div class="pattern-desc">Dos aristas + diagonal de cara</div>
+          </div>
+          <div class="pattern-card favorable">
+            <div class="pattern-label" style="color:var(--color-green)">(1, 2, 3)</div>
+            <div class="pattern-count">24 ternas</div>
+            <div class="pattern-desc">Arista + diagonal cara + diagonal cubo</div>
+          </div>
+          <div class="pattern-card favorable">
+            <div class="pattern-label" style="color:var(--color-green)">(2, 2, 2)</div>
+            <div class="pattern-count">8 ternas</div>
+            <div class="pattern-desc">Tres diagonales de cara</div>
+          </div>
+        </div>
+        <div class="math-block">$24 + 24 + 8 = 56 = \binom{8}{3}$</div>
+        <div class="combo-explorer">
+          <p style="font-size:0.88rem;color:var(--color-text-muted);margin-bottom:12px;">Explorador interactivo: filtra las 56 ternas por patr&oacute;n</p>
+          <div class="combo-controls">
+            <button class="combo-btn active" data-filter="all">Todas (56)</button>
+            <button class="combo-btn" data-filter="112" style="border-color:color-mix(in srgb, var(--color-red) 40%, transparent)">(1,1,2) &mdash; 24</button>
+            <button class="combo-btn" data-filter="123" style="border-color:color-mix(in srgb, var(--color-green) 40%, transparent)">(1,2,3) &mdash; 24</button>
+            <button class="combo-btn" data-filter="222" style="border-color:color-mix(in srgb, var(--color-green) 40%, transparent)">(2,2,2) &mdash; 8</button>
+          </div>
+          <div class="combo-list" id="comboList"></div>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(2)">&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(4)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4 ===== -->
+  <div class="step-panel" data-panel="4">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <h3 class="step-title">Interpretar el patr&oacute;n (1, 1, 2) &mdash; No favorable</h3>
+      </div>
+      <div class="step-body">
+        <p>Si las distancias son <strong>(1, 1, 2)</strong>, un v&eacute;rtice est&aacute; unido por aristas a los otros dos, y esos otros dos est&aacute;n separados por una diagonal de cara.</p>
+        <p>Ejemplo:</p>
+        <div class="math-block">$\text{000, 001, 010:} \quad d_H = 1, \; 1, \; 2$</div>
+        <p>Estos tres v&eacute;rtices est&aacute;n en la <strong>misma cara</strong> del cubo, porque comparten una coordenada fija (el tercer bit es 0).</p>
+        <p>El plano que determinan es simplemente el <strong>plano de una cara</strong>. Ese plano <strong>no atraviesa el interior</strong> del cubo; solo toca la frontera.</p>
+        <div class="concept-box">
+          <h4>&#9888; Conclusi&oacute;n</h4>
+          <p>El patr&oacute;n <strong>(1, 1, 2)</strong> identifica exactamente las ternas que est&aacute;n en una misma cara. Estas son <strong>no favorables</strong>: su plano no contiene puntos interiores.</p>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(3)">&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(5)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 5 ===== -->
+  <div class="step-panel" data-panel="5">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">5</div>
+        <h3 class="step-title">Patrones (1, 2, 3) y (2, 2, 2) &mdash; Favorables</h3>
+      </div>
+      <div class="step-body">
+        <p>Si la terna es del tipo <strong>(1, 2, 3)</strong> o <strong>(2, 2, 2)</strong>, los tres v&eacute;rtices <strong>no est&aacute;n contenidos en una sola cara</strong>.</p>
+        <p>Por eso, el plano que determinan <strong>s&iacute; corta el s&oacute;lido</strong> y contiene puntos interiores del cubo.</p>
+        <div class="pattern-grid">
+          <div class="pattern-card favorable">
+            <div class="pattern-label" style="color:var(--color-green)">(1, 2, 3)</div>
+            <div class="pattern-count">24 ternas &#10003;</div>
+            <div class="pattern-desc">Ejemplo: 000, 001, 110. Los tres v&eacute;rtices cruzan el cubo, formando un plano que corta su interior.</div>
+          </div>
+          <div class="pattern-card favorable">
+            <div class="pattern-label" style="color:var(--color-green)">(2, 2, 2)</div>
+            <div class="pattern-count">8 ternas &#10003;</div>
+            <div class="pattern-desc">Ejemplo: 001, 010, 100. Tres v&eacute;rtices equidistantes que forman un tri&aacute;ngulo equil&aacute;tero, cortando el cubo por dentro.</div>
+          </div>
+        </div>
+
+        <!-- AUTOPLAY SECTION -->
+        <div class="autoplay-section">
+          <div class="autoplay-header">
+            <span class="autoplay-title">&#9654; Visualizador de planos favorables</span>
+            <div class="autoplay-controls">
+              <button class="auto-btn" id="autoPrevBtn" aria-label="Anterior">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button class="auto-btn" id="autoPlayBtn" aria-label="Reproducir">
+                <svg viewBox="0 0 24 24" fill="currentColor" id="playIcon"><polygon points="5,3 19,12 5,21"/></svg>
+                <span id="playLabel">Auto</span>
+              </button>
+              <button class="auto-btn" id="autoNextBtn" aria-label="Siguiente">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="autoplay-info" id="autoplayInfo">
+            <span class="autoplay-counter" id="autoCounter">0 / 32</span>
+            <span class="autoplay-triple" id="autoTriple">&mdash;</span>
+            <span class="autoplay-pattern" id="autoPattern">&mdash;</span>
+          </div>
+          <p class="autoplay-desc">Cada terna favorable genera un plano <span style="color:var(--color-accent)">&#9632;</span> que atraviesa el interior del cubo. Los puntos <span style="color:var(--color-interior-dot)">&#9679;</span> amarillos son puntos interiores del cubo contenidos en ese plano.</p>
+          <div class="plane-canvas-container">
+            <canvas id="planeCanvas"></canvas>
+          </div>
+          <div class="plane-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-accent)"></div>Plano del tri&aacute;ngulo</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-interior-dot)"></div>Puntos interiores</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--color-green)"></div>V&eacute;rtices seleccionados</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(4)">&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(6)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 6 ===== -->
+  <div class="step-panel" data-panel="6">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">6</div>
+        <h3 class="step-title">Contar casos totales y favorables</h3>
+      </div>
+      <div class="step-body">
+        <p>N&uacute;mero total de maneras de elegir 3 v&eacute;rtices entre 8:</p>
+        <div class="math-block">$\binom{8}{3} = 56$</div>
+        <p>Clasificaci&oacute;n por patrones de Hamming:</p>
+        <div class="progress-bar">
+          <div class="bar-row">
+            <span class="bar-label" style="color:var(--color-red)">(1,1,2)</span>
+            <div class="bar-track"><div class="bar-fill red" style="width:0%" data-target="42.86">24</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="color:var(--color-green)">(1,2,3)</span>
+            <div class="bar-track"><div class="bar-fill green" style="width:0%" data-target="42.86">24</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label" style="color:var(--color-green)">(2,2,2)</span>
+            <div class="bar-track"><div class="bar-fill green" style="width:0%" data-target="14.29">8</div></div>
+          </div>
+        </div>
+        <div class="math-block">$\text{No favorables: } 24 \qquad \text{Favorables: } 24 + 8 = 32$</div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(5)">&larr; Anterior</button>
+        <button class="nav-btn" onclick="goStep(7)">Siguiente &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 7 ===== -->
+  <div class="step-panel" data-panel="7">
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-number">7</div>
+        <h3 class="step-title">Resultado Final</h3>
+      </div>
+      <div class="step-body">
+        <div class="final-result">
+          <div style="font-size:0.9rem;color:var(--color-text-muted);margin-bottom:16px;font-family:var(--font-mono)">P(plano corta el interior)</div>
+          <div class="final-fraction">32 / 56</div>
+          <div class="final-equals">=</div>
+          <div class="final-fraction" style="font-size:clamp(3rem,2.5rem+3vw,5rem)">4 / 7</div>
+          <div style="margin-top:12px;font-size:0.95rem;color:var(--color-text-muted)">&asymp; 0.5714</div>
+        </div>
+        <div class="concept-box" style="margin-top:32px;">
+          <h4>Concepto Clave</h4>
+          <p>Modelar el cubo como $\{0,1\}^3$ y usar <strong>distancia de Hamming</strong> para traducir un problema geom&eacute;trico en uno combinatorio.</p>
+          <p style="margin-top:10px;">Cuando escribes los v&eacute;rtices como cadenas binarias de 3 bits, cada movimiento por una arista cambia exactamente un bit. El patr&oacute;n (1,1,2) identifica las ternas en una misma cara &mdash; las &uacute;nicas cuyo plano no atraviesa el interior. La distancia de Hamming reemplaza geometr&iacute;a espacial por descripci&oacute;n discreta.</p>
+        </div>
+      </div>
+      <div class="step-navigation">
+        <button class="nav-btn" onclick="goStep(6)">&larr; Anterior</button>
+        <button class="nav-btn" disabled>Final &#10003;</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== THEME SYSTEM =====
+const themeBtn = document.getElementById('themeBtn');
+const themeDropdown = document.getElementById('themeDropdown');
+const themeOptions = document.querySelectorAll('.theme-option');
+let currentTheme = 'midnight';
+
+themeBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themeDropdown.classList.toggle('open');
+});
+
+document.addEventListener('click', () => themeDropdown.classList.remove('open'));
+themeDropdown.addEventListener('click', e => e.stopPropagation());
+
+themeOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const id = opt.dataset.themeId;
+    document.documentElement.setAttribute('data-theme', id);
+    currentTheme = id;
+    themeOptions.forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    themeDropdown.classList.remove('open');
+  });
+});
+
+// ===== STEP NAVIGATION =====
+const stepBtns = document.querySelectorAll('.step-btn');
+const panels = document.querySelectorAll('.step-panel');
+let currentStep = 1;
+
+function goStep(n) {
+  currentStep = n;
+  stepBtns.forEach(b => b.classList.toggle('active', +b.dataset.step === n));
+  panels.forEach(p => p.classList.toggle('active', +p.dataset.panel === n));
+  if (n === 6) animateBars();
+  if (n === 5) { resizePlaneCanvas(); drawPlane(); }
+  const activeBtn = document.querySelector(`.step-btn[data-step="${n}"]`);
+  if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+stepBtns.forEach(b => b.addEventListener('click', () => goStep(+b.dataset.step)));
+
+// ===== UTILITIES =====
+const vertices = ['000','001','010','011','100','101','110','111'];
+function hamming(a, b) { let d = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) d++; return d; }
+
+// ===== BITS GRID =====
+const bitsGrid = document.getElementById('bitsGrid');
+vertices.forEach((v, i) => {
+  const el = document.createElement('div');
+  el.className = 'bit-vertex'; el.id = 'bv-' + v;
+  el.innerHTML = `<span class="idx">v${i}</span><span class="bits">${v}</span>`;
+  bitsGrid.appendChild(el);
+});
+
+// ===== HAMMING TABLE =====
+const examplePairs = [['000','001'],['000','010'],['000','100'],['000','011'],['000','101'],['000','110'],['000','111'],['010','101'],['011','100']];
+const meanings = { 1:'Arista', 2:'Diagonal de cara', 3:'Diagonal de cubo' };
+const tbody = document.querySelector('#hammingTable tbody');
+examplePairs.forEach(([a,b]) => {
+  const d = hamming(a,b);
+  const diff = []; for (let i=0;i<3;i++) if(a[i]!==b[i]) diff.push(i);
+  const bits = a.split('').map((c,i) => diff.includes(i)?`<strong style="color:var(--color-accent)">${c}</strong>`:c).join('') + ' ↔ ' + b.split('').map((c,i) => diff.includes(i)?`<strong style="color:var(--color-accent)">${c}</strong>`:c).join('');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${a}, ${b}</td><td>${bits}</td><td class="dist-${d}">${d}</td><td style="color:var(--color-text-muted)">${meanings[d]}</td>`;
+  tbody.appendChild(tr);
+});
+
+// ===== COMBO EXPLORER =====
+function getAllTriples() {
+  const t = [];
+  for (let i=0;i<8;i++) for(let j=i+1;j<8;j++) for(let k=j+1;k<8;k++){
+    const a=vertices[i],b=vertices[j],c=vertices[k];
+    const ds=[hamming(a,b),hamming(a,c),hamming(b,c)].sort((x,y)=>x-y);
+    t.push({v:[a,b,c],pattern:ds.join('')});
+  }
+  return t;
+}
+const allTriples = getAllTriples();
+const favorableTriples = allTriples.filter(t => t.pattern !== '112');
+const comboList = document.getElementById('comboList');
+
+function renderCombos(filter) {
+  comboList.innerHTML = '';
+  const f = filter === 'all' ? allTriples : allTriples.filter(t => t.pattern === filter);
+  f.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'combo-item';
+    const col = t.pattern === '112' ? 'var(--color-red)' : 'var(--color-green)';
+    div.innerHTML = `${t.v.join(', ')} <span style="color:${col};margin-left:auto;font-size:0.72rem">(${t.pattern.split('').join(',')})</span>`;
+    div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center';
+    comboList.appendChild(div);
+  });
+}
+renderCombos('all');
+document.querySelectorAll('.combo-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.combo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCombos(btn.dataset.filter);
+  });
+});
+
+// ===== PROGRESS BARS =====
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(bar => bar.style.width = bar.dataset.target + '%');
+  }, 100);
+}
+
+// ===== 3D CUBE CANVAS (Step 1) =====
+const canvas = document.getElementById('cubeCanvas');
+const ctx = canvas.getContext('2d');
+let rotX = 0.45, rotY = 0.7, isDragging = false, lastMX, lastMY, hoveredVertex = -1;
+
+function resizeCanvas() {
+  const r = canvas.parentElement.getBoundingClientRect();
+  const s = Math.min(r.width, 420);
+  canvas.width = s*2; canvas.height = s*2;
+  canvas.style.width = s+'px'; canvas.style.height = s+'px';
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); resizePlaneCanvas(); });
+
+const cubeVerts = [[-1,-1,-1],[1,-1,-1],[-1,1,-1],[1,1,-1],[-1,-1,1],[1,-1,1],[-1,1,1],[1,1,1]];
+const edges = [[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
+
+function project(x,y,z,cw) {
+  const cosY=Math.cos(rotY),sinY=Math.sin(rotY);
+  let x1=x*cosY-z*sinY,z1=x*sinY+z*cosY;
+  const cosX=Math.cos(rotX),sinX=Math.sin(rotX);
+  let y1=y*cosX-z1*sinX,z2=y*sinX+z1*cosX;
+  const scale=cw*0.22,cx=cw/2,cy=cw/2,persp=4,f=persp/(persp+z2);
+  return {x:cx+x1*scale*f,y:cy+y1*scale*f,z:z2};
+}
+
+function getThemeColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = p => cs.getPropertyValue(p).trim();
+  return {
+    edge:g('--color-border'), text:g('--color-text'), accent:g('--color-accent'),
+    green:g('--color-green'), orange:g('--color-orange'), purple:g('--color-purple'),
+    muted:g('--color-text-muted'), planeFill:g('--color-plane-fill'), planeStroke:g('--color-plane-stroke'),
+    interiorDot:g('--color-interior-dot'),
+  };
+}
+
+function drawCube() {
+  const c = getThemeColors();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const proj = cubeVerts.map(v => project(v[0],v[1],v[2],canvas.width));
+  edges.forEach(([i,j]) => {
+    ctx.beginPath(); ctx.moveTo(proj[i].x,proj[i].y); ctx.lineTo(proj[j].x,proj[j].y);
+    ctx.strokeStyle=c.edge; ctx.lineWidth=2; ctx.stroke();
+  });
+  if (hoveredVertex >= 0) {
+    for (let i=0;i<8;i++){
+      if(i===hoveredVertex)continue;
+      const d=hamming(vertices[hoveredVertex],vertices[i]);
+      const col=d===1?c.green:d===2?c.orange:c.purple;
+      ctx.beginPath(); ctx.moveTo(proj[hoveredVertex].x,proj[hoveredVertex].y); ctx.lineTo(proj[i].x,proj[i].y);
+      ctx.strokeStyle=col; ctx.lineWidth=d===1?3:2; ctx.setLineDash(d===1?[]:d===2?[8,4]:[4,4]); ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+  const sorted = proj.map((p,i) => ({...p,i})).sort((a,b) => a.z-b.z);
+  sorted.forEach(p => {
+    const hov = p.i===hoveredVertex, r = hov?16:11;
+    if(hov){ctx.beginPath();ctx.arc(p.x,p.y,26,0,Math.PI*2);ctx.fillStyle=c.accent+'33';ctx.fill();}
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=hov?c.accent:c.muted;ctx.fill();
+    ctx.font=`${hov?'bold ':''}${hov?22:18}px 'JetBrains Mono',monospace`;
+    ctx.fillStyle=hov?'#fff':c.text;ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(vertices[p.i],p.x,p.y-r-6);
+  });
+  requestAnimationFrame(drawCube);
+}
+
+canvas.addEventListener('mousedown',e=>{isDragging=true;lastMX=e.clientX;lastMY=e.clientY;});
+window.addEventListener('mouseup',()=>{isDragging=false;});
+window.addEventListener('mousemove',e=>{if(isDragging){rotY+=(e.clientX-lastMX)*0.008;rotX+=(e.clientY-lastMY)*0.008;lastMX=e.clientX;lastMY=e.clientY;}});
+canvas.addEventListener('mousemove',e=>{
+  if(isDragging)return;
+  const rect=canvas.getBoundingClientRect(),mx=(e.clientX-rect.left)*2,my=(e.clientY-rect.top)*2;
+  const proj=cubeVerts.map(v=>project(v[0],v[1],v[2],canvas.width));
+  let closest=-1,minD=50;
+  proj.forEach((p,i)=>{const d=Math.hypot(p.x-mx,p.y-my);if(d<minD){minD=d;closest=i;}});
+  hoveredVertex=closest;
+  document.querySelectorAll('.bit-vertex').forEach(el=>el.className='bit-vertex');
+  if(closest>=0){
+    const hv=vertices[closest];
+    for(let i=0;i<8;i++){if(i===closest)continue;const d=hamming(hv,vertices[i]);document.getElementById('bv-'+vertices[i]).classList.add(d===1?'hl-edge':d===2?'hl-face':'hl-opp');}
+    document.getElementById('bv-'+hv).style.borderColor='var(--color-accent)';document.getElementById('bv-'+hv).style.background='var(--color-accent-glow)';
+  }
+});
+canvas.addEventListener('mouseleave',()=>{hoveredVertex=-1;document.querySelectorAll('.bit-vertex').forEach(el=>{el.className='bit-vertex';el.style.borderColor='';el.style.background='';});});
+canvas.addEventListener('touchstart',e=>{const t=e.touches[0];isDragging=true;lastMX=t.clientX;lastMY=t.clientY;e.preventDefault();},{passive:false});
+canvas.addEventListener('touchmove',e=>{if(isDragging){const t=e.touches[0];rotY+=(t.clientX-lastMX)*0.008;rotX+=(t.clientY-lastMY)*0.008;lastMX=t.clientX;lastMY=t.clientY;e.preventDefault();}},{passive:false});
+canvas.addEventListener('touchend',()=>{isDragging=false;});
+
+let autoRotate=true,autoTimer;
+canvas.addEventListener('mousedown',()=>{autoRotate=false;clearTimeout(autoTimer);});
+canvas.addEventListener('touchstart',()=>{autoRotate=false;clearTimeout(autoTimer);});
+window.addEventListener('mouseup',()=>{autoTimer=setTimeout(()=>autoRotate=true,3000);});
+window.addEventListener('touchend',()=>{autoTimer=setTimeout(()=>autoRotate=true,3000);});
+(function anim(){if(autoRotate)rotY+=0.003;requestAnimationFrame(anim);})();
+drawCube();
+
+// ===== PLANE VISUALIZER CANVAS (Step 5) =====
+const planeCanvas = document.getElementById('planeCanvas');
+const pctx = planeCanvas.getContext('2d');
+let planeRotX = 0.5, planeRotY = 0.75;
+let planeDrag = false, planeLMX, planeLMY;
+let currentFavIdx = -1;
+let isPlaying = false, playInterval = null;
+
+function resizePlaneCanvas() {
+  const r = planeCanvas.parentElement.getBoundingClientRect();
+  const s = Math.min(r.width, 460);
+  planeCanvas.width = s*2; planeCanvas.height = s*2;
+  planeCanvas.style.width = s+'px'; planeCanvas.style.height = s+'px';
+}
+resizePlaneCanvas();
+
+function projectPlane(x,y,z) {
+  const cosY=Math.cos(planeRotY),sinY=Math.sin(planeRotY);
+  let x1=x*cosY-z*sinY,z1=x*sinY+z*cosY;
+  const cosX=Math.cos(planeRotX),sinX=Math.sin(planeRotX);
+  let y1=y*cosX-z1*sinX,z2=y*sinX+z1*cosX;
+  const cw=planeCanvas.width,scale=cw*0.2,cx=cw/2,cy=cw/2,persp=4.5,f=persp/(persp+z2);
+  return {x:cx+x1*scale*f,y:cy+y1*scale*f,z:z2};
+}
+
+// Compute the plane intersection with the cube and sample interior points
+function getPlaneData(triple) {
+  const coords = triple.v.map(s => [+s[0]*2-1, +s[1]*2-1, +s[2]*2-1]);
+  // Normal vector via cross product
+  const u = [coords[1][0]-coords[0][0], coords[1][1]-coords[0][1], coords[1][2]-coords[0][2]];
+  const v = [coords[2][0]-coords[0][0], coords[2][1]-coords[0][1], coords[2][2]-coords[0][2]];
+  const n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+  const d = n[0]*coords[0][0] + n[1]*coords[0][1] + n[2]*coords[0][2];
+
+  // Find plane-cube intersection polygon
+  const cubeEdges3D = [
+    [[-1,-1,-1],[1,-1,-1]], [[-1,-1,-1],[-1,1,-1]], [[-1,-1,-1],[-1,-1,1]],
+    [[1,1,1],[-1,1,1]], [[1,1,1],[1,-1,1]], [[1,1,1],[1,1,-1]],
+    [[1,-1,-1],[1,1,-1]], [[1,-1,-1],[1,-1,1]],
+    [[-1,1,-1],[1,1,-1]], [[-1,1,-1],[-1,1,1]],
+    [[-1,-1,1],[1,-1,1]], [[-1,-1,1],[-1,1,1]]
+  ];
+
+  const intersections = [];
+  cubeEdges3D.forEach(([p1,p2]) => {
+    const d1 = n[0]*p1[0]+n[1]*p1[1]+n[2]*p1[2]-d;
+    const d2 = n[0]*p2[0]+n[1]*p2[1]+n[2]*p2[2]-d;
+    if (d1*d2 < 0) {
+      const t = d1/(d1-d2);
+      intersections.push([p1[0]+t*(p2[0]-p1[0]), p1[1]+t*(p2[1]-p1[1]), p1[2]+t*(p2[2]-p1[2])]);
+    } else if (Math.abs(d1) < 1e-9) {
+      intersections.push([...p1]);
+    }
+  });
+
+  // Also add the three selected vertices
+  coords.forEach(c => {
+    const val = n[0]*c[0]+n[1]*c[1]+n[2]*c[2]-d;
+    if (Math.abs(val) < 1e-9) {
+      const exists = intersections.some(p => Math.abs(p[0]-c[0])<0.01 && Math.abs(p[1]-c[1])<0.01 && Math.abs(p[2]-c[2])<0.01);
+      if (!exists) intersections.push([...c]);
+    }
+  });
+
+  // Sort by angle around centroid to form convex polygon
+  if (intersections.length >= 3) {
+    const cx = intersections.reduce((s,p)=>s+p[0],0)/intersections.length;
+    const cy = intersections.reduce((s,p)=>s+p[1],0)/intersections.length;
+    const cz = intersections.reduce((s,p)=>s+p[2],0)/intersections.length;
+    // Project to 2D for sorting
+    const nLen = Math.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2]);
+    const nn = [n[0]/nLen, n[1]/nLen, n[2]/nLen];
+    // Find two perpendicular axes in the plane
+    let refV = [1,0,0];
+    if (Math.abs(nn[0]) > 0.9) refV = [0,1,0];
+    const ax1 = [nn[1]*refV[2]-nn[2]*refV[1], nn[2]*refV[0]-nn[0]*refV[2], nn[0]*refV[1]-nn[1]*refV[0]];
+    const ax1Len = Math.sqrt(ax1[0]*ax1[0]+ax1[1]*ax1[1]+ax1[2]*ax1[2]);
+    ax1[0]/=ax1Len; ax1[1]/=ax1Len; ax1[2]/=ax1Len;
+    const ax2 = [nn[1]*ax1[2]-nn[2]*ax1[1], nn[2]*ax1[0]-nn[0]*ax1[2], nn[0]*ax1[1]-nn[1]*ax1[0]];
+
+    intersections.sort((a,b) => {
+      const aa = Math.atan2((a[0]-cx)*ax2[0]+(a[1]-cy)*ax2[1]+(a[2]-cz)*ax2[2], (a[0]-cx)*ax1[0]+(a[1]-cy)*ax1[1]+(a[2]-cz)*ax1[2]);
+      const bb = Math.atan2((b[0]-cx)*ax2[0]+(b[1]-cy)*ax2[1]+(b[2]-cz)*ax2[2], (b[0]-cx)*ax1[0]+(b[1]-cy)*ax1[1]+(b[2]-cz)*ax1[2]);
+      return aa-bb;
+    });
+  }
+
+  // Sample interior points: points on the plane strictly inside the cube
+  const interiorPts = [];
+  const centroid = coords.reduce((s,c) => [s[0]+c[0]/3, s[1]+c[1]/3, s[2]+c[2]/3], [0,0,0]);
+  // Check if centroid is strictly inside
+  const eps = 0.99;
+  if (Math.abs(centroid[0]) < eps && Math.abs(centroid[1]) < eps && Math.abs(centroid[2]) < eps) {
+    interiorPts.push(centroid);
+  }
+  // Sample along edges of the triangle and midpoints
+  for (let i=0; i<3; i++) {
+    for (let j=i+1; j<3; j++) {
+      for (let t=0.15; t<=0.85; t+=0.175) {
+        const pt = [coords[i][0]+t*(coords[j][0]-coords[i][0]), coords[i][1]+t*(coords[j][1]-coords[i][1]), coords[i][2]+t*(coords[j][2]-coords[i][2])];
+        if (Math.abs(pt[0])<eps && Math.abs(pt[1])<eps && Math.abs(pt[2])<eps) interiorPts.push(pt);
+      }
+    }
+  }
+  // Sample inside triangle
+  for (let a=0.1; a<=0.8; a+=0.15) {
+    for (let b=0.1; b<=0.8-a; b+=0.15) {
+      const c2 = 1-a-b;
+      const pt = [a*coords[0][0]+b*coords[1][0]+c2*coords[2][0], a*coords[0][1]+b*coords[1][1]+c2*coords[2][1], a*coords[0][2]+b*coords[1][2]+c2*coords[2][2]];
+      if (Math.abs(pt[0])<eps && Math.abs(pt[1])<eps && Math.abs(pt[2])<eps) interiorPts.push(pt);
+    }
+  }
+
+  return { coords, polygon: intersections, interiorPts };
+}
+
+function drawPlane() {
+  const c = getThemeColors();
+  const cw = planeCanvas.width;
+  pctx.clearRect(0,0,cw,cw);
+
+  // Draw cube wireframe
+  const proj = cubeVerts.map(v => projectPlane(v[0],v[1],v[2]));
+  edges.forEach(([i,j]) => {
+    pctx.beginPath(); pctx.moveTo(proj[i].x,proj[i].y); pctx.lineTo(proj[j].x,proj[j].y);
+    pctx.strokeStyle = c.edge; pctx.lineWidth = 1.5; pctx.globalAlpha = 0.5; pctx.stroke(); pctx.globalAlpha = 1;
+  });
+
+  // Draw vertex labels (dimmed)
+  proj.forEach((p,i) => {
+    pctx.beginPath(); pctx.arc(p.x,p.y,6,0,Math.PI*2); pctx.fillStyle = c.muted; pctx.globalAlpha=0.35; pctx.fill(); pctx.globalAlpha=1;
+  });
+
+  if (currentFavIdx >= 0 && currentFavIdx < favorableTriples.length) {
+    const triple = favorableTriples[currentFavIdx];
+    const data = getPlaneData(triple);
+
+    // Draw plane polygon
+    if (data.polygon.length >= 3) {
+      const polyProj = data.polygon.map(p => projectPlane(p[0],p[1],p[2]));
+      pctx.beginPath();
+      pctx.moveTo(polyProj[0].x, polyProj[0].y);
+      for (let i=1; i<polyProj.length; i++) pctx.lineTo(polyProj[i].x, polyProj[i].y);
+      pctx.closePath();
+      pctx.fillStyle = c.planeFill;
+      pctx.fill();
+      pctx.strokeStyle = c.planeStroke;
+      pctx.lineWidth = 2;
+      pctx.stroke();
+    }
+
+    // Draw interior points
+    data.interiorPts.forEach(pt => {
+      const pp = projectPlane(pt[0],pt[1],pt[2]);
+      pctx.beginPath(); pctx.arc(pp.x,pp.y,5,0,Math.PI*2);
+      pctx.fillStyle = c.interiorDot; pctx.fill();
+      // glow
+      pctx.beginPath(); pctx.arc(pp.x,pp.y,10,0,Math.PI*2);
+      pctx.fillStyle = c.interiorDot.replace(')',',0.25)').replace('rgb','rgba');
+      // fallback glow
+      pctx.globalAlpha = 0.3; pctx.fillStyle = c.interiorDot; pctx.fill(); pctx.globalAlpha = 1;
+    });
+
+    // Draw triangle edges
+    const triProj = data.coords.map(p => projectPlane(p[0],p[1],p[2]));
+    pctx.beginPath();
+    pctx.moveTo(triProj[0].x,triProj[0].y);
+    pctx.lineTo(triProj[1].x,triProj[1].y);
+    pctx.lineTo(triProj[2].x,triProj[2].y);
+    pctx.closePath();
+    pctx.strokeStyle = c.green;
+    pctx.lineWidth = 2.5;
+    pctx.stroke();
+
+    // Draw selected vertices
+    triProj.forEach((p,i) => {
+      pctx.beginPath(); pctx.arc(p.x,p.y,12,0,Math.PI*2);
+      pctx.fillStyle = c.green; pctx.fill();
+      pctx.font = "bold 16px 'JetBrains Mono',monospace";
+      pctx.fillStyle = '#fff'; pctx.textAlign = 'center'; pctx.textBaseline = 'bottom';
+      pctx.fillText(triple.v[i], p.x, p.y - 16);
+    });
+
+    // Update info
+    document.getElementById('autoCounter').textContent = `${currentFavIdx + 1} / ${favorableTriples.length}`;
+    document.getElementById('autoTriple').textContent = triple.v.join(', ');
+    document.getElementById('autoPattern').textContent = `(${triple.pattern.split('').join(', ')})`;
+  }
+
+  requestAnimationFrame(drawPlane);
+}
+
+// Plane canvas interaction
+planeCanvas.addEventListener('mousedown',e=>{planeDrag=true;planeLMX=e.clientX;planeLMY=e.clientY;});
+window.addEventListener('mouseup',()=>{planeDrag=false;});
+window.addEventListener('mousemove',e=>{
+  if(planeDrag){planeRotY+=(e.clientX-planeLMX)*0.008;planeRotX+=(e.clientY-planeLMY)*0.008;planeLMX=e.clientX;planeLMY=e.clientY;}
+});
+planeCanvas.addEventListener('touchstart',e=>{const t=e.touches[0];planeDrag=true;planeLMX=t.clientX;planeLMY=t.clientY;e.preventDefault();},{passive:false});
+planeCanvas.addEventListener('touchmove',e=>{if(planeDrag){const t=e.touches[0];planeRotY+=(t.clientX-planeLMX)*0.008;planeRotX+=(t.clientY-planeLMY)*0.008;planeLMX=t.clientX;planeLMY=t.clientY;e.preventDefault();}},{passive:false});
+planeCanvas.addEventListener('touchend',()=>{planeDrag=false;});
+
+// Slow auto-rotate for plane canvas
+let planeAutoRot = true;
+planeCanvas.addEventListener('mousedown',()=>{planeAutoRot=false;});
+planeCanvas.addEventListener('touchstart',()=>{planeAutoRot=false;});
+let planeAutoTimer;
+window.addEventListener('mouseup',()=>{clearTimeout(planeAutoTimer);planeAutoTimer=setTimeout(()=>planeAutoRot=true,3000);});
+window.addEventListener('touchend',()=>{clearTimeout(planeAutoTimer);planeAutoTimer=setTimeout(()=>planeAutoRot=true,3000);});
+(function planeAnim(){if(planeAutoRot && !planeDrag)planeRotY+=0.002;requestAnimationFrame(planeAnim);})();
+
+drawPlane();
+
+// Autoplay controls
+const autoPlayBtn = document.getElementById('autoPlayBtn');
+const autoPrevBtn = document.getElementById('autoPrevBtn');
+const autoNextBtn = document.getElementById('autoNextBtn');
+const playLabel = document.getElementById('playLabel');
+const playIcon = document.getElementById('playIcon');
+
+function showTriple(idx) {
+  currentFavIdx = ((idx % favorableTriples.length) + favorableTriples.length) % favorableTriples.length;
+}
+
+autoPrevBtn.addEventListener('click', () => {
+  if (currentFavIdx <= 0) currentFavIdx = favorableTriples.length;
+  showTriple(currentFavIdx - 1);
+});
+
+autoNextBtn.addEventListener('click', () => {
+  showTriple(currentFavIdx + 1);
+});
+
+autoPlayBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    isPlaying = false;
+    clearInterval(playInterval);
+    autoPlayBtn.classList.remove('playing');
+    playLabel.textContent = 'Auto';
+    playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"/>';
+  } else {
+    isPlaying = true;
+    autoPlayBtn.classList.add('playing');
+    playLabel.textContent = 'Pausa';
+    playIcon.innerHTML = '<rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/>';
+    if (currentFavIdx < 0) currentFavIdx = 0;
+    playInterval = setInterval(() => {
+      showTriple(currentFavIdx + 1);
+      if (currentFavIdx >= favorableTriples.length - 1) {
+        // loop
+        setTimeout(() => showTriple(0), 1800);
+      }
+    }, 1800);
+  }
+});
+
+// Start with first favorable triple visible
+showTriple(0);
+
+// ===== KATEX RENDER =====
+function renderKatex() {
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+document.addEventListener('DOMContentLoaded', renderKatex);
+window.addEventListener('load', renderKatex);
+</script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script>
+
+<footer style="
+  margin-top: 60px;
+  padding: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+">
+  Material elaborado por el profesor Sergio Gevatschnaider
+</footer>
+</body>
+</html>
