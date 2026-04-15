@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examen Interactivo de Grafos a Escala</title>
+  <style>
+    :root {
+      --bg-primary-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --text-primary-light: #1c1e21;
+      --text-secondary-light: #4a5568;
+      --bg-secondary-light: rgba(255, 255, 255, 0.74);
+      --border-light: #d1d9e6;
+      --accent-light: #2b6cb0;
+      --shadow-light: rgba(0, 0, 0, 0.12);
+
+      --bg-primary-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --text-primary-dark: #e2e8f0;
+      --text-secondary-dark: #94a3b8;
+      --bg-secondary-dark: rgba(30, 41, 59, 0.76);
+      --border-dark: #334155;
+      --accent-dark: #60a5fa;
+      --shadow-dark: rgba(0, 0, 0, 0.42);
+
+      --success: #48bb78;
+      --warning: #f6ad55;
+      --danger: #f56565;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.8;
+      overflow-x: hidden;
+      transition: background 0.35s ease, color 0.35s ease;
+      min-height: 100vh;
+    }
+
+    body.light-theme {
+      background: var(--bg-primary-light);
+      color: var(--text-primary-light);
+    }
+
+    body.dark-theme {
+      background: var(--bg-primary-dark);
+      color: var(--text-primary-dark);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 1rem auto;
+      padding: 2rem 2rem 2.2rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid;
+      box-shadow: 0 16px 40px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    body.light-theme .container {
+      background: var(--bg-secondary-light);
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow: 0 16px 40px var(--shadow-light);
+    }
+
+    body.dark-theme .container {
+      background: var(--bg-secondary-dark);
+      border-color: rgba(255, 255, 255, 0.10);
+      box-shadow: 0 16px 40px var(--shadow-dark);
+    }
+
+    h1 {
+      margin: 0 0 0.8rem;
+      text-align: center;
+      font-size: 2.45rem;
+      line-height: 1.2;
+      background: linear-gradient(45deg, var(--accent-light), #3182ce);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-theme h1 {
+      background: linear-gradient(45deg, var(--accent-dark), #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0 auto 2rem;
+      max-width: 900px;
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    body.light-theme .subtitle { color: var(--text-secondary-light); }
+    body.dark-theme .subtitle { color: var(--text-secondary-dark); }
+
+    .progress-container {
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    body.dark-theme .progress-container {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.10);
+    }
+
+    body.dark-theme .progress-bar {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.45s ease-in-out;
+      background: linear-gradient(90deg, var(--accent-light), #63b3ed);
+    }
+
+    body.dark-theme .progress-fill {
+      background: linear-gradient(90deg, var(--accent-dark), #bee3f8);
+    }
+
+    .progress-text {
+      margin-top: 0.65rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    body.light-theme .progress-text { color: var(--text-secondary-light); }
+    body.dark-theme .progress-text { color: var(--text-secondary-dark); }
+
+    .controls-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1.2rem;
+    }
+
+    .search-box {
+      min-width: min(380px, 92vw);
+      padding: 0.9rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-light);
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      transition: all 0.25s ease;
+    }
+
+    body.dark-theme .search-box {
+      background: rgba(15, 23, 42, 0.45);
+      border-color: var(--border-dark);
+      color: var(--text-primary-dark);
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 4px rgba(43, 108, 176, 0.14);
+    }
+
+    body.dark-theme .search-box:focus {
+      border-color: var(--accent-dark);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+    }
+
+    .action-button {
+      padding: 0.85rem 1.3rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    .action-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .action-button:active {
+      transform: translateY(0);
+    }
+
+    body.light-theme .theme-button {
+      background: linear-gradient(135deg, #333, #555);
+      color: white;
+    }
+
+    body.dark-theme .theme-button {
+      background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+      color: black;
+    }
+
+    body.light-theme .random-button {
+      background: linear-gradient(135deg, #2b6cb0, #3182ce);
+      color: white;
+    }
+
+    body.dark-theme .random-button {
+      background: linear-gradient(135deg, #60a5fa, #93c5fd);
+      color: black;
+    }
+
+    .secondary-button {
+      background: linear-gradient(135deg, #718096, #4a5568);
+      color: white;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .pill {
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    body.light-theme .pill {
+      background: rgba(255,255,255,0.7);
+      border-color: rgba(0,0,0,0.08);
+      color: var(--text-secondary-light);
+    }
+
+    body.dark-theme .pill {
+      background: rgba(15,23,42,0.42);
+      border-color: rgba(255,255,255,0.08);
+      color: var(--text-secondary-dark);
+    }
+
+    .qa-item {
+      margin-bottom: 1rem;
+      border-radius: var(--radius-md);
+      border-left: 5px solid transparent;
+      transition: transform 0.18s ease, box-shadow 0.2s ease, border-left-color 0.25s ease;
+      overflow: hidden;
+    }
+
+    .qa-item.mastered {
+      border-left-color: var(--success);
+    }
+
+    body.light-theme .qa-item {
+      background: rgba(255,255,255,0.45);
+    }
+
+    body.dark-theme .qa-item {
+      background: rgba(15,23,42,0.28);
+    }
+
+    .question {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 1.15rem 1.4rem;
+      text-align: left;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      transition: background 0.25s ease;
+    }
+
+    body.dark-theme .question { color: var(--text-primary-dark); }
+
+    .question:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    body.dark-theme .question:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .question-title {
+      flex: 1;
+    }
+
+    .question-icon {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--accent-light);
+      transition: transform 0.25s ease;
+      width: 26px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    body.dark-theme .question-icon {
+      color: var(--accent-dark);
+    }
+
+    .question.active .question-icon {
+      transform: rotate(45deg);
+    }
+
+    .answer {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 1.4rem;
+      transition: max-height 0.42s ease, padding 0.42s ease;
+      border-top: 1px solid transparent;
+    }
+
+    .answer.active {
+      padding: 1.35rem 1.4rem 1.4rem;
+    }
+
+    body.light-theme .answer.active { border-top-color: var(--border-light); }
+    body.dark-theme .answer.active { border-top-color: var(--border-dark); }
+
+    .answer p {
+      margin: 0 0 1rem;
+    }
+
+    .answer p:last-child {
+      margin-bottom: 0;
+    }
+
+    .answer ul {
+      margin: 0.6rem 0 1rem 1.2rem;
+    }
+
+    code {
+      background: rgba(43, 108, 176, 0.10);
+      color: var(--accent-light);
+      padding: 0.18rem 0.4rem;
+      border-radius: 6px;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.95em;
+    }
+
+    body.dark-theme code {
+      background: rgba(96, 165, 250, 0.14);
+      color: var(--accent-dark);
+    }
+
+    strong {
+      color: var(--accent-light);
+    }
+
+    body.dark-theme strong {
+      color: var(--accent-dark);
+    }
+
+    .mastery-button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--success);
+      background: transparent;
+      color: var(--success);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .mastery-button:hover,
+    .mastery-button.mastered {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2.8rem;
+      padding: 2rem 0 1rem;
+      font-size: 0.92rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    body.light-theme footer { color: #6b7280; }
+    body.dark-theme footer { color: var(--text-secondary-dark); }
+
+    .bubble {
+      position: fixed;
+      bottom: -150px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      animation: rise 24s infinite ease-in-out;
+    }
+
+    body.light-theme .bubble { background: rgba(43, 108, 176, 0.1); }
+    body.dark-theme .bubble { background: rgba(96, 165, 250, 0.08); }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(-50vh) scale(1.18);
+      }
+      90% {
+        opacity: 0.35;
+      }
+      100% {
+        transform: translateY(-110vh) scale(0.82);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      .container {
+        padding: 1.35rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      .question {
+        font-size: 1rem;
+        padding: 1rem 1.1rem;
+      }
+      .answer.active {
+        padding: 1rem 1.1rem 1.15rem;
+      }
+      .search-box {
+        min-width: 100%;
+      }
+      .controls-container {
+        flex-direction: column;
+      }
+      .action-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <div class="container">
+    <h1>Examen Interactivo de Grafos a Escala</h1>
+    <p class="subtitle">
+      Material interactivo con preguntas y respuestas desarrolladas sobre grafos masivos, I/O, muestreo,
+      sketching, sparsificación y preservación estructural. Diseñado para estudiar en profundidad y revisar
+      cada concepto con claridad.
+    </p>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Dominio: 0% - 0/30 preguntas dominadas</div>
+    </div>
+
+    <div class="controls-container">
+      <button class="action-button theme-button" id="theme-toggle">☀️ Cambiar a Tema Claro</button>
+      <input
+        type="text"
+        class="search-box"
+        id="search-input"
+        placeholder="🔍 Buscar pregunta o concepto..."
+      />
+      <button class="action-button random-button" id="random-question-btn">🎲 Pregunta Aleatoria</button>
+      <button class="action-button secondary-button" id="reset-progress-btn">♻️ Reiniciar Progreso</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="pill" id="visible-count">Visibles: 30</div>
+      <div class="pill" id="mastered-count">Dominadas: 0</div>
+    </div>
+  </div>
+
+  <div class="container" id="qa-container"></div>
+
+  <footer>
+    <p>Material elaborado por el profesor Sergio Gevatschnaider</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const STORAGE_KEYS = {
+        theme: "grafos-escala-theme",
+        mastered: "grafos-escala-mastered"
+      };
+
+      const questionsAndAnswers = [
+        {
+          question: "1. ¿Qué significa que un grafo “no cabe en memoria” y por qué eso modifica radicalmente el tipo de problema que enfrentamos?",
+          answer: `
+            <p>Cuando se dice que un grafo “no cabe en memoria”, se está señalando que su representación completa excede la capacidad de almacenamiento principal disponible, es decir, la RAM. Esto puede ocurrir incluso si se usan estructuras relativamente eficientes, como listas de adyacencia. En grafos cuyos vértices y aristas alcanzan escalas de cientos de millones o miles de millones, almacenar toda la estructura en memoria principal se vuelve impracticable.</p>
+            <p>Como consecuencia, el problema deja de consistir únicamente en elegir un algoritmo con buena complejidad asintótica. A partir de esa escala, también importa el acceso material a los datos: dónde están, cómo se leen, cuánto tarda moverlos y cuántas veces pueden recorrerse. En teoría de algoritmos muchas veces se supone que los datos ya están disponibles en memoria, pero en grafos masivos ese supuesto deja de ser válido.</p>
+            <p>El cambio es cualitativo. Un algoritmo lineal en <code>|V| + |E|</code> puede parecer eficiente en el plano formal y, sin embargo, resultar impracticable si requiere leer terabytes desde disco o coordinar información entre varias máquinas. Por eso, la pregunta central deja de ser solamente “¿qué algoritmo resuelve exactamente el problema?” y pasa a ser “¿cómo represento, recorro o resumo el grafo para que el problema sea tratable?”. Esa es la puerta de entrada a técnicas como muestreo, sketching y sparsificación.</p>
+          `
+        },
+        {
+          question: "2. ¿Por qué en grafos masivos el costo de I/O puede dominar al costo computacional del algoritmo?",
+          answer: `
+            <p>El costo de I/O, es decir, de entrada y salida de datos, puede dominar porque la transferencia física de información suele ser mucho más lenta que el procesamiento lógico sobre datos ya cargados en memoria. En grafos masivos, aunque el número de operaciones matemáticas del algoritmo sea razonable, la lectura del grafo puede consumir la mayor parte del tiempo total de ejecución.</p>
+            <p>En el plano teórico, una pasada sobre todas las aristas puede escribirse como <code>O(|E|)</code>, pero en la práctica esa pasada puede ser muy costosa si las aristas están distribuidas en múltiples archivos, discos o nodos de un sistema distribuido. El algoritmo puede “saber” exactamente qué hacer con cada dato, pero si el dato tarda demasiado en llegar, el verdadero cuello de botella deja de ser computacional y pasa a ser logístico.</p>
+            <p>Además, cuando el grafo está fragmentado o distribuido, aparece un costo adicional de coordinación: no solo hay que leer, sino también comunicar, combinar y sincronizar información parcial. Por eso, en grafos de gran escala, reducir el número de pasadas sobre los datos o minimizar el volumen de información movida puede ser más importante que optimizar una operación matemática interna del algoritmo. De allí surge el interés por técnicas que procesan el flujo en una sola pasada o que reemplazan el grafo por una estructura mucho más compacta.</p>
+          `
+        },
+        {
+          question: "3. ¿Por qué la matriz de adyacencia se vuelve completamente inviable en grafos enormes?",
+          answer: `
+            <p>La matriz de adyacencia representa un grafo mediante una tabla de tamaño <code>|V| × |V|</code>, donde cada celda indica si existe o no una arista entre dos vértices. Esa representación tiene la ventaja conceptual de ofrecer acceso inmediato a la información de adyacencia, pero paga esa comodidad con un costo de memoria cuadrático, es decir, <code>Θ(|V|²)</code>. Ese crecimiento cuadrático la vuelve prácticamente inútil en grafos enormes.</p>
+            <p>El problema se aprecia con claridad en escalas realistas. Si un grafo tiene <code>10⁹</code> nodos, la matriz necesita <code>10¹⁸</code> posiciones. Incluso si cada posición ocupara un solo bit, el tamaño resultante sería gigantesco. Por eso, en grafos masivos, la matriz de adyacencia no es solamente “poco eficiente”: directamente queda fuera del conjunto de soluciones factibles.</p>
+            <p>La dificultad es aún mayor si el grafo es disperso, que es lo habitual en muchas aplicaciones reales. En un grafo disperso, la enorme mayoría de las entradas de la matriz serían ceros. En consecuencia, se reservaría memoria para almacenar, básicamente, ausencia de información. Esto explica por qué, al pasar a gran escala, la matriz se abandona rápidamente y se buscan estructuras que aprovechen mejor la dispersión o que acepten compresión y aproximación.</p>
+          `
+        },
+        {
+          question: "4. ¿Por qué la lista de adyacencia, aun siendo mejor, también puede resultar insuficiente?",
+          answer: `
+            <p>La lista de adyacencia es la representación exacta estándar para grafos dispersos porque utiliza memoria <code>Θ(|V| + |E|)</code>, lo que constituye una mejora radical respecto del costo cuadrático de la matriz de adyacencia. En esta estructura, cada vértice mantiene una lista con sus vecinos, de modo que solo se almacena información efectivamente existente.</p>
+            <p>Sin embargo, que sea la mejor estructura exacta habitual no significa que resuelva todos los problemas de escala. Si el número de aristas es extremadamente grande, la suma <code>|V| + |E|</code> sigue siendo enorme. Un grafo con miles de millones de aristas puede requerir gigabytes o incluso terabytes aun en lista de adyacencia. En una sola máquina, eso puede exceder la RAM disponible; en un entorno distribuido, puede volver muy costosa la lectura, transferencia y coordinación.</p>
+            <p>Por eso, la lista de adyacencia marca un límite importante: es la mejor manera exacta usual de guardar el grafo, pero cuando el grafo es demasiado grande incluso esa representación queda al borde o directamente fuera de lo manejable. Ese hecho es crucial porque muestra que el salto conceptual no consiste simplemente en cambiar de estructura exacta, sino en aceptar representaciones comprimidas, parciales o aproximadas. Ahí es donde aparecen muestreo, sketching y sparsificación.</p>
+          `
+        },
+        {
+          question: "5. ¿Cuál es la tesis central del trabajo con grafos a escala?",
+          answer: `
+            <p>La tesis central es que, cuando el grafo se vuelve demasiado grande, lo decisivo ya no es únicamente reducir el tiempo de cómputo en el sentido clásico, sino disminuir la cantidad de información que debe almacenarse, transferirse o recorrerse repetidamente. Esto desplaza el foco desde el algoritmo exacto aplicado al grafo completo hacia estrategias de representación inteligente.</p>
+            <p>La idea rompe con una intuición habitual de la teoría algorítmica clásica. No siempre hace falta lograr tiempo sublineal en términos absolutos; a veces lo esencial es evitar mirar todo el grafo de forma exhaustiva. Si se puede construir una representación más pequeña que preserve lo relevante para la consulta o el análisis, entonces el problema se vuelve factible incluso cuando el grafo original no lo era.</p>
+            <p>De esta tesis se desprenden tres grandes familias de técnicas: <strong>muestreo</strong>, que observa solo una parte del grafo y estima el resto; <strong>sketching</strong>, que construye un resumen comprimido y actualizable; y <strong>sparsificación</strong>, que produce un nuevo grafo más pequeño pero estructuralmente similar. Aunque cada una funciona de manera distinta, las tres responden a una misma idea de fondo: en grafos masivos, el acceso completo a todos los datos no siempre es viable, ni tampoco necesario.</p>
+          `
+        },
+        {
+          question: "6. ¿Qué es el muestreo en grafos y qué principio lo justifica?",
+          answer: `
+            <p>El muestreo en grafos consiste en seleccionar una porción del grafo —por ejemplo, aristas, vértices o recorridos— para inferir propiedades del conjunto completo. Su fundamento proviene de la estadística: no siempre es necesario observar toda la población para estimar adecuadamente ciertas magnitudes globales. Si la muestra es adecuada y el estimador está bien diseñado, puede obtenerse información confiable con un costo muchísimo menor que el del procesamiento exhaustivo.</p>
+            <p>En el contexto de grafos, esta idea es especialmente poderosa porque muchas veces interesa conocer parámetros agregados y no la estructura exacta completa. Por ejemplo, puede bastar con estimar densidad, grado promedio o presencia aproximada de determinados patrones. En esos casos, observar todo el grafo sería un gasto enorme de memoria y tiempo que no necesariamente se traduce en un beneficio proporcional.</p>
+            <p>El punto clave es que el muestreo no equivale a “tomar cualquier pedazo del grafo”. Debe diseñarse de manera tal que la parte observada sea útil para inferir la totalidad. Por eso, el muestreo en grafos suele ir acompañado de técnicas de reponderación, corrección de sesgos y control de varianza. No es una simplificación arbitraria, sino una estrategia formal para convertir un problema de escala en un problema de estimación estadística con garantías controladas.</p>
+          `
+        },
+        {
+          question: "7. ¿Qué propiedades del grafo pueden estimarse mediante muestreo?",
+          answer: `
+            <p>El muestreo es especialmente adecuado para estimar propiedades globales o agregadas del grafo. Entre ellas se incluyen grados promedio, densidades, conteos aproximados de ciertos patrones y medidas de cohesión. Estas magnitudes no dependen tanto de conocer cada arista individual, sino de captar regularidades estructurales a gran escala.</p>
+            <p>Esto lo vuelve muy útil cuando lo importante no es reconstruir el grafo completo, sino comprender su comportamiento general. Si se quiere tener una idea del nivel de conectividad promedio, de la concentración estructural o de ciertos fenómenos estadísticos del grafo, el muestreo puede ofrecer una aproximación valiosa sin necesidad de cargar toda la estructura en memoria.</p>
+            <p>Sin embargo, no todas las consultas son igual de compatibles con esta técnica. Cuanto más localizada, exacta o dependiente de detalles finos sea la pregunta, menos probable es que una muestra simple resulte suficiente. Por eso el muestreo es especialmente útil para parámetros agregados y no tanto para tareas que exigen exactitud puntual. Su fortaleza está en responder inteligentemente ciertas preguntas a un costo muy inferior al de la inspección exhaustiva.</p>
+          `
+        },
+        {
+          question: "8. ¿Por qué el muestreo ingenuo introduce sesgos importantes en grafos?",
+          answer: `
+            <p>El muestreo ingenuo introduce sesgos porque la estructura de un grafo real rara vez es homogénea. Muchos grafos contienen <em>hubs</em> o nodos de grado muy alto que concentran gran cantidad de conexiones. Si el procedimiento de muestreo no tiene en cuenta esa heterogeneidad, esos nodos tienden a aparecer con mucha mayor frecuencia que los demás, mientras que los nodos periféricos o de bajo grado quedan subrepresentados.</p>
+            <p>Esto implica que la muestra deja de ser representativa de ciertas propiedades globales. Puede parecer, por ejemplo, que el grafo es más centralizado, más denso o más dominado por hubs de lo que realmente es. El sesgo no aparece por un error posterior en el análisis, sino que se introduce ya en el mecanismo mismo de selección.</p>
+            <p>Este punto es crucial porque muestra que el muestreo en grafos no puede pensarse con ingenuidad estadística. La topología del grafo influye directamente sobre la probabilidad de aparición de nodos y aristas en la muestra. Por eso, cuando se advierte sobre el sesgo, se está subrayando que en grafos el muestreo debe diseñarse estructuralmente, no solo probabilísticamente. No basta con reducir cantidad; hay que hacerlo sin deformar sistemáticamente la información relevante.</p>
+          `
+        },
+        {
+          question: "9. ¿Cómo se corrigen esos sesgos en un esquema de muestreo bien diseñado?",
+          answer: `
+            <p>La corrección del sesgo se logra mediante técnicas de reponderación y diseño de estimadores. La idea básica es que ciertos elementos del grafo tienen una probabilidad mayor de ser observados que otros, por lo que, una vez observados, no deben contarse todos del mismo modo. Algunos deben recibir menos peso relativo y otros más, para compensar la desigualdad de visibilidad introducida por la estructura del grafo.</p>
+            <p>Este proceso también está asociado al control de la varianza. No se trata solo de obtener un estimador insesgado en promedio, sino de lograr que las fluctuaciones de la estimación no sean demasiado grandes. Un esquema de muestreo útil no solo corrige sesgos, sino que produce respuestas estables y con error razonablemente acotado.</p>
+            <p>En términos conceptuales, lo que ocurre es un desplazamiento desde el cálculo exacto hacia la inferencia estadística. En lugar de computar directamente la propiedad sobre todo el grafo, se construye un estimador que usa la muestra observada para aproximar esa propiedad. La calidad del resultado depende entonces del diseño conjunto del procedimiento de selección y del método de corrección. Por eso, el cálculo exacto es reemplazado por estimadores estadísticos cuidadosamente construidos.</p>
+          `
+        },
+        {
+          question: "10. ¿Qué papel cumplen los random walks dentro del muestreo y del análisis de grafos masivos?",
+          answer: `
+            <p>Los <em>random walks</em> o recorridos aleatorios cumplen un papel muy importante porque permiten explorar el grafo localmente, sin necesidad de cargarlo completo en memoria. En lugar de examinar todas las aristas, el algoritmo se desplaza paso a paso desde un vértice hacia uno de sus vecinos elegidos al azar. Ese mecanismo produce una trayectoria dentro del grafo a partir de la cual puede inferirse información sobre su estructura global.</p>
+            <p>La gran ventaja de este enfoque es que traduce un problema masivo en una secuencia de decisiones locales. No hace falta disponer simultáneamente de todo el grafo; alcanza con conocer la vecindad del nodo actual para continuar el recorrido. Esto resulta especialmente valioso en escenarios de memoria restringida o acceso costoso a los datos.</p>
+            <p>Además, los random walks tienen una interpretación probabilística profunda. Bajo ciertas condiciones, la frecuencia con la que visitan nodos o regiones del grafo revela propiedades estructurales importantes. Por eso son útiles para estimar distribuciones, conectividad o incluso para diseñar métodos de muestreo más sofisticados. En grafos a escala, su interés no reside solo en que “recorren sin cargar todo”, sino en que convierten la exploración parcial en una fuente informativa matemáticamente aprovechable.</p>
+          `
+        },
+        {
+          question: "11. ¿Cuál es la intuición detrás del muestreo de aristas con probabilidad p y reponderación 1/p?",
+          answer: `
+            <p>La intuición central es que, si observamos solo una fracción del grafo, cada elemento observado debe representar también a aquellos que no fueron vistos. Si cada arista se incluye con probabilidad <code>p</code>, entonces, en promedio, solo una fracción <code>p</code> del total quedará en la muestra. Para compensar esa reducción, cada arista observada se pondera con <code>1/p</code>. De ese modo, lo que se pierde en cantidad se recupera en peso.</p>
+            <p>Matemáticamente, este esquema tiene la propiedad de que, en esperanza, la suma ponderada sobre la muestra coincide con la suma sobre el conjunto completo. Eso permite construir estimadores insesgados para muchas magnitudes globales. No se afirma que el resultado muestral sea siempre exactamente igual al real, sino que, en promedio y bajo repetición ideal del procedimiento, no introduce desviación sistemática.</p>
+            <p>La idea resume un principio general del muestreo probabilístico: menos observaciones no necesariamente significan menos información, siempre que las observaciones seleccionadas estén correctamente ponderadas. En grafos masivos, donde ver todo es inviable, este principio se convierte en una herramienta esencial para transformar un problema inabordable de enumeración completa en un problema manejable de estimación.</p>
+          `
+        },
+        {
+          question: "12. ¿Qué es exactamente el sketching en grafos y en qué se diferencia del muestreo?",
+          answer: `
+            <p>El <strong>sketching</strong> es una técnica de compresión algorítmica que busca representar un grafo gigantesco mediante un resumen compacto, usualmente denotado <code>φ(G)</code>. A diferencia del muestreo, que selecciona una parte visible del grafo, el sketching construye una codificación matemática del mismo. No retiene necesariamente un subconjunto interpretable de aristas o nodos, sino una estructura resumida obtenida mediante transformaciones como funciones hash o proyecciones lineales.</p>
+            <p>La diferencia conceptual con el muestreo es importante. En el muestreo seguimos pensando en términos de una “parte del grafo” a partir de la cual inferimos el resto. En el sketching, en cambio, el grafo entero queda absorbido en una representación comprimida que no busca conservar su forma explícita, sino la información necesaria para responder ciertas consultas aproximadas. Podría decirse que el muestreo preserva observaciones; el sketching preserva señales o información funcional.</p>
+            <p>Esta técnica es especialmente adecuada cuando interesa procesar enormes flujos de datos en una sola pasada y mantener una estructura de tamaño controlado. Por eso se la presenta como “un resumen que no olvida lo esencial”: no guarda el detalle, pero sí suficiente información para responder preguntas dentro de un margen de error preestablecido. El precio que se paga es renunciar a la reconstrucción exacta del grafo completo.</p>
+          `
+        },
+        {
+          question: "13. ¿Cómo opera el sketching en el modelo de streaming?",
+          answer: `
+            <p>En el modelo de <em>streaming</em>, las aristas llegan secuencialmente como un flujo de datos. El algoritmo no asume que podrá almacenarlas todas ni volver a leerlas más tarde. En ese contexto, sketching funciona procesando cada arista una sola vez en el momento en que aparece. Esa arista se transforma mediante una operación simple —por ejemplo, hash o proyección lineal— y su efecto se incorpora al resumen actual.</p>
+            <p>La clave está en que el sketch se actualiza incrementalmente. No hace falta reconstruir nada desde cero: cada nueva arista modifica localmente el estado del resumen. Este comportamiento lo vuelve ideal para entornos donde los datos llegan en tiempo real o a una velocidad tal que conservar el <em>stream</em> completo sería imposible.</p>
+            <p>Desde el punto de vista algorítmico, esto significa que el costo por elemento observado puede mantenerse pequeño y constante, mientras que la estructura en memoria conserva un tamaño muy inferior al del grafo original. El resultado es una herramienta que permite transformar un problema de almacenamiento masivo en uno de mantenimiento <em>online</em> de información resumida. En grafos a escala, esta propiedad es fundamental, porque muchas veces el problema no es solo cuánto espacio ocupa el grafo, sino que ni siquiera existe como objeto estático: aparece como un flujo continuo de interacciones.</p>
+          `
+        },
+        {
+          question: "14. ¿Qué significa que el sketch no almacena un subgrafo, sino un resumen comprimido?",
+          answer: `
+            <p>Que el sketch no almacene un subgrafo significa que el resultado de la compresión no es una versión reducida visible del grafo original, como podría ser un conjunto menor de nodos y aristas. En cambio, el sketch es una representación abstracta que condensa información del grafo sin preservar explícitamente su estructura topológica completa. No es una miniatura del grafo; es una huella matemática del mismo.</p>
+            <p>Esta distinción es muy importante porque aclara la naturaleza de la información que se conserva. Si se almacena un subgrafo, todavía se dispone de una estructura interpretable sobre la que pueden ejecutarse algoritmos clásicos. En el sketch, en cambio, se dispone de una estructura compacta diseñada para responder ciertos tipos de consultas, pero no para reconstruir la topología completa ni para operar como si fuera el grafo mismo.</p>
+            <p>Por eso se dice que el sketch “no olvida lo esencial” solo en un sentido funcional: conserva aquello para lo cual fue diseñado, pero no todo. La estructura exacta del grafo, sus detalles locales finos y su reconstrucción completa quedan fuera del alcance. El sketching no es una representación completa más pequeña, sino una representación parcial más inteligente.</p>
+          `
+        },
+        {
+          question: "15. ¿Por qué el tamaño del sketch es una ventaja tan importante frente al almacenamiento completo?",
+          answer: `
+            <p>La ventaja central del sketching reside en que el tamaño del resumen no depende linealmente del número total de aristas. Mientras que almacenar el grafo exacto requiere espacio <code>O(|E|)</code>, el sketch puede ocupar un espacio muchísimo menor, controlado principalmente por la precisión deseada y por ciertos factores que crecen muy lentamente con el tamaño del grafo.</p>
+            <p>Esto es crucial en contextos masivos. Si <code>|E|</code> es del orden de miles de millones, cualquier estructura que dependa linealmente de <code>|E|</code> puede volverse inmanejable. En cambio, si el tamaño está gobernado sobre todo por parámetros como <code>ε</code> y <code>δ</code>, entonces el costo pasa a depender de la calidad de la aproximación y no del volumen bruto de datos. Esa diferencia de escala es radical.</p>
+            <p>La contrapartida, naturalmente, es que las respuestas dejan de ser exactas. Pero en muchos problemas reales, una aproximación con error acotado y alta probabilidad de acierto es muchísimo más valiosa que una exactitud teórica imposible de ejecutar en la práctica. En ese sentido, la reducción de tamaño no es solo una mejora técnica: es lo que vuelve computable el problema.</p>
+          `
+        },
+        {
+          question: "16. ¿Cómo debe interpretarse la fórmula O((1/ε²)·log(1/δ)·polylog(|V|)) para el tamaño del sketch?",
+          answer: `
+            <p>Esa fórmula expresa que el espacio requerido por el sketch depende de tres grandes componentes. El primero es <code>1/ε²</code>, que refleja la precisión: cuanto menor error se quiera tolerar, más grande debe ser el sketch. La relación cuadrática muestra que mejorar mucho la precisión tiene un costo importante en memoria. El segundo componente es <code>log(1/δ)</code>, que capta la confiabilidad probabilística: si se quiere reducir la probabilidad de fallo, el tamaño crece, aunque de manera logarítmica, lo cual es relativamente suave.</p>
+            <p>El tercer componente son los factores <code>polylog(|V|)</code>, es decir, funciones polilogarítmicas del número de vértices. Estos factores crecen mucho más lentamente que una dependencia lineal o cuadrática, lo que significa que el espacio escala muy favorablemente con el tamaño del grafo. Esa es una de las razones por las cuales sketching se considera adecuado para estructuras enormes.</p>
+            <p>La importancia conceptual de la fórmula es que revela un cambio de paradigma: el costo espacial ya no está gobernado por cuántas aristas hay en bruto, sino por cuán buena queremos que sea la aproximación. El problema deja de ser “guardar todo” y pasa a ser “qué nivel de error estoy dispuesto a aceptar a cambio de compresión y escalabilidad”. Esa es la esencia probabilística del enfoque de sketching.</p>
+          `
+        },
+        {
+          question: "17. ¿Qué representan ε y δ y por qué son parámetros fundamentales?",
+          answer: `
+            <p>El parámetro <code>ε</code> representa el margen de error tolerado en la respuesta aproximada. Es una medida de exactitud: cuanto más pequeño sea <code>ε</code>, más cerca deberá estar el resultado del valor verdadero. En consecuencia, un <code>ε</code> pequeño implica más exigencia y, por tanto, un sketch más grande.</p>
+            <p>Por su parte, <code>δ</code> representa la probabilidad de que el método no logre respetar la precisión prometida. Es decir, mide el riesgo de fallo probabilístico. Un <code>δ</code> pequeño indica una alta garantía de confiabilidad: la respuesta será correcta dentro del error permitido con probabilidad muy alta. También aquí aparece un intercambio: mayor confiabilidad requiere más recursos.</p>
+            <p>Ambos parámetros son fundamentales porque hacen explícito el compromiso entre recursos y calidad de respuesta. En vez de un algoritmo exacto con costo fijo, sketching ofrece una familia de soluciones graduables. Se puede decidir cuánto error aceptar y con qué nivel de confianza se desea operar. Esa flexibilidad es una de las grandes fortalezas del enfoque, especialmente en problemas donde la exactitud total es materialmente imposible.</p>
+          `
+        },
+        {
+          question: "18. ¿Qué significa que un sketch sea mergeable y por qué eso es tan valioso en sistemas distribuidos?",
+          answer: `
+            <p>Que un sketch sea <em>mergeable</em> significa que los resúmenes construidos sobre distintas partes del flujo o del grafo pueden combinarse para formar un resumen del conjunto total. En otras palabras, si varias máquinas procesan distintos bloques de datos en paralelo, no hace falta reunir todos los datos originales para obtener una visión global; alcanza con fusionar sus sketches.</p>
+            <p>Esta propiedad es valiosísima en sistemas distribuidos porque reduce drásticamente el costo de comunicación. Mover el grafo completo entre máquinas puede ser prohibitivo, pero mover resúmenes compactos suele ser perfectamente factible. Así, el procesamiento se descentraliza y la integración de resultados se hace sobre estructuras pequeñas.</p>
+            <p>Además, la mergeabilidad da al sketching una ventaja arquitectónica muy fuerte. No solo comprime información, sino que también se adapta a la organización real de los sistemas modernos, donde los datos suelen estar repartidos entre nodos, centros de cómputo o particiones de stream. Por eso se dice que esta técnica es “natural para cómputo distribuido”: no solo funciona bien allí, sino que parece casi diseñada para ese entorno.</p>
+          `
+        },
+        {
+          question: "19. ¿Por qué sketching es particularmente adecuado para escenarios de Big Data?",
+          answer: `
+            <p>Sketching es especialmente adecuado para Big Data porque reúne tres propiedades clave: puede operar en <em>streaming</em>, usa poco espacio y permite combinar resultados distribuidos. Cada una de estas características responde directamente a uno de los problemas centrales del tratamiento de datos masivos.</p>
+            <p>Primero, en Big Data los datos muchas veces llegan como flujo continuo, no como un conjunto estático listo para procesarse una sola vez. Sketching se adapta a esto porque actualiza el resumen sobre la marcha. Segundo, el volumen de datos puede hacer inviable el almacenamiento exacto; el sketch reduce el problema a una estructura pequeña. Tercero, los datos suelen estar distribuidos geográfica o lógicamente; la propiedad de merge permite integrar información sin centralizar todos los datos brutos.</p>
+            <p>En conjunto, esto convierte al sketching en una respuesta muy poderosa a la pregunta de cómo procesar grandes volúmenes de información sin colapsar memoria, red o tiempo de acceso. No es casual que aparezca frecuentemente en conteo aproximado, monitoreo de streams y análisis de estructuras masivas. En grafos a escala, cumple exactamente ese papel: hacer tratable lo que, de otro modo, sería imposible sostener computacionalmente.</p>
+          `
+        },
+        {
+          question: "20. ¿Qué se pierde al reemplazar el grafo original por un sketch?",
+          answer: `
+            <p>Lo que se pierde es la exactitud estructural completa. El sketch no permite recuperar todas las aristas ni reconstruir el grafo tal como era originalmente. Tampoco garantiza responder cualquier consulta imaginable. Solo preserva la información para la cual fue diseñado, y lo hace además de manera aproximada y probabilística.</p>
+            <p>Esta pérdida no es un defecto accidental, sino el precio mismo de la compresión. Para reducir drásticamente el espacio y permitir procesamiento <em>online</em>, el método debe abandonar parte del detalle. Lo importante es que no se pierde información al azar, sino información que el algoritmo considera prescindible para las tareas objetivo.</p>
+            <p>Desde una perspectiva conceptual, el sketching implica aceptar un cambio de paradigma: en vez de trabajar con exactitud total sobre el objeto completo, se trabaja con garantías probabilísticas sobre un resumen funcional. Esta renuncia controlada a la completitud es justamente lo que hace posible el análisis a gran escala. Por eso, más que una limitación accidental, esta pérdida debe entenderse como una condición de posibilidad del enfoque.</p>
+          `
+        },
+        {
+          question: "21. ¿Qué es la sparsificación y cuál es su idea principal?",
+          answer: `
+            <p>La <strong>sparsificación</strong> consiste en construir un nuevo grafo <code>H</code> que conserva los mismos vértices que el grafo original <code>G</code>, pero con muchas menos aristas. Además, esas aristas se ajustan en sus pesos de modo que el nuevo grafo se comporte de forma similar al original respecto de ciertas propiedades de interés. La idea principal no es resumir abstractamente, como en sketching, sino obtener una estructura todavía interpretable como grafo, pero mucho más liviana.</p>
+            <p>Esta técnica es especialmente valiosa cuando se desea seguir aplicando algoritmos clásicos de grafos, pero sobre una versión reducida del problema. En vez de trabajar con el grafo completo, se trabaja con un sustituto estructural que preserva cortes, difusión o propiedades espectrales, según el tipo de sparsificación utilizado.</p>
+            <p>En ese sentido, la sparsificación puede verse como una forma de compresión estructural. No elimina arbitrariamente aristas, sino que construye un objeto más pequeño que mantiene aproximadamente el comportamiento relevante del original. Eso es lo que la distingue tanto del simple filtrado como del sketching abstracto. El resultado sigue siendo un grafo y, por eso mismo, conserva un valor algorítmico directo.</p>
+          `
+        },
+        {
+          question: "22. ¿En qué se diferencia conceptualmente la sparsificación del sketching?",
+          answer: `
+            <p>La diferencia principal es que la sparsificación produce otro grafo, mientras que el sketching produce un resumen comprimido que no necesariamente tiene forma de grafo interpretable. En la sparsificación seguimos teniendo vértices, aristas y pesos; lo que cambia es que la cantidad de aristas se reduce enormemente y sus pesos se ajustan para preservar ciertas propiedades. En sketching, en cambio, la salida puede ser una estructura algebraica o probabilística que no sirve como grafo sobre el cual ejecutar algoritmos convencionales.</p>
+            <p>Esto tiene consecuencias prácticas importantes. Un grafo sparsificado puede emplearse como entrada para nuevos algoritmos de caminos, clustering, difusión o análisis espectral. El sketch, en cambio, está pensado más bien para responder consultas o mantener ciertas estadísticas, no para ser tratado como sustituto estructural completo del grafo.</p>
+            <p>Por eso puede decirse que sketching y sparsificación resuelven problemas parcialmente distintos. Sketching es ideal para streaming, resúmenes y consultas aproximadas rápidas. Sparsificación es ideal cuando queremos reducir drásticamente el tamaño del grafo sin abandonar del todo su naturaleza estructural. Las dos técnicas son complementarias, pero no intercambiables.</p>
+          `
+        },
+        {
+          question: "23. ¿Qué significa que una sparsificación preserve cortes?",
+          answer: `
+            <p>Que preserve cortes significa que, para cualquier subconjunto de vértices <code>S ⊆ V</code>, el peso total de las aristas que salen de <code>S</code> hacia su complemento en el grafo sparsificado <code>H</code> sea aproximadamente el mismo que en el grafo original <code>G</code>, dentro de un factor <code>1 ± ε</code>. En otras palabras, aunque el nuevo grafo tenga muchas menos aristas, sigue reflejando bastante bien la forma en que el grafo original se separa o conecta a gran escala.</p>
+            <p>Esta propiedad es importante porque los cortes codifican información estructural fundamental: conectividad global, particionamiento natural, clustering y capacidad de flujo entre regiones del grafo. Si un sparsifier mantiene bien los cortes, entonces preserva muchas de las decisiones estructurales relevantes que podrían tomarse sobre el grafo original.</p>
+            <p>Lo notable es que esa preservación puede lograrse con una reducción drástica del número de aristas. Es decir, no hace falta mantener todas las conexiones para conservar la forma global en que el grafo se articula. Esta es una de las ideas más poderosas de la sparsificación: reducir enormemente la complejidad del objeto sin destruir las propiedades macroscópicas que nos interesan.</p>
+          `
+        },
+        {
+          question: "24. ¿Qué es la sparsificación espectral y por qué se considera más fuerte que la de cortes?",
+          answer: `
+            <p>La sparsificación espectral busca preservar aproximadamente la forma cuadrática <code>xᵀLx</code>, donde <code>L</code> es el laplaciano del grafo. Este objetivo es más fuerte que preservar cortes individuales porque el laplaciano concentra información más rica sobre la estructura global del grafo. Preservar el comportamiento espectral implica, en cierto sentido, preservar muchas propiedades estructurales a la vez.</p>
+            <p>Entre las propiedades asociadas al laplaciano se encuentran la difusión, los random walks, la resistencia efectiva y diversos aspectos de conectividad global. Por eso, un sparsifier espectral no solo mantiene cortes, sino que también reproduce bastante bien el comportamiento dinámico y energético del grafo.</p>
+            <p>La razón por la cual se considera una noción más fuerte es precisamente esa amplitud. Mientras la sparsificación de cortes protege una familia específica de cantidades, la espectral preserva una estructura algebraica más profunda, de la cual se desprenden muchas de esas cantidades y otras más. En consecuencia, ofrece una aproximación más robusta del grafo original, aunque también suele requerir un diseño más sofisticado.</p>
+          `
+        },
+        {
+          question: "25. ¿Por qué el laplaciano ocupa un lugar tan central en la teoría y análisis de grafos?",
+          answer: `
+            <p>El laplaciano del grafo ocupa un lugar central porque captura de manera algebraica la estructura de conectividad y difusión. Es una matriz que resume cómo cada vértice se relaciona con su entorno y, al mismo tiempo, permite analizar propiedades globales del grafo mediante herramientas del álgebra lineal y el análisis espectral.</p>
+            <p>Muchas dinámicas importantes sobre grafos —como propagación, mezcla de random walks, particionamientos y formas de cohesión estructural— pueden expresarse o estudiarse mediante el laplaciano. Por eso, preservar el laplaciano aproximadamente equivale a preservar una gran parte del comportamiento relevante del grafo.</p>
+            <p>En el contexto de sparsificación, esto explica por qué la preservación espectral es tan poderosa. No se trata simplemente de mantener un conteo de conexiones, sino de conservar una estructura matemática que condensa gran parte de la geometría y dinámica del grafo. El laplaciano funciona, por así decirlo, como una interfaz entre la topología del grafo y su análisis cuantitativo profundo.</p>
+          `
+        },
+        {
+          question: "26. ¿Qué importancia tiene que un sparsifier pueda tener tamaño O((|V| log |V|)/ε²) en lugar de depender de |E|?",
+          answer: `
+            <p>Esta cota es muy importante porque muestra que el número de aristas del grafo reducido puede depender principalmente del número de vértices, de un factor logarítmico y de la precisión deseada, pero no linealmente del número original de aristas. Cuando el grafo de partida es muy denso o muy grande, esta diferencia puede representar órdenes de magnitud de ahorro.</p>
+            <p>Desde el punto de vista práctico, esto significa que un grafo con una enorme cantidad de aristas puede reemplazarse por otro muchísimo más pequeño sin perder la propiedad estructural que interesa preservar. Esa reducción no es meramente cosmética: transforma la factibilidad del problema. Algoritmos que serían inabordables sobre el grafo original pueden volverse perfectamente razonables sobre el sparsifier.</p>
+            <p>Además, la presencia de <code>ε</code> vuelve explícito el compromiso con la precisión. Cuanto menor error se exija, mayor será el tamaño del sparsifier. Esto muestra nuevamente una idea clave del análisis a escala: la complejidad se negocia con aproximación. No se trata de obtener una copia exacta más pequeña, sino una versión estructuralmente fiel dentro de márgenes controlados.</p>
+          `
+        },
+        {
+          question: "27. ¿Qué significa que la sparsificación hace factibles algoritmos posteriores?",
+          answer: `
+            <p>Significa que la sparsificación no solo resume o comprime el grafo, sino que prepara una nueva entrada sobre la cual pueden ejecutarse otros algoritmos de manera mucho más eficiente. Si el grafo reducido conserva adecuadamente las propiedades importantes del original, entonces muchos algoritmos que antes eran demasiado costosos pueden correrse sobre el sparsifier obteniendo resultados relevantes con mucho menor gasto de tiempo y memoria.</p>
+            <p>Esto es crucial porque convierte a la sparsificación en una técnica de preprocesamiento estructural. No es el final del análisis, sino muchas veces su comienzo. Primero se construye el grafo reducido y luego se aplican sobre él algoritmos de clustering, difusión, cortes, flujos o análisis espectral.</p>
+            <p>En consecuencia, la sparsificación tiene un valor estratégico muy fuerte dentro de una tubería algorítmica. No solo resuelve el problema de representación, sino que habilita etapas posteriores que sobre el grafo original resultarían prohibitivas. Por eso se destaca que “hace factibles algoritmos posteriores”: el ahorro estructural no es un fin en sí mismo, sino una condición para seguir computando.</p>
+          `
+        },
+        {
+          question: "28. ¿Cómo se comparan en profundidad muestreo, sketching y sparsificación?",
+          answer: `
+            <p>Las tres técnicas comparten una motivación común: enfrentar el hecho de que el grafo completo es demasiado grande para ser tratado exhaustivamente. Pero difieren en la forma en que responden a ese desafío. El muestreo conserva una parte observable del grafo y usa herramientas estadísticas para inferir propiedades globales. Es especialmente útil para estimar parámetros agregados. El sketching construye un resumen comprimido, normalmente no interpretable como grafo, ideal para streaming, conteo aproximado y procesamiento distribuido. La sparsificación produce un nuevo grafo más pequeño que conserva ciertas propiedades estructurales y sobre el cual todavía pueden ejecutarse algoritmos de grafos.</p>
+            <p>Esta comparación muestra que no se trata de técnicas rivales, sino de enfoques orientados a objetivos distintos. Si interesa una estimación rápida de magnitudes globales, el muestreo puede ser la mejor opción. Si interesa procesar un stream gigantesco en una sola pasada, sketching es especialmente adecuado. Si interesa seguir trabajando estructuralmente sobre un grafo reducido, la sparsificación resulta más natural.</p>
+            <p>La elección entre ellas depende del tipo de pregunta, del entorno computacional y del grado de fidelidad requerido. En ese sentido, comprender sus diferencias no es solo una cuestión taxonómica, sino una herramienta para decidir estratégicamente cómo abordar un problema real de grafos a gran escala.</p>
+          `
+        },
+        {
+          question: "29. ¿Por qué se afirma que estas tres técnicas son complementarias y pueden combinarse?",
+          answer: `
+            <p>Se afirma que son complementarias porque atacan el mismo problema general desde ángulos distintos y, por eso, pueden encadenarse o coexistir dentro de una misma estrategia de análisis. Un flujo de trabajo posible podría comenzar con muestreo para obtener una visión inicial del grafo, continuar con sketching para mantener estadísticas o resúmenes <em>online</em>, y luego aplicar sparsificación para construir una versión estructural reducida apta para algoritmos más complejos.</p>
+            <p>La complementariedad también significa que cada técnica resuelve mejor ciertos tipos de limitaciones. El muestreo combate el costo de observar todo; el sketching combate el costo de almacenar y combinar grandes flujos; la sparsificación combate el costo de seguir computando sobre un grafo enorme. Cada una toma una parte distinta del problema de escala.</p>
+            <p>Por eso, más que preguntar cuál es “la mejor”, conviene entender qué preserva cada una, qué sacrifica y en qué contexto resulta más poderosa. Pensarlas como complementarias permite verlas no como alternativas excluyentes, sino como piezas de una caja de herramientas para trabajar con grafos masivos.</p>
+          `
+        },
+        {
+          question: "30. ¿Cuál es la gran idea unificadora detrás de todo el tema de grafos a escala?",
+          answer: `
+            <p>La gran idea unificadora es que, en contextos de gran escala, el valor no está en ver absolutamente todo, sino en preservar inteligentemente aquello que realmente importa para la tarea. El desafío central ya no es solo calcular, sino decidir qué información conservar, cómo resumirla y qué tipo de error o aproximación estamos dispuestos a aceptar.</p>
+            <p>Esta idea implica un cambio profundo respecto del ideal clásico de exactitud total. En grafos gigantes, la completitud absoluta puede ser imposible o innecesaria. Lo que se vuelve esencial es construir representaciones más pequeñas, más rápidas y más manejables que sigan siendo útiles para responder preguntas significativas.</p>
+            <p>Muestreo, sketching y sparsificación encarnan tres variantes de este mismo principio. Todas parten de aceptar que el grafo completo es demasiado costoso como objeto de trabajo directo, y todas intentan reemplazarlo por algo más pequeño sin perder lo decisivo. En ese sentido, la teoría de grafos a escala no es solo una teoría de algoritmos sobre grafos grandes, sino una teoría de cómo pensar la información cuando verla entera ya no es viable.</p>
+          `
+        }
+      ];
+
+      const qaContainer = document.getElementById("qa-container");
+      const searchInput = document.getElementById("search-input");
+      const themeToggle = document.getElementById("theme-toggle");
+      const randomBtn = document.getElementById("random-question-btn");
+      const resetProgressBtn = document.getElementById("reset-progress-btn");
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+      const visibleCount = document.getElementById("visible-count");
+      const masteredCount = document.getElementById("mastered-count");
+      const body = document.body;
+
+      const completedQuestions = new Set(loadMastered());
+
+      function loadMastered() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.mastered));
+          return Array.isArray(saved) ? saved : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveMastered() {
+        localStorage.setItem(STORAGE_KEYS.mastered, JSON.stringify([...completedQuestions]));
+      }
+
+      function saveTheme(theme) {
+        localStorage.setItem(STORAGE_KEYS.theme, theme);
+      }
+
+      function loadTheme() {
+        const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+        return savedTheme === "light-theme" || savedTheme === "dark-theme"
+          ? savedTheme
+          : "dark-theme";
+      }
+
+      function applyTheme(theme) {
+        body.classList.remove("light-theme", "dark-theme");
+        body.classList.add(theme);
+        const isDark = theme === "dark-theme";
+        themeToggle.innerHTML = isDark
+          ? "☀️ Cambiar a Tema Claro"
+          : "🌙 Cambiar a Tema Oscuro";
+      }
+
+      function renderQuestions() {
+        qaContainer.innerHTML = "";
+
+        questionsAndAnswers.forEach((qa, index) => {
+          const isMastered = completedQuestions.has(String(index));
+          const qaItem = document.createElement("div");
+          qaItem.className = `qa-item ${isMastered ? "mastered" : ""}`;
+          qaItem.dataset.index = index;
+          qaItem.innerHTML = `
+            <button class="question" aria-expanded="false">
+              <span class="question-title">${qa.question}</span>
+              <span class="question-icon">+</span>
+            </button>
+            <div class="answer">
+              ${qa.answer}
+              <button class="mastery-button ${isMastered ? "mastered" : ""}" data-index="${index}">
+                ${isMastered ? "¡Dominado!" : "Marcar como Dominado"}
+              </button>
+            </div>
+          `;
+          qaContainer.appendChild(qaItem);
+        });
+
+        addEventListeners();
+        updateProgress();
+        updateVisibleCount();
+      }
+
+      function addEventListeners() {
+        document.querySelectorAll(".question").forEach((button) => {
+          button.addEventListener("click", () => {
+            const answer = button.nextElementSibling;
+            const isActive = button.classList.contains("active");
+
+            button.classList.toggle("active");
+            answer.classList.toggle("active");
+            button.setAttribute("aria-expanded", String(!isActive));
+            button.querySelector(".question-icon").textContent = isActive ? "+" : "−";
+            answer.style.maxHeight = answer.classList.contains("active")
+              ? answer.scrollHeight + "px"
+              : null;
+          });
+        });
+
+        document.querySelectorAll(".mastery-button").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const index = String(e.currentTarget.dataset.index);
+            const qaItem = e.currentTarget.closest(".qa-item");
+
+            if (completedQuestions.has(index)) {
+              completedQuestions.delete(index);
+              e.currentTarget.textContent = "Marcar como Dominado";
+              e.currentTarget.classList.remove("mastered");
+              qaItem.classList.remove("mastered");
+            } else {
+              completedQuestions.add(index);
+              e.currentTarget.textContent = "¡Dominado!";
+              e.currentTarget.classList.add("mastered");
+              qaItem.classList.add("mastered");
+            }
+
+            saveMastered();
+            updateProgress();
+
+            const answer = qaItem.querySelector(".answer");
+            if (answer.classList.contains("active")) {
+              answer.style.maxHeight = answer.scrollHeight + "px";
+            }
+          });
+        });
+      }
+
+      function updateProgress() {
+        const completedCount = completedQuestions.size;
+        const totalCount = questionsAndAnswers.length;
+        const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+        progressFill.style.width = percentage + "%";
+        progressText.textContent = `Dominio: ${percentage}% - ${completedCount}/${totalCount} preguntas dominadas`;
+        masteredCount.textContent = `Dominadas: ${completedCount}`;
+      }
+
+      function updateVisibleCount() {
+        const visibleItems = [...document.querySelectorAll(".qa-item")].filter(
+          (item) => !item.classList.contains("hidden")
+        ).length;
+        visibleCount.textContent = `Visibles: ${visibleItems}`;
+      }
+
+      function filterQuestions() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+
+        document.querySelectorAll(".qa-item").forEach((item, index) => {
+          const qa = questionsAndAnswers[index];
+          const content = (qa.question + " " + stripHTML(qa.answer)).toLowerCase();
+
+          if (content.includes(searchTerm)) {
+            item.classList.remove("hidden");
+          } else {
+            item.classList.add("hidden");
+          }
+        });
+
+        updateVisibleCount();
+      }
+
+      function stripHTML(html) {
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        return div.textContent || div.innerText || "";
+      }
+
+      function showRandomQuestion() {
+        const visibleItems = [...document.querySelectorAll(".qa-item")].filter(
+          (item) => !item.classList.contains("hidden")
+        );
+
+        if (visibleItems.length === 0) return;
+
+        const randomItem = visibleItems[Math.floor(Math.random() * visibleItems.length)];
+        randomItem.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        const questionBtn = randomItem.querySelector(".question");
+        const answer = randomItem.querySelector(".answer");
+
+        if (!questionBtn.classList.contains("active")) {
+          questionBtn.classList.add("active");
+          answer.classList.add("active");
+          questionBtn.setAttribute("aria-expanded", "true");
+          questionBtn.querySelector(".question-icon").textContent = "−";
+          answer.style.maxHeight = answer.scrollHeight + "px";
+        }
+      }
+
+      function resetProgress() {
+        const confirmed = confirm("¿Querés reiniciar el progreso y desmarcar todas las preguntas dominadas?");
+        if (!confirmed) return;
+
+        completedQuestions.clear();
+        saveMastered();
+        renderQuestions();
+      }
+
+      function createBubble() {
+        const bubble = document.createElement("div");
+        bubble.classList.add("bubble");
+
+        const size = Math.random() * 80 + 20;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.animationDelay = `${Math.random() * 5}s`;
+        bubble.style.animationDuration = `${Math.random() * 10 + 15}s`;
+
+        document.body.appendChild(bubble);
+
+        setTimeout(() => {
+          bubble.remove();
+        }, 25000);
+      }
+
+      // Inicialización
+      applyTheme(loadTheme());
+      renderQuestions();
+
+      setInterval(createBubble, 650);
+
+      searchInput.addEventListener("input", filterQuestions);
+      randomBtn.addEventListener("click", showRandomQuestion);
+      resetProgressBtn.addEventListener("click", resetProgress);
+
+      themeToggle.addEventListener("click", () => {
+        const nextTheme = body.classList.contains("dark-theme") ? "light-theme" : "dark-theme";
+        applyTheme(nextTheme);
+        saveTheme(nextTheme);
+      });
+    });
+  </script>
+</body>
+</html>
