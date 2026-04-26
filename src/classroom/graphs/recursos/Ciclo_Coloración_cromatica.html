@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coloración de Grafos y Número Cromático</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg2: #111827;
+      --card: rgba(15, 23, 42, 0.78);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #f59e0b;
+      --edge: rgba(226, 232, 240, 0.52);
+      --node-stroke: rgba(255,255,255,.9);
+      --panel-border: rgba(148, 163, 184, 0.28);
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --ok: #22c55e;
+      --bad: #ef4444;
+    }
+
+    body.light {
+      --bg: #f8fafc;
+      --bg2: #dbeafe;
+      --card: rgba(255, 255, 255, 0.82);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --accent2: #d97706;
+      --edge: rgba(30, 41, 59, 0.42);
+      --node-stroke: rgba(15,23,42,.75);
+      --panel-border: rgba(15, 23, 42, 0.18);
+      --shadow: 0 24px 70px rgba(15,23,42,.18);
+    }
+
+    body.emerald {
+      --bg: #031b18;
+      --bg2: #064e3b;
+      --card: rgba(6, 78, 59, 0.52);
+      --text: #ecfdf5;
+      --muted: #a7f3d0;
+      --accent: #34d399;
+      --accent2: #facc15;
+      --edge: rgba(209, 250, 229, .55);
+      --panel-border: rgba(167, 243, 208, 0.28);
+    }
+
+    body.violet {
+      --bg: #1e1033;
+      --bg2: #312e81;
+      --card: rgba(49, 46, 129, 0.55);
+      --text: #f5f3ff;
+      --muted: #c4b5fd;
+      --accent: #a78bfa;
+      --accent2: #fb7185;
+      --edge: rgba(237, 233, 254, .55);
+      --panel-border: rgba(196, 181, 253, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(56,189,248,.23), transparent 28%),
+        radial-gradient(circle at 86% 16%, rgba(245,158,11,.18), transparent 30%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .background-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .16;
+      background-image:
+        linear-gradient(var(--edge) 1px, transparent 1px),
+        linear-gradient(90deg, var(--edge) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 75%);
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero, .panel, .legend, .explain {
+      border: 1px solid var(--panel-border);
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+    }
+
+    .hero {
+      padding: 28px;
+      min-height: 210px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 45%, transparent), transparent 67%);
+      opacity: .65;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4.6vw, 58px);
+      line-height: .98;
+      letter-spacing: -0.055em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      max-width: 780px;
+      line-height: 1.55;
+    }
+
+    .formula {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.08);
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .top-card {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .metric {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--panel-border);
+    }
+
+    .metric .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .metric .value {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: -0.07em;
+      margin-top: 4px;
+      color: var(--accent);
+    }
+
+    .metric .mini {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 26px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(14px);
+    }
+
+    button, select, input[type="range"] {
+      width: 100%;
+    }
+
+    button, select {
+      appearance: none;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.11);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 800;
+      min-height: 48px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.11);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    select option {
+      color: #0f172a;
+      background: #ffffff;
+    }
+
+    button:hover, select:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 70%, white 10%);
+      background: rgba(255,255,255,.17);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent2) 72%, var(--accent)));
+      color: white;
+      border-color: transparent;
+    }
+
+    button.danger {
+      background: rgba(239, 68, 68, .16);
+      border-color: rgba(239, 68, 68, .36);
+    }
+
+    .rangeBox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      grid-column: span 2;
+      padding: 8px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.08);
+      min-height: 48px;
+    }
+
+    .rangeBox span {
+      white-space: nowrap;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .visual {
+      min-height: 650px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    svg {
+      width: 100%;
+      height: 560px;
+      display: block;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.09), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+      border: 1px solid var(--panel-border);
+    }
+
+    .edge {
+      stroke: var(--edge);
+      stroke-width: 3.2;
+      stroke-linecap: round;
+      transition: stroke .25s ease, stroke-width .25s ease, opacity .25s ease;
+    }
+
+    .edge.conflict {
+      stroke: var(--bad);
+      stroke-width: 5.5;
+      filter: drop-shadow(0 0 8px rgba(239,68,68,.55));
+    }
+
+    .node {
+      stroke: var(--node-stroke);
+      stroke-width: 3.5;
+      filter: drop-shadow(0 12px 16px rgba(0,0,0,.28));
+      transition: fill .25s ease, r .25s ease, transform .25s ease;
+    }
+
+    .node.active {
+      r: 28;
+      filter: drop-shadow(0 0 18px rgba(255,255,255,.55));
+    }
+
+    .nodeText {
+      fill: white;
+      font-size: 16px;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+      text-shadow: 0 2px 5px rgba(0,0,0,.5);
+    }
+
+    .stepLabel {
+      fill: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .statusCard {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.08);
+    }
+
+    .statusCard strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 5px;
+    }
+
+    .statusCard span {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .explain {
+      padding: 20px;
+    }
+
+    .explain h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      letter-spacing: -.035em;
+    }
+
+    .explain p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 15.5px;
+    }
+
+    .caseBox {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,.08);
+      margin-top: 12px;
+    }
+
+    .caseBox h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: var(--accent);
+    }
+
+    .caseBox ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .legend {
+      padding: 18px;
+    }
+
+    .legend h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .legendGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .legendItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--panel-border);
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.55);
+    }
+
+    .log {
+      max-height: 240px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .logItem {
+      border-left: 4px solid var(--accent);
+      padding: 9px 10px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.07);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .logItem.bad {
+      border-left-color: var(--bad);
+      color: color-mix(in srgb, var(--bad) 80%, var(--text));
+      font-weight: 800;
+    }
+
+    .logItem.ok {
+      border-left-color: var(--ok);
+      color: color-mix(in srgb, var(--ok) 80%, var(--text));
+      font-weight: 800;
+    }
+
+    .proof {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--panel-border);
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .proof strong {
+      color: var(--text);
+    }
+
+    .footer {
+      margin-top: 22px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      header, main { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .rangeBox { grid-column: span 2; }
+      .visual { min-height: auto; }
+      svg { height: 500px; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 16px; }
+      .controls { grid-template-columns: 1fr; }
+      .rangeBox { grid-column: span 1; }
+      .status { grid-template-columns: 1fr; }
+      .legendGrid { grid-template-columns: 1fr; }
+      svg { height: 420px; }
+      .hero, .top-card, .panel, .legend, .explain { border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+
+  <div class="shell">
+    <header>
+      <section class="hero">
+        <div class="kicker">Teoría de grafos · ciclos Cₙ</div>
+        <h1>Coloración y Número Cromático</h1>
+        <p class="subtitle">
+          Asignamos colores a los vértices de modo que dos vértices adyacentes nunca compartan color.
+          La visualización muestra por qué un ciclo par se colorea con 2 colores y por qué un ciclo impar necesita 3.
+        </p>
+        <div class="formula">χ(Cₙ) = 2 si n es par · χ(Cₙ) = 3 si n es impar</div>
+      </section>
+
+      <aside class="top-card">
+        <div class="metric">
+          <div class="label">Número cromático actual</div>
+          <div class="value" id="chromaticValue">χ = 2</div>
+          <div class="mini" id="chromaticReason">Ciclo par: el patrón rojo-azul cierra sin conflicto.</div>
+        </div>
+        <div class="metric">
+          <div class="label">Modo didáctico</div>
+          <div class="mini">
+            Primero probá con 2 colores. En ciclos impares aparecerá el conflicto final. Luego activá la solución mínima.
+          </div>
+        </div>
+      </aside>
+    </header>
+
+    <section class="controls">
+      <select id="cyclePreset" title="Elegir caso">
+        <option value="4">Caso A: C₄ par</option>
+        <option value="5">Caso B: C₅ impar</option>
+        <option value="6">C₆ par</option>
+        <option value="7">C₇ impar</option>
+        <option value="8">C₈ par</option>
+        <option value="9">C₉ impar</option>
+      </select>
+
+      <div class="rangeBox">
+        <span id="nLabel">n = 4</span>
+        <input id="nRange" type="range" min="3" max="12" value="4"/>
+      </div>
+
+      <button class="primary" id="simulateBtn">▶ Simular coloración</button>
+      <button id="solveBtn">✓ Solución mínima</button>
+      <button class="danger" id="resetBtn">↺ Reiniciar</button>
+      <button id="themeBtn">◐ Cambiar tema</button>
+    </section>
+
+    <main>
+      <section class="panel visual">
+        <svg id="graphSvg" viewBox="0 0 680 560" role="img" aria-label="Visualización de coloración de un ciclo"></svg>
+
+        <div class="status">
+          <div class="statusCard">
+            <strong>Estado</strong>
+            <span id="statusText">Listo para simular</span>
+          </div>
+          <div class="statusCard">
+            <strong>Colores usados</strong>
+            <span id="colorsUsed">0</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="side">
+        <article class="explain">
+          <h2>Lectura matemática</h2>
+          <p id="mainExplanation">
+            En un ciclo par, los colores se alternan y el último vértice queda compatible con el primero.
+          </p>
+
+          <div class="caseBox">
+            <h3>Caso A: ciclo par</h3>
+            <ul>
+              <li>El ciclo es bipartito.</li>
+              <li>Puede dividirse en dos conjuntos independientes.</li>
+              <li>Por eso alcanza con 2 colores: χ(Cₙ) = 2.</li>
+            </ul>
+          </div>
+
+          <div class="caseBox">
+            <h3>Caso B: ciclo impar</h3>
+            <ul>
+              <li>La alternancia con 2 colores falla al cerrar el ciclo.</li>
+              <li>El último vértice queda forzado a chocar con uno de sus vecinos.</li>
+              <li>Se necesita un tercer color: χ(Cₙ) = 3.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="legend">
+          <h2>Paleta de coloración</h2>
+          <div class="legendGrid">
+            <div class="legendItem"><span class="swatch" style="background:#ef4444"></span> Rojo</div>
+            <div class="legendItem"><span class="swatch" style="background:#3b82f6"></span> Azul</div>
+            <div class="legendItem"><span class="swatch" style="background:#f59e0b"></span> Tercer color</div>
+          </div>
+        </article>
+
+        <article class="explain">
+          <h2>Registro de la simulación</h2>
+          <div class="log" id="log"></div>
+        </article>
+
+        <article class="proof">
+          <strong>Idea clave:</strong> un ciclo par permite alternar A-B-A-B hasta cerrar correctamente.
+          En cambio, un ciclo impar obliga a cerrar con dos vértices adyacentes del mismo color si solo usamos dos colores.
+        </article>
+      </section>
+    </main>
+
+    <div class="footer">
+      Material interactivo para clase · Coloración de vértices, ciclos pares/impares y número cromático χ(G)
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById("graphSvg");
+    const nRange = document.getElementById("nRange");
+    const nLabel = document.getElementById("nLabel");
+    const cyclePreset = document.getElementById("cyclePreset");
+    const simulateBtn = document.getElementById("simulateBtn");
+    const solveBtn = document.getElementById("solveBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const themeBtn = document.getElementById("themeBtn");
+    const chromaticValue = document.getElementById("chromaticValue");
+    const chromaticReason = document.getElementById("chromaticReason");
+    const statusText = document.getElementById("statusText");
+    const colorsUsed = document.getElementById("colorsUsed");
+    const mainExplanation = document.getElementById("mainExplanation");
+    const log = document.getElementById("log");
+
+    const colors = ["#ef4444", "#3b82f6", "#f59e0b"];
+    const emptyColor = "rgba(148, 163, 184, .35)";
+    const themes = ["", "light", "emerald", "violet"];
+    let themeIndex = 0;
+    let n = 4;
+    let nodeColors = [];
+    let animating = false;
+    let currentStep = 0;
+    let timer = null;
+
+    function addLog(text, type = "") {
+      const item = document.createElement("div");
+      item.className = "logItem " + type;
+      item.textContent = text;
+      log.prepend(item);
+    }
+
+    function clearLog() {
+      log.innerHTML = "";
+    }
+
+    function polarToCartesian(cx, cy, r, angle) {
+      return {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle)
+      };
+    }
+
+    function getPoints() {
+      const cx = 340, cy = 278;
+      const radius = n <= 5 ? 180 : n <= 8 ? 205 : 218;
+      const startAngle = -Math.PI / 2;
+      return Array.from({ length: n }, (_, i) => {
+        const angle = startAngle + i * 2 * Math.PI / n;
+        return polarToCartesian(cx, cy, radius, angle);
+      });
+    }
+
+    function chromaticNumber() {
+      return n % 2 === 0 ? 2 : 3;
+    }
+
+    function updateText() {
+      nLabel.textContent = "n = " + n;
+      chromaticValue.textContent = "χ = " + chromaticNumber();
+
+      if (n % 2 === 0) {
+        chromaticReason.textContent = "Ciclo par: el patrón rojo-azul cierra sin conflicto.";
+        mainExplanation.textContent = "En C" + sub(n) + ", la alternancia rojo-azul funciona porque el número de vértices es par. El último vértice queda con color opuesto al primero.";
+      } else {
+        chromaticReason.textContent = "Ciclo impar: dos colores generan conflicto al cerrar; se necesita un tercer color.";
+        mainExplanation.textContent = "En C" + sub(n) + ", la alternancia con dos colores falla al cerrar el ciclo. El último vértice queda forzado a entrar en conflicto, por eso χ(C" + sub(n) + ") = 3.";
+      }
+    }
+
+    function sub(num) {
+      const map = {"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉"};
+      return String(num).split("").map(d => map[d]).join("");
+    }
+
+    function setStatus(text) {
+      statusText.textContent = text;
+    }
+
+    function countColorsUsed() {
+      const used = new Set(nodeColors.filter(c => c !== null));
+      colorsUsed.textContent = used.size;
+    }
+
+    function hasConflict(i) {
+      if (nodeColors[i] === null) return false;
+      const prev = (i - 1 + n) % n;
+      const next = (i + 1) % n;
+      return nodeColors[i] === nodeColors[prev] || nodeColors[i] === nodeColors[next];
+    }
+
+    function edgeConflict(i, j) {
+      return nodeColors[i] !== null && nodeColors[i] === nodeColors[j];
+    }
+
+    function drawGraph(activeIndex = -1) {
+      svg.innerHTML = "";
+      const pts = getPoints();
+
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      defs.innerHTML = `
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      const centerText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      centerText.setAttribute("x", "340");
+      centerText.setAttribute("y", "265");
+      centerText.setAttribute("class", "stepLabel");
+      centerText.textContent = "C" + sub(n);
+      svg.appendChild(centerText);
+
+      const chiText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      chiText.setAttribute("x", "340");
+      chiText.setAttribute("y", "297");
+      chiText.setAttribute("class", "stepLabel");
+      chiText.setAttribute("style", "font-size:26px; fill: var(--accent); font-weight:900;");
+      chiText.textContent = "χ = " + chromaticNumber();
+      svg.appendChild(chiText);
+
+      for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", pts[i].x);
+        line.setAttribute("y1", pts[i].y);
+        line.setAttribute("x2", pts[j].x);
+        line.setAttribute("y2", pts[j].y);
+        line.setAttribute("class", "edge" + (edgeConflict(i, j) ? " conflict" : ""));
+        svg.appendChild(line);
+      }
+
+      for (let i = 0; i < n; i++) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", pts[i].x);
+        circle.setAttribute("cy", pts[i].y);
+        circle.setAttribute("r", i === activeIndex ? "29" : "24");
+        circle.setAttribute("class", "node" + (i === activeIndex ? " active" : ""));
+        circle.setAttribute("fill", nodeColors[i] === null ? emptyColor : colors[nodeColors[i]]);
+        circle.setAttribute("filter", nodeColors[i] !== null ? "url(#glow)" : "");
+        svg.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", pts[i].x);
+        text.setAttribute("y", pts[i].y + 1);
+        text.setAttribute("class", "nodeText");
+        text.textContent = i + 1;
+        svg.appendChild(text);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const outer = polarToCartesian(340, 278, n <= 5 ? 222 : n <= 8 ? 248 : 260, -Math.PI / 2 + i * 2 * Math.PI / n);
+        label.setAttribute("x", outer.x);
+        label.setAttribute("y", outer.y);
+        label.setAttribute("class", "stepLabel");
+        label.textContent = nodeColors[i] === null ? "sin color" : ["Rojo", "Azul", "3º"][nodeColors[i]];
+        svg.appendChild(label);
+      }
+      countColorsUsed();
+    }
+
+    function resetGraph() {
+      stopAnimation();
+      nodeColors = Array(n).fill(null);
+      currentStep = 0;
+      clearLog();
+      setStatus("Listo para simular");
+      colorsUsed.textContent = "0";
+      updateText();
+      drawGraph();
+      addLog("Grafo C" + n + " reiniciado. Iniciá la simulación para colorear vértice por vértice.");
+    }
+
+    function stopAnimation() {
+      animating = false;
+      if (timer) clearTimeout(timer);
+      timer = null;
+      simulateBtn.textContent = "▶ Simular coloración";
+    }
+
+    function simulateTwoColorAttempt() {
+      if (animating) {
+        stopAnimation();
+        setStatus("Simulación pausada");
+        return;
+      }
+
+      resetWithoutLogClear();
+      animating = true;
+      simulateBtn.textContent = "⏸ Pausar";
+      setStatus("Simulando intento con 2 colores...");
+      addLog("Comienza el intento con 2 colores: Rojo y Azul.", "ok");
+
+      function step() {
+        if (!animating) return;
+
+        if (currentStep < n) {
+          nodeColors[currentStep] = currentStep % 2;
+          drawGraph(currentStep);
+
+          const vertex = currentStep + 1;
+          const colorName = currentStep % 2 === 0 ? "Rojo" : "Azul";
+          addLog("Vértice " + vertex + ": se asigna " + colorName + ".");
+
+          currentStep++;
+          timer = setTimeout(step, 850);
+        } else {
+          drawGraph(-1);
+          const conflict = n % 2 !== 0;
+          if (conflict) {
+            setStatus("Conflicto detectado: agregando tercer color...");
+            addLog("Conflicto final: el vértice " + n + " y el vértice 1 quedan adyacentes con el mismo color.", "bad");
+            addLog("Como C" + n + " es impar, dos colores no alcanzan. Ahora se agrega un tercer color al vértice final.", "bad");
+
+            timer = setTimeout(() => {
+              if (!animating) return;
+              nodeColors[n - 1] = 2;
+              drawGraph(n - 1);
+              setStatus("Solución corregida con tercer color");
+              addLog("Vértice " + n + ": se cambia al tercer color. Ahora no choca ni con el vértice " + (n - 1) + " ni con el vértice 1.", "ok");
+              addLog("Conclusión: C" + n + " es impar, por lo tanto χ(C" + n + ") = 3.", "ok");
+              stopAnimation();
+            }, 1200);
+          } else {
+            setStatus("Coloración válida con 2 colores");
+            addLog("El ciclo cierra correctamente: el vértice " + n + " es adyacente al 1 y tienen colores distintos.", "ok");
+            addLog("Conclusión: C" + n + " es par y bipartito. χ = 2.", "ok");
+            stopAnimation();
+          }
+        }
+      }
+
+      step();
+    }
+
+    function resetWithoutLogClear() {
+      stopAnimation();
+      nodeColors = Array(n).fill(null);
+      currentStep = 0;
+      colorsUsed.textContent = "0";
+      drawGraph();
+    }
+
+    function showMinimalSolution() {
+      stopAnimation();
+      nodeColors = Array(n).fill(null);
+
+      if (n % 2 === 0) {
+        for (let i = 0; i < n; i++) nodeColors[i] = i % 2;
+        setStatus("Solución mínima aplicada: 2 colores");
+        addLog("Solución mínima para C" + n + ": alternancia Rojo-Azul. χ = 2.", "ok");
+      } else {
+        for (let i = 0; i < n - 1; i++) nodeColors[i] = i % 2;
+        nodeColors[n - 1] = 2;
+        setStatus("Solución mínima aplicada: 3 colores");
+        addLog("Solución mínima para C" + n + ": se agrega un tercer color en el cierre. χ = 3.", "ok");
+      }
+
+      drawGraph();
+    }
+
+    function changeTheme() {
+      document.body.classList.remove("light", "emerald", "violet");
+      themeIndex = (themeIndex + 1) % themes.length;
+      const theme = themes[themeIndex];
+      if (theme) document.body.classList.add(theme);
+      const label = theme === "" ? "oscuro" : theme;
+      addLog("Tema visual cambiado a: " + label + ".");
+    }
+
+    nRange.addEventListener("input", () => {
+      n = Number(nRange.value);
+      cyclePreset.value = String(n);
+      resetGraph();
+    });
+
+    cyclePreset.addEventListener("change", () => {
+      n = Number(cyclePreset.value);
+      nRange.value = String(n);
+      resetGraph();
+    });
+
+    simulateBtn.addEventListener("click", simulateTwoColorAttempt);
+    solveBtn.addEventListener("click", showMinimalSolution);
+    resetBtn.addEventListener("click", resetGraph);
+    themeBtn.addEventListener("click", changeTheme);
+
+    resetGraph();
+  </script>
+</body>
+</html>
