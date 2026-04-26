@@ -182,6 +182,13 @@
     "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
+    "title": "Coloración de Grafos y Número Cromático",
+    "path": "/src/classroom/graphs/recursos/Ciclo_Coloración_cromatica.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-04-26T09:21:06-03:00"
+  },
+  {
     "title": "Comparación AG vs PG - Crecimiento del Espacio de Búsqueda",
     "path": "/src/classroom/graphs/recursos/PG_ag_vs_pg_comparador_de_crecimiento_html_completo.html",
     "tag": "Demo",
