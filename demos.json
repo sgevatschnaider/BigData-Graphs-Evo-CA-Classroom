@@ -126,6 +126,13 @@
     "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
+    "title": "Bolas métricas en grafos",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Bola métrica.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
+  },
+  {
     "title": "Caminante Aleatorio · Grafo de Malla",
     "path": "/src/classroom/graphs/recursos/random_walk_3x3.html",
     "tag": "Demo",
@@ -259,6 +266,13 @@
     "mtime": "2026-03-10T00:35:46-03:00"
   },
   {
+    "title": "Dashboard de distorsión de embeddings de grafos",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_dashboard_distorsion_embeddings_grafos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
+  },
+  {
     "title": "Dashboard: Tradicional vs Tokenización vs ZKP",
     "path": "/src/classroom/graphs/recursos/Dashboard_Tokenizacion_ZK.html",
     "tag": "Demo",
@@ -313,6 +327,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
+    "title": "Disco de Poincaré | Visualización interactiva",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Disco de Poincaré.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
   },
   {
     "title": "Distancia de Hamming en el Cubo — Solución Interactiva",
@@ -376,6 +397,27 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-17T17:22:18-03:00"
+  },
+  {
+    "title": "Embedding de grafos en espacios geométricos",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Espacio Geométrico y Grafos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
+  },
+  {
+    "title": "Embedding dinámico: del dato discreto al espacio vectorial",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_embedding_dinamico_simulacion.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
+  },
+  {
+    "title": "Embeddings en grafos conexos no ponderados",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_SGrafos conexos no ponderados.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
   },
   {
     "title": "ER vs BA — Teoría de Grafos",
@@ -1029,11 +1071,25 @@
     "mtime": "2026-03-19T21:47:44-03:00"
   },
   {
+    "title": "Teselación estilo disco de Poincaré + versión artística",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Teselación estilo disco de Poincaré.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
+  },
+  {
     "title": "Teseracto 4D + Algoritmo Genético en vivo",
     "path": "/src/classroom/graphs/recursos/PG_hipercubogenetico.html.html",
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-13T15:24:24-03:00"
+  },
+  {
+    "title": "Tipos de Embeddings: explicación, formulación matemática y aplicaciones",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Tipos de embeddings grafos, texto, imágenes y más.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
   },
   {
     "title": "Topología, Geometría y Algoritmos Evolutivos",
@@ -1104,6 +1160,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-26T19:32:18-03:00"
+  },
+  {
+    "title": "Visualización del Plano Hiperbólico",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Visualización del plano hiperbólico.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-09T14:44:10-03:00"
   },
   {
     "title": "Visualizador Havel–Hakimi (HH) Corregido",
