@@ -289,22 +289,6 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 
 <br>
 
-## Geometría Hiperbólica, Teselaciones y Embeddings de Grafos
-
-<div align="center">
-
-<img src="https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/29fb87a575bc09783ba3c6e2d0617231ef3f5d6d/src/classroom/graphs/recursos/teselado.gif" alt="Teselado hiperbólico en el disco de Poincaré" width="100%">
-
-</div>
-
-<br>
-
-### Visualización introductoria
-
-Este teselado hiperbólico muestra cómo el espacio del **disco de Poincaré** permite representar patrones que se expanden hacia el borde de manera no euclidiana. La imagen funciona como una apertura visual para comprender la relación entre **curvatura negativa**, **simetría**, **repetición ornamental** y estructuras jerárquicas propias de grafos y embeddings hiperbólicos.
-
-<br>
-
 ### Embeddings Hiperbólicos y Teoría de Grafos
 
 Esta sección reúne una serie de recursos interactivos para estudiar la relación entre **geometría hiperbólica, teoría de grafos y embeddings**. El recorrido parte de la visualización del plano hiperbólico y del disco de Poincaré, avanza hacia teselaciones, bolas métricas y grafos conexos no ponderados, y finalmente conecta estas ideas con embeddings dinámicos, tipos de representaciones y análisis de distorsión.
