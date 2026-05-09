@@ -279,14 +279,44 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 |---|---|
 | **Palomar.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso se dedica a explicar una de las herramientas de demostración más elegantes y potentes de la matemática discreta. Define la versión básica y generalizada del Principio del Palomar (o Principio de Dirichlet). El componente central es un simulador interactivo donde se puede ajustar el número de "palomas" (objetos) y "palomares" (cajas) para ver visualmente por qué una colisión es inevitable cuando hay más objetos que contenedores. La página aplica este principio de manera explícita para reforzar la demostración de la imposibilidad de los grafos completamente irregulares.</p></details> | [![Ver Principio en Acción](https://img.shields.io/badge/Ver%20Principio-En%20Acción-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/Palomar.html) |
 
+## Geometría Hiperbólica, Teselaciones y Embeddings de Grafos
+
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/29fb87a575bc09783ba3c6e2d0617231ef3f5d6d/src/classroom/graphs/recursos/teselado.gif" alt="Teselado hiperbólico en el disco de Poincaré" width="100%">
+
+</div>
+
+<br>
+
+## Geometría Hiperbólica, Teselaciones y Embeddings de Grafos
+
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/29fb87a575bc09783ba3c6e2d0617231ef3f5d6d/src/classroom/graphs/recursos/teselado.gif" alt="Teselado hiperbólico en el disco de Poincaré" width="100%">
+
+</div>
+
+<br>
+
+### Visualización introductoria
+
+Este teselado hiperbólico muestra cómo el espacio del **disco de Poincaré** permite representar patrones que se expanden hacia el borde de manera no euclidiana. La imagen funciona como una apertura visual para comprender la relación entre **curvatura negativa**, **simetría**, **repetición ornamental** y estructuras jerárquicas propias de grafos y embeddings hiperbólicos.
+
+<br>
+
 ### Embeddings Hiperbólicos y Teoría de Grafos
 
 Esta sección reúne una serie de recursos interactivos para estudiar la relación entre **geometría hiperbólica, teoría de grafos y embeddings**. El recorrido parte de la visualización del plano hiperbólico y del disco de Poincaré, avanza hacia teselaciones, bolas métricas y grafos conexos no ponderados, y finalmente conecta estas ideas con embeddings dinámicos, tipos de representaciones y análisis de distorsión.
 
-El objetivo general es mostrar por qué ciertos grafos —especialmente árboles, jerarquías y redes con crecimiento expansivo— pueden representarse de manera más natural en espacios hiperbólicos que en espacios euclidianos. A través de visualizaciones HTML interactivas, el estudiante puede explorar cómo cambian las distancias, cómo se expanden las bolas métricas, cómo se proyectan estructuras discretas en espacios continuos y cómo se evalúa la calidad de un embedding.
 
-**Resumen visual del recorrido:** primero se presenta el plano hiperbólico y el disco de Poincaré como modelos geométricos; luego se muestran teselaciones y árboles dentro del disco; después se estudian grafos, bolas métricas y espacios geométricos; finalmente se comparan distintos tipos de embeddings y se analiza la distorsión generada al representar grafos en espacios continuos.
+### Embeddings Hiperbólicos y Teoría de Grafos
 
+Esta sección reúne una serie de recursos interactivos para estudiar la relación entre **geometría hiperbólica, teoría de grafos y embeddings**. El recorrido parte de la visualización del plano hiperbólico y del disco de Poincaré, avanza hacia teselaciones, bolas métricas y grafos conexos no ponderados, y finalmente conecta estas ideas con embeddings dinámicos, tipos de representaciones y análisis de distorsión.
+
+### Embeddings Hiperbólicos y Teoría de Grafos
+
+Esta sección reúne una serie de recursos interactivos para estudiar la relación entre **geometría hiperbólica, teoría de grafos y embeddings**. El recorrido parte de la visualización del plano hiperbólico y del disco de Poincaré, avanza hacia teselaciones, bolas métricas y grafos conexos no ponderados, y finalmente conecta estas ideas con embeddings dinámicos, tipos de representaciones y análisis de distorsión.
 | 📄 Recurso | 📥 Acceso |
 |---|---|
 | **El Problema del Embedding: Geometría Hiperbólica y Jerarquías** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Un recorrido exhaustivo de 6 módulos sobre la representación de jerarquías y grafos en espacios continuos. Aborda el <em>mismatch</em> geométrico del espacio euclidiano frente al crecimiento exponencial de los árboles, introduciendo la <strong>Geometría Hiperbólica</strong> y la <strong>Bola de Poincaré</strong> como una solución estructural natural. Incluye optimización riemanniana, enfoques constructivos con garantías de baja distorsión, trade-offs numéricos y aplicaciones en taxonomías, link prediction y redes filogenéticas.</p></details> | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WDxb8kUw6F6HJ6hJG1s0zGCz6YaE-ksU?usp=sharing) <br><br> [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/5eff3f62f4b8f22d48d610183af72e47438d4ca6/src/classroom/graphs/recursos/arbol_hiperbolico.html) |
