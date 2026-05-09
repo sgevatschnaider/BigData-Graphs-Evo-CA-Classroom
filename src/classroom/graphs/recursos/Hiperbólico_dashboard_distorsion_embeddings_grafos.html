@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de distorsión de embeddings de grafos</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111c34;
+      --panel-2: #1e2f53;
+      --text: #e5eefc;
+      --muted: #a8b6d8;
+      --accent: #74a7ff;
+      --accent-2: #7cf0c5;
+      --danger: #ff8a8a;
+      --line: rgba(255,255,255,.14);
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+    }
+
+    body.light {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef3ff;
+      --text: #182033;
+      --muted: #5e6b82;
+      --accent: #245cff;
+      --accent-2: #009b74;
+      --danger: #b42318;
+      --line: rgba(20,40,80,.16);
+      --shadow: 0 18px 50px rgba(20,40,80,.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 20% 10%, rgba(116,167,255,.24), transparent 34%), var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 28px 34px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 44px); letter-spacing: -0.04em; }
+    .subtitle { max-width: 1100px; color: var(--muted); line-height: 1.55; font-size: 16px; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), rgba(17,28,52,.86));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    body.light .card { background: var(--panel); }
+
+    .controls { display: grid; gap: 14px; align-content: start; position: sticky; top: 16px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    select, input[type="range"], button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 11px 12px;
+      font-size: 14px;
+    }
+
+    input[type="range"] { padding: 6px; accent-color: var(--accent); }
+    button { cursor: pointer; font-weight: 700; transition: transform .18s ease, filter .18s ease; }
+    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #06101f; }
+
+    .main { display: grid; gap: 18px; }
+    .viz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .canvas-wrap { min-height: 440px; display: grid; grid-template-rows: auto 1fr; }
+    .canvas-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .canvas-title h2 { margin: 0; font-size: 18px; }
+    .pill { padding: 6px 10px; border-radius: 999px; color: var(--accent-2); background: rgba(124,240,197,.11); font-size: 12px; border: 1px solid rgba(124,240,197,.24); }
+    svg { width: 100%; height: 100%; min-height: 380px; border-radius: 18px; background: rgba(0,0,0,.14); border: 1px solid var(--line); }
+    body.light svg { background: #f8fbff; }
+
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .metric { background: var(--panel-2); border: 1px solid var(--line); padding: 16px; border-radius: 18px; }
+    .metric small { display: block; color: var(--muted); margin-bottom: 8px; }
+    .metric strong { font-size: 26px; color: var(--accent); }
+
+    .explain { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+    .formula { font-family: Georgia, serif; font-size: 18px; line-height: 1.65; background: var(--panel-2); border-radius: 18px; padding: 16px; border: 1px solid var(--line); }
+    .note { color: var(--muted); line-height: 1.65; }
+    .pair-table { width: 100%; border-collapse: collapse; font-size: 13px; overflow: hidden; border-radius: 14px; }
+    .pair-table th, .pair-table td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+    .pair-table th:first-child, .pair-table td:first-child { text-align: left; }
+    .pair-table th { color: var(--muted); font-weight: 600; }
+
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 5px; }
+    .dot.bad { background: var(--danger); }
+    .dot.good { background: var(--accent-2); }
+
+    @media (max-width: 1050px) {
+      .dashboard, .viz-grid, .explain { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Distorsión de embeddings de grafos</h1>
+    <p class="subtitle">
+      Este dashboard compara la métrica original de un grafo —distancias de caminos más cortos— con la métrica inducida por un embedding en espacios Euclidiano, L1 o hiperbólico. La idea didáctica es ver cuándo una geometría destino preserva bien la estructura y cuándo la compresión dimensional produce pérdida isométrica.
+    </p>
+  </header>
+
+  <main class="dashboard">
+    <aside class="controls card">
+      <div>
+        <label>Grafo de prueba</label>
+        <select id="graphType">
+          <option value="tree">Árbol binario</option>
+          <option value="grid">Rejilla 4 × 4</option>
+          <option value="cycle">Ciclo</option>
+        </select>
+      </div>
+      <div>
+        <label>Espacio destino</label>
+        <select id="spaceType">
+          <option value="euclidean">Euclidiano L2</option>
+          <option value="l1">L1 / Manhattan</option>
+          <option value="hyperbolic">Hiperbólico, disco de Poincaré</option>
+        </select>
+      </div>
+      <div>
+        <label>Compresión dimensional: <span id="dimLabel">2D</span></label>
+        <input id="dimSlider" type="range" min="1" max="2" step="1" value="2" />
+      </div>
+      <div>
+        <label>Intensidad de compresión: <span id="compressLabel">0.35</span></label>
+        <input id="compressSlider" type="range" min="0" max="0.9" step="0.05" value="0.35" />
+      </div>
+      <div>
+        <label>Pares mostrados: <span id="pairLabel">6</span></label>
+        <input id="pairSlider" type="range" min="3" max="12" step="1" value="6" />
+      </div>
+      <div class="btn-row">
+        <button class="primary" id="simulateBtn">Simulación automática</button>
+        <button id="themeBtn">Cambiar tema</button>
+      </div>
+      <button id="randomBtn">Variar configuración</button>
+      <div class="note">
+        <strong>Lectura rápida:</strong> un embedding ideal tendría distancias embebidas proporcionales a las distancias del grafo. Cuando el estrés o la distorsión suben, la geometría destino está deformando la estructura original.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="metrics">
+        <div class="metric"><small>Estrés normalizado</small><strong id="stressVal">—</strong></div>
+        <div class="metric"><small>Distorsión tipo Bourgain</small><strong id="bourgainVal">—</strong></div>
+        <div class="metric"><small>Escala óptima α</small><strong id="scaleVal">—</strong></div>
+        <div class="metric"><small>Pares analizados</small><strong id="pairsVal">—</strong></div>
+      </section>
+
+      <section class="viz-grid">
+        <div class="card canvas-wrap">
+          <div class="canvas-title"><h2>Grafo original</h2><span class="pill">métrica: caminos mínimos</span></div>
+          <svg id="graphSvg" viewBox="0 0 600 430"></svg>
+        </div>
+        <div class="card canvas-wrap">
+          <div class="canvas-title"><h2>Embedding destino</h2><span class="pill" id="spacePill">Euclidiano L2</span></div>
+          <svg id="embedSvg" viewBox="0 0 600 430"></svg>
+        </div>
+      </section>
+
+      <section class="explain">
+        <div class="card">
+          <h2>Cómo se calcula</h2>
+          <div class="formula">
+            d<sub>G</sub>(u,v) = longitud del camino más corto<br>
+            d<sub>Z</sub>(u,v) = distancia en el espacio destino<br>
+            estrés = √[Σ(α d<sub>Z</sub> − d<sub>G</sub>)² / Σd<sub>G</sub>²]<br>
+            distorsión ≈ max pares max(α d<sub>Z</sub>/d<sub>G</sub>, d<sub>G</sub>/(α d<sub>Z</sub>))
+          </div>
+          <p class="note">
+            El factor α reescala el embedding para compararlo con la métrica del grafo. La distorsión tipo Bourgain aproxima la idea bi-Lipschitz: cuánto se estira o contrae, en el peor caso, una distancia del grafo al pasar al espacio geométrico.
+          </p>
+          <div class="legend">
+            <span><i class="dot good"></i>baja pérdida geométrica</span>
+            <span><i class="dot"></i>distorsión moderada</span>
+            <span><i class="dot bad"></i>alta deformación</span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Pares comparados</h2>
+          <table class="pair-table">
+            <thead><tr><th>par</th><th>dG</th><th>α·dZ</th><th>ratio</th></tr></thead>
+            <tbody id="pairRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const state = { graphType: 'tree', spaceType: 'euclidean', dim: 2, compress: 0.35, shownPairs: 6, running: false, timer: null };
+    const $ = id => document.getElementById(id);
+
+    function generateGraph(type) {
+      let nodes = [], edges = [];
+      if (type === 'tree') {
+        const levels = 4;
+        for (let i = 0; i < 15; i++) nodes.push({ id: i, label: String(i) });
+        for (let i = 1; i < 15; i++) edges.push([Math.floor((i - 1) / 2), i]);
+      }
+      if (type === 'grid') {
+        const n = 4;
+        for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) nodes.push({ id: r*n+c, label: `${r},${c}`, r, c });
+        for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+          const id = r*n+c;
+          if (c < n-1) edges.push([id, id+1]);
+          if (r < n-1) edges.push([id, id+n]);
+        }
+      }
+      if (type === 'cycle') {
+        const n = 16;
+        for (let i = 0; i < n; i++) nodes.push({ id: i, label: String(i) });
+        for (let i = 0; i < n; i++) edges.push([i, (i+1)%n]);
+      }
+      return { nodes, edges };
+    }
+
+    function originalLayout(graph, type) {
+      const W = 600, H = 430, cx = W/2, cy = H/2;
+      const pos = new Map();
+      if (type === 'cycle') {
+        graph.nodes.forEach((n, i) => {
+          const a = 2*Math.PI*i/graph.nodes.length - Math.PI/2;
+          pos.set(n.id, {x: cx + 155*Math.cos(a), y: cy + 155*Math.sin(a)});
+        });
+      } else if (type === 'grid') {
+        graph.nodes.forEach(n => pos.set(n.id, {x: 145 + n.c*95, y: 75 + n.r*95}));
+      } else {
+        graph.nodes.forEach(n => {
+          const level = Math.floor(Math.log2(n.id + 1));
+          const first = 2**level - 1;
+          const index = n.id - first;
+          const count = 2**level;
+          pos.set(n.id, {x: 70 + (index+0.5)*(460/count), y: 55 + level*95});
+        });
+      }
+      return pos;
+    }
+
+    function shortestPaths(graph) {
+      const n = graph.nodes.length;
+      const adj = Array.from({length:n}, () => []);
+      graph.edges.forEach(([a,b]) => { adj[a].push(b); adj[b].push(a); });
+      const D = Array.from({length:n}, () => Array(n).fill(Infinity));
+      for (let s=0; s<n; s++) {
+        const q=[s]; D[s][s]=0;
+        for (let qi=0; qi<q.length; qi++) {
+          const u=q[qi];
+          adj[u].forEach(v => { if (D[s][v] === Infinity) { D[s][v] = D[s][u]+1; q.push(v); } });
+        }
+      }
+      return D;
+    }
+
+    function embeddingLayout(graph, type, space, dim, compress) {
+      const base = originalLayout(graph, type);
+      const pts = new Map();
+      const values = [...base.values()];
+      const minX = Math.min(...values.map(p=>p.x)), maxX = Math.max(...values.map(p=>p.x));
+      const minY = Math.min(...values.map(p=>p.y)), maxY = Math.max(...values.map(p=>p.y));
+      const squeeze = 1 - compress;
+
+      graph.nodes.forEach(n => {
+        const p = base.get(n.id);
+        let x = ((p.x - minX) / (maxX - minX || 1) - 0.5) * 2;
+        let y = ((p.y - minY) / (maxY - minY || 1) - 0.5) * 2;
+
+        if (dim === 1) y = 0;
+        else y *= squeeze;
+
+        if (space === 'hyperbolic') {
+          const r = Math.sqrt(x*x + y*y) || 1e-9;
+          const targetR = Math.min(0.88, Math.tanh(1.2 * r) * (0.62 + 0.35*compress));
+          x = x/r * targetR;
+          y = y/r * targetR;
+        } else {
+          x *= 1.0;
+          y *= 1.0;
+        }
+        pts.set(n.id, {x, y});
+      });
+      return pts;
+    }
+
+    function targetDistance(a, b, space) {
+      const dx = a.x-b.x, dy = a.y-b.y;
+      if (space === 'l1') return Math.abs(dx) + Math.abs(dy);
+      if (space === 'hyperbolic') {
+        const na = a.x*a.x + a.y*a.y, nb = b.x*b.x + b.y*b.y;
+        const dsq = dx*dx + dy*dy;
+        const arg = 1 + 2*dsq / Math.max(1e-9, (1-na)*(1-nb));
+        return Math.acosh(Math.max(1, arg));
+      }
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    function computeMetrics(graph, D, emb, space) {
+      const pairs=[];
+      for (let i=0; i<graph.nodes.length; i++) for (let j=i+1; j<graph.nodes.length; j++) {
+        const dG = D[i][j];
+        const dZ = targetDistance(emb.get(i), emb.get(j), space);
+        if (dG > 0 && dZ > 1e-9) pairs.push({i,j,dG,dZ});
+      }
+      const alpha = pairs.reduce((s,p)=>s+p.dG*p.dZ,0) / Math.max(1e-9, pairs.reduce((s,p)=>s+p.dZ*p.dZ,0));
+      const stress = Math.sqrt(pairs.reduce((s,p)=>s+(alpha*p.dZ-p.dG)**2,0) / pairs.reduce((s,p)=>s+p.dG*p.dG,0));
+      const distortion = Math.max(...pairs.map(p => Math.max((alpha*p.dZ)/p.dG, p.dG/(alpha*p.dZ))));
+      const ranked = pairs.map(p => ({...p, scaled: alpha*p.dZ, ratio: Math.max((alpha*p.dZ)/p.dG, p.dG/(alpha*p.dZ))}))
+                          .sort((a,b)=>b.ratio-a.ratio);
+      return { alpha, stress, distortion, pairs: ranked };
+    }
+
+    function colorByRatio(r) {
+      if (r < 1.35) return 'var(--accent-2)';
+      if (r < 2.0) return 'var(--accent)';
+      return 'var(--danger)';
+    }
+
+    function drawGraph(svgId, graph, pos, edgesColor='var(--line)', isEmbedding=false) {
+      const svg = $(svgId);
+      svg.innerHTML = '';
+      if (isEmbedding && state.spaceType === 'hyperbolic') {
+        svg.innerHTML += `<circle cx="300" cy="215" r="170" fill="none" stroke="var(--accent-2)" stroke-width="2" opacity=".55"/><text x="300" y="405" text-anchor="middle" fill="var(--muted)" font-size="13">Disco de Poincaré: las distancias crecen hacia el borde</text>`;
+      }
+      const mapPoint = p => isEmbedding ? {x: 300 + p.x*170, y: 215 + p.y*170} : p;
+      graph.edges.forEach(([a,b]) => {
+        const pa=mapPoint(pos.get(a)), pb=mapPoint(pos.get(b));
+        svg.innerHTML += `<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" stroke="${edgesColor}" stroke-width="2"/>`;
+      });
+      graph.nodes.forEach(n => {
+        const p=mapPoint(pos.get(n.id));
+        svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="13" fill="var(--accent)" stroke="white" stroke-opacity=".65" stroke-width="1.5"/>`;
+        svg.innerHTML += `<text x="${p.x}" y="${p.y+4}" text-anchor="middle" fill="#06101f" font-size="11" font-weight="800">${n.id}</text>`;
+      });
+    }
+
+    function drawPairHighlights(graph, emb, pairs) {
+      const svg = $('embedSvg');
+      pairs.slice(0, state.shownPairs).reverse().forEach(p => {
+        const a=emb.get(p.i), b=emb.get(p.j);
+        const pa={x:300+a.x*170, y:215+a.y*170}, pb={x:300+b.x*170, y:215+b.y*170};
+        svg.innerHTML = `<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" stroke="${colorByRatio(p.ratio)}" stroke-width="3" opacity=".42" stroke-dasharray="6 6"/>` + svg.innerHTML;
+      });
+    }
+
+    function update() {
+      $('dimLabel').textContent = `${state.dim}D`;
+      $('compressLabel').textContent = Number(state.compress).toFixed(2);
+      $('pairLabel').textContent = state.shownPairs;
+      $('spacePill').textContent = state.spaceType === 'euclidean' ? 'Euclidiano L2' : state.spaceType === 'l1' ? 'L1 / Manhattan' : 'Hiperbólico';
+
+      const graph = generateGraph(state.graphType);
+      const pos = originalLayout(graph, state.graphType);
+      const D = shortestPaths(graph);
+      const emb = embeddingLayout(graph, state.graphType, state.spaceType, state.dim, state.compress);
+      const metrics = computeMetrics(graph, D, emb, state.spaceType);
+
+      drawGraph('graphSvg', graph, pos);
+      drawGraph('embedSvg', graph, emb, 'rgba(255,255,255,.18)', true);
+      drawPairHighlights(graph, emb, metrics.pairs);
+
+      $('stressVal').textContent = metrics.stress.toFixed(3);
+      $('bourgainVal').textContent = metrics.distortion.toFixed(2);
+      $('scaleVal').textContent = metrics.alpha.toFixed(2);
+      $('pairsVal').textContent = metrics.pairs.length;
+
+      $('pairRows').innerHTML = metrics.pairs.slice(0, state.shownPairs).map(p => `
+        <tr>
+          <td>${p.i}–${p.j}</td>
+          <td>${p.dG.toFixed(1)}</td>
+          <td>${p.scaled.toFixed(2)}</td>
+          <td style="color:${colorByRatio(p.ratio)};font-weight:800">${p.ratio.toFixed(2)}</td>
+        </tr>`).join('');
+    }
+
+    $('graphType').onchange = e => { state.graphType = e.target.value; update(); };
+    $('spaceType').onchange = e => { state.spaceType = e.target.value; update(); };
+    $('dimSlider').oninput = e => { state.dim = +e.target.value; update(); };
+    $('compressSlider').oninput = e => { state.compress = +e.target.value; update(); };
+    $('pairSlider').oninput = e => { state.shownPairs = +e.target.value; update(); };
+    $('themeBtn').onclick = () => document.body.classList.toggle('light');
+    $('randomBtn').onclick = randomize;
+
+    function randomize() {
+      const graphs = ['tree','grid','cycle'];
+      const spaces = ['euclidean','l1','hyperbolic'];
+      state.graphType = graphs[Math.floor(Math.random()*graphs.length)];
+      state.spaceType = spaces[Math.floor(Math.random()*spaces.length)];
+      state.dim = Math.random() > .45 ? 2 : 1;
+      state.compress = +(Math.random()*0.9).toFixed(2);
+      $('graphType').value = state.graphType;
+      $('spaceType').value = state.spaceType;
+      $('dimSlider').value = state.dim;
+      $('compressSlider').value = state.compress;
+      update();
+    }
+
+    $('simulateBtn').onclick = () => {
+      state.running = !state.running;
+      $('simulateBtn').textContent = state.running ? 'Detener simulación' : 'Simulación automática';
+      if (state.running) {
+        state.timer = setInterval(() => {
+          state.compress += 0.05;
+          if (state.compress > 0.9) {
+            state.compress = 0;
+            state.dim = state.dim === 2 ? 1 : 2;
+          }
+          $('compressSlider').value = state.compress;
+          $('dimSlider').value = state.dim;
+          update();
+        }, 850);
+      } else {
+        clearInterval(state.timer);
+      }
+    };
+
+    update();
+  </script>
+</body>
+</html>

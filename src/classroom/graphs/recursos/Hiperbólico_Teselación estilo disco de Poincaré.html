@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teselación estilo disco de Poincaré + versión artística</title>
+
+  <style>
+    :root{
+      --bg:#07101d;
+      --panel:rgba(14,23,42,.86);
+      --panel2:rgba(18,30,56,.76);
+      --text:#edf3ff;
+      --muted:#aebddb;
+      --accent:#7fb0ff;
+      --accent2:#77f0d8;
+      --line:rgba(255,255,255,.14);
+      --chip:rgba(127,176,255,.12);
+      --shadow:0 20px 60px rgba(0,0,0,.38);
+    }
+
+    body.light{
+      --bg:#eef4fb;
+      --panel:rgba(255,255,255,.88);
+      --panel2:rgba(247,250,255,.9);
+      --text:#13213b;
+      --muted:#5b6d8a;
+      --accent:#245fe8;
+      --accent2:#0f9f9a;
+      --line:rgba(19,33,59,.12);
+      --chip:rgba(36,95,232,.08);
+      --shadow:0 20px 60px rgba(16,34,64,.12);
+    }
+
+    body.warm{
+      --bg:#1a0f10;
+      --panel:rgba(39,24,26,.86);
+      --panel2:rgba(55,31,33,.82);
+      --text:#fff0ea;
+      --muted:#ddbcb3;
+      --accent:#ffb36b;
+      --accent2:#ff77b7;
+      --line:rgba(255,240,234,.14);
+      --chip:rgba(255,179,107,.12);
+      --shadow:0 20px 60px rgba(0,0,0,.42);
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(87,143,255,.16), transparent 28%),
+        radial-gradient(circle at 80% 80%, rgba(131,93,255,.13), transparent 28%),
+        var(--bg);
+      color:var(--text);
+      transition:background .35s ease,color .35s ease;
+    }
+
+    .wrap{
+      max-width:1360px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+    }
+
+    .hero-card{
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-card:after{
+      content:"ℍ²";
+      position:absolute;
+      right:20px;
+      bottom:-14px;
+      font-size:100px;
+      font-weight:900;
+      opacity:.08;
+      color:var(--accent);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(28px,4vw,52px);
+      line-height:1.03;
+      letter-spacing:-1.4px;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.6;
+      max-width:860px;
+    }
+
+    .controls{
+      padding:20px;
+      display:grid;
+      gap:12px;
+      align-content:start;
+    }
+
+    .ctrl{
+      background:var(--panel2);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px 14px;
+    }
+
+    .ctrl label{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-size:14px;
+      font-weight:700;
+      color:var(--text);
+      margin-bottom:8px;
+    }
+
+    .value{
+      color:var(--accent);
+      font-weight:800;
+    }
+
+    input[type="range"]{
+      width:100%;
+      accent-color:var(--accent);
+      cursor:pointer;
+    }
+
+    select,
+    button{
+      width:100%;
+      border:1px solid var(--line);
+      background:var(--chip);
+      color:var(--text);
+      border-radius:15px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .18s ease, background .18s ease, opacity .18s ease;
+    }
+
+    button:hover,
+    select:hover{
+      transform:translateY(-1px);
+    }
+
+    .primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:white;
+      border:none;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:18px;
+    }
+
+    .canvas-panel{
+      padding:18px;
+    }
+
+    .canvas-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .canvas-top h2,
+    .info h2{
+      margin:0;
+      font-size:22px;
+    }
+
+    .badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .pill{
+      border:1px solid var(--line);
+      background:var(--chip);
+      color:var(--muted);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:13px;
+    }
+
+    .canvas-shell{
+      position:relative;
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.04), transparent 40%),
+        rgba(0,0,0,.10);
+    }
+
+    canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .info{
+      padding:20px;
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+
+    .box{
+      border:1px solid var(--line);
+      background:var(--panel2);
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .box h3{
+      margin:0 0 8px;
+      font-size:17px;
+    }
+
+    .box p{
+      color:var(--muted);
+      line-height:1.6;
+      font-size:15px;
+    }
+
+    .formula{
+      font-family:Georgia, "Times New Roman", serif;
+      color:var(--text);
+      font-size:18px;
+      line-height:1.7;
+      margin:8px 0;
+    }
+
+    .footer{
+      margin-top:16px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media (max-width: 1080px){
+      .hero,
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body class="dark">
+  <div class="wrap">
+
+    <section class="hero">
+      <div class="panel hero-card">
+        <h1>Teselación estilo disco de Poincaré</h1>
+        <p class="lead">
+          Este ejemplo combina una <strong>versión geométrica</strong> inspirada en el disco de Poincaré
+          con una <strong>versión artística y ornamental</strong>. La visualización usa anillos hiperbólicos
+          comprimidos dentro de un disco finito, aumento de subdivisiones hacia el borde y motivos curvos
+          radiales para construir una estética cercana a una teselación hiperbólica decorativa.
+        </p>
+      </div>
+
+      <div class="panel controls">
+        <div class="ctrl">
+          <label for="mode">
+            Modo de visualización
+            <span class="value" id="modeValue">Ambos</span>
+          </label>
+          <select id="mode">
+            <option value="both" selected>Geométrico + artístico</option>
+            <option value="geom">Solo geométrico</option>
+            <option value="art">Solo artístico</option>
+          </select>
+        </div>
+
+        <div class="ctrl">
+          <label for="depth">
+            Profundidad / anillos
+            <span class="value" id="depthVal">7</span>
+          </label>
+          <input type="range" id="depth" min="4" max="10" step="1" value="7" />
+        </div>
+
+        <div class="ctrl">
+          <label for="sectors">
+            Sectores base
+            <span class="value" id="sectorVal">6</span>
+          </label>
+          <input type="range" id="sectors" min="4" max="10" step="1" value="6" />
+        </div>
+
+        <div class="ctrl">
+          <label for="curvature">
+            Curvatura visual / compresión hiperbólica
+            <span class="value" id="curvVal">4.8</span>
+          </label>
+          <input type="range" id="curvature" min="3.2" max="6.5" step="0.1" value="4.8" />
+        </div>
+
+        <div class="ctrl">
+          <label for="glow">
+            Brillo / resplandor
+            <span class="value" id="glowVal">82</span>
+          </label>
+          <input type="range" id="glow" min="20" max="100" step="1" value="82" />
+        </div>
+
+        <div class="ctrl">
+          <label for="speed">
+            Velocidad de animación
+            <span class="value" id="speedVal">3.0x</span>
+          </label>
+          <input type="range" id="speed" min="1" max="6" step="0.1" value="3" />
+        </div>
+
+        <button class="primary" id="animateBtn">⏸ Pausar animación</button>
+        <button id="themeBtn">Cambiar tema visual</button>
+        <button id="redrawBtn">Redibujar / resembrar</button>
+        <button id="downloadBtn">Descargar PNG</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel canvas-panel">
+        <div class="canvas-top">
+          <h2>Visualización dinámica</h2>
+          <div class="badges">
+            <span class="pill">Disco de Poincaré</span>
+            <span class="pill">Crecimiento hiperbólico</span>
+            <span class="pill">Ornamentación radial</span>
+            <span class="pill">Sin librerías externas</span>
+          </div>
+        </div>
+
+        <div class="canvas-shell">
+          <canvas id="canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="panel info">
+        <h2>Cómo está construido</h2>
+
+        <div class="box">
+          <h3>1. Idea geométrica</h3>
+          <p>
+            El disco representa el plano hiperbólico comprimido dentro de un círculo finito.
+            Los anillos se distribuyen usando una transformación inspirada en coordenadas hiperbólicas:
+          </p>
+
+          <div class="formula">
+            r = tanh(ρ / 2)
+          </div>
+
+          <p>
+            Donde <strong>ρ</strong> representa una distancia hiperbólica y <strong>r</strong>
+            es el radio euclidiano visible dentro del disco. Esta transformación produce la acumulación
+            progresiva de formas hacia el borde.
+          </p>
+        </div>
+
+        <div class="box">
+          <h3>2. Expansión hacia el borde</h3>
+          <p>
+            A medida que avanzan los anillos, aumenta la cantidad de sectores. Esto genera el efecto visual
+            característico del espacio hiperbólico: cerca del borde aparecen muchas más piezas,
+            aunque todo sigue contenido dentro del disco.
+          </p>
+
+          <div class="formula">
+            m<sub>k</sub> = m<sub>0</sub> · 2<sup>k</sup>
+          </div>
+
+          <p>
+            Aquí <strong>m<sub>0</sub></strong> representa los sectores iniciales y
+            <strong>k</strong> indica el nivel del anillo.
+          </p>
+        </div>
+
+        <div class="box">
+          <h3>3. Capa ornamental</h3>
+          <p>
+            Sobre la estructura geométrica se agregan curvas, brillos, pequeñas esferas y gradientes metálicos.
+            Esta capa transforma la teselación en una composición más artística, semejante a una imagen
+            ornamental inspirada en geometría hiperbólica.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Material interactivo: teselación estilo Poincaré + versión ornamental artística.
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const modeEl = document.getElementById("mode");
+    const depthEl = document.getElementById("depth");
+    const sectorsEl = document.getElementById("sectors");
+    const curvatureEl = document.getElementById("curvature");
+    const glowEl = document.getElementById("glow");
+    const speedEl = document.getElementById("speed");
+
+    const depthVal = document.getElementById("depthVal");
+    const sectorVal = document.getElementById("sectorVal");
+    const curvVal = document.getElementById("curvVal");
+    const glowVal = document.getElementById("glowVal");
+    const speedVal = document.getElementById("speedVal");
+    const modeValue = document.getElementById("modeValue");
+
+    const animateBtn = document.getElementById("animateBtn");
+    const themeBtn = document.getElementById("themeBtn");
+    const redrawBtn = document.getElementById("redrawBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    const themes = ["dark", "light", "warm"];
+    let themeIndex = 0;
+
+    const state = {
+      mode: "both",
+      depth: 7,
+      baseSectors: 6,
+      rhoMax: 4.8,
+      glow: 82,
+      speed: 3,
+      animate: true,
+      rotation: 0,
+      shimmer: 0,
+      seed: Math.random() * 1000
+    };
+
+    function updateLabels(){
+      depthVal.textContent = state.depth;
+      sectorVal.textContent = state.baseSectors;
+      curvVal.textContent = state.rhoMax.toFixed(1);
+      glowVal.textContent = state.glow;
+      speedVal.textContent = state.speed.toFixed(1) + "x";
+
+      const labelMap = {
+        both: "Ambos",
+        geom: "Geométrico",
+        art: "Artístico"
+      };
+
+      modeValue.textContent = labelMap[state.mode];
+
+      animateBtn.textContent = state.animate
+        ? "⏸ Pausar animación"
+        : "▶ Reanudar animación";
+    }
+
+    function syncStateFromUI(){
+      state.mode = modeEl.value;
+      state.depth = parseInt(depthEl.value, 10);
+      state.baseSectors = parseInt(sectorsEl.value, 10);
+      state.rhoMax = parseFloat(curvatureEl.value);
+      state.glow = parseInt(glowEl.value, 10);
+      state.speed = parseFloat(speedEl.value);
+      updateLabels();
+    }
+
+    function resizeCanvas(){
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function polar(cx, cy, R, r, a){
+      return {
+        x: cx + R * r * Math.cos(a),
+        y: cy + R * r * Math.sin(a)
+      };
+    }
+
+    function mix(a,b,t){
+      return a + (b-a)*t;
+    }
+
+    function hexToRgba(hex, alpha=1){
+      const h = hex.replace("#","");
+      const bigint = parseInt(h, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function paletteFor(themeName){
+      if(themeName === "light"){
+        return {
+          bgOuter: "#eaf1fb",
+          bgInner: "#fdfefe",
+          border: "#315ecb",
+          grid: "rgba(49,94,203,.18)",
+          accent: "#245fe8",
+          gold: "#d8b46a",
+          violet: "#8a67ff",
+          rose: "#ff7aa9",
+          cyan: "#66d8ff",
+          dark: "#12284c",
+          pearl: "#f8fbff"
+        };
+      }
+
+      if(themeName === "warm"){
+        return {
+          bgOuter: "#16090b",
+          bgInner: "#331518",
+          border: "#ffbf80",
+          grid: "rgba(255,191,128,.18)",
+          accent: "#ffb36b",
+          gold: "#ffd799",
+          violet: "#ca7cff",
+          rose: "#ff7ba8",
+          cyan: "#91cbff",
+          dark: "#1a0f12",
+          pearl: "#fff4ed"
+        };
+      }
+
+      return {
+        bgOuter: "#060a15",
+        bgInner: "#101a35",
+        border: "#81b6ff",
+        grid: "rgba(129,182,255,.18)",
+        accent: "#6ea7ff",
+        gold: "#f0d59c",
+        violet: "#8d70ff",
+        rose: "#ff86a6",
+        cyan: "#94dcff",
+        dark: "#0b1020",
+        pearl: "#f6fbff"
+      };
+    }
+
+    function hyperbolicRadius(t){
+      const rho = state.rhoMax * t;
+      return Math.min(0.992, Math.tanh(rho / 2));
+    }
+
+    function ringSectorCount(k){
+      return state.baseSectors * Math.pow(2, k);
+    }
+
+    function drawBackground(cx, cy, R, pal, w, h){
+      ctx.clearRect(0, 0, w, h);
+
+      const bg = ctx.createRadialGradient(cx, cy, R*0.12, cx, cy, R*1.25);
+      bg.addColorStop(0, hexToRgba(pal.bgInner, 1));
+      bg.addColorStop(0.55, hexToRgba(pal.dark, 0.98));
+      bg.addColorStop(1, hexToRgba(pal.bgOuter, 1));
+
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      const g1 = ctx.createRadialGradient(
+        cx - R*0.45,
+        cy - R*0.42,
+        0,
+        cx - R*0.45,
+        cy - R*0.42,
+        R*0.65
+      );
+
+      g1.addColorStop(0, "rgba(110,167,255,.10)");
+      g1.addColorStop(1, "rgba(110,167,255,0)");
+
+      ctx.fillStyle = g1;
+      ctx.fillRect(0,0,w,h);
+
+      const g2 = ctx.createRadialGradient(
+        cx + R*0.52,
+        cy + R*0.58,
+        0,
+        cx + R*0.52,
+        cy + R*0.58,
+        R*0.70
+      );
+
+      g2.addColorStop(0, "rgba(255,125,168,.08)");
+      g2.addColorStop(1, "rgba(255,125,168,0)");
+
+      ctx.fillStyle = g2;
+      ctx.fillRect(0,0,w,h);
+    }
+
+    function drawOuterLoops(cx, cy, R, pal){
+      const petals = state.baseSectors * 4;
+
+      ctx.save();
+      ctx.lineWidth = 1.3;
+
+      for(let i=0; i<petals; i++){
+        const a = state.rotation * 0.6 + (Math.PI*2*i/petals);
+
+        const p = polar(cx, cy, R, 1.01, a);
+        const p2 = polar(cx, cy, R, 1.18 + 0.02*Math.sin(i + state.shimmer), a);
+        const left = polar(cx, cy, R, 1.12, a - 0.11);
+        const right = polar(cx, cy, R, 1.12, a + 0.11);
+
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.quadraticCurveTo(left.x, left.y, p2.x, p2.y);
+        ctx.quadraticCurveTo(right.x, right.y, p.x, p.y);
+
+        ctx.strokeStyle = i % 2 === 0
+          ? hexToRgba(pal.gold, .65)
+          : hexToRgba(pal.rose, .55);
+
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function wedgePath(cx, cy, R, r1, r2, a1, a2){
+      ctx.beginPath();
+      ctx.arc(cx, cy, R*r2, a1, a2);
+
+      const pInnerEnd = polar(cx, cy, R, r1, a2);
+      ctx.lineTo(pInnerEnd.x, pInnerEnd.y);
+
+      if(r1 > 0){
+        ctx.arc(cx, cy, R*r1, a2, a1, true);
+      }else{
+        ctx.lineTo(cx, cy);
+      }
+
+      ctx.closePath();
+    }
+
+    function drawGeometricCell(cx, cy, R, r1, r2, a1, a2, k, i, pal){
+      const hueShift = 0.5 + 0.5*Math.sin(i*0.31 + k*0.75 + state.seed);
+      const fillAlpha = 0.06 + 0.04*hueShift;
+
+      wedgePath(cx, cy, R, r1, r2, a1, a2);
+
+      ctx.fillStyle = hexToRgba(pal.accent, fillAlpha);
+      ctx.fill();
+
+      ctx.strokeStyle = pal.grid;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      const am = (a1 + a2) / 2;
+      const p1 = polar(cx, cy, R, r1, am);
+      const p2 = polar(cx, cy, R, r2, am);
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = "rgba(255,255,255,.06)";
+      ctx.stroke();
+    }
+
+    function drawPearl(x, y, radius, pal){
+      const rg = ctx.createRadialGradient(
+        x - radius*0.25,
+        y - radius*0.25,
+        radius*0.12,
+        x,
+        y,
+        radius
+      );
+
+      rg.addColorStop(0, "rgba(255,255,255,.98)");
+      rg.addColorStop(0.18, hexToRgba(pal.pearl, .98));
+      rg.addColorStop(0.52, "rgba(198,215,255,.95)");
+      rg.addColorStop(0.76, "rgba(120,145,210,.92)");
+      rg.addColorStop(1, "rgba(28,35,56,.92)");
+
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI*2);
+      ctx.fillStyle = rg;
+      ctx.fill();
+
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x - radius*0.28, y - radius*0.28, radius*0.22, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,255,255,.62)";
+      ctx.fill();
+    }
+
+    function drawScallops(cx, cy, R, rEdge, a1, a2, k, pal){
+      const arcLen = (a2 - a1) * rEdge * R;
+      const n = Math.max(2, Math.floor(arcLen / 16));
+
+      for(let j=0; j<=n; j++){
+        const t = j / n;
+        const a = mix(a1, a2, t);
+        const p = polar(cx, cy, R, rEdge*0.996, a);
+
+        const radius = Math.max(
+          1.2,
+          (R * 0.009) * (1 + 0.8*(state.depth-k)/state.depth)
+        );
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI*2);
+        ctx.strokeStyle = hexToRgba(pal.cyan, 0.60);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    function drawArtisticCell(cx, cy, R, r1, r2, a1, a2, k, i, pal){
+      const am = (a1 + a2) / 2;
+      const sectorWidth = a2 - a1;
+
+      const hueSeed = i*0.43 + k*0.81 + state.seed*0.1 + state.shimmer;
+      const shimmer = 0.5 + 0.5*Math.sin(hueSeed);
+
+      wedgePath(cx, cy, R, r1, r2, a1, a2);
+
+      const gx = cx + Math.cos(am)*R*r2*0.35;
+      const gy = cy + Math.sin(am)*R*r2*0.35;
+
+      const grad = ctx.createLinearGradient(
+        cx - Math.cos(am)*R*0.3,
+        cy - Math.sin(am)*R*0.3,
+        gx,
+        gy
+      );
+
+      const c1 = shimmer > 0.5 ? pal.gold : pal.violet;
+      const c2 = shimmer > 0.5 ? pal.rose : pal.cyan;
+
+      grad.addColorStop(0, hexToRgba(pal.dark, .95));
+      grad.addColorStop(0.35, hexToRgba(c1, .88));
+      grad.addColorStop(0.68, hexToRgba(c2, .78));
+      grad.addColorStop(1, hexToRgba(pal.dark, .95));
+
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.stroke();
+
+      const q1 = polar(cx, cy, R, mix(r1, r2, 0.18), a1 + sectorWidth*0.08);
+      const q2 = polar(cx, cy, R, mix(r1, r2, 0.18), a2 - sectorWidth*0.08);
+      const tip = polar(cx, cy, R, r2*0.985, am);
+      const baseMid = polar(cx, cy, R, mix(r1, r2, 0.50), am);
+
+      const ctrl1 = polar(cx, cy, R, mix(r1, r2, 0.75), a1 + sectorWidth*0.22);
+      const ctrl2 = polar(cx, cy, R, mix(r1, r2, 0.75), a2 - sectorWidth*0.22);
+
+      ctx.beginPath();
+      ctx.moveTo(q1.x, q1.y);
+      ctx.quadraticCurveTo(ctrl1.x, ctrl1.y, tip.x, tip.y);
+      ctx.quadraticCurveTo(ctrl2.x, ctrl2.y, q2.x, q2.y);
+      ctx.quadraticCurveTo(baseMid.x, baseMid.y, q1.x, q1.y);
+
+      const innerGrad = ctx.createRadialGradient(
+        baseMid.x,
+        baseMid.y,
+        2,
+        tip.x,
+        tip.y,
+        Math.max(12, (r2-r1)*R*1.6)
+      );
+
+      innerGrad.addColorStop(0, hexToRgba("#ffffff", .40));
+      innerGrad.addColorStop(0.20, hexToRgba(c1, .50));
+      innerGrad.addColorStop(0.55, hexToRgba(pal.dark, .30));
+      innerGrad.addColorStop(1, "rgba(0,0,0,0)");
+
+      ctx.fillStyle = innerGrad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(q1.x, q1.y);
+      ctx.quadraticCurveTo(ctrl1.x, ctrl1.y, tip.x, tip.y);
+      ctx.quadraticCurveTo(ctrl2.x, ctrl2.y, q2.x, q2.y);
+
+      ctx.strokeStyle = "rgba(0,0,0,.45)";
+      ctx.lineWidth = Math.max(1, R*0.0035);
+      ctx.stroke();
+
+      const hi = polar(cx, cy, R, mix(r1, r2, 0.72), am - sectorWidth*0.10);
+
+      ctx.beginPath();
+      ctx.arc(hi.x, hi.y, Math.max(1.5, R*0.004), 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      ctx.fill();
+
+      const pearlCenter = polar(cx, cy, R, mix(r1, r2, 0.56), am);
+      const pr = Math.max(2, (r2-r1) * R * 0.16);
+
+      drawPearl(pearlCenter.x, pearlCenter.y, pr, pal);
+      drawScallops(cx, cy, R, r2, a1, a2, k, pal);
+    }
+
+    function drawCenterStar(cx, cy, R, pal){
+      const arms = state.baseSectors;
+      const inner = R * 0.08;
+      const outer = R * 0.18;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(state.rotation * 0.35);
+
+      ctx.beginPath();
+
+      for(let i=0; i<arms*2; i++){
+        const a = Math.PI * i / arms;
+        const rr = i % 2 === 0 ? outer : inner;
+        const x = rr * Math.cos(a);
+        const y = rr * Math.sin(a);
+
+        if(i===0){
+          ctx.moveTo(x,y);
+        }else{
+          ctx.lineTo(x,y);
+        }
+      }
+
+      ctx.closePath();
+
+      const rg = ctx.createRadialGradient(0, 0, outer*0.12, 0, 0, outer);
+      rg.addColorStop(0, hexToRgba(pal.gold, .9));
+      rg.addColorStop(0.3, hexToRgba(pal.rose, .65));
+      rg.addColorStop(0.6, hexToRgba(pal.dark, .78));
+      rg.addColorStop(1, hexToRgba(pal.violet, .30));
+
+      ctx.fillStyle = rg;
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255,255,255,.12)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      drawPearl(0, 0, R*0.035, pal);
+
+      ctx.restore();
+    }
+
+    function drawDiskFrame(cx, cy, R, pal){
+      ctx.save();
+
+      ctx.shadowColor = hexToRgba(pal.accent, state.glow/220);
+      ctx.shadowBlur = state.glow * 0.45;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.strokeStyle = hexToRgba(pal.border, .75);
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R*0.994, 0, Math.PI*2);
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawClippedDiskContent(cx, cy, R, pal){
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.clip();
+
+      const halo = ctx.createRadialGradient(cx, cy, R*0.1, cx, cy, R);
+      halo.addColorStop(0, "rgba(255,255,255,.06)");
+      halo.addColorStop(0.45, "rgba(255,255,255,.015)");
+      halo.addColorStop(1, "rgba(255,255,255,0)");
+
+      ctx.fillStyle = halo;
+      ctx.fillRect(cx-R, cy-R, 2*R, 2*R);
+
+      for(let k=0; k<state.depth; k++){
+        const count = ringSectorCount(k);
+        const r1 = k === 0 ? 0 : hyperbolicRadius(k / state.depth);
+        const r2 = hyperbolicRadius((k + 1) / state.depth);
+
+        for(let i=0; i<count; i++){
+          const a1 = state.rotation + (Math.PI*2 * i / count);
+          const a2 = state.rotation + (Math.PI*2 * (i + 1) / count);
+
+          if(state.mode === "geom" || state.mode === "both"){
+            drawGeometricCell(cx, cy, R, r1, r2, a1, a2, k, i, pal);
+          }
+
+          if(state.mode === "art" || state.mode === "both"){
+            drawArtisticCell(cx, cy, R, r1, r2, a1, a2, k, i, pal);
+          }
+        }
+      }
+
+      if(state.mode !== "art"){
+        for(let k=1; k<=state.depth; k++){
+          const rr = hyperbolicRadius(k/state.depth);
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, R*rr, 0, Math.PI*2);
+          ctx.strokeStyle = "rgba(255,255,255,.035)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function render(){
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      const cx = w/2;
+      const cy = h/2;
+      const R = Math.min(w,h) * 0.43;
+
+      const currentTheme = document.body.classList.contains("light")
+        ? "light"
+        : document.body.classList.contains("warm")
+        ? "warm"
+        : "dark";
+
+      const pal = paletteFor(currentTheme);
+
+      drawBackground(cx, cy, R, pal, w, h);
+
+      if(state.mode !== "geom"){
+        drawOuterLoops(cx, cy, R, pal);
+      }
+
+      drawClippedDiskContent(cx, cy, R, pal);
+
+      if(state.mode !== "geom"){
+        drawCenterStar(cx, cy, R, pal);
+      }
+
+      drawDiskFrame(cx, cy, R, pal);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,.10)";
+      ctx.font = "700 15px Inter, Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Disco de Poincaré — versión geométrica y ornamental", cx, h - 18);
+      ctx.restore();
+    }
+
+    function loop(){
+      if(state.animate){
+        state.rotation += 0.0022 * state.speed;
+        state.shimmer += 0.015 * state.speed;
+      }
+
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    [modeEl, depthEl, sectorsEl, curvatureEl, glowEl, speedEl].forEach(el=>{
+      el.addEventListener("input", ()=>{
+        syncStateFromUI();
+        render();
+      });
+    });
+
+    animateBtn.addEventListener("click", ()=>{
+      state.animate = !state.animate;
+      updateLabels();
+      render();
+    });
+
+    themeBtn.addEventListener("click", ()=>{
+      themeIndex = (themeIndex + 1) % themes.length;
+      document.body.className = themes[themeIndex];
+      render();
+    });
+
+    redrawBtn.addEventListener("click", ()=>{
+      state.seed = Math.random() * 1000;
+      render();
+    });
+
+    downloadBtn.addEventListener("click", ()=>{
+      const link = document.createElement("a");
+      link.download = "poincare_tiling_artistico.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    window.addEventListener("resize", ()=>{
+      resizeCanvas();
+      render();
+    });
+
+    syncStateFromUI();
+    resizeCanvas();
+    render();
+    loop();
+  </script>
+</body>
+</html>

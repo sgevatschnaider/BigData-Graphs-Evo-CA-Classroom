@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tipos de Embeddings: explicación, formulación matemática y aplicaciones</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --bg-soft:#0c1830;
+      --panel:rgba(13,25,45,.88);
+      --panel-2:rgba(18,35,63,.78);
+      --line:rgba(115,198,255,.18);
+      --text:#eef6ff;
+      --muted:#a9bdd7;
+      --accent:#50d8ff;
+      --accent-2:#8df7c8;
+      --accent-3:#ffd166;
+      --danger:#ff6b8a;
+      --shadow:0 24px 70px rgba(0,0,0,.34);
+      --success:#43d9a3;
+      --warning:#f3c969;
+      --outside:rgba(200,220,235,.25);
+      --code:#d8f3ff;
+    }
+
+    body.light{
+      --bg:#f4f8fc;
+      --bg-soft:#edf3fa;
+      --panel:rgba(255,255,255,.92);
+      --panel-2:rgba(255,255,255,.82);
+      --line:rgba(30,90,130,.14);
+      --text:#102033;
+      --muted:#5d7289;
+      --accent:#0b7db0;
+      --accent-2:#0d9c72;
+      --accent-3:#c68800;
+      --danger:#c64767;
+      --shadow:0 18px 50px rgba(40,70,100,.14);
+      --success:#0d9c72;
+      --warning:#b88300;
+      --outside:rgba(60,90,120,.20);
+      --code:#12354d;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(80,216,255,.16), transparent 32%),
+        radial-gradient(circle at 85% 12%, rgba(141,247,200,.10), transparent 30%),
+        radial-gradient(circle at 75% 90%, rgba(255,209,102,.07), transparent 32%),
+        var(--bg);
+      color:var(--text);
+      transition:background .3s ease,color .3s ease;
+    }
+
+    .app{
+      width:min(1480px, calc(100% - 28px));
+      margin:0 auto;
+      padding:24px 0 32px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+    }
+
+    .hero-main{
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-main::after{
+      content:"";
+      position:absolute;
+      right:-80px;
+      top:-80px;
+      width:260px;
+      height:260px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(80,216,255,.22), transparent 66%);
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--accent);
+      background:rgba(80,216,255,.10);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent-2);
+      box-shadow:0 0 16px var(--accent-2);
+    }
+
+    h1{
+      margin:18px 0 14px;
+      font-size:clamp(32px,4.1vw,58px);
+      line-height:.98;
+      letter-spacing:-.055em;
+    }
+
+    .lead{
+      margin:0;
+      font-size:clamp(16px,1.6vw,20px);
+      line-height:1.58;
+      color:var(--muted);
+      max-width:920px;
+    }
+
+    .formula-box{
+      margin-top:18px;
+      padding:16px 18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      font-family:"SFMono-Regular",Consolas,Menlo,monospace;
+      color:var(--code);
+      overflow:auto;
+      font-size:14px;
+    }
+
+    .hero-side{
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .hero-side h2{
+      margin:0 0 10px;
+      font-size:24px;
+      letter-spacing:-.03em;
+    }
+
+    .hero-side p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.56;
+    }
+
+    .insight{
+      border-left:3px solid var(--accent-2);
+      border-radius:14px;
+      background:rgba(141,247,200,.08);
+      color:var(--muted);
+      padding:13px 14px;
+      line-height:1.46;
+      font-size:14px;
+    }
+
+    .top-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    button, select{
+      font:inherit;
+      font-weight:850;
+      border:1px solid var(--line);
+      color:var(--text);
+      background:rgba(80,216,255,.10);
+      border-radius:14px;
+      padding:11px 14px;
+      cursor:pointer;
+      transition:transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    button:hover, select:hover{
+      transform:translateY(-1px);
+      border-color:var(--accent);
+    }
+
+    button.primary{
+      background:linear-gradient(135deg, rgba(80,216,255,.28), rgba(141,247,200,.18));
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:290px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .sidebar{
+      padding:18px;
+      position:sticky;
+      top:18px;
+    }
+
+    .sidebar h3{
+      margin:0 0 12px;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+
+    .nav{
+      display:grid;
+      gap:8px;
+    }
+
+    .nav a{
+      text-decoration:none;
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid transparent;
+      transition:all .15s ease;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    .nav a:hover{
+      color:var(--text);
+      border-color:var(--line);
+      background:rgba(255,255,255,.04);
+    }
+
+    .content{
+      display:grid;
+      gap:18px;
+    }
+
+    .section{
+      padding:22px;
+    }
+
+    .section h2{
+      margin:0 0 8px;
+      font-size:30px;
+      letter-spacing:-.04em;
+    }
+
+    .section p{
+      color:var(--muted);
+      line-height:1.62;
+      margin:10px 0 0;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:14px;
+    }
+
+    .mini-card{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .mini-card h4{
+      margin:0 0 8px;
+      font-size:17px;
+      letter-spacing:-.02em;
+    }
+
+    .mini-card p{
+      margin:0;
+      font-size:14px;
+      line-height:1.54;
+    }
+
+    .math{
+      margin-top:12px;
+      padding:13px 14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      font-family:"SFMono-Regular",Consolas,Menlo,monospace;
+      color:var(--code);
+      overflow:auto;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .interactive-header{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .interactive-header h3{
+      margin:0;
+      font-size:22px;
+      letter-spacing:-.03em;
+    }
+
+    .interactive-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .diagram-wrap{
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(255,255,255,.035);
+      padding:10px;
+      min-height:420px;
+    }
+
+    svg{
+      width:100%;
+      height:100%;
+      min-height:400px;
+      display:block;
+    }
+
+    .info-panel{
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(255,255,255,.035);
+      padding:18px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .stat{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:var(--panel-2);
+      padding:14px;
+      min-height:88px;
+    }
+
+    .stat .label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .stat .num{
+      margin-top:8px;
+      font-size:26px;
+      font-weight:950;
+      letter-spacing:-.04em;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    th, td{
+      padding:12px 14px;
+      text-align:left;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    th{
+      color:var(--text);
+      background:rgba(255,255,255,.04);
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    td{
+      color:var(--muted);
+    }
+
+    .chart-card{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:rgba(255,255,255,.035);
+      padding:14px;
+    }
+
+    .chart-card h4{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+
+    canvas{
+      width:100%;
+      height:auto;
+      display:block;
+      background:transparent;
+    }
+
+    .tag-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .tag{
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--accent);
+      background:rgba(80,216,255,.08);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .footer{
+      margin-top:8px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media (max-width: 1180px){
+      .hero, .layout, .interactive-grid, .grid-2, .grid-3{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        position:static;
+      }
+    }
+
+    @media (max-width: 700px){
+      .app{
+        width:min(100% - 14px, 1480px);
+        padding-top:12px;
+      }
+
+      .hero-main, .hero-side, .sidebar, .section{
+        padding:16px;
+        border-radius:20px;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      h1{
+        font-size:clamp(28px,9vw,46px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="eyebrow"><span class="dot"></span> Laboratorio visual de representaciones</div>
+        <h1>Tipos de embeddings: grafos, texto, imágenes y más</h1>
+        <p class="lead">
+          Un embedding transforma objetos complejos —nodos, palabras, imágenes, documentos, audios, series temporales o grafos completos—
+          en puntos de un espacio geométrico. La idea clave es que la representación preserve alguna estructura relevante:
+          distancia, similitud, vecindad, jerarquía, secuencia o relación.
+        </p>
+        <div class="formula-box">
+          φ: 𝓧 → 𝓜 &nbsp;&nbsp;&nbsp;&nbsp; con &nbsp;&nbsp;&nbsp;&nbsp;
+          d_𝓧(x_i,x_j) ≈ d_𝓜(φ(x_i), φ(x_j))
+        </div>
+        <div class="top-actions">
+          <button class="primary" id="themeBtn">Cambiar tema</button>
+          <button id="scrollExplorerBtn">Ir al explorador interactivo</button>
+        </div>
+      </div>
+
+      <aside class="card hero-side">
+        <div>
+          <h2>Idea central</h2>
+          <p>
+            Un embedding no es “solo vectorizar”. Es elegir una geometría de destino capaz de hacer visible y útil la estructura del dato:
+            relaciones semánticas en texto, cercanía visual en imágenes, jerarquías en grafos o alineación entre modalidades.
+          </p>
+        </div>
+        <div class="insight">
+          Si la estructura del dato y la geometría elegida no son compatibles, aparece distorsión. Por eso no siempre conviene usar el mismo tipo de embedding para todo.
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <aside class="card sidebar">
+        <h3>Mapa del contenido</h3>
+        <nav class="nav">
+          <a href="#concepto">1. Concepto general</a>
+          <a href="#matematica">2. Formulación matemática</a>
+          <a href="#explorador">3. Explorador interactivo</a>
+          <a href="#clasificacion">4. Clasificación general</a>
+          <a href="#espacios">5. Espacios geométricos</a>
+          <a href="#perdidas">6. Funciones de pérdida</a>
+          <a href="#resumen">7. Resumen final</a>
+        </nav>
+        <div class="insight" style="margin-top:14px;">
+          Material elaborado por el profesor Sergio Gevatschnaider
+        </div>
+      </aside>
+
+      <div class="content">
+        <section id="concepto" class="card section">
+          <h2>1. Concepto general</h2>
+          <div class="grid-3" style="margin-top:14px;">
+            <div class="mini-card">
+              <h4>¿Qué es un embedding?</h4>
+              <p>
+                Es una función que toma un objeto complejo y lo representa como un vector o punto en un espacio geométrico.
+              </p>
+              <div class="math">φ(x)=z, &nbsp; con &nbsp; z ∈ 𝓜</div>
+            </div>
+            <div class="mini-card">
+              <h4>¿Qué intenta preservar?</h4>
+              <p>
+                Puede preservar similitud, distancia, vecindad, estructura de grafo, jerarquía, relaciones semánticas o patrones temporales.
+              </p>
+              <div class="math">sim(x_i,x_j) ≈ sim(φ(x_i),φ(x_j))</div>
+            </div>
+            <div class="mini-card">
+              <h4>¿Para qué sirve?</h4>
+              <p>
+                Para clasificación, clustering, búsqueda semántica, recuperación de información, recomendación, razonamiento y representación visual.
+              </p>
+              <div class="math">x complejo → vector útil para aprender</div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:16px;">
+            <div class="chart-card">
+              <h4>Pipeline conceptual del embedding</h4>
+              <svg viewBox="0 0 820 280" aria-label="Pipeline conceptual de un embedding">
+                <defs>
+                  <linearGradient id="pipeGrad" x1="0" x2="1">
+                    <stop offset="0%" stop-color="var(--accent)"/>
+                    <stop offset="100%" stop-color="var(--accent-2)"/>
+                  </linearGradient>
+                </defs>
+                <rect x="20" y="50" width="170" height="160" rx="26" fill="rgba(255,255,255,.04)" stroke="var(--line)"/>
+                <text x="105" y="90" text-anchor="middle" fill="var(--text)" font-size="20" font-weight="900">Objeto original</text>
+                <circle cx="70" cy="145" r="18" fill="var(--accent-3)"/>
+                <circle cx="110" cy="120" r="14" fill="var(--accent)"/>
+                <circle cx="138" cy="160" r="12" fill="var(--accent-2)"/>
+                <line x1="70" y1="145" x2="110" y2="120" stroke="var(--text)" opacity=".45"/>
+                <line x1="110" y1="120" x2="138" y2="160" stroke="var(--text)" opacity=".45"/>
+                <text x="105" y="195" text-anchor="middle" fill="var(--muted)" font-size="14">grafo / texto / imagen / audio</text>
+
+                <path d="M210 130 C260 130 275 130 320 130" stroke="url(#pipeGrad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <polygon points="318,116 355,130 318,144" fill="var(--accent-2)"/>
+                <text x="280" y="108" fill="var(--muted)" font-size="15" text-anchor="middle">función φ</text>
+
+                <rect x="390" y="50" width="180" height="160" rx="26" fill="rgba(255,255,255,.04)" stroke="var(--line)"/>
+                <text x="480" y="90" text-anchor="middle" fill="var(--text)" font-size="20" font-weight="900">Embedding</text>
+                <rect x="430" y="113" width="100" height="34" rx="10" fill="rgba(80,216,255,.16)" stroke="var(--line)"/>
+                <text x="480" y="135" text-anchor="middle" fill="var(--code)" font-size="17" font-weight="800">z ∈ ℝᵈ</text>
+                <text x="480" y="180" text-anchor="middle" fill="var(--muted)" font-size="14">vector, tensor o punto geométrico</text>
+
+                <path d="M590 130 C640 130 655 130 700 130" stroke="url(#pipeGrad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <polygon points="698,116 735,130 698,144" fill="var(--accent-2)"/>
+
+                <rect x="730" y="50" width="70" height="160" rx="24" fill="rgba(255,255,255,.04)" stroke="var(--line)"/>
+                <text x="765" y="82" text-anchor="middle" fill="var(--text)" font-size="17" font-weight="900">Uso</text>
+                <text x="765" y="112" text-anchor="middle" fill="var(--muted)" font-size="12">buscar</text>
+                <text x="765" y="132" text-anchor="middle" fill="var(--muted)" font-size="12">clasificar</text>
+                <text x="765" y="152" text-anchor="middle" fill="var(--muted)" font-size="12">agrupar</text>
+                <text x="765" y="172" text-anchor="middle" fill="var(--muted)" font-size="12">alinear</text>
+              </svg>
+            </div>
+
+            <div class="chart-card">
+              <h4>Qué puede preservar un embedding</h4>
+              <canvas id="preservationChart" width="520" height="280"></canvas>
+              <div class="tag-row">
+                <span class="tag">similitud</span>
+                <span class="tag">vecindad</span>
+                <span class="tag">jerarquía</span>
+                <span class="tag">relaciones</span>
+                <span class="tag">temporalidad</span>
+                <span class="tag">alineación multimodal</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="matematica" class="card section">
+          <h2>2. Formulación matemática</h2>
+          <div class="grid-2" style="margin-top:12px;">
+            <div>
+              <p>
+                La formulación más general consiste en una aplicación entre un conjunto de objetos <strong>𝓧</strong> y un espacio geométrico de destino <strong>𝓜</strong>.
+              </p>
+              <div class="math">
+                φ: 𝓧 → 𝓜
+                <br><br>
+                x ↦ φ(x)=z
+              </div>
+              <p>
+                Si existe una noción de distancia, similitud o relación en el dominio original, el embedding intenta conservarla en el espacio de llegada.
+              </p>
+              <div class="math">
+                d_𝓧(x_i,x_j) ≈ d_𝓜(φ(x_i),φ(x_j))
+              </div>
+              <p>
+                También puede formularse en términos de productos internos, probabilidades o scores.
+              </p>
+            </div>
+
+            <div class="mini-card">
+              <h4>Tres formas frecuentes de formulación</h4>
+              <div class="math">
+                1) Preservación de distancia:
+                <br>
+                𝓛 = Σ w_ij ( d_𝓜(φ(x_i),φ(x_j)) - d_𝓧(x_i,x_j) )²
+                <br><br>
+                2) Score relacional:
+                <br>
+                s(x_i,x_j)= φ(x_i)^T φ(x_j)
+                <br><br>
+                3) Contraste positivo/negativo:
+                <br>
+                𝓛 = -log [ exp(sim(z_i,z_i⁺)/τ) / Σ_j exp(sim(z_i,z_j)/τ) ]
+              </div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Elemento</th>
+                <th>Notación</th>
+                <th>Significado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Objeto original</td>
+                <td>𝓧</td>
+                <td>Conjunto de palabras, nodos, documentos, imágenes, audios, etc.</td>
+              </tr>
+              <tr>
+                <td>Espacio de destino</td>
+                <td>𝓜</td>
+                <td>Espacio geométrico como ℝᵈ, 𝓗ᵈ, 𝕊ᵈ, etc.</td>
+              </tr>
+              <tr>
+                <td>Embedding</td>
+                <td>φ(x)</td>
+                <td>Representación vectorial o geométrica del objeto x.</td>
+              </tr>
+              <tr>
+                <td>Distancia / similitud</td>
+                <td>d, sim</td>
+                <td>Relación que se quiere preservar o aproximar.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="explorador" class="card section">
+          <div class="interactive-header">
+            <h2>3. Explorador interactivo de tipos de embeddings</h2>
+            <select id="embeddingSelector">
+              <option value="graph">Embeddings de grafos</option>
+              <option value="hyperbolic">Embeddings hiperbólicos</option>
+              <option value="word">Embeddings de palabras</option>
+              <option value="document">Embeddings de frases y documentos</option>
+              <option value="image">Embeddings de imágenes</option>
+              <option value="patch">Patch embeddings</option>
+              <option value="multimodal">Embeddings multimodales</option>
+              <option value="audio">Embeddings de audio</option>
+              <option value="timeseries">Embeddings de series temporales</option>
+              <option value="categorical">Embeddings de variables categóricas</option>
+              <option value="kg">Knowledge graph embeddings</option>
+              <option value="molecular">Embeddings moleculares</option>
+            </select>
+          </div>
+
+          <div class="interactive-grid">
+            <div class="diagram-wrap">
+              <svg id="interactiveSvg" viewBox="0 0 860 520" aria-label="Diagrama interactivo de embeddings"></svg>
+            </div>
+
+            <div class="info-panel">
+              <h3 id="typeTitle" style="margin:0 0 8px;">Embeddings de grafos</h3>
+              <p id="typeDescription"></p>
+
+              <div class="math" id="typeFormula"></div>
+
+              <div class="stats">
+                <div class="stat">
+                  <div class="label">Dominio</div>
+                  <div class="num" id="domainStat">V</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Destino</div>
+                  <div class="num" id="rangeStat">ℝᵈ</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Preserva</div>
+                  <div class="num" id="preserveStat">vecindad</div>
+                </div>
+                <div class="stat">
+                  <div class="label">Ejemplo</div>
+                  <div class="num" id="exampleStat">red</div>
+                </div>
+              </div>
+
+              <div class="chart-card" style="margin-top:14px;">
+                <h4 id="barTitle">Perfil estructural</h4>
+                <canvas id="typeBarChart" width="440" height="250"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="clasificacion" class="card section">
+          <h2>4. Clasificación general de embeddings</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de dato</th>
+                <th>Embedding típico</th>
+                <th>Función / formulación básica</th>
+                <th>Aplicaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Grafos</td>
+                <td>Node / Edge / Graph embeddings</td>
+                <td>φ: V → ℝᵈ o φ: V → 𝓗ᵈ</td>
+                <td>Link prediction, comunidades, conocimiento relacional</td>
+              </tr>
+              <tr>
+                <td>Jerarquías</td>
+                <td>Embeddings hiperbólicos</td>
+                <td>φ: V → 𝓑ᵈ, con distancia hiperbólica</td>
+                <td>Taxonomías, WordNet, ontologías</td>
+              </tr>
+              <tr>
+                <td>Palabras</td>
+                <td>Word embeddings</td>
+                <td>φ: 𝓥 → ℝᵈ</td>
+                <td>NLP, similitud semántica, traducción</td>
+              </tr>
+              <tr>
+                <td>Frases / documentos</td>
+                <td>Sentence / Document embeddings</td>
+                <td>φ: 𝓓 → ℝᵈ</td>
+                <td>Búsqueda semántica, RAG, clustering</td>
+              </tr>
+              <tr>
+                <td>Imágenes</td>
+                <td>Image embeddings</td>
+                <td>φ: ℝ^(H×W×C) → ℝᵈ</td>
+                <td>Visión computacional, búsqueda visual</td>
+              </tr>
+              <tr>
+                <td>Parches de imagen</td>
+                <td>Patch embeddings</td>
+                <td>z_i = W p_i + b</td>
+                <td>Vision Transformers</td>
+              </tr>
+              <tr>
+                <td>Texto + imagen</td>
+                <td>Embeddings multimodales</td>
+                <td>φ_img(I) ≈ φ_text(T)</td>
+                <td>CLIP, recuperación cruzada</td>
+              </tr>
+              <tr>
+                <td>Audio</td>
+                <td>Audio embeddings</td>
+                <td>φ_audio: 𝓐 → ℝᵈ</td>
+                <td>Habla, música, eventos sonoros</td>
+              </tr>
+              <tr>
+                <td>Series temporales</td>
+                <td>Temporal embeddings</td>
+                <td>φ:(x₁,…,x_T) → ℝᵈ</td>
+                <td>Finanzas, sensores, medicina</td>
+              </tr>
+              <tr>
+                <td>Categorías</td>
+                <td>Entity embeddings</td>
+                <td>z_i = E_i, con E ∈ ℝ^(n×d)</td>
+                <td>Datos tabulares, recomendación</td>
+              </tr>
+              <tr>
+                <td>Knowledge graph</td>
+                <td>Relational embeddings</td>
+                <td>z_h + z_r ≈ z_t</td>
+                <td>Inferencia de relaciones, QA</td>
+              </tr>
+              <tr>
+                <td>Moléculas</td>
+                <td>Molecular graph embeddings</td>
+                <td>Φ(G) → z_G</td>
+                <td>Drug discovery, química computacional</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="espacios" class="card section">
+          <h2>5. Espacios geométricos de destino</h2>
+          <div class="grid-2" style="margin-top:12px;">
+            <div class="chart-card">
+              <h4>Comparación de espacios</h4>
+              <canvas id="spaceChart" width="540" height="320"></canvas>
+            </div>
+            <div class="mini-card">
+              <h4>Interpretación</h4>
+              <p>
+                No todos los embeddings deben vivir en un espacio euclidiano. Si el dato tiene jerarquía profunda, puede convenir el espacio hiperbólico.
+                Si lo importante son direcciones o normalización, puede ser útil una esfera. También existen espacios producto y embeddings probabilísticos.
+              </p>
+              <div class="math">
+                Euclidiano: φ(x) ∈ ℝᵈ
+                <br><br>
+                Hiperbólico: φ(x) ∈ 𝓗ᵈ o 𝓑ᵈ
+                <br><br>
+                Esférico: ||φ(x)|| = 1
+              </div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Espacio</th>
+                <th>Notación</th>
+                <th>Uso típico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Euclidiano</td>
+                <td>ℝᵈ</td>
+                <td>Clustering, similitud general, NLP, visión, tabular</td>
+              </tr>
+              <tr>
+                <td>Hiperbólico</td>
+                <td>𝓗ᵈ / 𝓑ᵈ</td>
+                <td>Jerarquías, árboles, taxonomías, ontologías</td>
+              </tr>
+              <tr>
+                <td>Esférico</td>
+                <td>𝕊ᵈ</td>
+                <td>Representaciones normalizadas, similitud angular</td>
+              </tr>
+              <tr>
+                <td>Producto</td>
+                <td>ℝᵈ × 𝓗ᵏ</td>
+                <td>Datos mixtos: clusters + jerarquías</td>
+              </tr>
+              <tr>
+                <td>Probabilístico</td>
+                <td>Distribuciones</td>
+                <td>Incertidumbre y variabilidad semántica</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="perdidas" class="card section">
+          <h2>6. Funciones de pérdida típicas</h2>
+          <div class="grid-3" style="margin-top:12px;">
+            <div class="mini-card">
+              <h4>Preservación de distancias</h4>
+              <div class="math">
+                𝓛 = Σ w_ij ( d_𝓜(φ(x_i),φ(x_j)) - d_𝓧(x_i,x_j) )²
+              </div>
+              <p>
+                Busca que las distancias en el embedding sean lo más parecidas posible a las distancias originales.
+              </p>
+            </div>
+
+            <div class="mini-card">
+              <h4>Pérdida contrastiva</h4>
+              <div class="math">
+                𝓛 = -log [ exp(sim(z_i,z_i⁺)/τ) / Σ_j exp(sim(z_i,z_j)/τ) ]
+              </div>
+              <p>
+                Acerca pares positivos y aleja pares negativos. Muy usada en aprendizaje auto-supervisado y multimodal.
+              </p>
+            </div>
+
+            <div class="mini-card">
+              <h4>Score relacional</h4>
+              <div class="math">
+                s(h,r,t) = - || z_h + z_r - z_t ||
+              </div>
+              <p>
+                Modelo clásico para grafos de conocimiento: si la relación es válida, el error debe ser pequeño.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="resumen" class="card section">
+          <h2>7. Resumen final</h2>
+          <p>
+            Un embedding puede verse como una función matemática que toma objetos complejos y los ubica en un espacio geométrico.
+            Lo esencial no es solo obtener vectores, sino que esos vectores sean <strong>estructuralmente útiles</strong>.
+          </p>
+          <div class="math">
+            objeto complejo → representación geométrica → tareas de aprendizaje
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Pregunta</th>
+                <th>Respuesta guía</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>¿Qué objeto quiero representar?</td>
+                <td>Nodo, palabra, documento, imagen, audio, molécula, secuencia, etc.</td>
+              </tr>
+              <tr>
+                <td>¿Qué estructura quiero preservar?</td>
+                <td>Similitud, distancia, jerarquía, alineación, relación, temporalidad.</td>
+              </tr>
+              <tr>
+                <td>¿Qué espacio conviene?</td>
+                <td>Euclidiano, hiperbólico, esférico, producto o probabilístico.</td>
+              </tr>
+              <tr>
+                <td>¿Qué tarea downstream quiero resolver?</td>
+                <td>Búsqueda, clasificación, clustering, recomendación, inferencia, recuperación.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="insight" style="margin-top:14px;">
+            En síntesis: un embedding no es solamente convertir algo en números, sino diseñar una representación geométrica coherente con la estructura del dato y con la tarea que se quiere resolver.
+          </div>
+        </section>
+
+        <div class="footer">
+          Material elaborado por el profesor Sergio Gevatschnaider · HTML, CSS y JavaScript · Visualización didáctica sobre embeddings
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const themeBtn = document.getElementById("themeBtn");
+    const scrollExplorerBtn = document.getElementById("scrollExplorerBtn");
+    const selector = document.getElementById("embeddingSelector");
+
+    const typeTitle = document.getElementById("typeTitle");
+    const typeDescription = document.getElementById("typeDescription");
+    const typeFormula = document.getElementById("typeFormula");
+    const domainStat = document.getElementById("domainStat");
+    const rangeStat = document.getElementById("rangeStat");
+    const preserveStat = document.getElementById("preserveStat");
+    const exampleStat = document.getElementById("exampleStat");
+    const barTitle = document.getElementById("barTitle");
+    const interactiveSvg = document.getElementById("interactiveSvg");
+
+    const typeBarChart = document.getElementById("typeBarChart");
+    const typeCtx = typeBarChart.getContext("2d");
+
+    const preservationChart = document.getElementById("preservationChart").getContext("2d");
+    const spaceChart = document.getElementById("spaceChart").getContext("2d");
+
+    themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      drawAllCharts();
+      updateExplorer();
+    });
+
+    scrollExplorerBtn.addEventListener("click", () => {
+      document.getElementById("explorador").scrollIntoView({behavior:"smooth"});
+    });
+
+    const DATA = {
+      graph: {
+        title: "Embeddings de grafos",
+        description: "Representan nodos, aristas o grafos completos como vectores. Buscan preservar vecindad, proximidad topológica o capacidad de predecir enlaces.",
+        formula: "φ: V → ℝᵈ    o    φ: V → 𝓗ᵈ\n\nd_G(u,v) ≈ || φ(u)-φ(v) ||\n\nP((u,v)∈E)=σ( φ(u)^T φ(v) )",
+        domain: "V",
+        range: "ℝᵈ",
+        preserve: "vecindad",
+        example: "red",
+        metrics: [9, 4, 7, 6, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "relaciones", "temporalidad"]
+      },
+      hyperbolic: {
+        title: "Embeddings hiperbólicos",
+        description: "Especialmente adecuados para datos jerárquicos. Ubican conceptos generales cerca del centro y conceptos específicos hacia el borde del disco o bola de Poincaré.",
+        formula: "φ: V → 𝓑ᵈ = { x∈ℝᵈ : ||x||<1 }\n\nd_𝓑(u,v)= arcosh( 1 + 2 ||u-v||² / ((1-||u||²)(1-||v||²)) )",
+        domain: "V",
+        range: "𝓗ᵈ",
+        preserve: "jerarquía",
+        example: "taxonomía",
+        metrics: [10, 10, 7, 8, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "relaciones", "temporalidad"]
+      },
+      word: {
+        title: "Embeddings de palabras",
+        description: "Asignan un vector a cada palabra del vocabulario. Palabras con contextos similares suelen tener embeddings cercanos.",
+        formula: "φ: 𝓥 → ℝᵈ\n\nφ(w)=z_w\n\ncos(z_i,z_j)= (z_i·z_j)/(||z_i|| ||z_j||)",
+        domain: "𝓥",
+        range: "ℝᵈ",
+        preserve: "semántica",
+        example: "rey",
+        metrics: [6, 3, 8, 5, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      document: {
+        title: "Embeddings de frases y documentos",
+        description: "Representan oraciones, párrafos o documentos completos. Son fundamentales en búsqueda semántica, clustering de textos y recuperación en sistemas RAG.",
+        formula: "φ: 𝓓 → ℝᵈ\n\nD_i ↦ z_i\n\nsim(D_i,D_j) ≈ cos(z_i,z_j)",
+        domain: "𝓓",
+        range: "ℝᵈ",
+        preserve: "significado",
+        example: "texto",
+        metrics: [5, 2, 8, 9, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      image: {
+        title: "Embeddings de imágenes",
+        description: "Transforman una imagen en un vector que resume su contenido visual. Dos imágenes visualmente parecidas deberían producir embeddings próximos.",
+        formula: "φ: ℝ^(H×W×C) → ℝᵈ\n\nI ↦ z_I = f_θ(I)\n\n|| φ(I₁)-φ(I₂) || pequeño si las imágenes son similares",
+        domain: "ℝ^(H×W×C)",
+        range: "ℝᵈ",
+        preserve: "similitud visual",
+        example: "imagen",
+        metrics: [6, 2, 7, 8, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      patch: {
+        title: "Patch embeddings",
+        description: "En Vision Transformers, la imagen se divide en parches. Cada parche se proyecta a un vector y la imagen pasa a verse como una secuencia de embeddings.",
+        formula: "I → {p₁,p₂,…,p_n}\n\nz_i = W p_i + b\n\nZ = [z₁,z₂,…,z_n]",
+        domain: "parches",
+        range: "ℝᵈ",
+        preserve: "tokens visuales",
+        example: "ViT",
+        metrics: [7, 1, 7, 8, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      multimodal: {
+        title: "Embeddings multimodales",
+        description: "Buscan ubicar texto e imagen, o distintas modalidades, en un mismo espacio. Así, una imagen y su descripción quedan alineadas.",
+        formula: "φ_img: 𝓘 → ℝᵈ\nφ_text: 𝓣 → ℝᵈ\n\nφ_img(I) ≈ φ_text(T)",
+        domain: "𝓘 + 𝓣",
+        range: "ℝᵈ",
+        preserve: "alineación",
+        example: "CLIP",
+        metrics: [6, 2, 7, 9, 2],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "alineación", "temporalidad"]
+      },
+      audio: {
+        title: "Embeddings de audio",
+        description: "Representan voz, música o eventos sonoros. Se usan para reconocimiento del habla, identificación de hablantes y similitud musical.",
+        formula: "φ_audio: 𝓐 → ℝᵈ\n\nx(t) ↦ z   o   S∈ℝ^(F×T) ↦ z",
+        domain: "𝓐",
+        range: "ℝᵈ",
+        preserve: "patrones sonoros",
+        example: "voz",
+        metrics: [5, 2, 6, 7, 8],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      timeseries: {
+        title: "Embeddings de series temporales",
+        description: "Codifican secuencias temporales completas en vectores. Dos series con comportamiento parecido deberían producir embeddings cercanos.",
+        formula: "φ:(x₁,x₂,…,x_T) → z ∈ ℝᵈ",
+        domain: "secuencia",
+        range: "ℝᵈ",
+        preserve: "temporalidad",
+        example: "ECG",
+        metrics: [6, 2, 6, 6, 10],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      categorical: {
+        title: "Embeddings de variables categóricas",
+        description: "Cada categoría se mapea a un vector. Son muy usados en sistemas de recomendación y deep learning sobre datos tabulares.",
+        formula: "E ∈ ℝ^(n×d)\n\nz_i = E_i\n\nφ(c_i)=z_i",
+        domain: "categorías",
+        range: "ℝᵈ",
+        preserve: "afinidad",
+        example: "país",
+        metrics: [4, 2, 6, 5, 1],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "semántica", "temporalidad"]
+      },
+      kg: {
+        title: "Knowledge graph embeddings",
+        description: "Representan entidades y relaciones. Un ejemplo clásico es TransE, donde la relación se interpreta como una traducción geométrica.",
+        formula: "(h,r,t)\n\nz_h + z_r ≈ z_t\n\ns(h,r,t)= - || z_h + z_r - z_t ||",
+        domain: "triples",
+        range: "ℝᵈ",
+        preserve: "relaciones",
+        example: "KG",
+        metrics: [8, 6, 7, 10, 1],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "relaciones", "temporalidad"]
+      },
+      molecular: {
+        title: "Embeddings moleculares",
+        description: "Una molécula se modela como un grafo y luego se representa como un vector. Esto permite predecir propiedades químicas o biológicas.",
+        formula: "G=(V,E)\n\nΦ(G) → z_G ∈ ℝᵈ",
+        domain: "grafo G",
+        range: "ℝᵈ",
+        preserve: "estructura química",
+        example: "molécula",
+        metrics: [10, 4, 8, 8, 1],
+        metricLabels: ["estructura", "jerarquía", "vecindad", "relaciones", "temporalidad"]
+      }
+    };
+
+    function getCssVar(name){
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function clearCanvas(ctx, w, h){
+      ctx.clearRect(0,0,w,h);
+    }
+
+    function drawBarChart(ctx, w, h, labels, values, titleColor){
+      clearCanvas(ctx,w,h);
+
+      const pad = {top:20, right:14, bottom:52, left:42};
+      const chartW = w - pad.left - pad.right;
+      const chartH = h - pad.top - pad.bottom;
+      const maxVal = 10;
+
+      ctx.strokeStyle = getCssVar('--line');
+      ctx.lineWidth = 1;
+
+      for(let i=0; i<=5; i++){
+        const y = pad.top + chartH - (i/5)*chartH;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(w - pad.right, y);
+        ctx.stroke();
+
+        ctx.fillStyle = getCssVar('--muted');
+        ctx.font = "12px Inter";
+        ctx.fillText(String(i*2), 10, y + 4);
+      }
+
+      const barW = chartW / values.length * .58;
+      values.forEach((v, i) => {
+        const x = pad.left + i*(chartW/values.length) + (chartW/values.length - barW)/2;
+        const bh = (v/maxVal)*chartH;
+        const y = pad.top + chartH - bh;
+
+        const grad = ctx.createLinearGradient(0,y,0,y+bh);
+        grad.addColorStop(0, getCssVar('--accent-2'));
+        grad.addColorStop(1, getCssVar('--accent'));
+        ctx.fillStyle = grad;
+        roundRect(ctx, x, y, barW, bh, 10, true, false);
+
+        ctx.fillStyle = titleColor;
+        ctx.font = "12px Inter";
+        ctx.textAlign = "center";
+        wrapText(ctx, labels[i], x + barW/2, h - 28, barW + 12, 13);
+        ctx.fillText(v.toString(), x + barW/2, y - 8);
+      });
+
+      ctx.textAlign = "left";
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke){
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y, x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x, y+h, r);
+      ctx.arcTo(x, y+h, x, y, r);
+      ctx.arcTo(x, y, x+w, y, r);
+      ctx.closePath();
+      if(fill) ctx.fill();
+      if(stroke) ctx.stroke();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = text.split(' ');
+      let line = '';
+      let lines = [];
+      for(let n=0; n<words.length; n++){
+        const testLine = line + words[n] + ' ';
+        const testWidth = ctx.measureText(testLine).width;
+        if(testWidth > maxWidth && n > 0){
+          lines.push(line);
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+      lines.forEach((ln, idx)=>{
+        ctx.fillText(ln.trim(), x, y + idx*lineHeight);
+      });
+    }
+
+    function drawPreservationChart(){
+      const w = 520, h = 280;
+      drawBarChart(
+        preservationChart,
+        w,h,
+        ["similitud","vecindad","jerarquía","relaciones","temporalidad","alineación"],
+        [9,8,7,8,6,7],
+        getCssVar('--muted')
+      );
+    }
+
+    function drawSpaceChart(){
+      clearCanvas(spaceChart, 540, 320);
+      const ctx = spaceChart;
+      const titleColor = getCssVar('--text');
+      const muted = getCssVar('--muted');
+      const accent = getCssVar('--accent');
+      const accent2 = getCssVar('--accent-2');
+      const accent3 = getCssVar('--accent-3');
+      const line = getCssVar('--line');
+
+      const rows = [
+        {name:"Euclidiano ℝᵈ", value:7, color:accent, desc:"general"},
+        {name:"Hiperbólico 𝓗ᵈ", value:10, color:accent2, desc:"jerarquías"},
+        {name:"Esférico 𝕊ᵈ", value:5, color:accent3, desc:"angular"},
+        {name:"Producto", value:8, color:accent, desc:"mixto"},
+        {name:"Probabilístico", value:6, color:accent2, desc:"incertidumbre"}
+      ];
+
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 1;
+      rows.forEach((row, i)=>{
+        const y = 36 + i*54;
+        ctx.fillStyle = titleColor;
+        ctx.font = "14px Inter";
+        ctx.fillText(row.name, 14, y);
+        ctx.fillStyle = muted;
+        ctx.font = "12px Inter";
+        ctx.fillText(row.desc, 14, y + 16);
+
+        ctx.strokeStyle = line;
+        roundRect(ctx, 180, y - 14, 310, 20, 10, false, true);
+        ctx.fillStyle = row.color;
+        roundRect(ctx, 180, y - 14, row.value/10 * 310, 20, 10, true, false);
+
+        ctx.fillStyle = muted;
+        ctx.font = "12px Inter";
+        ctx.fillText(row.value + "/10", 500, y);
+      });
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px Inter";
+      ctx.fillText("Índice visual de adecuación estructural (esquemático)", 14, 302);
+    }
+
+    function drawTypeBarChart(item){
+      drawBarChart(typeCtx, 440, 250, item.metricLabels, item.metrics, getCssVar('--muted'));
+    }
+
+    function updateExplorer(){
+      const key = selector.value;
+      const item = DATA[key];
+
+      typeTitle.textContent = item.title;
+      typeDescription.textContent = item.description;
+      typeFormula.textContent = item.formula;
+      domainStat.textContent = item.domain;
+      rangeStat.textContent = item.range;
+      preserveStat.textContent = item.preserve;
+      exampleStat.textContent = item.example;
+      barTitle.textContent = "Perfil estructural";
+      drawTypeBarChart(item);
+      drawInteractiveDiagram(key);
+    }
+
+    function drawInteractiveDiagram(type){
+      const text = getCssVar('--text');
+      const muted = getCssVar('--muted');
+      const line = getCssVar('--line');
+      const accent = getCssVar('--accent');
+      const accent2 = getCssVar('--accent-2');
+      const accent3 = getCssVar('--accent-3');
+      const outside = getCssVar('--outside');
+
+      function circle(cx, cy, r, fill, stroke='transparent', strokeW=1){
+        return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+      }
+      function lineEl(x1,y1,x2,y2, stroke, sw=2, opacity=.8){
+        return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" opacity="${opacity}" />`;
+      }
+      function textEl(x,y,txt,size=14,weight=700,fill=text,anchor='middle'){
+        return `<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${fill}" font-size="${size}" font-weight="${weight}" font-family="Inter, sans-serif">${txt}</text>`;
+      }
+      function rect(x,y,w,h,rx=18, fill='rgba(255,255,255,.04)', stroke=line){
+        return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${stroke}"/>`;
+      }
+      function arrow(x1,y1,x2,y2,color=accent){
+        const angle = Math.atan2(y2-y1,x2-x1);
+        const a = 10;
+        const hx = x2 - a*Math.cos(angle - Math.PI/6);
+        const hy = y2 - a*Math.sin(angle - Math.PI/6);
+        const hx2 = x2 - a*Math.cos(angle + Math.PI/6);
+        const hy2 = y2 - a*Math.sin(angle + Math.PI/6);
+        return `
+          <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="4" stroke-linecap="round"/>
+          <polygon points="${x2},${y2} ${hx},${hy} ${hx2},${hy2}" fill="${color}"/>
+        `;
+      }
+
+      let svg = `
+        <defs>
+          <linearGradient id="grad1" x1="0" x2="1">
+            <stop offset="0%" stop-color="${accent}" />
+            <stop offset="100%" stop-color="${accent2}" />
+          </linearGradient>
+        </defs>
+      `;
+
+      if(type === 'graph'){
+        svg += rect(30, 40, 300, 220);
+        svg += textEl(180, 70, "Grafo original", 24, 900);
+        svg += lineEl(95,130,155,100,text,2,.5) + lineEl(155,100,210,150,text,2,.5) + lineEl(95,130,130,190,text,2,.5) +
+               lineEl(210,150,250,100,text,2,.5) + lineEl(130,190,210,150,text,2,.5);
+        svg += circle(95,130,16,accent3) + circle(155,100,14,accent) + circle(210,150,14,accent2) +
+               circle(130,190,13,accent) + circle(250,100,12,accent2);
+        svg += textEl(180, 235, "nodos y aristas", 14, 700, muted);
+
+        svg += arrow(350,150,430,150,'url(#grad1)');
+        svg += textEl(390,120,"φ",20,900,muted);
+
+        svg += rect(470, 40, 330, 220);
+        svg += textEl(635, 70, "Embedding", 24, 900);
+        [ [560,130],[620,100],[685,120],[735,165],[615,190],[690,210] ].forEach((p,i)=>{
+          svg += circle(p[0], p[1], 12, [accent,accent2,accent3,accent,accent2,accent3][i]);
+        });
+        svg += lineEl(560,130,620,100, outside,2,.9) + lineEl(620,100,685,120, outside,2,.9) + lineEl(685,120,735,165, outside,2,.9);
+        svg += textEl(635,235,"cercanía geométrica entre nodos",14,700,muted);
+      }
+
+      if(type === 'hyperbolic'){
+        svg += rect(30, 40, 360, 400);
+        svg += textEl(210, 70, "Disco / bola de Poincaré", 24, 900);
+        svg += `<circle cx="210" cy="250" r="150" fill="rgba(80,216,255,.04)" stroke="${accent}" stroke-width="2"/>`;
+        [0.33,0.66].forEach(fr => {
+          svg += `<circle cx="210" cy="250" r="${150*fr}" fill="none" stroke="${line}" stroke-width="1"/>`;
+        });
+        svg += circle(210,250,12,accent3);
+        const pts = [[210,170],[150,205],[272,212],[120,270],[302,278],[98,335],[326,345]];
+        pts.forEach((p,i)=>{
+          svg += lineEl(210,250,p[0],p[1], outside, 1.6, .7);
+          svg += circle(p[0],p[1],10,[accent,accent2,accent,accent2,accent,accent2,accent3][i]);
+        });
+        svg += textEl(210, 423, "centro = conceptos generales", 14, 800, muted);
+        svg += textEl(210, 442, "borde = mayor profundidad jerárquica", 14, 800, muted);
+
+        svg += arrow(410,240,485,240,'url(#grad1)');
+
+        svg += rect(520, 90, 280, 260);
+        svg += textEl(660, 126, "Intuición", 22, 900);
+        svg += textEl(660, 170, "más espacio hacia el borde", 16, 800, muted);
+        svg += textEl(660, 198, "compatible con árboles", 16, 800, muted);
+        svg += textEl(660, 226, "bueno para taxonomías", 16, 800, muted);
+        svg += textEl(660, 254, "preserva jerarquía + similitud", 16, 800, muted);
+        svg += textEl(660, 307, "φ: V → 𝓗ᵈ", 18, 900, accent);
+      }
+
+      if(type === 'word'){
+        svg += rect(40,50,300,370);
+        svg += textEl(190,82,"Palabras",22,900);
+        ["rey","reina","príncipe","niña","mujer","hombre"].forEach((w,i)=>{
+          svg += rect(90,110+i*42,200,30,12,'rgba(255,255,255,.04)',line);
+          svg += textEl(190,130+i*42,w,15,800,muted);
+        });
+
+        svg += arrow(360,220,445,220,'url(#grad1)');
+        svg += textEl(402,190,"φ",20,900,muted);
+
+        svg += rect(470,50,320,370);
+        svg += textEl(630,82,"Espacio vectorial",22,900);
+        const pts = [
+          [560,180,"rey",accent],
+          [610,160,"reina",accent2],
+          [595,120,"príncipe",accent3],
+          [705,225,"niña",accent2],
+          [660,205,"mujer",accent],
+          [550,235,"hombre",accent3]
+        ];
+        pts.forEach(p=>{
+          svg += circle(p[0],p[1],10,p[3]);
+          svg += textEl(p[0], p[1]-15, p[2], 12, 800, muted);
+        });
+        svg += textEl(630,382,"palabras cercanas semánticamente quedan próximas",14,700,muted);
+      }
+
+      if(type === 'document'){
+        svg += rect(40,55,310,360);
+        svg += textEl(195,85,"Documentos",22,900);
+        for(let i=0;i<4;i++){
+          svg += rect(95,120+i*62,200,46,12,'rgba(255,255,255,.04)',line);
+          svg += lineEl(118,136+i*62,260,136+i*62, muted, 2,.35);
+          svg += lineEl(118,149+i*62,275,149+i*62, muted, 2,.28);
+          svg += lineEl(118,160+i*62,240,160+i*62, muted, 2,.20);
+        }
+
+        svg += arrow(365,235,445,235,'url(#grad1)');
+        svg += rect(475,55,315,360);
+        svg += textEl(632,85,"Cluster semántico",22,900);
+        const groups = [
+          [[550,150],[590,170],[565,205]],
+          [[695,145],[730,182],[675,200]],
+          [[610,290],[650,320],[570,335]]
+        ];
+        groups.forEach((g, idx)=>{
+          g.forEach((p)=>{
+            svg += circle(p[0],p[1],10,[accent,accent2,accent3][idx]);
+          });
+        });
+        svg += textEl(632,388,"documentos similares → embeddings cercanos",14,700,muted);
+      }
+
+      if(type === 'image'){
+        svg += rect(40,60,300,340);
+        svg += textEl(190,90,"Imagen",22,900);
+        for(let r=0;r<3;r++){
+          for(let c=0;c<3;c++){
+            const col = [accent,accent2,accent3][(r+c)%3];
+            svg += `<rect x="${95+c*58}" y="${125+r*58}" width="46" height="46" rx="10" fill="${col}" opacity=".8"/>`;
+          }
+        }
+        svg += textEl(190,352,"píxeles / contenido visual",14,700,muted);
+
+        svg += arrow(360,230,445,230,'url(#grad1)');
+        svg += rect(475,60,320,340);
+        svg += textEl(635,90,"Embedding visual",22,900);
+        svg += rect(560,145,150,44,12,'rgba(80,216,255,.12)',line);
+        svg += textEl(635,173,"z_I ∈ ℝᵈ",18,900,accent);
+        svg += textEl(635,230,"resumen del contenido de la imagen",15,800,muted);
+        svg += textEl(635,260,"útil para similitud, clasificación",15,800,muted);
+        svg += textEl(635,290,"y búsqueda visual",15,800,muted);
+      }
+
+      if(type === 'patch'){
+        svg += rect(40,55,320,360);
+        svg += textEl(200,85,"Imagen → parches",22,900);
+        let k = 1;
+        for(let r=0;r<4;r++){
+          for(let c=0;c<4;c++){
+            svg += `<rect x="${90+c*48}" y="${120+r*48}" width="40" height="40" rx="8" fill="rgba(80,216,255,.12)" stroke="${line}"/>`;
+            svg += textEl(110+c*48,145+r*48,String(k++),10,800,muted);
+          }
+        }
+        svg += textEl(200,365,"cada parche actúa como un token visual",14,700,muted);
+
+        svg += arrow(375,235,455,235,'url(#grad1)');
+
+        svg += rect(490,55,290,360);
+        svg += textEl(635,85,"Secuencia de embeddings",22,900);
+        for(let i=0;i<6;i++){
+          svg += rect(550,130+i*34,170,24,10,'rgba(255,255,255,.04)',line);
+          svg += textEl(635,147+i*34,`z_${i+1} = W p_${i+1} + b`,13,800,muted);
+        }
+        svg += textEl(635,375,"Vision Transformer: imagen ≈ secuencia",14,700,muted);
+      }
+
+      if(type === 'multimodal'){
+        svg += rect(40,65,250,330);
+        svg += textEl(165,95,"Imagen",22,900);
+        svg += `<rect x="85" y="130" width="160" height="120" rx="18" fill="rgba(255,255,255,.04)" stroke="${line}"/>`;
+        svg += circle(135,170,18,accent3);
+        svg += circle(190,160,15,accent);
+        svg += circle(160,210,16,accent2);
+
+        svg += rect(570,65,250,330);
+        svg += textEl(695,95,"Texto",22,900);
+        for(let i=0;i<5;i++){
+          svg += lineEl(625,135+i*34,760-(i%2)*30,135+i*34,muted,3,.45);
+        }
+
+        svg += arrow(292,230,408,230,'url(#grad1)');
+        svg += arrow(568,230,452,230,'url(#grad1)');
+
+        svg += rect(418,145,110,170,20,'rgba(80,216,255,.08)',line);
+        svg += textEl(473,176,"mismo",16,900);
+        svg += textEl(473,202,"espacio",16,900);
+        svg += textEl(473,228,"latente",16,900);
+        svg += textEl(473,270,"I y T",16,900,muted);
+        svg += textEl(473,292,"alineados",16,900,muted);
+      }
+
+      if(type === 'audio'){
+        svg += rect(40,70,320,330);
+        svg += textEl(200,100,"Señal de audio",22,900);
+        let path = "M 75 235 ";
+        for(let x=0;x<=240;x+=8){
+          const y = 235 + Math.sin(x/18)*45 + Math.sin(x/6)*9;
+          path += `L ${75+x} ${y} `;
+        }
+        svg += `<path d="${path}" fill="none" stroke="${accent}" stroke-width="3"/>`;
+        svg += textEl(200,365,"voz / música / eventos sonoros",14,700,muted);
+
+        svg += arrow(380,235,460,235,'url(#grad1)');
+
+        svg += rect(490,70,290,330);
+        svg += textEl(635,100,"Embedding de audio",22,900);
+        svg += rect(560,155,150,44,12,'rgba(80,216,255,.12)',line);
+        svg += textEl(635,183,"z_audio ∈ ℝᵈ",18,900,accent);
+        svg += textEl(635,235,"hablante, fonética, timbre,",15,800,muted);
+        svg += textEl(635,261,"ritmo o contenido acústico",15,800,muted);
+      }
+
+      if(type === 'timeseries'){
+        svg += rect(40,70,320,330);
+        svg += textEl(200,100,"Serie temporal",22,900);
+        let pts = [];
+        for(let i=0;i<12;i++){
+          pts.push([80+i*22, 300 - (Math.sin(i*.7)+i*.14)*28]);
+        }
+        pts.forEach((p,i)=>{
+          if(i>0) svg += lineEl(pts[i-1][0],pts[i-1][1],p[0],p[1],accent,3,.9);
+          svg += circle(p[0],p[1],5,accent2);
+        });
+        svg += textEl(200,365,"x₁, x₂, …, x_T",14,700,muted);
+
+        svg += arrow(380,235,460,235,'url(#grad1)');
+
+        svg += rect(490,70,290,330);
+        svg += textEl(635,100,"Embedding temporal",22,900);
+        svg += rect(560,155,150,44,12,'rgba(80,216,255,.12)',line);
+        svg += textEl(635,183,"z ∈ ℝᵈ",18,900,accent);
+        svg += textEl(635,235,"resume evolución y patrón",15,800,muted);
+        svg += textEl(635,260,"dinámico de la secuencia",15,800,muted);
+      }
+
+      if(type === 'categorical'){
+        svg += rect(50,70,300,330);
+        svg += textEl(200,100,"Categorías",22,900);
+        const cats = ["Argentina","Brasil","Chile","México","Perú"];
+        cats.forEach((c,i)=>{
+          svg += rect(95,135+i*42,210,30,12,'rgba(255,255,255,.04)',line);
+          svg += textEl(200,155+i*42,c,14,800,muted);
+        });
+
+        svg += arrow(370,235,450,235,'url(#grad1)');
+
+        svg += rect(480,70,300,330);
+        svg += textEl(630,100,"Matriz de embeddings",22,900);
+        for(let i=0;i<5;i++){
+          svg += rect(535,135+i*40,190,26,8,'rgba(80,216,255,.08)',line);
+          svg += textEl(630,153+i*40,`E_${i+1} = [ … ]`,13,800,muted);
+        }
+        svg += textEl(630,368,"cada categoría toma una fila de E",14,700,muted);
+      }
+
+      if(type === 'kg'){
+        svg += rect(50,70,320,330);
+        svg += textEl(210,100,"Triple relacional",22,900);
+        svg += circle(120,220,18,accent3);
+        svg += circle(210,150,16,accent2);
+        svg += circle(300,220,18,accent);
+        svg += lineEl(138,210,192,160,accent,3,.9);
+        svg += lineEl(228,160,282,210,accent,3,.9);
+        svg += textEl(120,250,"h",16,900,muted);
+        svg += textEl(210,130,"r",16,900,muted);
+        svg += textEl(300,250,"t",16,900,muted);
+        svg += textEl(210,355,"(h,r,t)",14,800,muted);
+
+        svg += arrow(390,235,470,235,'url(#grad1)');
+        svg += rect(500,70,280,330);
+        svg += textEl(640,100,"TransE",22,900);
+        svg += textEl(640,170,"z_h + z_r ≈ z_t",20,900,accent);
+        svg += textEl(640,220,"la relación actúa",16,800,muted);
+        svg += textEl(640,244,"como una traslación",16,800,muted);
+        svg += textEl(640,268,"en el espacio",16,800,muted);
+      }
+
+      if(type === 'molecular'){
+        svg += rect(40,65,320,340);
+        svg += textEl(200,95,"Molécula como grafo",22,900);
+        svg += lineEl(125,205,200,155,text,3,.5) + lineEl(200,155,270,210,text,3,.5) + lineEl(200,155,205,260,text,3,.5);
+        svg += circle(125,205,18,accent3);
+        svg += circle(200,155,18,accent);
+        svg += circle(270,210,18,accent2);
+        svg += circle(205,260,16,accent);
+        svg += textEl(200,368,"átomos = nodos, enlaces = aristas",14,700,muted);
+
+        svg += arrow(382,235,462,235,'url(#grad1)');
+
+        svg += rect(490,65,300,340);
+        svg += textEl(640,95,"Embedding molecular",22,900);
+        svg += rect(555,155,170,46,12,'rgba(80,216,255,.12)',line);
+        svg += textEl(640,184,"z_G ∈ ℝᵈ",18,900,accent);
+        svg += textEl(640,236,"sirve para predecir",16,800,muted);
+        svg += textEl(640,261,"toxicidad, actividad,",16,800,muted);
+        svg += textEl(640,286,"propiedades y afinidad",16,800,muted);
+      }
+
+      interactiveSvg.innerHTML = svg;
+    }
+
+    selector.addEventListener("change", updateExplorer);
+
+    function drawAllCharts(){
+      drawPreservationChart();
+      drawSpaceChart();
+      updateExplorer();
+    }
+
+    drawAllCharts();
+  </script>
+</body>
+</html>

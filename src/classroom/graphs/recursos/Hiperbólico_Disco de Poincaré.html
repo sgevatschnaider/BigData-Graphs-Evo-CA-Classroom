@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Disco de Poincaré | Visualización interactiva</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg2: #0e1b2e;
+      --card: rgba(255, 255, 255, 0.075);
+      --card2: rgba(255, 255, 255, 0.11);
+      --text: #eef6ff;
+      --muted: #b7c4d8;
+      --line: rgba(255,255,255,.17);
+      --accent: #67e8f9;
+      --accent2: #a78bfa;
+      --accent3: #fbbf24;
+      --green: #86efac;
+      --red: #fb7185;
+      --canvas: #081426;
+      --shadow: 0 28px 80px rgba(0,0,0,.35);
+    }
+
+    body.light {
+      --bg: #f3f7fb;
+      --bg2: #e9eef6;
+      --card: rgba(255,255,255,.88);
+      --card2: rgba(255,255,255,1);
+      --text: #0f172a;
+      --muted: #475569;
+      --line: rgba(15,23,42,.16);
+      --accent: #0891b2;
+      --accent2: #7c3aed;
+      --accent3: #b45309;
+      --green: #15803d;
+      --red: #be123c;
+      --canvas: #ffffff;
+      --shadow: 0 28px 80px rgba(15,23,42,.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(103,232,249,.18), transparent 32%),
+        radial-gradient(circle at 84% 18%, rgba(167,139,250,.18), transparent 30%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+    }
+
+    header {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 38px 20px 18px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      padding: 34px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -130px;
+      top: -140px;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(103,232,249,.28), transparent 67%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 5vw, 4.4rem);
+      line-height: .98;
+      letter-spacing: -.06em;
+    }
+
+    .subtitle {
+      max-width: 980px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: rgba(103,232,249,.16);
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 20px 44px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(360px, .65fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+
+    .canvasWrap {
+      padding: 18px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 680px;
+      display: block;
+      border-radius: 24px;
+      background: var(--canvas);
+      border: 1px solid var(--line);
+    }
+
+    .side {
+      display: grid;
+      gap: 16px;
+    }
+
+    .box {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.12);
+    }
+
+    .box h2 {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+      letter-spacing: -.03em;
+    }
+
+    .box h3 {
+      margin: 18px 0 8px;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .box p {
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 0 0 12px;
+      font-size: .96rem;
+    }
+
+    .formula {
+      overflow-x: auto;
+      margin: 10px 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(103,232,249,.28);
+      border-radius: 16px;
+      background: rgba(103,232,249,.10);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: .93rem;
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .92rem;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .checks {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.1);
+      accent-color: var(--accent);
+    }
+
+    .metricGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.055);
+    }
+
+    .metric small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .metric strong {
+      font-size: 1.15rem;
+      color: var(--accent3);
+    }
+
+    .full {
+      margin-top: 22px;
+      padding: 26px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(103,232,249,.11), rgba(167,139,250,.08));
+      box-shadow: var(--shadow);
+    }
+
+    .full h2 {
+      margin-top: 0;
+      letter-spacing: -.035em;
+    }
+
+    .gridExplain {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.055);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .mini h3 {
+      margin: 0 0 10px;
+      color: var(--accent);
+    }
+
+    .mini p {
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 0 0 10px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 20px 46px;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 1050px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 610px;
+      }
+
+      .gridExplain {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .hero {
+        padding: 24px;
+      }
+
+      canvas {
+        height: 480px;
+      }
+
+      .metricGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <section class="hero">
+      <h1>Disco de Poincaré</h1>
+      <p class="subtitle">
+        Una visualización interactiva del plano hiperbólico dentro de un disco finito.
+        El borde representa el infinito, las distancias se deforman cerca de la frontera
+        y las rectas hiperbólicas se ven como diámetros o arcos ortogonales al borde.
+      </p>
+
+      <div class="toolbar">
+        <button id="themeBtn">Cambiar tema</button>
+        <button id="animBtn">Pausar animación</button>
+        <button id="resetBtn">Reiniciar puntos</button>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="layout">
+      <article class="panel">
+        <div class="canvasWrap">
+          <canvas id="poincareCanvas"></canvas>
+        </div>
+      </article>
+
+      <aside class="side">
+        <section class="box">
+          <h2>Controles</h2>
+
+          <div class="controls">
+            <div class="control">
+              <label>
+                Radio hiperbólico r
+                <span id="rValue">2.40</span>
+              </label>
+              <input id="rSlider" type="range" min="0.2" max="6" step="0.05" value="2.4">
+            </div>
+
+            <div class="control">
+              <label>
+                Niveles del árbol
+                <span id="levelValue">4</span>
+              </label>
+              <input id="levelSlider" type="range" min="1" max="6" step="1" value="4">
+            </div>
+
+            <div class="control">
+              <label>
+                Ramificación
+                <span id="branchValue">3</span>
+              </label>
+              <input id="branchSlider" type="range" min="2" max="4" step="1" value="3">
+            </div>
+          </div>
+
+          <div class="checks">
+            <label><input id="showCircles" type="checkbox" checked> Mostrar círculos hiperbólicos</label>
+            <label><input id="showGeodesics" type="checkbox" checked> Mostrar geodésicas</label>
+            <label><input id="showTree" type="checkbox" checked> Mostrar árbol jerárquico</label>
+            <label><input id="showMetric" type="checkbox" checked> Mostrar deformación de la métrica</label>
+          </div>
+        </section>
+
+        <section class="box">
+          <h2>Lectura matemática</h2>
+          <p>
+            El disco de Poincaré representa el plano hiperbólico dentro del disco unitario:
+          </p>
+          <div class="formula">D = {(x,y) ∈ R² : x² + y² &lt; 1}</div>
+
+          <p>
+            El borde <b>x² + y² = 1</b> no pertenece al espacio. Es el infinito hiperbólico.
+          </p>
+
+          <h3>Métrica</h3>
+          <div class="formula">ds² = 4(dx² + dy²) / (1 − x² − y²)²</div>
+          <p>
+            Cerca del centro, la métrica se parece más a la euclidiana.
+            Cerca del borde, el factor de escala crece muchísimo.
+          </p>
+
+          <h3>Radio visual</h3>
+          <div class="formula">ρ = tanh(r / 2)</div>
+          <p>
+            Un radio hiperbólico grande se ve comprimido cerca del borde del disco.
+          </p>
+        </section>
+
+        <section class="box">
+          <h2>Valores actuales</h2>
+          <div class="metricGrid">
+            <div class="metric">
+              <small>Radio visual ρ</small>
+              <strong id="rhoOut">0.00</strong>
+            </div>
+            <div class="metric">
+              <small>Factor métrico en ρ</small>
+              <strong id="scaleOut">0.00</strong>
+            </div>
+            <div class="metric">
+              <small>Distancia d(A,B)</small>
+              <strong id="distOut">0.00</strong>
+            </div>
+            <div class="metric">
+              <small>Crecimiento área</small>
+              <strong id="areaOut">0.00</strong>
+            </div>
+          </div>
+
+          <h3>Distancia entre puntos</h3>
+          <div class="formula">dH(u,v)=arcosh(1 + 2||u−v||² / ((1−||u||²)(1−||v||²)))</div>
+          <p>
+            Arrastrá los puntos A y B dentro del disco para ver cómo cambia la distancia.
+          </p>
+        </section>
+      </aside>
+    </section>
+
+    <section class="full">
+      <h2>Explicación completa del disco de Poincaré</h2>
+
+      <div class="gridExplain">
+        <div class="mini">
+          <h3>1. Qué representa</h3>
+          <p>
+            El disco de Poincaré es un modelo del plano hiperbólico.
+            Aunque visualmente vemos un disco euclidiano común, las distancias internas
+            se calculan con una métrica distinta.
+          </p>
+          <p>
+            El punto central representa una zona donde la geometría parece más familiar.
+            El borde representa el infinito y nunca se alcanza con distancia hiperbólica finita.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>2. Por qué el borde es infinito</h3>
+          <p>
+            Si un punto está a distancia euclidiana ρ del centro, su distancia hiperbólica
+            al centro es:
+          </p>
+          <div class="formula">r = 2 artanh(ρ) = ln((1 + ρ) / (1 − ρ))</div>
+          <p>
+            Cuando ρ se acerca a 1, el denominador 1 − ρ se acerca a 0.
+            Por eso la distancia tiende a infinito.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>3. Cómo se ven las rectas</h3>
+          <p>
+            Las rectas hiperbólicas se llaman geodésicas.
+            En el disco de Poincaré se ven como diámetros o como arcos de circunferencia
+            que cortan el borde en ángulo recto.
+          </p>
+          <p>
+            Por eso una línea que parece curva en el dibujo puede ser, en realidad,
+            el camino más corto de la geometría hiperbólica.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>4. Qué conserva el modelo</h3>
+          <p>
+            El disco de Poincaré es conforme: conserva ángulos.
+            Si dos curvas se cruzan con cierto ángulo en el plano hiperbólico,
+            ese ángulo se ve correctamente en el disco.
+          </p>
+          <p>
+            Pero no conserva tamaños ni distancias visuales. Cerca del borde todo se ve
+            pequeño porque se está comprimiendo una cantidad infinita de espacio.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>5. Crecimiento exponencial</h3>
+          <p>
+            En el plano euclidiano, el área de un disco crece como πr².
+            En el plano hiperbólico, el área crece como:
+          </p>
+          <div class="formula">A_H²(r) = 2π(cosh(r) − 1)</div>
+          <p>
+            Para radios grandes, cosh(r) se comporta aproximadamente como eʳ/2.
+            Por eso el espacio hiperbólico crece exponencialmente.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>6. Por qué sirve para árboles</h3>
+          <p>
+            Un árbol regular también crece exponencialmente.
+            Si cada nodo tiene b hijos, el nivel ℓ tiene aproximadamente b^ℓ nodos.
+          </p>
+          <div class="formula">nivel ℓ ≈ b^ℓ</div>
+          <p>
+            Como el espacio hiperbólico ofrece cada vez más “espacio hacia afuera”,
+            es muy natural para representar jerarquías, taxonomías y grafos arborescentes.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Material didáctico interactivo sobre geometría hiperbólica y disco de Poincaré.
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("poincareCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const state = {
+      r: 2.4,
+      levels: 4,
+      branch: 3,
+      running: true,
+      t: 0,
+      showCircles: true,
+      showGeodesics: true,
+      showTree: true,
+      showMetric: true,
+      A: { x: -0.34, y: 0.28 },
+      B: { x: 0.42, y: -0.18 },
+      dragging: null
+    };
+
+    const rSlider = document.getElementById("rSlider");
+    const levelSlider = document.getElementById("levelSlider");
+    const branchSlider = document.getElementById("branchSlider");
+
+    const rValue = document.getElementById("rValue");
+    const levelValue = document.getElementById("levelValue");
+    const branchValue = document.getElementById("branchValue");
+
+    const rhoOut = document.getElementById("rhoOut");
+    const scaleOut = document.getElementById("scaleOut");
+    const distOut = document.getElementById("distOut");
+    const areaOut = document.getElementById("areaOut");
+
+    function css(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      draw();
+    });
+
+    document.getElementById("animBtn").addEventListener("click", (e) => {
+      state.running = !state.running;
+      e.target.textContent = state.running ? "Pausar animación" : "Reanudar animación";
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      state.A = { x: -0.34, y: 0.28 };
+      state.B = { x: 0.42, y: -0.18 };
+      draw();
+    });
+
+    rSlider.addEventListener("input", () => {
+      state.r = parseFloat(rSlider.value);
+      rValue.textContent = state.r.toFixed(2);
+      updateNumbers();
+      draw();
+    });
+
+    levelSlider.addEventListener("input", () => {
+      state.levels = parseInt(levelSlider.value, 10);
+      levelValue.textContent = state.levels;
+      draw();
+    });
+
+    branchSlider.addEventListener("input", () => {
+      state.branch = parseInt(branchSlider.value, 10);
+      branchValue.textContent = state.branch;
+      draw();
+    });
+
+    document.getElementById("showCircles").addEventListener("change", e => {
+      state.showCircles = e.target.checked;
+      draw();
+    });
+
+    document.getElementById("showGeodesics").addEventListener("change", e => {
+      state.showGeodesics = e.target.checked;
+      draw();
+    });
+
+    document.getElementById("showTree").addEventListener("change", e => {
+      state.showTree = e.target.checked;
+      draw();
+    });
+
+    document.getElementById("showMetric").addEventListener("change", e => {
+      state.showMetric = e.target.checked;
+      draw();
+    });
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { w: rect.width, h: rect.height };
+    }
+
+    function diskParams() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const R = Math.min(w, h) * 0.42;
+      return {
+        w, h,
+        cx: w / 2,
+        cy: h / 2 + 14,
+        R
+      };
+    }
+
+    function toScreen(p, params = diskParams()) {
+      return {
+        x: params.cx + params.R * p.x,
+        y: params.cy - params.R * p.y
+      };
+    }
+
+    function fromScreen(x, y, params = diskParams()) {
+      return {
+        x: (x - params.cx) / params.R,
+        y: -(y - params.cy) / params.R
+      };
+    }
+
+    function norm2(p) {
+      return p.x * p.x + p.y * p.y;
+    }
+
+    function norm(p) {
+      return Math.sqrt(norm2(p));
+    }
+
+    function clampInsideDisk(p) {
+      const n = norm(p);
+      if (n < 0.965) return p;
+      return {
+        x: p.x / n * 0.965,
+        y: p.y / n * 0.965
+      };
+    }
+
+    function acosh(x) {
+      return Math.log(x + Math.sqrt(x * x - 1));
+    }
+
+    function hypDistance(u, v) {
+      const dx = u.x - v.x;
+      const dy = u.y - v.y;
+      const duv2 = dx * dx + dy * dy;
+      const nu = norm2(u);
+      const nv = norm2(v);
+      const value = 1 + (2 * duv2) / ((1 - nu) * (1 - nv));
+      return acosh(Math.max(1, value));
+    }
+
+    function updateNumbers() {
+      const rho = Math.tanh(state.r / 2);
+      const scale = 2 / (1 - rho * rho);
+      const dist = hypDistance(state.A, state.B);
+      const area = 2 * Math.PI * (Math.cosh(state.r) - 1);
+
+      rhoOut.textContent = rho.toFixed(4);
+      scaleOut.textContent = scale.toFixed(2);
+      distOut.textContent = dist.toFixed(3);
+      areaOut.textContent = area.toFixed(2);
+    }
+
+    function clear(w, h) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = css("--canvas");
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawLabel(text, x, y, color = css("--muted"), size = 13, weight = 700) {
+      ctx.fillStyle = color;
+      ctx.font = `${weight} ${size}px Inter, system-ui, sans-serif`;
+      ctx.fillText(text, x, y);
+    }
+
+    function draw() {
+      const { w, h } = resize();
+      const params = diskParams();
+      const { cx, cy, R } = params;
+
+      clear(w, h);
+
+      drawBackgroundGrid(params);
+      drawDiskBase(params);
+
+      if (state.showCircles) drawHyperbolicCircles(params);
+      if (state.showMetric) drawMetricDistortion(params);
+      if (state.showTree) drawTree(params);
+      if (state.showGeodesics) drawGeodesicDemo(params);
+
+      drawSelectedRadius(params);
+      drawPoints(params);
+      drawAnnotations(params);
+
+      updateNumbers();
+    }
+
+    function drawBackgroundGrid(params) {
+      const { w, h } = params;
+      const accent = css("--accent");
+
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x <= w; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y <= h; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawDiskBase(params) {
+      const { cx, cy, R } = params;
+      const accent = css("--accent");
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.clip();
+
+      const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, R);
+      grad.addColorStop(0, "rgba(103,232,249,0.18)");
+      grad.addColorStop(0.62, "rgba(167,139,250,0.07)");
+      grad.addColorStop(1, "rgba(251,191,36,0.03)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+
+      for (let i = 0; i < 24; i++) {
+        const a = i * 2 * Math.PI / 24;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
+        ctx.strokeStyle = "rgba(255,255,255,0.07)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 3.2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = css("--accent3");
+      ctx.fill();
+    }
+
+    function drawHyperbolicCircles(params) {
+      const { cx, cy, R } = params;
+
+      for (let rr = 0.75; rr <= 6; rr += 0.75) {
+        const rho = Math.tanh(rr / 2);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * rho, 0, Math.PI * 2);
+        ctx.strokeStyle = rr <= state.r
+          ? "rgba(103,232,249,0.34)"
+          : "rgba(255,255,255,0.10)";
+        ctx.lineWidth = rr <= state.r ? 1.8 : 1;
+        ctx.stroke();
+      }
+    }
+
+    function drawSelectedRadius(params) {
+      const { cx, cy, R } = params;
+      const rho = Math.tanh(state.r / 2);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * rho, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(251,191,36,.98)";
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      const angle = -Math.PI / 5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + R * rho * Math.cos(angle), cy + R * rho * Math.sin(angle));
+      ctx.strokeStyle = "rgba(251,191,36,.9)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      drawLabel(`r = ${state.r.toFixed(2)}`, cx + R * rho * Math.cos(angle) + 8, cy + R * rho * Math.sin(angle), css("--accent3"), 14, 800);
+      drawLabel(`ρ = tanh(r/2) = ${rho.toFixed(3)}`, cx - R + 18, cy + R + 28, css("--muted"), 13, 700);
+    }
+
+    function drawMetricDistortion(params) {
+      const { cx, cy, R } = params;
+
+      const samples = [
+        { rho: 0.15, label: "cerca del centro" },
+        { rho: 0.55, label: "zona media" },
+        { rho: 0.86, label: "cerca del borde" }
+      ];
+
+      samples.forEach((s, idx) => {
+        const angle = Math.PI * 0.66;
+        const x = cx + R * s.rho * Math.cos(angle);
+        const y = cy - R * s.rho * Math.sin(angle);
+
+        const factor = 2 / (1 - s.rho * s.rho);
+        const visualSize = 7;
+        const hyperSize = Math.min(40, visualSize * factor * 0.35);
+
+        ctx.beginPath();
+        ctx.arc(x, y, visualSize, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(251,191,36,.92)";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, hyperSize, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(251,191,36,.35)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (idx === 2) {
+          drawLabel("la métrica se estira", x - 58, y - 22, css("--accent3"), 12, 800);
+        }
+      });
+    }
+
+    function drawGeodesicDemo(params) {
+      drawGeodesicBetween(state.A, state.B, params, css("--accent3"), 4);
+
+      const geodesics = [
+        [{x: -0.82, y: -0.24}, {x: 0.28, y: 0.76}],
+        [{x: -0.55, y: 0.62}, {x: 0.78, y: 0.08}],
+        [{x: -0.74, y: 0.12}, {x: 0.15, y: -0.78}]
+      ];
+
+      geodesics.forEach((pair, i) => {
+        drawGeodesicBetween(pair[0], pair[1], params, i % 2 ? css("--accent") : css("--accent2"), 2.1);
+      });
+    }
+
+    function drawGeodesicBetween(p, q, params, color, width) {
+      const det = p.x * q.y - p.y * q.x;
+
+      if (Math.abs(det) < 0.01) {
+        const P = toScreen(p, params);
+        const Q = toScreen(q, params);
+
+        ctx.beginPath();
+        ctx.moveTo(P.x, P.y);
+        ctx.lineTo(Q.x, Q.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+        return;
+      }
+
+      const bp = (1 + norm2(p)) / 2;
+      const bq = (1 + norm2(q)) / 2;
+
+      const c = {
+        x: (bp * q.y - bq * p.y) / det,
+        y: (p.x * bq - q.x * bp) / det
+      };
+
+      const rad2 = norm2(c) - 1;
+      if (rad2 <= 0) return;
+
+      const rad = Math.sqrt(rad2);
+
+      const a1 = Math.atan2(p.y - c.y, p.x - c.x);
+      const a2 = Math.atan2(q.y - c.y, q.x - c.x);
+
+      const arc1 = sampleArc(c, rad, a1, a2, true);
+      const arc2 = sampleArc(c, rad, a1, a2, false);
+
+      const mid1 = arc1[Math.floor(arc1.length / 2)];
+      const chosen = norm2(mid1) < 1 ? arc1 : arc2;
+
+      ctx.beginPath();
+
+      chosen.forEach((pt, i) => {
+        const P = toScreen(pt, params);
+        if (i === 0) ctx.moveTo(P.x, P.y);
+        else ctx.lineTo(P.x, P.y);
+      });
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+
+    function sampleArc(c, rad, a1, a2, positive) {
+      let delta = a2 - a1;
+
+      if (positive) {
+        while (delta < 0) delta += 2 * Math.PI;
+      } else {
+        while (delta > 0) delta -= 2 * Math.PI;
+      }
+
+      const pts = [];
+      const n = 120;
+
+      for (let i = 0; i <= n; i++) {
+        const a = a1 + delta * i / n;
+        pts.push({
+          x: c.x + rad * Math.cos(a),
+          y: c.y + rad * Math.sin(a)
+        });
+      }
+
+      return pts;
+    }
+
+    function drawTree(params) {
+      const nodes = [];
+      const maxDepth = state.levels;
+      const branch = state.branch;
+
+      function add(level, a0, a1, parent) {
+        const angle = (a0 + a1) / 2;
+        const hyperR = level * 0.82;
+        const rho = Math.tanh(hyperR / 2);
+
+        const node = {
+          level,
+          angle,
+          x: rho * Math.cos(angle),
+          y: rho * Math.sin(angle),
+          parent
+        };
+
+        const index = nodes.length;
+        nodes.push(node);
+
+        if (level < maxDepth) {
+          const width = a1 - a0;
+          for (let i = 0; i < branch; i++) {
+            const na0 = a0 + width * i / branch;
+            const na1 = a0 + width * (i + 1) / branch;
+            add(level + 1, na0, na1, index);
+          }
+        }
+      }
+
+      add(0, -Math.PI * 0.92, Math.PI * 0.92, -1);
+
+      nodes.forEach(n => {
+        if (n.parent >= 0) {
+          const p = nodes[n.parent];
+          drawGeodesicBetween(p, n, params, "rgba(134,239,172,.33)", 1.4);
+        }
+      });
+
+      nodes.forEach(n => {
+        const P = toScreen(n, params);
+        ctx.beginPath();
+        ctx.arc(P.x, P.y, n.level === 0 ? 5.5 : 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = n.level === 0 ? "rgba(251,191,36,.98)" : "rgba(134,239,172,.88)";
+        ctx.fill();
+      });
+    }
+
+    function drawPoints(params) {
+      const A = toScreen(state.A, params);
+      const B = toScreen(state.B, params);
+
+      drawPoint(A.x, A.y, "A", css("--red"));
+      drawPoint(B.x, B.y, "B", css("--accent3"));
+    }
+
+    function drawPoint(x, y, label, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, 11, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(x, y, 16, 0, Math.PI * 2);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, x, y + 0.5);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+    }
+
+    function drawAnnotations(params) {
+      const { w, h, cx, cy, R } = params;
+
+      drawLabel("Disco de Poincaré: el plano hiperbólico dentro de un disco finito", 22, 32, css("--accent"), 15, 850);
+      drawLabel("El borde no pertenece al espacio: representa el infinito hiperbólico", 22, 54, css("--muted"), 13, 700);
+
+      drawLabel("geodésica entre A y B", 22, h - 66, css("--accent3"), 13, 850);
+      drawLabel("Arrastrá A y B para cambiar la distancia hiperbólica", 22, h - 42, css("--muted"), 13, 700);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R + 9, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(251,191,36,.20)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      drawLabel("∞", cx + R + 15, cy + 4, css("--accent3"), 28, 900);
+    }
+
+    function getMousePos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    canvas.addEventListener("mousedown", evt => {
+      const pos = getMousePos(evt);
+      const params = diskParams();
+      const A = toScreen(state.A, params);
+      const B = toScreen(state.B, params);
+
+      const da = Math.hypot(pos.x - A.x, pos.y - A.y);
+      const db = Math.hypot(pos.x - B.x, pos.y - B.y);
+
+      if (da < 24) state.dragging = "A";
+      else if (db < 24) state.dragging = "B";
+    });
+
+    canvas.addEventListener("mousemove", evt => {
+      if (!state.dragging) return;
+
+      const pos = getMousePos(evt);
+      const params = diskParams();
+      const p = clampInsideDisk(fromScreen(pos.x, pos.y, params));
+
+      if (state.dragging === "A") state.A = p;
+      if (state.dragging === "B") state.B = p;
+
+      draw();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      state.dragging = null;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      state.dragging = null;
+    });
+
+    canvas.addEventListener("touchstart", evt => {
+      const touch = evt.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const pos = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+
+      const params = diskParams();
+      const A = toScreen(state.A, params);
+      const B = toScreen(state.B, params);
+
+      const da = Math.hypot(pos.x - A.x, pos.y - A.y);
+      const db = Math.hypot(pos.x - B.x, pos.y - B.y);
+
+      if (da < 28) state.dragging = "A";
+      else if (db < 28) state.dragging = "B";
+
+      evt.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", evt => {
+      if (!state.dragging) return;
+
+      const touch = evt.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const pos = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+
+      const params = diskParams();
+      const p = clampInsideDisk(fromScreen(pos.x, pos.y, params));
+
+      if (state.dragging === "A") state.A = p;
+      if (state.dragging === "B") state.B = p;
+
+      draw();
+      evt.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", () => {
+      state.dragging = null;
+    });
+
+    function animate() {
+      if (state.running) {
+        state.t += 0.018;
+
+        const small = 0.012;
+        state.A.x += small * Math.cos(state.t * 0.8);
+        state.A.y += small * Math.sin(state.t * 0.6);
+        state.B.x += small * Math.cos(state.t * 0.7 + 2.4);
+        state.B.y += small * Math.sin(state.t * 0.9 + 1.2);
+
+        state.A = clampInsideDisk(state.A);
+        state.B = clampInsideDisk(state.B);
+
+        draw();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", draw);
+
+    rValue.textContent = state.r.toFixed(2);
+    levelValue.textContent = state.levels;
+    branchValue.textContent = state.branch;
+
+    draw();
+    animate();
+  </script>
+</body>
+</html>

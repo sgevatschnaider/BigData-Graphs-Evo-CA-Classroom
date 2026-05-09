@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embedding dinámico: del dato discreto al espacio vectorial</title>
+  <style>
+    :root {
+      --bg: #eef3f8;
+      --panel: rgba(255,255,255,.86);
+      --text: #172033;
+      --muted: #5e6b7d;
+      --accent: #246bfe;
+      --accent2: #00a8a8;
+      --danger: #e84a5f;
+      --line: rgba(23,32,51,.18);
+      --shadow: 0 18px 45px rgba(16, 30, 54, .16);
+      --chip: rgba(36,107,254,.1);
+      --canvas: #ffffff;
+    }
+    body.dark {
+      --bg: #0b1020;
+      --panel: rgba(18,26,48,.88);
+      --text: #e9eefc;
+      --muted: #a9b4cc;
+      --accent: #73a7ff;
+      --accent2: #46e0d1;
+      --danger: #ff7a90;
+      --line: rgba(233,238,252,.18);
+      --shadow: 0 18px 45px rgba(0,0,0,.36);
+      --chip: rgba(115,167,255,.14);
+      --canvas: #101729;
+    }
+    body.warm {
+      --bg: #fff4e6;
+      --panel: rgba(255,255,255,.88);
+      --text: #342314;
+      --muted: #765c45;
+      --accent: #d96c00;
+      --accent2: #8a5cf6;
+      --danger: #c43b4a;
+      --line: rgba(52,35,20,.18);
+      --shadow: 0 18px 45px rgba(92,55,21,.18);
+      --chip: rgba(217,108,0,.12);
+      --canvas: #fffaf2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36,107,254,.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(0,168,168,.14), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      transition: background .35s ease, color .35s ease;
+    }
+    .wrap { max-width: 1220px; margin: 0 auto; padding: 28px; }
+    header {
+      display: grid; grid-template-columns: 1.3fr .7fr; gap: 18px; align-items: stretch;
+      margin-bottom: 18px;
+    }
+    .hero, .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 24px;
+      box-shadow: var(--shadow); backdrop-filter: blur(10px);
+    }
+    .hero { padding: 28px; position: relative; overflow: hidden; }
+    .hero:after {
+      content: "φ(x)"; position: absolute; right: 22px; bottom: -18px; font-size: 92px;
+      font-weight: 900; color: var(--accent); opacity: .12;
+    }
+    h1 { margin: 0 0 10px; font-size: clamp(30px, 4vw, 54px); line-height: 1.02; letter-spacing: -1.5px; }
+    .lead { margin: 0; color: var(--muted); font-size: 18px; line-height: 1.55; max-width: 760px; }
+    .controls { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    button, select {
+      border: 1px solid var(--line); background: var(--chip); color: var(--text); border-radius: 15px;
+      padding: 12px 14px; font-weight: 750; cursor: pointer; transition: transform .18s ease, background .18s ease;
+    }
+    button:hover { transform: translateY(-1px); background: rgba(36,107,254,.18); }
+    .primary { background: var(--accent); color: white; border: 0; }
+    .grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 18px; }
+    .panel { padding: 20px; }
+    h2 { margin: 0 0 12px; font-size: 22px; }
+    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .token {
+      padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--chip);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .token strong { font-size: 16px; }
+    .vec { font-family: Consolas, monospace; color: var(--muted); font-size: 12px; }
+    .stage {
+      position: relative; min-height: 560px; overflow: hidden;
+    }
+    svg { width: 100%; height: 560px; background: var(--canvas); border: 1px solid var(--line); border-radius: 20px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .pill { border: 1px solid var(--line); background: var(--chip); color: var(--muted); padding: 8px 10px; border-radius: 999px; font-size: 13px; }
+    .metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px; }
+    .metric { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--chip); }
+    .metric b { display: block; font-size: 22px; margin-top: 5px; color: var(--accent); }
+    .formula { font-family: Georgia, serif; font-size: 18px; line-height: 1.55; color: var(--text); }
+    .calcbox { margin-top: 14px; border: 1px solid var(--line); border-radius: 18px; padding: 14px; background: var(--chip); }
+    .calcbox h3 { margin: 0 0 8px; font-size: 17px; }
+    .calcbox code { font-family: Consolas, monospace; color: var(--text); }
+    .calcgrid { display: grid; gap: 8px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+    .calcgrid strong { color: var(--text); }
+    .small { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .footer { margin-top: 18px; text-align: center; color: var(--muted); font-size: 13px; }
+    .arrow { stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 7 6; animation: dash 1.5s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -26; } }
+    .pulse { animation: pulse 1.8s ease-in-out infinite; transform-origin: center; }
+    @keyframes pulse { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+    @media (max-width: 900px) { header, .grid { grid-template-columns: 1fr; } .metrics { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <section class="hero">
+        <h1>Embedding dinámico</h1>
+        <p class="lead">Una simulación visual para entender cómo objetos discretos o de alta dimensión se transforman en vectores densos, donde la distancia geométrica representa similitud semántica, estructural o funcional.</p>
+      </section>
+      <section class="controls panel">
+        <button class="primary" id="autoBtn">▶ Iniciar simulación automática</button>
+        <button id="stepBtn">Avanzar un paso</button>
+        <button id="themeBtn">Cambiar tema visual</button>
+        <select id="scenario">
+          <option value="words">Palabras y contexto</option>
+          <option value="users">Usuarios y preferencias</option>
+          <option value="graph">Nodos de un grafo</option>
+        </select>
+      </section>
+    </header>
+
+    <main class="grid">
+      <section class="panel">
+        <h2 id="leftTitle">1. Espacio de entrada</h2>
+        <p class="small" id="explain">Cada objeto comienza como una entidad discreta. El embedding aplica una función φ que lo proyecta a un espacio vectorial continuo de baja dimensión.</p>
+        <div class="cards" id="tokens"></div>
+        <div class="metrics">
+          <div class="metric">Paso actual<b id="stepNum">0</b></div>
+          <div class="metric">Similitud coseno<b id="cosVal">—</b></div>
+          <div class="metric">Distancia euclidiana<b id="distVal">—</b></div>
+        </div>
+        <div style="margin-top:16px" class="formula" id="formula">
+          φ: 𝓧 → ℝᵈ<br>distancia pequeña ⇒ mayor afinidad
+        </div>
+        <div class="calcbox">
+          <h3>Cálculo con los dos primeros vectores</h3>
+          <div class="calcgrid" id="calcDetails"></div>
+        </div>
+      </section>
+
+      <section class="panel stage">
+        <h2>2. Espacio de embedding</h2>
+        <svg id="svg" viewBox="0 0 760 560" aria-label="Visualización dinámica de embeddings">
+          <defs>
+            <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L8,3 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <g id="viz"></g>
+        </svg>
+        <div class="legend">
+          <span class="pill">Puntos cercanos: objetos semejantes</span>
+          <span class="pill">Flechas: proyección φ(x)</span>
+          <span class="pill">Simulación: ajuste progresivo de vectores</span>
+        </div>
+      </section>
+    </main>
+    <div class="footer">Material elaborado por el profesor Sergio Gevatschnaider</div>
+  </div>
+
+<script>
+const scenarios = {
+  words: {
+    title: '1. Espacio de entrada: palabras',
+    explain: 'Ejemplo tipo Word2Vec: palabras que aparecen en contextos similares se acercan en el espacio vectorial. El entrenamiento ajusta posiciones para que la geometría capture afinidad semántica.',
+    formula: 'P(c|w) ∝ exp(vw · vc)<br>producto escalar alto ⇒ mayor compatibilidad. El valor exp(vw · vc) funciona como puntaje: luego se compara con otros puntajes mediante softmax.',
+    items: [
+      {name:'rey', group:'royal', vec:[.78,.61], start:[80,100], end:[540,150]},
+      {name:'reina', group:'royal', vec:[.75,.66], start:[80,170], end:[585,165]},
+      {name:'hombre', group:'human', vec:[.42,.58], start:[80,240], end:[460,255]},
+      {name:'mujer', group:'human', vec:[.39,.64], start:[80,310], end:[500,270]},
+      {name:'perro', group:'animal', vec:[.18,.23], start:[80,380], end:[255,405]},
+      {name:'gato', group:'animal', vec:[.22,.27], start:[80,450], end:[300,420]}
+    ]
+  },
+  users: {
+    title: '1. Espacio de entrada: usuarios',
+    explain: 'En recomendación, usuarios o productos se transforman en vectores. Quienes tienen preferencias parecidas quedan cerca, aunque originalmente sus datos fueran listas, compras o interacciones.',
+    formula: 'sim(u,i) = vu · vi<br>vectores cercanos ⇒ recomendación probable',
+    items: [
+      {name:'Usuario A', group:'tech', vec:[.82,.72], start:[80,100], end:[560,150]},
+      {name:'Usuario B', group:'tech', vec:[.77,.68], start:[80,170], end:[600,185]},
+      {name:'Curso IA', group:'tech', vec:[.84,.61], start:[80,240], end:[535,215]},
+      {name:'Novela', group:'lit', vec:[.24,.73], start:[80,310], end:[250,175]},
+      {name:'Poesía', group:'lit', vec:[.20,.66], start:[80,380], end:[285,220]},
+      {name:'Cocina', group:'food', vec:[.45,.22], start:[80,450], end:[380,430]}
+    ]
+  },
+  graph: {
+    title: '1. Espacio de entrada: nodos de un grafo',
+    explain: 'En grafos, el embedding intenta conservar relaciones estructurales: nodos vecinos, comunidades o distancias de caminos mínimos pasan a representarse como proximidad geométrica.',
+    formula: 'dG(u,v) ≈ ||φ(u) − φ(v)||<br>estructura del grafo ⇒ geometría',
+    items: [
+      {name:'Nodo 1', group:'A', vec:[.76,.66], start:[80,100], end:[560,165]},
+      {name:'Nodo 2', group:'A', vec:[.72,.60], start:[80,170], end:[520,210]},
+      {name:'Nodo 3', group:'A', vec:[.81,.57], start:[80,240], end:[610,225]},
+      {name:'Nodo 4', group:'B', vec:[.25,.33], start:[80,310], end:[260,380]},
+      {name:'Nodo 5', group:'B', vec:[.31,.29], start:[80,380], end:[315,420]},
+      {name:'Nodo 6', group:'B', vec:[.20,.38], start:[80,450], end:[220,335]}
+    ]
+  }
+};
+let current = 'words', t = 0, step = 0, auto = false, timer = null;
+const themes = ['', 'dark', 'warm']; let themeIndex = 0;
+const colors = ['#246bfe','#00a8a8','#e84a5f','#8a5cf6','#d96c00','#25a244'];
+const viz = document.getElementById('viz');
+function lerp(a,b,t){ return a+(b-a)*t; }
+function cos(a,b){ const dot=a[0]*b[0]+a[1]*b[1]; const na=Math.hypot(...a), nb=Math.hypot(...b); return dot/(na*nb); }
+function dist(a,b){ return Math.hypot(a[0]-b[0], a[1]-b[1]); }
+function fmt(x,n=4){ return Number(x).toFixed(n); }
+function updateCalcDetails(items){
+  const a = items[0], b = items[1];
+  const dot = a.vec[0]*b.vec[0] + a.vec[1]*b.vec[1];
+  const expDot = Math.exp(dot);
+  const normA = Math.hypot(...a.vec);
+  const normB = Math.hypot(...b.vec);
+  const cosine = dot/(normA*normB);
+  const euclid = dist(a.vec,b.vec);
+  const other = items[5] || items[2];
+  const dotOther = a.vec[0]*other.vec[0] + a.vec[1]*other.vec[1];
+  const expOther = Math.exp(dotOther);
+  document.getElementById('calcDetails').innerHTML = `
+    <div><strong>${a.name}</strong> = [${a.vec.map(v=>v.toFixed(2)).join(', ')}] &nbsp; | &nbsp; <strong>${b.name}</strong> = [${b.vec.map(v=>v.toFixed(2)).join(', ')}]</div>
+    <div><strong>Producto escalar:</strong> (${fmt(a.vec[0],2)}×${fmt(b.vec[0],2)}) + (${fmt(a.vec[1],2)}×${fmt(b.vec[1],2)}) = <code>${fmt(dot)}</code></div>
+    <div><strong>Puntaje exponencial:</strong> exp(${fmt(dot)}) = <code>${fmt(expDot,3)}</code>. Cuanto más alto, mayor compatibilidad entre palabra central y contexto.</div>
+    <div><strong>Distancia euclídea:</strong> √[(${fmt(b.vec[0],2)}−${fmt(a.vec[0],2)})² + (${fmt(b.vec[1],2)}−${fmt(a.vec[1],2)})²] = <code>${fmt(euclid,3)}</code></div>
+    <div><strong>Similitud coseno:</strong> ${fmt(dot)}/(${fmt(normA,3)}×${fmt(normB,3)}) = <code>${fmt(cosine,3)}</code></div>
+    <div><strong>Comparación:</strong> ${a.name}·${other.name} = ${fmt(dotOther)} y exp(${fmt(dotOther)}) = ${fmt(expOther,3)}. Si este puntaje es menor que el de ${b.name}, el modelo considera a ${b.name} más compatible con ${a.name}.</div>
+  `;
+}
+function renderTokens(items){
+  const box = document.getElementById('tokens'); box.innerHTML='';
+  items.forEach((it,i)=>{
+    const d=document.createElement('div'); d.className='token';
+    d.innerHTML=`<strong>${it.name}</strong><span class="vec">[${it.vec.map(v=>v.toFixed(2)).join(', ')}]</span>`;
+    box.appendChild(d);
+  });
+}
+function draw(){
+  const data = scenarios[current]; const items = data.items; viz.innerHTML='';
+  document.getElementById('leftTitle').textContent = data.title;
+  document.getElementById('explain').textContent = data.explain;
+  document.getElementById('formula').innerHTML = data.formula;
+  renderTokens(items);
+  updateCalcDetails(items);
+  // axes
+  viz.innerHTML += `<line x1="150" y1="500" x2="710" y2="500" stroke="var(--line)"/><line x1="150" y1="500" x2="150" y2="55" stroke="var(--line)"/>
+  <text x="650" y="530" fill="var(--muted)" font-size="13">dimensión 1</text><text x="35" y="70" fill="var(--muted)" font-size="13">dimensión 2</text>
+  <text x="38" y="35" fill="var(--accent)" font-size="18" font-weight="800">φ: entrada → embedding</text>`;
+  items.forEach((it,i)=>{
+    const x=lerp(it.start[0],it.end[0],t), y=lerp(it.start[1],it.end[1],t);
+    const c=colors[i%colors.length];
+    if(t<.96){ viz.innerHTML += `<line class="arrow" x1="${it.start[0]+78}" y1="${it.start[1]}" x2="${x-18}" y2="${y}" stroke="${c}"/>`; }
+    viz.innerHTML += `<circle class="${auto?'pulse':''}" cx="${x}" cy="${y}" r="15" fill="${c}" opacity=".88"/>
+      <text x="${x+21}" y="${y+5}" fill="var(--text)" font-size="15" font-weight="750">${it.name}</text>`;
+  });
+  // similarity line between first two
+  const a=items[0], b=items[1];
+  const ax=lerp(a.start[0],a.end[0],t), ay=lerp(a.start[1],a.end[1],t);
+  const bx=lerp(b.start[0],b.end[0],t), by=lerp(b.start[1],b.end[1],t);
+  viz.innerHTML += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="var(--accent2)" stroke-width="4" opacity="${Math.max(.15,t)}"/>
+    <text x="${(ax+bx)/2+8}" y="${(ay+by)/2-10}" fill="var(--accent2)" font-size="13" font-weight="800">similitud</text>`;
+  document.getElementById('stepNum').textContent = step;
+  document.getElementById('cosVal').textContent = t<.25 ? '—' : cos(a.vec,b.vec).toFixed(3);
+  document.getElementById('distVal').textContent = t<.25 ? '—' : dist(a.vec,b.vec).toFixed(3);
+}
+function nextStep(){ step=(step+1)%6; t = Math.min(1, step/5); draw(); }
+function runAuto(){
+  auto=!auto; document.getElementById('autoBtn').textContent = auto ? '⏸ Pausar simulación automática' : '▶ Iniciar simulación automática';
+  if(auto){ timer=setInterval(()=>{ t += .015; if(t>=1){ t=0; step=0; } step=Math.round(t*5); draw(); }, 55); }
+  else clearInterval(timer);
+}
+document.getElementById('autoBtn').onclick = runAuto;
+document.getElementById('stepBtn').onclick = nextStep;
+document.getElementById('themeBtn').onclick = ()=>{ themeIndex=(themeIndex+1)%themes.length; document.body.className=themes[themeIndex]; };
+document.getElementById('scenario').onchange = e=>{ current=e.target.value; t=0; step=0; draw(); };
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bolas métricas en grafos</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(13, 25, 45, 0.88);
+      --panel2: rgba(20, 38, 70, 0.78);
+      --text: #eef6ff;
+      --muted: #a8bdd8;
+      --line: rgba(130, 205, 255, 0.22);
+      --accent: #52d9ff;
+      --accent2: #8df7c8;
+      --accent3: #ffd166;
+      --danger: #ff6b8a;
+      --outside: rgba(170, 190, 215, 0.45);
+      --inside: #52d9ff;
+      --frontier: #8df7c8;
+      --center: #ffd166;
+      --edge: rgba(160, 210, 255, 0.26);
+      --edgeHot: rgba(82, 217, 255, 0.9);
+      --shadow: 0 24px 70px rgba(0,0,0,0.36);
+    }
+
+    body.light {
+      --bg: #f4f8fc;
+      --panel: rgba(255,255,255,0.92);
+      --panel2: rgba(255,255,255,0.78);
+      --text: #102033;
+      --muted: #5b6f85;
+      --line: rgba(30, 85, 130, 0.18);
+      --accent: #0077a8;
+      --accent2: #09966f;
+      --accent3: #c98700;
+      --danger: #c74361;
+      --outside: rgba(70, 90, 115, 0.35);
+      --inside: #0077a8;
+      --frontier: #09966f;
+      --center: #c98700;
+      --edge: rgba(30, 80, 120, 0.24);
+      --edgeHot: rgba(0, 119, 168, 0.9);
+      --shadow: 0 24px 60px rgba(40,70,100,0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(82,217,255,0.16), transparent 34%),
+        radial-gradient(circle at 90% 15%, rgba(141,247,200,0.10), transparent 32%),
+        radial-gradient(circle at 70% 90%, rgba(255,209,102,0.08), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      transition: background 300ms ease, color 300ms ease;
+    }
+
+    .app {
+      width: min(1500px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-main {
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      right: -80px;
+      top: -90px;
+      background: radial-gradient(circle, rgba(82,217,255,0.24), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(82,217,255,0.10);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 16px var(--accent2);
+    }
+
+    h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(32px, 4.2vw, 58px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: clamp(16px, 1.55vw, 20px);
+      line-height: 1.58;
+      margin: 0;
+      max-width: 930px;
+    }
+
+    .formula {
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-family: Consolas, Menlo, Monaco, monospace;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+
+    .hero-side {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .hero-side h2 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      letter-spacing: -0.035em;
+    }
+
+    .hero-side p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      letter-spacing: -0.035em;
+    }
+
+    .panel h3 {
+      margin: 20px 0 10px;
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .control {
+      margin: 16px 0;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .pill {
+      min-width: 46px;
+      text-align: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    select, button {
+      font: inherit;
+      font-weight: 850;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(82,217,255,0.10);
+      border-radius: 14px;
+      padding: 11px 13px;
+      cursor: pointer;
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+    }
+
+    select {
+      width: 100%;
+    }
+
+    button:hover, select:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(82,217,255,0.26), rgba(141,247,200,0.18));
+    }
+
+    button.danger {
+      background: rgba(255,107,138,0.12);
+      border-color: rgba(255,107,138,0.42);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .swatch {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      background: var(--outside);
+    }
+
+    .swatch.inside { background: var(--inside); box-shadow: 0 0 12px var(--inside); }
+    .swatch.frontier { background: var(--frontier); box-shadow: 0 0 12px var(--frontier); }
+    .swatch.center { background: var(--center); box-shadow: 0 0 12px var(--center); }
+
+    .main-viz {
+      padding: 18px;
+    }
+
+    .viz-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .viz-head h2 {
+      margin: 0;
+      font-size: clamp(22px, 2.5vw, 32px);
+      letter-spacing: -0.045em;
+    }
+
+    .viz-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .viz-grid {
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) 330px;
+      gap: 16px;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 700px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(82,217,255,0.07), transparent 46%),
+        rgba(255,255,255,0.035);
+      overflow: hidden;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 700px;
+    }
+
+    .edge {
+      stroke: var(--edge);
+      stroke-width: 1.6;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .edge.hot {
+      stroke: var(--edgeHot);
+      stroke-width: 2.8;
+      filter: drop-shadow(0 0 6px rgba(82,217,255,0.5));
+    }
+
+    .node {
+      stroke: rgba(255,255,255,0.82);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: r 150ms ease, opacity 150ms ease;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .node.outside {
+      fill: var(--outside);
+      opacity: 0.52;
+    }
+
+    .node.inside {
+      fill: var(--inside);
+      opacity: 0.95;
+      filter: drop-shadow(0 0 8px rgba(82,217,255,0.55));
+    }
+
+    .node.frontier {
+      fill: var(--frontier);
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(141,247,200,0.68));
+    }
+
+    .node.center {
+      fill: var(--center);
+      opacity: 1;
+      filter: drop-shadow(0 0 12px rgba(255,209,102,0.8));
+    }
+
+    .node-label {
+      fill: var(--text);
+      font-size: 11px;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .metric-panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.035);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .metric-panel h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .metric-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.48;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel2);
+      padding: 14px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat .num {
+      margin-top: 6px;
+      font-size: 30px;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+    }
+
+    .insight {
+      border-left: 3px solid var(--accent2);
+      background: rgba(141,247,200,0.08);
+      padding: 13px 14px;
+      border-radius: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .chart {
+      min-height: 190px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(255,255,255,0.035);
+    }
+
+    .bars {
+      height: 145px;
+      display: flex;
+      align-items: end;
+      gap: 7px;
+      padding: 8px 2px 0;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 4px;
+      border-radius: 999px 999px 4px 4px;
+      background: linear-gradient(180deg, var(--accent2), var(--accent));
+      transition: height 220ms ease, opacity 220ms ease;
+      opacity: 0.45;
+    }
+
+    .bar.active {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px rgba(82,217,255,0.45));
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      min-width: 180px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 13px;
+      box-shadow: var(--shadow);
+      transform: translate(-50%, calc(-100% - 14px)) scale(0.96);
+      transition: opacity 120ms ease, transform 120ms ease;
+      z-index: 5;
+      font-size: 13px;
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+      transform: translate(-50%, calc(-100% - 14px)) scale(1);
+    }
+
+    .tooltip strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .tooltip span {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1150px) {
+      .hero,
+      .layout,
+      .viz-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stage, svg {
+        min-height: 620px;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .app {
+        width: min(100% - 16px, 1500px);
+        padding: 12px 0;
+      }
+
+      .hero-main,
+      .hero-side,
+      .panel,
+      .main-viz {
+        padding: 16px;
+        border-radius: 20px;
+      }
+
+      .button-grid,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stage, svg {
+        min-height: 540px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="eyebrow"><span class="dot"></span> Laboratorio interactivo de grafos</div>
+        <h1>Bolas métricas y expansión en distintos tipos de grafos</h1>
+        <p class="lead">
+          Una bola métrica en un grafo muestra todos los nodos que pueden alcanzarse desde un centro usando como máximo
+          una cierta cantidad de pasos. Al aumentar el radio, vemos cómo se expande el grafo alrededor de ese vértice.
+        </p>
+        <div class="formula">
+          B_G(v,r) = { u ∈ V : d_G(v,u) ≤ r } &nbsp;&nbsp; |B_G(v,r)| = cantidad de nodos alcanzables en r pasos o menos
+        </div>
+      </div>
+
+      <aside class="card hero-side">
+        <div>
+          <h2>Idea central</h2>
+          <p>
+            El crecimiento de las bolas métricas permite comparar grafos lineales, grillas, árboles y estrellas.
+            Esta expansión es el análogo discreto del crecimiento de volumen en espacios geométricos continuos.
+          </p>
+        </div>
+        <div class="insight">
+          Si un grafo crece como un árbol, su expansión puede ser exponencial. Por eso, los espacios hiperbólicos son interesantes para representar jerarquías profundas.
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <aside class="card panel">
+        <h2>Controles</h2>
+
+        <div class="control">
+          <div class="control-row">
+            <label for="graphType">Tipo de grafo</label>
+          </div>
+          <select id="graphType">
+            <option value="path">Camino lineal</option>
+            <option value="grid">Grilla 2D</option>
+            <option value="tree" selected>Árbol binario</option>
+            <option value="star">Estrella</option>
+            <option value="cycle">Ciclo</option>
+            <option value="random">Grafo aleatorio</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <div class="control-row">
+            <label for="radiusRange">Radio métrico r</label>
+            <span class="pill" id="radiusValue">0</span>
+          </div>
+          <input id="radiusRange" type="range" min="0" max="6" step="1" value="0">
+        </div>
+
+        <div class="control">
+          <div class="control-row">
+            <label for="centerSelect">Centro de la bola</label>
+          </div>
+          <select id="centerSelect"></select>
+        </div>
+
+        <div class="button-grid">
+          <button class="primary" id="expandBtn">Expandir +1</button>
+          <button id="resetBtn">Reiniciar</button>
+          <button class="primary full" id="autoBtn">Iniciar animación</button>
+          <button class="full" id="themeBtn">Cambiar tema</button>
+        </div>
+
+        <h3>Ley de crecimiento visual</h3>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch center"></span> Centro elegido: vértice desde donde se mide la distancia.</div>
+          <div class="legend-item"><span class="swatch frontier"></span> Frontera: nodos a distancia exactamente r.</div>
+          <div class="legend-item"><span class="swatch inside"></span> Interior: nodos con distancia menor que r.</div>
+          <div class="legend-item"><span class="swatch"></span> Exterior: nodos todavía no alcanzados.</div>
+        </div>
+
+        <h3>Lectura didáctica</h3>
+        <div class="insight">
+          En un camino, la bola crece lentamente. En una grilla, crece como un área. En un árbol, puede crecer mucho más rápido porque cada nivel multiplica nodos.
+        </div>
+      </aside>
+
+      <section class="card main-viz">
+        <div class="viz-head">
+          <div>
+            <h2 id="graphTitle">Árbol binario</h2>
+            <p id="graphSubtitle">Expansión jerárquica: cada nivel puede multiplicar la cantidad de nodos.</p>
+          </div>
+        </div>
+
+        <div class="viz-grid">
+          <div class="stage" id="stage">
+            <svg id="svg" viewBox="0 0 900 700" role="img" aria-label="Visualización de bolas métricas en grafos">
+              <g id="edgesLayer"></g>
+              <g id="nodesLayer"></g>
+              <g id="labelsLayer"></g>
+            </svg>
+            <div class="tooltip" id="tooltip"></div>
+          </div>
+
+          <aside class="metric-panel">
+            <h3>Bola métrica actual</h3>
+            <p id="ballFormula">B_G(v,0): nodos a distancia menor o igual que 0.</p>
+
+            <div class="stats">
+              <div class="stat">
+                <div class="label">Radio r</div>
+                <div class="num" id="rStat">0</div>
+              </div>
+              <div class="stat">
+                <div class="label">|B_G(v,r)|</div>
+                <div class="num" id="ballSizeStat">1</div>
+              </div>
+              <div class="stat">
+                <div class="label">Frontera</div>
+                <div class="num" id="frontierStat">1</div>
+              </div>
+              <div class="stat">
+                <div class="label">Total nodos</div>
+                <div class="num" id="totalStat">31</div>
+              </div>
+            </div>
+
+            <div class="chart">
+              <p style="margin:0 0 8px; font-weight:900; color:var(--text);">Crecimiento de |B_G(v,r)|</p>
+              <div class="bars" id="bars"></div>
+            </div>
+
+            <div class="insight" id="interpretation">
+              En un árbol binario, la cantidad de nodos alcanzables puede crecer muy rápido con el radio, porque cada nivel abre nuevas ramas.
+            </div>
+          </aside>
+        </div>
+      </section>
+    </section>
+
+    <div class="footer">
+      Material elaborado por el profesor Sergio Gevatschnaider · Visualización didáctica con HTML, CSS y JavaScript
+    </div>
+  </main>
+
+  <script>
+    const svg = document.getElementById("svg");
+    const edgesLayer = document.getElementById("edgesLayer");
+    const nodesLayer = document.getElementById("nodesLayer");
+    const labelsLayer = document.getElementById("labelsLayer");
+    const tooltip = document.getElementById("tooltip");
+    const stage = document.getElementById("stage");
+
+    const graphType = document.getElementById("graphType");
+    const radiusRange = document.getElementById("radiusRange");
+    const radiusValue = document.getElementById("radiusValue");
+    const centerSelect = document.getElementById("centerSelect");
+
+    const expandBtn = document.getElementById("expandBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const autoBtn = document.getElementById("autoBtn");
+    const themeBtn = document.getElementById("themeBtn");
+
+    const graphTitle = document.getElementById("graphTitle");
+    const graphSubtitle = document.getElementById("graphSubtitle");
+    const ballFormula = document.getElementById("ballFormula");
+
+    const rStat = document.getElementById("rStat");
+    const ballSizeStat = document.getElementById("ballSizeStat");
+    const frontierStat = document.getElementById("frontierStat");
+    const totalStat = document.getElementById("totalStat");
+    const bars = document.getElementById("bars");
+    const interpretation = document.getElementById("interpretation");
+
+    let graph = { nodes: [], edges: [] };
+    let distances = new Map();
+    let state = {
+      type: "tree",
+      radius: 0,
+      center: "0",
+      timer: null,
+      auto: false
+    };
+
+    function makeSvgEl(type, attrs = {}) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", type);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      return el;
+    }
+
+    function clearSvg() {
+      edgesLayer.innerHTML = "";
+      nodesLayer.innerHTML = "";
+      labelsLayer.innerHTML = "";
+    }
+
+    function node(id, x, y, label = null) {
+      return { id: String(id), x, y, label: label ?? String(id) };
+    }
+
+    function edge(a, b) {
+      return { a: String(a), b: String(b) };
+    }
+
+    function buildPathGraph() {
+      const nodes = [];
+      const edges = [];
+      const n = 19;
+      const startX = 90;
+      const gap = 42;
+      for (let i = 0; i < n; i++) {
+        nodes.push(node(i, startX + i * gap, 350, i));
+        if (i > 0) edges.push(edge(i - 1, i));
+      }
+      return {
+        nodes,
+        edges,
+        defaultCenter: "9",
+        maxRadius: 9,
+        title: "Camino lineal",
+        subtitle: "Crecimiento aproximadamente lineal: al aumentar r se suman pocos nodos por nivel.",
+        insight: "En un camino lineal, la bola métrica crece lentamente: hacia la izquierda y hacia la derecha del centro. Es el caso más simple de expansión."
+      };
+    }
+
+    function buildGridGraph() {
+      const nodes = [];
+      const edges = [];
+      const rows = 7;
+      const cols = 7;
+      const gap = 74;
+      const startX = 230;
+      const startY = 105;
+
+      function id(r, c) {
+        return r * cols + c;
+      }
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          nodes.push(node(id(r, c), startX + c * gap, startY + r * gap, `${r},${c}`));
+          if (c > 0) edges.push(edge(id(r, c - 1), id(r, c)));
+          if (r > 0) edges.push(edge(id(r - 1, c), id(r, c)));
+        }
+      }
+
+      return {
+        nodes,
+        edges,
+        defaultCenter: String(id(3, 3)),
+        maxRadius: 6,
+        title: "Grilla 2D",
+        subtitle: "Crecimiento tipo área: la bola se expande como un diamante en distancia Manhattan.",
+        insight: "En una grilla, la bola métrica crece más rápido que en un camino. No es explosiva como un árbol, pero sí se expande como una región bidimensional."
+      };
+    }
+
+    function buildTreeGraph() {
+      const nodes = [];
+      const edges = [];
+      const depth = 5;
+      let counter = 0;
+
+      function add(level, index, xMin, xMax, parent = null) {
+        const id = String(counter++);
+        const x = (xMin + xMax) / 2;
+        const y = 70 + level * 118;
+        nodes.push(node(id, x, y, id));
+
+        if (parent !== null) edges.push(edge(parent, id));
+
+        if (level < depth) {
+          const mid = (xMin + xMax) / 2;
+          add(level + 1, index * 2, xMin, mid, id);
+          add(level + 1, index * 2 + 1, mid, xMax, id);
+        }
+
+        return id;
+      }
+
+      add(0, 0, 60, 840);
+
+      return {
+        nodes,
+        edges,
+        defaultCenter: "0",
+        maxRadius: 5,
+        title: "Árbol binario",
+        subtitle: "Expansión jerárquica: cada nivel puede multiplicar la cantidad de nodos.",
+        insight: "En un árbol binario, la cantidad de nodos alcanzables puede crecer muy rápido con el radio, porque cada nivel abre nuevas ramas."
+      };
+    }
+
+    function buildStarGraph() {
+      const nodes = [];
+      const edges = [];
+      const n = 24;
+      const cx = 450;
+      const cy = 350;
+      const R = 245;
+
+      nodes.push(node(0, cx, cy, "C"));
+
+      for (let i = 1; i <= n; i++) {
+        const a = (i - 1) / n * Math.PI * 2;
+        nodes.push(node(i, cx + R * Math.cos(a), cy + R * Math.sin(a), i));
+        edges.push(edge(0, i));
+      }
+
+      return {
+        nodes,
+        edges,
+        defaultCenter: "0",
+        maxRadius: 2,
+        title: "Grafo estrella",
+        subtitle: "Crecimiento abrupto: desde el centro, con r = 1 se alcanza casi todo el grafo.",
+        insight: "En una estrella, la elección del centro importa mucho. Desde el nodo central, la bola de radio 1 alcanza todos los nodos periféricos."
+      };
+    }
+
+    function buildCycleGraph() {
+      const nodes = [];
+      const edges = [];
+      const n = 24;
+      const cx = 450;
+      const cy = 350;
+      const R = 250;
+
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2 - Math.PI / 2;
+        nodes.push(node(i, cx + R * Math.cos(a), cy + R * Math.sin(a), i));
+        edges.push(edge(i, (i + 1) % n));
+      }
+
+      return {
+        nodes,
+        edges,
+        defaultCenter: "0",
+        maxRadius: 12,
+        title: "Ciclo",
+        subtitle: "Crecimiento lineal con cierre: la bola avanza en dos direcciones hasta cubrir el ciclo.",
+        insight: "En un ciclo, la bola crece de manera similar a un camino, pero con una diferencia: tarde o temprano ambos frentes se encuentran."
+      };
+    }
+
+    function buildRandomGraph() {
+      const nodes = [];
+      const edges = [];
+      const n = 28;
+      const cx = 450;
+      const cy = 350;
+      const R = 260;
+
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2;
+        const jitter = 35 * Math.sin(i * 2.17);
+        nodes.push(node(i, cx + (R + jitter) * Math.cos(a), cy + (R + jitter) * Math.sin(a), i));
+      }
+
+      // Aseguramos conexidad con un ciclo base
+      for (let i = 0; i < n; i++) {
+        edges.push(edge(i, (i + 1) % n));
+      }
+
+      // Agregamos atajos determinísticos
+      const extra = [
+        [0,7], [0,13], [1,10], [2,16], [3,21], [4,14], [5,19],
+        [6,24], [8,18], [9,26], [11,22], [12,25], [15,23],
+        [17,27], [20,27]
+      ];
+      extra.forEach(([a,b]) => edges.push(edge(a,b)));
+
+      return {
+        nodes,
+        edges,
+        defaultCenter: "0",
+        maxRadius: 5,
+        title: "Grafo aleatorio conectado",
+        subtitle: "Crecimiento irregular: los atajos pueden acelerar la expansión de la bola.",
+        insight: "En grafos con atajos, la bola puede crecer de forma irregular. Un enlace adicional puede reducir muchas distancias internas."
+      };
+    }
+
+    function buildGraph(type) {
+      if (type === "path") return buildPathGraph();
+      if (type === "grid") return buildGridGraph();
+      if (type === "tree") return buildTreeGraph();
+      if (type === "star") return buildStarGraph();
+      if (type === "cycle") return buildCycleGraph();
+      if (type === "random") return buildRandomGraph();
+      return buildTreeGraph();
+    }
+
+    function adjacencyList(g) {
+      const adj = new Map(g.nodes.map(n => [n.id, []]));
+      g.edges.forEach(e => {
+        adj.get(e.a).push(e.b);
+        adj.get(e.b).push(e.a);
+      });
+      return adj;
+    }
+
+    function bfsDistances(g, source) {
+      const adj = adjacencyList(g);
+      const dist = new Map(g.nodes.map(n => [n.id, Infinity]));
+      const queue = [source];
+      dist.set(source, 0);
+
+      while (queue.length) {
+        const current = queue.shift();
+        const d = dist.get(current);
+        for (const nb of adj.get(current)) {
+          if (dist.get(nb) === Infinity) {
+            dist.set(nb, d + 1);
+            queue.push(nb);
+          }
+        }
+      }
+      return dist;
+    }
+
+    function updateCenterOptions() {
+      centerSelect.innerHTML = "";
+      graph.nodes.forEach(n => {
+        const option = document.createElement("option");
+        option.value = n.id;
+        option.textContent = `Nodo ${n.label}`;
+        centerSelect.appendChild(option);
+      });
+      centerSelect.value = state.center;
+    }
+
+    function setGraph(type) {
+      const built = buildGraph(type);
+      graph = { nodes: built.nodes, edges: built.edges, meta: built };
+      state.type = type;
+      state.center = built.defaultCenter;
+      state.radius = 0;
+      radiusRange.max = built.maxRadius;
+      radiusRange.value = 0;
+      radiusValue.textContent = "0";
+      graphTitle.textContent = built.title;
+      graphSubtitle.textContent = built.subtitle;
+      interpretation.textContent = built.insight;
+      updateCenterOptions();
+      render();
+    }
+
+    function edgeIsHot(e, dist, radius) {
+      const da = dist.get(e.a);
+      const db = dist.get(e.b);
+      return da <= radius && db <= radius;
+    }
+
+    function render() {
+      clearSvg();
+
+      distances = bfsDistances(graph, state.center);
+
+      const radius = state.radius;
+      const nodeMap = new Map(graph.nodes.map(n => [n.id, n]));
+      const inside = graph.nodes.filter(n => distances.get(n.id) <= radius);
+      const frontier = graph.nodes.filter(n => distances.get(n.id) === radius);
+
+      graph.edges.forEach(e => {
+        const a = nodeMap.get(e.a);
+        const b = nodeMap.get(e.b);
+        const line = makeSvgEl("line", {
+          x1: a.x,
+          y1: a.y,
+          x2: b.x,
+          y2: b.y,
+          class: edgeIsHot(e, distances, radius) ? "edge hot" : "edge"
+        });
+        edgesLayer.appendChild(line);
+      });
+
+      graph.nodes.forEach(n => {
+        const d = distances.get(n.id);
+        let cls = "outside";
+        if (d < radius) cls = "inside";
+        if (d === radius) cls = "frontier";
+        if (n.id === state.center) cls = "center";
+
+        const circle = makeSvgEl("circle", {
+          cx: n.x,
+          cy: n.y,
+          r: n.id === state.center ? 13 : cls === "frontier" ? 11 : cls === "inside" ? 9 : 7,
+          class: `node ${cls}`
+        });
+
+        circle.addEventListener("mouseenter", evt => showTooltip(evt, n, d));
+        circle.addEventListener("mousemove", evt => showTooltip(evt, n, d));
+        circle.addEventListener("mouseleave", hideTooltip);
+        circle.addEventListener("click", () => {
+          state.center = n.id;
+          state.radius = 0;
+          radiusRange.value = 0;
+          centerSelect.value = n.id;
+          render();
+        });
+
+        nodesLayer.appendChild(circle);
+
+        if (graph.nodes.length <= 55) {
+          const label = makeSvgEl("text", {
+            x: n.x,
+            y: n.y,
+            class: "node-label"
+          });
+          label.textContent = n.label;
+          labelsLayer.appendChild(label);
+        }
+      });
+
+      radiusValue.textContent = radius;
+      rStat.textContent = radius;
+      ballSizeStat.textContent = inside.length;
+      frontierStat.textContent = frontier.length;
+      totalStat.textContent = graph.nodes.length;
+
+      ballFormula.textContent = `B_G(v,${radius}): nodos a distancia menor o igual que ${radius} desde el centro elegido.`;
+
+      renderBars();
+    }
+
+    function renderBars() {
+      bars.innerHTML = "";
+
+      const maxR = Number(radiusRange.max);
+      const values = [];
+      for (let r = 0; r <= maxR; r++) {
+        const count = graph.nodes.filter(n => distances.get(n.id) <= r).length;
+        values.push(count);
+      }
+
+      const maxValue = Math.max(...values, 1);
+
+      values.forEach((val, r) => {
+        const wrap = document.createElement("div");
+        wrap.className = "bar-wrap";
+
+        const bar = document.createElement("div");
+        bar.className = "bar" + (r === state.radius ? " active" : "");
+        bar.style.height = `${Math.max(5, (val / maxValue) * 128)}px`;
+        bar.title = `r=${r}, |B|=${val}`;
+
+        const label = document.createElement("div");
+        label.className = "bar-label";
+        label.textContent = `r${r}`;
+
+        wrap.appendChild(bar);
+        wrap.appendChild(label);
+        bars.appendChild(wrap);
+      });
+    }
+
+    function showTooltip(evt, n, d) {
+      const rect = stage.getBoundingClientRect();
+      const status =
+        n.id === state.center ? "Centro" :
+        d === state.radius ? "Frontera" :
+        d < state.radius ? "Interior de la bola" :
+        "Exterior";
+
+      tooltip.innerHTML = `
+        <strong>Nodo ${n.label}</strong>
+        <span>Distancia al centro: ${d}</span>
+        <span>Estado: ${status}</span>
+        <span>Pertenece a B: ${d <= state.radius ? "sí" : "no"}</span>
+      `;
+
+      tooltip.style.left = `${evt.clientX - rect.left}px`;
+      tooltip.style.top = `${evt.clientY - rect.top}px`;
+      tooltip.classList.add("visible");
+    }
+
+    function hideTooltip() {
+      tooltip.classList.remove("visible");
+    }
+
+    function expandOneStep() {
+      const max = Number(radiusRange.max);
+      state.radius = state.radius < max ? state.radius + 1 : 0;
+      radiusRange.value = state.radius;
+      render();
+    }
+
+    graphType.addEventListener("change", () => {
+      setGraph(graphType.value);
+    });
+
+    radiusRange.addEventListener("input", () => {
+      state.radius = Number(radiusRange.value);
+      render();
+    });
+
+    centerSelect.addEventListener("change", () => {
+      state.center = centerSelect.value;
+      state.radius = 0;
+      radiusRange.value = 0;
+      render();
+    });
+
+    expandBtn.addEventListener("click", expandOneStep);
+
+    resetBtn.addEventListener("click", () => {
+      state.radius = 0;
+      radiusRange.value = 0;
+      render();
+    });
+
+    themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+    });
+
+    autoBtn.addEventListener("click", () => {
+      state.auto = !state.auto;
+
+      if (state.auto) {
+        autoBtn.textContent = "Detener animación";
+        autoBtn.classList.add("danger");
+        state.timer = setInterval(expandOneStep, 850);
+      } else {
+        autoBtn.textContent = "Iniciar animación";
+        autoBtn.classList.remove("danger");
+        clearInterval(state.timer);
+        state.timer = null;
+      }
+    });
+
+    setGraph("tree");
+  </script>
+</body>
+</html>

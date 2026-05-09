@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embeddings en grafos conexos no ponderados</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101d34;
+      --panel-soft: #162540;
+      --text: #eef6ff;
+      --muted: #a9bdd7;
+      --accent: #50d8ff;
+      --accent2: #8df7c8;
+      --accent3: #ffd166;
+      --line: rgba(130, 205, 255, 0.22);
+      --code-bg: rgba(255,255,255,0.05);
+    }
+
+    body.light {
+      --bg: #f5f8fc;
+      --panel: #ffffff;
+      --panel-soft: #eef4fa;
+      --text: #102033;
+      --muted: #5d7289;
+      --accent: #0878a8;
+      --accent2: #0e9c72;
+      --accent3: #c48700;
+      --line: rgba(30, 90, 130, 0.16);
+      --code-bg: rgba(0,0,0,0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(80,216,255,0.14), transparent 30%),
+        radial-gradient(circle at top right, rgba(141,247,200,0.10), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.25);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(80,216,255,0.12);
+      border: 1px solid var(--line);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      margin: 0 0 18px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-top: 0;
+      letter-spacing: -0.03em;
+    }
+
+    h3 {
+      color: var(--accent);
+      margin-top: 24px;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+    }
+
+    .formula {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin: 16px 0;
+      color: var(--text);
+      font-family: Consolas, Menlo, monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .highlight {
+      border-left: 4px solid var(--accent2);
+      background: rgba(141,247,200,0.08);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin: 18px 0;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel-soft);
+      color: var(--text);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .mini {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .mini h3 {
+      margin-top: 0;
+      color: var(--text);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: rgba(80,216,255,0.12);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 32px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      header,
+      .card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <div class="eyebrow">Embeddings · Grafos · Geometría métrica</div>
+      <h1>¿Se puede aplicar un embedding a grafos conexos no ponderados?</h1>
+
+      <p>
+        Sí. Un grafo conexo no ponderado puede convertirse primero en un espacio métrico discreto
+        mediante la distancia de camino mínimo. Luego, un embedding permite representar sus vértices
+        como puntos en un espacio geométrico, por ejemplo en un espacio euclidiano o hiperbólico.
+      </p>
+
+      <button onclick="document.body.classList.toggle('light')">
+        Cambiar tema claro / oscuro
+      </button>
+    </header>
+
+    <section class="card">
+      <h2>1. Punto de partida: el grafo</h2>
+
+      <p>
+        Un grafo se define como:
+      </p>
+
+      <div class="formula">G = (V, E)</div>
+
+      <p>
+        Donde:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Elemento</th>
+            <th>Significado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>V</td>
+            <td>Conjunto de vértices o nodos.</td>
+          </tr>
+          <tr>
+            <td>E</td>
+            <td>Conjunto de aristas o conexiones entre nodos.</td>
+          </tr>
+          <tr>
+            <td>Conexo</td>
+            <td>Desde cualquier nodo se puede llegar a cualquier otro siguiendo aristas.</td>
+          </tr>
+          <tr>
+            <td>No ponderado</td>
+            <td>Todas las aristas valen lo mismo: cada arista cuenta como un paso.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>2. Distancia de camino mínimo</h2>
+
+      <p>
+        Como el grafo es conexo, siempre existe un camino entre dos vértices.
+        Como no es ponderado, cada arista tiene costo 1. Por eso, la distancia natural entre dos nodos
+        es la cantidad mínima de aristas necesarias para ir de uno a otro.
+      </p>
+
+      <div class="formula">d_G(u,v) = mínima cantidad de aristas necesarias para ir de u a v</div>
+
+      <p>
+        Formalmente:
+      </p>
+
+      <div class="formula">d_G(u,v) = min { k : existe un camino u = v₀, v₁, ..., vₖ = v 
+con (vᵢ₋₁, vᵢ) ∈ E }</div>
+
+      <div class="highlight">
+        Esto significa que buscamos todos los caminos posibles entre u y v,
+        y elegimos el que utiliza la menor cantidad de aristas.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. El grafo como espacio métrico</h2>
+
+      <p>
+        Una vez definida la distancia de camino mínimo, el grafo deja de ser solamente
+        una estructura combinatoria y pasa a ser un espacio métrico discreto.
+      </p>
+
+      <div class="formula">(V, d_G)</div>
+
+      <p>
+        Esto significa que tenemos un conjunto de puntos, los vértices,
+        y una función de distancia entre ellos.
+      </p>
+
+      <h3>Propiedades de la métrica</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Propiedad</th>
+            <th>Fórmula</th>
+            <th>Interpretación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>No negatividad</td>
+            <td>d_G(u,v) ≥ 0</td>
+            <td>No existen caminos con cantidad negativa de aristas.</td>
+          </tr>
+          <tr>
+            <td>Identidad</td>
+            <td>d_G(u,u) = 0</td>
+            <td>Un nodo está a distancia cero de sí mismo.</td>
+          </tr>
+          <tr>
+            <td>Simetría</td>
+            <td>d_G(u,v) = d_G(v,u)</td>
+            <td>En un grafo no dirigido, todo camino puede recorrerse en sentido inverso.</td>
+          </tr>
+          <tr>
+            <td>Desigualdad triangular</td>
+            <td>d_G(u,w) ≤ d_G(u,v) + d_G(v,w)</td>
+            <td>El camino mínimo directo no puede ser más largo que ir pasando por un nodo intermedio.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>4. Qué es un embedding de grafos</h2>
+
+      <p>
+        Un embedding de grafos es una función que asigna a cada nodo del grafo
+        un punto en un espacio geométrico.
+      </p>
+
+      <div class="formula">φ : V → X</div>
+
+      <p>
+        Si el espacio de destino es euclidiano, por ejemplo:
+      </p>
+
+      <div class="formula">φ : V → ℝᵈ</div>
+
+      <p>
+        Cada nodo se transforma en un vector:
+      </p>
+
+      <div class="formula">v ↦ φ(v) = (x₁, x₂, ..., x_d)</div>
+
+      <div class="highlight">
+        La idea no es solo “dibujar” el grafo, sino representar sus relaciones internas
+        en un espacio donde podamos medir distancias, hacer clustering, clasificar,
+        predecir enlaces o alimentar modelos de machine learning.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5. Objetivo del embedding</h2>
+
+      <p>
+        El objetivo ideal es que las distancias del grafo se conserven lo mejor posible
+        en el espacio geométrico de llegada.
+      </p>
+
+      <div class="formula">d_G(u,v) ≈ d_X(φ(u), φ(v))</div>
+
+      <p>
+        Si usamos distancia euclidiana en el espacio de destino:
+      </p>
+
+      <div class="formula">d_G(u,v) ≈ || φ(u) - φ(v) ||</div>
+
+      <p>
+        En palabras simples:
+      </p>
+
+      <div class="grid">
+        <div class="mini">
+          <h3>Nodos cercanos en el grafo</h3>
+          <p>
+            Si dos nodos están conectados directamente o separados por pocos pasos,
+            sus embeddings deberían quedar cerca.
+          </p>
+        </div>
+
+        <div class="mini">
+          <h3>Nodos lejanos en el grafo</h3>
+          <p>
+            Si dos nodos están separados por muchos pasos,
+            sus representaciones deberían quedar más alejadas.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>6. Bola métrica en el grafo</h2>
+
+      <p>
+        Además de medir distancias entre pares de nodos, podemos definir bolas métricas.
+        Una bola métrica contiene todos los nodos que están a distancia menor o igual que cierto radio.
+      </p>
+
+      <div class="formula">B_G(u,r) = { w ∈ V : d_G(u,w) ≤ r }</div>
+
+      <p>
+        El tamaño de la bola métrica es:
+      </p>
+
+      <div class="formula">|B_G(u,r)|</div>
+
+      <p>
+        Este valor mide cuántos nodos se pueden alcanzar desde u usando como máximo r pasos.
+      </p>
+
+      <div class="highlight">
+        Las bolas métricas permiten estudiar cómo se expande el grafo alrededor de un nodo.
+        En un camino lineal crecen lentamente; en una grilla crecen como una región bidimensional;
+        en un árbol pueden crecer de manera exponencial.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>7. Por qué importa la geometría de destino</h2>
+
+      <p>
+        No todos los espacios geométricos tienen la misma capacidad para representar grafos.
+        Si el grafo tiene estructura plana o de comunidades, un espacio euclidiano puede funcionar bien.
+        Pero si el grafo tiene estructura jerárquica o tipo árbol, puede aparecer mucha distorsión en espacios euclidianos de baja dimensión.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo de grafo</th>
+            <th>Crecimiento</th>
+            <th>Espacio que suele convenir</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Camino lineal</td>
+            <td>Lineal</td>
+            <td>Euclidiano</td>
+          </tr>
+          <tr>
+            <td>Grilla</td>
+            <td>Cuadrático / bidimensional</td>
+            <td>Euclidiano</td>
+          </tr>
+          <tr>
+            <td>Árbol</td>
+            <td>Exponencial</td>
+            <td>Hiperbólico</td>
+          </tr>
+          <tr>
+            <td>Taxonomía</td>
+            <td>Jerárquico</td>
+            <td>Hiperbólico</td>
+          </tr>
+          <tr>
+            <td>Red social</td>
+            <td>Comunidades + hubs</td>
+            <td>Euclidiano o hiperbólico, según la estructura</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>8. Síntesis conceptual</h2>
+
+      <p>
+        Aplicar embeddings a grafos conexos no ponderados es natural porque el grafo puede convertirse
+        primero en un espacio métrico discreto. Luego, el embedding busca representar ese espacio
+        en una geometría continua.
+      </p>
+
+      <div class="formula">Grafo conexo no ponderado
+↓
+Espacio métrico discreto (V, d_G)
+↓
+Embedding φ : V → X
+↓
+Representación geométrica útil para machine learning</div>
+
+      <div class="highlight">
+        En síntesis: sí se puede aplicar un embedding a grafos conexos no ponderados.
+        La clave es que la distancia de camino mínimo convierte al grafo en un espacio métrico,
+        y el embedding intenta preservar esa estructura en otro espacio.
+      </div>
+    </section>
+
+    <footer>
+      Material elaborado por el profesor Sergio Gevatschnaider · HTML didáctico sobre embeddings en grafos
+    </footer>
+
+  </div>
+</body>
+</html>

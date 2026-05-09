@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visualización del Plano Hiperbólico</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg2: #111a2e;
+      --card: rgba(255,255,255,0.075);
+      --card2: rgba(255,255,255,0.11);
+      --text: #eef4ff;
+      --muted: #aebbd3;
+      --line: rgba(255,255,255,0.18);
+      --accent: #67e8f9;
+      --accent2: #a78bfa;
+      --accent3: #fbbf24;
+      --danger: #fb7185;
+      --good: #86efac;
+      --canvas: #09111f;
+      --shadow: 0 25px 80px rgba(0,0,0,.35);
+    }
+
+    body.light {
+      --bg: #f4f7fb;
+      --bg2: #eaf0f8;
+      --card: rgba(255,255,255,0.85);
+      --card2: rgba(255,255,255,1);
+      --text: #0f172a;
+      --muted: #475569;
+      --line: rgba(15,23,42,0.16);
+      --accent: #0891b2;
+      --accent2: #7c3aed;
+      --accent3: #b45309;
+      --danger: #be123c;
+      --good: #15803d;
+      --canvas: #ffffff;
+      --shadow: 0 25px 80px rgba(15,23,42,.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(103,232,249,.18), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(167,139,250,.18), transparent 30%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 44px 20px 18px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      right: -140px;
+      top: -160px;
+      background: radial-gradient(circle, rgba(103,232,249,.28), transparent 65%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      letter-spacing: -0.05em;
+      line-height: .98;
+    }
+
+    .subtitle {
+      max-width: 900px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: rgba(103,232,249,.18);
+    }
+
+    .sliderBox {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    input[type="range"] {
+      width: min(340px, 70vw);
+      accent-color: var(--accent);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .formulaPanel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 12px 35px rgba(0,0,0,.12);
+    }
+
+    .metric small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.35rem;
+      color: var(--accent);
+    }
+
+    .metric code {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .92rem;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .cardHeader {
+      padding: 20px 22px 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(103,232,249,.32);
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    canvas {
+      width: 100%;
+      height: 360px;
+      display: block;
+      background: var(--canvas);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .explanation {
+      padding: 18px 22px 24px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .98rem;
+    }
+
+    .explanation b {
+      color: var(--text);
+    }
+
+    .formula {
+      margin: 12px 0;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(103,232,249,.10);
+      color: var(--text);
+      border: 1px solid rgba(103,232,249,.22);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overflow-x: auto;
+    }
+
+    .compare {
+      margin-top: 24px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(103,232,249,.12), rgba(167,139,250,.08));
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .compare h2 {
+      margin-bottom: 12px;
+    }
+
+    .compare p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 35px 20px 50px;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid,
+      .formulaPanel {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 320px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <section class="hero">
+      <h1>¿Se puede visualizar el plano hiperbólico?</h1>
+      <p class="subtitle">
+        Sí. El plano hiperbólico no se puede dibujar de manera perfecta en el plano euclidiano común,
+        pero se puede representar mediante modelos. Cada modelo conserva algo distinto:
+        ángulos, rectas, geodésicas o estructura algebraica.
+      </p>
+
+      <div class="toolbar">
+        <button id="themeBtn">Cambiar tema</button>
+        <button id="animBtn">Pausar animación</button>
+
+        <div class="sliderBox">
+          <label for="radiusSlider">Radio hiperbólico r:</label>
+          <input id="radiusSlider" type="range" min="0.2" max="4.5" step="0.05" value="2.2">
+          <span id="radiusValue">2.20</span>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="formulaPanel">
+      <div class="metric">
+        <small>Longitud hiperbólica</small>
+        <strong id="hypCirc">0</strong>
+        <code>C<sub>H²</sub>(r) = 2π sinh(r)</code>
+      </div>
+
+      <div class="metric">
+        <small>Área hiperbólica</small>
+        <strong id="hypArea">0</strong>
+        <code>A<sub>H²</sub>(r) = 2π(cosh(r) − 1)</code>
+      </div>
+
+      <div class="metric">
+        <small>Longitud euclidiana</small>
+        <strong id="eucCirc">0</strong>
+        <code>C<sub>R²</sub>(r) = 2πr</code>
+      </div>
+
+      <div class="metric">
+        <small>Área euclidiana</small>
+        <strong id="eucArea">0</strong>
+        <code>A<sub>R²</sub>(r) = πr²</code>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="cardHeader">
+          <div class="tag">Modelo conforme</div>
+          <h2>1. Disco de Poincaré</h2>
+        </div>
+        <canvas id="poincare"></canvas>
+        <div class="explanation">
+          <b>Idea:</b> todo el plano hiperbólico se dibuja dentro de un disco.
+          El borde no pertenece al espacio: representa el infinito hiperbólico.
+          <div class="formula">ρ = tanh(r / 2)</div>
+          Si r crece, ρ se acerca al borde. Visualmente parece comprimido,
+          pero en la métrica hiperbólica hay muchísimo espacio cerca del borde.
+          Las geodésicas son diámetros o arcos que cortan el borde en ángulo recto.
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="cardHeader">
+          <div class="tag">Modelo conforme</div>
+          <h2>2. Semiplano superior</h2>
+        </div>
+        <canvas id="halfplane"></canvas>
+        <div class="explanation">
+          <b>Idea:</b> el plano hiperbólico se representa como la región y &gt; 0.
+          La frontera y = 0 no pertenece al espacio.
+          <div class="formula">H² = {(x, y) ∈ R² : y &gt; 0}</div>
+          Las geodésicas son rectas verticales o semicircunferencias perpendiculares
+          a la frontera. Al igual que el disco de Poincaré, conserva ángulos.
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="cardHeader">
+          <div class="tag">Geodésicas rectas</div>
+          <h2>3. Modelo de Klein</h2>
+        </div>
+        <canvas id="klein"></canvas>
+        <div class="explanation">
+          <b>Idea:</b> también usa un disco, pero ahora las geodésicas se ven como
+          segmentos rectos o cuerdas.
+          <div class="formula">ρ<sub>Klein</sub> = tanh(r)</div>
+          Es muy útil para ver caminos mínimos como líneas rectas. La desventaja
+          es que no conserva bien los ángulos: las formas se deforman angularmente.
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="cardHeader">
+          <div class="tag">Modelo algebraico</div>
+          <h2>4. Hiperboloide</h2>
+        </div>
+        <canvas id="hyperboloid"></canvas>
+        <div class="explanation">
+          <b>Idea:</b> el plano hiperbólico puede verse como una hoja de un hiperboloide
+          en un espacio tridimensional con métrica lorentziana.
+          <div class="formula">x² + y² − z² = −1, &nbsp; z &gt; 0</div>
+          Este modelo es importante para la formulación matemática de embeddings
+          hiperbólicos, porque permite trabajar con coordenadas y distancias de forma
+          más algebraica.
+        </div>
+      </article>
+    </section>
+
+    <section class="compare">
+      <h2>¿Por qué esto ayuda a entender árboles y jerarquías?</h2>
+      <p>
+        En el plano euclidiano, el área disponible dentro de una bola de radio r crece como πr².
+        En cambio, en el plano hiperbólico crece como 2π(cosh(r) − 1), que para radios grandes
+        se comporta aproximadamente como una exponencial.
+      </p>
+      <p>
+        Esto es importante porque un árbol regular también crece exponencialmente por niveles:
+        si cada nodo tiene b hijos, el nivel ℓ tiene aproximadamente b^ℓ nodos.
+        Por eso el plano hiperbólico es una geometría muy natural para visualizar jerarquías,
+        taxonomías, grafos arborescentes y redes con estructura centro-periferia.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Visualización didáctica del plano hiperbólico mediante cuatro modelos geométricos.
+  </footer>
+
+  <script>
+    const state = {
+      r: 2.2,
+      running: true,
+      t: 0
+    };
+
+    const canvases = {
+      poincare: document.getElementById("poincare"),
+      halfplane: document.getElementById("halfplane"),
+      klein: document.getElementById("klein"),
+      hyperboloid: document.getElementById("hyperboloid")
+    };
+
+    const radiusSlider = document.getElementById("radiusSlider");
+    const radiusValue = document.getElementById("radiusValue");
+
+    const hypCirc = document.getElementById("hypCirc");
+    const hypArea = document.getElementById("hypArea");
+    const eucCirc = document.getElementById("eucCirc");
+    const eucArea = document.getElementById("eucArea");
+
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.body.classList.toggle("light");
+    });
+
+    document.getElementById("animBtn").addEventListener("click", (e) => {
+      state.running = !state.running;
+      e.target.textContent = state.running ? "Pausar animación" : "Reanudar animación";
+    });
+
+    radiusSlider.addEventListener("input", () => {
+      state.r = parseFloat(radiusSlider.value);
+      radiusValue.textContent = state.r.toFixed(2);
+      updateMetrics();
+      drawAll();
+    });
+
+    function cssVar(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function resizeCanvas(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w: rect.width, h: rect.height };
+    }
+
+    function clear(ctx, w, h) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = cssVar("--canvas");
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawText(ctx, text, x, y, size = 13, color = cssVar("--muted")) {
+      ctx.fillStyle = color;
+      ctx.font = `600 ${size}px Inter, system-ui, sans-serif`;
+      ctx.fillText(text, x, y);
+    }
+
+    function updateMetrics() {
+      const r = state.r;
+      const hc = 2 * Math.PI * Math.sinh(r);
+      const ha = 2 * Math.PI * (Math.cosh(r) - 1);
+      const ec = 2 * Math.PI * r;
+      const ea = Math.PI * r * r;
+
+      hypCirc.textContent = hc.toFixed(2);
+      hypArea.textContent = ha.toFixed(2);
+      eucCirc.textContent = ec.toFixed(2);
+      eucArea.textContent = ea.toFixed(2);
+    }
+
+    function mapDisk(cx, cy, R, p) {
+      return {
+        x: cx + R * p.x,
+        y: cy - R * p.y
+      };
+    }
+
+    function drawPoincare() {
+      const { ctx, w, h } = resizeCanvas(canvases.poincare);
+      clear(ctx, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const R = Math.min(w, h) * 0.39;
+      const accent = cssVar("--accent");
+      const accent2 = cssVar("--accent2");
+      const muted = cssVar("--muted");
+      const line = cssVar("--line");
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.clip();
+
+      const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, R);
+      grad.addColorStop(0, "rgba(103,232,249,0.16)");
+      grad.addColorStop(1, "rgba(167,139,250,0.05)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+
+      // Círculos hiperbólicos centrados en el origen: rho = tanh(r / 2)
+      for (let rr = 0.75; rr <= 4.5; rr += 0.75) {
+        const rho = Math.tanh(rr / 2);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * rho, 0, Math.PI * 2);
+        ctx.strokeStyle = rr <= state.r ? "rgba(103,232,249,0.35)" : "rgba(255,255,255,0.10)";
+        ctx.lineWidth = rr <= state.r ? 1.6 : 1;
+        ctx.stroke();
+      }
+
+      // Rayos
+      for (let i = 0; i < 16; i++) {
+        const a = i * Math.PI * 2 / 16;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Geodésicas como arcos ortogonales
+      const pairs = [
+        [0.15, 2.25],
+        [0.75, 3.95],
+        [1.35, 5.15],
+        [2.75, 5.75]
+      ];
+
+      pairs.forEach((p, idx) => {
+        drawOrthogonalArc(ctx, cx, cy, R, p[0] + 0.08 * Math.sin(state.t + idx), p[1], idx % 2 ? accent2 : accent);
+      });
+
+      // Árbol radial dentro del disco
+      drawTreeInDisk(ctx, cx, cy, R, 4, 3, accent);
+
+      // Radio seleccionado
+      const rhoR = Math.tanh(state.r / 2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * rhoR, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(251,191,36,0.95)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawText(ctx, "Borde = infinito hiperbólico", cx - R + 12, cy + R + 24, 13, muted);
+      drawText(ctx, "Disco de Poincaré: conserva ángulos", 18, 28, 14, accent);
+    }
+
+    function drawOrthogonalArc(ctx, cx, cy, R, a, b, color) {
+      const p = { x: Math.cos(a), y: Math.sin(a) };
+      const q = { x: Math.cos(b), y: Math.sin(b) };
+
+      const det = p.x * q.y - p.y * q.x;
+
+      if (Math.abs(det) < 0.03) {
+        const P = mapDisk(cx, cy, R, p);
+        const Q = mapDisk(cx, cy, R, q);
+        ctx.beginPath();
+        ctx.moveTo(P.x, P.y);
+        ctx.lineTo(Q.x, Q.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        return;
+      }
+
+      // Centro del círculo ortogonal a la unidad:
+      // c · p = 1 y c · q = 1
+      const c = {
+        x: (q.y - p.y) / det,
+        y: (p.x - q.x) / det
+      };
+
+      const rad = Math.sqrt(c.x * c.x + c.y * c.y - 1);
+
+      const a1 = Math.atan2(p.y - c.y, p.x - c.x);
+      const a2 = Math.atan2(q.y - c.y, q.x - c.x);
+
+      const path1 = sampleArc(c, rad, a1, a2, true);
+      const path2 = sampleArc(c, rad, a1, a2, false);
+
+      const mid1 = path1[Math.floor(path1.length / 2)];
+      const inside1 = mid1.x * mid1.x + mid1.y * mid1.y < 1;
+
+      const chosen = inside1 ? path1 : path2;
+
+      ctx.beginPath();
+      chosen.forEach((pt, i) => {
+        const P = mapDisk(cx, cy, R, pt);
+        if (i === 0) ctx.moveTo(P.x, P.y);
+        else ctx.lineTo(P.x, P.y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+    }
+
+    function sampleArc(c, rad, a1, a2, positive) {
+      let delta = a2 - a1;
+
+      if (positive) {
+        while (delta < 0) delta += Math.PI * 2;
+      } else {
+        while (delta > 0) delta -= Math.PI * 2;
+      }
+
+      const pts = [];
+      const n = 70;
+
+      for (let i = 0; i <= n; i++) {
+        const a = a1 + delta * i / n;
+        pts.push({
+          x: c.x + rad * Math.cos(a),
+          y: c.y + rad * Math.sin(a)
+        });
+      }
+
+      return pts;
+    }
+
+    function drawTreeInDisk(ctx, cx, cy, R, depth, branch, color) {
+      const nodes = [];
+
+      function addNode(level, maxDepth, angleStart, angleEnd, parentIndex) {
+        const angle = (angleStart + angleEnd) / 2;
+        const hyperR = level * 0.75;
+        const rho = Math.tanh(hyperR / 2);
+        const node = {
+          level,
+          angle,
+          x: rho * Math.cos(angle),
+          y: rho * Math.sin(angle),
+          parentIndex
+        };
+        const index = nodes.length;
+        nodes.push(node);
+
+        if (level < maxDepth) {
+          const width = angleEnd - angleStart;
+          for (let i = 0; i < branch; i++) {
+            const a0 = angleStart + width * i / branch;
+            const a1 = angleStart + width * (i + 1) / branch;
+            addNode(level + 1, maxDepth, a0, a1, index);
+          }
+        }
+      }
+
+      addNode(0, depth, -Math.PI * 0.88, Math.PI * 0.88, -1);
+
+      ctx.save();
+
+      nodes.forEach(n => {
+        if (n.parentIndex >= 0) {
+          const p = nodes[n.parentIndex];
+          const P = mapDisk(cx, cy, R, p);
+          const Q = mapDisk(cx, cy, R, n);
+
+          ctx.beginPath();
+          ctx.moveTo(P.x, P.y);
+          ctx.lineTo(Q.x, Q.y);
+          ctx.strokeStyle = "rgba(134,239,172,0.33)";
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
+      });
+
+      nodes.forEach(n => {
+        const P = mapDisk(cx, cy, R, n);
+        ctx.beginPath();
+        ctx.arc(P.x, P.y, n.level === 0 ? 5 : 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = n.level === 0 ? "rgba(251,191,36,0.95)" : "rgba(134,239,172,0.9)";
+        ctx.fill();
+      });
+
+      ctx.restore();
+    }
+
+    function drawHalfPlane() {
+      const { ctx, w, h } = resizeCanvas(canvases.halfplane);
+      clear(ctx, w, h);
+
+      const accent = cssVar("--accent");
+      const accent2 = cssVar("--accent2");
+      const muted = cssVar("--muted");
+
+      const pad = 42;
+      const xMin = -3.5;
+      const xMax = 3.5;
+      const yMin = 0;
+      const yMax = 4.2;
+
+      function X(x) {
+        return pad + (x - xMin) / (xMax - xMin) * (w - 2 * pad);
+      }
+
+      function Y(y) {
+        return h - pad - (y - yMin) / (yMax - yMin) * (h - 2 * pad);
+      }
+
+      // Fondo
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "rgba(103,232,249,0.12)");
+      grad.addColorStop(1, "rgba(167,139,250,0.03)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Frontera
+      ctx.beginPath();
+      ctx.moveTo(pad, Y(0));
+      ctx.lineTo(w - pad, Y(0));
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawText(ctx, "frontera y = 0 no pertenece al espacio", pad + 8, Y(0) + 25, 12, muted);
+
+      // Líneas horizontales
+      for (let y = 0.5; y <= 4; y += 0.5) {
+        ctx.beginPath();
+        ctx.moveTo(pad, Y(y));
+        ctx.lineTo(w - pad, Y(y));
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Geodésicas verticales
+      [-2.4, -1.2, 0, 1.2, 2.4].forEach((x, i) => {
+        ctx.beginPath();
+        ctx.moveTo(X(x), Y(0.05));
+        ctx.lineTo(X(x), Y(4.05));
+        ctx.strokeStyle = i === 2 ? "rgba(251,191,36,0.9)" : "rgba(103,232,249,0.35)";
+        ctx.lineWidth = i === 2 ? 2.5 : 1.7;
+        ctx.stroke();
+      });
+
+      // Semicircunferencias perpendiculares al eje
+      const arcs = [
+        { c: -1.8, r: 1.1 },
+        { c: 0, r: 1.8 },
+        { c: 1.7, r: 1.25 }
+      ];
+
+      arcs.forEach((arc, idx) => {
+        ctx.beginPath();
+        for (let i = 0; i <= 100; i++) {
+          const a = Math.PI * i / 100;
+          const x = arc.c + arc.r * Math.cos(a);
+          const y = arc.r * Math.sin(a);
+          if (i === 0) ctx.moveTo(X(x), Y(y));
+          else ctx.lineTo(X(x), Y(y));
+        }
+        ctx.strokeStyle = idx === 1 ? accent2 : accent;
+        ctx.lineWidth = idx === 1 ? 2.5 : 2;
+        ctx.stroke();
+      });
+
+      // Punto animado
+      const tt = (Math.sin(state.t) + 1) / 2;
+      const px = -2.5 + 5 * tt;
+      const py = 0.45 + 1.9 * Math.abs(Math.sin(state.t * 0.7));
+
+      ctx.beginPath();
+      ctx.arc(X(px), Y(py), 7, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(251,191,36,0.95)";
+      ctx.fill();
+
+      drawText(ctx, "Semiplano superior: geodésicas verticales o semicircunferencias", 18, 28, 14, accent);
+    }
+
+    function drawKlein() {
+      const { ctx, w, h } = resizeCanvas(canvases.klein);
+      clear(ctx, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const R = Math.min(w, h) * 0.39;
+      const accent = cssVar("--accent");
+      const accent2 = cssVar("--accent2");
+      const muted = cssVar("--muted");
+
+      ctx.save();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.clip();
+
+      const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, R);
+      grad.addColorStop(0, "rgba(167,139,250,0.16)");
+      grad.addColorStop(1, "rgba(103,232,249,0.04)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+
+      // Círculos de radio hiperbólico en Klein: rho = tanh(r)
+      for (let rr = 0.75; rr <= 4.5; rr += 0.75) {
+        const rho = Math.tanh(rr);
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * rho, 0, Math.PI * 2);
+        ctx.strokeStyle = rr <= state.r ? "rgba(167,139,250,0.38)" : "rgba(255,255,255,0.09)";
+        ctx.lineWidth = rr <= state.r ? 1.6 : 1;
+        ctx.stroke();
+      }
+
+      // Cuerdas rectas: geodésicas del modelo de Klein
+      const chords = [
+        [0.25, 2.35],
+        [0.85, 4.25],
+        [1.55, 5.35],
+        [2.85, 5.85],
+        [3.4, 0.6]
+      ];
+
+      chords.forEach((pair, idx) => {
+        const p = {
+          x: Math.cos(pair[0] + 0.08 * Math.sin(state.t + idx)),
+          y: Math.sin(pair[0] + 0.08 * Math.sin(state.t + idx))
+        };
+        const q = {
+          x: Math.cos(pair[1]),
+          y: Math.sin(pair[1])
+        };
+
+        const P = mapDisk(cx, cy, R, p);
+        const Q = mapDisk(cx, cy, R, q);
+
+        ctx.beginPath();
+        ctx.moveTo(P.x, P.y);
+        ctx.lineTo(Q.x, Q.y);
+        ctx.strokeStyle = idx % 2 ? accent2 : accent;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+      });
+
+      // Triángulo hiperbólico visual
+      const tri = [
+        { x: -0.55, y: -0.25 },
+        { x: 0.58, y: -0.15 },
+        { x: 0.1, y: 0.62 }
+      ];
+
+      ctx.beginPath();
+      tri.forEach((p, i) => {
+        const P = mapDisk(cx, cy, R, p);
+        if (i === 0) ctx.moveTo(P.x, P.y);
+        else ctx.lineTo(P.x, P.y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(251,191,36,0.12)";
+      ctx.strokeStyle = "rgba(251,191,36,0.9)";
+      ctx.lineWidth = 2.4;
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.strokeStyle = accent2;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawText(ctx, "Modelo de Klein: geodésicas como segmentos rectos", 18, 28, 14, accent2);
+      drawText(ctx, "No conserva ángulos", cx - R + 12, cy + R + 24, 13, muted);
+    }
+
+    function drawHyperboloid() {
+      const { ctx, w, h } = resizeCanvas(canvases.hyperboloid);
+      clear(ctx, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2 + 70;
+      const scale = Math.min(w, h) * 0.18;
+      const accent = cssVar("--accent");
+      const accent2 = cssVar("--accent2");
+      const muted = cssVar("--muted");
+
+      const angle = state.t * 0.35;
+
+      function point(r, theta) {
+        return {
+          x: Math.sinh(r) * Math.cos(theta),
+          y: Math.sinh(r) * Math.sin(theta),
+          z: Math.cosh(r)
+        };
+      }
+
+      function rotate(p) {
+        const ca = Math.cos(angle);
+        const sa = Math.sin(angle);
+
+        let x = p.x * ca - p.y * sa;
+        let y = p.x * sa + p.y * ca;
+        let z = p.z;
+
+        const tilt = -0.72;
+        const ct = Math.cos(tilt);
+        const st = Math.sin(tilt);
+
+        const y2 = y * ct - z * st;
+        const z2 = y * st + z * ct;
+
+        return { x, y: y2, z: z2 };
+      }
+
+      function project(p) {
+        const q = rotate(p);
+        const perspective = 4.8 / (4.8 + q.z);
+        return {
+          x: cx + scale * q.x * perspective,
+          y: cy - scale * q.y * perspective
+        };
+      }
+
+      // Ejes guía
+      ctx.beginPath();
+      ctx.moveTo(cx, 35);
+      ctx.lineTo(cx, h - 30);
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Meridianos
+      for (let j = 0; j < 18; j++) {
+        const theta = j * Math.PI * 2 / 18;
+        ctx.beginPath();
+
+        for (let i = 0; i <= 90; i++) {
+          const r = 0.05 + 2.65 * i / 90;
+          const P = project(point(r, theta));
+          if (i === 0) ctx.moveTo(P.x, P.y);
+          else ctx.lineTo(P.x, P.y);
+        }
+
+        ctx.strokeStyle = "rgba(103,232,249,0.22)";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+
+      // Anillos
+      for (let rr = 0.35; rr <= 2.7; rr += 0.35) {
+        ctx.beginPath();
+
+        for (let i = 0; i <= 160; i++) {
+          const theta = i * Math.PI * 2 / 160;
+          const P = project(point(rr, theta));
+          if (i === 0) ctx.moveTo(P.x, P.y);
+          else ctx.lineTo(P.x, P.y);
+        }
+
+        ctx.strokeStyle = rr <= state.r * 0.65 ? "rgba(167,139,250,0.38)" : "rgba(255,255,255,0.09)";
+        ctx.lineWidth = rr <= state.r * 0.65 ? 1.8 : 1;
+        ctx.stroke();
+      }
+
+      // Anillo destacado
+      const rr = Math.min(2.7, state.r * 0.65);
+      ctx.beginPath();
+      for (let i = 0; i <= 180; i++) {
+        const theta = i * Math.PI * 2 / 180;
+        const P = project(point(rr, theta));
+        if (i === 0) ctx.moveTo(P.x, P.y);
+        else ctx.lineTo(P.x, P.y);
+      }
+      ctx.strokeStyle = "rgba(251,191,36,0.95)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Punto superior
+      const top = project(point(0.01, 0));
+      ctx.beginPath();
+      ctx.arc(top.x, top.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(251,191,36,0.95)";
+      ctx.fill();
+
+      drawText(ctx, "Hiperboloide: x² + y² − z² = −1", 18, 28, 14, accent);
+      drawText(ctx, "Una hoja superior: z > 0", 18, 48, 13, muted);
+    }
+
+    function drawAll() {
+      drawPoincare();
+      drawHalfPlane();
+      drawKlein();
+      drawHyperboloid();
+    }
+
+    function loop() {
+      if (state.running) {
+        state.t += 0.018;
+        drawAll();
+      }
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener("resize", drawAll);
+
+    updateMetrics();
+    drawAll();
+    loop();
+  </script>
+</body>
+</html>
