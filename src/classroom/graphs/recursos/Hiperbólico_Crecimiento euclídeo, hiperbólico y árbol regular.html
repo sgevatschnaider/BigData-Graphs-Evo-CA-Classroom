@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crecimiento euclídeo, hiperbólico y árbol regular</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #172033;
+      --panel-2: #1e293b;
+      --text: #e5e7eb;
+      --muted: #aab6ca;
+      --border: rgba(255,255,255,0.14);
+      --accent: #38bdf8;
+      --hyper: #22c55e;
+      --tree: #f97316;
+      --danger: #ef4444;
+      --canvas-bg: #0b1120;
+      --formula-bg: rgba(255,255,255,0.06);
+      --shadow: 0 22px 70px rgba(0,0,0,0.35);
+    }
+
+    body.light {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef3f9;
+      --text: #172033;
+      --muted: #5b677a;
+      --border: rgba(15,23,42,0.16);
+      --accent: #0284c7;
+      --hyper: #16a34a;
+      --tree: #ea580c;
+      --danger: #dc2626;
+      --canvas-bg: #f8fafc;
+      --formula-bg: rgba(2,132,199,0.08);
+      --shadow: 0 18px 50px rgba(15,23,42,0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,0.13), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 920px;
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 11px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 800;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      color: white;
+      border: none;
+    }
+
+    .primary.running {
+      background: linear-gradient(135deg, var(--tree), var(--danger));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    .card h3 {
+      margin: 18px 0 8px;
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
+    .explain {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.98rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0 18px;
+    }
+
+    .control {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 18px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .value {
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .status-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: var(--muted);
+      box-shadow: none;
+    }
+
+    .status-dot.running {
+      background: var(--tree);
+      box-shadow: 0 0 0 7px rgba(249,115,22,0.14);
+    }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .canvas-wrap {
+      background: var(--canvas-bg);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      min-height: 340px;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 340px;
+    }
+
+    .canvas-title {
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      background: rgba(15,23,42,0.82);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      backdrop-filter: blur(10px);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    body.light .canvas-title {
+      background: rgba(255,255,255,0.88);
+      color: #172033;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      font-size: 1.16rem;
+    }
+
+    .formula-box {
+      background: var(--formula-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+
+    .highlight {
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      background: var(--formula-bg);
+      border-radius: 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-top: 14px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      font-size: 0.84rem;
+      font-weight: 900;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .dot.euclid { background: var(--accent); }
+    .dot.hyper { background: var(--hyper); }
+    .dot.tree { background: var(--tree); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 18px;
+      font-size: 0.93rem;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding-bottom: 30px;
+    }
+
+    @media (max-width: 1000px) {
+      header,
+      .grid,
+      .visual-grid,
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .container {
+        padding: 18px;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 300px;
+      }
+
+      .canvas-wrap {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Crecimiento euclídeo, hiperbólico y árbol regular</h1>
+        <p class="subtitle">
+          Comparación visual entre el crecimiento polinómico del plano euclídeo,
+          el crecimiento exponencial del plano hiperbólico y el crecimiento ramificado
+          de un árbol regular.
+        </p>
+      </div>
+
+      <div class="top-actions">
+        <button id="themeBtn">Cambiar tema</button>
+        <button id="playBtn" class="primary">Iniciar animación</button>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card full">
+        <h2>1. Visualización dinámica</h2>
+
+        <div class="controls">
+          <div class="control">
+            <label>
+              Radio geodésico r
+              <span class="value" id="rValue">2.50</span>
+            </label>
+            <input id="radiusSlider" type="range" min="0.1" max="6" step="0.05" value="2.5" />
+          </div>
+
+          <div class="control">
+            <label>
+              Ramificación del árbol b
+              <span class="value" id="bValue">2</span>
+            </label>
+            <input id="branchSlider" type="range" min="2" max="5" step="1" value="2" />
+          </div>
+
+          <div class="control">
+            <label>
+              Velocidad
+              <span class="value" id="speedValue">1.40</span>
+            </label>
+            <input id="speedSlider" type="range" min="0.3" max="3" step="0.1" value="1.4" />
+            <div class="status">
+              <span id="statusDot" class="status-dot"></span>
+              <span id="statusText">Animación detenida</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="visual-grid">
+          <div class="canvas-wrap">
+            <div class="canvas-title">Plano euclídeo R²</div>
+            <canvas id="euclidCanvas"></canvas>
+          </div>
+
+          <div class="canvas-wrap">
+            <div class="canvas-title">Disco de Poincaré H²</div>
+            <canvas id="hyperCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <span>Circunferencia euclídea</span>
+            <strong id="ceVal">—</strong>
+          </div>
+
+          <div class="metric">
+            <span>Área euclídea</span>
+            <strong id="aeVal">—</strong>
+          </div>
+
+          <div class="metric">
+            <span>Circunferencia hiperbólica</span>
+            <strong id="chVal">—</strong>
+          </div>
+
+          <div class="metric">
+            <span>Área hiperbólica</span>
+            <strong id="ahVal">—</strong>
+          </div>
+        </div>
+
+        <div class="highlight">
+          En el plano euclídeo, el radio visual crece de manera directa.
+          En el disco de Poincaré, una bola hiperbólica centrada en el origen
+          se ve con radio euclídeo ρ = tanh(r/2). Por eso se acerca al borde,
+          pero nunca lo alcanza: el borde está infinitamente lejos en distancia hiperbólica.
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>2. Fórmulas principales</h2>
+
+        <h3>Plano euclídeo común</h3>
+        <div class="formula-box">
+          C<sub>E²</sub>(r) = 2πr<br>
+          A<sub>E²</sub>(r) = πr²
+        </div>
+
+        <p class="explain">
+          La circunferencia crece linealmente con el radio,
+          mientras que el área crece cuadráticamente.
+        </p>
+
+        <div class="formula-box">
+          Circunferencia ∼ r<br>
+          Área ∼ r²
+        </div>
+
+        <h3>Plano hiperbólico con curvatura −1</h3>
+        <div class="formula-box">
+          C<sub>H²</sub>(r) = 2π sinh(r)<br>
+          A<sub>H²</sub>(r) = 2π(cosh(r) − 1)
+        </div>
+
+        <p class="explain">
+          Las funciones hiperbólicas se expresan con exponenciales:
+        </p>
+
+        <div class="formula-box">
+          sinh(r) = (e<sup>r</sup> − e<sup>−r</sup>) / 2<br>
+          cosh(r) = (e<sup>r</sup> + e<sup>−r</sup>) / 2
+        </div>
+
+        <p class="explain">
+          Cuando r crece, e<sup>−r</sup> se vuelve muy pequeño. Por eso:
+        </p>
+
+        <div class="formula-box">
+          sinh(r) ∼ ½ e<sup>r</sup><br>
+          cosh(r) ∼ ½ e<sup>r</sup>
+        </div>
+
+        <div class="highlight">
+          En el plano hiperbólico, tanto la circunferencia como el área
+          crecen aproximadamente como e<sup>r</sup>. Ese es el punto clave:
+          el crecimiento es exponencial.
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>3. Árbol regular</h2>
+
+        <p class="explain">
+          En un árbol regular, cada nivel abre nuevas ramas. Si el factor de
+          ramificación efectivo es b, entonces la cantidad de nodos dentro
+          de una bola de radio r crece aproximadamente como:
+        </p>
+
+        <div class="formula-box">
+          |B<sub>r</sub>| ∼ b<sup>r</sup>
+        </div>
+
+        <p class="explain">
+          Como b<sup>r</sup> = e<sup>r ln b</sup>, el crecimiento también es exponencial.
+          Por eso los árboles y el plano hiperbólico tienen una relación geométrica profunda.
+        </p>
+
+        <div class="canvas-wrap">
+          <div class="canvas-title">Árbol regular</div>
+          <canvas id="treeCanvas"></canvas>
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>4. Comparación gráfica del crecimiento</h2>
+
+        <div class="legend">
+          <span class="pill"><span class="dot euclid"></span> Euclídeo: πr²</span>
+          <span class="pill"><span class="dot hyper"></span> Hiperbólico: 2π(cosh(r) − 1)</span>
+          <span class="pill"><span class="dot tree"></span> Árbol: bʳ</span>
+        </div>
+
+        <div class="canvas-wrap">
+          <div class="canvas-title">Gráfico en escala logarítmica</div>
+          <canvas id="chartCanvas"></canvas>
+        </div>
+
+        <div class="highlight">
+          El gráfico usa escala logarítmica para que las tres curvas puedan verse juntas.
+          En escala normal, las curvas exponenciales crecerían tan rápido que aplastarían
+          visualmente a la curva euclídea.
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>5. Tabla comparativa</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Espacio</th>
+              <th>Circunferencia</th>
+              <th>Área / bola</th>
+              <th>Tipo de crecimiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Plano euclídeo R²</td>
+              <td>2πr</td>
+              <td>πr²</td>
+              <td>Polinómico</td>
+            </tr>
+            <tr>
+              <td>Plano hiperbólico H²</td>
+              <td>2π sinh(r)</td>
+              <td>2π(cosh(r) − 1)</td>
+              <td>Exponencial</td>
+            </tr>
+            <tr>
+              <td>Árbol regular</td>
+              <td>Niveles discretos</td>
+              <td>|B<sub>r</sub>| ∼ b<sup>r</sup></td>
+              <td>Exponencial</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="highlight">
+          La intuición central es que el plano euclídeo se expande de manera moderada,
+          mientras que el plano hiperbólico y los árboles abren mucho más espacio al alejarse
+          del centro. Por eso la geometría hiperbólica es adecuada para representar jerarquías,
+          taxonomías, grafos ramificados y redes centro-periferia.
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      Visualización didáctica: crecimiento polinómico versus crecimiento exponencial.
+    </footer>
+  </div>
+
+  <script>
+    const body = document.body;
+
+    const themeBtn = document.getElementById("themeBtn");
+    const playBtn = document.getElementById("playBtn");
+
+    const radiusSlider = document.getElementById("radiusSlider");
+    const branchSlider = document.getElementById("branchSlider");
+    const speedSlider = document.getElementById("speedSlider");
+
+    const rValue = document.getElementById("rValue");
+    const bValue = document.getElementById("bValue");
+    const speedValue = document.getElementById("speedValue");
+
+    const ceVal = document.getElementById("ceVal");
+    const aeVal = document.getElementById("aeVal");
+    const chVal = document.getElementById("chVal");
+    const ahVal = document.getElementById("ahVal");
+
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+
+    const euclidCanvas = document.getElementById("euclidCanvas");
+    const hyperCanvas = document.getElementById("hyperCanvas");
+    const treeCanvas = document.getElementById("treeCanvas");
+    const chartCanvas = document.getElementById("chartCanvas");
+
+    let playing = false;
+    let direction = 1;
+    let animationId = null;
+    let lastTime = null;
+
+    function getCss(name) {
+      return getComputedStyle(body).getPropertyValue(name).trim();
+    }
+
+    function resizeCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      return {
+        ctx,
+        w: rect.width,
+        h: rect.height
+      };
+    }
+
+    function formatNumber(x) {
+      if (!isFinite(x)) return "∞";
+      if (x < 1000) return x.toFixed(2);
+      if (x < 1000000) {
+        return x.toLocaleString("es-AR", {
+          maximumFractionDigits: 0
+        });
+      }
+      return x.toExponential(2);
+    }
+
+    function sinh(x) {
+      return (Math.exp(x) - Math.exp(-x)) / 2;
+    }
+
+    function cosh(x) {
+      return (Math.exp(x) + Math.exp(-x)) / 2;
+    }
+
+    function hexToRgba(color, alpha) {
+      color = color.trim();
+
+      if (color.startsWith("rgba")) {
+        return color;
+      }
+
+      if (color.startsWith("rgb")) {
+        return color.replace("rgb", "rgba").replace(")", `, ${alpha})`);
+      }
+
+      let hex = color.replace("#", "");
+
+      if (hex.length === 3) {
+        hex = hex.split("").map(c => c + c).join("");
+      }
+
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function drawGrid(ctx, w, h, step) {
+      const muted = getCss("--muted");
+
+      ctx.save();
+      ctx.strokeStyle = hexToRgba(muted, 0.12);
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x <= w; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y <= h; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawEuclidean(r) {
+      const { ctx, w, h } = resizeCanvas(euclidCanvas);
+
+      const accent = getCss("--accent");
+      const text = getCss("--text");
+      const muted = getCss("--muted");
+
+      ctx.clearRect(0, 0, w, h);
+      drawGrid(ctx, w, h, 28);
+
+      const cx = w / 2;
+      const cy = h / 2 + 30;
+      const maxRadius = Math.min(w, h) * 0.36;
+      const visualRadius = maxRadius * (r / 6);
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px system-ui";
+      ctx.fillText("El área crece como r²", 18, 78);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, visualRadius, 0, Math.PI * 2);
+      ctx.fillStyle = hexToRgba(accent, 0.18);
+      ctx.fill();
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + visualRadius, cy);
+      ctx.strokeStyle = text;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = text;
+      ctx.fill();
+
+      ctx.fillStyle = muted;
+      ctx.font = "13px system-ui";
+      ctx.fillText("radio r", cx + visualRadius / 2 - 20, cy - 12);
+
+      ctx.fillStyle = text;
+      ctx.font = "bold 15px system-ui";
+      ctx.fillText("C = 2πr", 18, h - 50);
+      ctx.fillText("A = πr²", 18, h - 26);
+    }
+
+    function drawHyperbolic(r) {
+      const { ctx, w, h } = resizeCanvas(hyperCanvas);
+
+      const hyper = getCss("--hyper");
+      const accent = getCss("--accent");
+      const text = getCss("--text");
+      const muted = getCss("--muted");
+
+      ctx.clearRect(0, 0, w, h);
+      drawGrid(ctx, w, h, 28);
+
+      const cx = w / 2;
+      const cy = h / 2 + 30;
+      const diskRadius = Math.min(w, h) * 0.37;
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px system-ui";
+      ctx.fillText("El área crece como eʳ", 18, 78);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, diskRadius, 0, Math.PI * 2);
+      ctx.fillStyle = hexToRgba(accent, 0.06);
+      ctx.fill();
+
+      ctx.strokeStyle = muted;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      for (let i = 1; i <= 5; i++) {
+        const rr = diskRadius * i / 5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+        ctx.strokeStyle = hexToRgba(muted, 0.22);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + diskRadius * Math.cos(a), cy + diskRadius * Math.sin(a));
+        ctx.strokeStyle = hexToRgba(muted, 0.16);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      const rho = Math.tanh(r / 2);
+      const visualRadius = diskRadius * rho;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, visualRadius, 0, Math.PI * 2);
+      ctx.fillStyle = hexToRgba(hyper, 0.22);
+      ctx.fill();
+
+      ctx.strokeStyle = hyper;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + visualRadius, cy);
+      ctx.strokeStyle = text;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = text;
+      ctx.fill();
+
+      ctx.fillStyle = muted;
+      ctx.font = "13px system-ui";
+      ctx.fillText("ρ = tanh(r/2)", cx + 12, cy - 12);
+
+      ctx.fillStyle = text;
+      ctx.font = "bold 15px system-ui";
+      ctx.fillText("C = 2π sinh(r)", 18, h - 50);
+      ctx.fillText("A = 2π(cosh(r) − 1)", 18, h - 26);
+    }
+
+    function drawTree(r, b) {
+      const { ctx, w, h } = resizeCanvas(treeCanvas);
+
+      const tree = getCss("--tree");
+      const text = getCss("--text");
+      const muted = getCss("--muted");
+
+      ctx.clearRect(0, 0, w, h);
+      drawGrid(ctx, w, h, 32);
+
+      const levels = Math.min(6, Math.max(1, Math.floor(r)));
+      const cx = w / 2;
+      const cy = 82;
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px system-ui";
+      ctx.fillText("Cada nivel abre nuevas ramas", 18, 78);
+
+      ctx.fillStyle = text;
+      ctx.font = "bold 15px system-ui";
+      ctx.fillText(`Niveles visibles: ${levels}`, 18, h - 52);
+      ctx.fillText(`bʳ ≈ ${formatNumber(Math.pow(b, r))}`, 18, h - 28);
+
+      let current = [
+        {
+          x: cx,
+          y: cy,
+          angle: Math.PI / 2,
+          spread: Math.PI * 0.9
+        }
+      ];
+
+      drawNode(ctx, cx, cy, 8, tree);
+
+      for (let level = 1; level <= levels; level++) {
+        const next = [];
+        const distance = 46 + level * 8;
+
+        current.forEach(parent => {
+          const children = level === 1 ? b + 1 : b;
+          const spread = parent.spread;
+
+          for (let i = 0; i < children; i++) {
+            const t = children === 1 ? 0 : (i / (children - 1)) - 0.5;
+            const angle = parent.angle + t * spread;
+
+            const x = parent.x + Math.cos(angle) * distance;
+            const y = parent.y + Math.sin(angle) * distance;
+
+            if (x < 16 || x > w - 16 || y < 20 || y > h - 78) continue;
+
+            ctx.beginPath();
+            ctx.moveTo(parent.x, parent.y);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = hexToRgba(muted, 0.48);
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+
+            drawNode(ctx, x, y, Math.max(3.4, 7 - level * 0.55), tree);
+
+            next.push({
+              x,
+              y,
+              angle,
+              spread: spread * 0.62
+            });
+          }
+        });
+
+        current = next;
+      }
+    }
+
+    function drawNode(ctx, x, y, radius, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = "white";
+      ctx.stroke();
+    }
+
+    function drawPoint(ctx, x, y, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "white";
+      ctx.stroke();
+    }
+
+    function drawChart(r, b) {
+      const { ctx, w, h } = resizeCanvas(chartCanvas);
+
+      const accent = getCss("--accent");
+      const hyper = getCss("--hyper");
+      const tree = getCss("--tree");
+      const text = getCss("--text");
+      const muted = getCss("--muted");
+
+      ctx.clearRect(0, 0, w, h);
+
+      const padL = 62;
+      const padR = 26;
+      const padT = 80;
+      const padB = 48;
+
+      const xMax = 6;
+      const maxEuclid = Math.PI * xMax * xMax;
+      const maxHyper = 2 * Math.PI * (cosh(xMax) - 1);
+      const maxTree = Math.pow(b, xMax);
+      const yMax = Math.log(Math.max(maxEuclid, maxHyper, maxTree) + 1);
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px system-ui";
+      ctx.fillText("Escala vertical: log(valor + 1)", 18, 78);
+
+      ctx.strokeStyle = hexToRgba(muted, 0.45);
+      ctx.lineWidth = 1.5;
+
+      ctx.beginPath();
+      ctx.moveTo(padL, padT);
+      ctx.lineTo(padL, h - padB);
+      ctx.lineTo(w - padR, h - padB);
+      ctx.stroke();
+
+      ctx.strokeStyle = hexToRgba(muted, 0.15);
+      ctx.lineWidth = 1;
+
+      for (let i = 1; i <= 5; i++) {
+        const y = padT + i * (h - padT - padB) / 5;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(w - padR, y);
+        ctx.stroke();
+      }
+
+      for (let i = 1; i <= 6; i++) {
+        const x = padL + i * (w - padL - padR) / 6;
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, h - padB);
+        ctx.stroke();
+      }
+
+      function sx(x) {
+        return padL + (x / xMax) * (w - padL - padR);
+      }
+
+      function sy(y) {
+        const ly = Math.log(y + 1);
+        return h - padB - (ly / yMax) * (h - padT - padB);
+      }
+
+      function plot(fn, color) {
+        ctx.beginPath();
+
+        for (let i = 0; i <= 220; i++) {
+          const x = xMax * i / 220;
+          const y = fn(x);
+          const px = sx(x);
+          const py = sy(y);
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      plot(x => Math.PI * x * x, accent);
+      plot(x => 2 * Math.PI * (cosh(x) - 1), hyper);
+      plot(x => Math.pow(b, x), tree);
+
+      const rx = sx(r);
+
+      ctx.beginPath();
+      ctx.moveTo(rx, padT);
+      ctx.lineTo(rx, h - padB);
+      ctx.strokeStyle = hexToRgba(text, 0.46);
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      drawPoint(ctx, sx(r), sy(Math.PI * r * r), accent);
+      drawPoint(ctx, sx(r), sy(2 * Math.PI * (cosh(r) - 1)), hyper);
+      drawPoint(ctx, sx(r), sy(Math.pow(b, r)), tree);
+
+      ctx.fillStyle = text;
+      ctx.font = "bold 13px system-ui";
+      ctx.fillText("radio r", w - padR - 70, h - 14);
+
+      ctx.fillStyle = muted;
+      ctx.font = "12px system-ui";
+      ctx.fillText("0", padL - 16, h - padB + 4);
+      ctx.fillText("6", w - padR - 8, h - padB + 20);
+    }
+
+    function update() {
+      const r = parseFloat(radiusSlider.value);
+      const b = parseInt(branchSlider.value, 10);
+      const speed = parseFloat(speedSlider.value);
+
+      rValue.textContent = r.toFixed(2);
+      bValue.textContent = b;
+      speedValue.textContent = speed.toFixed(2);
+
+      const ce = 2 * Math.PI * r;
+      const ae = Math.PI * r * r;
+      const ch = 2 * Math.PI * sinh(r);
+      const ah = 2 * Math.PI * (cosh(r) - 1);
+
+      ceVal.textContent = formatNumber(ce);
+      aeVal.textContent = formatNumber(ae);
+      chVal.textContent = formatNumber(ch);
+      ahVal.textContent = formatNumber(ah);
+
+      drawEuclidean(r);
+      drawHyperbolic(r);
+      drawTree(r, b);
+      drawChart(r, b);
+    }
+
+    function animate(timestamp) {
+      if (!playing) return;
+
+      if (lastTime === null) {
+        lastTime = timestamp;
+      }
+
+      const delta = timestamp - lastTime;
+      lastTime = timestamp;
+
+      let r = parseFloat(radiusSlider.value);
+      const speed = parseFloat(speedSlider.value);
+
+      r += direction * speed * (delta / 1000);
+
+      if (r >= 6) {
+        r = 6;
+        direction = -1;
+      }
+
+      if (r <= 0.1) {
+        r = 0.1;
+        direction = 1;
+      }
+
+      radiusSlider.value = r.toFixed(2);
+
+      update();
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+      playing = true;
+      lastTime = null;
+      playBtn.textContent = "Pausar animación";
+      playBtn.classList.add("running");
+      statusDot.classList.add("running");
+      statusText.textContent = "Animación activa";
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function stopAnimation() {
+      playing = false;
+      playBtn.textContent = "Iniciar animación";
+      playBtn.classList.remove("running");
+      statusDot.classList.remove("running");
+      statusText.textContent = "Animación detenida";
+
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+      }
+
+      animationId = null;
+      lastTime = null;
+    }
+
+    themeBtn.addEventListener("click", () => {
+      body.classList.toggle("light");
+      update();
+    });
+
+    playBtn.addEventListener("click", () => {
+      if (playing) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    });
+
+    radiusSlider.addEventListener("input", update);
+    branchSlider.addEventListener("input", update);
+    speedSlider.addEventListener("input", update);
+
+    window.addEventListener("resize", update);
+
+    update();
+  </script>
+</body>
+</html>

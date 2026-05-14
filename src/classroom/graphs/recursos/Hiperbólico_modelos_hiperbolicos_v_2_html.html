@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modelos de representación del espacio hiperbólico | Versión 2.0</title>
+
+  <!-- MathJax para renderizar fórmulas matemáticas -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    :root {
+      --bg: #08111f;
+      --bg-2: #0d1b2f;
+      --card: rgba(255, 255, 255, 0.075);
+      --card-strong: rgba(255, 255, 255, 0.12);
+      --text: #edf4ff;
+      --muted: #a9b9d6;
+      --line: rgba(255, 255, 255, 0.16);
+      --accent: #43d4ff;
+      --accent-2: #9b8cff;
+      --accent-3: #ffd166;
+      --danger: #ff6b8a;
+      --success: #60f0b6;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --radius: 24px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.light {
+      --bg: #eef4ff;
+      --bg-2: #f8fbff;
+      --card: rgba(255, 255, 255, 0.86);
+      --card-strong: rgba(255, 255, 255, 0.98);
+      --text: #102033;
+      --muted: #536579;
+      --line: rgba(12, 29, 51, 0.14);
+      --accent: #006eff;
+      --accent-2: #6f4bff;
+      --accent-3: #bd7500;
+      --danger: #c03458;
+      --success: #008e64;
+      --shadow: 0 24px 70px rgba(38, 82, 140, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(67, 212, 255, 0.20), transparent 32%),
+        radial-gradient(circle at 80% 12%, rgba(155, 140, 255, 0.20), transparent 30%),
+        radial-gradient(circle at 70% 88%, rgba(255, 209, 102, 0.10), transparent 34%),
+        linear-gradient(135deg, var(--bg), var(--bg-2));
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, var(--card-strong), var(--card));
+      border-radius: calc(var(--radius) + 8px);
+      padding: 34px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -140px -80px auto auto;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(67, 212, 255, 0.28), transparent 68%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.86rem;
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 7px rgba(96, 240, 182, 0.10);
+    }
+
+    h1 {
+      max-width: 920px;
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+    }
+
+    .lead {
+      max-width: 890px;
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      line-height: 1.7;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 20px;
+      margin-top: 24px;
+      align-items: stretch;
+    }
+
+    .control-panel, .visual-card, .content-card, .table-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--card-strong), var(--card));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .control-panel {
+      padding: 18px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button, .chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      font-family: inherit;
+    }
+
+    button:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+    button.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 12px 32px rgba(67, 212, 255, 0.22);
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: transparent;
+      color: white;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+      margin: 10px 0 0;
+    }
+
+    .visual-card {
+      padding: 16px;
+      min-height: 390px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 390px;
+      display: block;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 54%),
+        rgba(0, 0, 0, 0.10);
+      border: 1px solid var(--line);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .dot.yellow { background: var(--accent-3); }
+    .dot.pink { background: var(--danger); }
+
+    .section {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 0.94fr 1.06fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .content-card {
+      padding: 24px;
+    }
+
+    .content-card h2, .table-card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.45rem, 3vw, 2.1rem);
+      letter-spacing: -0.04em;
+    }
+
+    .content-card h3 {
+      margin: 22px 0 8px;
+      font-size: 1.08rem;
+      color: var(--accent);
+    }
+
+    .content-card p {
+      color: var(--muted);
+      line-height: 1.76;
+      margin: 10px 0;
+    }
+
+    .formula {
+      margin: 14px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow-x: auto;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .model-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.055);
+      min-height: 148px;
+    }
+
+    .model-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .model-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.55;
+    }
+
+    .table-card {
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(67, 212, 255, 0.30);
+      background: linear-gradient(135deg, rgba(67, 212, 255, 0.12), rgba(155, 140, 255, 0.09));
+      color: var(--muted);
+      line-height: 1.68;
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card-strong), var(--card));
+      backdrop-filter: blur(16px);
+    }
+
+    .footer strong { color: var(--text); }
+
+    @media (max-width: 920px) {
+      .hero-grid, .section { grid-template-columns: 1fr; }
+      canvas { height: 330px; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 22px, 1180px); padding-top: 12px; }
+      .hero { padding: 22px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      th, td { font-size: 0.82rem; padding: 10px 8px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow"><span class="pulse"></span> Simulador didáctico interactivo | Versión 2.0</div>
+      <h1>Modelos de representación del espacio hiperbólico</h1>
+      <p class="lead">
+        El espacio hiperbólico tiene curvatura negativa constante y no puede representarse en el plano sin distorsión. Por eso se trabaja con modelos equivalentes que conservan propiedades distintas: algunos preservan ángulos, otros convierten geodésicas en segmentos rectos y otros conectan la geometría con álgebra, relatividad o aprendizaje automático.
+      </p>
+
+      <div class="hero-grid">
+        <div class="control-panel">
+          <h2 style="margin:0; letter-spacing:-0.03em;">Explorar representación</h2>
+          <p class="mini">
+            Seleccioná un modelo para ver su intuición geométrica. El botón dinámico activa una animación de puntos y geodésicas, y el cambio de tema permite usar la simulación en modo oscuro o claro para clase.
+          </p>
+
+          <div class="control-row" id="modelButtons">
+            <button class="active" data-model="poincare">Disco de Poincaré</button>
+            <button data-model="klein">Beltrami-Klein</button>
+            <button data-model="halfplane">Semiplano superior</button>
+            <button data-model="hyperboloid">Hiperboloide</button>
+            <button data-model="pseudosphere">Pseudoesfera</button>
+          </div>
+
+          <div class="control-row">
+            <button class="btn-main" id="animateBtn">Pausar animación</button>
+            <button id="themeBtn">Cambiar tema</button>
+            <button id="resetBtn">Reiniciar vista</button>
+          </div>
+
+          <div class="callout" id="modelExplanation">
+            <strong>Disco de Poincaré.</strong> Usa el disco unitario abierto. Es conforme, por lo tanto preserva ángulos. Sus geodésicas son diámetros o arcos de circunferencia ortogonales al borde.
+          </div>
+        </div>
+
+        <div class="visual-card">
+          <canvas id="hyperCanvas" width="900" height="560" aria-label="Visualización de modelos hiperbólicos"></canvas>
+          <div class="legend">
+            <span><i class="dot"></i> Puntos</span>
+            <span><i class="dot yellow"></i> Geodésicas</span>
+            <span><i class="dot pink"></i> Frontera o borde ideal</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <article class="content-card">
+        <h2>Idea central</h2>
+        <p>
+          La geometría hiperbólica se caracteriza por una expansión espacial mayor que la euclidiana. Esta propiedad explica por qué resulta especialmente útil para representar árboles, jerarquías y grafos donde el número de nodos crece rápidamente al alejarse de un origen.
+        </p>
+
+        <h3>Modelo del hiperboloide</h3>
+        <p>
+          Representa el espacio hiperbólico como una hoja superior de un hiperboloide dentro del espacio de Minkowski. Es muy importante para formulaciones algebraicas, redes neuronales hiperbólicas y vínculos con relatividad.
+        </p>
+        <div class="formula">\[-x_0^2+x_1^2+\cdots+x_n^2=-1, \qquad x_0>0\]</div>
+        <div class="formula">\[d(u,v)=\operatorname{arcosh}(-B(u,v))\]</div>
+
+        <h3>Disco de Poincaré</h3>
+        <p>
+          Es uno de los modelos más didácticos porque permite visualizar todo el plano hiperbólico dentro de un disco. Los objetos cercanos al borde parecen comprimirse, aunque desde la métrica hiperbólica siguen estando cada vez más lejos.
+        </p>
+        <div class="formula">\[ds^2=4\,\frac{\sum_i dx_i^2}{(1-\sum_i x_i^2)^2}\]</div>
+
+        <h3>Semiplano superior</h3>
+        <p>
+          Representa el plano hiperbólico en el dominio \(y>0\). Sus geodésicas son semicírculos ortogonales al eje real o rectas verticales. Es útil para estudiar transformaciones de Möbius y simetrías.
+        </p>
+        <div class="formula">\[ds^2=\frac{dx^2+dy^2}{y^2}\]</div>
+      </article>
+
+      <aside class="content-card">
+        <h2>Lectura comparada</h2>
+        <div class="cards-grid">
+          <div class="model-card">
+            <strong>Disco de Poincaré</strong>
+            <p>Preserva ángulos y muestra geodésicas curvas ortogonales a la frontera. Es ideal para explicación visual.</p>
+          </div>
+          <div class="model-card">
+            <strong>Beltrami-Klein</strong>
+            <p>Usa también el disco unitario, pero transforma geodésicas en cuerdas rectas. No es conforme.</p>
+          </div>
+          <div class="model-card">
+            <strong>Semiplano superior</strong>
+            <p>Trabaja sobre \(y>0\). Las geodésicas son semicírculos ortogonales al eje real o rectas verticales.</p>
+          </div>
+          <div class="model-card">
+            <strong>Hiperboloide</strong>
+            <p>Permite una formulación robusta con la forma bilineal de Minkowski y proyecciones hacia otros modelos.</p>
+          </div>
+          <div class="model-card">
+            <strong>Pseudoesfera</strong>
+            <p>Es localmente hiperbólica, pero no representa todo el plano hiperbólico porque no es completa.</p>
+          </div>
+          <div class="model-card">
+            <strong>Aplicaciones modernas</strong>
+            <p>Embeddings jerárquicos, grafos, redes neuronales hiperbólicas, relatividad y visualización matemática.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="table-card" style="margin-top:24px;">
+      <h2>Comparación de modelos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Dominio</th>
+            <th>Geodésicas</th>
+            <th>Ventaja didáctica</th>
+            <th>Conforme</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hiperboloide</td>
+            <td>Hoja superior en espacio de Minkowski</td>
+            <td>Intersecciones con planos que pasan por el origen</td>
+            <td>Excelente para distancia, álgebra e isometrías</td>
+            <td>Sí, como modelo riemanniano</td>
+          </tr>
+          <tr>
+            <td>Disco de Poincaré</td>
+            <td>Disco unitario abierto</td>
+            <td>Arcos ortogonales al borde y diámetros</td>
+            <td>Muy visual y útil para teselaciones hiperbólicas</td>
+            <td>Sí</td>
+          </tr>
+          <tr>
+            <td>Semiplano superior</td>
+            <td>\(y>0\)</td>
+            <td>Semicírculos ortogonales al eje real y rectas verticales</td>
+            <td>Conecta con transformaciones de Möbius</td>
+            <td>Sí</td>
+          </tr>
+          <tr>
+            <td>Beltrami-Klein</td>
+            <td>Disco unitario abierto</td>
+            <td>Cuerdas euclidianas rectas</td>
+            <td>Permite ver las geodésicas como segmentos rectos</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Pseudoesfera</td>
+            <td>Superficie de revolución en \(\mathbb{R}^3\)</td>
+            <td>Curvas sobre la superficie</td>
+            <td>Muestra curvatura negativa en una superficie tangible</td>
+            <td>Solo localmente</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Conclusión para clase:</strong> ningún modelo “es” toda la geometría hiperbólica en sentido visual perfecto. Cada representación sacrifica algo para conservar otra propiedad: ángulos, rectas, distancia, simetría algebraica o intuición tridimensional.
+      </div>
+    </section>
+
+    <footer class="footer">
+      <strong>Material elaborado por el profesor Sergio Gevatschnaider</strong>
+    </footer>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('hyperCanvas');
+    const ctx = canvas.getContext('2d');
+    const buttons = document.querySelectorAll('[data-model]');
+    const explanation = document.getElementById('modelExplanation');
+    const animateBtn = document.getElementById('animateBtn');
+    const themeBtn = document.getElementById('themeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let currentModel = 'poincare';
+    let running = true;
+    let t = 0;
+
+    const modelText = {
+      poincare: '<strong>Disco de Poincaré.</strong> Usa el disco unitario abierto. Es conforme, por lo tanto preserva ángulos. Sus geodésicas son diámetros o arcos de circunferencia ortogonales al borde.',
+      klein: '<strong>Beltrami-Klein.</strong> También usa el disco unitario, pero sus geodésicas se ven como cuerdas rectas. Es útil para comparar caminos rectos, aunque no preserva ángulos.',
+      halfplane: '<strong>Semiplano superior.</strong> Representa el plano hiperbólico como el dominio y &gt; 0. Sus geodésicas son semicírculos ortogonales al eje real o rectas verticales.',
+      hyperboloid: '<strong>Modelo del hiperboloide.</strong> Representa el espacio hiperbólico como una hoja superior en el espacio de Minkowski. Sus geodésicas surgen de cortes por planos que pasan por el origen.',
+      pseudosphere: '<strong>Pseudoesfera.</strong> Visualiza curvatura negativa mediante una superficie de revolución. Es localmente hiperbólica, pero no representa todo el plano hiperbólico.'
+    };
+
+    function cssVar(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function resizeCanvasForDPR() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function clear() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const grad = ctx.createRadialGradient(w * 0.5, h * 0.5, 20, w * 0.5, h * 0.5, Math.max(w, h));
+      grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.02)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function line(x1, y1, x2, y2, color, width = 2, dash = []) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function circle(x, y, r, stroke, fill = null, width = 2) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function point(x, y, r = 5, color = cssVar('--accent')) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 14;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function label(text, x, y, align = 'left') {
+      ctx.save();
+      ctx.fillStyle = cssVar('--muted');
+      ctx.font = '700 13px Inter, system-ui, sans-serif';
+      ctx.textAlign = align;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawPoincare() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const cx = w / 2, cy = h / 2;
+      const R = Math.min(w, h) * 0.40;
+      const accent = cssVar('--accent');
+      const yellow = cssVar('--accent-3');
+      const pink = cssVar('--danger');
+      const muted = cssVar('--line');
+
+      circle(cx, cy, R, pink, 'rgba(255,255,255,0.035)', 3);
+      circle(cx, cy, R * 0.72, muted, null, 1);
+      circle(cx, cy, R * 0.45, muted, null, 1);
+
+      // Geodésicas tipo diámetro
+      const angle = t * 0.012;
+      line(cx - R * Math.cos(angle), cy - R * Math.sin(angle), cx + R * Math.cos(angle), cy + R * Math.sin(angle), yellow, 3);
+
+      // Arcos ortogonales esquemáticos
+      ctx.save();
+      ctx.strokeStyle = yellow;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(cx + R * 0.68, cy, R * 0.62, Math.PI * 0.62, Math.PI * 1.38);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx - R * 0.62, cy + R * 0.10, R * 0.58, -Math.PI * 0.35, Math.PI * 0.35);
+      ctx.stroke();
+      ctx.restore();
+
+      for (let i = 0; i < 18; i++) {
+        const a = i * Math.PI * 2 / 18 + t * 0.006;
+        const r = R * (0.15 + 0.73 * ((i * 37) % 100) / 100);
+        point(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 4.2, i % 3 === 0 ? accent : cssVar('--accent-2'));
+      }
+
+      label('borde ideal', cx + R - 62, cy - R - 10);
+      label('geodésicas curvas ortogonales al borde', cx, cy + R + 26, 'center');
+    }
+
+    function drawKlein() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const cx = w / 2, cy = h / 2;
+      const R = Math.min(w, h) * 0.40;
+      const accent = cssVar('--accent');
+      const yellow = cssVar('--accent-3');
+      const pink = cssVar('--danger');
+      const muted = cssVar('--line');
+
+      circle(cx, cy, R, pink, 'rgba(255,255,255,0.035)', 3);
+      for (let i = -3; i <= 3; i++) {
+        const y = cy + i * R * 0.18;
+        const dx = Math.sqrt(Math.max(0, R * R - (y - cy) * (y - cy)));
+        line(cx - dx, y, cx + dx, y + Math.sin(t * 0.015 + i) * 10, muted, 1);
+      }
+      for (let i = 0; i < 7; i++) {
+        const a1 = i * 0.8 + t * 0.004;
+        const a2 = a1 + 1.8 + Math.sin(i) * 0.6;
+        line(cx + Math.cos(a1) * R, cy + Math.sin(a1) * R, cx + Math.cos(a2) * R, cy + Math.sin(a2) * R, yellow, i === 3 ? 3 : 2);
+      }
+      for (let i = 0; i < 16; i++) {
+        const a = i * Math.PI * 2 / 16 + 0.4;
+        const r = R * (0.20 + 0.60 * ((i * 23) % 100) / 100);
+        point(cx + Math.cos(a + t * 0.003) * r, cy + Math.sin(a) * r, 4.2, accent);
+      }
+      label('geodésicas como cuerdas rectas', cx, cy + R + 26, 'center');
+    }
+
+    function drawHalfPlane() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const axisY = h * 0.78;
+      const accent = cssVar('--accent');
+      const yellow = cssVar('--accent-3');
+      const pink = cssVar('--danger');
+      const muted = cssVar('--line');
+
+      line(46, axisY, w - 46, axisY, pink, 3);
+      label('eje real: frontera ideal', w - 200, axisY + 24);
+
+      // Semicírculos ortogonales al eje real
+      for (let i = 0; i < 5; i++) {
+        const cx = w * (0.18 + i * 0.16);
+        const r = 52 + i * 18 + Math.sin(t * 0.02 + i) * 8;
+        ctx.save();
+        ctx.strokeStyle = yellow;
+        ctx.lineWidth = i === 2 ? 3 : 2;
+        ctx.beginPath();
+        ctx.arc(cx, axisY, r, Math.PI, 0, false);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Rectas verticales
+      for (let i = 0; i < 4; i++) {
+        const x = w * (0.25 + i * 0.18) + Math.sin(t * 0.015 + i) * 7;
+        line(x, axisY, x, h * 0.16, muted, 1.5, [5, 8]);
+      }
+
+      for (let i = 0; i < 18; i++) {
+        const x = w * (0.15 + ((i * 41) % 100) / 135);
+        const y = axisY - 35 - ((i * 29) % 100) * 2.1;
+        point(x + Math.sin(t * 0.01 + i) * 5, y, 4.5, i % 2 ? accent : cssVar('--accent-2'));
+      }
+      label('semicírculos ortogonales o rectas verticales', w / 2, h * 0.10, 'center');
+    }
+
+    function drawHyperboloid() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const cx = w / 2, cy = h * 0.58;
+      const accent = cssVar('--accent');
+      const yellow = cssVar('--accent-3');
+      const pink = cssVar('--danger');
+      const muted = cssVar('--line');
+
+      // Ejes
+      line(cx, h * 0.12, cx, h * 0.88, muted, 1.4, [6, 8]);
+      line(w * 0.18, cy, w * 0.82, cy, muted, 1.4, [6, 8]);
+      label('x₀', cx + 12, h * 0.16);
+      label('x₁, x₂', w * 0.74, cy - 10);
+
+      // Superficie esquemática como familia de elipses
+      for (let i = 0; i < 12; i++) {
+        const yy = cy - i * 20;
+        const rx = 30 + i * 16;
+        const ry = 7 + i * 1.8;
+        ctx.save();
+        ctx.strokeStyle = i === 8 ? yellow : muted;
+        ctx.lineWidth = i === 8 ? 3 : 1.2;
+        ctx.beginPath();
+        ctx.ellipse(cx, yy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Curvas generatrices
+      for (let s of [-1, 1]) {
+        ctx.save();
+        ctx.strokeStyle = pink;
+        ctx.lineWidth = 2.3;
+        ctx.beginPath();
+        for (let i = 0; i <= 100; i++) {
+          const u = i / 100;
+          const y = cy - u * 235;
+          const x = cx + s * (28 + 180 * u * u);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      for (let i = 0; i < 10; i++) {
+        const u = (i + 1) / 12;
+        const y = cy - u * 215;
+        const x = cx + Math.sin(i * 1.7 + t * 0.02) * (35 + 150 * u * u);
+        point(x, y, 4.8, accent);
+      }
+      label('hoja superior del hiperboloide', cx, h * 0.09, 'center');
+      label('geodésicas por cortes con planos por el origen', cx, h * 0.91, 'center');
+    }
+
+    function drawPseudosphere() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const cx = w / 2, cy = h * 0.52;
+      const accent = cssVar('--accent');
+      const yellow = cssVar('--accent-3');
+      const pink = cssVar('--danger');
+      const muted = cssVar('--line');
+
+      // Perfil tipo tractriz rotada, vista esquemática
+      ctx.save();
+      ctx.strokeStyle = pink;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 110; i++) {
+        const u = i / 110;
+        const y = cy - 170 + u * 320;
+        const r = 165 * Math.exp(-2.35 * u) + 16;
+        const x = cx - r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      for (let i = 110; i >= 0; i--) {
+        const u = i / 110;
+        const y = cy - 170 + u * 320;
+        const r = 165 * Math.exp(-2.35 * u) + 16;
+        const x = cx + r;
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.fill();
+      ctx.restore();
+
+      for (let i = 0; i < 12; i++) {
+        const u = i / 11;
+        const y = cy - 160 + u * 300;
+        const rx = 165 * Math.exp(-2.35 * u) + 16;
+        ctx.save();
+        ctx.strokeStyle = i === 3 || i === 8 ? yellow : muted;
+        ctx.lineWidth = i === 3 || i === 8 ? 2.6 : 1.2;
+        ctx.beginPath();
+        ctx.ellipse(cx, y, rx, 9 + 3 * Math.sin(u * Math.PI), 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      for (let i = 0; i < 14; i++) {
+        const u = (i + 1) / 16;
+        const y = cy - 160 + u * 295;
+        const rx = 165 * Math.exp(-2.35 * u) + 16;
+        const x = cx + Math.cos(i * 1.2 + t * 0.03) * rx;
+        point(x, y, 4.6, accent);
+      }
+      label('curvatura negativa constante local', cx, h * 0.11, 'center');
+      label('no representa todo H²: es incompleta', cx, h * 0.91, 'center');
+    }
+
+    function draw() {
+      clear();
+      if (currentModel === 'poincare') drawPoincare();
+      if (currentModel === 'klein') drawKlein();
+      if (currentModel === 'halfplane') drawHalfPlane();
+      if (currentModel === 'hyperboloid') drawHyperboloid();
+      if (currentModel === 'pseudosphere') drawPseudosphere();
+      if (running) t += 1;
+      requestAnimationFrame(draw);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentModel = btn.dataset.model;
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        explanation.innerHTML = modelText[currentModel];
+      });
+    });
+
+    animateBtn.addEventListener('click', () => {
+      running = !running;
+      animateBtn.textContent = running ? 'Pausar animación' : 'Activar animación';
+    });
+
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+    });
+
+    resetBtn.addEventListener('click', () => {
+      t = 0;
+      currentModel = 'poincare';
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.model === 'poincare'));
+      explanation.innerHTML = modelText.poincare;
+    });
+
+    window.addEventListener('resize', resizeCanvasForDPR);
+    resizeCanvasForDPR();
+    draw();
+  </script>
+</body>
+</html>

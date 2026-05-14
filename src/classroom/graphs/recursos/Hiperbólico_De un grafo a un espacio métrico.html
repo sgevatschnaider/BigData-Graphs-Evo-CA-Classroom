@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grafos como espacios métricos</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #172033;
+      --panel-2: #1e293b;
+      --text: #e5e7eb;
+      --muted: #aab6ca;
+      --border: rgba(255,255,255,0.14);
+      --accent: #38bdf8;
+      --good: #22c55e;
+      --warn: #f97316;
+      --bad: #ef4444;
+      --canvas-bg: #0b1120;
+      --formula-bg: rgba(255,255,255,0.06);
+      --shadow: 0 22px 70px rgba(0,0,0,0.35);
+    }
+
+    body.light {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #eef3f9;
+      --text: #172033;
+      --muted: #5b677a;
+      --border: rgba(15,23,42,0.16);
+      --accent: #0284c7;
+      --good: #16a34a;
+      --warn: #ea580c;
+      --bad: #dc2626;
+      --canvas-bg: #f8fafc;
+      --formula-bg: rgba(2,132,199,0.08);
+      --shadow: 0 18px 50px rgba(15,23,42,0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,0.13), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 980px;
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    button,
+    select {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      color: white;
+      border: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    .card h3 {
+      margin: 18px 0 8px;
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr auto;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: end;
+    }
+
+    .control {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 18px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 100%;
+      box-shadow: none;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      background: var(--canvas-bg);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      min-height: 430px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 430px;
+    }
+
+    .canvas-title {
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      background: rgba(15,23,42,0.82);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      backdrop-filter: blur(10px);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    body.light .canvas-title {
+      background: rgba(255,255,255,0.88);
+      color: #172033;
+    }
+
+    .formula-box {
+      background: var(--formula-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .explain {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.98rem;
+    }
+
+    .highlight {
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      background: var(--formula-bg);
+      border-radius: 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-top: 14px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .status {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .status span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .status strong {
+      font-size: 1.05rem;
+    }
+
+    .ok strong {
+      color: var(--good);
+    }
+
+    .warn strong {
+      color: var(--warn);
+    }
+
+    .bad strong {
+      color: var(--bad);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 18px;
+      font-size: 0.93rem;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .tag.ok {
+      color: var(--good);
+    }
+
+    .tag.bad {
+      color: var(--bad);
+    }
+
+    .tag.warn {
+      color: var(--warn);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      display: inline-block;
+    }
+
+    .d1 { background: var(--accent); }
+    .d2 { background: var(--good); }
+    .d3 { background: var(--warn); }
+    .d4 { background: var(--bad); }
+
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding-bottom: 30px;
+    }
+
+    @media (max-width: 1050px) {
+      header,
+      .grid,
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 18px;
+      }
+
+      canvas {
+        height: 360px;
+      }
+
+      .canvas-wrap {
+        min-height: 360px;
+      }
+
+      table {
+        font-size: 0.82rem;
+      }
+
+      th, td {
+        padding: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>De un grafo a un espacio métrico</h1>
+        <p class="subtitle">
+          Para que la distancia de camino mínimo de un grafo sea una métrica finita y simétrica,
+          el caso estándar es trabajar con un grafo conexo y no dirigido. Esta visualización muestra
+          cuándo funciona y cuándo aparecen problemas.
+        </p>
+      </div>
+
+      <button id="themeBtn">Cambiar tema</button>
+    </header>
+
+    <section class="grid">
+      <article class="card full">
+        <h2>1. Grafo dinámico y distancia de camino mínimo</h2>
+
+        <div class="controls">
+          <div class="control">
+            <label for="graphSelect">Tipo de grafo</label>
+            <select id="graphSelect">
+              <option value="connected">Grafo conexo no dirigido</option>
+              <option value="tree">Árbol conexo no dirigido</option>
+              <option value="disconnected">Grafo no conexo</option>
+              <option value="directed">Grafo dirigido</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="sourceSelect">Nodo origen</label>
+            <select id="sourceSelect"></select>
+          </div>
+
+          <div class="control">
+            <label for="targetSelect">Nodo destino</label>
+            <select id="targetSelect"></select>
+          </div>
+
+          <button id="animateBtn" class="primary">Animar camino</button>
+        </div>
+
+        <div class="canvas-wrap">
+          <div class="canvas-title" id="canvasTitle">Grafo conexo no dirigido</div>
+          <canvas id="graphCanvas"></canvas>
+        </div>
+
+        <div class="legend">
+          <span class="tag"><span class="dot d1"></span> Nodo</span>
+          <span class="tag"><span class="dot d2"></span> Camino más corto</span>
+          <span class="tag"><span class="dot d3"></span> Arista dirigida</span>
+          <span class="tag"><span class="dot d4"></span> Problema métrico</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>2. Idea matemática</h2>
+
+        <p class="explain">
+          Un grafo se escribe como:
+        </p>
+
+        <div class="formula-box">
+          G = (V, E)
+        </div>
+
+        <p class="explain">
+          Si el grafo es no dirigido y conexo, podemos definir entre dos nodos u y v:
+        </p>
+
+        <div class="formula-box">
+          d<sub>G</sub>(u,v) = longitud del camino más corto entre u y v
+        </div>
+
+        <p class="explain">
+          Entonces el conjunto de vértices V junto con esa distancia se convierte en un espacio métrico:
+        </p>
+
+        <div class="formula-box">
+          (V, d<sub>G</sub>)
+        </div>
+
+        <div class="highlight">
+          Esta es la base para pasar de un grafo a un espacio geométrico mediante un embedding:
+          φ: V → M, donde M puede ser R<sup>d</sup>, H<sup>d</sup> u otro espacio.
+        </div>
+
+        <h3>Embedding</h3>
+
+        <div class="formula-box">
+          φ: V → M<br>
+          d<sub>G</sub>(u,v) ≈ d<sub>M</sub>(φ(u), φ(v))
+        </div>
+
+        <p class="explain">
+          La idea es que si dos nodos están cerca en el grafo, sus puntos embebidos también deberían quedar cerca
+          en el espacio geométrico.
+        </p>
+      </article>
+
+      <article class="card">
+        <h2>3. Verificación métrica</h2>
+
+        <div class="status-grid">
+          <div class="status" id="connectedStatus">
+            <span>Conectividad</span>
+            <strong>—</strong>
+          </div>
+
+          <div class="status" id="directedStatus">
+            <span>Dirección de aristas</span>
+            <strong>—</strong>
+          </div>
+
+          <div class="status" id="finiteStatus">
+            <span>Distancias finitas</span>
+            <strong>—</strong>
+          </div>
+
+          <div class="status" id="metricStatus">
+            <span>¿Es espacio métrico?</span>
+            <strong>—</strong>
+          </div>
+        </div>
+
+        <h3>Propiedades de una métrica</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Propiedad</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="metricProps"></tbody>
+        </table>
+
+        <div class="highlight" id="explanationBox">
+          Seleccioná un grafo para ver si su distancia de camino mínimo define una métrica.
+        </div>
+      </article>
+
+      <article class="card full">
+        <h2>4. Matriz de distancias d<sub>G</sub>(u,v)</h2>
+
+        <p class="explain">
+          La matriz muestra la distancia de camino mínimo entre todos los pares de nodos.
+          En un grafo conexo no dirigido, la matriz es finita y simétrica.
+        </p>
+
+        <div id="distanceMatrix"></div>
+      </article>
+
+      <article class="card full">
+        <h2>5. Comparación conceptual</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th class="left">Tipo de grafo</th>
+              <th>¿Conexo?</th>
+              <th>¿No dirigido?</th>
+              <th>¿d<sub>G</sub> es métrica finita?</th>
+              <th class="left">Comentario</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="left">Grafo conexo no dirigido</td>
+              <td>Sí</td>
+              <td>Sí</td>
+              <td>Sí</td>
+              <td class="left">Caso estándar para embeddings que buscan preservar distancias.</td>
+            </tr>
+            <tr>
+              <td class="left">Árbol conexo no dirigido</td>
+              <td>Sí</td>
+              <td>Sí</td>
+              <td>Sí</td>
+              <td class="left">Además, entre dos nodos existe un único camino simple.</td>
+            </tr>
+            <tr>
+              <td class="left">Grafo no conexo</td>
+              <td>No</td>
+              <td>Sí</td>
+              <td>No como métrica finita</td>
+              <td class="left">Entre componentes distintas aparece distancia infinita.</td>
+            </tr>
+            <tr>
+              <td class="left">Grafo dirigido</td>
+              <td>Depende</td>
+              <td>No</td>
+              <td>No necesariamente</td>
+              <td class="left">Puede fallar la simetría: d(u,v) puede ser distinto de d(v,u).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="highlight">
+          Conclusión: el grafo no “necesita” ser conexo y no dirigido para existir,
+          pero sí conviene que lo sea si queremos que la distancia de camino mínimo sea una métrica clásica
+          y usarla luego para comparar con distancias en un espacio geométrico.
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      Visualización didáctica sobre grafos, métricas y embeddings geométricos.
+    </footer>
+  </div>
+
+  <script>
+    const body = document.body;
+    const themeBtn = document.getElementById("themeBtn");
+    const graphSelect = document.getElementById("graphSelect");
+    const sourceSelect = document.getElementById("sourceSelect");
+    const targetSelect = document.getElementById("targetSelect");
+    const animateBtn = document.getElementById("animateBtn");
+    const canvasTitle = document.getElementById("canvasTitle");
+    const canvas = document.getElementById("graphCanvas");
+    const distanceMatrix = document.getElementById("distanceMatrix");
+    const explanationBox = document.getElementById("explanationBox");
+    const metricProps = document.getElementById("metricProps");
+
+    const connectedStatus = document.getElementById("connectedStatus");
+    const directedStatus = document.getElementById("directedStatus");
+    const finiteStatus = document.getElementById("finiteStatus");
+    const metricStatus = document.getElementById("metricStatus");
+
+    let animationActive = false;
+    let animationProgress = 0;
+    let animationFrame = null;
+
+    const graphs = {
+      connected: {
+        title: "Grafo conexo no dirigido",
+        directed: false,
+        nodes: {
+          A: { x: 0.18, y: 0.32 },
+          B: { x: 0.38, y: 0.20 },
+          C: { x: 0.62, y: 0.28 },
+          D: { x: 0.78, y: 0.52 },
+          E: { x: 0.52, y: 0.72 },
+          F: { x: 0.25, y: 0.62 }
+        },
+        edges: [
+          ["A", "B"], ["B", "C"], ["C", "D"],
+          ["D", "E"], ["E", "F"], ["F", "A"],
+          ["B", "F"], ["C", "E"]
+        ],
+        explanation:
+          "Este grafo es conexo y no dirigido. Por eso la distancia de camino mínimo entre nodos es finita, simétrica y cumple las propiedades de una métrica."
+      },
+
+      tree: {
+        title: "Árbol conexo no dirigido",
+        directed: false,
+        nodes: {
+          A: { x: 0.50, y: 0.15 },
+          B: { x: 0.30, y: 0.34 },
+          C: { x: 0.70, y: 0.34 },
+          D: { x: 0.18, y: 0.58 },
+          E: { x: 0.42, y: 0.58 },
+          F: { x: 0.62, y: 0.58 },
+          G: { x: 0.82, y: 0.58 }
+        },
+        edges: [
+          ["A", "B"], ["A", "C"],
+          ["B", "D"], ["B", "E"],
+          ["C", "F"], ["C", "G"]
+        ],
+        explanation:
+          "Este es un árbol: es conexo, no dirigido y no tiene ciclos. Entre dos nodos existe un único camino simple. Su distancia de camino mínimo define una métrica."
+      },
+
+      disconnected: {
+        title: "Grafo no conexo",
+        directed: false,
+        nodes: {
+          A: { x: 0.18, y: 0.30 },
+          B: { x: 0.34, y: 0.22 },
+          C: { x: 0.30, y: 0.55 },
+          D: { x: 0.66, y: 0.35 },
+          E: { x: 0.82, y: 0.52 }
+        },
+        edges: [
+          ["A", "B"], ["B", "C"], ["C", "A"],
+          ["D", "E"]
+        ],
+        explanation:
+          "Este grafo no es conexo. Entre nodos de componentes distintas no hay camino, por lo que la distancia sería infinita. Por eso no define una métrica finita sobre todo V."
+      },
+
+      directed: {
+        title: "Grafo dirigido",
+        directed: true,
+        nodes: {
+          A: { x: 0.20, y: 0.34 },
+          B: { x: 0.42, y: 0.18 },
+          C: { x: 0.68, y: 0.30 },
+          D: { x: 0.75, y: 0.62 },
+          E: { x: 0.42, y: 0.74 }
+        },
+        edges: [
+          ["A", "B"], ["B", "C"], ["C", "D"],
+          ["D", "E"], ["E", "A"], ["A", "C"]
+        ],
+        explanation:
+          "Este grafo tiene aristas con dirección. La distancia dirigida puede cumplir d(u,v) ≠ d(v,u). Por eso no es una métrica clásica salvo que se modifique o simetrice."
+      }
+    };
+
+    function getCss(name) {
+      return getComputedStyle(body).getPropertyValue(name).trim();
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      return {
+        ctx,
+        w: rect.width,
+        h: rect.height
+      };
+    }
+
+    function hexToRgba(color, alpha) {
+      color = color.trim();
+
+      if (color.startsWith("rgba")) return color;
+
+      if (color.startsWith("rgb")) {
+        return color.replace("rgb", "rgba").replace(")", `, ${alpha})`);
+      }
+
+      let hex = color.replace("#", "");
+
+      if (hex.length === 3) {
+        hex = hex.split("").map(c => c + c).join("");
+      }
+
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function currentGraph() {
+      return graphs[graphSelect.value];
+    }
+
+    function nodeNames(graph) {
+      return Object.keys(graph.nodes);
+    }
+
+    function buildAdjacency(graph) {
+      const adj = {};
+      for (const n of nodeNames(graph)) adj[n] = [];
+
+      for (const [u, v] of graph.edges) {
+        adj[u].push(v);
+        if (!graph.directed) adj[v].push(u);
+      }
+
+      return adj;
+    }
+
+    function shortestPath(graph, start, target) {
+      const adj = buildAdjacency(graph);
+      const queue = [start];
+      const visited = new Set([start]);
+      const parent = {};
+
+      while (queue.length > 0) {
+        const u = queue.shift();
+
+        if (u === target) break;
+
+        for (const v of adj[u]) {
+          if (!visited.has(v)) {
+            visited.add(v);
+            parent[v] = u;
+            queue.push(v);
+          }
+        }
+      }
+
+      if (!visited.has(target)) {
+        return {
+          distance: Infinity,
+          path: []
+        };
+      }
+
+      const path = [];
+      let cur = target;
+
+      while (cur !== undefined) {
+        path.push(cur);
+        cur = parent[cur];
+      }
+
+      path.reverse();
+
+      return {
+        distance: path.length - 1,
+        path
+      };
+    }
+
+    function allPairsDistances(graph) {
+      const names = nodeNames(graph);
+      const matrix = {};
+
+      for (const u of names) {
+        matrix[u] = {};
+        for (const v of names) {
+          matrix[u][v] = shortestPath(graph, u, v).distance;
+        }
+      }
+
+      return matrix;
+    }
+
+    function isConnectedForMetric(graph) {
+      const names = nodeNames(graph);
+      const matrix = allPairsDistances(graph);
+
+      for (const u of names) {
+        for (const v of names) {
+          if (matrix[u][v] === Infinity) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function checkSymmetry(graph, matrix) {
+      const names = nodeNames(graph);
+
+      for (const u of names) {
+        for (const v of names) {
+          if (matrix[u][v] !== matrix[v][u]) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function checkIdentity(graph, matrix) {
+      const names = nodeNames(graph);
+
+      for (const u of names) {
+        for (const v of names) {
+          if (u === v && matrix[u][v] !== 0) return false;
+          if (u !== v && matrix[u][v] === 0) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function checkNonNegative(graph, matrix) {
+      const names = nodeNames(graph);
+
+      for (const u of names) {
+        for (const v of names) {
+          if (matrix[u][v] < 0) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function checkTriangle(graph, matrix) {
+      const names = nodeNames(graph);
+
+      for (const u of names) {
+        for (const v of names) {
+          for (const w of names) {
+            const duw = matrix[u][w];
+            const duv = matrix[u][v];
+            const dvw = matrix[v][w];
+
+            if (duv === Infinity || dvw === Infinity) continue;
+
+            if (duw > duv + dvw) return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
+    function setStatus(element, label, state) {
+      element.classList.remove("ok", "warn", "bad");
+
+      if (state === "ok") element.classList.add("ok");
+      if (state === "warn") element.classList.add("warn");
+      if (state === "bad") element.classList.add("bad");
+
+      element.querySelector("strong").textContent = label;
+    }
+
+    function renderMetricStatus(graph, matrix) {
+      const connected = isConnectedForMetric(graph);
+      const finite = connected;
+      const symmetric = checkSymmetry(graph, matrix);
+      const identity = checkIdentity(graph, matrix);
+      const nonnegative = checkNonNegative(graph, matrix);
+      const triangle = checkTriangle(graph, matrix);
+
+      const isMetric = finite && symmetric && identity && nonnegative && triangle;
+
+      setStatus(
+        connectedStatus,
+        connected ? "Conexo" : "No conexo",
+        connected ? "ok" : "bad"
+      );
+
+      setStatus(
+        directedStatus,
+        graph.directed ? "Dirigido" : "No dirigido",
+        graph.directed ? "warn" : "ok"
+      );
+
+      setStatus(
+        finiteStatus,
+        finite ? "Todas finitas" : "Hay ∞",
+        finite ? "ok" : "bad"
+      );
+
+      setStatus(
+        metricStatus,
+        isMetric ? "Sí" : "No",
+        isMetric ? "ok" : "bad"
+      );
+
+      const rows = [
+        {
+          name: "No negatividad: d(u,v) ≥ 0",
+          pass: nonnegative,
+          comment: "Las longitudes de caminos no son negativas."
+        },
+        {
+          name: "Identidad: d(u,v)=0 ⇔ u=v",
+          pass: identity,
+          comment: "Un nodo está a distancia cero solo de sí mismo."
+        },
+        {
+          name: "Simetría: d(u,v)=d(v,u)",
+          pass: symmetric,
+          comment: graph.directed
+            ? "En grafos dirigidos puede fallar."
+            : "En grafos no dirigidos se cumple."
+        },
+        {
+          name: "Desigualdad triangular",
+          pass: triangle,
+          comment: "Ir de u a w nunca es más largo que ir de u a v y luego de v a w."
+        },
+        {
+          name: "Finitud para todo par de nodos",
+          pass: finite,
+          comment: connected
+            ? "Todo par de nodos está conectado por algún camino."
+            : "Hay pares de nodos sin camino entre ellos."
+        }
+      ];
+
+      metricProps.innerHTML = rows.map(row => `
+        <tr>
+          <td class="left">${row.name}<br><span style="color:var(--muted);font-size:0.84rem;">${row.comment}</span></td>
+          <td>
+            <span class="tag ${row.pass ? "ok" : "bad"}">
+              ${row.pass ? "Cumple" : "No cumple"}
+            </span>
+          </td>
+        </tr>
+      `).join("");
+
+      explanationBox.textContent = graph.explanation;
+    }
+
+    function renderMatrix(graph, matrix) {
+      const names = nodeNames(graph);
+
+      let html = "<table><thead><tr><th>d<sub>G</sub></th>";
+
+      for (const n of names) {
+        html += `<th>${n}</th>`;
+      }
+
+      html += "</tr></thead><tbody>";
+
+      for (const u of names) {
+        html += `<tr><th>${u}</th>`;
+
+        for (const v of names) {
+          const value = matrix[u][v] === Infinity ? "∞" : matrix[u][v];
+          const symmetricProblem = matrix[u][v] !== matrix[v][u];
+          const infProblem = matrix[u][v] === Infinity;
+
+          let color = "var(--muted)";
+          if (u === v) color = "var(--good)";
+          if (symmetricProblem) color = "var(--warn)";
+          if (infProblem) color = "var(--bad)";
+
+          html += `<td style="color:${color};font-weight:900;">${value}</td>`;
+        }
+
+        html += "</tr>";
+      }
+
+      html += "</tbody></table>";
+
+      distanceMatrix.innerHTML = html;
+    }
+
+    function populateNodeSelectors(graph) {
+      const names = nodeNames(graph);
+
+      const currentSource = sourceSelect.value;
+      const currentTarget = targetSelect.value;
+
+      sourceSelect.innerHTML = "";
+      targetSelect.innerHTML = "";
+
+      for (const n of names) {
+        sourceSelect.innerHTML += `<option value="${n}">${n}</option>`;
+        targetSelect.innerHTML += `<option value="${n}">${n}</option>`;
+      }
+
+      sourceSelect.value = names.includes(currentSource) ? currentSource : names[0];
+      targetSelect.value = names.includes(currentTarget) ? currentTarget : names[names.length - 1];
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2, color) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const nodeRadius = 22;
+
+      const sx = x1 + Math.cos(angle) * nodeRadius;
+      const sy = y1 + Math.sin(angle) * nodeRadius;
+      const ex = x2 - Math.cos(angle) * nodeRadius;
+      const ey = y2 - Math.sin(angle) * nodeRadius;
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const headLength = 13;
+      ctx.beginPath();
+      ctx.moveTo(ex, ey);
+      ctx.lineTo(
+        ex - headLength * Math.cos(angle - Math.PI / 6),
+        ey - headLength * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        ex - headLength * Math.cos(angle + Math.PI / 6),
+        ey - headLength * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function drawLine(ctx, x1, y1, x2, y2, color, width = 3) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+
+    function edgeInPath(edge, path, directed) {
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i];
+        const b = path[i + 1];
+
+        if (directed) {
+          if (edge[0] === a && edge[1] === b) return true;
+        } else {
+          if ((edge[0] === a && edge[1] === b) || (edge[0] === b && edge[1] === a)) return true;
+        }
+      }
+
+      return false;
+    }
+
+    function drawGraph() {
+      const graph = currentGraph();
+      const { ctx, w, h } = resizeCanvas();
+
+      const accent = getCss("--accent");
+      const good = getCss("--good");
+      const warn = getCss("--warn");
+      const bad = getCss("--bad");
+      const text = getCss("--text");
+      const muted = getCss("--muted");
+
+      ctx.clearRect(0, 0, w, h);
+
+      drawBackgroundGrid(ctx, w, h);
+
+      const source = sourceSelect.value;
+      const target = targetSelect.value;
+      const result = shortestPath(graph, source, target);
+      const path = result.path;
+
+      const coords = {};
+      for (const [name, pos] of Object.entries(graph.nodes)) {
+        coords[name] = {
+          x: pos.x * w,
+          y: pos.y * h
+        };
+      }
+
+      for (const edge of graph.edges) {
+        const [u, v] = edge;
+        const a = coords[u];
+        const b = coords[v];
+
+        const isPath = edgeInPath(edge, path, graph.directed);
+        const color = isPath ? good : hexToRgba(muted, 0.50);
+        const width = isPath ? 5 : 3;
+
+        if (graph.directed) {
+          drawArrow(ctx, a.x, a.y, b.x, b.y, isPath ? good : warn);
+        } else {
+          drawLine(ctx, a.x, a.y, b.x, b.y, color, width);
+        }
+      }
+
+      if (animationActive && path.length > 1) {
+        drawMovingDot(ctx, coords, path, animationProgress, good);
+      }
+
+      for (const name of nodeNames(graph)) {
+        const { x, y } = coords[name];
+        const isSource = name === source;
+        const isTarget = name === target;
+        const inPath = path.includes(name);
+
+        let fill = accent;
+        if (inPath) fill = good;
+        if (isSource) fill = warn;
+        if (isTarget) fill = bad;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 23, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(name, x, y);
+      }
+
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      ctx.fillStyle = text;
+      ctx.font = "bold 16px system-ui";
+      ctx.fillText(`Origen: ${source}    Destino: ${target}`, 18, h - 58);
+
+      ctx.fillStyle = result.distance === Infinity ? bad : good;
+      ctx.font = "bold 16px system-ui";
+      ctx.fillText(
+        result.distance === Infinity
+          ? "No existe camino: dG(u,v) = ∞"
+          : `Camino más corto: ${path.join(" → ")}    dG = ${result.distance}`,
+        18,
+        h - 30
+      );
+    }
+
+    function drawBackgroundGrid(ctx, w, h) {
+      const muted = getCss("--muted");
+
+      ctx.save();
+      ctx.strokeStyle = hexToRgba(muted, 0.12);
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x <= w; x += 32) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y <= h; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawMovingDot(ctx, coords, path, progress, color) {
+      const totalSegments = path.length - 1;
+      const scaled = progress * totalSegments;
+      const segmentIndex = Math.min(Math.floor(scaled), totalSegments - 1);
+      const localT = scaled - segmentIndex;
+
+      const a = coords[path[segmentIndex]];
+      const b = coords[path[segmentIndex + 1]];
+
+      const x = a.x + (b.x - a.x) * localT;
+      const y = a.y + (b.y - a.y) * localT;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "white";
+      ctx.stroke();
+    }
+
+    function animatePath() {
+      if (!animationActive) return;
+
+      animationProgress += 0.012;
+
+      if (animationProgress >= 1) {
+        animationProgress = 1;
+        drawGraph();
+        animationActive = false;
+        animateBtn.textContent = "Animar camino";
+        cancelAnimationFrame(animationFrame);
+        return;
+      }
+
+      drawGraph();
+      animationFrame = requestAnimationFrame(animatePath);
+    }
+
+    function updateAll() {
+      const graph = currentGraph();
+
+      canvasTitle.textContent = graph.title;
+
+      populateNodeSelectors(graph);
+
+      const matrix = allPairsDistances(graph);
+
+      renderMetricStatus(graph, matrix);
+      renderMatrix(graph, matrix);
+      drawGraph();
+    }
+
+    themeBtn.addEventListener("click", () => {
+      body.classList.toggle("light");
+      drawGraph();
+    });
+
+    graphSelect.addEventListener("change", () => {
+      animationActive = false;
+      animateBtn.textContent = "Animar camino";
+      updateAll();
+    });
+
+    sourceSelect.addEventListener("change", () => {
+      animationActive = false;
+      animateBtn.textContent = "Animar camino";
+      updateAll();
+    });
+
+    targetSelect.addEventListener("change", () => {
+      animationActive = false;
+      animateBtn.textContent = "Animar camino";
+      updateAll();
+    });
+
+    animateBtn.addEventListener("click", () => {
+      const graph = currentGraph();
+      const result = shortestPath(graph, sourceSelect.value, targetSelect.value);
+
+      if (result.path.length <= 1) {
+        drawGraph();
+        return;
+      }
+
+      animationActive = true;
+      animationProgress = 0;
+      animateBtn.textContent = "Animando...";
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(animatePath);
+    });
+
+    window.addEventListener("resize", drawGraph);
+
+    updateAll();
+  </script>
+</body>
+</html>
