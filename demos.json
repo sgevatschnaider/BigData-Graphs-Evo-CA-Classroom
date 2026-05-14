@@ -413,6 +413,13 @@
     "mtime": "2026-05-09T14:44:10-03:00"
   },
   {
+    "title": "Embedding de grafos en espacios geométricos | Versión corregida",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Espacio_Geométrico_y_Grafos_Tipos.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-14T20:31:42-03:00"
+  },
+  {
     "title": "Embedding dinámico: del dato discreto al espacio vectorial",
     "path": "/src/classroom/graphs/recursos/Hiperbólico_embedding_dinamico_simulacion.html",
     "tag": "Demo",
