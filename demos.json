@@ -238,6 +238,13 @@
     "mtime": "2025-11-13T15:41:55-03:00"
   },
   {
+    "title": "Crecimiento euclídeo, hiperbólico y árbol regular",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_Crecimiento euclídeo, hiperbólico y árbol regular.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-14T20:10:20-03:00"
+  },
+  {
     "title": "Cuando el Papel Empieza a Calcular | Origami Turing-Completo",
     "path": "/src/classroom/graphs/recursos/Origami_origami_Cuando_ el_Papel_ Empieza_a_Calcular.html",
     "tag": "Demo",
@@ -595,6 +602,13 @@
     "mtime": "2025-10-11T23:49:53-03:00"
   },
   {
+    "title": "Grafos como espacios métricos",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_De un grafo a un espacio métrico.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-14T20:10:20-03:00"
+  },
+  {
     "title": "Grafos Completamente Irregulares: La Búsqueda de la Diversidad Total",
     "path": "/src/classroom/graphs/recursos/3.Grafos_ Irregulares.html",
     "tag": "Demo",
@@ -859,6 +873,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-15T19:02:58-03:00"
+  },
+  {
+    "title": "Modelos de representación del espacio hiperbólico | Versión 2.0",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_modelos_hiperbolicos_v_2_html.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-14T20:10:20-03:00"
   },
   {
     "title": "Mundo Pequeño — Watts–Strogatz",
