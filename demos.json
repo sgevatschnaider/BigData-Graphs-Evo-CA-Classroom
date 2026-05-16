@@ -252,6 +252,13 @@
     "mtime": "2025-11-16T08:49:34-03:00"
   },
   {
+    "title": "Cuestionario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
+    "path": "/src/classroom/graphs/recursos/Hiperbolica_cuestionario_geometria_hiperbolica.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
     "title": "Cuestionario Experto: Grafos de Cayley y Redes P2P",
     "path": "/src/classroom/graphs/recursos/Cuestionario_Cayley.html",
     "tag": "Demo",
@@ -546,6 +553,13 @@
     "mtime": "2026-03-14T21:28:41-03:00"
   },
   {
+    "title": "Glosario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
+    "path": "/src/classroom/graphs/recursos/Hiperbolico_glosario.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
     "title": "Glosario de Mundo Pequeño y Teoría de Redes",
     "path": "/src/classroom/graphs/recursos/Mundo_pequeño_Glosario.html",
     "tag": "Demo",
@@ -579,6 +593,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Gradient Descent Euclídeo — Simulador avanzado",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_GD.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
   },
   {
     "title": "Gráfica de Cayley S₄ - Cubo Truncado Interactivo 3D",
@@ -649,6 +670,20 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Grafos, espacios geométricos e IA | Matriz avanzada interactiva",
+    "path": "/src/classroom/graphs/recursos/Hiperbolico Tabla_grafos_AI.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
+    "title": "Grafos, espacios geométricos e inteligencia artificial — Versión 3.1",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_GRAFOS_GEOMETRIA_IA.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
   },
   {
     "title": "Guía de Estudio: Arquitectura Modular de Blockchain",
@@ -875,6 +910,13 @@
     "mtime": "2025-11-24T17:09:50-03:00"
   },
   {
+    "title": "Laplaciano de un grafo | Teoría y visualización interactiva",
+    "path": "/src/classroom/graphs/recursos/Hiperbólico_laplaciano_grafo_visual.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
     "title": "Máquina de Turing de Origami",
     "path": "/src/classroom/graphs/recursos/Origami_origami_Máquina de Turing de Origami - Simulación Computacional.html",
     "tag": "Demo",
@@ -1020,6 +1062,27 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-12T17:50:29-03:00"
+  },
+  {
+    "title": "RSGD en Espacio Hiperbólico — Versión 2.0",
+    "path": "/src/classroom/graphs/recursos/Hiperbolico_RSSD_adicional.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
+    "title": "RSGD en geometría hiperbólica — Laboratorio avanzado",
+    "path": "/src/classroom/graphs/recursos/Hiperbolico_RGSD.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
+    "title": "SGD Euclídeo — Simulador avanzado",
+    "path": "/src/classroom/graphs/recursos/Hiperbolico_SGD.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-16T19:09:16-03:00"
   },
   {
     "title": "Simulador ZKP: SNARK vs STARK",
