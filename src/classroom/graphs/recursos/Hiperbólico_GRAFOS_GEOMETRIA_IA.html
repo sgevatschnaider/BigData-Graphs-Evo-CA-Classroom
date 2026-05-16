@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grafos, espacios geométricos e inteligencia artificial — Versión 3.1</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg0:#050814;
+      --bg1:#081529;
+      --bg2:#0d2139;
+      --panel:rgba(255,255,255,.075);
+      --panel2:rgba(255,255,255,.115);
+      --panel3:rgba(255,255,255,.17);
+      --text:#eef7ff;
+      --muted:#a9bdd3;
+      --line:rgba(255,255,255,.16);
+      --line2:rgba(255,255,255,.28);
+      --accent:#42e8c4;
+      --accent2:#5eb9ff;
+      --accent3:#b694ff;
+      --hot:#ff6f91;
+      --gold:#f9d66a;
+      --green:#81f495;
+      --orange:#ff9b54;
+      --shadow:0 30px 90px rgba(0,0,0,.42);
+      --shadow2:0 18px 50px rgba(0,0,0,.24);
+      --radius:26px;
+      --radius2:38px;
+      --focus:0 0 0 4px rgba(66,232,196,.22);
+    }
+    body[data-palette="violet"] {
+      --accent:#b694ff;
+      --accent2:#56b6ff;
+      --accent3:#ff6f91;
+      --hot:#37e7c2;
+      --gold:#f5c542;
+      --bg0:#080612;
+      --bg1:#140b2b;
+      --bg2:#241445;
+    }
+    body[data-palette="solar"] {
+      --accent:#f9d66a;
+      --accent2:#ff9b54;
+      --accent3:#56b6ff;
+      --hot:#ff6f91;
+      --gold:#ffe58a;
+      --bg0:#0b0b13;
+      --bg1:#19140b;
+      --bg2:#2a1b0c;
+    }
+    body[data-palette="emerald"] {
+      --accent:#81f495;
+      --accent2:#37e7c2;
+      --accent3:#56b6ff;
+      --hot:#ff9b54;
+      --gold:#f9d66a;
+      --bg0:#04100d;
+      --bg1:#062018;
+      --bg2:#0c3026;
+    }
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg0:#eef5fa;
+      --bg1:#f7fbff;
+      --bg2:#e6eef7;
+      --panel:rgba(255,255,255,.88);
+      --panel2:#fff;
+      --panel3:#f7fbff;
+      --text:#102033;
+      --muted:#53677d;
+      --line:rgba(16,32,51,.14);
+      --line2:rgba(16,32,51,.24);
+      --shadow:0 24px 60px rgba(16,32,51,.14);
+      --shadow2:0 14px 36px rgba(16,32,51,.10);
+      --focus:0 0 0 4px rgba(0,139,133,.18);
+    }
+
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0;
+      min-height:100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 32%),
+        radial-gradient(circle at 82% 8%, color-mix(in srgb, var(--accent2) 24%, transparent), transparent 34%),
+        radial-gradient(circle at 22% 88%, color-mix(in srgb, var(--accent3) 18%, transparent), transparent 30%),
+        linear-gradient(140deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+      color:var(--text);
+      line-height:1.62;
+      overflow-x:hidden;
+    }
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-2;
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size:44px 44px;
+      mask-image:linear-gradient(to bottom, black, transparent 82%);
+      opacity:.36;
+    }
+    body::after {
+      content:"";
+      position:fixed;
+      inset:-20%;
+      pointer-events:none;
+      z-index:-1;
+      background:
+        conic-gradient(from 230deg at 50% 50%, transparent 0deg, color-mix(in srgb, var(--accent) 12%, transparent) 82deg, transparent 160deg, color-mix(in srgb, var(--accent2) 10%, transparent) 250deg, transparent 360deg);
+      filter:blur(70px);
+      animation:aurora 18s ease-in-out infinite alternate;
+      opacity:.68;
+    }
+    @keyframes aurora { from{transform:rotate(0deg) scale(1)} to{transform:rotate(24deg) scale(1.08)} }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition:none !important; }
+    }
+
+    a { color:var(--accent); }
+    button, select, input { font:inherit; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline:none; box-shadow:var(--focus); }
+    .wrap { width:min(1240px, calc(100% - 36px)); margin:0 auto; }
+    .progressBar {
+      position:fixed;
+      top:0;
+      left:0;
+      height:4px;
+      width:0%;
+      z-index:999;
+      background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+      box-shadow:0 0 18px color-mix(in srgb, var(--accent) 65%, transparent);
+    }
+
+    .hero {
+      min-height:86vh;
+      display:grid;
+      place-items:center;
+      padding:82px 0 52px;
+      position:relative;
+    }
+    .heroGrid {
+      display:grid;
+      grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);
+      gap:30px;
+      align-items:center;
+    }
+    .badge, .chip {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:var(--muted);
+      border-radius:999px;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+    .badge { padding:8px 13px; font-size:.84rem; }
+    .chip { padding:7px 10px; font-size:.78rem; }
+    .chip strong { color:var(--accent); }
+    .hero h1 {
+      margin:18px 0 22px;
+      font-size:clamp(2.55rem,6vw,6rem);
+      line-height:.92;
+      letter-spacing:-.07em;
+      max-width:960px;
+    }
+    .gradientText {
+      background:linear-gradient(110deg,var(--text),var(--accent),var(--accent2),var(--accent3));
+      background-size:200% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:shine 7s ease-in-out infinite;
+    }
+    @keyframes shine { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+    .lead {
+      color:var(--muted);
+      font-size:clamp(1.06rem,1.8vw,1.32rem);
+      max-width:900px;
+      margin:0 0 26px;
+    }
+    .heroActions {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin:24px 0 0;
+    }
+    .glass {
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,var(--panel),rgba(255,255,255,.035));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .heroCard {
+      position:relative;
+      padding:22px;
+      border-radius:var(--radius2);
+      overflow:hidden;
+    }
+    .heroCard::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 24%, transparent), transparent 34%, color-mix(in srgb, var(--accent2) 18%, transparent));
+      opacity:.75;
+      pointer-events:none;
+    }
+    .heroCard > * { position:relative; }
+    .heroViz {
+      height:390px;
+      border-radius:30px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 55%),
+        rgba(255,255,255,.04);
+    }
+    .heroStats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    .heroStat {
+      padding:12px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.065);
+      min-height:84px;
+    }
+    .heroStat b {
+      display:block;
+      color:var(--accent);
+      font-size:1.25rem;
+      line-height:1.1;
+    }
+    .heroStat span { color:var(--muted); font-size:.82rem; }
+
+    .toolbar {
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background:color-mix(in srgb, var(--bg0) 82%, transparent);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+    }
+    .toolbarInner {
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+      flex-wrap:wrap;
+    }
+    .tabs {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .tools {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn, select, .search {
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:850;
+      cursor:pointer;
+      transition:transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .btn:hover, select:hover, .search:hover { transform:translateY(-1px); background:var(--panel2); border-color:var(--line2); }
+    .btn.active {
+      background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent2) 12%, transparent));
+      border-color:color-mix(in srgb, var(--accent) 55%, white 5%);
+      box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent), 0 14px 34px color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+    .btn.primary {
+      background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 34%, transparent), color-mix(in srgb, var(--accent2) 24%, transparent));
+      border-color:color-mix(in srgb, var(--accent) 55%, white 5%);
+    }
+    .btn.danger { border-color:color-mix(in srgb, var(--hot) 55%, transparent); }
+    .search {
+      width:210px;
+      cursor:text;
+      font-weight:700;
+    }
+    select { appearance:none; padding-right:34px; background-image:linear-gradient(45deg,transparent 50%,var(--accent) 50%),linear-gradient(135deg,var(--accent) 50%,transparent 50%); background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px; background-size:5px 5px; background-repeat:no-repeat; }
+
+    main { padding:34px 0 76px; }
+    .module {
+      display:none;
+      margin:34px 0;
+      animation:reveal .35s ease both;
+    }
+    .module.active { display:block; }
+    .module.hiddenBySearch { display:none !important; }
+    @keyframes reveal { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+    .moduleHeader {
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+    h2 {
+      font-size:clamp(1.8rem,3vw,3.15rem);
+      line-height:1.05;
+      letter-spacing:-.045em;
+      margin:0 0 12px;
+    }
+    h3 { margin:0 0 10px; font-size:1.24rem; letter-spacing:-.018em; }
+    h4 { margin:0 0 7px; font-size:1.03rem; }
+    p { margin:0 0 12px; }
+    .sectionLead {
+      color:var(--muted);
+      max-width:1000px;
+      margin:0;
+      font-size:1.02rem;
+    }
+    .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    .grid4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .card {
+      position:relative;
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,var(--panel),rgba(255,255,255,.035));
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow2);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      overflow:hidden;
+    }
+    .card::before {
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+      opacity:.48;
+    }
+    .card.highlight {
+      border-color:color-mix(in srgb, var(--accent) 42%, transparent);
+      background:linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, transparent), var(--panel));
+    }
+    .card.soft { box-shadow:none; }
+    .card.interactive {
+      cursor:pointer;
+      transition:transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .card.interactive:hover {
+      transform:translateY(-4px);
+      border-color:color-mix(in srgb, var(--accent) 60%, transparent);
+      background:linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, transparent), var(--panel));
+    }
+    .equation {
+      font-family:"Cambria Math","STIX Two Math","Segoe UI Symbol", Georgia, serif;
+      background:linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.045));
+      border:1px solid var(--line2);
+      border-radius:17px;
+      color:var(--accent);
+      padding:14px 16px;
+      margin:12px 0;
+      overflow-x:auto;
+      font-weight:850;
+      letter-spacing:.005em;
+      font-size:clamp(1rem, 1.3vw, 1.18rem);
+      line-height:1.7;
+      white-space:nowrap;
+    }
+    .equation sub, .equation sup {
+      font-size:.72em;
+      line-height:0;
+    }
+    .equation .op { color:var(--gold); font-weight:950; }
+    .equation .set { color:var(--text); }
+    .equation .fn { color:var(--accent2); }
+    .simulationStrip {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin:0 0 14px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+    }
+    .simulationStrip::before {
+      content:"Simulación dinámica";
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-right:4px;
+    }
+    .note { color:var(--muted); font-size:.95rem; }
+    .small { color:var(--muted); font-size:.85rem; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 9px;
+      margin:3px 3px 3px 0;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.055);
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:800;
+    }
+    .pill::before {
+      content:"";
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 12px var(--accent);
+    }
+    .controls {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin:10px 0 16px;
+    }
+    .controlGroup { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    label { color:var(--muted); font-size:.9rem; font-weight:850; }
+    input[type="range"] {
+      accent-color:var(--accent);
+      min-width:130px;
+      cursor:pointer;
+    }
+    .kbd {
+      display:inline-flex;
+      min-width:48px;
+      justify-content:center;
+      padding:3px 8px;
+      border:1px solid var(--line);
+      border-radius:9px;
+      background:rgba(255,255,255,.08);
+      color:var(--accent);
+      font-weight:900;
+      font-family:ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    .viz {
+      width:100%;
+      min-height:520px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 58%),
+        rgba(255,255,255,.043);
+      position:relative;
+    }
+    svg { display:block; width:100%; height:100%; }
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .stat {
+      min-height:78px;
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:rgba(255,255,255,.065);
+      padding:12px;
+      overflow:hidden;
+    }
+    .stat b {
+      display:block;
+      color:var(--accent);
+      font-size:1.34rem;
+      line-height:1.05;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .stat span {
+      color:var(--muted);
+      font-size:.83rem;
+    }
+    .legend {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:.88rem;
+      margin-top:10px;
+    }
+    .dot {
+      display:inline-block;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.75);
+      vertical-align:-1px;
+      margin-right:5px;
+    }
+    .canvasBox {
+      position:relative;
+      min-height:560px;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%),
+        rgba(255,255,255,.04);
+      overflow:hidden;
+      box-shadow:var(--shadow2);
+    }
+    canvas { width:100%; height:100%; display:block; }
+    .caption {
+      position:absolute;
+      left:16px;
+      bottom:16px;
+      max-width:570px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:color-mix(in srgb, var(--bg0) 78%, transparent);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .flow {
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+    .flowStep {
+      min-height:150px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:15px;
+      background:rgba(255,255,255,.058);
+      position:relative;
+      overflow:hidden;
+    }
+    .flowStep::before {
+      content:attr(data-step);
+      display:inline-grid;
+      place-items:center;
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#07111f;
+      font-weight:1000;
+      margin-bottom:10px;
+    }
+    .flowStep::after {
+      content:"→";
+      position:absolute;
+      right:-14px;
+      top:42%;
+      color:var(--accent);
+      font-size:1.9rem;
+      font-weight:1000;
+      filter:drop-shadow(0 0 14px var(--accent));
+    }
+    .flowStep:last-child::after { display:none; }
+    .flowStep b { display:block; color:var(--accent); margin-bottom:4px; }
+    .insightBox {
+      min-height:120px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.058);
+      border-radius:22px;
+      padding:16px;
+    }
+    .matrixWrap { overflow:auto; border-radius:22px; }
+    table.matrix {
+      width:100%;
+      min-width:920px;
+      border-collapse:collapse;
+      font-size:.93rem;
+    }
+    .matrix th, .matrix td {
+      padding:14px 12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+    }
+    .matrix th {
+      text-align:left;
+      color:var(--accent);
+      background:color-mix(in srgb, var(--accent) 10%, transparent);
+      position:sticky;
+      top:0;
+      backdrop-filter:blur(12px);
+    }
+    .matrix tr { transition:background .18s ease; }
+    .matrix tr:hover td { background:rgba(255,255,255,.045); }
+    .matrix tr.filtered { display:none; }
+    .glossaryGrid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+    }
+    .glossaryCard {
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      border-radius:20px;
+      padding:15px;
+      min-height:154px;
+    }
+    .glossaryCard strong { color:var(--accent); font-size:1.02rem; }
+    .footer {
+      border-top:1px solid var(--line);
+      padding:28px 0 40px;
+      text-align:center;
+      color:var(--muted);
+    }
+    .signature {
+      color:var(--accent);
+      font-weight:950;
+      letter-spacing:.02em;
+    }
+    .toast {
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      max-width:340px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:color-mix(in srgb, var(--bg0) 82%, transparent);
+      color:var(--text);
+      box-shadow:var(--shadow2);
+      backdrop-filter:blur(16px);
+      transform:translateY(12px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+      z-index:120;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+
+    body.presentation .toolbar { top:0; }
+    body.presentation .module.active {
+      min-height:calc(100vh - 90px);
+      display:grid;
+      align-content:center;
+    }
+    body.presentation .module:not(.active), body.presentation footer { display:none !important; }
+    body.presentation .hero { display:none; }
+
+    @media (max-width:980px) {
+      .heroGrid, .grid2, .grid3, .grid4, .glossaryGrid { grid-template-columns:1fr; }
+      .heroGrid { gap:18px; }
+      .stats, .heroStats { grid-template-columns:repeat(2,1fr); }
+      .flow { grid-template-columns:1fr; }
+      .flowStep::after { display:none; }
+      .toolbar { position:relative; }
+      .search { width:100%; }
+      .tools { width:100%; justify-content:flex-start; }
+      .viz { min-height:660px; }
+      .canvasBox { min-height:520px; }
+    }
+    @media print {
+      body { background:white; color:#111; }
+      body::before, body::after, .toolbar, .progressBar, .toast, .heroActions { display:none !important; }
+      .hero, .module { display:block !important; min-height:auto; page-break-after:auto; }
+      .card, .glass, .viz, .canvasBox { box-shadow:none; border-color:#ddd; background:#fff; }
+    }
+  </style>
+</head>
+<body data-theme="dark" data-palette="aurora">
+  <div class="progressBar" id="progressBar"></div>
+
+  <header class="hero" id="top">
+    <div class="wrap heroGrid">
+      <div>
+        <span class="badge">Versión 3.1 · Laboratorio interactivo · Grafos · Geometría · IA</span>
+        <h1><span class="gradientText">De grafos discretos a inteligencia artificial geométrica</span></h1>
+        <p class="lead">Una versión más dinámica para clase, presentación o estudio: el grafo define relaciones, la métrica permite medirlas, la geometría ofrece el espacio adecuado, los embeddings traducen la estructura y la IA aprende patrones, jerarquías, comunidades, anomalías y predicciones.</p>
+        <div class="heroActions">
+          <button class="btn primary" id="startLabBtn">Entrar al laboratorio</button>
+          <button class="btn" id="presentationBtnHero">Modo presentación</button>
+          <span class="chip"><strong>Sin librerías externas</strong> HTML + CSS + JavaScript</span>
+        </div>
+      </div>
+
+      <div class="heroCard glass">
+        <div class="heroViz"><svg id="heroSvg" viewBox="0 0 560 390" aria-label="Mapa conceptual animado"></svg></div>
+        <div class="heroStats">
+          <div class="heroStat"><b>8</b><span>módulos interactivos</span></div>
+          <div class="heroStat"><b>5</b><span>tipos de grafos</span></div>
+          <div class="heroStat"><b>4</b><span>geometrías comparables</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toolbar" aria-label="Navegación de módulos">
+    <div class="wrap toolbarInner">
+      <div class="tabs" id="tabs"></div>
+      <div class="tools">
+        <input class="search" id="moduleSearch" type="search" placeholder="Buscar módulo..." aria-label="Buscar módulo" />
+        <select id="paletteSelect" aria-label="Paleta de color">
+          <option value="aurora">Aurora</option>
+          <option value="violet">Violeta</option>
+          <option value="solar">Solar</option>
+          <option value="emerald">Esmeralda</option>
+        </select>
+        <button class="btn" id="themeBtn">Tema claro/oscuro</button>
+        <button class="btn" id="tourBtn">Tour automático</button>
+        <button class="btn" id="presentationBtn">Presentación</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section class="module active" id="m1" data-title="Mapa 3.0" data-keywords="conceptual grafo métrica geometría embedding inteligencia artificial ia">
+      <div class="moduleHeader">
+        <div>
+          <h2>1. Modelo conceptual 3.0</h2>
+          <p class="sectionLead">El salto conceptual es pasar de una red como dibujo a una red como objeto matemático entrenable, donde cada decisión —métrica, espacio, embedding y algoritmo— modifica qué puede aprender la IA.</p>
+        </div>
+        <span class="badge">Arquitectura de decisión</span>
+      </div>
+
+      <div class="grid2">
+        <div class="card highlight">
+          <h3>Idea central</h3>
+          <p>Un grafo enriquecido puede escribirse como:</p>
+          <div class="equation"><span class="fn">G</span> <span class="op">=</span> <span class="set">(V, E, X, W, T)</span></div>
+          <p>donde <b>V</b> son nodos, <b>E</b> relaciones, <b>X</b> atributos, <b>W</b> pesos y <b>T</b> una posible dimensión temporal. La inteligencia artificial necesita transformar esta estructura en una representación entrenable.</p>
+          <div class="equation"><span class="fn">f</span>: V <span class="op">→</span> 𝓜, &nbsp; <span class="fn">f</span>(v<sub>i</sub>) <span class="op">=</span> z<sub>i</sub></div>
+          <p>La función <b>f</b> lleva cada nodo a un punto <b>zᵢ</b> dentro de un espacio geométrico <b>𝓜</b>: euclídeo, hiperbólico, esférico o producto de espacios.</p>
+        </div>
+
+        <div class="card">
+          <h3>Cadena de decisión</h3>
+          <div class="flow">
+            <div class="flowStep" data-step="1"><b>Grafo</b>¿Qué entidades y relaciones modelamos?</div>
+            <div class="flowStep" data-step="2"><b>Métrica</b>¿Cómo definimos cercanía o separación?</div>
+            <div class="flowStep" data-step="3"><b>Geometría</b>¿Qué espacio reduce la distorsión?</div>
+            <div class="flowStep" data-step="4"><b>Embedding</b>¿Cómo aprendemos coordenadas útiles?</div>
+            <div class="flowStep" data-step="5"><b>Tarea IA</b>¿Qué inferimos, predecimos o explicamos?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid4" style="margin-top:18px">
+        <div class="card interactive" data-insight="Euclídeo: ideal para clusters relativamente planos, clasificación clásica y visualización inicial de similitudes.">
+          <h3>Euclídeo</h3>
+          <p>Similitud, clusters y distancias planas.</p>
+          <span class="pill">PCA</span><span class="pill">UMAP</span><span class="pill">node2vec</span>
+        </div>
+        <div class="card interactive" data-insight="Hiperbólico: especialmente potente cuando el grafo tiene crecimiento tipo árbol, jerarquías, taxonomías o relaciones centro-periferia.">
+          <h3>Hiperbólico</h3>
+          <p>Jerarquías, árboles y estructuras centro-periferia.</p>
+          <span class="pill">Poincaré</span><span class="pill">RSGD</span>
+        </div>
+        <div class="card interactive" data-insight="Esférico: útil cuando importan direcciones, periodicidad, orientación, similitud angular o datos sobre superficies como la Tierra.">
+          <h3>Esférico</h3>
+          <p>Ángulos, ciclos, orientación y normalización.</p>
+          <span class="pill">Coseno</span><span class="pill">Spherical CNN</span>
+        </div>
+        <div class="card interactive" data-insight="Producto de espacios: combina geometrías cuando una red tiene simultáneamente clusters, jerarquías, ciclos y atributos heterogéneos.">
+          <h3>Producto mixto</h3>
+          <p>Combina lo plano, lo jerárquico y lo angular.</p>
+          <span class="pill">GNN</span><span class="pill">Manifold ML</span>
+        </div>
+      </div>
+
+      <div class="insightBox" id="conceptInsight" style="margin-top:18px">
+        <b style="color:var(--accent)">Lectura activa:</b>
+        <span class="note"> pasá el cursor o tocá una tarjeta para ver cuándo conviene cada espacio.</span>
+      </div>
+    </section>
+
+    <section class="module" id="m2" data-title="Embeddings" data-keywords="embedding grafo euclideo hiperbólico esférico distancia distorsión simulador">
+      <div class="moduleHeader">
+        <div>
+          <h2>2. Laboratorio: del grafo al espacio geométrico</h2>
+          <p class="sectionLead">Compará una estructura relacional con su proyección geométrica. Al seleccionar dos nodos, el laboratorio calcula la distancia en el grafo, la distancia en el espacio y una lectura de distorsión.</p>
+        </div>
+        <span class="badge">Simulador comparativo</span>
+      </div>
+
+      <div class="card">
+        <div class="controls">
+          <div class="controlGroup"><label for="graphSelect">Tipo de grafo</label><select id="graphSelect"></select></div>
+          <div class="controlGroup"><label for="spaceSelect">Espacio</label><select id="spaceSelect"></select></div>
+          <div class="controlGroup"><label for="jitterRange">Separación visual</label><input id="jitterRange" type="range" min="0" max="40" value="12" /><span class="kbd" id="jitterLabel">12</span></div>
+          <button class="btn primary" id="randomPick">Seleccionar dos nodos</button>
+          <button class="btn" id="resetSelection">Limpiar</button>
+        </div>
+        <div class="simulationStrip">
+          <button class="btn primary" id="embeddingPlay">Animar embedding</button>
+          <button class="btn" id="graphShuffle">Grafo + espacio aleatorio</button>
+          <button class="btn" id="demoHierarchy">Demo jerarquía hiperbólica</button>
+        </div>
+        <div class="viz"><svg id="embeddingSvg" viewBox="0 0 1200 540" role="img" aria-label="Comparación entre grafo y embedding"></svg></div>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--accent)"></i> nodo seleccionado</span>
+          <span><i class="dot" style="background:var(--accent3)"></i> nodo no seleccionado</span>
+          <span><i class="dot" style="background:var(--gold)"></i> camino mínimo / relación destacada</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="statNodes">—</b><span>nodos</span></div>
+          <div class="stat"><b id="statEdges">—</b><span>aristas</span></div>
+          <div class="stat"><b id="statGraphDist">—</b><span>distancia dG(u,v)</span></div>
+          <div class="stat"><b id="statGeomDist">—</b><span>distancia geométrica d𝓜</span></div>
+        </div>
+        <div class="insightBox" id="distortionInsight" style="margin-top:12px">
+          <b style="color:var(--accent)">Interpretación:</b>
+          <span class="note"> seleccioná dos nodos para comparar la distancia relacional con la distancia geométrica.</span>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:18px">
+        <div class="card">
+          <h3>Principio de preservación</h3>
+          <div class="equation">d<sub>G</sub>(u,v) <span class="op">≈</span> d<sub>𝓜</sub>(f(u), f(v))</div>
+          <p>Un buen embedding conserva relaciones relevantes: cercanía, comunidad, jerarquía, centralidad o similitud estructural.</p>
+        </div>
+        <div class="card">
+          <h3>Pérdida de embedding</h3>
+          <div class="equation">𝓛 <span class="op">=</span> Σ<sub>u,v</sub> <span class="set">(</span>d<sub>G</sub>(u,v) <span class="op">−</span> d<sub>𝓜</sub>(f(u), f(v))<span class="set">)</span><sup>2</sup></div>
+          <p>El algoritmo ajusta coordenadas para reducir la diferencia entre el grafo original y la representación geométrica.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="module" id="m3" data-title="Bolas métricas" data-keywords="bolas métricas radio crecimiento grafo árbol hiperbólico volumen">
+      <div class="moduleHeader">
+        <div>
+          <h2>3. Bolas métricas y crecimiento de la red</h2>
+          <p class="sectionLead">La bola métrica permite observar cuántos nodos aparecen al alejarnos de un centro. Si el crecimiento se acelera rápidamente, la geometría hiperbólica suele capturar mejor esa expansión.</p>
+        </div>
+        <span class="badge">Crecimiento discreto</span>
+      </div>
+
+      <div class="card">
+        <div class="controls">
+          <div class="controlGroup"><label for="ballGraphSelect">Grafo</label><select id="ballGraphSelect"></select></div>
+          <div class="controlGroup"><label for="radiusRange">Radio r</label><input id="radiusRange" type="range" min="0" max="5" value="1" /><span class="kbd" id="radiusLabel">1</span></div>
+          <button class="btn primary" id="nextCenter">Cambiar centro</button>
+        </div>
+        <div class="simulationStrip">
+          <button class="btn primary" id="ballAnimate">Animar expansión</button>
+          <button class="btn" id="ballExpand">Expandir +1</button>
+          <button class="btn" id="ballReset">Reiniciar radio</button>
+        </div>
+        <div class="viz"><svg id="ballSvg" viewBox="0 0 1200 520" aria-label="Bolas métricas en grafos"></svg></div>
+        <div class="stats">
+          <div class="stat"><b id="ballCenter">—</b><span>centro</span></div>
+          <div class="stat"><b id="ballSize">—</b><span>|B(v,r)|</span></div>
+          <div class="stat"><b id="ballGrowth">—</b><span>nodos nuevos</span></div>
+          <div class="stat"><b id="ballHint">—</b><span>lectura geométrica</span></div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:18px">
+        <div class="card">
+          <h3>Definición</h3>
+          <div class="equation">B<sub>G</sub>(v,r) <span class="op">=</span> <span class="set">{ u ∈ V : d<sub>G</sub>(u,v) ≤ r }</span></div>
+          <p>En redes de conocimiento, redes sociales o jerarquías, esta idea permite medir expansión local, influencia, accesibilidad y complejidad.</p>
+        </div>
+        <div class="card">
+          <h3>Conexión geométrica</h3>
+          <p>El plano euclídeo crece de forma polinómica; el espacio hiperbólico crece de forma exponencial; por eso los árboles y jerarquías “entran” mejor en geometría hiperbólica.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="module" id="m4" data-title="GNN" data-keywords="graph neural network message passing vecinos agregación red social">
+      <div class="moduleHeader">
+        <div>
+          <h2>4. Graph Neural Network: message passing paso a paso</h2>
+          <p class="sectionLead">Una GNN no aprende cada nodo de forma aislada: actualiza su representación con información de sus vecinos. Esa propagación permite detectar comunidades, influencia, fraude, roles estructurales o afinidades.</p>
+        </div>
+        <span class="badge">Aprendizaje relacional</span>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="equation">h<sub>v</sub><sup>(k+1)</sup> <span class="op">=</span> σ<span class="set">(</span>W · AGG{ h<sub>u</sub><sup>(k)</sup> : u ∈ N(v) }<span class="set">)</span></div>
+          <p>La simulación combina el estado propio de cada nodo con el promedio de sus vecinos. A medida que avanzan las capas, las representaciones se suavizan y capturan contexto relacional.</p>
+          <div class="controls">
+            <div class="controlGroup"><label for="gnnMixRange">Peso vecinos</label><input id="gnnMixRange" type="range" min="10" max="90" value="60" /><span class="kbd" id="gnnMixLabel">0.60</span></div>
+            <button class="btn primary" id="gnnStep">Propagar capa</button>
+            <button class="btn" id="gnnAuto">Auto</button>
+            <button class="btn" id="gnnReset">Reiniciar</button>
+          </div>
+          <div class="simulationStrip">
+            <button class="btn primary" id="gnnBurst">5 capas rápidas</button>
+            <button class="btn" id="gnnRandomize">Estados aleatorios</button>
+            <button class="btn" id="gnnStrongMix">Simular alta influencia vecinal</button>
+          </div>
+          <div class="stats">
+            <div class="stat"><b id="gnnLayer">0</b><span>capa k</span></div>
+            <div class="stat"><b id="gnnVariance">—</b><span>varianza</span></div>
+            <div class="stat"><b id="gnnAvg">—</b><span>promedio</span></div>
+            <div class="stat"><b id="gnnSmooth">—</b><span>suavizado</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="viz" style="min-height:480px"><svg id="gnnSvg" viewBox="0 0 590 480" aria-label="Simulación de message passing"></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module" id="m5" data-title="RSGD" data-keywords="riemannian stochastic gradient descent rsgd poincare hiperbólico disco gradiente">
+      <div class="moduleHeader">
+        <div>
+          <h2>5. Riemannian SGD en el disco de Poincaré</h2>
+          <p class="sectionLead">Cuando el modelo aprende en una variedad curva, el gradiente debe respetar la geometría. La actualización no puede sacar el punto del disco: necesita una retracción o una operación compatible con la variedad.</p>
+        </div>
+        <span class="badge">Optimización sobre variedades</span>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="equation">x<sub>t+1</sub> <span class="op">=</span> R<sub>xₜ</sub><span class="set">(</span>−η ∇<sup>R</sup> f(x<sub>t</sub>)<span class="set">)</span></div>
+          <p>El punto se mueve hacia un objetivo, pero permanece dentro del disco. Cerca del borde, la geometría representa regiones muy alejadas en sentido hiperbólico, útiles para nodos específicos de una jerarquía.</p>
+          <div class="controls">
+            <div class="controlGroup"><label for="rsgdEta">η</label><input id="rsgdEta" type="range" min="1" max="30" value="10" /><span class="kbd" id="etaLabel">0.10</span></div>
+            <button class="btn primary" id="rsgdStep">Paso RSGD</button>
+            <button class="btn" id="rsgdAuto">Auto</button>
+            <button class="btn" id="rsgdReset">Reiniciar</button>
+          </div>
+          <div class="simulationStrip">
+            <button class="btn primary" id="rsgdBurst">30 pasos rápidos</button>
+            <button class="btn" id="rsgdNewTarget">Nuevo objetivo</button>
+            <button class="btn" id="rsgdBoundaryDemo">Demo hacia frontera</button>
+          </div>
+          <div class="stats">
+            <div class="stat"><b id="rsgdIter">0</b><span>iteración</span></div>
+            <div class="stat"><b id="rsgdNorm">—</b><span>||x||</span></div>
+            <div class="stat"><b id="rsgdDist">—</b><span>distancia al objetivo</span></div>
+            <div class="stat"><b>K&lt;0</b><span>curvatura negativa</span></div>
+          </div>
+        </div>
+        <div class="canvasBox">
+          <canvas id="rsgdCanvas"></canvas>
+          <div class="caption">El borde del disco de Poincaré no es un borde físico: representa el infinito hiperbólico. Por eso las jerarquías ubican lo general cerca del centro y lo específico hacia la frontera.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module" id="m6" data-title="KG + RAG" data-keywords="grafo de conocimiento llm rag recuperación generación inteligencia artificial relaciones">
+      <div class="moduleHeader">
+        <div>
+          <h2>6. Grafo de conocimiento + embeddings + LLM + RAG</h2>
+          <p class="sectionLead">Un LLM explica y sintetiza; un grafo de conocimiento estructura relaciones verificables. Juntos permiten recuperación más trazable, razonamiento relacional y respuestas contextualizadas.</p>
+        </div>
+        <span class="badge">IA simbólica + generativa</span>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Pregunta guiada</h3>
+          <div class="controls"><select id="kgQuestion"></select></div>
+          <div class="simulationStrip">
+            <button class="btn primary" id="kgNext">Siguiente pregunta</button>
+            <button class="btn" id="kgPlay">Animar recuperación RAG</button>
+          </div>
+          <p id="kgAnswer" class="note"></p>
+          <div class="equation">Knowledge Graph <span class="op">+</span> Embeddings <span class="op">+</span> LLM <span class="op">+</span> RAG</div>
+          <p>El grafo recupera entidades y relaciones relevantes; los embeddings amplían la búsqueda por similitud; el LLM transforma esa evidencia en una respuesta comprensible.</p>
+          <div class="stats">
+            <div class="stat"><b id="kgNodesStat">—</b><span>entidades</span></div>
+            <div class="stat"><b id="kgEdgesStat">—</b><span>relaciones</span></div>
+            <div class="stat"><b id="kgFocusStat">—</b><span>nodos foco</span></div>
+            <div class="stat"><b>RAG</b><span>recuperar + generar</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="viz" style="min-height:480px"><svg id="kgSvg" viewBox="0 0 640 480" aria-label="Grafo de conocimiento"></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module" id="m7" data-title="Matriz" data-keywords="matriz decisión algoritmo espacio grafo problema recomendación fraude moléculas clima">
+      <div class="moduleHeader">
+        <div>
+          <h2>7. Matriz de decisión: grafo, espacio y algoritmo</h2>
+          <p class="sectionLead">La geometría elegida no es estética: determina qué relaciones se preservan, qué distorsiones aparecen y qué algoritmo resulta más natural para la tarea.</p>
+        </div>
+        <span class="badge">Guía estratégica</span>
+      </div>
+
+      <div class="card">
+        <div class="controls">
+          <div class="controlGroup"><label for="matrixFilter">Filtrar por espacio</label><select id="matrixFilter">
+            <option value="all">Todos</option>
+            <option value="euclideo">Euclídeo</option>
+            <option value="hiperbolico">Hiperbólico</option>
+            <option value="esferico">Esférico</option>
+            <option value="producto">Producto mixto</option>
+          </select></div>
+          <button class="btn" id="matrixReset">Ver todo</button>
+        </div>
+        <div class="matrixWrap">
+          <table class="matrix" id="decisionMatrix">
+            <thead>
+              <tr><th>Problema</th><th>Tipo de grafo</th><th>Espacio geométrico</th><th>Algoritmos</th><th>Lectura estratégica</th></tr>
+            </thead>
+            <tbody>
+              <tr data-space="euclideo producto"><td>Recomendación</td><td>Bipartito usuario-producto</td><td>Euclídeo / producto</td><td>Matrix factorization, node2vec, GNN</td><td>Conectar demanda y oferta mediante proximidad latente.</td></tr>
+              <tr data-space="euclideo hiperbolico producto"><td>Red social</td><td>Comunidades, hubs y puentes</td><td>Euclídeo + hiperbólico</td><td>GraphSAGE, GAT, community detection</td><td>Detectar influencia, difusión y grupos estructurales.</td></tr>
+              <tr data-space="hiperbolico"><td>Jerarquía conceptual</td><td>Árbol o DAG</td><td>Hiperbólico</td><td>Poincaré embeddings, RSGD</td><td>Representar niveles de generalidad y especificidad.</td></tr>
+              <tr data-space="euclideo hiperbolico producto"><td>Grafo de conocimiento</td><td>Entidades y relaciones</td><td>Euclídeo / hiperbólico / complejo</td><td>TransE, RotatE, ComplEx, GNN</td><td>Completar relaciones y recuperar contexto.</td></tr>
+              <tr data-space="euclideo"><td>Moléculas</td><td>Grafo con geometría 3D</td><td>Euclídeo equivarante</td><td>MPNN, EGNN, SE(3)-Transformers</td><td>Respetar distancias, ángulos y simetrías físicas.</td></tr>
+              <tr data-space="esferico"><td>Clima global</td><td>Grafo sobre la esfera terrestre</td><td>Esférico</td><td>Spherical CNN, GNN geoespacial</td><td>Modelar señales sobre superficie curva.</td></tr>
+              <tr data-space="euclideo hiperbolico"><td>Fraude financiero</td><td>Transaccional dinámico</td><td>Euclídeo / hiperbólico</td><td>GNN, anomaly detection</td><td>Identificar patrones raros y redes coordinadas.</td></tr>
+              <tr data-space="hiperbolico producto"><td>Sistemas educativos</td><td>Grafo de conceptos</td><td>Hiperbólico / producto</td><td>Knowledge tracing, recomendadores</td><td>Construir rutas de aprendizaje personalizadas.</td></tr>
+              <tr data-space="esferico producto"><td>Señales periódicas</td><td>Ciclos, rotaciones, orientación</td><td>Esférico / toroidal</td><td>Embeddings angulares, Fourier features</td><td>Preservar periodicidad, dirección y fase.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card highlight" style="margin-top:18px">
+        <h3>Frase síntesis</h3>
+        <p>La unión más poderosa entre grafos, espacios geométricos e inteligencia artificial aparece cuando los nodos y relaciones se transforman en puntos de una geometría adecuada, para que el modelo aprenda no solo atributos, sino también distancia, jerarquía, comunidad, simetría, dinámica y significado estructural.</p>
+      </div>
+    </section>
+
+    <section class="module" id="m8" data-title="Glosario" data-keywords="glosario estudio definición conceptos métrica variedad embedding manifold">
+      <div class="moduleHeader">
+        <div>
+          <h2>8. Glosario activo para estudiar</h2>
+          <p class="sectionLead">Cada concepto está definido de forma breve pero precisa para que el archivo funcione también como material de repaso antes de una clase o exposición.</p>
+        </div>
+        <span class="badge">Material de estudio</span>
+      </div>
+
+      <div class="card">
+        <div class="controls">
+          <input class="search" id="glossarySearch" type="search" placeholder="Buscar concepto..." aria-label="Buscar concepto del glosario" />
+          <button class="btn" id="glossaryClear">Limpiar</button>
+        </div>
+        <div class="glossaryGrid" id="glossaryGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="signature">Material elaborado por el profesor Sergio Gevatschnaider</div>
+      <div class="small">Versión 3.1 · HTML + CSS + JavaScript puro · Laboratorio visual para grafos, geometría e inteligencia artificial</div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Listo.</div>
+
+<script>
+/* ============================
+   Utilidades base
+============================ */
+const $ = (id) => document.getElementById(id);
+const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+const palette = () => ({
+  accent: css('--accent'),
+  accent2: css('--accent2'),
+  accent3: css('--accent3'),
+  hot: css('--hot'),
+  gold: css('--gold'),
+  green: css('--green'),
+  muted: css('--muted'),
+  text: css('--text'),
+  line: css('--line')
+});
+function svgEl(name, attrs={}) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', name);
+  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+  return e;
+}
+function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+function acosh(x){ return Math.log(x + Math.sqrt(x*x - 1)); }
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================
+   Navegación, presentación, tema
+============================ */
+let activeModuleIndex = 0;
+let tourTimer = null;
+function modules() { return [...document.querySelectorAll('.module')]; }
+function showModule(index, scroll=true) {
+  const mods = modules();
+  activeModuleIndex = ((index % mods.length) + mods.length) % mods.length;
+  mods.forEach((m,i) => m.classList.toggle('active', i === activeModuleIndex));
+  document.querySelectorAll('.tabs .btn').forEach((b,i) => b.classList.toggle('active', i === activeModuleIndex));
+  if (scroll) {
+    const target = document.body.classList.contains('presentation') ? document.querySelector('.toolbar') : mods[activeModuleIndex];
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  drawAll();
+}
+function makeTabs() {
+  const tabs = $('tabs');
+  tabs.innerHTML = '';
+  modules().forEach((m, idx) => {
+    const b = document.createElement('button');
+    b.className = 'btn' + (idx === 0 ? ' active' : '');
+    b.textContent = m.dataset.title;
+    b.onclick = () => showModule(idx);
+    tabs.appendChild(b);
+  });
+}
+function togglePresentation(source='') {
+  document.body.classList.toggle('presentation');
+  const on = document.body.classList.contains('presentation');
+  $('presentationBtn').classList.toggle('active', on);
+  $('presentationBtnHero').classList.toggle('active', on);
+  toast(on ? 'Modo presentación activado: usá ← y → para navegar.' : 'Modo presentación desactivado.');
+  showModule(activeModuleIndex, false);
+}
+function toggleTour() {
+  if (tourTimer) {
+    clearInterval(tourTimer);
+    tourTimer = null;
+    $('tourBtn').classList.remove('active');
+    $('tourBtn').textContent = 'Tour automático';
+    toast('Tour automático pausado.');
+  } else {
+    tourTimer = setInterval(() => showModule(activeModuleIndex + 1), 5500);
+    $('tourBtn').classList.add('active');
+    $('tourBtn').textContent = 'Pausar tour';
+    toast('Tour automático iniciado.');
+  }
+}
+function setupNav() {
+  makeTabs();
+  $('startLabBtn').onclick = () => showModule(1);
+  $('presentationBtn').onclick = () => togglePresentation('toolbar');
+  $('presentationBtnHero').onclick = () => togglePresentation('hero');
+  $('tourBtn').onclick = toggleTour;
+  $('themeBtn').onclick = () => {
+    document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    drawAll();
+    drawRsgd();
+  };
+  $('paletteSelect').onchange = (e) => {
+    document.body.dataset.palette = e.target.value;
+    drawAll();
+    drawRsgd();
+  };
+  $('moduleSearch').oninput = (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    modules().forEach((m) => {
+      const txt = `${m.dataset.title} ${m.dataset.keywords || ''} ${m.innerText}`.toLowerCase();
+      m.classList.toggle('hiddenBySearch', q && !txt.includes(q));
+    });
+  };
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') showModule(activeModuleIndex + 1);
+    if (e.key === 'ArrowLeft') showModule(activeModuleIndex - 1);
+    if (e.key.toLowerCase() === 'p') togglePresentation('keyboard');
+    if (e.key.toLowerCase() === 't') toggleTour();
+  });
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    const pct = h > 0 ? scrollY / h * 100 : 0;
+    $('progressBar').style.width = pct + '%';
+  });
+}
+
+/* ============================
+   Datos de grafos
+============================ */
+function graphData(type) {
+  if (type === 'tree') {
+    const nodes = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'].map((id,i)=>({id, label:id, level:Math.floor(Math.log2(i+1))}));
+    const edges = [];
+    for (let i=1;i<nodes.length;i++) edges.push([nodes[Math.floor((i-1)/2)].id, nodes[i].id]);
+    return {name:'Árbol jerárquico', nodes, edges};
+  }
+  if (type === 'social') {
+    const labels = ['Ana','Bruno','Carla','Diego','Eva','Fabio','Gala','Hugo','Iris','Julián','Kai','Luna'];
+    const nodes = labels.map((id,i)=>({id, label:id[0] + (i+1)}));
+    const edges = [['Ana','Bruno'],['Ana','Carla'],['Bruno','Carla'],['Carla','Diego'],['Diego','Eva'],['Eva','Ana'],['Fabio','Gala'],['Fabio','Hugo'],['Gala','Hugo'],['Hugo','Iris'],['Iris','Julián'],['Julián','Fabio'],['Diego','Fabio'],['Eva','Kai'],['Kai','Luna'],['Luna','Gala']];
+    return {name:'Red social con comunidades', nodes, edges};
+  }
+  if (type === 'cycle') {
+    const nodes = Array.from({length:12},(_,i)=>({id:'v'+i,label:'v'+i}));
+    const edges = nodes.map((n,i)=>[n.id,nodes[(i+1)%nodes.length].id]);
+    edges.push(['v0','v6'],['v3','v9'],['v2','v8']);
+    return {name:'Ciclo con simetrías', nodes, edges};
+  }
+  if (type === 'bipartite') {
+    const users = ['U1','U2','U3','U4','U5'];
+    const items = ['P1','P2','P3','P4','P5','P6'];
+    const nodes = users.map(id=>({id,label:id,part:'user'})).concat(items.map(id=>({id,label:id,part:'item'})));
+    const edges = [['U1','P1'],['U1','P2'],['U1','P4'],['U2','P2'],['U2','P3'],['U3','P1'],['U3','P5'],['U4','P4'],['U4','P5'],['U4','P6'],['U5','P3'],['U5','P6']];
+    return {name:'Grafo bipartito usuario-producto', nodes, edges};
+  }
+  const names = ['Data Science','ML','Estadística','Big Data','Visualización','Supervisado','No supervisado','Deep Learning','CNN','RNN','Transformers','GNN','Grafos','Embeddings','RAG','LLM'];
+  const levelOf = (id) => id === 'Data Science' ? 0 : ['ML','Estadística','Big Data','Visualización'].includes(id) ? 1 : ['Supervisado','No supervisado','Deep Learning','Grafos','Embeddings','RAG','LLM'].includes(id) ? 2 : 3;
+  const nodes = names.map(id => ({id,label:id,level:levelOf(id)}));
+  const edges = [['Data Science','ML'],['Data Science','Estadística'],['Data Science','Big Data'],['Data Science','Visualización'],['ML','Supervisado'],['ML','No supervisado'],['ML','Deep Learning'],['Deep Learning','CNN'],['Deep Learning','RNN'],['Deep Learning','Transformers'],['Deep Learning','GNN'],['GNN','Grafos'],['Grafos','Embeddings'],['ML','Embeddings'],['LLM','RAG'],['RAG','Grafos'],['Embeddings','RAG']];
+  return {name:'Árbol/DAG de conocimiento', nodes, edges};
+}
+const graphTypes = {
+  tree:'Árbol jerárquico',
+  social:'Red social',
+  cycle:'Ciclo con simetrías',
+  bipartite:'Bipartito usuario-producto',
+  knowledge:'Conocimiento'
+};
+const spaces = {
+  euclidean:'Euclídeo',
+  hyperbolic:'Hiperbólico / Poincaré',
+  spherical:'Esférico / angular',
+  product:'Producto mixto'
+};
+function populateSelect(select, obj) {
+  select.innerHTML = '';
+  Object.entries(obj).forEach(([v,t]) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = t; select.appendChild(o);
+  });
+}
+function adjacency(g) {
+  const adj = Object.fromEntries(g.nodes.map(n => [n.id, []]));
+  g.edges.forEach(([a,b]) => { adj[a].push(b); adj[b].push(a); });
+  return adj;
+}
+function shortestPath(g, start, end) {
+  const adj = adjacency(g), q=[start], prev={}, seen=new Set([start]);
+  while(q.length) {
+    const u = q.shift();
+    if (u === end) break;
+    for (const v of adj[u]) if (!seen.has(v)) { seen.add(v); prev[v]=u; q.push(v); }
+  }
+  if (!seen.has(end)) return [];
+  const path=[end];
+  while(path[0] !== start) path.unshift(prev[path[0]]);
+  return path;
+}
+function allDistances(g, center) {
+  const adj = adjacency(g);
+  const dist = Object.fromEntries(g.nodes.map(n => [n.id, Infinity]));
+  dist[center] = 0;
+  const q=[center];
+  while(q.length) {
+    const u = q.shift();
+    for (const v of adj[u]) if (dist[v] === Infinity) { dist[v] = dist[u] + 1; q.push(v); }
+  }
+  return dist;
+}
+
+/* ============================
+   Layouts geométricos
+============================ */
+function baseLayout(g, width=540, height=440) {
+  const cx=width/2, cy=height/2, pos={};
+  if (g.name.includes('Árbol jerárquico')) {
+    const levels={};
+    g.nodes.forEach((n,i) => { const l = n.level ?? Math.floor(Math.log2(i+1)); (levels[l]=levels[l] || []).push(n); });
+    Object.entries(levels).forEach(([l,arr]) => arr.forEach((n,i) => pos[n.id] = {x:(i+1)*width/(arr.length+1), y:58 + Number(l)*96}));
+  } else if (g.name.includes('bipartito')) {
+    const left=g.nodes.filter(n=>n.part==='user'), right=g.nodes.filter(n=>n.part==='item');
+    left.forEach((n,i)=>pos[n.id]={x:130,y:(i+1)*height/(left.length+1)});
+    right.forEach((n,i)=>pos[n.id]={x:width-130,y:(i+1)*height/(right.length+1)});
+  } else if (g.name.includes('conocimiento')) {
+    const levels={};
+    g.nodes.forEach(n => (levels[n.level]=levels[n.level] || []).push(n));
+    Object.entries(levels).forEach(([l,arr]) => arr.forEach((n,i) => pos[n.id] = {x:(i+1)*width/(arr.length+1), y:58 + Number(l)*104}));
+  } else if (g.name.includes('social')) {
+    const left=['Ana','Bruno','Carla','Diego','Eva','Kai'];
+    const right=['Fabio','Gala','Hugo','Iris','Julián','Luna'];
+    left.forEach((id,i)=>{ const a=2*Math.PI*i/left.length; pos[id]={x:170+98*Math.cos(a), y:height/2+98*Math.sin(a)}; });
+    right.forEach((id,i)=>{ const a=2*Math.PI*i/right.length; pos[id]={x:width-170+98*Math.cos(a), y:height/2+98*Math.sin(a)}; });
+  } else {
+    g.nodes.forEach((n,i)=>{ const a=2*Math.PI*i/g.nodes.length; pos[n.id]={x:cx+170*Math.cos(a), y:cy+170*Math.sin(a)}; });
+  }
+  return pos;
+}
+function embeddingLayout(g, space, width=540, height=440) {
+  const cx=width/2, cy=height/2, pos={};
+  const jitter = Number($('jitterRange')?.value || 0);
+  if (space === 'euclidean') {
+    const b = baseLayout(g,width,height);
+    g.nodes.forEach((n,i) => {
+      pos[n.id] = {x:b[n.id].x + Math.sin(i*1.7)*jitter, y:b[n.id].y + Math.cos(i*1.2)*jitter};
+    });
+    return pos;
+  }
+  if (space === 'spherical') {
+    g.nodes.forEach((n,i) => {
+      const a=2*Math.PI*i/g.nodes.length - Math.PI/2;
+      pos[n.id] = {x:cx+162*Math.cos(a), y:cy+162*Math.sin(a), unit:[Math.cos(a), Math.sin(a)]};
+    });
+    return pos;
+  }
+  if (space === 'product') {
+    const b=baseLayout(g,width,height);
+    g.nodes.forEach((n,i)=>{
+      const a=2*Math.PI*i/g.nodes.length;
+      const mix=.43;
+      pos[n.id] = {
+        x:b[n.id].x*(1-mix)+(cx+158*Math.cos(a))*mix + Math.sin(i)*jitter*.4,
+        y:b[n.id].y*(1-mix)+(cy+158*Math.sin(a))*mix + Math.cos(i)*jitter*.4
+      };
+    });
+    return pos;
+  }
+  const root = g.name.includes('conocimiento') ? 'Data Science' : g.nodes[0].id;
+  const dist=allDistances(g, root);
+  const groups={};
+  g.nodes.forEach((n,i) => {
+    const d = Number.isFinite(dist[n.id]) ? dist[n.id] : 1;
+    (groups[d] = groups[d] || []).push(n);
+  });
+  Object.entries(groups).forEach(([d,arr]) => {
+    const depth = Number(d);
+    const r = depth === 0 ? 0 : Math.min(.90, .17 + .18*depth);
+    arr.forEach((n,i) => {
+      const phase = g.name.includes('social') ? (n.id.charCodeAt(0)%11)/11 : 0;
+      const a = 2*Math.PI*(i+phase)/arr.length + depth*.38;
+      pos[n.id] = {x:cx+r*190*Math.cos(a), y:cy+r*190*Math.sin(a), poincare:[r*Math.cos(a), r*Math.sin(a)]};
+    });
+  });
+  return pos;
+}
+function normUnit(p) { const r = Math.hypot(p.x,p.y) || 1; return [p.x/r, p.y/r]; }
+function toPoincare(p) { return [(p.x-270)/190, (p.y-220)/190]; }
+function geomDistance(p,q,space) {
+  const dx=p.x-q.x, dy=p.y-q.y;
+  if (space === 'spherical') {
+    const u=p.unit || normUnit(p), v=q.unit || normUnit(q);
+    const dot=clamp(u[0]*v[0]+u[1]*v[1], -1, 1);
+    return {value:Math.acos(dot), label:Math.acos(dot).toFixed(2)+' rad'};
+  }
+  if (space === 'hyperbolic') {
+    const u=p.poincare || toPoincare(p), v=q.poincare || toPoincare(q);
+    const duv=(u[0]-v[0])**2+(u[1]-v[1])**2, nu=u[0]**2+u[1]**2, nv=v[0]**2+v[1]**2;
+    const val=1+2*duv/Math.max(1e-6,(1-nu)*(1-nv));
+    const d=acosh(Math.max(1,val));
+    return {value:d, label:d.toFixed(2)};
+  }
+  const d = Math.sqrt(dx*dx+dy*dy)/95;
+  return {value:d, label:d.toFixed(2)};
+}
+
+/* ============================
+   Hero
+============================ */
+function drawHero() {
+  const svg = $('heroSvg');
+  clear(svg);
+  const C = palette();
+  const W=560,H=390;
+  const defs=svgEl('defs');
+  const glow=svgEl('filter',{id:'glow',x:'-50%',y:'-50%',width:'200%',height:'200%'});
+  glow.appendChild(svgEl('feGaussianBlur',{stdDeviation:'4',result:'blur'}));
+  const merge=svgEl('feMerge');
+  merge.appendChild(svgEl('feMergeNode',{in:'blur'}));
+  merge.appendChild(svgEl('feMergeNode',{in:'SourceGraphic'}));
+  glow.appendChild(merge);
+  defs.appendChild(glow);
+  svg.appendChild(defs);
+
+  const nodes=['Grafo','Métrica','Geometría','Embedding','IA','Predicción','Comunidades','Jerarquía','RAG'];
+  const pos={};
+  nodes.forEach((n,i)=>{ const a=2*Math.PI*i/nodes.length - .9; pos[n]={x:W/2+166*Math.cos(a), y:H/2+128*Math.sin(a)}; });
+  const edges=[['Grafo','Métrica'],['Métrica','Geometría'],['Geometría','Embedding'],['Embedding','IA'],['IA','Predicción'],['IA','Comunidades'],['Geometría','Jerarquía'],['Jerarquía','Embedding'],['Grafo','Comunidades'],['RAG','IA'],['Grafo','RAG']];
+  edges.forEach(([a,b],i)=>{
+    const line=svgEl('line',{x1:pos[a].x,y1:pos[a].y,x2:pos[b].x,y2:pos[b].y,stroke:i%2?C.accent2:C.muted,'stroke-width':2,opacity:i%2?.55:.38,'stroke-linecap':'round'});
+    svg.appendChild(line);
+  });
+  nodes.forEach((n,i)=>{
+    const isIA=n==='IA';
+    const g=svgEl('g',{filter:isIA?'url(#glow)':''});
+    g.appendChild(svgEl('circle',{cx:pos[n].x,cy:pos[n].y,r:isIA?26:18,fill:isIA?C.accent:i%3===0?C.accent2:C.accent3,stroke:'#fff','stroke-width':1.2,opacity:.95}));
+    const t=svgEl('text',{x:pos[n].x,y:pos[n].y+42,fill:C.text,'font-size':13,'font-weight':900,'text-anchor':'middle'});
+    t.textContent=n;
+    g.appendChild(t);
+    svg.appendChild(g);
+  });
+}
+
+/* ============================
+   Embedding simulator
+============================ */
+let selected=[];
+function drawGraphPanel(svg, g, pos, offsetX, title, space, selectedNodes=[], path=[]) {
+  const C=palette();
+  const panel=svgEl('g',{transform:`translate(${offsetX},48)`});
+  svg.appendChild(panel);
+  panel.appendChild(svgEl('rect',{x:0,y:0,width:550,height:440,rx:24,fill:'rgba(255,255,255,.045)',stroke:'rgba(255,255,255,.16)'}));
+  const titleNode=svgEl('text',{x:20,y:-14,fill:C.text,'font-size':18,'font-weight':950});
+  titleNode.textContent=title;
+  panel.appendChild(titleNode);
+
+  if (space === 'hyperbolic') {
+    panel.appendChild(svgEl('circle',{cx:275,cy:220,r:194,fill:'none',stroke:C.accent,'stroke-width':2,opacity:.62}));
+    [0.25,0.50,0.75].forEach(rr => panel.appendChild(svgEl('circle',{cx:275,cy:220,r:194*rr,fill:'none',stroke:C.accent,'stroke-width':1,opacity:.16})));
+  }
+  if (space === 'spherical') {
+    panel.appendChild(svgEl('circle',{cx:275,cy:220,r:165,fill:'none',stroke:C.accent2,'stroke-width':2,opacity:.64}));
+    panel.appendChild(svgEl('ellipse',{cx:275,cy:220,rx:165,ry:50,fill:'none',stroke:C.accent2,'stroke-width':1,opacity:.22}));
+  }
+
+  g.edges.forEach(([a,b]) => {
+    const pa=pos[a], pb=pos[b];
+    const inPath = path.includes(a) && path.includes(b) && Math.abs(path.indexOf(a)-path.indexOf(b)) === 1;
+    panel.appendChild(svgEl('line',{
+      x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y,
+      stroke:inPath?C.gold:'rgba(169,189,211,.46)',
+      'stroke-width':inPath?4.4:1.65,
+      'stroke-linecap':'round',
+      opacity:inPath?1:.78
+    }));
+  });
+
+  g.nodes.forEach((n,i) => {
+    const p=pos[n.id], sel=selectedNodes.includes(n.id);
+    const group=svgEl('g',{class:'node',style:'cursor:pointer'});
+    group.onclick = () => handleNodeClick(n.id);
+    group.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:sel?14:10.5,fill:sel?C.accent:C.accent3,stroke:'#fff','stroke-width':sel?2.2:1,opacity:sel?1:.92}));
+    group.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:sel?22:0,fill:'none',stroke:C.accent,'stroke-width':sel?1.4:0,opacity:.35}));
+    const txt=svgEl('text',{x:p.x+14,y:p.y+5,fill:C.text,'font-size':11.5,'font-weight':900});
+    txt.textContent=n.label;
+    group.appendChild(txt);
+    panel.appendChild(group);
+  });
+}
+function handleNodeClick(id) {
+  if (selected.includes(id)) selected = selected.filter(x => x !== id);
+  else {
+    if (selected.length >= 2) selected = [];
+    selected.push(id);
+  }
+  drawEmbedding();
+}
+function updateDistortionInsight(g, pos2, space) {
+  if (selected.length !== 2) {
+    $('distortionInsight').innerHTML = '<b style="color:var(--accent)">Interpretación:</b> <span class="note">seleccioná dos nodos para comparar la distancia relacional con la distancia geométrica.</span>';
+    return;
+  }
+  const path = shortestPath(g, selected[0], selected[1]);
+  const gd = path.length ? path.length - 1 : Infinity;
+  const geo = geomDistance(pos2[selected[0]], pos2[selected[1]], space);
+  const normalized = gd === 0 || !Number.isFinite(gd) ? 0 : geo.value / gd;
+  let msg = 'La distancia geométrica acompaña razonablemente la distancia del grafo.';
+  if (normalized > 1.35) msg = 'La proyección está separando más de lo esperable: posible distorsión por exceso.';
+  if (normalized < .55 && gd > 1) msg = 'La proyección está acercando demasiado nodos relacionalmente lejanos: posible compresión.';
+  $('distortionInsight').innerHTML = `<b style="color:var(--accent)">Interpretación:</b> <span class="note">${msg} Relación seleccionada: <span class="mono">${selected[0]} ↔ ${selected[1]}</span>.</span>`;
+}
+function drawEmbedding() {
+  const g=graphData($('graphSelect').value), space=$('spaceSelect').value;
+  const svg=$('embeddingSvg');
+  clear(svg);
+  selected = selected.filter(id => g.nodes.some(n => n.id === id));
+  const pos1=baseLayout(g,550,440), pos2=embeddingLayout(g,space,550,440);
+  let path=[];
+  if (selected.length === 2) path=shortestPath(g, selected[0], selected[1]);
+  drawGraphPanel(svg,g,pos1,35,'Grafo original: relaciones discretas','none',selected,path);
+  drawGraphPanel(svg,g,pos2,625,'Embedding en '+spaces[space],space,selected,path);
+  const C=palette();
+  const arrow=svgEl('text',{x:600,y:280,fill:C.accent,'font-size':40,'font-weight':1000,'text-anchor':'middle'});
+  arrow.textContent='→';
+  svg.appendChild(arrow);
+
+  $('statNodes').textContent=g.nodes.length;
+  $('statEdges').textContent=g.edges.length;
+  if (selected.length === 2) {
+    const p=shortestPath(g,selected[0],selected[1]);
+    $('statGraphDist').textContent=p.length ? p.length-1 : '∞';
+    $('statGeomDist').textContent=geomDistance(pos2[selected[0]],pos2[selected[1]],space).label;
+  } else {
+    $('statGraphDist').textContent='seleccionar';
+    $('statGeomDist').textContent='seleccionar';
+  }
+  updateDistortionInsight(g,pos2,space);
+}
+
+/* ============================
+   Bolas métricas
+============================ */
+let ballCenterIndex=0;
+function drawBall() {
+  const g=graphData($('ballGraphSelect').value);
+  const r=Number($('radiusRange').value);
+  const maxDistance = Math.max(...g.nodes.map(n => Math.max(...Object.values(allDistances(g,n.id)).filter(Number.isFinite))));
+  $('radiusRange').max = Math.max(3, Math.min(6, maxDistance));
+  const center=g.nodes[ballCenterIndex % g.nodes.length].id;
+  const dist=allDistances(g,center);
+  const prevSize=Object.values(dist).filter(d=>d<=Math.max(0,r-1)).length;
+  const size=Object.values(dist).filter(d=>d<=r).length;
+  const svg=$('ballSvg'); clear(svg);
+  const C=palette();
+  const pos=baseLayout(g,1100,430);
+  const group=svgEl('g',{transform:'translate(50,45)'});
+  svg.appendChild(group);
+  group.appendChild(svgEl('rect',{x:0,y:0,width:1100,height:430,rx:25,fill:'rgba(255,255,255,.045)',stroke:'rgba(255,255,255,.16)'}));
+  g.edges.forEach(([a,b])=>{
+    const active=dist[a]<=r && dist[b]<=r;
+    group.appendChild(svgEl('line',{x1:pos[a].x,y1:pos[a].y,x2:pos[b].x,y2:pos[b].y,stroke:active?C.gold:'rgba(169,189,211,.34)','stroke-width':active?4:1.55,'stroke-linecap':'round',opacity:active?1:.75}));
+  });
+  g.nodes.forEach(n=>{
+    const active=dist[n.id]<=r, isCenter=n.id===center;
+    const fill=isCenter?C.accent:active?C.green:C.accent3;
+    group.appendChild(svgEl('circle',{cx:pos[n.id].x,cy:pos[n.id].y,r:isCenter?16:active?12:9,fill,stroke:'#fff','stroke-width':isCenter?2.2:1,opacity:active?1:.36}));
+    const tx=svgEl('text',{x:pos[n.id].x+15,y:pos[n.id].y+5,fill:C.text,'font-size':12,'font-weight':900});
+    tx.textContent=n.label;
+    group.appendChild(tx);
+    if (active) {
+      const d=svgEl('text',{x:pos[n.id].x,y:pos[n.id].y-18,fill:C.gold,'font-size':10,'font-weight':900,'text-anchor':'middle'});
+      d.textContent='d='+dist[n.id];
+      group.appendChild(d);
+    }
+  });
+  $('radiusLabel').textContent=r;
+  $('ballCenter').textContent=center;
+  $('ballSize').textContent=size;
+  $('ballGrowth').textContent=r===0 ? '—' : '+'+(size-prevSize);
+  const ratio = r > 1 && prevSize ? size/prevSize : 1;
+  $('ballHint').textContent = ratio > 1.65 ? 'hiperbólico' : ratio > 1.2 ? 'mixto' : 'moderado';
+}
+
+/* ============================
+   GNN
+============================ */
+const gnnGraph = graphData('social');
+let gnnStates={}, gnnLayer=0, gnnTimer=null, gnnBaseVariance=0;
+function initGNN() {
+  gnnStates={};
+  gnnGraph.nodes.forEach((n,i)=> {
+    gnnStates[n.id] = clamp(i%4===0 ? .94 : i%3===0 ? .20 : .52 + .24*Math.sin(i*1.8), 0.05, .98);
+  });
+  gnnLayer=0;
+  const vals=Object.values(gnnStates);
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  gnnBaseVariance=vals.reduce((a,b)=>a+(b-avg)**2,0)/vals.length;
+  drawGNN();
+}
+function colorScale(v) {
+  const C=palette();
+  const r1=parseInt(C.accent.slice(1,3),16), g1=parseInt(C.accent.slice(3,5),16), b1=parseInt(C.accent.slice(5,7),16);
+  const r2=parseInt(C.hot.slice(1,3),16), g2=parseInt(C.hot.slice(3,5),16), b2=parseInt(C.hot.slice(5,7),16);
+  const r=Math.round(r1*(1-v)+r2*v), g=Math.round(g1*(1-v)+g2*v), b=Math.round(b1*(1-v)+b2*v);
+  return `rgb(${r},${g},${b})`;
+}
+function drawGNN() {
+  const svg=$('gnnSvg'); clear(svg);
+  const C=palette();
+  const pos=baseLayout(gnnGraph,540,420);
+  const group=svgEl('g',{transform:'translate(25,30)'});
+  svg.appendChild(group);
+  gnnGraph.edges.forEach(([a,b])=>group.appendChild(svgEl('line',{x1:pos[a].x,y1:pos[a].y,x2:pos[b].x,y2:pos[b].y,stroke:'rgba(169,189,211,.46)','stroke-width':2,'stroke-linecap':'round'})));
+  gnnGraph.nodes.forEach(n=>{
+    const v=gnnStates[n.id];
+    group.appendChild(svgEl('circle',{cx:pos[n.id].x,cy:pos[n.id].y,r:11+12*v,fill:colorScale(v),stroke:'#fff','stroke-width':1.35}));
+    const tx=svgEl('text',{x:pos[n.id].x+17,y:pos[n.id].y+5,fill:C.text,'font-size':12,'font-weight':900});
+    tx.textContent=n.label+' '+v.toFixed(2);
+    group.appendChild(tx);
+  });
+  const vals=Object.values(gnnStates);
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const variance=vals.reduce((a,b)=>a+(b-avg)**2,0)/vals.length;
+  const smooth=gnnBaseVariance ? (1 - variance/gnnBaseVariance) : 0;
+  $('gnnLayer').textContent=gnnLayer;
+  $('gnnAvg').textContent=avg.toFixed(2);
+  $('gnnVariance').textContent=variance.toFixed(3);
+  $('gnnSmooth').textContent=(smooth*100).toFixed(0)+'%';
+}
+function stepGNN() {
+  const adj=adjacency(gnnGraph), next={};
+  const mix=Number($('gnnMixRange').value)/100;
+  for (const n of gnnGraph.nodes) {
+    const neigh=adj[n.id];
+    const avg=neigh.reduce((a,b)=>a+gnnStates[b],0)/neigh.length;
+    next[n.id]=(1-mix)*gnnStates[n.id]+mix*avg;
+  }
+  gnnStates=next; gnnLayer++; drawGNN();
+}
+
+/* ============================
+   RSGD Canvas
+============================ */
+let rsgd = {x:[-0.58,0.28], target:[0.58,-0.36], path:[[-0.58,0.28]], iter:0, timer:null};
+function resizeCanvas(c) {
+  const rect=c.getBoundingClientRect();
+  c.width=Math.max(650,Math.floor(rect.width*devicePixelRatio));
+  c.height=Math.max(520,Math.floor(rect.height*devicePixelRatio));
+}
+function drawRsgd() {
+  const c=$('rsgdCanvas');
+  resizeCanvas(c);
+  const ctx=c.getContext('2d'), C=palette();
+  const W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)*.37;
+  ctx.clearRect(0,0,W,H);
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  grad.addColorStop(0, C.accent + '33');
+  grad.addColorStop(1, 'rgba(255,255,255,0.02)');
+  ctx.fillStyle=grad;
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+
+  ctx.lineWidth=2*devicePixelRatio; ctx.strokeStyle=C.accent; ctx.globalAlpha=.68; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha=1;
+  for (let rr=.25; rr<1; rr+=.25) {
+    ctx.strokeStyle=C.accent; ctx.globalAlpha=.16; ctx.beginPath(); ctx.arc(cx,cy,R*rr,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.globalAlpha=.55;
+  ctx.strokeStyle=C.accent2;
+  ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.moveTo(cx,cy-R); ctx.lineTo(cx,cy+R); ctx.stroke();
+  ctx.globalAlpha=1;
+
+  const toPx=(p)=>[cx+p[0]*R, cy-p[1]*R];
+  ctx.strokeStyle=C.gold; ctx.lineWidth=3*devicePixelRatio; ctx.beginPath();
+  rsgd.path.forEach((p,i)=>{ const [x,y]=toPx(p); if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+
+  const [tx,ty]=toPx(rsgd.target);
+  ctx.fillStyle=C.green; ctx.beginPath(); ctx.arc(tx,ty,12*devicePixelRatio,0,Math.PI*2); ctx.fill();
+  const [x,y]=toPx(rsgd.x);
+  ctx.fillStyle=C.accent; ctx.beginPath(); ctx.arc(x,y,13*devicePixelRatio,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.8*devicePixelRatio; ctx.stroke();
+
+  ctx.fillStyle=C.text; ctx.font=`${15*devicePixelRatio}px sans-serif`;
+  ctx.fillText('objetivo', tx+16*devicePixelRatio, ty);
+  ctx.fillText('xₜ', x+16*devicePixelRatio, y);
+
+  $('rsgdIter').textContent=rsgd.iter;
+  $('rsgdNorm').textContent=Math.hypot(...rsgd.x).toFixed(3);
+  $('rsgdDist').textContent=Math.hypot(rsgd.target[0]-rsgd.x[0], rsgd.target[1]-rsgd.x[1]).toFixed(3);
+}
+function stepRsgd() {
+  const eta=Number($('rsgdEta').value)/100;
+  const dx=rsgd.target[0]-rsgd.x[0], dy=rsgd.target[1]-rsgd.x[1];
+  let nx=rsgd.x[0]+eta*dx, ny=rsgd.x[1]+eta*dy;
+  const norm=Math.hypot(nx,ny);
+  if (norm > .965) { nx=nx/norm*.965; ny=ny/norm*.965; }
+  rsgd.x=[nx,ny]; rsgd.path.push([...rsgd.x]); rsgd.iter++; drawRsgd();
+}
+
+/* ============================
+   KG + RAG
+============================ */
+const kgNodes = ['China','Tierras raras','Refinación','UE','Proveedores','OMC','DS431','Argentina','SBC','LLM','RAG','Grafo','Embeddings','Mercados'];
+const kgEdges = [
+  ['China','Tierras raras','controla'],
+  ['China','Refinación','domina'],
+  ['UE','Proveedores','diversifica'],
+  ['OMC','DS431','resolvió'],
+  ['Argentina','SBC','exporta'],
+  ['Grafo','RAG','estructura'],
+  ['LLM','RAG','genera'],
+  ['Grafo','LLM','contextualiza'],
+  ['Tierras raras','UE','afecta'],
+  ['Embeddings','RAG','amplían'],
+  ['SBC','Mercados','busca'],
+  ['Argentina','Mercados','analiza'],
+  ['Grafo','Embeddings','proyecta']
+];
+const kgQuestions = [
+  {q:'¿Por qué combinar LLM con grafo de conocimiento?', focus:['Grafo','LLM','RAG','Embeddings'], a:'Porque el grafo aporta relaciones explícitas y trazables, los embeddings permiten recuperación por similitud y el LLM convierte esa estructura en explicación comprensible.'},
+  {q:'¿Cómo se representa una relación estratégica?', focus:['China','Tierras raras','Refinación'], a:'Como tripletas sujeto–relación–objeto, por ejemplo: China controla tierras raras o China domina refinación. Luego esas relaciones pueden recuperarse y proyectarse en embeddings.'},
+  {q:'¿Qué aporta RAG?', focus:['RAG','Grafo','LLM','Embeddings'], a:'RAG recupera contexto relevante antes de generar una respuesta. Si la recuperación usa un grafo, la respuesta puede apoyarse en relaciones explícitas y no solo en similitud textual.'},
+  {q:'¿Cómo se conecta con comercio internacional?', focus:['Argentina','SBC','Mercados','UE'], a:'Un grafo puede conectar países, sectores, acuerdos, empresas, servicios y mercados. La IA puede usar esas relaciones para inteligencia comercial y análisis estratégico.'}
+];
+function initKG() {
+  populateSelect($('kgQuestion'), Object.fromEntries(kgQuestions.map((x,i)=>[i,x.q])));
+  $('kgQuestion').onchange=drawKG;
+}
+function drawKG() {
+  const idx=Number($('kgQuestion').value || 0);
+  const item=kgQuestions[idx];
+  const focus=new Set(item.focus);
+  $('kgAnswer').textContent=item.a;
+  $('kgNodesStat').textContent=kgNodes.length;
+  $('kgEdgesStat').textContent=kgEdges.length;
+  $('kgFocusStat').textContent=focus.size;
+  const svg=$('kgSvg'); clear(svg);
+  const C=palette(), cx=320, cy=240, R=176, pos={};
+  kgNodes.forEach((n,i)=>{ const a=2*Math.PI*i/kgNodes.length - Math.PI/2; pos[n]={x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)}; });
+  kgEdges.forEach(([a,b,label])=>{
+    const active=focus.has(a) && focus.has(b);
+    svg.appendChild(svgEl('line',{x1:pos[a].x,y1:pos[a].y,x2:pos[b].x,y2:pos[b].y,stroke:active?C.gold:'rgba(169,189,211,.40)','stroke-width':active?4:1.45,'stroke-linecap':'round'}));
+    const mx=(pos[a].x+pos[b].x)/2, my=(pos[a].y+pos[b].y)/2;
+    const t=svgEl('text',{x:mx,y:my,fill:active?C.gold:'rgba(169,189,211,.82)','font-size':10,'text-anchor':'middle','font-weight':active?900:700});
+    t.textContent=label;
+    svg.appendChild(t);
+  });
+  kgNodes.forEach(n=>{
+    const active=focus.has(n);
+    svg.appendChild(svgEl('circle',{cx:pos[n].x,cy:pos[n].y,r:active?18:13,fill:active?C.accent:C.accent3,stroke:'#fff','stroke-width':1.2,opacity:active?1:.86}));
+    const t=svgEl('text',{x:pos[n].x,y:pos[n].y+34,fill:C.text,'font-size':12,'font-weight':900,'text-anchor':'middle'});
+    t.textContent=n;
+    svg.appendChild(t);
+  });
+}
+
+/* ============================
+   Matriz y glosario
+============================ */
+function setupMatrix() {
+  const apply = () => {
+    const filter=$('matrixFilter').value;
+    document.querySelectorAll('#decisionMatrix tbody tr').forEach(tr => {
+      tr.classList.toggle('filtered', filter !== 'all' && !tr.dataset.space.includes(filter));
+    });
+  };
+  $('matrixFilter').onchange=apply;
+  $('matrixReset').onclick=()=>{ $('matrixFilter').value='all'; apply(); };
+}
+const glossary = [
+  ['Grafo','Objeto matemático formado por nodos y aristas. Permite modelar relaciones entre entidades: personas, productos, conceptos, moléculas, páginas web o países.'],
+  ['Métrica de grafo','Función de distancia basada en la estructura del grafo. La más común es la longitud del camino mínimo entre dos nodos.'],
+  ['Embedding','Representación vectorial o geométrica de un nodo, relación o grafo completo en un espacio continuo entrenable.'],
+  ['Distorsión','Diferencia entre las distancias originales del grafo y las distancias resultantes en el espacio de embedding.'],
+  ['Espacio euclídeo','Geometría plana tradicional. Es útil para clusters, clasificación, visualización inicial y similitudes relativamente homogéneas.'],
+  ['Espacio hiperbólico','Geometría de curvatura negativa. Su volumen crece exponencialmente, por eso representa bien árboles y jerarquías.'],
+  ['Disco de Poincaré','Modelo visual de geometría hiperbólica dentro de un disco. El borde representa el infinito hiperbólico.'],
+  ['Espacio esférico','Geometría sobre una esfera. Es útil cuando importan ángulos, orientación, ciclos, periodicidad o datos geográficos.'],
+  ['Producto de espacios','Combinación de varias geometrías para representar redes con propiedades simultáneas: clusters, jerarquías y ciclos.'],
+  ['GNN','Graph Neural Network. Red neuronal que aprende representaciones propagando información entre nodos vecinos.'],
+  ['Message passing','Mecanismo por el cual cada nodo actualiza su estado agregando información de sus vecinos.'],
+  ['RSGD','Riemannian Stochastic Gradient Descent. Variante del descenso por gradiente que respeta la geometría de una variedad curva.'],
+  ['Grafo de conocimiento','Grafo donde los nodos son entidades y las aristas son relaciones semánticas explícitas.'],
+  ['RAG','Retrieval-Augmented Generation. Técnica que recupera información relevante antes de que un modelo generativo produzca una respuesta.'],
+  ['LLM','Large Language Model. Modelo de lenguaje capaz de generar, resumir, traducir y razonar sobre texto, aunque necesita contexto confiable para reducir errores.'],
+  ['Bola métrica','Conjunto de nodos ubicados a distancia menor o igual que un radio r desde un centro determinado.'],
+  ['Centralidad','Familia de medidas que indican importancia estructural de un nodo: grado, cercanía, intermediación, PageRank, entre otras.'],
+  ['Comunidad','Grupo de nodos más conectados entre sí que con el resto del grafo.'],
+  ['Taxonomía','Organización jerárquica de conceptos o categorías. Suele representarse bien con árboles o DAGs.'],
+  ['Manifold learning','Aprendizaje sobre variedades o estructuras geométricas no necesariamente planas.']
+];
+function renderGlossary() {
+  const grid=$('glossaryGrid'), q=($('glossarySearch').value || '').toLowerCase().trim();
+  grid.innerHTML='';
+  glossary
+    .filter(([term,def]) => !q || term.toLowerCase().includes(q) || def.toLowerCase().includes(q))
+    .forEach(([term,def]) => {
+      const card=document.createElement('div');
+      card.className='glossaryCard';
+      card.innerHTML=`<strong>${term}</strong><p class="note" style="margin-top:8px">${def}</p>`;
+      grid.appendChild(card);
+    });
+}
+function setupGlossary() {
+  $('glossarySearch').oninput=renderGlossary;
+  $('glossaryClear').onclick=()=>{ $('glossarySearch').value=''; renderGlossary(); };
+  renderGlossary();
+}
+
+/* ============================
+   Concept cards
+============================ */
+function setupConceptCards() {
+  document.querySelectorAll('.card.interactive[data-insight]').forEach(card => {
+    const show = () => {
+      $('conceptInsight').innerHTML = `<b style="color:var(--accent)">Lectura activa:</b> <span class="note">${card.dataset.insight}</span>`;
+    };
+    card.addEventListener('mouseenter', show);
+    card.addEventListener('click', show);
+  });
+}
+
+/* ============================
+   Inicialización
+============================ */
+function drawAll() {
+  drawHero();
+  if ($('embeddingSvg')) drawEmbedding();
+  if ($('ballSvg')) drawBall();
+  if ($('gnnSvg')) drawGNN();
+  if ($('kgSvg')) drawKG();
+}
+
+/* ============================
+   Controles dinámicos agregados en versión 3.1
+============================ */
+let embeddingTimer = null;
+let ballTimer = null;
+let kgTimer = null;
+function pickTwoRandomNodes() {
+  const g=graphData($('graphSelect').value);
+  selected=[];
+  while(selected.length<2) {
+    const id=g.nodes[Math.floor(Math.random()*g.nodes.length)].id;
+    if (!selected.includes(id)) selected.push(id);
+  }
+}
+function stopEmbeddingAnimation() {
+  if (embeddingTimer) {
+    clearInterval(embeddingTimer);
+    embeddingTimer=null;
+    if ($('embeddingPlay')) { $('embeddingPlay').textContent='Animar embedding'; $('embeddingPlay').classList.remove('active'); }
+  }
+}
+function toggleEmbeddingAnimation() {
+  if (embeddingTimer) { stopEmbeddingAnimation(); toast('Animación de embedding pausada.'); return; }
+  let tick=0;
+  const graphKeys=Object.keys(graphTypes), spaceKeys=Object.keys(spaces);
+  $('embeddingPlay').textContent='Pausar embedding';
+  $('embeddingPlay').classList.add('active');
+  toast('Animación de embedding iniciada.');
+  embeddingTimer=setInterval(()=>{
+    tick++;
+    $('jitterRange').value = String(Math.round(20 + 20*Math.sin(tick*.8)));
+    $('jitterLabel').textContent = $('jitterRange').value;
+    if (tick % 2 === 0) $('spaceSelect').value = spaceKeys[(spaceKeys.indexOf($('spaceSelect').value)+1) % spaceKeys.length];
+    if (tick % 5 === 0) $('graphSelect').value = graphKeys[(graphKeys.indexOf($('graphSelect').value)+1) % graphKeys.length];
+    pickTwoRandomNodes();
+    drawEmbedding();
+  }, 950);
+}
+function randomGraphAndSpace() {
+  stopEmbeddingAnimation();
+  const graphKeys=Object.keys(graphTypes), spaceKeys=Object.keys(spaces);
+  $('graphSelect').value = graphKeys[Math.floor(Math.random()*graphKeys.length)];
+  $('spaceSelect').value = spaceKeys[Math.floor(Math.random()*spaceKeys.length)];
+  $('jitterRange').value = String(Math.floor(Math.random()*35)+3);
+  $('jitterLabel').textContent = $('jitterRange').value;
+  pickTwoRandomNodes();
+  drawEmbedding();
+  toast('Nuevo escenario de grafo y geometría generado.');
+}
+function demoHierarchy() {
+  stopEmbeddingAnimation();
+  $('graphSelect').value='tree';
+  $('spaceSelect').value='hyperbolic';
+  $('jitterRange').value='6';
+  $('jitterLabel').textContent='6';
+  selected=['A','O'];
+  drawEmbedding();
+  toast('Demo: jerarquía proyectada en geometría hiperbólica.');
+}
+function stopBallAnimation() {
+  if (ballTimer) {
+    clearInterval(ballTimer);
+    ballTimer=null;
+    if ($('ballAnimate')) { $('ballAnimate').textContent='Animar expansión'; $('ballAnimate').classList.remove('active'); }
+  }
+}
+function toggleBallAnimation() {
+  if (ballTimer) { stopBallAnimation(); toast('Expansión pausada.'); return; }
+  $('ballAnimate').textContent='Pausar expansión';
+  $('ballAnimate').classList.add('active');
+  toast('Expansión de bola métrica iniciada.');
+  ballTimer=setInterval(()=>{
+    const max=Number($('radiusRange').max || 5);
+    let r=Number($('radiusRange').value);
+    r = r >= max ? 0 : r + 1;
+    $('radiusRange').value=String(r);
+    if (r===0) ballCenterIndex++;
+    drawBall();
+  }, 900);
+}
+function ballExpandOnce() {
+  stopBallAnimation();
+  const max=Number($('radiusRange').max || 5);
+  $('radiusRange').value = String(Math.min(max, Number($('radiusRange').value)+1));
+  drawBall();
+}
+function ballResetRadius() {
+  stopBallAnimation();
+  $('radiusRange').value='0';
+  ballCenterIndex=0;
+  drawBall();
+  toast('Radio reiniciado.');
+}
+function gnnBurstSteps() {
+  let steps=0;
+  const timer=setInterval(()=>{
+    stepGNN();
+    steps++;
+    if (steps>=5) clearInterval(timer);
+  }, 220);
+  toast('Propagando 5 capas rápidamente.');
+}
+function randomizeGNNStates() {
+  if (gnnTimer) { clearInterval(gnnTimer); gnnTimer=null; $('gnnAuto').textContent='Auto'; }
+  gnnStates={};
+  gnnGraph.nodes.forEach(n => gnnStates[n.id]=clamp(Math.random(), .05, .98));
+  gnnLayer=0;
+  const vals=Object.values(gnnStates);
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  gnnBaseVariance=vals.reduce((a,b)=>a+(b-avg)**2,0)/vals.length;
+  drawGNN();
+  toast('Estados iniciales aleatorizados.');
+}
+function setStrongGNNMix() {
+  $('gnnMixRange').value='85';
+  $('gnnMixLabel').textContent='0.85';
+  stepGNN();
+  toast('Alta influencia vecinal: el suavizado se acelera.');
+}
+function rsgdBurstSteps() {
+  let steps=0;
+  const timer=setInterval(()=>{
+    stepRsgd();
+    steps++;
+    if (steps>=30) clearInterval(timer);
+  }, 45);
+  toast('Ejecutando 30 pasos de RSGD.');
+}
+function rsgdNewTarget() {
+  if (rsgd.timer) { clearInterval(rsgd.timer); rsgd.timer=null; $('rsgdAuto').textContent='Auto'; }
+  const angle=Math.random()*Math.PI*2, radius=.18+Math.random()*.62;
+  rsgd.target=[radius*Math.cos(angle), radius*Math.sin(angle)];
+  rsgd.path=[...rsgd.path.slice(-1)];
+  drawRsgd();
+  toast('Nuevo objetivo dentro del disco.');
+}
+function rsgdBoundaryDemo() {
+  if (rsgd.timer) { clearInterval(rsgd.timer); rsgd.timer=null; $('rsgdAuto').textContent='Auto'; }
+  rsgd.target=[.90,.10];
+  $('rsgdEta').value='18';
+  $('etaLabel').textContent='0.18';
+  drawRsgd();
+  toast('Demo: trayectoria hacia la frontera hiperbólica.');
+}
+function kgNextQuestion() {
+  const select=$('kgQuestion');
+  select.value = String((Number(select.value || 0)+1) % kgQuestions.length);
+  drawKG();
+}
+function stopKgAnimation() {
+  if (kgTimer) {
+    clearInterval(kgTimer);
+    kgTimer=null;
+    if ($('kgPlay')) { $('kgPlay').textContent='Animar recuperación RAG'; $('kgPlay').classList.remove('active'); }
+  }
+}
+function toggleKgAnimation() {
+  if (kgTimer) { stopKgAnimation(); toast('Animación RAG pausada.'); return; }
+  $('kgPlay').textContent='Pausar RAG';
+  $('kgPlay').classList.add('active');
+  toast('Animando recuperación por relaciones.');
+  kgTimer=setInterval(kgNextQuestion, 1200);
+}
+
+function setupControls() {
+  populateSelect($('graphSelect'), graphTypes);
+  populateSelect($('ballGraphSelect'), graphTypes);
+  populateSelect($('spaceSelect'), spaces);
+  $('graphSelect').value='tree';
+  $('ballGraphSelect').value='tree';
+  $('spaceSelect').value='hyperbolic';
+
+  $('graphSelect').onchange=()=>{ selected=[]; drawEmbedding(); };
+  $('spaceSelect').onchange=drawEmbedding;
+  $('jitterRange').oninput=()=>{ $('jitterLabel').textContent=$('jitterRange').value; drawEmbedding(); };
+  $('randomPick').onclick=()=> {
+    stopEmbeddingAnimation();
+    pickTwoRandomNodes();
+    drawEmbedding();
+  };
+  $('resetSelection').onclick=()=>{ selected=[]; stopEmbeddingAnimation(); drawEmbedding(); };
+  $('embeddingPlay').onclick=toggleEmbeddingAnimation;
+  $('graphShuffle').onclick=randomGraphAndSpace;
+  $('demoHierarchy').onclick=demoHierarchy;
+
+  $('ballGraphSelect').onchange=()=>{ ballCenterIndex=0; stopBallAnimation(); drawBall(); };
+  $('radiusRange').oninput=drawBall;
+  $('nextCenter').onclick=()=>{ stopBallAnimation(); ballCenterIndex++; drawBall(); };
+  $('ballAnimate').onclick=toggleBallAnimation;
+  $('ballExpand').onclick=ballExpandOnce;
+  $('ballReset').onclick=ballResetRadius;
+
+  $('gnnMixRange').oninput=()=>{ $('gnnMixLabel').textContent=(Number($('gnnMixRange').value)/100).toFixed(2); };
+  $('gnnStep').onclick=stepGNN;
+  $('gnnReset').onclick=()=>{ if(gnnTimer) clearInterval(gnnTimer); gnnTimer=null; $('gnnAuto').textContent='Auto'; initGNN(); };
+  $('gnnAuto').onclick=()=> {
+    if (gnnTimer) { clearInterval(gnnTimer); gnnTimer=null; $('gnnAuto').textContent='Auto'; }
+    else { gnnTimer=setInterval(stepGNN,850); $('gnnAuto').textContent='Pausar'; }
+  };
+  $('gnnBurst').onclick=gnnBurstSteps;
+  $('gnnRandomize').onclick=randomizeGNNStates;
+  $('gnnStrongMix').onclick=setStrongGNNMix;
+
+  $('rsgdEta').oninput=()=>{ $('etaLabel').textContent=(Number($('rsgdEta').value)/100).toFixed(2); };
+  $('rsgdStep').onclick=stepRsgd;
+  $('rsgdReset').onclick=()=> {
+    if (rsgd.timer) clearInterval(rsgd.timer);
+    rsgd={x:[-0.58,0.28], target:[0.58,-0.36], path:[[-0.58,0.28]], iter:0, timer:null};
+    $('rsgdAuto').textContent='Auto';
+    drawRsgd();
+  };
+  $('rsgdAuto').onclick=()=> {
+    if (rsgd.timer) { clearInterval(rsgd.timer); rsgd.timer=null; $('rsgdAuto').textContent='Auto'; }
+    else { rsgd.timer=setInterval(stepRsgd,650); $('rsgdAuto').textContent='Pausar'; }
+  };
+  $('rsgdBurst').onclick=rsgdBurstSteps;
+  $('rsgdNewTarget').onclick=rsgdNewTarget;
+  $('rsgdBoundaryDemo').onclick=rsgdBoundaryDemo;
+  $('kgNext').onclick=kgNextQuestion;
+  $('kgPlay').onclick=toggleKgAnimation;
+  window.addEventListener('resize', () => { drawRsgd(); });
+}
+
+setupNav();
+setupControls();
+setupConceptCards();
+setupMatrix();
+setupGlossary();
+initKG();
+initGNN();
+$('rsgdReset').click();
+drawAll();
+</script>
+</body>
+</html>

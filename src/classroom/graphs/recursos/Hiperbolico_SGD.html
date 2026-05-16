@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SGD Euclídeo — Simulador avanzado</title>
+  <style>
+    :root {
+      --bg: #06111f;
+      --bg2: #0b1730;
+      --panel: rgba(15, 23, 42, .90);
+      --panel2: rgba(30, 41, 59, .88);
+      --panel3: rgba(2, 6, 23, .46);
+      --text: #e5edf8;
+      --muted: #9fb2c7;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --danger: #fb7185;
+      --warn: #facc15;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --border: rgba(148, 163, 184, .22);
+      --shadow: 0 22px 70px rgba(0,0,0,.44);
+      --canvasBg: radial-gradient(circle at 50% 30%, #14223d 0%, #07111f 78%);
+      --point: #38bdf8;
+      --minimum: #facc15;
+      --path: rgba(34,197,94,.86);
+      --trueGrad: #fb7185;
+      --stochGrad: #fb923c;
+      --stepVec: #22c55e;
+      --noiseVec: #a78bfa;
+      --heatHueHigh: 26;
+      --heatHueLow: 215;
+      --gridAlpha: .16;
+    }
+
+    body.theme-light {
+      --bg: #eef5ff;
+      --bg2: #dbeafe;
+      --panel: rgba(255,255,255,.94);
+      --panel2: rgba(236,245,255,.96);
+      --panel3: rgba(255,255,255,.62);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0369a1;
+      --accent2: #15803d;
+      --danger: #be123c;
+      --warn: #ca8a04;
+      --purple: #7c3aed;
+      --orange: #c2410c;
+      --border: rgba(15, 23, 42, .13);
+      --shadow: 0 22px 70px rgba(15,23,42,.16);
+      --canvasBg: radial-gradient(circle at 50% 30%, #ffffff 0%, #dbeafe 78%);
+      --point: #0284c7;
+      --minimum: #ca8a04;
+      --path: rgba(22,163,74,.78);
+      --trueGrad: #be123c;
+      --stochGrad: #ea580c;
+      --stepVec: #15803d;
+      --noiseVec: #7c3aed;
+      --heatHueHigh: 18;
+      --heatHueLow: 205;
+      --gridAlpha: .18;
+    }
+
+    body.theme-neon {
+      --bg: #040711;
+      --bg2: #111827;
+      --panel: rgba(5, 8, 22, .92);
+      --panel2: rgba(17, 24, 39, .92);
+      --panel3: rgba(3, 7, 18, .70);
+      --text: #f8fafc;
+      --muted: #a5b4fc;
+      --accent: #22d3ee;
+      --accent2: #84cc16;
+      --danger: #ff3f81;
+      --warn: #fde047;
+      --purple: #c084fc;
+      --orange: #fb923c;
+      --border: rgba(34, 211, 238, .28);
+      --shadow: 0 24px 85px rgba(34,211,238,.12);
+      --canvasBg: radial-gradient(circle at 50% 24%, #131a3d 0%, #040711 78%);
+      --point: #22d3ee;
+      --minimum: #fde047;
+      --path: rgba(132,204,22,.88);
+      --trueGrad: #ff3f81;
+      --stochGrad: #fb923c;
+      --stepVec: #84cc16;
+      --noiseVec: #c084fc;
+      --heatHueHigh: 315;
+      --heatHueLow: 190;
+      --gridAlpha: .19;
+    }
+
+    body.theme-contrast {
+      --bg: #000000;
+      --bg2: #111111;
+      --panel: rgba(0,0,0,.94);
+      --panel2: rgba(18,18,18,.98);
+      --panel3: rgba(0,0,0,.72);
+      --text: #ffffff;
+      --muted: #d4d4d4;
+      --accent: #00e5ff;
+      --accent2: #00ff6a;
+      --danger: #ff3366;
+      --warn: #ffea00;
+      --purple: #b388ff;
+      --orange: #ff9d00;
+      --border: rgba(255,255,255,.24);
+      --shadow: 0 22px 70px rgba(0,0,0,.70);
+      --canvasBg: radial-gradient(circle at 50% 30%, #151515 0%, #000000 82%);
+      --point: #00e5ff;
+      --minimum: #ffea00;
+      --path: rgba(0,255,106,.88);
+      --trueGrad: #ff3366;
+      --stochGrad: #ff9d00;
+      --stepVec: #00ff6a;
+      --noiseVec: #b388ff;
+      --heatHueHigh: 55;
+      --heatHueLow: 240;
+      --gridAlpha: .22;
+    }
+
+    body.theme-paper {
+      --bg: #f4ecd8;
+      --bg2: #ede0c3;
+      --panel: rgba(255,248,230,.94);
+      --panel2: rgba(246,235,204,.96);
+      --panel3: rgba(255,248,230,.66);
+      --text: #2f2416;
+      --muted: #705f43;
+      --accent: #8b5e20;
+      --accent2: #4d7c0f;
+      --danger: #9f1239;
+      --warn: #b45309;
+      --purple: #7e22ce;
+      --orange: #c2410c;
+      --border: rgba(91, 63, 27, .20);
+      --shadow: 0 22px 70px rgba(88,64,32,.18);
+      --canvasBg: radial-gradient(circle at 50% 30%, #fff7dc 0%, #ead9b6 82%);
+      --point: #2563eb;
+      --minimum: #b45309;
+      --path: rgba(77,124,15,.78);
+      --trueGrad: #9f1239;
+      --stochGrad: #c2410c;
+      --stepVec: #4d7c0f;
+      --noiseVec: #7e22ce;
+      --heatHueHigh: 34;
+      --heatHueLow: 198;
+      --gridAlpha: .18;
+    }
+
+    body.theme-forest {
+      --bg: #07170f;
+      --bg2: #0f2a1c;
+      --panel: rgba(9, 31, 22, .91);
+      --panel2: rgba(15, 49, 36, .92);
+      --panel3: rgba(6, 24, 17, .62);
+      --text: #eafff2;
+      --muted: #add8bd;
+      --accent: #2dd4bf;
+      --accent2: #86efac;
+      --danger: #fb7185;
+      --warn: #fde68a;
+      --purple: #c4b5fd;
+      --orange: #fdba74;
+      --border: rgba(134, 239, 172, .22);
+      --shadow: 0 24px 78px rgba(0,0,0,.42);
+      --canvasBg: radial-gradient(circle at 50% 30%, #153527 0%, #07170f 78%);
+      --point: #2dd4bf;
+      --minimum: #fde68a;
+      --path: rgba(134,239,172,.84);
+      --trueGrad: #fb7185;
+      --stochGrad: #fdba74;
+      --stepVec: #86efac;
+      --noiseVec: #c4b5fd;
+      --heatHueHigh: 92;
+      --heatHueLow: 188;
+      --gridAlpha: .18;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 18%, transparent), transparent 32%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent2) 14%, transparent), transparent 34%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      transition: background .25s ease, color .25s ease;
+    }
+
+    .app {
+      width: min(1540px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero, .formula-card, .panel, .stage-shell {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -100px -155px auto;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+      pointer-events: none;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.65;
+      max-width: 980px;
+    }
+
+    .formula-card {
+      padding: 20px;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--panel2);
+      font-size: 12px;
+      font-weight: 850;
+      margin: 4px 5px 4px 0;
+    }
+
+    .formula {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 15px;
+      font-family: "Cambria Math", Georgia, serif;
+      font-size: 19px;
+      line-height: 1.45;
+      overflow-x: auto;
+    }
+
+    .formula b { color: var(--text); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 370px minmax(0, 1fr) 365px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 18px; }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+      letter-spacing: -.02em;
+    }
+
+    .panel h3 {
+      margin: 16px 0 9px;
+      font-size: 14px;
+      letter-spacing: .02em;
+      color: var(--text);
+    }
+
+    .control-group {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button, select {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel2);
+      color: var(--text);
+      font-weight: 780;
+      padding: 12px 13px;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease, filter .12s ease;
+      width: 100%;
+    }
+
+    button:hover, select:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+      filter: brightness(1.04);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #2563eb));
+      color: white;
+      border: none;
+    }
+
+    button.green {
+      background: linear-gradient(135deg, var(--accent2), color-mix(in srgb, var(--accent2) 55%, #16a34a));
+      color: #06111f;
+      border: none;
+    }
+
+    button.red {
+      background: linear-gradient(135deg, var(--danger), #e11d48);
+      color: white;
+      border: none;
+    }
+
+    button.orange {
+      background: linear-gradient(135deg, var(--orange), #f97316);
+      color: white;
+      border: none;
+    }
+
+    button.full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 14px 0 7px;
+      font-weight: 750;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .stage-shell {
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 760px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--canvasBg);
+    }
+
+    canvas#canvas {
+      width: 100%;
+      height: 760px;
+      display: block;
+    }
+
+    .hud {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .hud-card {
+      background: var(--panel3);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px 13px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hud-card strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .hud-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      min-height: 82px;
+    }
+
+    .metric small {
+      display: block;
+      color: var(--muted);
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .metric strong {
+      font-size: 22px;
+      letter-spacing: -.03em;
+    }
+
+    .explain {
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 14px;
+      margin: 0 0 10px;
+    }
+
+    .legend {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      display: inline-block;
+      background: var(--point);
+      flex: 0 0 auto;
+    }
+
+    .dot.min { background: var(--minimum); }
+    .dot.true { background: var(--trueGrad); }
+    .dot.stoch { background: var(--stochGrad); }
+    .dot.step { background: var(--stepVec); }
+    .dot.noise { background: var(--noiseVec); }
+    .dot.path { background: var(--path); }
+
+    .toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 740;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .check input { accent-color: var(--accent); }
+
+    .mini-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .row strong { color: var(--text); }
+
+    .step-box {
+      display: grid;
+      gap: 8px;
+    }
+
+    .step-line {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .step-line strong { color: var(--text); font-size: 12px; }
+
+    .chart-wrap {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 10px;
+    }
+
+    canvas#lossCanvas {
+      width: 100%;
+      height: 150px;
+      display: block;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      background: var(--panel2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .diag {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .diag-card {
+      border-radius: 16px;
+      padding: 11px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .diag-card b { color: var(--text); }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1220px) {
+      header, .grid { grid-template-columns: 1fr; }
+      .stage, canvas#canvas { min-height: 650px; height: 650px; }
+      .hud { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .app { width: min(100vw - 16px, 1540px); padding-top: 12px; }
+      .hero, .formula-card, .panel, .stage-shell { border-radius: 20px; }
+      .metrics, .toggles { grid-template-columns: 1fr; }
+      .btns { grid-template-columns: 1fr; }
+      button.full { grid-column: auto; }
+    }
+  </style>
+</head>
+<body class="theme-dark">
+  <div class="app">
+    <header>
+      <section class="hero">
+        <div class="kicker">Optimización euclídea · Aprendizaje estocástico · Simulación interactiva</div>
+        <h1>SGD clásico en espacio euclídeo</h1>
+        <p class="subtitle">
+          Esta simulación muestra cómo <b>Stochastic Gradient Descent</b> actualiza los parámetros de un modelo sobre una superficie de pérdida.
+          Se llama <b>estocástico</b> porque en cada iteración no calcula necesariamente el gradiente completo con todos los datos, sino una
+          <b>estimación aproximada</b> construida a partir de una muestra o mini-lote; por eso el recorrido puede verse irregular, aunque siga
+          buscando reducir la función de pérdida.
+        </p>
+      </section>
+
+      <section class="formula-card">
+        <div>
+          <span class="badge">Espacio de trabajo: ℝ²</span>
+          <span class="badge">Trayectoria ruidosa</span>
+          <span class="badge">Mini-batch configurable</span>
+        </div>
+        <div class="formula">
+          θ<sub>t+1</sub> = θ<sub>t</sub> − η ĝ<sub>t</sub>,
+          &nbsp; donde &nbsp; ĝ<sub>t</sub> = ∇L(θ<sub>t</sub>) + ε<sub>t</sub>
+        </div>
+        <div class="formula">
+          Var(ĝ<sub>t</sub>) ↓ cuando aumenta el tamaño del mini-batch:
+          &nbsp; ruido efectivo ≈ σ / √B
+        </div>
+      </section>
+    </header>
+
+    <main class="grid">
+      <aside class="panel">
+        <h2>Controles de simulación</h2>
+
+        <div class="btns">
+          <button id="toggleRun" class="primary">Iniciar</button>
+          <button id="stepBtn">Paso único</button>
+          <button id="autoBtn" class="green full">Acción automática: 100 pasos</button>
+          <button id="epochBtn" class="orange full">Simular época didáctica: 300 pasos</button>
+          <button id="resetBtn" class="red">Reiniciar</button>
+          <button id="randomBtn">Nuevo punto</button>
+        </div>
+
+        <div class="control-group">
+          <label for="themeSelect">Tema visual</label>
+          <select id="themeSelect">
+            <option value="theme-dark">Nocturno científico</option>
+            <option value="theme-light">Claro académico</option>
+            <option value="theme-neon">Neón tecnológico</option>
+            <option value="theme-contrast">Alto contraste</option>
+            <option value="theme-paper">Pergamino analítico</option>
+            <option value="theme-forest">Bosque de datos</option>
+          </select>
+
+          <label for="scenario">Función de pérdida</label>
+          <select id="scenario">
+            <option value="convex">Convexa simple</option>
+            <option value="ellipse">Elipse anisotrópica</option>
+            <option value="valley">Valle rotado y alargado</option>
+            <option value="rosenbrock">Rosenbrock suavizada</option>
+            <option value="nonconvex">No convexa con ondulaciones</option>
+            <option value="saddle">Silla regularizada</option>
+            <option value="himmelblau">Himmelblau suavizada</option>
+          </select>
+
+          <label for="optimizer">Modo de actualización</label>
+          <select id="optimizer">
+            <option value="sgd">SGD puro</option>
+            <option value="minibatch">Mini-batch SGD</option>
+            <option value="momentum">SGD + Momentum</option>
+            <option value="decay">SGD con decaimiento de η</option>
+          </select>
+
+          <label for="lr">Tasa de aprendizaje η</label>
+          <input id="lr" type="range" min="0.002" max="0.18" step="0.002" value="0.052"/>
+          <div class="value-row"><span>lenta</span><span id="lrVal">0.052</span><span>rápida</span></div>
+
+          <label for="speed">Velocidad</label>
+          <input id="speed" type="range" min="1" max="12" step="1" value="3"/>
+          <div class="value-row"><span>1x</span><span id="speedVal">3x</span><span>12x</span></div>
+
+          <label for="noise">Ruido base σ</label>
+          <input id="noise" type="range" min="0" max="0.42" step="0.01" value="0.14"/>
+          <div class="value-row"><span>determinista</span><span id="noiseVal">0.14</span><span>muy ruidoso</span></div>
+
+          <label for="batch">Tamaño de mini-batch B</label>
+          <input id="batch" type="range" min="1" max="64" step="1" value="8"/>
+          <div class="value-row"><span>1</span><span id="batchVal">8</span><span>64</span></div>
+
+          <label for="momentum">Momentum β</label>
+          <input id="momentum" type="range" min="0" max="0.96" step="0.01" value="0.78"/>
+          <div class="value-row"><span>0</span><span id="momentumVal">0.78</span><span>0.96</span></div>
+        </div>
+
+        <div class="control-group">
+          <h2>Capas visuales</h2>
+          <div class="toggles">
+            <label class="check"><input type="checkbox" id="showContours" checked> Contornos</label>
+            <label class="check"><input type="checkbox" id="showField" checked> Campo</label>
+            <label class="check"><input type="checkbox" id="showTrueGrad" checked> ∇L real</label>
+            <label class="check"><input type="checkbox" id="showStochGrad" checked> ĝ estocástico</label>
+            <label class="check"><input type="checkbox" id="showNoise" checked> Ruido ε</label>
+            <label class="check"><input type="checkbox" id="showSamples" checked> Mini-batch</label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2>Lectura visual</h2>
+          <div class="legend">
+            <div class="legend-item"><span class="dot"></span>Parámetros actuales θ</div>
+            <div class="legend-item"><span class="dot min"></span>Mínimo aproximado</div>
+            <div class="legend-item"><span class="dot true"></span>Gradiente real ∇L: dirección de subida</div>
+            <div class="legend-item"><span class="dot stoch"></span>Gradiente estocástico ĝ: dirección estimada</div>
+            <div class="legend-item"><span class="dot step"></span>Paso −ηĝ: movimiento que baja la pérdida</div>
+            <div class="legend-item"><span class="dot noise"></span>Ruido ε: diferencia entre muestra y gradiente real</div>
+            <div class="legend-item"><span class="dot path"></span>Trayectoria de aprendizaje</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="stage-shell">
+        <div class="stage">
+          <canvas id="canvas"></canvas>
+          <div class="hud">
+            <div class="hud-card">
+              <strong id="hudTitle">SGD como movimiento sobre una superficie de pérdida</strong>
+              <span id="hudText">El punto azul se mueve en sentido contrario al gradiente estocástico. Hacé clic sobre el mapa para elegir otro punto inicial.</span>
+            </div>
+            <div class="hud-card">
+              <strong id="hudFormula">θ ← θ − ηĝ</strong>
+              <span id="hudFormulaText">El gradiente real indica la pendiente de la función; SGD usa una estimación con ruido, por eso el camino no es perfectamente suave.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>Métricas</h2>
+        <div class="metrics">
+          <div class="metric">
+            <small>Iteración</small>
+            <strong id="iter">0</strong>
+          </div>
+          <div class="metric">
+            <small>Pérdida L(θ)</small>
+            <strong id="loss">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>|∇L real|</small>
+            <strong id="gradNorm">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>|ĝ estocástico|</small>
+            <strong id="stochNorm">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>|paso|</small>
+            <strong id="stepNorm">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>distancia al mínimo</small>
+            <strong id="distMin">0.000</strong>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2>Curva de pérdida</h2>
+          <div class="chart-wrap">
+            <canvas id="lossCanvas"></canvas>
+          </div>
+          <div class="diag">
+            <div class="diag-card" id="diagnostic"><b>Diagnóstico:</b> esperando primeros pasos.</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2>Un paso visto por dentro</h2>
+          <div class="step-box">
+            <div class="step-line"><strong>θ actual</strong><span id="thetaVal">(0.000, 0.000)</span></div>
+            <div class="step-line"><strong>∇L real</strong><span id="trueGradVal">(0.000, 0.000)</span></div>
+            <div class="step-line"><strong>ruido ε</strong><span id="noiseVecVal">(0.000, 0.000)</span></div>
+            <div class="step-line"><strong>ĝ usado</strong><span id="stochGradVal">(0.000, 0.000)</span></div>
+            <div class="step-line"><strong>−ηĝ</strong><span id="stepVecVal">(0.000, 0.000)</span></div>
+            <div class="step-line"><strong>θ siguiente</strong><span id="nextThetaVal">(0.000, 0.000)</span></div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2>Qué está pasando</h2>
+          <p class="explain" id="explain">
+            En SGD, el modelo no usa necesariamente todo el conjunto de datos para calcular el gradiente. Usa una muestra o mini-batch,
+            obtiene una dirección aproximada y actualiza los parámetros con una resta vectorial en un espacio euclídeo.
+          </p>
+          <div class="mini-table">
+            <div class="row"><strong>GD</strong><span>Usa el gradiente completo. Trayectoria más suave, pero más costosa con muchos datos.</span></div>
+            <div class="row"><strong>SGD</strong><span>Usa una estimación por muestra o mini-batch. Es más irregular, pero escala mejor.</span></div>
+            <div class="row"><strong>Mini-batch</strong><span>Reduce ruido promediando varias muestras: más estabilidad sin perder eficiencia.</span></div>
+            <div class="row"><strong>Momentum</strong><span>Acumula dirección histórica para suavizar oscilaciones en valles alargados.</span></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Material elaborado por el profesor Sergio Gevatschnaider</footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const lossCanvas = document.getElementById("lossCanvas");
+    const lctx = lossCanvas.getContext("2d");
+
+    const ui = {
+      toggleRun: document.getElementById("toggleRun"),
+      stepBtn: document.getElementById("stepBtn"),
+      autoBtn: document.getElementById("autoBtn"),
+      epochBtn: document.getElementById("epochBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      randomBtn: document.getElementById("randomBtn"),
+      themeSelect: document.getElementById("themeSelect"),
+      scenario: document.getElementById("scenario"),
+      optimizer: document.getElementById("optimizer"),
+      lr: document.getElementById("lr"),
+      speed: document.getElementById("speed"),
+      noise: document.getElementById("noise"),
+      batch: document.getElementById("batch"),
+      momentum: document.getElementById("momentum"),
+      lrVal: document.getElementById("lrVal"),
+      speedVal: document.getElementById("speedVal"),
+      noiseVal: document.getElementById("noiseVal"),
+      batchVal: document.getElementById("batchVal"),
+      momentumVal: document.getElementById("momentumVal"),
+      iter: document.getElementById("iter"),
+      loss: document.getElementById("loss"),
+      gradNorm: document.getElementById("gradNorm"),
+      stochNorm: document.getElementById("stochNorm"),
+      stepNorm: document.getElementById("stepNorm"),
+      distMin: document.getElementById("distMin"),
+      explain: document.getElementById("explain"),
+      diagnostic: document.getElementById("diagnostic"),
+      thetaVal: document.getElementById("thetaVal"),
+      trueGradVal: document.getElementById("trueGradVal"),
+      noiseVecVal: document.getElementById("noiseVecVal"),
+      stochGradVal: document.getElementById("stochGradVal"),
+      stepVecVal: document.getElementById("stepVecVal"),
+      nextThetaVal: document.getElementById("nextThetaVal"),
+      hudTitle: document.getElementById("hudTitle"),
+      hudText: document.getElementById("hudText"),
+      hudFormula: document.getElementById("hudFormula"),
+      hudFormulaText: document.getElementById("hudFormulaText"),
+      showContours: document.getElementById("showContours"),
+      showField: document.getElementById("showField"),
+      showTrueGrad: document.getElementById("showTrueGrad"),
+      showStochGrad: document.getElementById("showStochGrad"),
+      showNoise: document.getElementById("showNoise"),
+      showSamples: document.getElementById("showSamples")
+    };
+
+    let W = 900, H = 760, LW = 320, LH = 150;
+    let running = false;
+    let autoSteps = 0;
+    let iteration = 0;
+    let theta = {x: -3.35, y: 2.85};
+    let previousTheta = {...theta};
+    let nextThetaPreview = {...theta};
+    let velocity = {x: 0, y: 0};
+    let trajectory = [];
+    let lossHistory = [];
+    let lastLoss = 0;
+    let previousLoss = 0;
+    let trueGrad = {x: 0, y: 0};
+    let stochGrad = {x: 0, y: 0};
+    let noiseVec = {x: 0, y: 0};
+    let stepVec = {x: 0, y: 0};
+    let minPoint = {x: 0, y: 0};
+    let surfaceCache = null;
+    let miniBatchCloud = [];
+    const domain = {xmin: -4, xmax: 4, ymin: -4, ymax: 4};
+
+    function cssVar(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function setCanvasSize(c, context, logicalW, logicalH) {
+      const dpr = window.devicePixelRatio || 1;
+      c.width = Math.floor(logicalW * dpr);
+      c.height = Math.floor(logicalH * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      setCanvasSize(canvas, ctx, W, H);
+
+      const lrect = lossCanvas.getBoundingClientRect();
+      LW = lrect.width;
+      LH = lrect.height;
+      setCanvasSize(lossCanvas, lctx, LW, LH);
+
+      draw();
+      drawLossChart();
+    }
+
+    function toScreen(p) {
+      const pad = 62;
+      const x = pad + (p.x - domain.xmin) / (domain.xmax - domain.xmin) * (W - 2*pad);
+      const y = H - pad - (p.y - domain.ymin) / (domain.ymax - domain.ymin) * (H - 2*pad);
+      return {x, y};
+    }
+
+    function fromScreen(s) {
+      const pad = 62;
+      const x = domain.xmin + (s.x - pad) / (W - 2*pad) * (domain.xmax - domain.xmin);
+      const y = domain.ymin + (H - pad - s.y) / (H - 2*pad) * (domain.ymax - domain.ymin);
+      return {x, y};
+    }
+
+    function clampTheta(p) {
+      return {
+        x: Math.max(domain.xmin, Math.min(domain.xmax, p.x)),
+        y: Math.max(domain.ymin, Math.min(domain.ymax, p.y))
+      };
+    }
+
+    function fmt(v) {
+      const fixed = Math.abs(v) >= 10 ? 2 : 3;
+      return Number.isFinite(v) ? v.toFixed(fixed) : "—";
+    }
+
+    function fmtVec(v) {
+      return "(" + fmt(v.x) + ", " + fmt(v.y) + ")";
+    }
+
+    function randn() {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function rotate(p, angle) {
+      const c = Math.cos(angle), s = Math.sin(angle);
+      return {x: c*p.x - s*p.y, y: s*p.x + c*p.y};
+    }
+
+    function loss(p) {
+      const type = ui.scenario.value;
+
+      if (type === "convex") {
+        return 0.5 * ((p.x - 0.8)**2 + 1.25*(p.y + 0.7)**2);
+      }
+
+      if (type === "ellipse") {
+        const q = rotate({x: p.x - 0.7, y: p.y + 0.6}, -0.42);
+        return 0.18*q.x*q.x + 2.35*q.y*q.y;
+      }
+
+      if (type === "valley") {
+        const u = (p.x + p.y - 0.42) / Math.SQRT2;
+        const v = (p.x - p.y - 0.72) / Math.SQRT2;
+        return 0.07*u*u + 2.15*v*v;
+      }
+
+      if (type === "rosenbrock") {
+        const X = p.x / 2.25;
+        const Y = p.y / 2.25;
+        const a = 1 - X;
+        const b = Y - X*X;
+        return a*a + 12*b*b;
+      }
+
+      if (type === "nonconvex") {
+        return 0.30*((p.x - 0.55)**2 + (p.y + 0.25)**2) + 0.20*Math.sin(2.4*p.x)*Math.cos(2.1*p.y);
+      }
+
+      if (type === "saddle") {
+        const r2 = p.x*p.x + p.y*p.y;
+        return 0.25*(p.x*p.x - p.y*p.y) + 0.055*r2*r2 + 0.30*((p.x - 0.75)**2 + (p.y + 0.55)**2);
+      }
+
+      const a = p.x*p.x + p.y - 11;
+      const b = p.x + p.y*p.y - 7;
+      return (a*a + b*b) / 160;
+    }
+
+    function grad(p) {
+      const type = ui.scenario.value;
+
+      if (type === "convex") {
+        return {x: p.x - 0.8, y: 1.25*(p.y + 0.7)};
+      }
+
+      if (type === "ellipse") {
+        const angle = -0.42;
+        const q = rotate({x: p.x - 0.7, y: p.y + 0.6}, angle);
+        const gxq = 0.36*q.x;
+        const gyq = 4.70*q.y;
+        const c = Math.cos(angle), s = Math.sin(angle);
+        return {
+          x: c*gxq - s*gyq,
+          y: s*gxq + c*gyq
+        };
+      }
+
+      if (type === "valley") {
+        const u = (p.x + p.y - 0.42) / Math.SQRT2;
+        const v = (p.x - p.y - 0.72) / Math.SQRT2;
+        return {
+          x: (0.14*u + 4.30*v) / Math.SQRT2,
+          y: (0.14*u - 4.30*v) / Math.SQRT2
+        };
+      }
+
+      if (type === "rosenbrock") {
+        const X = p.x / 2.25;
+        const Y = p.y / 2.25;
+        const a = 1 - X;
+        const b = Y - X*X;
+        const dLdX = -2*a - 48*X*b;
+        const dLdY = 24*b;
+        return {x: dLdX/2.25, y: dLdY/2.25};
+      }
+
+      if (type === "nonconvex") {
+        return {
+          x: 0.60*(p.x - 0.55) + 0.48*Math.cos(2.4*p.x)*Math.cos(2.1*p.y),
+          y: 0.60*(p.y + 0.25) - 0.42*Math.sin(2.4*p.x)*Math.sin(2.1*p.y)
+        };
+      }
+
+      if (type === "saddle") {
+        const r2 = p.x*p.x + p.y*p.y;
+        return {
+          x: 0.50*p.x + 0.22*p.x*r2 + 0.60*(p.x - 0.75),
+          y: -0.50*p.y + 0.22*p.y*r2 + 0.60*(p.y + 0.55)
+        };
+      }
+
+      const a = p.x*p.x + p.y - 11;
+      const b = p.x + p.y*p.y - 7;
+      return {
+        x: (4*p.x*a + 2*b) / 160,
+        y: (2*a + 4*p.y*b) / 160
+      };
+    }
+
+    const scenarioInfo = {
+      convex: "Función convexa: sirve para ver el caso ideal. SGD se acerca al mínimo global, aunque el ruido hace que la trayectoria tiemble alrededor del descenso.",
+      ellipse: "Elipse anisotrópica: la curvatura no es igual en todas las direcciones. Permite observar por qué una tasa alta puede producir rebotes.",
+      valley: "Valle rotado y alargado: el algoritmo puede zigzaguear porque una dirección es muy inclinada y la otra casi plana.",
+      rosenbrock: "Rosenbrock suavizada: muestra un valle estrecho donde el avance puede ser lento y sensible a η.",
+      nonconvex: "Función no convexa: aparecen mínimos locales y ondulaciones. El ruido puede empeorar la estabilidad, pero también puede ayudar a explorar.",
+      saddle: "Silla regularizada: muestra zonas donde la pendiente cambia de signo según la dirección, algo frecuente en optimización de redes neuronales.",
+      himmelblau: "Himmelblau suavizada: tiene múltiples regiones atractoras. El punto inicial puede cambiar el mínimo hacia el que converge."
+    };
+
+    function invalidateSurface() {
+      surfaceCache = null;
+    }
+
+    function computeMinimumApprox() {
+      let best = {x: 0, y: 0};
+      let bestVal = Infinity;
+      const N = 125;
+      for (let i=0; i<=N; i++) {
+        for (let j=0; j<=N; j++) {
+          const p = {
+            x: domain.xmin + i/N*(domain.xmax-domain.xmin),
+            y: domain.ymin + j/N*(domain.ymax-domain.ymin)
+          };
+          const v = loss(p);
+          if (v < bestVal) {
+            bestVal = v;
+            best = p;
+          }
+        }
+      }
+      minPoint = best;
+    }
+
+    function chooseStart() {
+      const type = ui.scenario.value;
+      if (type === "convex") return {x: -3.30 + Math.random()*0.60, y: 2.85 - Math.random()*0.55};
+      if (type === "ellipse") return {x: -3.20 + Math.random()*0.65, y: 2.65 - Math.random()*0.65};
+      if (type === "valley") return {x: -3.30 + Math.random()*0.45, y: -2.85 + Math.random()*0.45};
+      if (type === "rosenbrock") return {x: -2.75 + Math.random()*0.45, y: 2.45 - Math.random()*0.45};
+      if (type === "saddle") return {x: -2.80 + Math.random()*0.75, y: 2.45 - Math.random()*0.55};
+      if (type === "himmelblau") return {x: -3.30 + Math.random()*1.20, y: 3.30 - Math.random()*1.10};
+      return {x: -3.20 + Math.random()*0.55, y: 2.75 - Math.random()*0.55};
+    }
+
+    function reset(keepStart=false) {
+      iteration = 0;
+      velocity = {x: 0, y: 0};
+      if (!keepStart) theta = chooseStart();
+      previousTheta = {...theta};
+      trueGrad = grad(theta);
+      stochGrad = {...trueGrad};
+      noiseVec = {x: 0, y: 0};
+      stepVec = {x: 0, y: 0};
+      nextThetaPreview = {...theta};
+      trajectory = [{...theta}];
+      lossHistory = [loss(theta)];
+      previousLoss = loss(theta);
+      lastLoss = previousLoss;
+      miniBatchCloud = [];
+      computeMinimumApprox();
+      updateExplanation();
+      updateMetrics();
+      draw();
+      drawLossChart();
+    }
+
+    function effectiveLR() {
+      const eta = parseFloat(ui.lr.value);
+      if (ui.optimizer.value === "decay") {
+        return eta / Math.sqrt(1 + iteration * 0.012);
+      }
+      return eta;
+    }
+
+    function currentBatchSize() {
+      if (ui.optimizer.value === "sgd") return 1;
+      return parseInt(ui.batch.value, 10);
+    }
+
+    function makeMiniBatchCloud(center, baseNoise, B) {
+      miniBatchCloud = [];
+      const count = Math.min(26, Math.max(6, Math.round(B / 2)));
+      for (let i=0; i<count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.10 + Math.random() * (0.22 + baseNoise * 0.75);
+        miniBatchCloud.push({
+          x: center.x + Math.cos(angle)*radius,
+          y: center.y + Math.sin(angle)*radius,
+          r: 2 + Math.random()*2.2,
+          a: 0.30 + Math.random()*0.45
+        });
+      }
+    }
+
+    function sgdStep() {
+      const eta = effectiveLR();
+      const sigma = parseFloat(ui.noise.value);
+      const B = currentBatchSize();
+      const beta = parseFloat(ui.momentum.value);
+
+      previousTheta = {...theta};
+      previousLoss = loss(theta);
+      trueGrad = grad(theta);
+
+      const effNoise = sigma / Math.sqrt(B);
+      const stochasticNoise = {
+        x: randn() * effNoise * 3.2,
+        y: randn() * effNoise * 3.2
+      };
+
+      noiseVec = stochasticNoise;
+      stochGrad = {
+        x: trueGrad.x + stochasticNoise.x,
+        y: trueGrad.y + stochasticNoise.y
+      };
+
+      if (ui.optimizer.value === "momentum") {
+        velocity = {
+          x: beta * velocity.x - eta * stochGrad.x,
+          y: beta * velocity.y - eta * stochGrad.y
+        };
+        stepVec = {...velocity};
+      } else {
+        velocity = {x: 0, y: 0};
+        stepVec = {
+          x: -eta * stochGrad.x,
+          y: -eta * stochGrad.y
+        };
+      }
+
+      nextThetaPreview = clampTheta({
+        x: theta.x + stepVec.x,
+        y: theta.y + stepVec.y
+      });
+
+      theta = {...nextThetaPreview};
+
+      makeMiniBatchCloud(previousTheta, sigma, B);
+
+      trajectory.push({...theta});
+      if (trajectory.length > 620) trajectory.shift();
+
+      lastLoss = loss(theta);
+      lossHistory.push(lastLoss);
+      if (lossHistory.length > 320) lossHistory.shift();
+
+      iteration++;
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      const g = grad(theta);
+      const d = Math.hypot(theta.x - minPoint.x, theta.y - minPoint.y);
+      const eta = effectiveLR();
+      const B = currentBatchSize();
+      const effNoise = parseFloat(ui.noise.value) / Math.sqrt(B);
+      const sNorm = Math.hypot(stochGrad.x, stochGrad.y);
+      const stepNorm = Math.hypot(stepVec.x, stepVec.y);
+
+      ui.iter.textContent = iteration;
+      ui.loss.textContent = fmt(loss(theta));
+      ui.gradNorm.textContent = fmt(Math.hypot(g.x, g.y));
+      ui.stochNorm.textContent = fmt(sNorm);
+      ui.stepNorm.textContent = fmt(stepNorm);
+      ui.distMin.textContent = fmt(d);
+
+      ui.lrVal.textContent = parseFloat(ui.lr.value).toFixed(3) + (ui.optimizer.value === "decay" ? " → " + eta.toFixed(3) : "");
+      ui.speedVal.textContent = ui.speed.value + "x";
+      ui.noiseVal.textContent = parseFloat(ui.noise.value).toFixed(2) + " | ef. " + effNoise.toFixed(3);
+      ui.batchVal.textContent = B;
+      ui.momentumVal.textContent = parseFloat(ui.momentum.value).toFixed(2);
+
+      ui.thetaVal.textContent = fmtVec(previousTheta);
+      ui.trueGradVal.textContent = fmtVec(trueGrad);
+      ui.noiseVecVal.textContent = fmtVec(noiseVec);
+      ui.stochGradVal.textContent = fmtVec(stochGrad);
+      ui.stepVecVal.textContent = fmtVec(stepVec);
+      ui.nextThetaVal.textContent = fmtVec(nextThetaPreview);
+
+      updateDiagnostic();
+    }
+
+    function updateDiagnostic() {
+      const gradN = Math.hypot(grad(theta).x, grad(theta).y);
+      const delta = lastLoss - previousLoss;
+      const B = currentBatchSize();
+      const eta = effectiveLR();
+
+      let message = "";
+      if (iteration === 0) {
+        message = "<b>Diagnóstico:</b> elegí paso único o iniciar para observar la actualización.";
+      } else if (delta > 0.08 && eta > 0.06) {
+        message = "<b>Diagnóstico:</b> la pérdida subió con fuerza. Puede haber tasa de aprendizaje alta, ruido elevado o rebote en una zona curva.";
+      } else if (delta > 0.005) {
+        message = "<b>Diagnóstico:</b> la pérdida subió levemente. En SGD esto puede ser normal porque el gradiente es una estimación ruidosa.";
+      } else if (gradN < 0.045 && B > 8) {
+        message = "<b>Diagnóstico:</b> zona cercana a equilibrio. Un mini-batch mayor reduce oscilaciones alrededor del mínimo.";
+      } else if (Math.abs(delta) < 0.003) {
+        message = "<b>Diagnóstico:</b> avance pequeño. Puede convenir revisar η, curvatura local o si el algoritmo está en valle plano.";
+      } else {
+        message = "<b>Diagnóstico:</b> descenso activo. El paso va en dirección contraria al gradiente estocástico.";
+      }
+      ui.diagnostic.innerHTML = message;
+    }
+
+    function updateExplanation() {
+      ui.explain.textContent = scenarioInfo[ui.scenario.value] || scenarioInfo.convex;
+
+      const opt = ui.optimizer.value;
+      if (opt === "sgd") {
+        ui.hudFormula.textContent = "SGD puro: θ ← θ − ηĝ";
+        ui.hudFormulaText.textContent = "B = 1. Cada paso depende de una estimación muy ruidosa del gradiente.";
+      } else if (opt === "minibatch") {
+        ui.hudFormula.textContent = "Mini-batch SGD: ruido ≈ σ / √B";
+        ui.hudFormulaText.textContent = "Al aumentar B, la dirección se parece más al gradiente completo y la trayectoria se suaviza.";
+      } else if (opt === "momentum") {
+        ui.hudFormula.textContent = "Momentum: v ← βv − ηĝ; θ ← θ + v";
+        ui.hudFormulaText.textContent = "La dirección histórica suaviza zigzags y puede acelerar el avance en valles alargados.";
+      } else {
+        ui.hudFormula.textContent = "Decaimiento: ηₜ = η / √(1 + kt)";
+        ui.hudFormulaText.textContent = "Al comienzo explora más; luego reduce el tamaño del paso para estabilizar la convergencia.";
+      }
+    }
+
+    function computeSurface() {
+      const cols = 92;
+      const rows = 92;
+      let minV = Infinity, maxV = -Infinity;
+      const vals = [];
+
+      for (let i=0; i<cols; i++) {
+        vals[i] = [];
+        for (let j=0; j<rows; j++) {
+          const p = {
+            x: domain.xmin + i/(cols-1)*(domain.xmax-domain.xmin),
+            y: domain.ymin + j/(rows-1)*(domain.ymax-domain.ymin)
+          };
+          const v = loss(p);
+          vals[i][j] = v;
+          minV = Math.min(minV, v);
+          maxV = Math.max(maxV, v);
+        }
+      }
+      surfaceCache = {cols, rows, vals, minV, maxV};
+      return surfaceCache;
+    }
+
+    function drawSurface() {
+      const s = surfaceCache || computeSurface();
+      const {cols, rows, vals, minV, maxV} = s;
+
+      const pad = 62;
+      const cellW = (W - 2*pad) / cols;
+      const cellH = (H - 2*pad) / rows;
+      const hueLow = parseFloat(cssVar("--heatHueLow"));
+      const hueHigh = parseFloat(cssVar("--heatHueHigh"));
+      const lightBase = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper") ? 90 : 17;
+      const lightAmp = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper") ? -34 : 34;
+
+      for (let i=0; i<cols; i++) {
+        for (let j=0; j<rows; j++) {
+          const denom = Math.max(1e-9, maxV - minV);
+          const a = Math.max(0, Math.min(1, (vals[i][j] - minV) / denom));
+          const hue = hueLow + (hueHigh - hueLow) * a;
+          const light = lightBase + lightAmp * a;
+          ctx.fillStyle = `hsla(${hue}, 78%, ${light}%, .90)`;
+          const x = pad + i*cellW;
+          const y = pad + (rows-1-j)*cellH;
+          ctx.fillRect(x, y, cellW+1, cellH+1);
+        }
+      }
+
+      if (ui.showContours.checked) drawContours(s);
+    }
+
+    function drawContours(surface) {
+      const {cols, rows, vals, minV, maxV} = surface;
+      const pad = 62;
+      const cellW = (W - 2*pad) / (cols-1);
+      const cellH = (H - 2*pad) / (rows-1);
+      const levels = 13;
+
+      ctx.save();
+      ctx.strokeStyle = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper")
+        ? "rgba(15,23,42,.18)"
+        : "rgba(255,255,255,.16)";
+      ctx.lineWidth = 1;
+
+      function interp(p1, p2, v1, v2, level) {
+        const t = (level - v1) / ((v2 - v1) || 1e-9);
+        return {
+          x: p1.x + (p2.x - p1.x)*t,
+          y: p1.y + (p2.y - p1.y)*t
+        };
+      }
+
+      for (let k=1; k<=levels; k++) {
+        const level = minV + (maxV-minV) * k/(levels+1);
+        ctx.beginPath();
+
+        for (let i=0; i<cols-1; i++) {
+          for (let j=0; j<rows-1; j++) {
+            const p00 = {x: pad + i*cellW, y: pad + (rows-1-j)*cellH};
+            const p10 = {x: pad + (i+1)*cellW, y: pad + (rows-1-j)*cellH};
+            const p11 = {x: pad + (i+1)*cellW, y: pad + (rows-2-j)*cellH};
+            const p01 = {x: pad + i*cellW, y: pad + (rows-2-j)*cellH};
+
+            const v00 = vals[i][j], v10 = vals[i+1][j], v11 = vals[i+1][j+1], v01 = vals[i][j+1];
+            const pts = [];
+
+            if ((v00-level)*(v10-level) < 0) pts.push(interp(p00, p10, v00, v10, level));
+            if ((v10-level)*(v11-level) < 0) pts.push(interp(p10, p11, v10, v11, level));
+            if ((v11-level)*(v01-level) < 0) pts.push(interp(p11, p01, v11, v01, level));
+            if ((v01-level)*(v00-level) < 0) pts.push(interp(p01, p00, v01, v00, level));
+
+            if (pts.length === 2) {
+              ctx.moveTo(pts[0].x, pts[0].y);
+              ctx.lineTo(pts[1].x, pts[1].y);
+            } else if (pts.length === 4) {
+              ctx.moveTo(pts[0].x, pts[0].y);
+              ctx.lineTo(pts[1].x, pts[1].y);
+              ctx.moveTo(pts[2].x, pts[2].y);
+              ctx.lineTo(pts[3].x, pts[3].y);
+            }
+          }
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      ctx.save();
+      const origin = toScreen({x: 0, y: 0});
+      ctx.strokeStyle = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper")
+        ? "rgba(15,23,42,.22)"
+        : "rgba(255,255,255,.18)";
+      ctx.lineWidth = 1.2;
+
+      ctx.beginPath();
+      ctx.moveTo(62, origin.y);
+      ctx.lineTo(W-62, origin.y);
+      ctx.moveTo(origin.x, 62);
+      ctx.lineTo(origin.x, H-62);
+      ctx.stroke();
+
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "800 12px Inter, sans-serif";
+      ctx.fillText("θ₁", W-48, origin.y-8);
+      ctx.fillText("θ₂", origin.x+8, 52);
+
+      ctx.globalAlpha = parseFloat(cssVar("--gridAlpha")) || .16;
+      ctx.lineWidth = 1;
+      for (let gx=-4; gx<=4; gx++) {
+        const a = toScreen({x: gx, y: -4});
+        const b = toScreen({x: gx, y: 4});
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      for (let gy=-4; gy<=4; gy++) {
+        const a = toScreen({x: -4, y: gy});
+        const b = toScreen({x: 4, y: gy});
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawArrow(start, end, color, width=2.2, dashed=false, label="") {
+      const a = toScreen(start);
+      const b = toScreen(end);
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 2) return;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      if (dashed) ctx.setLineDash([6, 6]);
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      const ang = Math.atan2(dy, dx);
+      const head = 11;
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(b.x - head*Math.cos(ang-.38), b.y - head*Math.sin(ang-.38));
+      ctx.lineTo(b.x - head*Math.cos(ang+.38), b.y - head*Math.sin(ang+.38));
+      ctx.closePath();
+      ctx.fill();
+
+      if (label) {
+        ctx.font = "850 12px Inter, sans-serif";
+        ctx.fillText(label, b.x + 8, b.y - 8);
+      }
+      ctx.restore();
+    }
+
+    function drawVectorField() {
+      if (!ui.showField.checked) return;
+      ctx.save();
+      const color = cssVar("--stepVec");
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = .38;
+      ctx.lineWidth = 1.2;
+
+      for (let x=-3.5; x<=3.51; x+=0.85) {
+        for (let y=-3.5; y<=3.51; y+=0.85) {
+          const g = grad({x, y});
+          const n = Math.hypot(g.x, g.y) || 1;
+          const len = 0.20;
+          const start = {x, y};
+          const end = {x: x - len*g.x/n, y: y - len*g.y/n};
+          const a = toScreen(start);
+          const b = toScreen(end);
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const ang = Math.atan2(dy, dx);
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(b.x, b.y);
+          ctx.lineTo(b.x - 5*Math.cos(ang-.4), b.y - 5*Math.sin(ang-.4));
+          ctx.lineTo(b.x - 5*Math.cos(ang+.4), b.y - 5*Math.sin(ang+.4));
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawTrajectory() {
+      if (trajectory.length < 2) return;
+      ctx.save();
+
+      ctx.beginPath();
+      const first = toScreen(trajectory[0]);
+      ctx.moveTo(first.x, first.y);
+      for (let i=1; i<trajectory.length; i++) {
+        const p = toScreen(trajectory[i]);
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = cssVar("--path");
+      ctx.lineWidth = 2.7;
+      ctx.shadowColor = cssVar("--path");
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      const skip = Math.max(1, Math.floor(trajectory.length / 28));
+      for (let i=0; i<trajectory.length; i+=skip) {
+        const p = toScreen(trajectory[i]);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.3, 0, Math.PI*2);
+        ctx.fillStyle = cssVar("--path");
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawMiniBatchCloud() {
+      if (!ui.showSamples.checked || miniBatchCloud.length === 0) return;
+      ctx.save();
+      ctx.fillStyle = cssVar("--stochGrad");
+      for (const s of miniBatchCloud) {
+        const p = toScreen(s);
+        ctx.globalAlpha = s.a;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = cssVar("--muted");
+      const anchor = toScreen(previousTheta);
+      ctx.font = "800 11px Inter, sans-serif";
+      ctx.fillText("mini-batch conceptual", anchor.x + 16, anchor.y + 25);
+      ctx.restore();
+    }
+
+    function drawVectors() {
+      const scale = 0.42;
+      const start = previousTheta;
+      const gradEnd = {x: start.x + trueGrad.x*scale, y: start.y + trueGrad.y*scale};
+      const stochEnd = {x: start.x + stochGrad.x*scale, y: start.y + stochGrad.y*scale};
+      const noiseStart = {x: start.x + trueGrad.x*scale, y: start.y + trueGrad.y*scale};
+      const noiseEnd = {x: start.x + stochGrad.x*scale, y: start.y + stochGrad.y*scale};
+      const stepEnd = {x: start.x + stepVec.x*5.0, y: start.y + stepVec.y*5.0};
+
+      if (ui.showTrueGrad.checked) {
+        drawArrow(start, gradEnd, cssVar("--trueGrad"), 2.1, false, "∇L");
+      }
+      if (ui.showStochGrad.checked) {
+        drawArrow(start, stochEnd, cssVar("--stochGrad"), 2.3, false, "ĝ");
+      }
+      if (ui.showNoise.checked) {
+        drawArrow(noiseStart, noiseEnd, cssVar("--noiseVec"), 2.0, true, "ε");
+      }
+      drawArrow(start, stepEnd, cssVar("--stepVec"), 3.0, false, "−ηĝ");
+    }
+
+    function drawPoints() {
+      const m = toScreen(minPoint);
+      ctx.save();
+      ctx.shadowColor = cssVar("--minimum");
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 10, 0, Math.PI*2);
+      ctx.fillStyle = cssVar("--minimum");
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = cssVar("--text");
+      ctx.font = "850 12px Inter, sans-serif";
+      ctx.fillText("mínimo aprox.", m.x + 13, m.y - 12);
+
+      if (trajectory.length > 1) {
+        const prev = toScreen(previousTheta);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(prev.x, prev.y, 7, 0, Math.PI*2);
+        ctx.strokeStyle = cssVar("--muted");
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const p = toScreen(theta);
+      ctx.save();
+      ctx.shadowColor = cssVar("--point");
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 11.5, 0, Math.PI*2);
+      ctx.fillStyle = cssVar("--point");
+      ctx.fill();
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 16, 0, Math.PI*2);
+      ctx.strokeStyle = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper")
+        ? "rgba(15,23,42,.36)"
+        : "rgba(255,255,255,.52)";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      ctx.fillStyle = cssVar("--text");
+      ctx.font = "850 12px Inter, sans-serif";
+      ctx.fillText("θ actual", p.x + 14, p.y - 14);
+    }
+
+    function drawInfo() {
+      ctx.save();
+      ctx.fillStyle = cssVar("--text");
+      ctx.font = "900 15px Inter, sans-serif";
+      ctx.fillText("SGD: gradiente estimado, ruido y paso de actualización en ℝ²", 24, 34);
+
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "700 13px Inter, sans-serif";
+      ctx.fillText("Rojo: ∇L sube la pérdida · Naranja: ĝ estimado · Verde: −ηĝ mueve los parámetros · Violeta: ruido de muestra", 24, 57);
+
+      const pillText = "η=" + effectiveLR().toFixed(3) + " · B=" + currentBatchSize() + " · σ=" + parseFloat(ui.noise.value).toFixed(2);
+      ctx.fillStyle = cssVar("--panel3");
+      ctx.strokeStyle = cssVar("--border");
+      roundRect(ctx, W - 240, 22, 214, 34, 17, true, true);
+      ctx.fillStyle = cssVar("--text");
+      ctx.font = "850 12px Inter, sans-serif";
+      ctx.fillText(pillText, W - 224, 44);
+
+      ctx.restore();
+    }
+
+    function roundRect(context, x, y, w, h, r, fill, stroke) {
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      context.beginPath();
+      context.moveTo(x+r, y);
+      context.arcTo(x+w, y, x+w, y+h, r);
+      context.arcTo(x+w, y+h, x, y+h, r);
+      context.arcTo(x, y+h, x, y, r);
+      context.arcTo(x, y, x+w, y, r);
+      context.closePath();
+      if (fill) context.fill();
+      if (stroke) context.stroke();
+    }
+
+    function drawLossChart() {
+      lctx.clearRect(0, 0, LW, LH);
+      lctx.save();
+
+      lctx.fillStyle = cssVar("--panel2");
+      lctx.fillRect(0, 0, LW, LH);
+
+      const padL = 34, padR = 14, padT = 14, padB = 28;
+      lctx.strokeStyle = document.body.classList.contains("theme-light") || document.body.classList.contains("theme-paper")
+        ? "rgba(15,23,42,.20)"
+        : "rgba(255,255,255,.18)";
+      lctx.lineWidth = 1;
+
+      for (let i=0; i<4; i++) {
+        const y = padT + i/3*(LH-padT-padB);
+        lctx.beginPath();
+        lctx.moveTo(padL, y);
+        lctx.lineTo(LW-padR, y);
+        lctx.stroke();
+      }
+
+      if (lossHistory.length > 1) {
+        const minL = Math.min(...lossHistory);
+        const maxL = Math.max(...lossHistory);
+        const denom = Math.max(1e-9, maxL - minL);
+        lctx.beginPath();
+        for (let i=0; i<lossHistory.length; i++) {
+          const x = padL + i/(lossHistory.length-1)*(LW-padL-padR);
+          const y = padT + (1 - (lossHistory[i]-minL)/denom)*(LH-padT-padB);
+          if (i === 0) lctx.moveTo(x, y);
+          else lctx.lineTo(x, y);
+        }
+        lctx.strokeStyle = cssVar("--accent");
+        lctx.lineWidth = 2.6;
+        lctx.shadowColor = cssVar("--accent");
+        lctx.shadowBlur = 8;
+        lctx.stroke();
+
+        lctx.shadowBlur = 0;
+        lctx.fillStyle = cssVar("--muted");
+        lctx.font = "800 11px Inter, sans-serif";
+        lctx.fillText("max " + fmt(maxL), 5, padT+4);
+        lctx.fillText("min " + fmt(minL), 5, LH-padB+3);
+      }
+
+      lctx.fillStyle = cssVar("--text");
+      lctx.font = "850 12px Inter, sans-serif";
+      lctx.fillText("L(θ) en tiempo real", padL, LH - 9);
+      lctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      drawSurface();
+      drawAxes();
+      drawVectorField();
+      drawTrajectory();
+      drawMiniBatchCloud();
+      drawVectors();
+      drawPoints();
+      drawInfo();
+      drawLossChart();
+    }
+
+    function animate() {
+      const speed = parseInt(ui.speed.value, 10);
+      if (running || autoSteps > 0) {
+        for (let i=0; i<speed; i++) {
+          sgdStep();
+          if (autoSteps > 0) autoSteps--;
+          if (autoSteps === 0 && !running) break;
+        }
+        draw();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    ui.toggleRun.addEventListener("click", () => {
+      running = !running;
+      ui.toggleRun.textContent = running ? "Pausar" : "Iniciar";
+    });
+
+    ui.stepBtn.addEventListener("click", () => {
+      sgdStep();
+      draw();
+    });
+
+    ui.autoBtn.addEventListener("click", () => {
+      autoSteps = 100;
+      running = false;
+      ui.toggleRun.textContent = "Iniciar";
+    });
+
+    ui.epochBtn.addEventListener("click", () => {
+      autoSteps = 300;
+      running = false;
+      ui.toggleRun.textContent = "Iniciar";
+    });
+
+    ui.resetBtn.addEventListener("click", () => reset(false));
+    ui.randomBtn.addEventListener("click", () => reset(false));
+
+    ui.themeSelect.addEventListener("change", () => {
+      document.body.className = ui.themeSelect.value;
+      draw();
+      drawLossChart();
+    });
+
+    ui.scenario.addEventListener("change", () => {
+      invalidateSurface();
+      reset(false);
+    });
+
+    ui.optimizer.addEventListener("change", () => {
+      velocity = {x: 0, y: 0};
+      updateExplanation();
+      updateMetrics();
+      draw();
+    });
+
+    [ui.lr, ui.speed, ui.noise, ui.batch, ui.momentum].forEach(el => {
+      el.addEventListener("input", () => {
+        updateMetrics();
+        draw();
+      });
+    });
+
+    [ui.showContours, ui.showField, ui.showTrueGrad, ui.showStochGrad, ui.showNoise, ui.showSamples].forEach(el => {
+      el.addEventListener("change", draw);
+    });
+
+    canvas.addEventListener("click", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      theta = clampTheta(fromScreen({
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      }));
+      reset(true);
+    });
+
+    window.addEventListener("resize", resize);
+
+    reset(false);
+    resize();
+    animate();
+  </script>
+</body>
+</html>

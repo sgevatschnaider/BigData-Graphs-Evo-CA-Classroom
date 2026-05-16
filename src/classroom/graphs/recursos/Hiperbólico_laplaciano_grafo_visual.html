@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laplaciano de un grafo | Teoría y visualización interactiva</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg2: #111827;
+      --card: rgba(17, 24, 39, 0.86);
+      --card2: rgba(15, 23, 42, 0.82);
+      --text: #e5e7eb;
+      --muted: #a7b0c4;
+      --line: rgba(148, 163, 184, 0.22);
+      --primary: #38bdf8;
+      --primary2: #22d3ee;
+      --accent: #a78bfa;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --node: #38bdf8;
+      --node2: #a78bfa;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+      --formula: rgba(56, 189, 248, 0.12);
+      --matrixHead: rgba(56, 189, 248, 0.16);
+      --matrixCell: rgba(255,255,255,0.04);
+      --button: rgba(56, 189, 248, 0.14);
+    }
+
+    body.light {
+      --bg: #f5f7fb;
+      --bg2: #eaf0f8;
+      --card: rgba(255,255,255,0.9);
+      --card2: rgba(255,255,255,0.96);
+      --text: #172033;
+      --muted: #526078;
+      --line: rgba(15, 23, 42, 0.12);
+      --primary: #0369a1;
+      --primary2: #0891b2;
+      --accent: #7c3aed;
+      --good: #047857;
+      --warn: #b45309;
+      --bad: #be123c;
+      --node: #0284c7;
+      --node2: #7c3aed;
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      --formula: rgba(2, 132, 199, 0.09);
+      --matrixHead: rgba(2, 132, 199, 0.10);
+      --matrixCell: rgba(15,23,42,0.035);
+      --button: rgba(2, 132, 199, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 35%),
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.16), transparent 30%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 32px 22px 18px;
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .hero-card, .panel, .mini-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-card { padding: 30px; position: relative; overflow: hidden; }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      right: -100px;
+      top: -120px;
+      background: radial-gradient(circle, rgba(56,189,248,0.22), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      color: var(--primary2);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2.05rem, 4vw, 4.35rem);
+      line-height: 0.98;
+      letter-spacing: -0.06em;
+    }
+
+    h2 { margin: 0 0 14px; font-size: 1.45rem; letter-spacing: -0.025em; }
+    h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    p { line-height: 1.65; color: var(--muted); margin: 0 0 12px; }
+
+    .hero-card p { max-width: 850px; font-size: 1.03rem; }
+
+    .formula {
+      display: inline-block;
+      background: var(--formula);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 1.05rem;
+      margin: 4px 2px;
+    }
+
+    .controls-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: space-between;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button, select, input[type="range"] {
+      font-family: inherit;
+    }
+
+    button, select {
+      border: 1px solid var(--line);
+      background: var(--button);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover, select:hover {
+      transform: translateY(-1px);
+      border-color: rgba(56, 189, 248, 0.52);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+    }
+
+    select { width: 100%; border-radius: 16px; }
+
+    main {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 0 22px 44px;
+    }
+
+    .nav-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 10px 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-pills a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card2);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-main { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr); gap: 18px; }
+
+    .panel { padding: 22px; margin-bottom: 18px; }
+    .mini-card { padding: 18px; }
+
+    .canvas-wrap {
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      min-height: 480px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #graphCanvas {
+      width: 100%;
+      height: 480px;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .dot.blue { background: var(--primary); }
+    .dot.purple { background: var(--accent); }
+    .dot.green { background: var(--good); }
+    .dot.red { background: var(--bad); }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 9px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+    }
+
+    th { background: var(--matrixHead); color: var(--text); }
+    td { background: var(--matrixCell); }
+    tr:last-child td { border-bottom: 0; }
+    th:last-child, td:last-child { border-right: 0; }
+
+    .matrix-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .small { font-size: 0.88rem; color: var(--muted); }
+    .value { color: var(--primary2); font-weight: 850; }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 54px;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--primary); }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+    .kpi {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .kpi .num { font-size: 1.45rem; font-weight: 900; color: var(--primary2); }
+    .kpi .label { font-size: 0.82rem; color: var(--muted); }
+
+    .theory-block {
+      border-left: 4px solid var(--primary);
+      padding: 12px 14px;
+      background: var(--card2);
+      border-radius: 0 18px 18px 0;
+      margin: 12px 0;
+    }
+
+    .list-clean {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      background: var(--formula);
+      color: var(--text);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 760;
+      margin: 3px 4px 3px 0;
+    }
+
+    .edge-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .edge-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: 0.91rem;
+    }
+
+    .bar-wrap {
+      height: 10px;
+      background: rgba(148, 163, 184, 0.18);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 7px;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 18px 0 6px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 960px) {
+      .hero, .grid-main, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: 1fr; }
+      #graphCanvas { height: 420px; }
+      .canvas-wrap { min-height: 420px; }
+      .nav-pills { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Grafos · Álgebra lineal · Machine Learning</div>
+        <h1>Laplaciano de un grafo</h1>
+        <p>
+          Una explicación visual e interactiva de la matriz <span class="formula">L = D - A</span>, con teoría completa,
+          matrices, ejemplos, señal sobre nodos, difusión, autovalores, conectividad algebraica y vector de Fiedler.
+        </p>
+        <div class="button-row" style="margin-top:18px;">
+          <a href="#simulador"><button class="primary">Ir al simulador</button></a>
+          <a href="#teoria"><button>Leer teoría</button></a>
+          <a href="#espectral"><button>Parte espectral</button></a>
+        </div>
+      </div>
+
+      <div class="controls-card hero-card">
+        <div>
+          <h2>Controles generales</h2>
+          <p>Elegí un grafo, modificá la señal sobre los nodos y observá cómo cambia la energía laplaciana.</p>
+        </div>
+        <label class="small" for="graphSelect">Grafo de ejemplo</label>
+        <select id="graphSelect">
+          <option value="path3">Camino P3: 1 - 2 - 3</option>
+          <option value="triangle">Triángulo K3</option>
+          <option value="star4">Estrella K1,3</option>
+          <option value="communities">Dos comunidades con cuello de botella</option>
+          <option value="cycle5">Ciclo C5</option>
+          <option value="disconnected">No conexo: dos componentes</option>
+        </select>
+        <div class="button-row">
+          <button id="themeBtn">Cambiar tema</button>
+          <button id="randomSignalBtn">Señal aleatoria</button>
+          <button id="resetSignalBtn">Reset señal</button>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <nav class="nav-pills">
+      <a href="#definicion">Definición</a>
+      <a href="#simulador">Simulador</a>
+      <a href="#matrices">Matrices</a>
+      <a href="#energia">Energía</a>
+      <a href="#difusion">Difusión</a>
+      <a href="#espectral">Espectral</a>
+      <a href="#normalizado">Normalizado</a>
+      <a href="#aplicaciones">Aplicaciones</a>
+    </nav>
+
+    <section id="definicion" class="panel">
+      <h2>1. Definición central</h2>
+      <p>
+        El laplaciano de un grafo transforma una estructura de conexiones en una matriz. Para un grafo no ponderado,
+        no dirigido y sin lazos, la definición principal es:
+      </p>
+      <div class="theory-block">
+        <span class="formula">L = D - A</span>
+        <p style="margin-top:10px;">
+          <strong>D</strong> es la matriz diagonal de grados y <strong>A</strong> es la matriz de adyacencia. En la diagonal de
+          <strong>L</strong> aparece el grado de cada nodo; fuera de la diagonal aparece <strong>-1</strong> cuando dos nodos están conectados
+          y <strong>0</strong> cuando no lo están.
+        </p>
+      </div>
+      <div class="grid-3">
+        <div class="mini-card">
+          <h3>Matriz de adyacencia</h3>
+          <p><span class="formula">Aᵢⱼ = 1</span> si existe arista entre i y j; de lo contrario <span class="formula">Aᵢⱼ = 0</span>.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Matriz de grados</h3>
+          <p><span class="formula">Dᵢᵢ = dᵢ</span>, donde <span class="formula">dᵢ</span> es la cantidad de vecinos del nodo i.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Laplaciano</h3>
+          <p><span class="formula">Lᵢᵢ = dᵢ</span>, <span class="formula">Lᵢⱼ = -1</span> si hay arista, y <span class="formula">0</span> si no hay arista.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulador" class="grid-main">
+      <div class="panel">
+        <div class="matrix-title">
+          <div>
+            <h2>2. Visualización del grafo</h2>
+            <div class="small" id="graphDescription">Descripción del grafo seleccionado.</div>
+          </div>
+          <span class="tag" id="connectivityTag">Conexo</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="graphCanvas" width="900" height="520"></canvas>
+        </div>
+        <div class="legend">
+          <span><span class="dot blue"></span>Valor bajo/medio de la señal</span>
+          <span><span class="dot purple"></span>Valor alto de la señal</span>
+          <span><span class="dot green"></span>Cluster positivo de Fiedler</span>
+          <span><span class="dot red"></span>Cluster negativo de Fiedler</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>3. Señal sobre nodos</h2>
+        <p>
+          Pensá que cada nodo tiene un valor: temperatura, opinión, probabilidad, activación, precio, embedding o feature.
+          El laplaciano mide cuánto cambia esa señal entre nodos vecinos.
+        </p>
+        <div id="sliders"></div>
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="num" id="energyValue">0</div>
+            <div class="label">Energía xᵀLx</div>
+          </div>
+          <div class="kpi">
+            <div class="num" id="lambda2Value">0</div>
+            <div class="label">λ₂ conectividad algebraica</div>
+          </div>
+          <div class="kpi">
+            <div class="num" id="componentsValue">1</div>
+            <div class="label">Componentes conexas</div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="toggleFiedlerBtn">Mostrar clusters de Fiedler</button>
+          <button id="showSignalBtn">Mostrar señal</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="matrices" class="panel">
+      <h2>4. Matrices A, D y L</h2>
+      <p>
+        En el caso no ponderado y no dirigido, la matriz de adyacencia es simétrica. Como <span class="formula">L = D - A</span>,
+        el laplaciano también es simétrico.
+      </p>
+      <div class="grid-3">
+        <div>
+          <div class="matrix-title"><h3>A: adyacencia</h3><span class="small">Conexiones</span></div>
+          <div id="matrixA"></div>
+        </div>
+        <div>
+          <div class="matrix-title"><h3>D: grados</h3><span class="small">Diagonal</span></div>
+          <div id="matrixD"></div>
+        </div>
+        <div>
+          <div class="matrix-title"><h3>L = D - A</h3><span class="small">Laplaciano</span></div>
+          <div id="matrixL"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="energia" class="grid-2">
+      <div class="panel">
+        <h2>5. Forma cuadrática</h2>
+        <p>
+          La expresión más importante para entender el laplaciano es:
+        </p>
+        <div class="theory-block">
+          <span class="formula">xᵀLx = Σ₍ᵢ,ⱼ₎∈E (xᵢ - xⱼ)²</span>
+          <p style="margin-top:10px;">
+            Si nodos conectados tienen valores parecidos, la energía es baja. Si nodos vecinos tienen valores muy distintos,
+            la energía crece. Por eso el laplaciano mide rugosidad o falta de suavidad de una señal sobre el grafo.
+          </p>
+        </div>
+        <div id="edgeContributions" class="edge-list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>6. Propiedades del caso no ponderado, no dirigido y conexo</h2>
+        <ul class="list-clean">
+          <li><strong>Simetría:</strong> como el grafo es no dirigido, <span class="formula">A = Aᵀ</span> y <span class="formula">L = Lᵀ</span>.</li>
+          <li><strong>Filas que suman cero:</strong> cada fila de L suma cero, por lo tanto <span class="formula">L1 = 0</span>.</li>
+          <li><strong>Autovalor cero:</strong> el vector constante siempre es autovector asociado a <span class="formula">λ₁ = 0</span>.</li>
+          <li><strong>Conectividad:</strong> si el grafo es conexo, el cero aparece una sola vez.</li>
+          <li><strong>Semidefinido positivo:</strong> todos los autovalores son no negativos porque <span class="formula">xᵀLx ≥ 0</span>.</li>
+          <li><strong>λ₂:</strong> si el grafo es conexo, <span class="formula">λ₂ &gt; 0</span>. Si no es conexo, <span class="formula">λ₂ = 0</span>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="difusion" class="panel">
+      <div class="matrix-title">
+        <div>
+          <h2>7. Laplaciano como operador de difusión</h2>
+          <p>
+            La ecuación <span class="formula">dx/dt = -Lx</span> suaviza la señal. En un grafo conexo, los nodos tienden al consenso.
+          </p>
+        </div>
+        <div class="button-row">
+          <button id="playBtn" class="primary">Iniciar difusión</button>
+          <button id="stepBtn">Paso</button>
+          <button id="stopBtn">Detener</button>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="mini-card">
+          <h3>Idea</h3>
+          <p>Un nodo con valor alto rodeado de nodos bajos tiende a bajar; un nodo bajo rodeado de nodos altos tiende a subir.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Consenso</h3>
+          <p>Si el grafo es conexo, la señal converge hacia un valor común: el promedio inicial.</p>
+        </div>
+        <div class="mini-card">
+          <h3>No conexo</h3>
+          <p>Si el grafo no es conexo, cada componente alcanza su propio consenso interno.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="espectral" class="panel">
+      <h2>8. Lectura espectral: autovalores y vector de Fiedler</h2>
+      <p>
+        El espectro del laplaciano permite estudiar conectividad usando álgebra lineal. El número de autovalores iguales a cero
+        coincide con el número de componentes conexas. El segundo autovalor, <span class="formula">λ₂</span>, se llama conectividad algebraica.
+      </p>
+      <div class="grid-2">
+        <div>
+          <h3>Autovalores aproximados</h3>
+          <div id="eigenBars"></div>
+        </div>
+        <div>
+          <h3>Vector de Fiedler</h3>
+          <p>
+            El vector asociado a <span class="formula">λ₂</span> suele separar el grafo en dos regiones: valores positivos de un lado,
+            valores negativos del otro. En redes con comunidades, permite detectar cortes naturales.
+          </p>
+          <div id="fiedlerTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="normalizado" class="panel">
+      <h2>9. Laplaciano normalizado</h2>
+      <p>
+        El laplaciano combinatorio es <span class="formula">L = D - A</span>. Cuando hay nodos con grados muy diferentes,
+        puede convenir usar versiones normalizadas, especialmente en redes sociales, grafos de conocimiento y clustering espectral.
+      </p>
+      <div class="grid-2">
+        <div class="mini-card">
+          <h3>Laplaciano simétrico normalizado</h3>
+          <p><span class="formula">Lₛᵧₘ = I - D⁻¹ᐟ² A D⁻¹ᐟ²</span></p>
+          <p>Reduce el efecto dominante de nodos con grado muy alto.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Laplaciano random-walk</h3>
+          <p><span class="formula">Lᵣ𝓌 = I - D⁻¹A</span></p>
+          <p>Se relaciona con caminatas aleatorias sobre grafos y procesos de difusión probabilística.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="aplicaciones" class="panel">
+      <h2>10. Aplicaciones</h2>
+      <div class="grid-3">
+        <div class="mini-card">
+          <h3>Clustering espectral</h3>
+          <p>Usa autovectores del laplaciano para encontrar comunidades o cortes naturales en redes complejas.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Difusión y consenso</h3>
+          <p>Modela propagación de información, temperatura, opiniones, contagio o sincronización.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Machine Learning sobre grafos</h3>
+          <p>Permite regularizar señales, suavizar embeddings y construir filtros en Graph Neural Networks.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Embeddings</h3>
+          <p>La penalización <span class="formula">xᵀLx</span> favorece que nodos conectados queden cerca en el espacio de representación.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Redes sociales</h3>
+          <p>Ayuda a detectar comunidades, influencers estructurales, puentes y cuellos de botella.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Grafos de conocimiento</h3>
+          <p>Sirve para estudiar relaciones semánticas, taxonomías y propagación de información entre entidades.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">Material elaborado por el profesor Sergio Gevatschnaider · Laplaciano de grafos · HTML + JavaScript interactivo</div>
+  </main>
+
+  <script>
+    const graphs = {
+      path3: {
+        name: "Camino P3",
+        desc: "Tres nodos en línea: 1 - 2 - 3. Es el ejemplo mínimo para ver cómo L penaliza diferencias entre vecinos.",
+        nodes: [
+          {id:1, x:0.18, y:0.50}, {id:2, x:0.50, y:0.50}, {id:3, x:0.82, y:0.50}
+        ],
+        edges: [[1,2], [2,3]],
+        signal: [1,2,4]
+      },
+      triangle: {
+        name: "Triángulo K3",
+        desc: "Todos los nodos están conectados con todos. Cada nodo tiene grado 2.",
+        nodes: [
+          {id:1, x:0.50, y:0.18}, {id:2, x:0.20, y:0.76}, {id:3, x:0.80, y:0.76}
+        ],
+        edges: [[1,2], [2,3], [1,3]],
+        signal: [1,3,5]
+      },
+      star4: {
+        name: "Estrella K1,3",
+        desc: "Un nodo central conectado a tres nodos periféricos. Sirve para ver cómo el grado aparece en la diagonal.",
+        nodes: [
+          {id:1, x:0.50, y:0.50}, {id:2, x:0.20, y:0.25}, {id:3, x:0.80, y:0.25}, {id:4, x:0.50, y:0.82}
+        ],
+        edges: [[1,2], [1,3], [1,4]],
+        signal: [4,1,2,5]
+      },
+      communities: {
+        name: "Dos comunidades con cuello de botella",
+        desc: "Dos grupos densos unidos por pocas aristas. Es ideal para observar λ₂ pequeño y vector de Fiedler.",
+        nodes: [
+          {id:1, x:0.18, y:0.32}, {id:2, x:0.30, y:0.20}, {id:3, x:0.34, y:0.46},
+          {id:4, x:0.66, y:0.46}, {id:5, x:0.70, y:0.20}, {id:6, x:0.82, y:0.32}
+        ],
+        edges: [[1,2],[1,3],[2,3],[4,5],[4,6],[5,6],[3,4]],
+        signal: [1,1.4,1.1,4.8,5.2,4.9]
+      },
+      cycle5: {
+        name: "Ciclo C5",
+        desc: "Cinco nodos formando un ciclo. Todos tienen grado 2 y no hay extremos.",
+        nodes: Array.from({length:5}, (_,i) => ({
+          id:i+1,
+          x:0.5 + 0.32*Math.cos(-Math.PI/2 + 2*Math.PI*i/5),
+          y:0.5 + 0.32*Math.sin(-Math.PI/2 + 2*Math.PI*i/5)
+        })),
+        edges: [[1,2],[2,3],[3,4],[4,5],[5,1]],
+        signal: [1,4,2,5,3]
+      },
+      disconnected: {
+        name: "No conexo: dos componentes",
+        desc: "Dos componentes separadas. El autovalor cero aparece dos veces y no hay consenso global.",
+        nodes: [
+          {id:1, x:0.20, y:0.34}, {id:2, x:0.34, y:0.58}, {id:3, x:0.18, y:0.76},
+          {id:4, x:0.70, y:0.34}, {id:5, x:0.84, y:0.58}, {id:6, x:0.68, y:0.76}
+        ],
+        edges: [[1,2],[2,3],[4,5],[5,6]],
+        signal: [1,5,2,8,4,7]
+      }
+    };
+
+    let currentKey = "path3";
+    let currentGraph = graphs[currentKey];
+    let signal = [...currentGraph.signal];
+    let diffusionTimer = null;
+    let viewMode = "signal";
+
+    const $ = id => document.getElementById(id);
+    const canvas = $("graphCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function adjacencyMatrix(g) {
+      const n = g.nodes.length;
+      const A = Array.from({length:n}, () => Array(n).fill(0));
+      g.edges.forEach(([u,v]) => {
+        A[u-1][v-1] = 1;
+        A[v-1][u-1] = 1;
+      });
+      return A;
+    }
+
+    function degreeMatrix(A) {
+      const n = A.length;
+      const D = Array.from({length:n}, () => Array(n).fill(0));
+      for (let i=0; i<n; i++) D[i][i] = A[i].reduce((a,b) => a+b, 0);
+      return D;
+    }
+
+    function laplacianMatrix(A, D) {
+      const n = A.length;
+      return Array.from({length:n}, (_,i) => Array.from({length:n}, (_,j) => D[i][j] - A[i][j]));
+    }
+
+    function matVec(M, x) {
+      return M.map(row => row.reduce((acc, val, j) => acc + val*x[j], 0));
+    }
+
+    function dot(a,b) {
+      return a.reduce((acc, val, i) => acc + val*b[i], 0);
+    }
+
+    function energy(g, x) {
+      let total = 0;
+      for (const [u,v] of g.edges) total += Math.pow(x[u-1] - x[v-1], 2);
+      return total;
+    }
+
+    function connectedComponents(g) {
+      const n = g.nodes.length;
+      const adj = Array.from({length:n}, () => []);
+      g.edges.forEach(([u,v]) => { adj[u-1].push(v-1); adj[v-1].push(u-1); });
+      const seen = Array(n).fill(false);
+      let comps = [];
+      for (let i=0; i<n; i++) {
+        if (!seen[i]) {
+          const stack = [i], comp = [];
+          seen[i] = true;
+          while (stack.length) {
+            const u = stack.pop();
+            comp.push(u);
+            for (const v of adj[u]) if (!seen[v]) { seen[v] = true; stack.push(v); }
+          }
+          comps.push(comp);
+        }
+      }
+      return comps;
+    }
+
+    // Jacobi eigenvalue algorithm for small real symmetric matrices.
+    function jacobiEigen(Ain, maxIter=120, eps=1e-10) {
+      const n = Ain.length;
+      let A = Ain.map(r => r.slice());
+      let V = Array.from({length:n}, (_,i) => Array.from({length:n}, (_,j) => i===j ? 1 : 0));
+
+      for (let iter=0; iter<maxIter; iter++) {
+        let p = 0, q = 1, max = Math.abs(A[0][1] || 0);
+        for (let i=0; i<n; i++) {
+          for (let j=i+1; j<n; j++) {
+            const val = Math.abs(A[i][j]);
+            if (val > max) { max = val; p = i; q = j; }
+          }
+        }
+        if (max < eps) break;
+        const theta = (A[q][q] - A[p][p]) / (2 * A[p][q]);
+        const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta*theta + 1));
+        const c = 1 / Math.sqrt(t*t + 1);
+        const s = t * c;
+        const app = A[p][p], aqq = A[q][q], apq = A[p][q];
+        A[p][p] = c*c*app - 2*s*c*apq + s*s*aqq;
+        A[q][q] = s*s*app + 2*s*c*apq + c*c*aqq;
+        A[p][q] = A[q][p] = 0;
+        for (let k=0; k<n; k++) {
+          if (k !== p && k !== q) {
+            const akp = A[k][p], akq = A[k][q];
+            A[k][p] = A[p][k] = c*akp - s*akq;
+            A[k][q] = A[q][k] = s*akp + c*akq;
+          }
+        }
+        for (let k=0; k<n; k++) {
+          const vkp = V[k][p], vkq = V[k][q];
+          V[k][p] = c*vkp - s*vkq;
+          V[k][q] = s*vkp + c*vkq;
+        }
+      }
+      const vals = A.map((row,i) => row[i]);
+      const pairs = vals.map((val, idx) => ({
+        value: Math.abs(val) < 1e-8 ? 0 : val,
+        vector: V.map(row => row[idx])
+      })).sort((a,b) => a.value - b.value);
+      return pairs;
+    }
+
+    function matrixHTML(M) {
+      let html = "<table><tbody>";
+      for (let i=0; i<M.length; i++) {
+        html += "<tr>";
+        for (let j=0; j<M.length; j++) {
+          const val = Math.abs(M[i][j]) < 1e-9 ? 0 : M[i][j];
+          html += `<td>${Number.isInteger(val) ? val : val.toFixed(2)}</td>`;
+        }
+        html += "</tr>";
+      }
+      html += "</tbody></table>";
+      return html;
+    }
+
+    function colorForValue(v, min, max) {
+      const denom = Math.max(max - min, 1e-9);
+      const t = Math.max(0, Math.min(1, (v - min) / denom));
+      const r = Math.round(56 + t*(167-56));
+      const g = Math.round(189 + t*(139-189));
+      const b = Math.round(248 + t*(250-248));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    function resizeCanvasToDisplaySize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.floor(rect.width * dpr);
+      const h = Math.floor(rect.height * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return {w: rect.width, h: rect.height};
+    }
+
+    function drawGraph() {
+      const {w,h} = resizeCanvasToDisplaySize();
+      ctx.clearRect(0, 0, w, h);
+      const g = currentGraph;
+      const A = adjacencyMatrix(g);
+      const D = degreeMatrix(A);
+      const L = laplacianMatrix(A,D);
+      const eig = jacobiEigen(L);
+      const fiedler = eig[1] ? eig[1].vector : eig[0].vector;
+      const minX = Math.min(...signal), maxX = Math.max(...signal);
+
+      // background grid
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--muted');
+      for (let x=30; x<w; x+=46) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y=30; y<h; y+=46) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      ctx.restore();
+
+      // edges
+      ctx.lineCap = "round";
+      g.edges.forEach(([u,v]) => {
+        const a = g.nodes[u-1], b = g.nodes[v-1];
+        const x1 = a.x*w, y1 = a.y*h, x2 = b.x*w, y2 = b.y*h;
+        const diff = Math.abs(signal[u-1] - signal[v-1]);
+        ctx.lineWidth = 3 + Math.min(7, diff * 1.4);
+        ctx.strokeStyle = `rgba(148, 163, 184, ${0.32 + Math.min(0.48, diff/8)})`;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        const mx = (x1+x2)/2, my = (y1+y2)/2;
+        ctx.font = "700 13px Inter, sans-serif";
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--muted');
+        ctx.fillText(`Δ²=${(diff*diff).toFixed(1)}`, mx+6, my-6);
+      });
+
+      // nodes
+      g.nodes.forEach((node, idx) => {
+        const x = node.x*w, y = node.y*h;
+        let fill;
+        if (viewMode === "fiedler") {
+          fill = fiedler[idx] >= 0 ? getComputedStyle(document.body).getPropertyValue('--good') : getComputedStyle(document.body).getPropertyValue('--bad');
+        } else {
+          fill = colorForValue(signal[idx], minX, maxX);
+        }
+        ctx.save();
+        ctx.shadowColor = fill;
+        ctx.shadowBlur = 22;
+        ctx.beginPath();
+        ctx.arc(x, y, 28, 0, Math.PI*2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.restore();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255,255,255,0.78)";
+        ctx.stroke();
+
+        ctx.fillStyle = "white";
+        ctx.font = "900 17px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.id, x, y - 4);
+        ctx.font = "800 11px Inter, sans-serif";
+        ctx.fillText(viewMode === "fiedler" ? fiedler[idx].toFixed(2) : signal[idx].toFixed(1), x, y + 13);
+      });
+    }
+
+    function renderSliders() {
+      const container = $("sliders");
+      container.innerHTML = "";
+      currentGraph.nodes.forEach((node, i) => {
+        const row = document.createElement("div");
+        row.className = "slider-row";
+        row.innerHTML = `
+          <label class="small">Nodo ${node.id}</label>
+          <input type="range" min="-5" max="10" step="0.1" value="${signal[i]}" data-idx="${i}">
+          <span class="value" id="sigVal${i}">${signal[i].toFixed(1)}</span>
+        `;
+        container.appendChild(row);
+      });
+      container.querySelectorAll("input[type=range]").forEach(inp => {
+        inp.addEventListener("input", e => {
+          const idx = Number(e.target.dataset.idx);
+          signal[idx] = Number(e.target.value);
+          $("sigVal"+idx).textContent = signal[idx].toFixed(1);
+          updateAll(false);
+        });
+      });
+    }
+
+    function renderEdgeContributions() {
+      const el = $("edgeContributions");
+      const contributions = currentGraph.edges.map(([u,v]) => {
+        const diff = signal[u-1] - signal[v-1];
+        return {u,v,val: diff*diff};
+      });
+      const max = Math.max(...contributions.map(c => c.val), 1);
+      el.innerHTML = contributions.map(c => `
+        <div class="edge-item">
+          <div>Arista (${c.u}, ${c.v}) · (x${c.u} - x${c.v})²</div>
+          <div><strong>${c.val.toFixed(3)}</strong></div>
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:${100*c.val/max}%"></div></div>
+      `).join("");
+    }
+
+    function renderEigen(L) {
+      const eig = jacobiEigen(L);
+      const max = Math.max(...eig.map(e => e.value), 1);
+      $("eigenBars").innerHTML = eig.map((e,i) => `
+        <div class="edge-item">
+          <div>λ${i+1}</div>
+          <div><strong>${e.value.toFixed(4)}</strong></div>
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:${100*e.value/max}%"></div></div>
+      `).join("");
+
+      const fiedler = eig[1] ? eig[1].vector : eig[0].vector;
+      $("fiedlerTable").innerHTML = `<table><thead><tr><th>Nodo</th><th>Valor Fiedler</th><th>Cluster</th></tr></thead><tbody>` +
+        fiedler.map((v,i) => `<tr><td>${i+1}</td><td>${v.toFixed(4)}</td><td>${v >= 0 ? "positivo" : "negativo"}</td></tr>`).join("") +
+        `</tbody></table>`;
+
+      const lambda2 = eig[1] ? eig[1].value : 0;
+      $("lambda2Value").textContent = lambda2.toFixed(3);
+    }
+
+    function updateAll(rebuildSliders=true) {
+      const A = adjacencyMatrix(currentGraph);
+      const D = degreeMatrix(A);
+      const L = laplacianMatrix(A,D);
+      const comps = connectedComponents(currentGraph);
+      $("matrixA").innerHTML = matrixHTML(A);
+      $("matrixD").innerHTML = matrixHTML(D);
+      $("matrixL").innerHTML = matrixHTML(L);
+      $("energyValue").textContent = energy(currentGraph, signal).toFixed(3);
+      $("componentsValue").textContent = comps.length;
+      $("connectivityTag").textContent = comps.length === 1 ? "Conexo" : "No conexo";
+      $("connectivityTag").style.borderColor = comps.length === 1 ? "rgba(52, 211, 153, 0.6)" : "rgba(251, 113, 133, 0.6)";
+      $("connectivityTag").style.color = comps.length === 1 ? getComputedStyle(document.body).getPropertyValue('--good') : getComputedStyle(document.body).getPropertyValue('--bad');
+      $("graphDescription").textContent = currentGraph.desc;
+      if (rebuildSliders) renderSliders();
+      renderEdgeContributions();
+      renderEigen(L);
+      drawGraph();
+    }
+
+    function setGraph(key) {
+      currentKey = key;
+      currentGraph = graphs[key];
+      signal = [...currentGraph.signal];
+      stopDiffusion();
+      updateAll(true);
+    }
+
+    function diffusionStep(dt=0.035) {
+      const A = adjacencyMatrix(currentGraph);
+      const D = degreeMatrix(A);
+      const L = laplacianMatrix(A,D);
+      const Lx = matVec(L, signal);
+      signal = signal.map((xi,i) => xi - dt*Lx[i]);
+      renderSliders();
+      updateAll(false);
+    }
+
+    function startDiffusion() {
+      if (diffusionTimer) return;
+      diffusionTimer = setInterval(() => diffusionStep(0.04), 160);
+      $("playBtn").textContent = "Difundiendo...";
+    }
+
+    function stopDiffusion() {
+      if (diffusionTimer) clearInterval(diffusionTimer);
+      diffusionTimer = null;
+      $("playBtn").textContent = "Iniciar difusión";
+    }
+
+    $("graphSelect").addEventListener("change", e => setGraph(e.target.value));
+    $("themeBtn").addEventListener("click", () => { document.body.classList.toggle("light"); drawGraph(); });
+    $("randomSignalBtn").addEventListener("click", () => {
+      signal = currentGraph.nodes.map(() => Number((-2 + Math.random()*10).toFixed(1)));
+      renderSliders();
+      updateAll(false);
+    });
+    $("resetSignalBtn").addEventListener("click", () => { signal = [...currentGraph.signal]; renderSliders(); updateAll(false); });
+    $("playBtn").addEventListener("click", startDiffusion);
+    $("stopBtn").addEventListener("click", stopDiffusion);
+    $("stepBtn").addEventListener("click", () => diffusionStep(0.06));
+    $("toggleFiedlerBtn").addEventListener("click", () => { viewMode = "fiedler"; drawGraph(); });
+    $("showSignalBtn").addEventListener("click", () => { viewMode = "signal"; drawGraph(); });
+    window.addEventListener("resize", drawGraph);
+
+    updateAll(true);
+  </script>
+</body>
+</html>

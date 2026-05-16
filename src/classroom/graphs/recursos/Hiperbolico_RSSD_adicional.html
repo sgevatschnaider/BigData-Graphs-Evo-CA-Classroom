@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RSGD en Espacio Hiperbólico — Versión 2.0</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(15, 23, 42, 0.86);
+      --panel2: rgba(30, 41, 59, 0.86);
+      --text: #e5edf8;
+      --muted: #9fb2c7;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --danger: #fb7185;
+      --warn: #facc15;
+      --border: rgba(148, 163, 184, 0.22);
+      --shadow: 0 22px 70px rgba(0,0,0,.42);
+      --canvasBg: radial-gradient(circle at 50% 50%, #132238 0%, #08111f 72%);
+      --node: #38bdf8;
+      --target: #facc15;
+      --edge: rgba(148, 163, 184, .32);
+      --geodesic: rgba(34,197,94,.75);
+    }
+
+    body.light {
+      --bg: #eef5ff;
+      --panel: rgba(255,255,255,.9);
+      --panel2: rgba(236, 245, 255, .92);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0369a1;
+      --accent2: #15803d;
+      --danger: #be123c;
+      --warn: #ca8a04;
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 22px 70px rgba(15,23,42,.16);
+      --canvasBg: radial-gradient(circle at 50% 50%, #ffffff 0%, #dbeafe 72%);
+      --node: #0284c7;
+      --target: #ca8a04;
+      --edge: rgba(30, 41, 59, .28);
+      --geodesic: rgba(22,163,74,.78);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.15), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,.12), transparent 34%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(1420px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero, .formula-card, .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero { padding: 26px; position: relative; overflow: hidden; }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -100px -160px auto;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(56,189,248,.2), transparent 70%);
+      pointer-events: none;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 54px);
+      line-height: 1.02;
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.65;
+      max-width: 920px;
+    }
+
+    .formula-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .formula {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      font-family: "Cambria Math", Georgia, serif;
+      font-size: 20px;
+      line-height: 1.45;
+      overflow-x: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 18px; }
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+      letter-spacing: -.02em;
+    }
+
+    .control-group {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button, select {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel2);
+      color: var(--text);
+      font-weight: 750;
+      padding: 12px 13px;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+
+    button:hover, select:hover { transform: translateY(-1px); border-color: rgba(56,189,248,.55); }
+    button.primary { background: linear-gradient(135deg, var(--accent), #2563eb); color: white; border: none; }
+    button.green { background: linear-gradient(135deg, var(--accent2), #16a34a); color: white; border: none; }
+    button.red { background: linear-gradient(135deg, var(--danger), #e11d48); color: white; border: none; }
+    button.full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 14px 0 7px;
+      font-weight: 700;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 760px;
+      border-radius: 30px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: var(--canvasBg);
+    }
+
+    canvas { width: 100%; height: 760px; display: block; }
+
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--panel2);
+      font-size: 12px;
+      font-weight: 800;
+      margin: 4px 5px 4px 0;
+    }
+
+    .metrics {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 13px;
+    }
+
+    .metric small {
+      display:block;
+      color: var(--muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      font-size: 24px;
+      letter-spacing: -.03em;
+    }
+
+    .explain {
+      color: var(--muted);
+      line-height: 1.62;
+      font-size: 14px;
+    }
+
+    .legend {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      background: var(--node);
+    }
+
+    .dot.target { background: var(--target); }
+    .dot.grad { background: var(--danger); }
+    .dot.geo { background: var(--accent2); }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1120px) {
+      header, .grid { grid-template-columns: 1fr; }
+      .stage, canvas { min-height: 620px; height: 620px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <section class="hero">
+        <div class="kicker">Versión 2.0 · Geometría hiperbólica + optimización</div>
+        <h1>RSGD en el disco de Poincaré</h1>
+        <p class="subtitle">
+          Esta simulación muestra cómo un punto aprende su posición dentro de un espacio hiperbólico usando
+          <b>Riemannian Stochastic Gradient Descent</b>. La diferencia central con SGD tradicional es que el paso
+          de optimización no se toma como si el espacio fuera plano: primero se adapta el gradiente a la métrica
+          riemanniana y luego se retrae el punto para permanecer dentro del disco.
+        </p>
+      </section>
+
+      <section class="formula-card">
+        <div class="badge">SGD euclídeo: espacio plano</div>
+        <div class="formula">x<sub>t+1</sub> = x<sub>t</sub> − η ∇f(x<sub>t</sub>)</div>
+        <div class="badge">RSGD: espacio curvo</div>
+        <div class="formula">x<sub>t+1</sub> = R<sub>xₜ</sub>(−η grad<sub>R</sub> f(x<sub>t</sub>))</div>
+      </section>
+    </header>
+
+    <main class="grid">
+      <aside class="panel">
+        <h2>Controles de simulación</h2>
+
+        <div class="btns">
+          <button id="toggleRun" class="primary">Iniciar</button>
+          <button id="stepBtn">Paso único</button>
+          <button id="autoBtn" class="green full">Acción automática: 80 pasos RSGD</button>
+          <button id="resetBtn" class="red">Reiniciar</button>
+          <button id="themeBtn">Cambiar tema</button>
+        </div>
+
+        <div class="control-group">
+          <label for="scenario">Escenario</label>
+          <select id="scenario">
+            <option value="tree">Árbol jerárquico</option>
+            <option value="social">Red social centro-periferia</option>
+            <option value="taxonomy">Taxonomía conceptual</option>
+          </select>
+
+          <label for="lr">Tasa de aprendizaje η</label>
+          <input id="lr" type="range" min="0.002" max="0.08" step="0.002" value="0.026"/>
+          <div class="value-row"><span>lento</span><span id="lrVal">0.026</span><span>rápido</span></div>
+
+          <label for="speed">Velocidad</label>
+          <input id="speed" type="range" min="1" max="8" step="1" value="3"/>
+          <div class="value-row"><span>1x</span><span id="speedVal">3x</span><span>8x</span></div>
+
+          <label for="noise">Componente estocástico</label>
+          <input id="noise" type="range" min="0" max="0.06" step="0.002" value="0.014"/>
+          <div class="value-row"><span>estable</span><span id="noiseVal">0.014</span><span>ruidoso</span></div>
+        </div>
+
+        <div class="control-group">
+          <h2>Lectura visual</h2>
+          <div class="legend">
+            <div class="legend-item"><span class="dot"></span>Punto que se optimiza</div>
+            <div class="legend-item"><span class="dot target"></span>Objetivos hiperbólicos</div>
+            <div class="legend-item"><span class="dot grad"></span>Dirección del gradiente</div>
+            <div class="legend-item"><span class="dot geo"></span>Geodésicas / trayectoria</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="stage">
+        <canvas id="canvas"></canvas>
+      </section>
+
+      <aside class="panel">
+        <h2>Métricas</h2>
+        <div class="metrics">
+          <div class="metric">
+            <small>Iteración</small>
+            <strong id="iter">0</strong>
+          </div>
+          <div class="metric">
+            <small>Pérdida aproximada</small>
+            <strong id="loss">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>Norma euclídea del punto</small>
+            <strong id="norm">0.000</strong>
+          </div>
+          <div class="metric">
+            <small>Distancia al borde</small>
+            <strong id="borderDist">1.000</strong>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2>Qué está pasando</h2>
+          <p class="explain" id="explain">
+            El punto azul se mueve dentro del disco de Poincaré. En cada paso se elige una referencia objetivo,
+            se calcula una dirección de ajuste y se corrige el movimiento para respetar la geometría hiperbólica.
+          </p>
+          <p class="explain">
+            En el borde del disco, la distancia hiperbólica crece mucho. Por eso un pequeño movimiento visual puede
+            representar un gran cambio geométrico. RSGD evita tratar el disco como si fuera un plano euclídeo común.
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Material elaborado por el profesor Sergio Gevatschnaider</footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const ui = {
+      toggleRun: document.getElementById("toggleRun"),
+      stepBtn: document.getElementById("stepBtn"),
+      autoBtn: document.getElementById("autoBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      themeBtn: document.getElementById("themeBtn"),
+      scenario: document.getElementById("scenario"),
+      lr: document.getElementById("lr"),
+      speed: document.getElementById("speed"),
+      noise: document.getElementById("noise"),
+      lrVal: document.getElementById("lrVal"),
+      speedVal: document.getElementById("speedVal"),
+      noiseVal: document.getElementById("noiseVal"),
+      iter: document.getElementById("iter"),
+      loss: document.getElementById("loss"),
+      norm: document.getElementById("norm"),
+      borderDist: document.getElementById("borderDist"),
+      explain: document.getElementById("explain")
+    };
+
+    let W = 900, H = 760, cx = 450, cy = 380, R = 320;
+    let running = false;
+    let autoSteps = 0;
+    let iteration = 0;
+    let point = {x: -0.34, y: 0.18};
+    let velocity = {x: 0, y: 0};
+    let trajectory = [];
+    let targets = [];
+    let edges = [];
+    let currentTarget = 0;
+    let lastGrad = {x: 0, y: 0};
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      W = rect.width;
+      H = rect.height;
+      cx = W / 2;
+      cy = H / 2;
+      R = Math.min(W, H) * 0.41;
+      draw();
+    }
+
+    function toScreen(p) {
+      return {x: cx + p.x * R, y: cy - p.y * R};
+    }
+
+    function norm(p) {
+      return Math.sqrt(p.x*p.x + p.y*p.y);
+    }
+
+    function clampInside(p) {
+      const n = norm(p);
+      if (n >= 0.985) {
+        return {x: p.x / n * 0.985, y: p.y / n * 0.985};
+      }
+      return p;
+    }
+
+    function poincareDistance(a, b) {
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const duv2 = dx*dx + dy*dy;
+      const au = 1 - a.x*a.x - a.y*a.y;
+      const bv = 1 - b.x*b.x - b.y*b.y;
+      const z = 1 + 2 * duv2 / Math.max(au*bv, 1e-9);
+      return Math.acosh(Math.max(1, z));
+    }
+
+    function conformalFactor(p) {
+      const n2 = p.x*p.x + p.y*p.y;
+      return 2 / Math.max(1 - n2, 1e-6);
+    }
+
+    function euclideanToRiemannianGradient(p, gradE) {
+      const lambda = conformalFactor(p);
+      return {
+        x: gradE.x / (lambda * lambda),
+        y: gradE.y / (lambda * lambda)
+      };
+    }
+
+    function makeScenario(type) {
+      targets = [];
+      edges = [];
+      if (type === "tree") {
+        targets = [
+          {x: 0, y: 0.02, label: "raíz"},
+          {x: -0.36, y: .28, label: "rama A"},
+          {x: .36, y: .28, label: "rama B"},
+          {x: -.62, y: -.16, label: "hoja A1"},
+          {x: -.20, y: -.50, label: "hoja A2"},
+          {x: .20, y: -.50, label: "hoja B1"},
+          {x: .62, y: -.16, label: "hoja B2"}
+        ];
+        edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6]];
+        ui.explain.textContent = "Escenario árbol: el espacio hiperbólico es adecuado porque el volumen crece de manera similar a una jerarquía con muchas ramas.";
+      } else if (type === "social") {
+        targets = [
+          {x: 0.0, y: 0.0, label: "hub"},
+          {x: -.58, y: .34, label: "com. 1"},
+          {x: .50, y: .38, label: "com. 2"},
+          {x: -.64, y: -.38, label: "perif. 1"},
+          {x: .65, y: -.34, label: "perif. 2"},
+          {x: -.10, y: .70, label: "influencer"},
+          {x: .12, y: -.72, label: "puente"}
+        ];
+        edges = [[0,1],[0,2],[0,5],[0,6],[1,3],[2,4],[3,6],[4,6]];
+        ui.explain.textContent = "Escenario red social: el centro puede representar hubs o comunidades generales, mientras el borde concentra usuarios periféricos o subcomunidades.";
+      } else {
+        targets = [
+          {x: 0, y: 0, label: "concepto"},
+          {x: -.26, y: .38, label: "categoría"},
+          {x: .26, y: .38, label: "categoría"},
+          {x: -.58, y: .05, label: "subtipo"},
+          {x: .58, y: .05, label: "subtipo"},
+          {x: -.44, y: -.55, label: "ejemplo"},
+          {x: .44, y: -.55, label: "ejemplo"}
+        ];
+        edges = [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6]];
+        ui.explain.textContent = "Escenario taxonomía: los conceptos generales quedan cerca del centro y los más específicos se desplazan hacia regiones más externas.";
+      }
+    }
+
+    function reset() {
+      iteration = 0;
+      point = {x: -0.34 + Math.random()*0.18, y: 0.18 - Math.random()*0.18};
+      velocity = {x:0, y:0};
+      trajectory = [point];
+      currentTarget = 0;
+      lastGrad = {x:0, y:0};
+      makeScenario(ui.scenario.value);
+      updateMetrics(0);
+      draw();
+    }
+
+    function rsgdStep() {
+      if (!targets.length) return;
+      const eta = parseFloat(ui.lr.value);
+      const noise = parseFloat(ui.noise.value);
+
+      currentTarget = Math.floor(Math.random() * targets.length);
+      const t = targets[currentTarget];
+
+      const dx = point.x - t.x;
+      const dy = point.y - t.y;
+
+      let gradE = {
+        x: dx + (Math.random() - .5) * noise,
+        y: dy + (Math.random() - .5) * noise
+      };
+
+      const gradR = euclideanToRiemannianGradient(point, gradE);
+
+      lastGrad = gradR;
+
+      velocity.x = -eta * gradR.x;
+      velocity.y = -eta * gradR.y;
+
+      point = clampInside({
+        x: point.x + velocity.x,
+        y: point.y + velocity.y
+      });
+
+      trajectory.push({...point});
+      if (trajectory.length > 260) trajectory.shift();
+
+      iteration++;
+      const avgLoss = targets.reduce((acc, target) => acc + poincareDistance(point, target), 0) / targets.length;
+      updateMetrics(avgLoss);
+    }
+
+    function updateMetrics(loss) {
+      const n = norm(point);
+      ui.iter.textContent = iteration;
+      ui.loss.textContent = loss.toFixed(3);
+      ui.norm.textContent = n.toFixed(3);
+      ui.borderDist.textContent = (1 - n).toFixed(3);
+      ui.lrVal.textContent = parseFloat(ui.lr.value).toFixed(3);
+      ui.speedVal.textContent = ui.speed.value + "x";
+      ui.noiseVal.textContent = parseFloat(ui.noise.value).toFixed(3);
+    }
+
+    function cssVar(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function drawDisk() {
+      ctx.clearRect(0,0,W,H);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.clip();
+
+      for (let i=1; i<=7; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, (R/7)*i, 0, Math.PI*2);
+        ctx.strokeStyle = i === 7 ? cssVar("--accent") : "rgba(148,163,184,.15)";
+        ctx.lineWidth = i === 7 ? 2.2 : 1;
+        ctx.stroke();
+      }
+
+      for (let a=0; a<Math.PI*2; a+=Math.PI/12) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a)*R, cy + Math.sin(a)*R);
+        ctx.strokeStyle = "rgba(148,163,184,.11)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.strokeStyle = cssVar("--accent");
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "700 13px Inter, sans-serif";
+      ctx.fillText("Disco de Poincaré: ||x|| < 1", cx - 92, cy + R + 30);
+    }
+
+    function drawEdges() {
+      ctx.save();
+      ctx.strokeStyle = cssVar("--edge");
+      ctx.lineWidth = 1.6;
+      edges.forEach(([a,b]) => {
+        const A = toScreen(targets[a]);
+        const B = toScreen(targets[b]);
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        const mx = (A.x+B.x)/2, my = (A.y+B.y)/2;
+        const curve = 20;
+        ctx.quadraticCurveTo(mx + (cx-mx)*0.08, my + (cy-my)*0.08 - curve, B.x, B.y);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawTargets() {
+      targets.forEach((t, idx) => {
+        const s = toScreen(t);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, idx === currentTarget ? 9 : 7, 0, Math.PI*2);
+        ctx.fillStyle = idx === currentTarget ? cssVar("--warn") : cssVar("--target");
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,.55)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = cssVar("--text");
+        ctx.font = "700 12px Inter, sans-serif";
+        ctx.fillText(t.label, s.x + 10, s.y - 10);
+      });
+    }
+
+    function drawTrajectory() {
+      if (trajectory.length < 2) return;
+      ctx.save();
+      ctx.beginPath();
+      const first = toScreen(trajectory[0]);
+      ctx.moveTo(first.x, first.y);
+      for (let i=1; i<trajectory.length; i++) {
+        const p = toScreen(trajectory[i]);
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = cssVar("--geodesic");
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawGradient() {
+      const p = toScreen(point);
+      const scale = 900;
+      const end = toScreen({
+        x: point.x - lastGrad.x * scale,
+        y: point.y - lastGrad.y * scale
+      });
+
+      ctx.save();
+      ctx.strokeStyle = cssVar("--danger");
+      ctx.fillStyle = cssVar("--danger");
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+
+      const ang = Math.atan2(end.y - p.y, end.x - p.x);
+      ctx.beginPath();
+      ctx.moveTo(end.x, end.y);
+      ctx.lineTo(end.x - 10*Math.cos(ang-.35), end.y - 10*Math.sin(ang-.35));
+      ctx.lineTo(end.x - 10*Math.cos(ang+.35), end.y - 10*Math.sin(ang+.35));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawPoint() {
+      const p = toScreen(point);
+      ctx.save();
+      ctx.shadowColor = "rgba(56,189,248,.65)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 11, 0, Math.PI*2);
+      ctx.fillStyle = cssVar("--node");
+      ctx.fill();
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 15, 0, Math.PI*2);
+      ctx.strokeStyle = "rgba(255,255,255,.48)";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+
+    function drawInfo() {
+      ctx.save();
+      ctx.fillStyle = cssVar("--text");
+      ctx.font = "800 15px Inter, sans-serif";
+      ctx.fillText("RSGD: paso estocástico + métrica riemanniana + retracción", 24, 34);
+
+      ctx.fillStyle = cssVar("--muted");
+      ctx.font = "600 13px Inter, sans-serif";
+      ctx.fillText("El punto azul busca aproximarse a objetivos amarillos sin salir del espacio hiperbólico.", 24, 57);
+      ctx.restore();
+    }
+
+    function draw() {
+      drawDisk();
+      drawEdges();
+      drawTrajectory();
+      drawTargets();
+      drawGradient();
+      drawPoint();
+      drawInfo();
+    }
+
+    function animate() {
+      const speed = parseInt(ui.speed.value, 10);
+      if (running || autoSteps > 0) {
+        for (let i=0; i<speed; i++) {
+          rsgdStep();
+          if (autoSteps > 0) autoSteps--;
+          if (autoSteps === 0 && !running) break;
+        }
+        draw();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    ui.toggleRun.addEventListener("click", () => {
+      running = !running;
+      ui.toggleRun.textContent = running ? "Pausar" : "Iniciar";
+    });
+
+    ui.stepBtn.addEventListener("click", () => {
+      rsgdStep();
+      draw();
+    });
+
+    ui.autoBtn.addEventListener("click", () => {
+      autoSteps = 80;
+      running = false;
+      ui.toggleRun.textContent = "Iniciar";
+    });
+
+    ui.resetBtn.addEventListener("click", reset);
+
+    ui.themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      draw();
+    });
+
+    ui.scenario.addEventListener("change", reset);
+    ui.lr.addEventListener("input", () => updateMetrics(parseFloat(ui.loss.textContent)));
+    ui.speed.addEventListener("input", () => updateMetrics(parseFloat(ui.loss.textContent)));
+    ui.noise.addEventListener("input", () => updateMetrics(parseFloat(ui.loss.textContent)));
+
+    window.addEventListener("resize", resize);
+
+    reset();
+    resize();
+    animate();
+  </script>
+</body>
+</html>

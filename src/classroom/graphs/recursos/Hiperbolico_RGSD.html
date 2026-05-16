@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSGD en geometría hiperbólica — Laboratorio avanzado</title>
+  <style>
+    :root {
+      --bg: #06101e;
+      --bg2: #0a213c;
+      --panel: rgba(255,255,255,0.084);
+      --panel2: rgba(255,255,255,0.14);
+      --panel3: rgba(255,255,255,0.055);
+      --text: #eef7ff;
+      --muted: #a9bed6;
+      --line: rgba(255,255,255,0.16);
+      --line2: rgba(255,255,255,0.30);
+      --cyan: #36e7c7;
+      --blue: #5bb9ff;
+      --purple: #b894ff;
+      --yellow: #f7d76c;
+      --orange: #ff9c55;
+      --red: #ff6f91;
+      --green: #83f49a;
+      --shadow: 0 28px 85px rgba(0,0,0,0.38);
+      --radius: 26px;
+      --radius2: 36px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --heroGlow1: rgba(54,231,199,0.18);
+      --heroGlow2: rgba(91,185,255,0.20);
+      --heroGlow3: rgba(184,148,255,0.14);
+    }
+
+    [data-theme="aurora"] {
+      --bg: #031515;
+      --bg2: #102b39;
+      --panel: rgba(227,255,247,0.082);
+      --panel2: rgba(227,255,247,0.14);
+      --text: #efffff;
+      --muted: #acd2cf;
+      --line: rgba(200,255,244,0.17);
+      --line2: rgba(200,255,244,0.30);
+      --cyan: #32f2cf;
+      --blue: #66d9ff;
+      --purple: #7fb3ff;
+      --yellow: #f4e17d;
+      --orange: #ffad66;
+      --red: #ff709c;
+      --green: #8dff9e;
+      --heroGlow1: rgba(50,242,207,0.20);
+      --heroGlow2: rgba(102,217,255,0.16);
+      --heroGlow3: rgba(141,255,158,0.13);
+    }
+
+    [data-theme="graphite"] {
+      --bg: #111417;
+      --bg2: #1c232b;
+      --panel: rgba(255,255,255,0.075);
+      --panel2: rgba(255,255,255,0.12);
+      --text: #f2f4f5;
+      --muted: #b4bec8;
+      --line: rgba(255,255,255,0.15);
+      --line2: rgba(255,255,255,0.28);
+      --cyan: #8be9d4;
+      --blue: #9fc7ff;
+      --purple: #c7a8ff;
+      --yellow: #ffd36a;
+      --orange: #ff9a56;
+      --red: #ff6b6b;
+      --green: #9cf090;
+      --heroGlow1: rgba(255,154,86,0.14);
+      --heroGlow2: rgba(159,199,255,0.15);
+      --heroGlow3: rgba(139,233,212,0.12);
+    }
+
+    [data-theme="paper"] {
+      --bg: #f5f7fb;
+      --bg2: #e8eef6;
+      --panel: rgba(255,255,255,0.88);
+      --panel2: #ffffff;
+      --panel3: rgba(0,53,102,0.045);
+      --text: #102033;
+      --muted: #536a82;
+      --line: rgba(16,32,51,0.15);
+      --line2: rgba(16,32,51,0.28);
+      --cyan: #007d78;
+      --blue: #005eb8;
+      --purple: #6d49c8;
+      --yellow: #946500;
+      --orange: #b95500;
+      --red: #c9345b;
+      --green: #18864e;
+      --shadow: 0 22px 55px rgba(22,42,68,0.14);
+      --heroGlow1: rgba(0,125,120,0.11);
+      --heroGlow2: rgba(0,94,184,0.10);
+      --heroGlow3: rgba(109,73,200,0.08);
+    }
+
+    [data-theme="solar"] {
+      --bg: #181106;
+      --bg2: #2b210f;
+      --panel: rgba(255,236,204,0.085);
+      --panel2: rgba(255,236,204,0.14);
+      --text: #fff7e8;
+      --muted: #dcc9a9;
+      --line: rgba(255,225,178,0.18);
+      --line2: rgba(255,225,178,0.32);
+      --cyan: #6ee7d3;
+      --blue: #8ec8ff;
+      --purple: #d0a6ff;
+      --yellow: #ffd166;
+      --orange: #ff9f45;
+      --red: #ff6b7f;
+      --green: #c7f464;
+      --heroGlow1: rgba(255,209,102,0.17);
+      --heroGlow2: rgba(255,159,69,0.15);
+      --heroGlow3: rgba(110,231,211,0.11);
+    }
+
+    [data-theme="forest"] {
+      --bg: #06130c;
+      --bg2: #10251a;
+      --panel: rgba(230,255,235,0.078);
+      --panel2: rgba(230,255,235,0.135);
+      --text: #f1fff4;
+      --muted: #abcbb2;
+      --line: rgba(211,255,222,0.17);
+      --line2: rgba(211,255,222,0.32);
+      --cyan: #6fffe9;
+      --blue: #72c9ff;
+      --purple: #b8a1ff;
+      --yellow: #ffe071;
+      --orange: #ffb15f;
+      --red: #ff7a90;
+      --green: #88ff8a;
+      --heroGlow1: rgba(136,255,138,0.18);
+      --heroGlow2: rgba(111,255,233,0.14);
+      --heroGlow3: rgba(114,201,255,0.11);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      line-height: 1.62;
+      background:
+        radial-gradient(circle at 12% 8%, var(--heroGlow1), transparent 32%),
+        radial-gradient(circle at 82% 14%, var(--heroGlow2), transparent 34%),
+        radial-gradient(circle at 14% 92%, var(--heroGlow3), transparent 28%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.20;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+      z-index: -1;
+    }
+
+    .wrap { width: min(1280px, calc(100% - 36px)); margin: 0 auto; }
+    .hero {
+      padding: 72px 0 42px;
+      min-height: 70vh;
+      display: grid;
+      align-items: center;
+    }
+    .heroGrid {
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+      white-space: nowrap;
+    }
+    .badge strong { color: var(--cyan); }
+    h1 {
+      margin: 18px 0 18px;
+      max-width: 900px;
+      font-size: clamp(2.3rem, 4.9vw, 5.35rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+    .lead {
+      margin: 0 0 22px;
+      color: var(--muted);
+      max-width: 940px;
+      font-size: clamp(1.04rem, 1.65vw, 1.28rem);
+    }
+    .heroActions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 20px; }
+    .heroCard {
+      padding: 20px;
+      border-radius: var(--radius2);
+      background: linear-gradient(145deg, var(--panel), rgba(255,255,255,0.035));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+    .heroMini {
+      min-height: 365px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(55,231,194,0.13), transparent 58%),
+        rgba(255,255,255,0.04);
+      overflow: hidden;
+      position: relative;
+    }
+    .heroMini canvas { width: 100%; height: 365px; display: block; }
+    .heroCaption {
+      margin: 14px 2px 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: color-mix(in srgb, var(--bg) 84%, transparent);
+      border-block: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .toolbarInner {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .navBtns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    button, select, input { font: inherit; }
+    .btn, select, .searchInput {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 820;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      backdrop-filter: blur(12px);
+    }
+    .searchInput { cursor: text; width: min(420px, 100%); }
+    .btn:hover, select:hover {
+      transform: translateY(-1px);
+      background: var(--panel2);
+      border-color: var(--line2);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+    }
+    .btn.primary {
+      color: #061323;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      border-color: rgba(255,255,255,0.35);
+      box-shadow: 0 16px 34px rgba(55,231,194,0.18);
+    }
+    [data-theme="paper"] .btn.primary { color: #ffffff; }
+    .btn.warn { border-color: color-mix(in srgb, var(--yellow) 55%, transparent); background: color-mix(in srgb, var(--yellow) 14%, transparent); }
+    .btn.danger { border-color: color-mix(in srgb, var(--red) 55%, transparent); background: color-mix(in srgb, var(--red) 13%, transparent); }
+    .btn.active { border-color: color-mix(in srgb, var(--cyan) 68%, white 10%); background: color-mix(in srgb, var(--cyan) 18%, transparent); }
+    input[type="range"] { accent-color: var(--cyan); }
+
+    main { padding: 34px 0 72px; }
+    section { margin: 34px 0; }
+    h2 {
+      font-size: clamp(1.75rem, 3vw, 3.05rem);
+      line-height: 1.06;
+      margin: 0 0 12px;
+      letter-spacing: -0.04em;
+    }
+    h3 { margin: 0 0 10px; font-size: 1.2rem; letter-spacing: -0.01em; }
+    p { margin: 0 0 12px; }
+    .sectionLead { color: var(--muted); max-width: 980px; margin-bottom: 20px; font-size: 1.04rem; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card {
+      position: relative;
+      background: linear-gradient(145deg, var(--panel), rgba(255,255,255,0.035));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top left, rgba(55,231,194,0.08), transparent 42%);
+      opacity: 0.85;
+    }
+    .card > * { position: relative; }
+    .card.soft { box-shadow: none; }
+    .card.highlight {
+      border-color: color-mix(in srgb, var(--cyan) 38%, transparent);
+      background: linear-gradient(145deg, color-mix(in srgb, var(--cyan) 13%, transparent), var(--panel));
+    }
+    .card.orange {
+      border-color: color-mix(in srgb, var(--orange) 38%, transparent);
+      background: linear-gradient(145deg, color-mix(in srgb, var(--orange) 13%, transparent), var(--panel));
+    }
+    .card.purple {
+      border-color: color-mix(in srgb, var(--purple) 38%, transparent);
+      background: linear-gradient(145deg, color-mix(in srgb, var(--purple) 13%, transparent), var(--panel));
+    }
+
+    .formula {
+      font-family: "Cambria Math", "Segoe UI Symbol", var(--mono);
+      color: var(--yellow);
+      background: rgba(255,255,255,0.075);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 13px 15px;
+      margin: 12px 0;
+      overflow-x: auto;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.055);
+      color: var(--muted);
+      font-weight: 780;
+      font-size: 0.79rem;
+      margin: 2px 2px 2px 0;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--cyan); }
+
+    .themeStrip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .themeChip {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(255,255,255,0.045);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease;
+      min-height: 88px;
+    }
+    .themeChip:hover { transform: translateY(-2px); border-color: var(--cyan); }
+    .themeChip b { display: block; margin-bottom: 4px; }
+    .swatches { display: flex; gap: 4px; margin-top: 8px; }
+    .swatches i { display:block; width: 22px; height: 10px; border-radius: 999px; }
+
+    .labGrid {
+      display: grid;
+      grid-template-columns: 0.84fr 1.16fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .controlPanel { display: grid; gap: 14px; align-content: start; }
+    .controlBox {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+    }
+    .controlBox label {
+      display: block;
+      color: var(--muted);
+      font-weight: 820;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    .controlLine { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0; }
+    .controlLine span { color: var(--text); font-weight: 850; }
+    .rangeFull { width: 100%; }
+    .btnRow { display: flex; flex-wrap: wrap; gap: 8px; }
+    .canvasPanel {
+      min-height: 700px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(55,231,194,0.10), transparent 58%),
+        rgba(255,255,255,0.045);
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 90px rgba(0,0,0,0.18);
+    }
+    #mainCanvas { width: 100%; height: 700px; display: block; }
+    .canvasOverlay {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: calc(100% - 32px);
+      pointer-events: none;
+    }
+    .canvasBadge {
+      pointer-events: auto;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 76%, transparent);
+      backdrop-filter: blur(14px);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 840;
+    }
+    .canvasHint {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--bg) 75%, transparent);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 14px;
+      backdrop-filter: blur(14px);
+      font-size: 0.92rem;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat {
+      min-height: 82px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.055);
+      padding: 12px;
+    }
+    .stat b {
+      display: block;
+      color: var(--cyan);
+      font-size: 1.28rem;
+      line-height: 1.1;
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+    .stat span { color: var(--muted); font-size: 0.83rem; }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      font-size: 0.94rem;
+    }
+    .comparison th, .comparison td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .comparison th {
+      text-align: left;
+      color: var(--cyan);
+      background: color-mix(in srgb, var(--cyan) 10%, transparent);
+    }
+    .comparison tr:hover td { background: rgba(255,255,255,0.045); }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .step {
+      min-height: 144px;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.055);
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -14px;
+      top: 42%;
+      color: var(--cyan);
+      font-weight: 950;
+      font-size: 1.5rem;
+    }
+    .step b { color: var(--cyan); display: block; margin-bottom: 5px; }
+
+    .appCard {
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .appCard:hover { border-color: var(--cyan); }
+    .appCard .miniBtn { margin-top: 12px; width: fit-content; }
+
+    .glossary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .term {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+      background: rgba(255,255,255,0.052);
+    }
+    .term b { color: var(--cyan); display: block; margin-bottom: 6px; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 28px 0 40px;
+      color: var(--muted);
+      text-align: center;
+    }
+    footer strong { color: var(--cyan); }
+
+    @media (max-width: 1060px) {
+      .heroGrid, .grid2, .grid3, .labGrid { grid-template-columns: 1fr; }
+      .grid4, .stats, .themeStrip, .glossary { grid-template-columns: repeat(2, 1fr); }
+      .timeline { grid-template-columns: 1fr; }
+      .step::after { display: none; }
+      .toolbar { position: relative; }
+      .canvasPanel { min-height: 630px; }
+      #mainCanvas { height: 630px; }
+    }
+    @media (max-width: 650px) {
+      .grid4, .stats, .themeStrip, .glossary { grid-template-columns: 1fr; }
+      .hero { padding-top: 48px; }
+      .wrap { width: min(100% - 22px, 1280px); }
+      .btn, select { width: 100%; text-align: center; }
+      .btnRow, .heroActions, .navBtns { width: 100%; }
+      .badge { white-space: normal; }
+    }
+  </style>
+</head>
+<body data-theme="midnight">
+  <header class="hero" id="inicio">
+    <div class="wrap heroGrid">
+      <div>
+        <span class="badge"><strong>RSGD</strong> · geometría hiperbólica · disco de Poincaré · embeddings · IA</span>
+        <h1>Riemannian SGD aplicado a embeddings hiperbólicos</h1>
+        <p class="lead">Un laboratorio visual para explicar por qué el descenso por gradiente debe adaptarse cuando los parámetros viven en una variedad curva. El disco de Poincaré permite representar jerarquías, taxonomías, grafos de conocimiento y estructuras tipo árbol con una intuición geométrica muy potente.</p>
+        <div class="formula">xₜ₊₁ = Retrₓₜ( −η · gradᴿ f(xₜ) )</div>
+        <div class="heroActions">
+          <a class="btn primary" href="#laboratorio" style="text-decoration:none">Abrir simulador</a>
+          <a class="btn" href="#temas" style="text-decoration:none">Explorar temas</a>
+          <button class="btn" id="themeBtnHero">Cambiar paleta</button>
+          <select id="themeSelectHero" aria-label="Paleta visual">
+            <option value="midnight">Noche hiperbólica</option>
+            <option value="aurora">Aurora</option>
+            <option value="graphite">Grafito</option>
+            <option value="paper">Claro académico</option>
+            <option value="solar">Solar</option>
+            <option value="forest">Bosque</option>
+          </select>
+        </div>
+      </div>
+      <div class="heroCard">
+        <div class="heroMini"><canvas id="heroCanvas"></canvas></div>
+        <p class="heroCaption">La animación inicial muestra una jerarquía conceptual: nodos generales cerca del centro y nodos específicos cerca de la frontera. En geometría hiperbólica, esa expansión radial permite representar árboles con menor distorsión visual y matemática.</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toolbar">
+    <div class="wrap toolbarInner">
+      <div class="navBtns">
+        <a class="btn" href="#teoria" style="text-decoration:none">Teoría</a>
+        <a class="btn" href="#laboratorio" style="text-decoration:none">Simulación</a>
+        <a class="btn" href="#temas" style="text-decoration:none">Temas IA</a>
+        <a class="btn" href="#comparacion" style="text-decoration:none">SGD vs RSGD</a>
+        <a class="btn" href="#glosario" style="text-decoration:none">Glosario</a>
+      </div>
+      <div class="navBtns">
+        <select id="themeSelect" aria-label="Paleta visual">
+          <option value="midnight">Noche hiperbólica</option>
+          <option value="aurora">Aurora</option>
+          <option value="graphite">Grafito</option>
+          <option value="paper">Claro académico</option>
+          <option value="solar">Solar</option>
+          <option value="forest">Bosque</option>
+        </select>
+        <button class="btn primary" id="themeBtn">Cambiar paleta</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section id="teoria">
+      <h2>1. Marco conceptual avanzado</h2>
+      <p class="sectionLead">La idea central es que el algoritmo no solo minimiza una función de pérdida, sino que lo hace dentro de una geometría específica. En el caso hiperbólico, el espacio tiene curvatura negativa y un crecimiento de volumen que se ajusta muy bien a estructuras jerárquicas.</p>
+      <div class="grid3">
+        <div class="card highlight">
+          <h3>Grafo jerárquico</h3>
+          <p>Taxonomías, árboles conceptuales, ontologías, grafos de conocimiento y rutas educativas suelen tener crecimiento ramificado.</p>
+          <div class="formula">G = (V, E)</div>
+          <span class="pill"><span class="dot"></span> nodos</span>
+          <span class="pill"><span class="dot" style="background:var(--purple)"></span> relaciones</span>
+        </div>
+        <div class="card purple">
+          <h3>Embedding hiperbólico</h3>
+          <p>Cada nodo se proyecta dentro del disco. Lo general suele quedar cerca del centro; lo específico, cerca de la frontera.</p>
+          <div class="formula">f: V → 𝔻ⁿ, &nbsp; f(v) = zᵥ</div>
+          <span class="pill">Disco de Poincaré</span>
+          <span class="pill">curvatura negativa</span>
+        </div>
+        <div class="card orange">
+          <h3>Optimización geométrica</h3>
+          <p>RSGD ajusta los puntos respetando la variedad para que las distancias aprendidas representen mejor la estructura original.</p>
+          <div class="formula">min Σᵤᵥ ( dᴳ(u,v) − dᴴ(zᵤ,zᵥ) )²</div>
+          <span class="pill">gradiente riemanniano</span>
+          <span class="pill">retracción</span>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:18px">
+        <div class="card">
+          <h3>Distancia hiperbólica en el disco</h3>
+          <div class="formula">dᴴ(u,v) = arcosh( 1 + 2‖u−v‖² / ((1−‖u‖²)(1−‖v‖²)) )</div>
+          <p class="muted">Cuando un punto se acerca al borde del disco, pequeñas diferencias visuales pueden representar grandes diferencias hiperbólicas. El borde funciona como una frontera hacia el infinito geométrico.</p>
+        </div>
+        <div class="card">
+          <h3>Gradiente riemanniano</h3>
+          <div class="formula">gradᴿ f(x) = ((1 − ‖x‖²)² / 4) · gradᴱ f(x)</div>
+          <p class="muted">El gradiente euclídeo se reescala por el factor de la métrica. En la simulación, esto permite mostrar por qué el movimiento cerca del borde debe ser tratado con cuidado.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="paletas">
+      <h2>2. Paletas visuales para presentación</h2>
+      <p class="sectionLead">La presentación incluye varias paletas para adaptar la clase a un estilo oscuro tecnológico, claro académico, cálido, institucional o exploratorio.</p>
+      <div class="themeStrip">
+        <div class="themeChip" data-set-theme="midnight"><b>Noche hiperbólica</b><span class="muted">contraste alto para proyector</span><div class="swatches"><i style="background:#06101e"></i><i style="background:#36e7c7"></i><i style="background:#b894ff"></i></div></div>
+        <div class="themeChip" data-set-theme="aurora"><b>Aurora</b><span class="muted">verde, azul y neón suave</span><div class="swatches"><i style="background:#031515"></i><i style="background:#32f2cf"></i><i style="background:#66d9ff"></i></div></div>
+        <div class="themeChip" data-set-theme="graphite"><b>Grafito</b><span class="muted">sobrio, técnico e institucional</span><div class="swatches"><i style="background:#111417"></i><i style="background:#ff9a56"></i><i style="background:#9fc7ff"></i></div></div>
+        <div class="themeChip" data-set-theme="paper"><b>Claro académico</b><span class="muted">ideal para lectura y captura</span><div class="swatches"><i style="background:#f5f7fb"></i><i style="background:#005eb8"></i><i style="background:#007d78"></i></div></div>
+        <div class="themeChip" data-set-theme="solar"><b>Solar</b><span class="muted">cálido y editorial</span><div class="swatches"><i style="background:#181106"></i><i style="background:#ffd166"></i><i style="background:#ff9f45"></i></div></div>
+        <div class="themeChip" data-set-theme="forest"><b>Bosque</b><span class="muted">verde profundo y analítico</span><div class="swatches"><i style="background:#06130c"></i><i style="background:#88ff8a"></i><i style="background:#6fffe9"></i></div></div>
+      </div>
+    </section>
+
+    <section id="laboratorio">
+      <h2>3. Laboratorio dinámico: RSGD en el disco de Poincaré</h2>
+      <p class="sectionLead">Usá los botones para ejecutar la optimización paso a paso, activar la animación automática, cambiar de escenario, simular ruido estocástico, comparar con un paso euclídeo y observar cómo el punto entrenable se mueve sin abandonar la geometría hiperbólica.</p>
+
+      <div class="labGrid">
+        <aside class="controlPanel">
+          <div class="card">
+            <h3>Controles principales</h3>
+            <div class="btnRow">
+              <button class="btn primary" id="stepBtn">Paso RSGD</button>
+              <button class="btn primary" id="autoBtn">Auto</button>
+              <button class="btn" id="resetBtn">Reiniciar</button>
+              <button class="btn" id="clearPathBtn">Limpiar trayectoria</button>
+            </div>
+          </div>
+
+          <div class="controlBox">
+            <label for="scenarioSelect">Escenario conceptual</label>
+            <select id="scenarioSelect" class="rangeFull">
+              <option value="ai">Taxonomía de IA</option>
+              <option value="kg">Grafo de conocimiento</option>
+              <option value="edu">Mapa curricular</option>
+              <option value="reco">Recomendador jerárquico</option>
+              <option value="bio">Ontología biomédica</option>
+              <option value="risk">Riesgo y anomalías</option>
+            </select>
+          </div>
+
+          <div class="controlBox">
+            <label for="etaRange">Tasa de aprendizaje η</label>
+            <input class="rangeFull" id="etaRange" type="range" min="1" max="45" value="12" />
+            <div class="controlLine"><span>η</span><span id="etaValue">0.12</span></div>
+          </div>
+
+          <div class="controlBox">
+            <label for="speedRange">Velocidad de simulación</label>
+            <input class="rangeFull" id="speedRange" type="range" min="90" max="1400" value="500" />
+            <div class="controlLine"><span>intervalo</span><span id="speedValue">500 ms</span></div>
+          </div>
+
+          <div class="controlBox">
+            <label>Objetivos y demostraciones</label>
+            <div class="btnRow">
+              <button class="btn" id="newTargetBtn">Nuevo objetivo</button>
+              <button class="btn warn" id="boundaryDemoBtn">Objetivo frontera</button>
+              <button class="btn warn" id="centerDemoBtn">Objetivo centro</button>
+              <button class="btn" id="selectLeafBtn">Elegir hoja</button>
+              <button class="btn" id="batchBtn">Mini-batch estocástico</button>
+              <button class="btn primary" id="fastBtn">30 pasos rápidos</button>
+              <button class="btn primary" id="tourBtn">Secuencia didáctica</button>
+            </div>
+          </div>
+
+          <div class="controlBox">
+            <label>Capas visuales</label>
+            <div class="btnRow">
+              <button class="btn active" id="toggleGridBtn">Grilla</button>
+              <button class="btn active" id="togglePathBtn">Trayectoria</button>
+              <button class="btn active" id="toggleGeoBtn">Geodésica</button>
+              <button class="btn active" id="toggleTreeBtn">Árbol</button>
+              <button class="btn active" id="toggleVectorBtn">Vector</button>
+              <button class="btn" id="toggleGhostBtn">Comparar SGD</button>
+              <button class="btn" id="toggleNoiseBtn">Ruido estocástico</button>
+              <button class="btn" id="pulseBtn">Pulso jerárquico</button>
+            </div>
+          </div>
+
+          <div class="card highlight">
+            <h3>Lectura del simulador</h3>
+            <p>El punto celeste es el embedding que se está entrenando. El punto verde es el objetivo. La línea amarilla marca la trayectoria. Cuando activás “Comparar SGD”, aparece un punto rojo que muestra el movimiento plano de referencia.</p>
+          </div>
+        </aside>
+
+        <div>
+          <div class="canvasPanel">
+            <canvas id="mainCanvas"></canvas>
+            <div class="canvasOverlay">
+              <div class="canvasBadge">𝔻² = { x : ‖x‖ &lt; 1 }</div>
+              <div class="canvasBadge">curvatura K &lt; 0</div>
+              <div class="canvasBadge">el borde representa infinito hiperbólico</div>
+            </div>
+            <div class="canvasHint" id="canvasHint">Sugerencia: activá “Auto” y luego “Objetivo frontera” para observar cómo el punto se aproxima a una zona de mayor especificidad jerárquica sin salir del disco.</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><b id="iterStat">0</b><span>iteración</span></div>
+            <div class="stat"><b id="normStat">0.000</b><span>norma euclídea ‖x‖</span></div>
+            <div class="stat"><b id="distStat">—</b><span>distancia hiperbólica al objetivo</span></div>
+            <div class="stat"><b id="lossStat">—</b><span>loss aproximada ½ d²</span></div>
+            <div class="stat"><b id="lambdaStat">—</b><span>factor métrico λ(x)</span></div>
+            <div class="stat"><b id="gradStat">—</b><span>escala gradᴿ</span></div>
+            <div class="stat"><b id="targetStat">—</b><span>tipo de objetivo</span></div>
+            <div class="stat"><b id="statusStat">Listo</b><span>estado</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="temas">
+      <h2>4. Temas avanzados para conectar RSGD con IA</h2>
+      <p class="sectionLead">Cada tarjeta representa una forma distinta de explicar por qué los espacios hiperbólicos son relevantes para ciencia de datos, grafos e inteligencia artificial. Hacé clic en una tarjeta para cargar un escenario en la simulación.</p>
+      <div class="grid3">
+        <div class="card appCard" data-load-scenario="ai"><div><h3>Taxonomías de IA</h3><p>Organizar conceptos desde categorías generales hasta técnicas específicas, como embeddings, GNN, RAG y optimización.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+        <div class="card appCard" data-load-scenario="kg"><div><h3>Grafos de conocimiento</h3><p>Representar entidades, relaciones y niveles de abstracción para búsqueda semántica y razonamiento relacional.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+        <div class="card appCard" data-load-scenario="edu"><div><h3>Mapa curricular</h3><p>Diseñar rutas de aprendizaje donde los conceptos previos quedan cerca del centro y las aplicaciones avanzadas hacia la frontera.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+        <div class="card appCard" data-load-scenario="reco"><div><h3>Recomendadores</h3><p>Modelar categorías, subcategorías y preferencias con estructura jerárquica para mejorar recuperación y ranking.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+        <div class="card appCard" data-load-scenario="bio"><div><h3>Ontologías biomédicas</h3><p>Conectar dominios, sistemas, diagnósticos y subtipos donde la profundidad conceptual es central.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+        <div class="card appCard" data-load-scenario="risk"><div><h3>Riesgo y anomalías</h3><p>Analizar redes con hubs, patrones raros y ramificaciones de comportamiento que pueden emerger cerca de la frontera.</p></div><button class="btn miniBtn">Cargar escenario</button></div>
+      </div>
+    </section>
+
+    <section id="comparacion">
+      <h2>5. Comparación: SGD tradicional vs RSGD</h2>
+      <p class="sectionLead">La diferencia no está en “usar gradiente” o “no usar gradiente”, sino en cuál es el espacio donde vive el parámetro. Si el parámetro vive en una variedad, el algoritmo debe actualizarlo respetando la métrica de esa variedad.</p>
+      <div class="card" style="overflow:auto">
+        <table class="comparison">
+          <thead>
+            <tr>
+              <th>Aspecto</th>
+              <th>SGD tradicional</th>
+              <th>RSGD hiperbólico</th>
+              <th>Interpretación para IA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Espacio</td>
+              <td>Euclídeo: ℝⁿ</td>
+              <td>Variedad curva: disco de Poincaré 𝔻ⁿ</td>
+              <td>El embedding no vive necesariamente en un plano, sino en una geometría elegida por la estructura del dato.</td>
+            </tr>
+            <tr>
+              <td>Actualización</td>
+              <td>xₜ₊₁ = xₜ − η grad f(xₜ)</td>
+              <td>xₜ₊₁ = Retrₓₜ( −η gradᴿ f(xₜ) )</td>
+              <td>Después del paso, el punto debe seguir perteneciendo a la variedad.</td>
+            </tr>
+            <tr>
+              <td>Distancia</td>
+              <td>Distancia euclídea</td>
+              <td>Distancia hiperbólica</td>
+              <td>Las distancias cerca del borde crecen de manera no lineal.</td>
+            </tr>
+            <tr>
+              <td>Datos favorecidos</td>
+              <td>Clusters planos, tablas, vectores densos, señales homogéneas</td>
+              <td>Árboles, taxonomías, ontologías, grafos jerárquicos</td>
+              <td>La geometría debe elegirse según el patrón estructural dominante.</td>
+            </tr>
+            <tr>
+              <td>Visualización</td>
+              <td>Movimiento directo sobre una superficie plana</td>
+              <td>Movimiento dentro de un disco donde el borde codifica profundidad</td>
+              <td>Permite explicar por qué una jerarquía puede comprimirse mejor con curvatura negativa.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="lectura">
+      <h2>6. Guion didáctico para presentar en clase</h2>
+      <p class="sectionLead">Una forma clara de usar el material es avanzar desde la estructura discreta hasta la optimización geométrica y luego conectar con aplicaciones reales.</p>
+      <div class="timeline">
+        <div class="step"><b>1. Grafo</b>Se parte de una red: conceptos, usuarios, productos, papers, entidades, eventos o transacciones.</div>
+        <div class="step"><b>2. Métrica</b>Se define qué significa cercanía: camino mínimo, similitud, coocurrencia, relación semántica o distancia estructural.</div>
+        <div class="step"><b>3. Geometría</b>Si la red tiene jerarquías, se elige un espacio hiperbólico porque su volumen crece rápidamente hacia la frontera.</div>
+        <div class="step"><b>4. Optimización</b>RSGD mueve los embeddings dentro de la variedad para minimizar una función de pérdida.</div>
+        <div class="step"><b>5. IA</b>Los embeddings entrenados pueden alimentar clasificación, recomendación, búsqueda, RAG, detección de comunidades o análisis de conocimiento.</div>
+      </div>
+    </section>
+
+    <section id="glosario">
+      <h2>7. Glosario interactivo</h2>
+      <p class="sectionLead">Usá el buscador para repasar conceptos clave. El glosario está pensado para que también funcione como material de estudio.</p>
+      <input class="searchInput" id="glossarySearch" placeholder="Buscar: Poincaré, RSGD, retracción, frontera..." />
+      <div class="glossary" id="glossaryGrid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br />
+      HTML + CSS + JavaScript puro · Laboratorio dinámico de RSGD hiperbólico
+    </div>
+  </footer>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const body = document.body;
+  const TAU = Math.PI * 2;
+  const THEMES = ['midnight','aurora','graphite','paper','solar','forest'];
+  const COLORS = {
+    cyan: '#36e7c7', blue: '#5bb9ff', purple: '#b894ff', yellow: '#f7d76c', orange: '#ff9c55', red: '#ff6f91', green: '#83f49a'
+  };
+
+  function cssVar(name){ return getComputedStyle(body).getPropertyValue(name).trim(); }
+  function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
+  function acosh(x){ return Math.log(x + Math.sqrt(Math.max(0, x*x - 1))); }
+  function norm(p){ return Math.hypot(p[0], p[1]); }
+  function sub(a,b){ return [a[0]-b[0], a[1]-b[1]]; }
+  function add(a,b){ return [a[0]+b[0], a[1]+b[1]]; }
+  function mul(a,s){ return [a[0]*s, a[1]*s]; }
+  function rand(a,b){ return a + Math.random()*(b-a); }
+  function randomPoint(maxR=0.82){ const r = Math.sqrt(Math.random()) * maxR; const t = Math.random() * TAU; return [r*Math.cos(t), r*Math.sin(t)]; }
+  function projectInside(p, maxR=0.965){ const n = norm(p); return n > maxR ? mul(p, maxR/n) : p; }
+  function poincareDistance(u, v){
+    const duv = norm(sub(u,v)) ** 2;
+    const nu = norm(u) ** 2;
+    const nv = norm(v) ** 2;
+    const den = Math.max(1e-9, (1 - nu) * (1 - nv));
+    return acosh(Math.max(1, 1 + 2 * duv / den));
+  }
+  function lambdaFactor(x){ return 2 / Math.max(1e-6, 1 - norm(x)**2); }
+  function riemannianScale(x){ return ((1 - norm(x)**2) ** 2) / 4; }
+
+  const SCENARIOS = {
+    ai: {
+      name: 'Taxonomía de IA',
+      root: 'IA',
+      nodes: [
+        ['IA','IA',0], ['ML','ML',1], ['KG','KG',1], ['GEO','Geometría',1], ['STATS','Estadística',1],
+        ['GNN','GNN',2], ['EMB','Embeddings',2], ['RAG','RAG',2], ['ONTO','Ontologías',2], ['POIN','Poincaré',2], ['RSGD','RSGD',2], ['BAYES','Bayes',2], ['VAR','Varianza',2],
+        ['NODE2VEC','node2vec',3], ['HYPERGNN','HyperGNN',3], ['TAX','Taxonomía',3], ['SEARCH','Búsqueda',3], ['CURV','K < 0',3], ['OPT','Optimización',3], ['PRIORS','Priors',3], ['ANOM','Anomalías',3]
+      ],
+      edges: [['IA','ML'], ['IA','KG'], ['IA','GEO'], ['IA','STATS'], ['ML','GNN'], ['ML','EMB'], ['KG','RAG'], ['KG','ONTO'], ['GEO','POIN'], ['GEO','RSGD'], ['STATS','BAYES'], ['STATS','VAR'], ['GNN','NODE2VEC'], ['GNN','HYPERGNN'], ['EMB','TAX'], ['RAG','SEARCH'], ['POIN','CURV'], ['RSGD','OPT'], ['BAYES','PRIORS'], ['VAR','ANOM']]
+    },
+    kg: {
+      name: 'Grafo de conocimiento',
+      root: 'KG',
+      nodes: [
+        ['KG','Knowledge graph',0], ['ENT','Entidades',1], ['REL','Relaciones',1], ['SEM','Semántica',1], ['RAG','RAG',1],
+        ['ORG','Organización',2], ['PAIS','País',2], ['PERS','Persona',2], ['CAUSA','Causa',2], ['EFECTO','Efecto',2], ['EMB','Embeddings',2], ['LLM','LLM',2],
+        ['TRIP','Tripletas',3], ['LINK','Link prediction',3], ['TRACE','Trazabilidad',3], ['QUERY','Consulta',3], ['CTX','Contexto',3]
+      ],
+      edges: [['KG','ENT'],['KG','REL'],['KG','SEM'],['KG','RAG'],['ENT','ORG'],['ENT','PAIS'],['ENT','PERS'],['REL','CAUSA'],['REL','EFECTO'],['SEM','EMB'],['RAG','LLM'],['REL','TRIP'],['EMB','LINK'],['RAG','TRACE'],['RAG','QUERY'],['LLM','CTX']]
+    },
+    edu: {
+      name: 'Mapa curricular',
+      root: 'CURSO',
+      nodes: [
+        ['CURSO','Curso',0], ['BASE','Base matemática',1], ['PY','Python',1], ['ML','Machine learning',1], ['PROY','Proyecto',1],
+        ['ALG','Álgebra',2], ['PROB','Probabilidad',2], ['PANDAS','pandas',2], ['SK','scikit-learn',2], ['GRAFOS','Grafos',2], ['EVAL','Evaluación',2],
+        ['RSGD','RSGD',3], ['GNN','GNN',3], ['RAG','RAG',3], ['DASH','Dashboard',3], ['DEPLOY','Deploy',3]
+      ],
+      edges: [['CURSO','BASE'],['CURSO','PY'],['CURSO','ML'],['CURSO','PROY'],['BASE','ALG'],['BASE','PROB'],['PY','PANDAS'],['ML','SK'],['ML','GRAFOS'],['ML','EVAL'],['GRAFOS','RSGD'],['GRAFOS','GNN'],['PROY','RAG'],['PROY','DASH'],['PROY','DEPLOY']]
+    },
+    reco: {
+      name: 'Recomendador jerárquico',
+      root: 'CAT',
+      nodes: [
+        ['CAT','Catálogo',0], ['USER','Usuarios',1], ['ITEM','Items',1], ['PREF','Preferencias',1], ['RANK','Ranking',1],
+        ['SEG','Segmentos',2], ['HIST','Historial',2], ['ELEC','Electrónica',2], ['LIB','Libros',2], ['SIM','Similitud',2], ['CTR','CTR',2],
+        ['PHONE','Celulares',3], ['AI_BOOK','IA aplicada',3], ['NEXT','Next best offer',3], ['COLD','Cold start',3]
+      ],
+      edges: [['CAT','USER'],['CAT','ITEM'],['CAT','PREF'],['CAT','RANK'],['USER','SEG'],['USER','HIST'],['ITEM','ELEC'],['ITEM','LIB'],['PREF','SIM'],['RANK','CTR'],['ELEC','PHONE'],['LIB','AI_BOOK'],['RANK','NEXT'],['PREF','COLD']]
+    },
+    bio: {
+      name: 'Ontología biomédica',
+      root: 'BIO',
+      nodes: [
+        ['BIO','Biomedicina',0], ['SIS','Sistema',1], ['DX','Diagnóstico',1], ['TRAT','Tratamiento',1], ['DATA','Datos',1],
+        ['CARD','Cardio',2], ['NEURO','Neuro',2], ['LAB','Laboratorio',2], ['IMG','Imágenes',2], ['FARM','Fármaco',2], ['GUIDE','Guías',2],
+        ['ARR','Arritmia',3], ['TUM','Tumor',3], ['PCR','PCR',3], ['MRI','MRI',3], ['DOSIS','Dosis',3]
+      ],
+      edges: [['BIO','SIS'],['BIO','DX'],['BIO','TRAT'],['BIO','DATA'],['SIS','CARD'],['SIS','NEURO'],['DX','LAB'],['DX','IMG'],['TRAT','FARM'],['TRAT','GUIDE'],['CARD','ARR'],['NEURO','TUM'],['LAB','PCR'],['IMG','MRI'],['FARM','DOSIS']]
+    },
+    risk: {
+      name: 'Riesgo y anomalías',
+      root: 'RIESGO',
+      nodes: [
+        ['RIESGO','Riesgo',0], ['TX','Transacciones',1], ['RED','Red',1], ['ALERTA','Alertas',1], ['MODELO','Modelo',1],
+        ['HUB','Hubs',2], ['PUENTE','Puentes',2], ['FRAUDE','Fraude',2], ['BOT','Bots',2], ['SCORE','Score',2], ['AUDIT','Auditoría',2],
+        ['ANOM','Anomalía',3], ['CLUSTER','Cluster raro',3], ['CHAIN','Cadena',3], ['TRACE','Trazabilidad',3]
+      ],
+      edges: [['RIESGO','TX'],['RIESGO','RED'],['RIESGO','ALERTA'],['RIESGO','MODELO'],['RED','HUB'],['RED','PUENTE'],['ALERTA','FRAUDE'],['ALERTA','BOT'],['MODELO','SCORE'],['MODELO','AUDIT'],['FRAUDE','ANOM'],['HUB','CLUSTER'],['TX','CHAIN'],['AUDIT','TRACE']]
+    }
+  };
+
+  function prepareScenario(raw){
+    const nodes = raw.nodes.map(([id,label,level]) => ({id,label,level}));
+    const levels = {};
+    nodes.forEach(n => { if(!levels[n.level]) levels[n.level] = []; levels[n.level].push(n); });
+    Object.keys(levels).forEach(lvl => {
+      const arr = levels[lvl];
+      if(Number(lvl) === 0){ arr.forEach(n => n.angle = -Math.PI/2); return; }
+      const spread = Math.PI * 1.78;
+      const start = -Math.PI/2 - spread/2 + Number(lvl)*0.13;
+      arr.forEach((n,i) => { n.angle = start + spread * (i + 0.5) / arr.length; });
+    });
+    return { ...raw, nodes };
+  }
+
+  let currentScenarioKey = 'ai';
+  let currentScenario = prepareScenario(SCENARIOS[currentScenarioKey]);
+
+  const sim = {
+    x: [-0.48, 0.26],
+    ghost: [-0.48, 0.26],
+    target: [0.56, -0.34],
+    batch: [],
+    path: [[-0.48, 0.26]],
+    ghostPath: [[-0.48, 0.26]],
+    iter: 0,
+    timer: null,
+    targetType: 'manual',
+    showGrid: true,
+    showPath: true,
+    showGeo: true,
+    showTree: true,
+    showVector: true,
+    showGhost: false,
+    stochastic: false,
+    pulseUntil: 0,
+    selectedNode: null
+  };
+
+  function nodePoint(n){
+    const rByLevel = [0, 0.34, 0.62, 0.86, 0.93];
+    const r = rByLevel[n.level] ?? Math.min(0.92, 0.20 + 0.18*n.level);
+    return [r * Math.cos(n.angle), r * Math.sin(n.angle)];
+  }
+
+  function applyTheme(theme){
+    body.dataset.theme = theme;
+    $('themeSelect').value = theme;
+    $('themeSelectHero').value = theme;
+    drawAll();
+  }
+  function cycleTheme(){
+    const cur = body.dataset.theme || 'midnight';
+    const next = THEMES[(THEMES.indexOf(cur)+1) % THEMES.length];
+    applyTheme(next);
+  }
+  $('themeBtn').onclick = cycleTheme;
+  $('themeBtnHero').onclick = cycleTheme;
+  $('themeSelect').onchange = (e) => applyTheme(e.target.value);
+  $('themeSelectHero').onchange = (e) => applyTheme(e.target.value);
+  document.querySelectorAll('[data-set-theme]').forEach(chip => chip.onclick = () => applyTheme(chip.dataset.setTheme));
+
+  function resizeCanvas(canvas, fallbackH){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(360, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(fallbackH, Math.floor(rect.height * dpr));
+    return {w: canvas.width, h: canvas.height, dpr};
+  }
+  function drawCircle(ctx, x, y, r, fill, stroke, lw=1){
+    ctx.beginPath(); ctx.arc(x,y,r,0,TAU); if(fill){ctx.fillStyle=fill; ctx.fill();} if(stroke){ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke();}
+  }
+  function drawLine(ctx, a, b, stroke, lw=1, dash=null){
+    ctx.save(); ctx.strokeStyle=stroke; ctx.lineWidth=lw; if(dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); ctx.restore();
+  }
+  function drawText(ctx, text, x, y, opts={}){
+    ctx.save(); ctx.fillStyle = opts.fill || cssVar('--text'); ctx.font = opts.font || `${14*(window.devicePixelRatio||1)}px ${getComputedStyle(body).fontFamily}`; ctx.textAlign = opts.align || 'left'; ctx.textBaseline = opts.baseline || 'middle'; ctx.fillText(text, x, y); ctx.restore();
+  }
+
+  function getDiskTransform(canvas){
+    const {w,h,dpr} = resizeCanvas(canvas, 680);
+    const cx = w/2;
+    const cy = h/2 + 18*dpr;
+    const R = Math.min(w, h) * 0.365;
+    const toPx = (p) => [cx + p[0]*R, cy - p[1]*R];
+    const fromPx = (x,y) => [(x-cx)/R, -(y-cy)/R];
+    return {w,h,dpr,cx,cy,R,toPx,fromPx};
+  }
+
+  function drawHyperbolicGrid(ctx, tr){
+    const {cx,cy,R,dpr} = tr;
+    for(let rr=0.2; rr<1; rr+=0.2){ drawCircle(ctx,cx,cy,R*rr,null,'rgba(55,231,194,0.15)',1*dpr); }
+    for(let i=0;i<20;i++){
+      const a = TAU*i/20;
+      drawLine(ctx, [cx,cy], [cx+R*Math.cos(a), cy-R*Math.sin(a)], 'rgba(91,185,255,0.105)', 1*dpr);
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(184,148,255,0.13)';
+    ctx.lineWidth = 1*dpr;
+    for(let i=-4;i<=4;i++){
+      const off = i*0.15;
+      ctx.beginPath();
+      for(let t=-1;t<=1.001;t+=0.025){
+        const p=[t, off*(1-t*t)];
+        const [x,y]=tr.toPx(projectInside(p,0.999));
+        if(t===-1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawHierarchy(ctx, tr){
+    if(!sim.showTree) return;
+    const dpr = tr.dpr;
+    const pos = Object.fromEntries(currentScenario.nodes.map(n => [n.id, tr.toPx(nodePoint(n))]));
+    currentScenario.edges.forEach(([a,b]) => {
+      const active = sim.selectedNode && (sim.selectedNode.id === a || sim.selectedNode.id === b);
+      drawLine(ctx, pos[a], pos[b], active ? 'rgba(247,215,108,0.92)' : 'rgba(167,190,212,0.36)', active ? 3*dpr : 1.4*dpr);
+    });
+    const now = performance.now();
+    currentScenario.nodes.forEach((n) => {
+      const p = pos[n.id];
+      const active = sim.selectedNode && sim.selectedNode.id === n.id;
+      const baseR = (n.level === 0 ? 16 : n.level === 1 ? 12 : n.level === 2 ? 10 : 8) * dpr;
+      const pulse = now < sim.pulseUntil ? 1 + 0.28*Math.sin(now*0.015 - n.level*0.8) : 1;
+      drawCircle(ctx, p[0], p[1], active ? baseR*1.65 : baseR*pulse, active ? COLORS.yellow : (n.id==='RSGD' ? COLORS.cyan : 'rgba(184,148,255,0.86)'), 'rgba(255,255,255,0.84)', 1.1*dpr);
+      if(n.level <= 2 || active){
+        drawText(ctx, n.label, p[0] + 12*dpr, p[1] - 12*dpr, {fill: active ? COLORS.yellow : cssVar('--text'), font:`${11*dpr}px ${getComputedStyle(body).fontFamily}`});
+      }
+    });
+  }
+
+  function drawApproxGeodesic(ctx, tr){
+    if(!sim.showGeo) return;
+    drawLine(ctx, tr.toPx(sim.x), tr.toPx(sim.target), 'rgba(247,215,108,0.70)', 2.4*tr.dpr, [8*tr.dpr, 9*tr.dpr]);
+  }
+
+  function drawVector(ctx, tr){
+    if(!sim.showVector) return;
+    const a = tr.toPx(sim.x);
+    const dir = sub(sim.target, sim.x);
+    const scale = riemannianScale(sim.x);
+    const end = tr.toPx(add(sim.x, mul(dir, 0.30*scale*3.8)));
+    drawLine(ctx, a, end, 'rgba(54,231,199,0.95)', 4*tr.dpr);
+    drawCircle(ctx, end[0], end[1], 5*tr.dpr, COLORS.cyan, null);
+  }
+
+  function drawPath(ctx, tr, path, color, show=true){
+    if(!show || path.length < 2) return;
+    const ctx2 = tr.ctx;
+    ctx2.save();
+    ctx2.strokeStyle = color;
+    ctx2.lineWidth = 3.1 * tr.dpr;
+    ctx2.lineJoin = 'round';
+    ctx2.lineCap = 'round';
+    ctx2.beginPath();
+    path.forEach((p,i) => { const q=tr.toPx(p); if(i===0) ctx2.moveTo(q[0],q[1]); else ctx2.lineTo(q[0],q[1]); });
+    ctx2.stroke();
+    ctx2.restore();
+  }
+
+  function drawMain(){
+    const canvas = $('mainCanvas');
+    const tr = getDiskTransform(canvas);
+    const ctx = canvas.getContext('2d');
+    tr.ctx = ctx;
+    const {w,h,dpr,cx,cy,R} = tr;
+    ctx.clearRect(0,0,w,h);
+
+    const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.32);
+    grd.addColorStop(0,'rgba(54,231,199,0.10)');
+    grd.addColorStop(0.62,'rgba(91,185,255,0.035)');
+    grd.addColorStop(1,'rgba(0,0,0,0.0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0,0,w,h);
+
+    drawCircle(ctx, cx, cy, R, 'rgba(255,255,255,0.032)', 'rgba(54,231,199,0.72)', 2.4*dpr);
+    drawCircle(ctx, cx, cy, R*0.985, null, 'rgba(255,255,255,0.32)', 1*dpr);
+    if(sim.showGrid) drawHyperbolicGrid(ctx, tr);
+
+    drawHierarchy(ctx, tr);
+    drawApproxGeodesic(ctx, tr);
+    drawVector(ctx, tr);
+    drawPath(ctx, tr, sim.path, 'rgba(247,215,108,0.95)', sim.showPath);
+    if(sim.showGhost) drawPath(ctx, tr, sim.ghostPath, 'rgba(255,111,145,0.68)', sim.showPath);
+
+    if(sim.batch.length){
+      sim.batch.forEach((p,i) => {
+        const bp = tr.toPx(p);
+        drawCircle(ctx, bp[0], bp[1], 6*dpr, i%2 ? 'rgba(91,185,255,0.85)' : 'rgba(184,148,255,0.85)', 'rgba(255,255,255,0.45)', 1*dpr);
+      });
+    }
+
+    const tp = tr.toPx(sim.target);
+    drawCircle(ctx, tp[0], tp[1], 16*dpr, COLORS.green, 'rgba(255,255,255,0.9)', 1.5*dpr);
+    drawCircle(ctx, tp[0], tp[1], 26*dpr, null, 'rgba(131,244,154,0.35)', 1.5*dpr);
+    drawText(ctx, 'objetivo', tp[0]+22*dpr, tp[1], {fill:COLORS.green, font:`${13*dpr}px ${getComputedStyle(body).fontFamily}`});
+
+    if(sim.showGhost){
+      const gp = tr.toPx(sim.ghost);
+      drawCircle(ctx, gp[0], gp[1], 13*dpr, COLORS.red, 'rgba(255,255,255,0.82)', 1.4*dpr);
+      drawText(ctx, 'SGD plano', gp[0]+18*dpr, gp[1], {fill:COLORS.red, font:`${12*dpr}px ${getComputedStyle(body).fontFamily}`});
+    }
+
+    const xp = tr.toPx(sim.x);
+    drawCircle(ctx, xp[0], xp[1], 17*dpr, COLORS.cyan, 'rgba(255,255,255,0.95)', 1.7*dpr);
+    drawCircle(ctx, xp[0], xp[1], 30*dpr, null, 'rgba(54,231,199,0.32)', 1.5*dpr);
+    drawText(ctx, 'xₜ', xp[0]+23*dpr, xp[1], {fill:COLORS.cyan, font:`${14*dpr}px ${getComputedStyle(body).fontFamily}`});
+
+    drawText(ctx, currentScenario.name + ' · Disco de Poincaré', cx, cy - R - 30*dpr, {align:'center', fill:cssVar('--text'), font:`${17*dpr}px ${getComputedStyle(body).fontFamily}`});
+    drawText(ctx, '‖x‖ < 1', cx, cy + R + 28*dpr, {align:'center', fill:cssVar('--muted'), font:`${13*dpr}px ${getComputedStyle(body).fontFamily}`});
+
+    updateStats();
+    if(performance.now() < sim.pulseUntil) requestAnimationFrame(drawMain);
+  }
+
+  function updateStats(){
+    const d = poincareDistance(sim.x, sim.target);
+    const n = norm(sim.x);
+    const lambda = lambdaFactor(sim.x);
+    const scale = riemannianScale(sim.x);
+    $('iterStat').textContent = sim.iter;
+    $('normStat').textContent = n.toFixed(3);
+    $('distStat').textContent = d.toFixed(3);
+    $('lossStat').textContent = (0.5*d*d).toFixed(3);
+    $('lambdaStat').textContent = lambda.toFixed(2);
+    $('gradStat').textContent = scale.toFixed(3);
+    $('targetStat').textContent = sim.targetType;
+    $('statusStat').textContent = sim.timer ? 'Auto' : (sim.stochastic ? 'Estocástico' : 'Listo');
+    if(n > 0.90) $('canvasHint').textContent = 'El punto está cerca de la frontera: visualmente parece un pequeño movimiento, pero hiperbólicamente puede representar un cambio muy grande.';
+  }
+
+  function rsgdStep(){
+    const eta = Number($('etaRange').value) / 100;
+    let direction = sub(sim.target, sim.x);
+    if(sim.stochastic){
+      direction = add(direction, [rand(-0.18,0.18), rand(-0.18,0.18)]);
+    }
+    const eGrad = mul(direction, -1);
+    const rScale = riemannianScale(sim.x);
+    const step = mul(eGrad, -eta * rScale * 3.25);
+    let next = add(sim.x, step);
+    next = projectInside(next, 0.962);
+
+    const ghostDir = sub(sim.target, sim.ghost);
+    let ghostNext = add(sim.ghost, mul(ghostDir, eta * 0.65));
+    ghostNext = projectInside(ghostNext, 0.985);
+
+    if(norm(sub(next, sim.target)) < 0.002) next = [...sim.target];
+    sim.x = next;
+    sim.ghost = ghostNext;
+    sim.path.push([...sim.x]);
+    sim.ghostPath.push([...sim.ghost]);
+    if(sim.path.length > 500) sim.path.shift();
+    if(sim.ghostPath.length > 500) sim.ghostPath.shift();
+    sim.iter++;
+    drawMain();
+  }
+
+  function setAuto(on){
+    if(on){
+      if(sim.timer) clearInterval(sim.timer);
+      sim.timer = setInterval(rsgdStep, Number($('speedRange').value));
+      $('autoBtn').textContent = 'Pausar';
+    } else {
+      if(sim.timer) clearInterval(sim.timer);
+      sim.timer = null;
+      $('autoBtn').textContent = 'Auto';
+    }
+    drawMain();
+  }
+
+  function resetSim(){
+    setAuto(false);
+    sim.x = [-0.48, 0.26];
+    sim.ghost = [-0.48, 0.26];
+    sim.target = [0.56, -0.34];
+    sim.batch = [];
+    sim.path = [[...sim.x]];
+    sim.ghostPath = [[...sim.ghost]];
+    sim.iter = 0;
+    sim.targetType = 'manual';
+    sim.selectedNode = null;
+    $('canvasHint').textContent = 'Sugerencia: activá “Auto” y luego “Objetivo frontera” para observar cómo el punto se aproxima a una zona de mayor especificidad jerárquica sin salir del disco.';
+    drawMain();
+  }
+
+  function setTarget(p, type='aleatorio'){
+    sim.target = projectInside(p, 0.92);
+    sim.targetType = type;
+    sim.batch = [];
+    sim.path = [[...sim.x]];
+    sim.ghostPath = [[...sim.ghost]];
+    sim.selectedNode = null;
+    drawMain();
+  }
+
+  function loadScenario(key){
+    currentScenarioKey = key;
+    currentScenario = prepareScenario(SCENARIOS[key]);
+    $('scenarioSelect').value = key;
+    resetSim();
+    sim.targetType = currentScenario.name;
+    sim.pulseUntil = performance.now() + 1800;
+    drawMain();
+    document.querySelector('#laboratorio').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  $('stepBtn').onclick = rsgdStep;
+  $('autoBtn').onclick = () => setAuto(!sim.timer);
+  $('resetBtn').onclick = resetSim;
+  $('clearPathBtn').onclick = () => { sim.path = [[...sim.x]]; sim.ghostPath = [[...sim.ghost]]; drawMain(); };
+  $('newTargetBtn').onclick = () => setTarget(randomPoint(0.85), 'aleatorio');
+  $('boundaryDemoBtn').onclick = () => setTarget([0.88*Math.cos(-0.18), 0.88*Math.sin(-0.18)], 'frontera');
+  $('centerDemoBtn').onclick = () => setTarget([0.03, -0.02], 'centro');
+  $('selectLeafBtn').onclick = () => {
+    const leaves = currentScenario.nodes.filter(n => n.level === Math.max(...currentScenario.nodes.map(x=>x.level)));
+    const n = leaves[Math.floor(Math.random()*leaves.length)];
+    sim.selectedNode = n;
+    setTarget(nodePoint(n), 'hoja: ' + n.label);
+    sim.selectedNode = n;
+    drawMain();
+  };
+  $('batchBtn').onclick = () => {
+    sim.batch = Array.from({length: 10}, () => randomPoint(0.88));
+    const avg = sim.batch.reduce((acc,p)=>[acc[0]+p[0], acc[1]+p[1]], [0,0]).map(v => v/sim.batch.length);
+    setTarget(projectInside(avg,0.86), 'mini-batch');
+    sim.batch = Array.from({length: 10}, () => add(sim.target, [rand(-0.12,0.12), rand(-0.12,0.12)])).map(p => projectInside(p,0.92));
+    drawMain();
+  };
+  $('fastBtn').onclick = () => { for(let i=0;i<30;i++) rsgdStep(); };
+  $('tourBtn').onclick = () => {
+    resetSim();
+    sim.pulseUntil = performance.now() + 1800;
+    drawMain();
+    setTimeout(() => $('selectLeafBtn').click(), 700);
+    setTimeout(() => setAuto(true), 1200);
+    setTimeout(() => setAuto(false), 6500);
+  };
+  $('pulseBtn').onclick = () => { sim.pulseUntil = performance.now() + 2200; drawMain(); };
+
+  $('scenarioSelect').onchange = (e) => loadScenario(e.target.value);
+  document.querySelectorAll('[data-load-scenario]').forEach(card => card.onclick = () => loadScenario(card.dataset.loadScenario));
+
+  $('etaRange').oninput = () => { $('etaValue').textContent = (Number($('etaRange').value)/100).toFixed(2); };
+  $('speedRange').oninput = () => {
+    $('speedValue').textContent = $('speedRange').value + ' ms';
+    if(sim.timer) setAuto(true);
+  };
+
+  const toggles = [
+    ['toggleGridBtn','showGrid','Grilla'],
+    ['togglePathBtn','showPath','Trayectoria'],
+    ['toggleGeoBtn','showGeo','Geodésica'],
+    ['toggleTreeBtn','showTree','Árbol'],
+    ['toggleVectorBtn','showVector','Vector'],
+    ['toggleGhostBtn','showGhost','Comparar SGD']
+  ];
+  toggles.forEach(([id,key,label]) => {
+    $(id).onclick = () => {
+      sim[key] = !sim[key];
+      $(id).classList.toggle('active', sim[key]);
+      $(id).textContent = sim[key] ? label : 'Mostrar ' + label;
+      drawMain();
+    };
+  });
+  $('toggleNoiseBtn').onclick = () => {
+    sim.stochastic = !sim.stochastic;
+    $('toggleNoiseBtn').classList.toggle('active', sim.stochastic);
+    $('toggleNoiseBtn').textContent = sim.stochastic ? 'Ruido activado' : 'Ruido estocástico';
+    drawMain();
+  };
+
+  $('mainCanvas').addEventListener('click', (ev) => {
+    const canvas = $('mainCanvas');
+    const tr = getDiskTransform(canvas);
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const x = (ev.clientX - rect.left)*dpr;
+    const y = (ev.clientY - rect.top)*dpr;
+    const p = tr.fromPx(x,y);
+    if(norm(p) < 0.96) setTarget(p, 'clic');
+  });
+
+  const hero = {t:0};
+  function drawHeroCanvas(){
+    const c = $('heroCanvas');
+    const {w,h,dpr} = resizeCanvas(c, 360);
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0,0,w,h);
+    const cx=w/2, cy=h/2, R=Math.min(w,h)*0.39;
+    drawCircle(ctx,cx,cy,R,'rgba(255,255,255,0.025)','rgba(54,231,199,0.55)',2*dpr);
+    for(let rr=.25; rr<1; rr+=.25) drawCircle(ctx,cx,cy,R*rr,null,'rgba(54,231,199,0.12)',1*dpr);
+    const toPx=(p)=>[cx+p[0]*R, cy-p[1]*R];
+    const nodes = currentScenario.nodes.slice(0,15);
+    const pos = Object.fromEntries(nodes.map(n => [n.id, toPx(nodePoint(n))]));
+    currentScenario.edges.filter(e=>pos[e[0]]&&pos[e[1]]).forEach(([a,b])=>drawLine(ctx,pos[a],pos[b],'rgba(167,190,212,0.35)',1.4*dpr));
+    nodes.forEach((n,i)=>{
+      const p=pos[n.id];
+      const pulse = 1 + 0.18*Math.sin(hero.t*0.035+i);
+      drawCircle(ctx,p[0],p[1],(n.level===0?15:10)*dpr*pulse,n.level===0?COLORS.cyan:COLORS.purple,'rgba(255,255,255,0.78)',1*dpr);
+      if(n.level<2) drawText(ctx,n.label,p[0]+13*dpr,p[1],{fill:cssVar('--text'),font:`${11*dpr}px ${getComputedStyle(body).fontFamily}`});
+    });
+    const moving = [0.56*Math.cos(hero.t*0.014), 0.56*Math.sin(hero.t*0.014)];
+    const mp=toPx(moving);
+    drawCircle(ctx,mp[0],mp[1],11*dpr,COLORS.yellow,'rgba(255,255,255,0.9)',1*dpr);
+    hero.t++;
+    requestAnimationFrame(drawHeroCanvas);
+  }
+
+  const glossaryTerms = [
+    ['RSGD','Descenso por gradiente estocástico adaptado a variedades. En lugar de actualizar parámetros en un plano, usa el gradiente riemanniano y una retracción para permanecer dentro del espacio geométrico.'],
+    ['Disco de Poincaré','Modelo del espacio hiperbólico donde todos los puntos están dentro de un disco. El borde representa el infinito hiperbólico, no un límite euclídeo común.'],
+    ['Curvatura negativa','Propiedad geométrica que permite que el volumen crezca rápidamente con el radio. Por eso resulta útil para representar árboles y jerarquías.'],
+    ['Embedding','Representación continua de un objeto discreto, como un nodo de un grafo, mediante un vector o punto en un espacio geométrico.'],
+    ['Retracción','Operación que devuelve el punto actualizado a la variedad después de moverse en una dirección de gradiente.'],
+    ['Gradiente riemanniano','Gradiente que tiene en cuenta la métrica del espacio curvo donde viven los parámetros.'],
+    ['Frontera hiperbólica','Borde visual del disco de Poincaré. Representa direcciones hacia el infinito, muy útil para ubicar conceptos específicos.'],
+    ['Geodésica','Camino más corto dentro de una geometría. En el disco de Poincaré no siempre coincide con una línea recta euclídea.'],
+    ['Taxonomía','Estructura jerárquica de conceptos, desde categorías generales hasta subcategorías específicas.'],
+    ['Grafo de conocimiento','Red de entidades y relaciones explícitas que permite representar conocimiento estructurado y recuperar contexto verificable.'],
+    ['Mini-batch','Subconjunto de ejemplos usado para estimar el gradiente. Introduce variabilidad y hace que el proceso sea estocástico.'],
+    ['Distorsión','Diferencia entre las distancias del grafo original y las distancias del embedding aprendido.']
+  ];
+
+  function drawGlossary(){
+    const q = $('glossarySearch').value.toLowerCase().trim();
+    const grid = $('glossaryGrid');
+    grid.innerHTML = '';
+    glossaryTerms
+      .filter(([t,d]) => !q || t.toLowerCase().includes(q) || d.toLowerCase().includes(q))
+      .forEach(([t,d]) => {
+        const div = document.createElement('div');
+        div.className = 'term';
+        div.innerHTML = `<b>${t}</b><span class="muted">${d}</span>`;
+        grid.appendChild(div);
+      });
+  }
+  $('glossarySearch').oninput = drawGlossary;
+
+  function drawAll(){ drawMain(); }
+  window.addEventListener('resize', drawAll);
+  applyTheme('midnight');
+  resetSim();
+  drawGlossary();
+  drawHeroCanvas();
+</script>
+</body>
+</html>

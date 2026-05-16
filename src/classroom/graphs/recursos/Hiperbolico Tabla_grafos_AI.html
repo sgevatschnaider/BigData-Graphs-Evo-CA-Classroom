@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grafos, espacios geométricos e IA | Matriz avanzada interactiva</title>
+  <style>
+    :root {
+      --bg: #050a14;
+      --bg2: #0a1830;
+      --panel: rgba(11, 24, 44, 0.84);
+      --panel-strong: rgba(14, 31, 58, 0.94);
+      --panel-soft: rgba(255,255,255,0.055);
+      --text: #edf7ff;
+      --muted: #abc0d7;
+      --faint: rgba(237,247,255,0.62);
+      --line: rgba(255,255,255,0.13);
+      --accent: #42d9ff;
+      --accent2: #87f7c6;
+      --accent3: #ffd36b;
+      --accent4: #bda1ff;
+      --danger: #ff7b9c;
+      --orange: #ffae72;
+      --shadow: 0 30px 90px rgba(0,0,0,0.42);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --mono: Consolas, "SFMono-Regular", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body.light {
+      --bg: #f5f8fc;
+      --bg2: #e8eff8;
+      --panel: rgba(255,255,255,0.90);
+      --panel-strong: rgba(255,255,255,0.98);
+      --panel-soft: rgba(10,28,52,0.045);
+      --text: #112235;
+      --muted: #536a82;
+      --faint: rgba(17,34,53,0.66);
+      --line: rgba(13, 39, 70, 0.14);
+      --shadow: 0 24px 76px rgba(65, 91, 120, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(66,217,255,.24), transparent 31rem),
+        radial-gradient(circle at 88% 11%, rgba(135,247,198,.18), transparent 32rem),
+        radial-gradient(circle at 60% 88%, rgba(189,161,255,.13), transparent 34rem),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      overflow-x: hidden;
+    }
+
+    body.presentation .side,
+    body.presentation .table-toolbar,
+    body.presentation .controls { display: none; }
+
+    body.presentation .layout { grid-template-columns: 1fr; }
+    body.presentation .wrap { max-width: 1600px; }
+    body.presentation .card { min-height: 210px; }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+    }
+
+    .wrap {
+      width: min(1540px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 44px;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      align-items: end;
+      padding: 26px 0 20px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(66,217,255,.09);
+      color: var(--accent2);
+      border-radius: 999px;
+      padding: 8px 14px;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 18px var(--accent2);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: .75; }
+      50% { transform: scale(1.35); opacity: 1; }
+    }
+
+    h1 {
+      max-width: 1080px;
+      margin: 18px 0 14px;
+      font-size: clamp(42px, 5.3vw, 86px);
+      line-height: .92;
+      letter-spacing: -0.065em;
+    }
+
+    .lead {
+      max-width: 1120px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 23px);
+      line-height: 1.58;
+    }
+
+    .hero-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(66,217,255,.13), rgba(135,247,198,.07), rgba(189,161,255,.08));
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      right: -110px;
+      top: -100px;
+      background: radial-gradient(circle, rgba(66,217,255,.24), transparent 70%);
+    }
+
+    .hero-card h2 {
+      position: relative;
+      margin: 0 0 10px;
+      font-size: 24px;
+      letter-spacing: -.035em;
+    }
+
+    .hero-card p {
+      position: relative;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button, input, select { font-family: inherit; }
+
+    button {
+      border: 0;
+      border-radius: 15px;
+      padding: 11px 15px;
+      font-weight: 900;
+      cursor: pointer;
+      color: #051120;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 16px 38px rgba(66,217,255,.16);
+      transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    button:active { transform: translateY(0); }
+
+    button.secondary {
+      color: var(--text);
+      background: rgba(255,255,255,.075);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.ghost {
+      color: var(--accent2);
+      background: transparent;
+      border: 1px dashed rgba(135,247,198,.36);
+      box-shadow: none;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 375px minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .side {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 19px 20px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2, .panel-head h3 {
+      margin: 0;
+      letter-spacing: -0.035em;
+    }
+
+    .panel-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .controls {
+      padding: 16px 18px 18px;
+      display: grid;
+      gap: 13px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    input[type="search"], select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 12px 12px;
+      outline: none;
+      background: var(--panel-strong);
+      color: var(--text);
+    }
+
+    input[type="search"]:focus, select:focus { border-color: rgba(66,217,255,.48); }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 18px 18px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      border-radius: 19px;
+      padding: 13px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .stat strong {
+      font-size: 27px;
+      letter-spacing: -0.055em;
+    }
+
+    .decision { padding: 0 18px 18px; }
+
+    .decision-card {
+      border: 1px solid rgba(66,217,255,.20);
+      background: linear-gradient(135deg, rgba(66,217,255,.10), rgba(135,247,198,.055));
+      border-radius: 22px;
+      padding: 15px;
+    }
+
+    .decision-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: -.025em;
+    }
+
+    .decision-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.52;
+      font-size: 14px;
+    }
+
+    .tagline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.075);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.euclidean { color: var(--accent); }
+    .tag.hyperbolic { color: var(--accent2); }
+    .tag.riemannian { color: var(--accent3); }
+    .tag.temporal { color: var(--danger); }
+    .tag.product { color: var(--accent4); }
+    .tag.spherical { color: var(--orange); }
+    .tag.semantic { color: #9dd4ff; }
+
+    .content { display: grid; gap: 18px; }
+
+    .map-panel { overflow: hidden; }
+
+    .map-area {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1.12fr .88fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .svgbox {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        rgba(255,255,255,.04);
+      background-size: 38px 38px;
+      min-height: 390px;
+      overflow: hidden;
+    }
+
+    canvas#particleCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: .72;
+    }
+
+    svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 390px;
+      display: block;
+      z-index: 1;
+    }
+
+    .map-title {
+      fill: var(--text);
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing: -.03em;
+    }
+
+    .map-muted { fill: var(--muted); font-size: 12px; }
+
+    .flow-line {
+      stroke: rgba(255,255,255,.25);
+      stroke-width: 3.2;
+      fill: none;
+      stroke-dasharray: 8 8;
+      animation: dash 1.45s linear infinite;
+    }
+
+    body.paused .flow-line { animation-play-state: paused; }
+
+    @keyframes dash { to { stroke-dashoffset: -32; } }
+
+    .flow-node {
+      stroke: rgba(255,255,255,.78);
+      stroke-width: 2.2;
+      filter: drop-shadow(0 12px 22px rgba(0,0,0,.30));
+    }
+
+    .flow-label {
+      fill: #04101d;
+      font-weight: 950;
+      font-size: 13px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    body.light .flow-label { fill: white; }
+
+    .legend {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel-soft);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .legend h3 { margin: 0; letter-spacing: -.025em; }
+    .legend p { margin: 0; color: var(--muted); line-height: 1.55; font-size: 14px; }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      margin-top: 2px;
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+      padding: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .lab-card {
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    .lab-card b {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+      letter-spacing: -.02em;
+    }
+
+    .bar {
+      height: 9px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .45s ease;
+    }
+
+    .lab-card small {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 17px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+      min-height: 265px;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(66,217,255,.48);
+      background: linear-gradient(135deg, rgba(66,217,255,.10), rgba(255,255,255,.045));
+    }
+
+    .card.active {
+      border-color: rgba(135,247,198,.58);
+      box-shadow: 0 24px 80px rgba(135,247,198,.13);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      right: -76px;
+      top: -76px;
+      background: radial-gradient(circle, rgba(66,217,255,.22), transparent 66%);
+    }
+
+    .card h3 {
+      margin: 12px 0 10px;
+      font-size: 18px;
+      letter-spacing: -0.032em;
+      line-height: 1.18;
+    }
+
+    .card p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13.5px;
+    }
+
+    .mini {
+      font-family: var(--mono);
+      color: var(--accent2);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.13);
+      border: 1px solid var(--line);
+    }
+
+    body.light .mini { background: rgba(14, 40, 70, .045); }
+
+    .table-panel { overflow: hidden; }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .table-wrap { overflow: auto; max-height: 790px; }
+
+    table {
+      width: 100%;
+      min-width: 1320px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: rgba(9, 22, 42, .98);
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: .055em;
+      font-size: 11px;
+    }
+
+    body.light th { background: rgba(247, 250, 254, .98); }
+
+    td { color: var(--muted); line-height: 1.47; }
+    td strong { color: var(--text); }
+
+    tr { transition: background .14s ease; cursor: pointer; }
+    tr:hover td { background: rgba(66,217,255,.055); }
+    tr.selected td { background: rgba(135,247,198,.095); }
+
+    .space-badge, .algo-badge, .level-badge {
+      display: inline-flex;
+      align-items: center;
+      margin: 0 5px 5px 0;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.065);
+      white-space: nowrap;
+    }
+
+    .space-badge.euclidean { color: var(--accent); }
+    .space-badge.hyperbolic { color: var(--accent2); }
+    .space-badge.riemannian { color: var(--accent3); }
+    .space-badge.temporal { color: var(--danger); }
+    .space-badge.product { color: var(--accent4); }
+    .space-badge.spherical { color: var(--orange); }
+    .space-badge.semantic { color: #9dd4ff; }
+    .algo-badge { color: var(--text); }
+    .level-badge { color: var(--accent2); }
+
+    .explain-panel {
+      padding: 22px;
+      line-height: 1.72;
+      color: var(--muted);
+    }
+
+    .explain-panel h2 {
+      margin: 0 0 10px;
+      color: var(--text);
+      letter-spacing: -0.038em;
+    }
+
+    .explain-panel strong { color: var(--text); }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .rule {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: var(--panel-soft);
+    }
+
+    .rule b {
+      display: block;
+      color: var(--accent2);
+      margin-bottom: 7px;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .formula {
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: rgba(0,0,0,.10);
+      padding: 14px;
+    }
+
+    .formula code {
+      display: block;
+      color: var(--accent3);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    body.light .formula { background: rgba(14,40,70,.045); }
+
+    .footer {
+      padding: 26px 10px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer strong { color: var(--text); }
+
+    @media (max-width: 1260px) {
+      .hero { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      .side { position: relative; top: auto; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .map-area { grid-template-columns: 1fr; }
+      .rules-grid, .lab-grid, .formula-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { width: min(100% - 26px, 1540px); }
+      .cards, .rules-grid, .lab-grid, .formula-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 42px; }
+      .toolbar { display: grid; }
+      .toolbar button { width: 100%; }
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="wrap">
+    <header class="hero">
+      <div>
+        <div class="kicker"><span class="pulse"></span> Matriz avanzada interactiva · grafos + geometría + IA</div>
+        <h1>Qué espacio geométrico conviene para cada grafo y qué algoritmo usar.</h1>
+        <p class="lead">
+          Un laboratorio visual para comparar estructuras de grafos, espacios geométricos, algoritmos de optimización, embeddings, GNN, GraphRAG, redes temporales, topología de datos y aplicaciones reales en inteligencia artificial.
+        </p>
+        <div class="toolbar">
+          <button onclick="scrollToTable()">Ver matriz completa</button>
+          <button class="secondary" onclick="toggleTheme()">Cambiar tema</button>
+          <button class="secondary" onclick="toggleMotion()">Pausar / animar</button>
+          <button class="secondary" onclick="randomCase()">Caso aleatorio</button>
+          <button class="secondary" onclick="togglePresentation()">Modo clase</button>
+          <button class="ghost" onclick="copyVisibleRows()">Copiar filas visibles</button>
+        </div>
+      </div>
+
+      <aside class="hero-card">
+        <h2>Idea rectora</h2>
+        <p>
+          La elección no empieza por el algoritmo, sino por la forma de los datos. Una red plana, una jerarquía, una superficie curva, un sistema temporal o un grafo heterogéneo no piden la misma geometría ni la misma estrategia de aprendizaje.
+        </p>
+      </aside>
+    </header>
+
+    <main class="layout">
+      <aside class="panel side">
+        <div class="panel-head">
+          <h2>Explorador</h2>
+          <p>Filtrá por estructura, espacio, algoritmo o dominio para encontrar la recomendación más adecuada.</p>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label>Buscar</label>
+            <input id="searchBox" type="search" placeholder="Ejemplo: árbol, RAG, esférico, comercio..." oninput="applyFilters()" />
+          </div>
+
+          <div class="field">
+            <label>Espacio geométrico</label>
+            <select id="spaceFilter" onchange="applyFilters()">
+              <option value="todos">Todos</option>
+              <option value="euclídeo">Euclídeo</option>
+              <option value="hiperbólico">Hiperbólico</option>
+              <option value="riemanniana">Variedad riemanniana</option>
+              <option value="esférico">Esférico</option>
+              <option value="producto">Producto / multiplex</option>
+              <option value="temporal">Temporal / espacio-tiempo</option>
+              <option value="semántico">Semántico / vectorial</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Familia de algoritmo</label>
+            <select id="algoFilter" onchange="applyFilters()">
+              <option value="todos">Todos</option>
+              <option value="sgd">GD / SGD / Adam</option>
+              <option value="rsgd">RSGD / Riemannian Adam</option>
+              <option value="gnn">GNN / Message Passing</option>
+              <option value="node2vec">Node2Vec / DeepWalk</option>
+              <option value="matrix">Matrix Factorization</option>
+              <option value="rag">GraphRAG / Knowledge Graph</option>
+              <option value="temporal">Temporal / Dynamic</option>
+              <option value="spectral">Spectral / Laplacian</option>
+              <option value="transformer">Graph Transformer</option>
+              <option value="causal">Causal / Probabilístico</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Dominio</label>
+            <select id="domainFilter" onchange="applyFilters()"></select>
+          </div>
+
+          <div class="field">
+            <label>Caso destacado</label>
+            <select id="caseSelect" onchange="selectRowById(Number(this.value), true)"></select>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat"><span>Filas visibles</span><strong id="visibleCount">0</strong></div>
+          <div class="stat"><span>Total matriz</span><strong id="totalCount">0</strong></div>
+          <div class="stat"><span>Dominios</span><strong id="domainCount">0</strong></div>
+          <div class="stat"><span>Foco</span><strong>IA</strong></div>
+        </div>
+
+        <div class="decision">
+          <div class="decision-card" id="selectedCard">
+            <h3>Seleccioná una fila</h3>
+            <p>Al hacer clic en una tarjeta o en una fila de la matriz, aparece una explicación didáctica del caso.</p>
+          </div>
+        </div>
+      </aside>
+
+      <section class="content">
+        <section class="panel map-panel">
+          <div class="panel-head">
+            <h2>Mapa de decisión geométrico</h2>
+            <p>La geometría se elige según la estructura dominante: plana, jerárquica, curva, temporal, semántica, heterogénea o de orden superior.</p>
+          </div>
+
+          <div class="map-area">
+            <div class="svgbox">
+              <canvas id="particleCanvas"></canvas>
+              <svg viewBox="0 0 800 430" aria-label="Mapa de decisión entre grafo, espacio, algoritmo y aplicación">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1"><stop offset="0%" stop-color="#42d9ff"/><stop offset="100%" stop-color="#87f7c6"/></linearGradient>
+                  <linearGradient id="g2" x1="0" x2="1"><stop offset="0%" stop-color="#87f7c6"/><stop offset="100%" stop-color="#ffd36b"/></linearGradient>
+                  <linearGradient id="g3" x1="0" x2="1"><stop offset="0%" stop-color="#ffd36b"/><stop offset="100%" stop-color="#ff7b9c"/></linearGradient>
+                  <linearGradient id="g4" x1="0" x2="1"><stop offset="0%" stop-color="#bda1ff"/><stop offset="100%" stop-color="#42d9ff"/></linearGradient>
+                </defs>
+
+                <text x="30" y="44" class="map-title">Estructura → Geometría → Optimización → Inteligencia</text>
+                <text x="32" y="70" class="map-muted">Regla didáctica: el embedding debe deformar lo menos posible la forma del grafo.</text>
+
+                <path class="flow-line" d="M138 195 C245 95, 365 95, 465 195 S650 300, 690 195"/>
+                <path class="flow-line" d="M138 282 C270 360, 395 355, 520 282 S645 205, 690 282"/>
+                <path class="flow-line" d="M138 195 C250 245, 330 260, 438 230 S620 170, 690 195"/>
+
+                <circle cx="128" cy="195" r="62" fill="url(#g1)" class="flow-node"/>
+                <text x="128" y="188" class="flow-label">GRAFO</text>
+                <text x="128" y="208" class="flow-label">G=(V,E)</text>
+
+                <circle cx="348" cy="128" r="62" fill="url(#g2)" class="flow-node"/>
+                <text x="348" y="120" class="flow-label">ESPACIO</text>
+                <text x="348" y="141" class="flow-label">geométrico</text>
+
+                <circle cx="530" cy="220" r="62" fill="url(#g3)" class="flow-node"/>
+                <text x="530" y="212" class="flow-label">ALGORITMO</text>
+                <text x="530" y="233" class="flow-label">aprendizaje</text>
+
+                <circle cx="690" cy="282" r="62" fill="url(#g4)" class="flow-node"/>
+                <text x="690" y="275" class="flow-label">IA</text>
+                <text x="690" y="296" class="flow-label">decisión</text>
+
+                <rect x="55" y="315" width="155" height="48" rx="20" fill="rgba(66,217,255,.15)" stroke="rgba(255,255,255,.22)"/>
+                <text x="132" y="334" class="map-muted" text-anchor="middle">estructura local</text>
+                <text x="132" y="354" class="map-muted" text-anchor="middle">y global</text>
+
+                <rect x="267" y="250" width="174" height="48" rx="20" fill="rgba(135,247,198,.14)" stroke="rgba(255,255,255,.22)"/>
+                <text x="354" y="269" class="map-muted" text-anchor="middle">euclídeo · hiperbólico</text>
+                <text x="354" y="289" class="map-muted" text-anchor="middle">esférico · producto</text>
+
+                <rect x="456" y="330" width="178" height="48" rx="20" fill="rgba(255,211,107,.15)" stroke="rgba(255,255,255,.22)"/>
+                <text x="545" y="349" class="map-muted" text-anchor="middle">SGD · RSGD · GNN</text>
+                <text x="545" y="369" class="map-muted" text-anchor="middle">GraphRAG · temporal</text>
+              </svg>
+            </div>
+
+            <div class="legend">
+              <h3>Lectura rápida</h3>
+              <p>
+                La matriz no busca imponer una única respuesta. Su objetivo es mostrar qué geometría reduce mejor la distorsión cuando transformamos un grafo discreto en un espacio continuo para aprender, visualizar o predecir.
+              </p>
+              <div class="legend-row"><span class="swatch" style="background:#42d9ff"></span><span><strong>Euclídeo:</strong> redes planas, grillas, embeddings clásicos y modelos vectoriales.</span></div>
+              <div class="legend-row"><span class="swatch" style="background:#87f7c6"></span><span><strong>Hiperbólico:</strong> árboles, taxonomías, jerarquías y crecimiento exponencial.</span></div>
+              <div class="legend-row"><span class="swatch" style="background:#ffd36b"></span><span><strong>Riemanniano:</strong> superficies curvas, esferas, grupos de Lie y optimización sobre variedades.</span></div>
+              <div class="legend-row"><span class="swatch" style="background:#bda1ff"></span><span><strong>Producto / multiplex:</strong> grafos heterogéneos, multimodales, multicapa o con relaciones de naturaleza distinta.</span></div>
+              <div class="legend-row"><span class="swatch" style="background:#ff7b9c"></span><span><strong>Temporal:</strong> redes que cambian por eventos, secuencias, shocks, contagios o difusión.</span></div>
+            </div>
+          </div>
+
+          <div class="lab-grid" id="labGrid"></div>
+        </section>
+
+        <section>
+          <div class="cards" id="cards"></div>
+        </section>
+
+        <section class="panel table-panel" id="tabla">
+          <div class="panel-head">
+            <h2>Matriz completa</h2>
+            <p>Hacé clic en cualquier fila para abrir su explicación ampliada en el panel lateral.</p>
+          </div>
+          <div class="table-toolbar">
+            <span id="resultText">Mostrando todos los casos.</span>
+            <span>Estructura · espacio · algoritmo · intuición · justificación · aplicación</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tipo de estructura / grafo</th>
+                  <th>Espacio geométrico conveniente</th>
+                  <th>Algoritmo posible</th>
+                  <th>Idea central</th>
+                  <th>¿Por qué ese espacio es adecuado?</th>
+                  <th>Ejemplo de aplicación</th>
+                  <th>Dominio</th>
+                  <th>Nivel</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel explain-panel">
+          <h2>Síntesis conceptual</h2>
+          <p>
+            La decisión geométrica depende de la estructura que domina al grafo. Si el grafo se comporta como una nube de puntos, una grilla o una red con comunidades relativamente planas, el <strong>espacio euclídeo</strong> suele ser suficiente. Si el grafo tiene ramas, profundidad, niveles o crecimiento exponencial, el <strong>espacio hiperbólico</strong> suele representar mejor la estructura con menor distorsión. Si los datos viven sobre superficies curvas, grupos de rotaciones o espacios con restricciones, conviene pensar en <strong>variedades riemannianas</strong>. Y si aparecen muchos tipos de nodos, relaciones, modalidades o tiempo, puede ser mejor usar <strong>productos de espacios</strong>, arquitecturas GNN especializadas, modelos temporales o GraphRAG.
+          </p>
+
+          <div class="rules-grid">
+            <div class="rule"><b>Regla 1: estructura plana</b>Usar espacios euclídeos cuando la estructura no tiene una jerarquía profunda.</div>
+            <div class="rule"><b>Regla 2: jerarquía</b>Usar espacios hiperbólicos cuando hay árbol, taxonomía, profundidad o crecimiento exponencial.</div>
+            <div class="rule"><b>Regla 3: superficie curva</b>Usar geometría riemanniana cuando los datos viven sobre una variedad o tienen restricciones geométricas.</div>
+            <div class="rule"><b>Regla 4: complejidad real</b>Usar productos de espacios, GNN heterogéneas o modelos temporales cuando hay múltiples relaciones.</div>
+          </div>
+
+          <div class="formula-grid">
+            <div class="formula"><code>d_G(u,v) ≈ d_Z(f(u), f(v))</code>Un buen embedding busca conservar las distancias relevantes del grafo dentro del espacio geométrico elegido.</div>
+            <div class="formula"><code>Vol_H(r) crece de forma exponencial</code>Por eso el espacio hiperbólico es tan natural para árboles y taxonomías profundas.</div>
+            <div class="formula"><code>h_v ← UPDATE(h_v, AGG({h_u : u ∈ N(v)}))</code>Las GNN aprenden representaciones propagando información entre vecinos mediante message passing.</div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br>
+      HTML interactivo · Grafos, espacios geométricos, embeddings, GNN, GraphRAG e inteligencia artificial
+    </footer>
+  </div>
+
+  <script>
+    "use strict";
+
+    const data = [
+  {
+    "id": 1,
+    "estructura": "Grafo simple no dirigido",
+    "espacio": "Espacio euclídeo ℝⁿ",
+    "algoritmo": "Gradient Descent / SGD",
+    "familia": "SGD",
+    "dominio": "Fundamentos",
+    "idea": "Representar cada nodo como un vector en un espacio plano.",
+    "porque": "Es adecuado cuando la estructura del grafo no tiene una jerarquía profunda ni crecimiento exponencial marcado.",
+    "ejemplo": "Representación básica de redes de amistades, conexiones simples o relaciones simétricas.",
+    "nivel": "Inicial"
+  },
+  {
+    "id": 2,
+    "estructura": "Grafo grande con muchos nodos",
+    "espacio": "Espacio euclídeo ℝⁿ",
+    "algoritmo": "SGD / Mini-batch SGD / Negative Sampling",
+    "familia": "SGD",
+    "dominio": "Escalabilidad",
+    "idea": "Entrenar embeddings usando subconjuntos de nodos y aristas.",
+    "porque": "El espacio euclídeo permite entrenamientos eficientes y escalables con lotes pequeños de datos.",
+    "ejemplo": "Embeddings de usuarios, productos, documentos o palabras en grandes bases de datos.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 3,
+    "estructura": "Árbol",
+    "espacio": "Espacio hiperbólico",
+    "algoritmo": "RSGD / Poincaré Embeddings",
+    "familia": "RSGD",
+    "dominio": "Jerarquías",
+    "idea": "Representar jerarquías con baja distorsión.",
+    "porque": "El espacio hiperbólico crece exponencialmente con el radio, de manera similar a un árbol.",
+    "ejemplo": "Taxonomías, árboles genealógicos, ontologías o estructuras de carpetas.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 4,
+    "estructura": "Jerarquía / taxonomía",
+    "espacio": "Espacio hiperbólico",
+    "algoritmo": "RSGD / Riemannian Adam",
+    "familia": "RSGD",
+    "dominio": "Jerarquías",
+    "idea": "Ubicar conceptos generales cerca del centro y conceptos específicos cerca del borde.",
+    "porque": "El centro puede representar categorías amplias y el borde conceptos más especializados.",
+    "ejemplo": "WordNet, categorías de productos, mapas conceptuales o conocimiento científico.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 5,
+    "estructura": "Red social con comunidades",
+    "espacio": "Espacio euclídeo o hiperbólico",
+    "algoritmo": "Node2Vec / DeepWalk / RSGD",
+    "familia": "Node2Vec",
+    "dominio": "Redes sociales",
+    "idea": "Capturar cercanía, comunidad, influencia y posibles jerarquías internas.",
+    "porque": "Si predominan comunidades planas, conviene el espacio euclídeo; si hay comunidades anidadas, puede convenir el hiperbólico.",
+    "ejemplo": "Detección de comunidades, recomendación de contactos y análisis de influencia.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 6,
+    "estructura": "Grafo de conocimiento",
+    "espacio": "Espacio hiperbólico o producto de espacios",
+    "algoritmo": "RSGD / Riemannian Optimization / RotatE / TransE adaptado",
+    "familia": "GraphRAG",
+    "dominio": "Conocimiento",
+    "idea": "Modelar relaciones semánticas, jerárquicas y relacionales.",
+    "porque": "Muchas relaciones de conocimiento combinan jerarquía, similitud, dirección y tipos de vínculos distintos.",
+    "ejemplo": "Knowledge Graphs, motores semánticos, RAG, búsqueda inteligente y LLM conectados a bases de conocimiento.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 7,
+    "estructura": "Grafo bipartito",
+    "espacio": "Espacio euclídeo, hiperbólico o producto de espacios",
+    "algoritmo": "Matrix Factorization / SGD / RSGD / GraphSAGE bipartito",
+    "familia": "Matrix",
+    "dominio": "Recomendación",
+    "idea": "Relacionar dos tipos de nodos diferentes.",
+    "porque": "Es útil cuando existen dos conjuntos separados, por ejemplo usuarios y productos, autores y papers, empresas y mercados.",
+    "ejemplo": "Sistemas de recomendación, matching usuario-producto, comercio electrónico y plataformas educativas.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 8,
+    "estructura": "Grafo regular o grilla",
+    "espacio": "Espacio euclídeo",
+    "algoritmo": "Gradient Descent / SGD / Laplacian Eigenmaps",
+    "familia": "Spectral",
+    "dominio": "Geometría discreta",
+    "idea": "Representar una estructura geométrica ordenada.",
+    "porque": "La grilla ya tiene una geometría cercana al plano euclídeo, por lo que no requiere curvatura negativa.",
+    "ejemplo": "Imágenes, mapas, tableros, sensores distribuidos y autómatas celulares.",
+    "nivel": "Inicial"
+  },
+  {
+    "id": 9,
+    "estructura": "Grafo tipo árbol con crecimiento exponencial",
+    "espacio": "Espacio hiperbólico",
+    "algoritmo": "Poincaré Embeddings + RSGD",
+    "familia": "RSGD",
+    "dominio": "Jerarquías",
+    "idea": "Imitar el crecimiento radial del árbol dentro de un espacio continuo.",
+    "porque": "En un árbol, la cantidad de nodos crece rápidamente con la distancia al origen; lo mismo ocurre con el volumen en geometría hiperbólica.",
+    "ejemplo": "Modelado de jerarquías profundas, árboles de decisión, taxonomías biológicas o conceptuales.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 10,
+    "estructura": "Grafo dinámico temporal",
+    "espacio": "Espacio euclídeo, hiperbólico o espacio-tiempo",
+    "algoritmo": "Temporal GNN / Dynamic Node Embeddings / SGD / RSGD",
+    "familia": "Temporal",
+    "dominio": "Series temporales",
+    "idea": "Aprender relaciones que cambian con el tiempo.",
+    "porque": "El tiempo agrega una dimensión adicional: no solo importa quién está conectado con quién, sino cuándo ocurre la conexión.",
+    "ejemplo": "Redes sociales dinámicas, transacciones financieras, movilidad urbana y evolución de comunidades.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 11,
+    "estructura": "Red neuronal tradicional",
+    "espacio": "Espacio euclídeo ℝⁿ",
+    "algoritmo": "Backpropagation + SGD / Adam",
+    "familia": "SGD",
+    "dominio": "Deep Learning",
+    "idea": "Optimizar pesos en un espacio plano.",
+    "porque": "Las redes neuronales clásicas asumen parámetros viviendo en espacios vectoriales euclídeos.",
+    "ejemplo": "Clasificación de imágenes, regresión, NLP tradicional y predicción tabular.",
+    "nivel": "Inicial"
+  },
+  {
+    "id": 12,
+    "estructura": "Red neuronal hiperbólica",
+    "espacio": "Espacio hiperbólico / variedad riemanniana",
+    "algoritmo": "RSGD / Riemannian Adam",
+    "familia": "RSGD",
+    "dominio": "Deep Learning",
+    "idea": "Entrenar embeddings o capas respetando la curvatura del espacio.",
+    "porque": "La geometría curva permite representar jerarquías y relaciones de inclusión con menor distorsión.",
+    "ejemplo": "Hyperbolic Neural Networks, clasificación jerárquica y embeddings semánticos profundos.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 13,
+    "estructura": "Grafo con muchas relaciones locales",
+    "espacio": "Espacio euclídeo o latente aprendido",
+    "algoritmo": "Graph Neural Networks + SGD / Adam",
+    "familia": "GNN",
+    "dominio": "Machine Learning",
+    "idea": "Propagar información entre vecinos mediante message passing.",
+    "porque": "Las GNN aprovechan la vecindad local del grafo para aprender representaciones útiles.",
+    "ejemplo": "Clasificación de nodos, predicción de enlaces, detección de fraude, moléculas y redes sociales.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 14,
+    "estructura": "Grafo jerárquico con comunidades anidadas",
+    "espacio": "Espacio hiperbólico",
+    "algoritmo": "Hyperbolic GNN + RSGD",
+    "familia": "GNN",
+    "dominio": "Jerarquías",
+    "idea": "Capturar comunidad, jerarquía y profundidad simultáneamente.",
+    "porque": "La geometría hiperbólica permite representar tanto cercanía local como expansión jerárquica global.",
+    "ejemplo": "Redes organizacionales, comunidades científicas, sistemas biológicos y redes de conocimiento.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 15,
+    "estructura": "Grafo sobre una superficie curva",
+    "espacio": "Variedad riemanniana",
+    "algoritmo": "RSGD / Riemannian Optimization",
+    "familia": "RSGD",
+    "dominio": "Geometría",
+    "idea": "Optimizar respetando la geometría intrínseca del espacio.",
+    "porque": "Cuando los datos viven sobre una superficie curva, usar geometría euclídea puede distorsionar las distancias.",
+    "ejemplo": "Datos sobre esferas, mallas 3D, manifolds, robótica y visión computacional geométrica.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 16,
+    "estructura": "Grafo dirigido",
+    "espacio": "Espacio euclídeo, hiperbólico o producto asimétrico",
+    "algoritmo": "Directed Graph Embeddings / GraphSAGE dirigido / GAT",
+    "familia": "GNN",
+    "dominio": "Direccionalidad",
+    "idea": "Representar relaciones con orientación.",
+    "porque": "La dirección de la arista importa, por lo que no alcanza con medir cercanía simétrica entre nodos.",
+    "ejemplo": "Citaciones académicas, links web, cadenas de suministro y flujos financieros.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 17,
+    "estructura": "Grafo ponderado",
+    "espacio": "Espacio euclídeo o hiperbólico",
+    "algoritmo": "Weighted Node2Vec / Weighted GNN / SGD / RSGD",
+    "familia": "Node2Vec",
+    "dominio": "Pesos y flujos",
+    "idea": "Incorporar intensidad o fuerza de las relaciones.",
+    "porque": "El peso de la arista modifica cuánto influye un vecino sobre otro.",
+    "ejemplo": "Redes de transporte, redes comerciales, redes de colaboración y transacciones.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 18,
+    "estructura": "Grafo con atributos en nodos",
+    "espacio": "Espacio euclídeo latente",
+    "algoritmo": "GCN / GraphSAGE / GAT + Adam",
+    "familia": "GNN",
+    "dominio": "Machine Learning",
+    "idea": "Combinar estructura del grafo con información propia de cada nodo.",
+    "porque": "No solo importa la conexión, sino también las variables asociadas a cada nodo.",
+    "ejemplo": "Clasificación de clientes, papers, usuarios, empresas o moléculas.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 19,
+    "estructura": "Grafo con atributos en aristas",
+    "espacio": "Espacio euclídeo o producto de espacios",
+    "algoritmo": "Edge-conditioned GNN / Message Passing Neural Networks",
+    "familia": "GNN",
+    "dominio": "Machine Learning",
+    "idea": "Usar las propiedades de las conexiones como parte del aprendizaje.",
+    "porque": "La arista no es solo un vínculo, también puede tener tipo, peso, distancia, costo o dirección.",
+    "ejemplo": "Moléculas químicas, rutas logísticas, comercio internacional y redes de pagos.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 20,
+    "estructura": "Grafo heterogéneo",
+    "espacio": "Producto de espacios o espacios latentes múltiples",
+    "algoritmo": "Heterogeneous GNN / HAN / R-GCN",
+    "familia": "GNN",
+    "dominio": "Heterogeneidad",
+    "idea": "Trabajar con distintos tipos de nodos y relaciones.",
+    "porque": "Un único espacio puede ser insuficiente cuando hay entidades de naturaleza diferente.",
+    "ejemplo": "Grafos empresa-país-sector, usuario-producto-categoría o paper-autor-institución.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 21,
+    "estructura": "Grafo multimodal",
+    "espacio": "Producto de espacios euclídeos, hiperbólicos y semánticos",
+    "algoritmo": "Multimodal GNN / Contrastive Learning",
+    "familia": "GNN",
+    "dominio": "Multimodal",
+    "idea": "Integrar texto, imagen, estructura y relaciones.",
+    "porque": "Cada modalidad puede requerir una geometría distinta antes de combinarse.",
+    "ejemplo": "Recomendadores avanzados, búsqueda semántica e IA generativa con grafos.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 22,
+    "estructura": "Grafo de rutas o transporte",
+    "espacio": "Espacio euclídeo, geográfico o riemanniano",
+    "algoritmo": "Shortest Path / GNN espacial / Graph Attention",
+    "familia": "GNN",
+    "dominio": "Logística",
+    "idea": "Modelar distancia, costo, flujo y conectividad.",
+    "porque": "La posición espacial y la topología importan al mismo tiempo.",
+    "ejemplo": "Logística, rutas comerciales, transporte urbano y cadenas de suministro.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 23,
+    "estructura": "Grafo de comercio internacional",
+    "espacio": "Espacio euclídeo, hiperbólico o multiplex",
+    "algoritmo": "Network Embeddings / GNN / Community Detection",
+    "familia": "GNN",
+    "dominio": "Comercio internacional",
+    "idea": "Representar países, productos, empresas o flujos comerciales como nodos y relaciones.",
+    "porque": "Permite analizar centralidad, dependencia, clusters y jerarquías productivas.",
+    "ejemplo": "Análisis de mercados, cadenas globales de valor, exportaciones e integración regional.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 24,
+    "estructura": "Grafo financiero",
+    "espacio": "Espacio euclídeo, hiperbólico o temporal",
+    "algoritmo": "Temporal GNN / Graph Autoencoders / Anomaly Detection",
+    "familia": "Temporal",
+    "dominio": "Finanzas",
+    "idea": "Detectar relaciones, riesgo sistémico o anomalías.",
+    "porque": "Las redes financieras suelen ser dinámicas, ponderadas y con dependencia entre entidades.",
+    "ejemplo": "Fraude, riesgo crediticio, contagio financiero y redes de pagos.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 25,
+    "estructura": "Grafo molecular",
+    "espacio": "Espacio euclídeo 3D o espacio geométrico equivarante",
+    "algoritmo": "Message Passing Neural Networks / SE(3)-GNN",
+    "familia": "GNN",
+    "dominio": "Ciencia molecular",
+    "idea": "Representar átomos, enlaces y estructura tridimensional.",
+    "porque": "La geometría física importa: rotaciones y traslaciones no deberían cambiar la predicción.",
+    "ejemplo": "Predicción de propiedades moleculares, diseño de fármacos y química computacional.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 26,
+    "estructura": "Grafo para LLM + RAG",
+    "espacio": "Espacio semántico euclídeo + grafo de conocimiento",
+    "algoritmo": "GraphRAG / Knowledge Graph Embeddings / GNN",
+    "familia": "GraphRAG",
+    "dominio": "IA generativa",
+    "idea": "Mejorar la recuperación de información combinando embeddings y relaciones explícitas.",
+    "porque": "Los embeddings capturan similitud semántica, mientras que el grafo conserva relaciones verificables.",
+    "ejemplo": "Chatbots expertos, investigación documental, asistentes académicos, bases jurídicas o científicas.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 27,
+    "estructura": "Grafo de conceptos educativos",
+    "espacio": "Hiperbólico o grafo dirigido acíclico",
+    "algoritmo": "Poincaré Embeddings / GNN / Learning Path Recommendation",
+    "familia": "RSGD",
+    "dominio": "Educación",
+    "idea": "Representar prerequisitos, profundidad conceptual y rutas de aprendizaje.",
+    "porque": "Los conceptos básicos pueden estar cerca del centro y los avanzados en niveles más profundos.",
+    "ejemplo": "Plataformas educativas, cursos adaptativos y mapas conceptuales.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 28,
+    "estructura": "Grafo de decisiones",
+    "espacio": "Árbol, DAG o espacio hiperbólico",
+    "algoritmo": "Decision Tree / GNN sobre DAG / RSGD",
+    "familia": "RSGD",
+    "dominio": "Decisión",
+    "idea": "Representar secuencias de decisión y dependencias.",
+    "porque": "Las decisiones suelen formar caminos, ramas y jerarquías.",
+    "ejemplo": "Sistemas expertos, árboles de decisión y planificación estratégica.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 29,
+    "estructura": "Grafo de comunidades científicas",
+    "espacio": "Espacio euclídeo, hiperbólico o temporal",
+    "algoritmo": "Node2Vec / GNN / Dynamic Embeddings",
+    "familia": "Node2Vec",
+    "dominio": "Ciencia",
+    "idea": "Representar autores, papers, instituciones y líneas de investigación.",
+    "porque": "Permite observar clusters, influencia y evolución temática.",
+    "ejemplo": "Bibliometría, análisis de citaciones y mapas de investigación.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 30,
+    "estructura": "Grafo de dependencias tecnológicas",
+    "espacio": "Dirigido, jerárquico o hiperbólico",
+    "algoritmo": "DAG Embeddings / GNN dirigida / RSGD",
+    "familia": "GNN",
+    "dominio": "Tecnología",
+    "idea": "Representar dependencia entre componentes, librerías o procesos.",
+    "porque": "La dirección y la jerarquía son centrales para entender propagación de errores o vulnerabilidades.",
+    "ejemplo": "Software, ciberseguridad, pipelines de datos y MLOps.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 31,
+    "estructura": "Grafo de Cayley",
+    "espacio": "Espacio geométrico inducido por grupos",
+    "algoritmo": "Spectral Methods / Group Equivariant Networks",
+    "familia": "Spectral",
+    "dominio": "Álgebra y simetría",
+    "idea": "Representar relaciones generadas por operaciones de un grupo.",
+    "porque": "La simetría del grupo define una geometría natural para distancias, recorridos y transformaciones.",
+    "ejemplo": "Criptografía, teoría de grupos computacional y modelos con simetría algebraica.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 32,
+    "estructura": "Hipergrafo",
+    "espacio": "Espacio euclídeo latente o producto de espacios",
+    "algoritmo": "Hypergraph Neural Networks / HyperGCN",
+    "familia": "GNN",
+    "dominio": "Relaciones múltiples",
+    "idea": "Modelar relaciones que conectan más de dos nodos a la vez.",
+    "porque": "Una arista común no alcanza cuando la unidad relacional es un grupo completo.",
+    "ejemplo": "Coautorías, equipos de trabajo, conjuntos de productos comprados juntos o grupos de genes.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 33,
+    "estructura": "Complejo simplicial",
+    "espacio": "Geometría algebraica-topológica / variedad discreta",
+    "algoritmo": "Simplicial Neural Networks / Hodge Laplacian",
+    "familia": "Topological",
+    "dominio": "Topología de datos",
+    "idea": "Extender el grafo a triángulos, caras y relaciones de orden superior.",
+    "porque": "Permite capturar ciclos, cavidades y estructuras que un grafo simple no representa.",
+    "ejemplo": "Topological data analysis, dinámica de flujos, redes biológicas y cooperación grupal.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 34,
+    "estructura": "Grafo firmado",
+    "espacio": "Espacio pseudo-euclídeo o latente con polaridad",
+    "algoritmo": "Signed Graph Neural Networks / Balance Theory Embeddings",
+    "familia": "GNN",
+    "dominio": "Relaciones positivas y negativas",
+    "idea": "Distinguir vínculos de afinidad, oposición, confianza o conflicto.",
+    "porque": "La cercanía no siempre significa semejanza positiva; también puede haber antagonismo estructurado.",
+    "ejemplo": "Redes de confianza, reputación, conflicto político, alianzas y rivalidades.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 35,
+    "estructura": "Grafo multiplex",
+    "espacio": "Producto de espacios / capas múltiples",
+    "algoritmo": "Multiplex GNN / Multilayer Node Embeddings",
+    "familia": "GNN",
+    "dominio": "Redes multicapa",
+    "idea": "Representar varias capas de relación entre los mismos nodos.",
+    "porque": "Dos nodos pueden estar conectados por comercio, inversión, migración, conocimiento o infraestructura al mismo tiempo.",
+    "ejemplo": "Relaciones internacionales, redes empresariales, análisis sectorial y ecosistemas tecnológicos.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 36,
+    "estructura": "Grafo causal",
+    "espacio": "DAG / espacio dirigido acíclico",
+    "algoritmo": "Causal Discovery / Structural Causal Models / GNN causal",
+    "familia": "Causal",
+    "dominio": "Causalidad",
+    "idea": "Representar relaciones de causa, intervención y dependencia direccional.",
+    "porque": "La estructura causal necesita dirección, ausencia de ciclos y lectura intervencional.",
+    "ejemplo": "Econometría, medicina, políticas públicas, riesgo financiero y experimentación.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 37,
+    "estructura": "Red bayesiana",
+    "espacio": "DAG probabilístico",
+    "algoritmo": "Bayesian Inference / Belief Propagation / Structure Learning",
+    "familia": "Probabilistic",
+    "dominio": "Probabilidad",
+    "idea": "Modelar dependencias condicionales entre variables aleatorias.",
+    "porque": "El grafo codifica qué variables dependen de cuáles y permite razonar bajo incertidumbre.",
+    "ejemplo": "Diagnóstico médico, scoring de riesgo, toma de decisiones e inferencia causal.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 38,
+    "estructura": "Cadena de Markov como grafo",
+    "espacio": "Simplejo probabilístico / grafo dirigido ponderado",
+    "algoritmo": "Power Iteration / PageRank / Random Walks",
+    "familia": "Random Walk",
+    "dominio": "Procesos estocásticos",
+    "idea": "Modelar transiciones entre estados con probabilidades.",
+    "porque": "Cada arista codifica la probabilidad de pasar de un estado a otro.",
+    "ejemplo": "PageRank, navegación web, movilidad, churn, secuencias de usuario y modelos de difusión.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 39,
+    "estructura": "Grafo de difusión de información",
+    "espacio": "Espacio temporal o latente dinámico",
+    "algoritmo": "Diffusion Models on Graphs / Temporal GNN / Hawkes Processes",
+    "familia": "Temporal",
+    "dominio": "Difusión",
+    "idea": "Representar cómo una señal, rumor, innovación o contagio se propaga en la red.",
+    "porque": "La propagación depende de estructura, tiempo, intensidad y memoria del proceso.",
+    "ejemplo": "Viralidad en redes sociales, epidemiología, adopción tecnológica y propagación de shocks.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 40,
+    "estructura": "Grafo de ciberseguridad",
+    "espacio": "Grafo dirigido, temporal y heterogéneo",
+    "algoritmo": "Attack Graph Analysis / Temporal GNN / Anomaly Detection",
+    "familia": "Temporal",
+    "dominio": "Ciberseguridad",
+    "idea": "Representar activos, vulnerabilidades, credenciales, rutas de ataque y eventos.",
+    "porque": "El riesgo emerge de rutas, permisos, dependencias y secuencias temporales.",
+    "ejemplo": "Detección de intrusiones, análisis de caminos de ataque y priorización de vulnerabilidades.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 41,
+    "estructura": "Grafo de infraestructura crítica",
+    "espacio": "Espacio geográfico, red ponderada y temporal",
+    "algoritmo": "Network Flow / GNN espacial-temporal / Resilience Analysis",
+    "familia": "Temporal",
+    "dominio": "Infraestructura",
+    "idea": "Representar dependencias físicas y operativas entre componentes.",
+    "porque": "La localización, capacidad, redundancia y cascadas de falla son centrales.",
+    "ejemplo": "Energía, telecomunicaciones, transporte, agua, logística y resiliencia urbana.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 42,
+    "estructura": "Grafo de cadena de suministro",
+    "espacio": "Grafo dirigido ponderado / multiplex",
+    "algoritmo": "Supply Chain Graph Analytics / GNN / Flow Optimization",
+    "familia": "GNN",
+    "dominio": "Supply Chain",
+    "idea": "Modelar proveedores, plantas, puertos, clientes, rutas, costos y riesgos.",
+    "porque": "La estructura combina dirección, peso, geografía, dependencia y temporalidad.",
+    "ejemplo": "Riesgo de abastecimiento, logística internacional, nearshoring y análisis de cuellos de botella.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 43,
+    "estructura": "Grafo de embeddings semánticos",
+    "espacio": "Espacio vectorial euclídeo de alta dimensión",
+    "algoritmo": "Approximate Nearest Neighbors / Contrastive Learning / Vector Search",
+    "familia": "Vector Search",
+    "dominio": "IA generativa",
+    "idea": "Conectar documentos o conceptos por similitud semántica.",
+    "porque": "La distancia en el espacio vectorial aproxima semejanza de significado.",
+    "ejemplo": "Búsqueda semántica, RAG, recomendación de contenidos y clustering documental.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 44,
+    "estructura": "Grafo Transformer",
+    "espacio": "Espacio latente aprendido con atención",
+    "algoritmo": "Graph Transformer / Attention Networks",
+    "familia": "Transformer",
+    "dominio": "Deep Learning",
+    "idea": "Usar atención para ponderar relaciones locales y globales del grafo.",
+    "porque": "La atención permite combinar vecinos cercanos con dependencias de largo alcance.",
+    "ejemplo": "Moléculas, recomendadores, knowledge graphs, predicción de enlaces y modelos híbridos con LLM.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 45,
+    "estructura": "Grafo esférico",
+    "espacio": "Espacio esférico / variedad con curvatura positiva",
+    "algoritmo": "Spherical Embeddings / Riemannian Optimization",
+    "familia": "RSGD",
+    "dominio": "Geometría",
+    "idea": "Representar datos donde la dirección angular importa más que la distancia lineal.",
+    "porque": "La esfera es útil cuando los datos tienen norma controlada, ciclos o relaciones angulares.",
+    "ejemplo": "Embeddings normalizados, geodatos globales, orientación 3D y aprendizaje contrastivo.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 46,
+    "estructura": "Grafo de rotaciones y poses",
+    "espacio": "Grupos de Lie SO(3), SE(3)",
+    "algoritmo": "Lie Group Optimization / Equivariant GNN",
+    "familia": "Equivariant",
+    "dominio": "Robótica",
+    "idea": "Modelar posiciones, rotaciones y transformaciones físicas.",
+    "porque": "Las rotaciones y traslaciones tienen una geometría propia que no conviene aplanar sin cuidado.",
+    "ejemplo": "Robótica, SLAM, visión 3D, dinámica molecular y control de movimiento.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 47,
+    "estructura": "Grafo de rutas de aprendizaje adaptativo",
+    "espacio": "DAG educativo + espacio hiperbólico",
+    "algoritmo": "Knowledge Tracing / GNN / Poincaré Embeddings",
+    "familia": "GNN",
+    "dominio": "Educación",
+    "idea": "Personalizar trayectorias según prerequisitos, desempeño y dificultad.",
+    "porque": "El conocimiento suele organizarse por niveles, dependencias y especialización progresiva.",
+    "ejemplo": "Plataformas de e-learning, tutores inteligentes y secuencias de contenidos.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 48,
+    "estructura": "Grafo de coocurrencia textual",
+    "espacio": "Espacio euclídeo semántico",
+    "algoritmo": "Word2Vec / GloVe / Random Walks / Graph Embeddings",
+    "familia": "Node2Vec",
+    "dominio": "NLP",
+    "idea": "Conectar palabras o conceptos que aparecen juntos en contextos similares.",
+    "porque": "La cercanía por coocurrencia aproxima regularidades semánticas y sintácticas.",
+    "ejemplo": "Análisis de corpus, minería de temas, extracción de conceptos y NLP educativo.",
+    "nivel": "Intermedio"
+  },
+  {
+    "id": 49,
+    "estructura": "Grafo de conocimiento jurídico o regulatorio",
+    "espacio": "Grafo de conocimiento + espacio semántico",
+    "algoritmo": "GraphRAG / Entity Linking / Knowledge Graph Embeddings",
+    "familia": "GraphRAG",
+    "dominio": "Regulación",
+    "idea": "Conectar normas, artículos, obligaciones, actores y sanciones.",
+    "porque": "La respuesta precisa necesita similitud semántica y trazabilidad explícita de relaciones normativas.",
+    "ejemplo": "Asistentes legales, compliance, comercio internacional, contratos y análisis regulatorio.",
+    "nivel": "Clave"
+  },
+  {
+    "id": 50,
+    "estructura": "Grafo de agentes económicos",
+    "espacio": "Espacio de estados + red dinámica",
+    "algoritmo": "Agent-Based Modeling / Dynamic Graphs / Reinforcement Learning",
+    "familia": "Temporal",
+    "dominio": "Economía computacional",
+    "idea": "Representar agentes que interactúan, aprenden y modifican la red.",
+    "porque": "La estructura no es fija: emerge de decisiones, incentivos y shocks.",
+    "ejemplo": "Mercados, adopción tecnológica, contagio financiero y simulaciones de política económica.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 51,
+    "estructura": "Grafo de juegos estratégicos",
+    "espacio": "Grafo de estados, pagos y estrategias",
+    "algoritmo": "Game Graph Search / Reinforcement Learning / Equilibrium Computation",
+    "familia": "RL",
+    "dominio": "Teoría de juegos",
+    "idea": "Representar jugadores, estrategias, información y transiciones.",
+    "porque": "Las decisiones estratégicas dependen de caminos posibles, información y respuesta del otro jugador.",
+    "ejemplo": "Negociación, seguridad internacional, competencia empresarial y modelos de conflicto.",
+    "nivel": "Avanzado"
+  },
+  {
+    "id": 52,
+    "estructura": "Grafo para mapas de conocimiento personal",
+    "espacio": "Grafo semántico + espacio hiperbólico opcional",
+    "algoritmo": "Graph Embeddings / Community Detection / GraphRAG",
+    "familia": "GraphRAG",
+    "dominio": "Gestión del conocimiento",
+    "idea": "Convertir notas, conceptos y lecturas en una red navegable.",
+    "porque": "El conocimiento personal mezcla asociaciones libres, jerarquías, proyectos y conexiones semánticas.",
+    "ejemplo": "Obsidian, Zettelkasten, mapas conceptuales, investigación académica y asistentes personales.",
+    "nivel": "Intermedio"
+  }
+];
+
+    let selectedId = 3;
+    let visibleRows = [...data];
+    let motion = true;
+    let particleFrame = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function normalize(s) {
+      return String(s)
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function spaceClass(text) {
+      const t = normalize(text);
+      if (t.includes("esfer") || t.includes("so(3)")) return "spherical";
+      if (t.includes("semantic") || t.includes("semant") || t.includes("vectorial")) return "semantic";
+      if (t.includes("producto") || t.includes("multiplex") || t.includes("multicapa")) return "product";
+      if (t.includes("temporal") || t.includes("espacio-tiempo") || t.includes("dinamico")) return "temporal";
+      if (t.includes("riemann") || t.includes("variedad") || t.includes("lie")) return "riemannian";
+      if (t.includes("hiperbol")) return "hyperbolic";
+      if (t.includes("eucl")) return "euclidean";
+      return "";
+    }
+
+    function tagClass(text) { return spaceClass(text); }
+
+    function splitBadges(text, type = "space") {
+      return text
+        .split(/\/|,|\+| o | y /)
+        .map(x => x.trim())
+        .filter(Boolean)
+        .map(part => `<span class="${type}-badge ${type === "space" ? spaceClass(part) : ""}">${part}</span>`)
+        .join(" ");
+    }
+
+    function matchesSpace(row, filter) {
+      if (filter === "todos") return true;
+      const t = normalize(row.espacio);
+      if (filter === "euclídeo") return t.includes("eucl");
+      if (filter === "hiperbólico") return t.includes("hiperbol");
+      if (filter === "riemanniana") return t.includes("riemann") || t.includes("variedad") || t.includes("lie");
+      if (filter === "esférico") return t.includes("esfer") || t.includes("so(3)") || t.includes("se(3)");
+      if (filter === "producto") return t.includes("producto") || t.includes("multiplex") || t.includes("multicapa") || t.includes("multiple");
+      if (filter === "temporal") return t.includes("temporal") || t.includes("espacio-tiempo") || t.includes("dinamico");
+      if (filter === "semántico") return t.includes("semant") || t.includes("vectorial") || t.includes("conocimiento");
+      return true;
+    }
+
+    function matchesAlgo(row, filter) {
+      if (filter === "todos") return true;
+      const t = normalize(row.algoritmo + " " + row.ejemplo + " " + row.idea + " " + row.familia);
+      if (filter === "sgd") return t.includes("sgd") || t.includes("gradient") || t.includes("adam") || t.includes("backpropagation");
+      if (filter === "rsgd") return t.includes("rsgd") || t.includes("riemannian") || t.includes("poincare");
+      if (filter === "gnn") return t.includes("gnn") || t.includes("gcn") || t.includes("graphsage") || t.includes("gat") || t.includes("message passing") || t.includes("hypergcn");
+      if (filter === "node2vec") return t.includes("node2vec") || t.includes("deepwalk") || t.includes("random walks") || t.includes("word2vec") || t.includes("glove");
+      if (filter === "matrix") return t.includes("matrix factorization");
+      if (filter === "rag") return t.includes("rag") || t.includes("knowledge graph") || t.includes("graphrag") || t.includes("entity linking");
+      if (filter === "temporal") return t.includes("temporal") || t.includes("dynamic") || t.includes("dinamico") || t.includes("hawkes");
+      if (filter === "spectral") return t.includes("spectral") || t.includes("laplacian") || t.includes("hodge") || t.includes("pagerank") || t.includes("power iteration");
+      if (filter === "transformer") return t.includes("transformer") || t.includes("attention");
+      if (filter === "causal") return t.includes("causal") || t.includes("bayesian") || t.includes("belief") || t.includes("probabilistic");
+      return true;
+    }
+
+    function applyFilters() {
+      const q = normalize($("searchBox").value);
+      const sf = $("spaceFilter").value;
+      const af = $("algoFilter").value;
+      const df = $("domainFilter").value;
+
+      visibleRows = data.filter(row => {
+        const blob = normalize(Object.values(row).join(" "));
+        const domainOk = df === "todos" || row.dominio === df;
+        return (!q || blob.includes(q)) && matchesSpace(row, sf) && matchesAlgo(row, af) && domainOk;
+      });
+
+      renderTable();
+      renderCards();
+      renderLab();
+      updateStats();
+    }
+
+    function renderTable() {
+      const body = $("tableBody");
+      body.innerHTML = visibleRows.map(row => `
+        <tr onclick="selectRowById(${row.id}, false)" class="${row.id === selectedId ? "selected" : ""}">
+          <td><strong>${row.estructura}</strong></td>
+          <td>${splitBadges(row.espacio, "space")}</td>
+          <td>${splitBadges(row.algoritmo, "algo")}</td>
+          <td>${row.idea}</td>
+          <td>${row.porque}</td>
+          <td>${row.ejemplo}</td>
+          <td>${row.dominio}</td>
+          <td><span class="level-badge">${row.nivel}</span></td>
+        </tr>
+      `).join("");
+
+      $("resultText").textContent = visibleRows.length === data.length
+        ? "Mostrando todos los casos."
+        : `Mostrando ${visibleRows.length} de ${data.length} casos.`;
+    }
+
+    function renderCards() {
+      const featured = getFeaturedRows();
+      $("cards").innerHTML = featured.map(row => `
+        <article class="card ${row.id === selectedId ? "active" : ""}" onclick="selectRowById(${row.id}, true)">
+          <div class="tagline">${spaceTags(row.espacio)}<span class="tag">${row.dominio}</span></div>
+          <h3>${row.estructura}</h3>
+          <p>${row.idea}</p>
+          <div class="mini">${row.algoritmo}</div>
+          <p><strong>Aplicación:</strong> ${row.ejemplo}</p>
+        </article>
+      `).join("");
+    }
+
+    function getFeaturedRows() {
+      if (visibleRows.length <= 6) return visibleRows;
+      const desired = [3,4,6,13,23,26,32,36,42,43,45,52];
+      const fromVisible = desired.map(id => visibleRows.find(r => r.id === id)).filter(Boolean);
+      const fill = visibleRows.filter(r => !fromVisible.includes(r)).slice(0, 6 - fromVisible.length);
+      return [...fromVisible, ...fill].slice(0, 6);
+    }
+
+    function spaceTags(text) {
+      return text.split(/,|\/| o |\+| y /)
+        .map(x => x.trim())
+        .filter(Boolean)
+        .slice(0,3)
+        .map(x => `<span class="tag ${tagClass(x)}">${x}</span>`)
+        .join("");
+    }
+
+    function renderLab() {
+      const counts = {
+        "Euclídeo": visibleRows.filter(r => normalize(r.espacio).includes("eucl")).length,
+        "Hiperbólico": visibleRows.filter(r => normalize(r.espacio).includes("hiperbol")).length,
+        "Riemanniano": visibleRows.filter(r => normalize(r.espacio).includes("riemann") || normalize(r.espacio).includes("variedad") || normalize(r.espacio).includes("lie")).length,
+        "Temporal / producto": visibleRows.filter(r => normalize(r.espacio).includes("temporal") || normalize(r.espacio).includes("producto") || normalize(r.espacio).includes("multiplex")).length
+      };
+      const max = Math.max(1, ...Object.values(counts));
+      $("labGrid").innerHTML = Object.entries(counts).map(([label, value]) => `
+        <div class="lab-card">
+          <b>${label}</b>
+          <div class="bar"><span style="--w:${Math.max(8, Math.round((value / max) * 100))}%"></span></div>
+          <small>${value} caso${value === 1 ? "" : "s"} visible${value === 1 ? "" : "s"} con esta familia geométrica.</small>
+        </div>
+      `).join("");
+    }
+
+    function updateStats() {
+      $("visibleCount").textContent = visibleRows.length;
+      $("totalCount").textContent = data.length;
+      $("domainCount").textContent = new Set(data.map(r => r.dominio)).size;
+    }
+
+    function populateSelects() {
+      $("caseSelect").innerHTML = data.map(row => `
+        <option value="${row.id}">${String(row.id).padStart(2, "0")} · ${row.estructura}</option>
+      `).join("");
+      $("caseSelect").value = selectedId;
+
+      const domains = ["todos", ...Array.from(new Set(data.map(r => r.dominio))).sort((a,b) => a.localeCompare(b))];
+      $("domainFilter").innerHTML = domains.map(d => `<option value="${d}">${d === "todos" ? "Todos" : d}</option>`).join("");
+    }
+
+    function selectRowById(id, scrollTable) {
+      selectedId = id;
+      const row = data.find(x => x.id === id);
+      if (!row) return;
+      $("caseSelect").value = id;
+
+      $("selectedCard").innerHTML = `
+        <h3>${row.estructura}</h3>
+        <p><strong>Espacio:</strong> ${row.espacio}</p>
+        <p><strong>Algoritmo:</strong> ${row.algoritmo}</p>
+        <p><strong>Idea:</strong> ${row.idea}</p>
+        <div class="tagline">${spaceTags(row.espacio)}<span class="tag">${row.dominio}</span><span class="tag">${row.nivel}</span></div>
+        <p style="margin-top:12px;"><strong>Justificación:</strong> ${row.porque}</p>
+        <p style="margin-top:10px;"><strong>Aplicación:</strong> ${row.ejemplo}</p>
+      `;
+
+      renderTable();
+      renderCards();
+      renderLab();
+
+      if (scrollTable) {
+        $("tabla").scrollIntoView({behavior: "smooth", block: "start"});
+      }
+    }
+
+    function resetFilters() {
+      $("searchBox").value = "";
+      $("spaceFilter").value = "todos";
+      $("algoFilter").value = "todos";
+      $("domainFilter").value = "todos";
+      visibleRows = [...data];
+      applyFilters();
+      selectRowById(3, false);
+    }
+
+    function toggleTheme() { document.body.classList.toggle("light"); }
+    function togglePresentation() { document.body.classList.toggle("presentation"); }
+
+    function toggleMotion() {
+      motion = !motion;
+      document.body.classList.toggle("paused", !motion);
+      if (motion) animateParticles();
+      else if (particleFrame) cancelAnimationFrame(particleFrame);
+    }
+
+    function scrollToTable() { $("tabla").scrollIntoView({behavior: "smooth", block: "start"}); }
+
+    function randomCase() {
+      const pool = visibleRows.length ? visibleRows : data;
+      const row = pool[Math.floor(Math.random() * pool.length)];
+      selectRowById(row.id, true);
+    }
+
+    async function copyVisibleRows() {
+      const header = [
+        "Tipo de estructura / grafo",
+        "Espacio geométrico conveniente",
+        "Algoritmo posible",
+        "Idea central",
+        "Por qué ese espacio es adecuado",
+        "Ejemplo de aplicación",
+        "Dominio",
+        "Nivel"
+      ].join("\t");
+
+      const rows = visibleRows.map(r => [
+        r.estructura, r.espacio, r.algoritmo, r.idea, r.porque, r.ejemplo, r.dominio, r.nivel
+      ].join("\t")).join("\n");
+
+      const text = header + "\n" + rows;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        $("resultText").textContent = "Filas visibles copiadas al portapapeles.";
+      } catch (e) {
+        $("resultText").textContent = "No se pudo copiar automáticamente. Seleccioná la matriz y copiá manualmente.";
+      }
+    }
+
+    function initParticles() {
+      const canvas = $("particleCanvas");
+      const box = canvas.parentElement;
+      const ctx = canvas.getContext("2d");
+      let particles = [];
+
+      function resize() {
+        const rect = box.getBoundingClientRect();
+        canvas.width = Math.floor(rect.width * devicePixelRatio);
+        canvas.height = Math.floor(rect.height * devicePixelRatio);
+        ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        const count = Math.max(26, Math.floor(rect.width / 18));
+        particles = Array.from({length: count}, () => ({
+          x: Math.random() * rect.width,
+          y: Math.random() * rect.height,
+          vx: (Math.random() - .5) * .46,
+          vy: (Math.random() - .5) * .46,
+          r: 1.4 + Math.random() * 2.2
+        }));
+      }
+
+      function draw() {
+        if (!motion) return;
+        const rect = box.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.globalAlpha = .70;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > rect.width) p.vx *= -1;
+          if (p.y < 0 || p.y > rect.height) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(135,247,198,.82)";
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const q = particles[j];
+            const dx = p.x - q.x;
+            const dy = p.y - q.y;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if (d < 90) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(66,217,255,${(1 - d / 90) * .22})`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        }
+        particleFrame = requestAnimationFrame(draw);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      draw();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateSelects();
+      applyFilters();
+      selectRowById(selectedId, false);
+      initParticles();
+    });
+  </script>
+</body>
+</html>
