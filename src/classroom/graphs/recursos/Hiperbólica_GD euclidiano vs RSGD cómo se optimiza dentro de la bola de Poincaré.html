@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GD euclidiano vs RSGD en la bola de Poincaré · Versión 2.1</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0f2136;
+      --panel2: #132b45;
+      --text: #eef6ff;
+      --muted: #9fc3e8;
+      --border: rgba(255,255,255,0.16);
+      --blue: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --purple: #a78bfa;
+      --gray: #94a3b8;
+      --shadow: 0 24px 70px rgba(0,0,0,0.35);
+    }
+
+    html[data-theme="light"] {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel2: #eef4fb;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: rgba(15,23,42,0.15);
+      --blue: #0284c7;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #d97706;
+      --purple: #7c3aed;
+      --gray: #64748b;
+      --shadow: 0 20px 50px rgba(15,23,42,0.12);
+    }
+
+    html[data-theme="academic"] {
+      --bg: #111827;
+      --panel: #1f2937;
+      --panel2: #263244;
+      --text: #f9fafb;
+      --muted: #cbd5e1;
+      --border: rgba(251,191,36,0.22);
+      --blue: #60a5fa;
+      --green: #34d399;
+      --red: #f87171;
+      --orange: #fbbf24;
+      --purple: #c084fc;
+      --gray: #d1d5db;
+      --shadow: 0 25px 70px rgba(0,0,0,0.35);
+    }
+
+    html[data-theme="contrast"] {
+      --bg: #000000;
+      --panel: #101010;
+      --panel2: #1b1b1b;
+      --text: #ffffff;
+      --muted: #e5e7eb;
+      --border: rgba(255,255,255,0.34);
+      --blue: #00e5ff;
+      --green: #00ff66;
+      --red: #ff2d55;
+      --orange: #ffd60a;
+      --purple: #bf5af2;
+      --gray: #d1d5db;
+      --shadow: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(167,139,250,0.14), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    header {
+      max-width: 1500px;
+      margin: auto;
+      padding: 28px 28px 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(28px, 4vw, 50px);
+      line-height: 1.05;
+      letter-spacing: -0.045em;
+    }
+
+    header p {
+      max-width: 1180px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 17px;
+      margin: 0;
+    }
+
+    .layout {
+      max-width: 1500px;
+      margin: 22px auto 40px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, var(--panel2), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-height: 470px;
+    }
+
+    .panel.full {
+      grid-column: 1 / -1;
+      min-height: auto;
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .panel-header h2 {
+      margin: 0 0 4px;
+      font-size: 19px;
+    }
+
+    .panel-header span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    svg {
+      width: 100%;
+      height: 430px;
+      display: block;
+      background: rgba(0,0,0,0.08);
+      border-radius: 18px;
+      overflow: visible;
+    }
+
+    .formula {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-family: "Cambria Math", "Times New Roman", serif;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.045);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 25px;
+      letter-spacing: -0.04em;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+    }
+
+    th, td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th {
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 18px;
+    }
+
+    .control-box {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      padding: 16px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      color: #fff;
+      font-weight: 800;
+      background: linear-gradient(135deg, #2563eb, var(--blue));
+      box-shadow: 0 10px 24px rgba(37,99,235,0.22);
+    }
+
+    button.green {
+      background: linear-gradient(135deg, #16a34a, var(--green));
+    }
+
+    button.red {
+      background: linear-gradient(135deg, #dc2626, var(--red));
+    }
+
+    button.purple {
+      background: linear-gradient(135deg, #7c3aed, var(--purple));
+    }
+
+    button.gray {
+      background: linear-gradient(135deg, #475569, #64748b);
+      box-shadow: none;
+    }
+
+    button.gold {
+      background: linear-gradient(135deg, #d97706, var(--orange));
+      color: #111827;
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 210px 1fr 90px;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      margin: 12px 0;
+      font-size: 14px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .guide {
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .guide h3 {
+      color: var(--text);
+      margin-top: 0;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    @media (max-width: 1100px) {
+      .layout,
+      .controls,
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .slider-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="badge">Versión 2.1 · GD euclidiano vs RSGD · Punto inválido visible · Proyección explícita</div>
+    <h1>GD euclidiano vs RSGD: cómo se optimiza dentro de la bola de Poincaré</h1>
+    <p>
+      Esta simulación compara dos formas de mover un punto hacia un objetivo dentro de la bola de Poincaré: el descenso de gradiente euclidiano, que trata el espacio como si fuera plano, y el descenso de gradiente riemanniano, que reescala el paso según la métrica hiperbólica. En esta versión, cuando el paso euclidiano propone un punto fuera de la bola, el punto inválido aparece explícitamente en rojo antes de ser proyectado.
+    </p>
+  </header>
+
+  <main class="layout">
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Panel A · Descenso euclidiano</h2>
+        <span>Actualiza como si el espacio fuera plano; puede proponer puntos inválidos</span>
+      </div>
+      <div class="panel-body">
+        <svg id="svgE" viewBox="-40 -20 680 470"></svg>
+        <div class="formula">
+          x<sub>t+1</sub><sup>E</sup> = x<sub>t</sub><sup>E</sup> − η ∇<sub>E</sub>L(x<sub>t</sub><sup>E</sup>)
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Panel B · Riemannian Gradient Descent</h2>
+        <span>Actualiza respetando la métrica hiperbólica</span>
+      </div>
+      <div class="panel-body">
+        <svg id="svgR" viewBox="-40 -20 680 470"></svg>
+        <div class="formula">
+          ∇<sub>R</sub>L(x) = ((1 − ||x||²) / 2)² ∇<sub>E</sub>L(x),
+          &nbsp;&nbsp;
+          x<sub>t+1</sub><sup>R</sup> = Retr(x<sub>t</sub><sup>R</sup> − η∇<sub>R</sub>L)
+        </div>
+      </div>
+    </section>
+
+    <section class="panel full">
+      <div class="panel-header">
+        <h2>Panel C · Métricas comparativas</h2>
+        <span>La diferencia central es el tamaño efectivo del paso cerca del borde</span>
+      </div>
+
+      <div class="panel-body">
+        <div class="metrics">
+          <div class="metric">
+            <strong id="iterMetric">0</strong>
+            <span>Iteración</span>
+          </div>
+          <div class="metric">
+            <strong id="rhoMetric">-</strong>
+            <span>Factor riemanniano ρ(x)</span>
+          </div>
+          <div class="metric">
+            <strong id="lossEMetric">-</strong>
+            <span>Pérdida GD euclidiano</span>
+          </div>
+          <div class="metric">
+            <strong id="lossRMetric">-</strong>
+            <span>Pérdida RSGD</span>
+          </div>
+          <div class="metric">
+            <strong id="invalidMetric">-</strong>
+            <span>Paso euclidiano inválido</span>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Métrica</th>
+              <th>GD euclidiano</th>
+              <th>RSGD</th>
+              <th>Interpretación</th>
+            </tr>
+          </thead>
+          <tbody id="metricTable"></tbody>
+        </table>
+
+        <div class="legend">
+          <span><i class="dot" style="background:var(--blue)"></i>Paso euclidiano</span>
+          <span><i class="dot" style="background:var(--green)"></i>Paso riemanniano</span>
+          <span><i class="dot" style="background:var(--gray)"></i>Gradiente euclidiano de referencia</span>
+          <span><i class="dot" style="background:var(--orange)"></i>Proyección / retracción</span>
+          <span><i class="dot" style="background:var(--red)"></i>Punto inválido fuera de la bola</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel full">
+      <div class="panel-header">
+        <h2>Panel D · Controles y modo guiado</h2>
+        <span>Explorá centro, borde, learning rate alto y cambio angular</span>
+      </div>
+
+      <div class="panel-body controls">
+
+        <div class="control-box">
+          <div class="buttons">
+            <button id="resetBtn">Reiniciar comparación</button>
+            <button id="stepBtn" class="green">Ejecutar un paso</button>
+            <button id="autoBtn" class="purple">Ejecutar automático</button>
+            <button id="stopBtn" class="red">Detener</button>
+            <button id="gradBtn" class="gray">Mostrar gradientes</button>
+            <button id="pathBtn" class="gray">Mostrar trayectoria</button>
+            <button id="riskBtn" class="gray">Zona de riesgo</button>
+            <button id="retrBtn" class="gray">Proyección / retracción</button>
+            <button id="invalidBtn" class="gray">Mostrar punto inválido</button>
+            <button id="guideBtn" class="gold">Modo guiado</button>
+            <button id="themeBtn" class="gold">Cambiar tema</button>
+          </div>
+
+          <div class="slider-row">
+            <label>Tasa de aprendizaje η</label>
+            <input id="etaSlider" type="range" min="0.005" max="0.30" step="0.005" value="0.055">
+            <span id="etaValue">0.055</span>
+          </div>
+
+          <div class="slider-row">
+            <label>Radio inicial ||x₀||</label>
+            <input id="r0Slider" type="range" min="0.05" max="0.97" step="0.01" value="0.88">
+            <span id="r0Value">0.88</span>
+          </div>
+
+          <div class="slider-row">
+            <label>Ángulo inicial</label>
+            <input id="a0Slider" type="range" min="0" max="360" step="1" value="210">
+            <span id="a0Value">210°</span>
+          </div>
+
+          <div class="slider-row">
+            <label>Radio objetivo ||y||</label>
+            <input id="rySlider" type="range" min="0.05" max="0.97" step="0.01" value="0.68">
+            <span id="ryValue">0.68</span>
+          </div>
+
+          <div class="slider-row">
+            <label>Ángulo objetivo</label>
+            <input id="aySlider" type="range" min="0" max="360" step="1" value="30">
+            <span id="ayValue">30°</span>
+          </div>
+
+          <div class="buttons" style="margin-top:14px">
+            <button id="scenario1" class="gray">Escenario 1 · Centro</button>
+            <button id="scenario2" class="gray">Escenario 2 · Borde</button>
+            <button id="scenario3" class="gray">Escenario 3 · η alta</button>
+            <button id="scenario4" class="gray">Escenario 4 · Cambio angular</button>
+            <button id="scenario5" class="red">Escenario 5 · Forzar salida</button>
+          </div>
+
+          <div class="status" id="statusBox">
+            <strong>Estado:</strong> simulación lista. Presioná “Ejecutar un paso” o “Ejecutar automático”.
+          </div>
+        </div>
+
+        <div class="control-box guide">
+          <h3 id="guideTitle">Etapa 1 · Mismo problema, dos algoritmos</h3>
+          <p id="guideText">
+            Ambos paneles intentan minimizar la misma pérdida y alcanzar el mismo objetivo. La diferencia está en cómo se calcula el paso de actualización.
+          </p>
+          <div class="formula" id="guideFormula">
+            L(x) = d<sub>B</sub>(x,y)²
+          </div>
+
+          <p>
+            <strong>Idea clave:</strong> RSGD no es simplemente proyectar después de moverse; primero corrige el gradiente según la métrica del espacio y luego asegura que la actualización permanezca dentro de la variedad.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const svgE = document.getElementById("svgE");
+    const svgR = document.getElementById("svgR");
+
+    const state = {
+      iter: 0,
+      xE: {x: 0, y: 0},
+      xR: {x: 0, y: 0},
+      y: {x: 0, y: 0},
+      pathE: [],
+      pathR: [],
+      showGradients: true,
+      showPath: true,
+      showRisk: true,
+      showRetraction: true,
+      showInvalidPoint: true,
+      auto: null,
+      themeIndex: 0,
+      guideIndex: 0,
+      lastEStart: null,
+      lastRStart: null,
+      lastEProposed: null,
+      lastEProjected: null,
+      lastRProposed: null,
+      lastRRetracted: null,
+      eInvalid: false,
+      invalidCount: 0
+    };
+
+    const themes = ["dark", "light", "academic", "contrast"];
+
+    const guideSteps = [
+      {
+        title: "Etapa 1 · Mismo problema, dos algoritmos",
+        text: "Ambos paneles intentan minimizar la misma pérdida y alcanzar el mismo objetivo. La diferencia está en cómo se calcula el paso de actualización.",
+        formula: "L(x) = dB(x,y)²"
+      },
+      {
+        title: "Etapa 2 · El gradiente euclidiano",
+        text: "El descenso euclidiano usa una dirección calculada con la geometría plana de R². Puede proponer un punto fuera de la bola cuando el paso es grande o el punto está cerca del borde.",
+        formula: "x(t+1) = x(t) − η ∇E L(x)"
+      },
+      {
+        title: "Etapa 3 · La métrica de Poincaré",
+        text: "En la bola de Poincaré, la métrica depende de la posición. Cerca del borde, las distancias hiperbólicas se estiran fuertemente.",
+        formula: "gx = λx² I,   λx = 2 / (1 − ||x||²)"
+      },
+      {
+        title: "Etapa 4 · Gradiente riemanniano",
+        text: "Para obtener una dirección compatible con la geometría, el gradiente euclidiano se corrige mediante la inversa de la métrica.",
+        formula: "∇R L(x) = gx⁻¹ ∇E L(x)"
+      },
+      {
+        title: "Etapa 5 · Reescalado en Poincaré",
+        text: "Como la métrica es conforme, la conversión se expresa como un reescalado del gradiente euclidiano.",
+        formula: "∇R L(x) = ((1 − ||x||²) / 2)² ∇E L(x)"
+      },
+      {
+        title: "Etapa 6 · Cerca del borde el paso se achica",
+        text: "Cuando ||x|| se acerca a 1, el factor riemanniano tiende a cero. Esto evita pasos hiperbólicamente enormes.",
+        formula: "||x|| → 1  ⇒  ρ(x) → 0"
+      },
+      {
+        title: "Etapa 7 · Proyección no es RSGD",
+        text: "La proyección corrige un punto inválido después de un paso euclidiano, pero RSGD cambia la dirección y el tamaño del paso antes de actualizar.",
+        formula: "proyección euclidiana ≠ gradiente riemanniano"
+      },
+      {
+        title: "Etapa 8 · Conexión con embeddings hiperbólicos",
+        text: "En embeddings hiperbólicos, cada nodo se mueve dentro de la bola para reducir una pérdida basada en distancias hiperbólicas, pero el movimiento debe respetar la geometría del espacio.",
+        formula: "xv(t+1) = Retr(xv(t) − η ∇R L)"
+      }
+    ];
+
+    function setStatus(msg) {
+      document.getElementById("statusBox").innerHTML = "<strong>Estado:</strong> " + msg;
+    }
+
+    function polarToPoint(r, deg) {
+      const a = deg * Math.PI / 180;
+      return { x: r * Math.cos(a), y: r * Math.sin(a) };
+    }
+
+    function norm(p) {
+      return Math.sqrt(p.x * p.x + p.y * p.y);
+    }
+
+    function poincareDistance(a, b) {
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const eu2 = dx * dx + dy * dy;
+      const na2 = a.x * a.x + a.y * a.y;
+      const nb2 = b.x * b.x + b.y * b.y;
+      const denom = Math.max(1e-10, (1 - na2) * (1 - nb2));
+      const z = 1 + 2 * eu2 / denom;
+      return Math.acosh(Math.max(1, z));
+    }
+
+    function safeLoss(p) {
+      if (norm(p) >= 0.999) return Infinity;
+      const d = poincareDistance(p, state.y);
+      return d * d;
+    }
+
+    function rho(p) {
+      const n2 = p.x * p.x + p.y * p.y;
+      return Math.pow((1 - n2) / 2, 2);
+    }
+
+    function retract(p, maxNorm = 0.985) {
+      const n = norm(p);
+      if (n >= maxNorm) {
+        return {
+          x: p.x / n * maxNorm,
+          y: p.y / n * maxNorm
+        };
+      }
+      return { x: p.x, y: p.y };
+    }
+
+    function gradientEuclideanApprox(p) {
+      /*
+        Gradiente didáctico aproximado:
+        dirección desde x hacia y, amplificada por la distancia hiperbólica.
+        Esta elección permite visualizar el contraste entre un paso euclidiano
+        potencialmente peligroso y un paso riemanniano reescalado.
+      */
+      const dx = p.x - state.y.x;
+      const dy = p.y - state.y.y;
+      const dE = Math.sqrt(dx * dx + dy * dy) + 1e-8;
+      const dB = poincareDistance(p, state.y);
+      const scale = 2.8 * dB / dE;
+
+      return {
+        x: dx * scale,
+        y: dy * scale
+      };
+    }
+
+    function step() {
+      const eta = Number(document.getElementById("etaSlider").value);
+
+      state.lastEStart = { ...state.xE };
+      state.lastRStart = { ...state.xR };
+
+      const gE = gradientEuclideanApprox(state.xE);
+
+      const proposedE = {
+        x: state.xE.x - eta * gE.x,
+        y: state.xE.y - eta * gE.y
+      };
+
+      state.lastEProposed = proposedE;
+      state.eInvalid = norm(proposedE) >= 1;
+
+      if (state.eInvalid) {
+        state.invalidCount++;
+        state.lastEProjected = retract(proposedE, 0.995);
+        state.xE = { ...state.lastEProjected };
+      } else {
+        state.lastEProjected = null;
+        state.xE = { ...proposedE };
+      }
+
+      const gRef = gradientEuclideanApprox(state.xR);
+      const factor = rho(state.xR);
+
+      const gR = {
+        x: factor * gRef.x,
+        y: factor * gRef.y
+      };
+
+      const proposedR = {
+        x: state.xR.x - eta * gR.x,
+        y: state.xR.y - eta * gR.y
+      };
+
+      state.lastRProposed = proposedR;
+      state.xR = retract(proposedR, 0.985);
+      state.lastRRetracted = { ...state.xR };
+
+      state.iter++;
+      state.pathE.push({ ...state.xE });
+      state.pathR.push({ ...state.xR });
+
+      render();
+
+      if (state.eInvalid) {
+        setStatus("paso euclidiano inválido: el punto rojo muestra la posición propuesta fuera de la bola y la flecha naranja muestra la proyección hacia dentro.");
+      } else {
+        setStatus("paso ejecutado. Compará el tamaño del paso azul con el paso verde y observá el factor ρ(x).");
+      }
+    }
+
+    function reset() {
+      stopAuto();
+
+      const r0 = Number(document.getElementById("r0Slider").value);
+      const a0 = Number(document.getElementById("a0Slider").value);
+      const ry = Number(document.getElementById("rySlider").value);
+      const ay = Number(document.getElementById("aySlider").value);
+
+      const x0 = polarToPoint(r0, a0);
+
+      state.xE = { ...x0 };
+      state.xR = { ...x0 };
+      state.y = polarToPoint(ry, ay);
+      state.iter = 0;
+      state.pathE = [{ ...state.xE }];
+      state.pathR = [{ ...state.xR }];
+      state.lastEStart = null;
+      state.lastRStart = null;
+      state.lastEProposed = null;
+      state.lastEProjected = null;
+      state.lastRProposed = null;
+      state.lastRRetracted = null;
+      state.eInvalid = false;
+      state.invalidCount = 0;
+
+      render();
+      setStatus("comparación reiniciada. Ambos algoritmos parten del mismo punto inicial y buscan el mismo objetivo.");
+    }
+
+    function startAuto() {
+      stopAuto();
+
+      state.auto = setInterval(() => {
+        step();
+
+        if (state.iter >= 350 || safeLoss(state.xR) < 0.04) {
+          stopAuto();
+          setStatus("entrenamiento automático detenido por criterio de parada: iteraciones máximas o pérdida RSGD suficientemente baja.");
+        }
+      }, 180);
+
+      setStatus("entrenamiento automático en ejecución.");
+    }
+
+    function stopAuto() {
+      if (state.auto) {
+        clearInterval(state.auto);
+        state.auto = null;
+      }
+    }
+
+    function toSvg(p) {
+      const cx = 300;
+      const cy = 215;
+      const R = 165;
+
+      return {
+        x: cx + p.x * R,
+        y: cy - p.y * R
+      };
+    }
+
+    function make(tag, attrs = {}) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      return el;
+    }
+
+    function css(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function drawArrow(svg, from, to, color, width = 4, dashed = false, opacity = 0.92) {
+      const id = "arrow_" + Math.random().toString(36).slice(2);
+
+      const defs = make("defs");
+      const marker = make("marker", {
+        id,
+        markerWidth: 10,
+        markerHeight: 10,
+        refX: 8,
+        refY: 3,
+        orient: "auto"
+      });
+
+      marker.appendChild(make("path", {
+        d: "M0,0 L0,6 L9,3 z",
+        fill: color
+      }));
+
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+
+      const line = make("line", {
+        x1: from.x,
+        y1: from.y,
+        x2: to.x,
+        y2: to.y,
+        stroke: color,
+        "stroke-width": width,
+        "stroke-linecap": "round",
+        "marker-end": `url(#${id})`,
+        opacity
+      });
+
+      if (dashed) {
+        line.setAttribute("stroke-dasharray", "7 7");
+      }
+
+      svg.appendChild(line);
+    }
+
+    function drawPath(svg, arr, color) {
+      if (arr.length < 2) return;
+
+      let d = "";
+
+      arr.forEach((p, i) => {
+        const q = toSvg(p);
+        d += i === 0 ? `M ${q.x} ${q.y}` : ` L ${q.x} ${q.y}`;
+      });
+
+      svg.appendChild(make("path", {
+        d,
+        fill: "none",
+        stroke: color,
+        "stroke-width": 3,
+        opacity: 0.82
+      }));
+    }
+
+    function drawText(svg, text, x, y, color, size = 14, weight = 800, anchor = "start") {
+      const t = make("text", {
+        x,
+        y,
+        fill: color,
+        "font-size": size,
+        "font-weight": weight,
+        "text-anchor": anchor,
+        "paint-order": "stroke",
+        stroke: css("--bg"),
+        "stroke-width": 4,
+        "stroke-linejoin": "round"
+      });
+
+      t.textContent = text;
+      svg.appendChild(t);
+    }
+
+    function drawDisk(svg, mode) {
+      svg.innerHTML = "";
+
+      const cx = 300;
+      const cy = 215;
+      const R = 165;
+
+      if (state.showRisk) {
+        svg.appendChild(make("circle", {
+          cx,
+          cy,
+          r: R,
+          fill: css("--red"),
+          opacity: 0.08
+        }));
+
+        svg.appendChild(make("circle", {
+          cx,
+          cy,
+          r: R * 0.90,
+          fill: css("--panel"),
+          opacity: 1
+        }));
+      }
+
+      [0.25, 0.50, 0.75].forEach(k => {
+        svg.appendChild(make("circle", {
+          cx,
+          cy,
+          r: R * k,
+          fill: "none",
+          stroke: css("--border"),
+          "stroke-width": 1
+        }));
+      });
+
+      svg.appendChild(make("line", {
+        x1: cx - R,
+        y1: cy,
+        x2: cx + R,
+        y2: cy,
+        stroke: css("--border")
+      }));
+
+      svg.appendChild(make("line", {
+        x1: cx,
+        y1: cy - R,
+        x2: cx,
+        y2: cy + R,
+        stroke: css("--border")
+      }));
+
+      svg.appendChild(make("circle", {
+        cx,
+        cy,
+        r: R,
+        fill: "rgba(255,255,255,0.025)",
+        stroke: css("--muted"),
+        "stroke-width": 3
+      }));
+
+      const y = toSvg(state.y);
+
+      svg.appendChild(make("circle", {
+        cx: y.x,
+        cy: y.y,
+        r: 14,
+        fill: css("--purple"),
+        stroke: "#fff",
+        "stroke-width": 2
+      }));
+
+      drawText(svg, "objetivo y", y.x + 18, y.y - 12, css("--text"), 15);
+
+      const p = mode === "E" ? state.xE : state.xR;
+      const ps = toSvg(p);
+
+      if (state.showPath) {
+        drawPath(svg, mode === "E" ? state.pathE : state.pathR, mode === "E" ? css("--blue") : css("--green"));
+      }
+
+      if (state.showGradients) {
+        if (mode === "E") {
+          const eta = Number(document.getElementById("etaSlider").value);
+
+          const startPoint = state.lastEStart || state.xE;
+          const startSvg = toSvg(startPoint);
+
+          const g = gradientEuclideanApprox(startPoint);
+          const proposed = {
+            x: startPoint.x - eta * g.x,
+            y: startPoint.y - eta * g.y
+          };
+
+          const proposedSvg = toSvg(proposed);
+
+          drawArrow(svg, startSvg, proposedSvg, css("--blue"), 4, false, 0.92);
+
+          if (state.showInvalidPoint && state.lastEProposed && state.eInvalid) {
+            const invalidSvg = toSvg(state.lastEProposed);
+
+            svg.appendChild(make("circle", {
+              cx: invalidSvg.x,
+              cy: invalidSvg.y,
+              r: 13,
+              fill: css("--red"),
+              stroke: "#fff",
+              "stroke-width": 3,
+              opacity: 0.96
+            }));
+
+            drawText(svg, "punto propuesto inválido", invalidSvg.x + 16, invalidSvg.y - 10, css("--red"), 14);
+
+            if (state.showRetraction && state.lastEProjected) {
+              const projectedSvg = toSvg(state.lastEProjected);
+              drawArrow(svg, invalidSvg, projectedSvg, css("--orange"), 4, true, 0.95);
+              drawText(svg, "proyección", (invalidSvg.x + projectedSvg.x) / 2 + 8, (invalidSvg.y + projectedSvg.y) / 2 - 8, css("--orange"), 14);
+            }
+          }
+        } else {
+          const eta = Number(document.getElementById("etaSlider").value);
+
+          const startPoint = state.lastRStart || state.xR;
+          const startSvg = toSvg(startPoint);
+
+          const g = gradientEuclideanApprox(startPoint);
+          const refEnd = toSvg({
+            x: startPoint.x - eta * g.x,
+            y: startPoint.y - eta * g.y
+          });
+
+          drawArrow(svg, startSvg, refEnd, css("--gray"), 3, true, 0.70);
+
+          const factor = rho(startPoint);
+          const end = toSvg({
+            x: startPoint.x - eta * factor * g.x,
+            y: startPoint.y - eta * factor * g.y
+          });
+
+          drawArrow(svg, startSvg, end, css("--green"), 5, false, 0.95);
+
+          if (state.showRetraction && state.lastRProposed && norm(state.lastRProposed) >= 0.985) {
+            const proposed = toSvg(state.lastRProposed);
+            const retracted = toSvg(state.xR);
+            drawArrow(svg, proposed, retracted, css("--orange"), 3, true, 0.9);
+          }
+        }
+      }
+
+      svg.appendChild(make("circle", {
+        cx: ps.x,
+        cy: ps.y,
+        r: 15,
+        fill: mode === "E" ? css("--blue") : css("--green"),
+        stroke: "#fff",
+        "stroke-width": 3
+      }));
+
+      drawText(svg, mode === "E" ? "xE" : "xR", ps.x + 18, ps.y + 4, css("--text"), 15);
+
+      const label = make("text", {
+        x: 300,
+        y: 430,
+        "text-anchor": "middle",
+        fill: css("--muted"),
+        "font-size": 13
+      });
+
+      label.textContent = mode === "E"
+        ? "GD euclidiano: el punto rojo muestra una propuesta fuera de la bola"
+        : "RSGD: reescala el gradiente con ρ(x) y aplica retracción";
+
+      svg.appendChild(label);
+
+      if (mode === "E" && state.eInvalid) {
+        drawText(svg, "Paso euclidiano inválido: salió de la bola", 300, 20, css("--red"), 17, 900, "middle");
+      }
+
+      if (mode === "R") {
+        const rValue = rho(state.xR);
+        drawText(svg, "ρ(xR) = " + rValue.toFixed(6), 300, 20, css("--green"), 16, 900, "middle");
+      }
+    }
+
+    function renderMetrics() {
+      const nE = norm(state.xE);
+      const nR = norm(state.xR);
+
+      const proposedENorm = state.lastEProposed ? norm(state.lastEProposed) : "-";
+
+      const dE = poincareDistance(state.xE, state.y);
+      const dR = poincareDistance(state.xR, state.y);
+
+      const lE = dE * dE;
+      const lR = dR * dR;
+
+      const gE = gradientEuclideanApprox(state.xE);
+      const gRRef = gradientEuclideanApprox(state.xR);
+      const rhoR = rho(state.xR);
+
+      const gradENorm = Math.sqrt(gE.x * gE.x + gE.y * gE.y);
+      const gradRRefNorm = Math.sqrt(gRRef.x * gRRef.x + gRRef.y * gRRef.y);
+      const gradRNorm = rhoR * gradRRefNorm;
+
+      document.getElementById("iterMetric").textContent = state.iter;
+      document.getElementById("rhoMetric").textContent = rhoR.toFixed(6);
+      document.getElementById("lossEMetric").textContent = lE.toFixed(3);
+      document.getElementById("lossRMetric").textContent = lR.toFixed(3);
+      document.getElementById("invalidMetric").textContent = state.invalidCount;
+
+      document.getElementById("metricTable").innerHTML = `
+        <tr>
+          <td>Norma ||x||</td>
+          <td>${nE.toFixed(4)}</td>
+          <td>${nR.toFixed(4)}</td>
+          <td>Cerca de 1 significa cercanía al borde del disco.</td>
+        </tr>
+        <tr>
+          <td>Norma del punto propuesto</td>
+          <td>${typeof proposedENorm === "number" ? proposedENorm.toFixed(4) : "-"}</td>
+          <td>${state.lastRProposed ? norm(state.lastRProposed).toFixed(4) : "-"}</td>
+          <td>Si la propuesta euclidiana supera 1, queda fuera de la bola.</td>
+        </tr>
+        <tr>
+          <td>Factor ρ(x)</td>
+          <td>No usado</td>
+          <td>${rhoR.toFixed(8)}</td>
+          <td>Cuando ||x|| → 1, ρ(x) → 0 y el paso riemanniano se achica.</td>
+        </tr>
+        <tr>
+          <td>Distancia hiperbólica al objetivo</td>
+          <td>${dE.toFixed(4)}</td>
+          <td>${dR.toFixed(4)}</td>
+          <td>Ambos métodos buscan reducir esta distancia.</td>
+        </tr>
+        <tr>
+          <td>Pérdida L(x)=dB(x,y)²</td>
+          <td>${lE.toFixed(4)}</td>
+          <td>${lR.toFixed(4)}</td>
+          <td>La pérdida compara qué tan lejos está cada punto del objetivo.</td>
+        </tr>
+        <tr>
+          <td>Norma del gradiente euclidiano</td>
+          <td>${gradENorm.toFixed(4)}</td>
+          <td>${gradRRefNorm.toFixed(4)} como referencia</td>
+          <td>RSGD no usa directamente este gradiente; primero lo reescala.</td>
+        </tr>
+        <tr>
+          <td>Norma del gradiente riemanniano</td>
+          <td>No usado</td>
+          <td>${gradRNorm.toFixed(8)}</td>
+          <td>Es el gradiente compatible con la métrica de Poincaré.</td>
+        </tr>
+        <tr>
+          <td>¿Punto dentro de la bola?</td>
+          <td>${nE < 1 ? "Sí, después de proyección si fue necesaria" : "No"}</td>
+          <td>${nR < 1 ? "Sí" : "No"}</td>
+          <td>El punto rojo permite ver la propuesta euclidiana inválida antes de corregirla.</td>
+        </tr>
+        <tr>
+          <td>Estado del paso</td>
+          <td>${state.eInvalid ? "Inválido: requirió proyección" : "Válido"}</td>
+          <td>Válido</td>
+          <td>La proyección euclidiana no equivale a una actualización riemanniana.</td>
+        </tr>
+      `;
+    }
+
+    function renderGuide() {
+      const g = guideSteps[state.guideIndex % guideSteps.length];
+
+      document.getElementById("guideTitle").textContent = g.title;
+      document.getElementById("guideText").textContent = g.text;
+      document.getElementById("guideFormula").textContent = g.formula;
+    }
+
+    function render() {
+      drawDisk(svgE, "E");
+      drawDisk(svgR, "R");
+      renderMetrics();
+      renderGuide();
+    }
+
+    function updateSliderLabels() {
+      document.getElementById("etaValue").textContent = Number(document.getElementById("etaSlider").value).toFixed(3);
+      document.getElementById("r0Value").textContent = Number(document.getElementById("r0Slider").value).toFixed(2);
+      document.getElementById("a0Value").textContent = document.getElementById("a0Slider").value + "°";
+      document.getElementById("ryValue").textContent = Number(document.getElementById("rySlider").value).toFixed(2);
+      document.getElementById("ayValue").textContent = document.getElementById("aySlider").value + "°";
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", reset);
+
+    document.getElementById("stepBtn").addEventListener("click", step);
+
+    document.getElementById("autoBtn").addEventListener("click", startAuto);
+
+    document.getElementById("stopBtn").addEventListener("click", () => {
+      stopAuto();
+      setStatus("entrenamiento detenido manualmente.");
+    });
+
+    document.getElementById("gradBtn").addEventListener("click", () => {
+      state.showGradients = !state.showGradients;
+      render();
+    });
+
+    document.getElementById("pathBtn").addEventListener("click", () => {
+      state.showPath = !state.showPath;
+      render();
+    });
+
+    document.getElementById("riskBtn").addEventListener("click", () => {
+      state.showRisk = !state.showRisk;
+      render();
+    });
+
+    document.getElementById("retrBtn").addEventListener("click", () => {
+      state.showRetraction = !state.showRetraction;
+      render();
+    });
+
+    document.getElementById("invalidBtn").addEventListener("click", () => {
+      state.showInvalidPoint = !state.showInvalidPoint;
+      render();
+    });
+
+    document.getElementById("guideBtn").addEventListener("click", () => {
+      state.guideIndex = (state.guideIndex + 1) % guideSteps.length;
+      render();
+    });
+
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      state.themeIndex = (state.themeIndex + 1) % themes.length;
+      document.documentElement.setAttribute("data-theme", themes[state.themeIndex]);
+      render();
+    });
+
+    ["etaSlider", "r0Slider", "a0Slider", "rySlider", "aySlider"].forEach(id => {
+      document.getElementById(id).addEventListener("input", () => {
+        updateSliderLabels();
+      });
+    });
+
+    ["r0Slider", "a0Slider", "rySlider", "aySlider"].forEach(id => {
+      document.getElementById(id).addEventListener("change", reset);
+    });
+
+    document.getElementById("scenario1").addEventListener("click", () => {
+      document.getElementById("etaSlider").value = 0.045;
+      document.getElementById("r0Slider").value = 0.15;
+      document.getElementById("a0Slider").value = 210;
+      document.getElementById("rySlider").value = 0.50;
+      document.getElementById("aySlider").value = 30;
+      updateSliderLabels();
+      reset();
+      setStatus("Escenario 1 cargado: punto cerca del centro. GD y RSGD se parecen más.");
+    });
+
+    document.getElementById("scenario2").addEventListener("click", () => {
+      document.getElementById("etaSlider").value = 0.055;
+      document.getElementById("r0Slider").value = 0.92;
+      document.getElementById("a0Slider").value = 210;
+      document.getElementById("rySlider").value = 0.70;
+      document.getElementById("aySlider").value = 30;
+      updateSliderLabels();
+      reset();
+      setStatus("Escenario 2 cargado: punto cerca del borde. El factor riemanniano se vuelve muy pequeño.");
+    });
+
+    document.getElementById("scenario3").addEventListener("click", () => {
+      document.getElementById("etaSlider").value = 0.18;
+      document.getElementById("r0Slider").value = 0.95;
+      document.getElementById("a0Slider").value = 210;
+      document.getElementById("rySlider").value = 0.72;
+      document.getElementById("aySlider").value = 25;
+      updateSliderLabels();
+      reset();
+      setStatus("Escenario 3 cargado: tasa de aprendizaje alta. GD puede proponer un punto fuera de la bola.");
+    });
+
+    document.getElementById("scenario4").addEventListener("click", () => {
+      document.getElementById("etaSlider").value = 0.06;
+      document.getElementById("r0Slider").value = 0.80;
+      document.getElementById("a0Slider").value = 220;
+      document.getElementById("rySlider").value = 0.75;
+      document.getElementById("aySlider").value = 20;
+      updateSliderLabels();
+      reset();
+      setStatus("Escenario 4 cargado: objetivo en otra región angular.");
+    });
+
+    document.getElementById("scenario5").addEventListener("click", () => {
+      document.getElementById("etaSlider").value = 0.28;
+      document.getElementById("r0Slider").value = 0.96;
+      document.getElementById("a0Slider").value = 210;
+      document.getElementById("rySlider").value = 0.88;
+      document.getElementById("aySlider").value = 20;
+      updateSliderLabels();
+      reset();
+      setStatus("Escenario 5 cargado: salida forzada. Presioná “Ejecutar un paso” para ver el punto rojo fuera de la bola.");
+    });
+
+    updateSliderLabels();
+    reset();
+  </script>
+</body>
+</html>
