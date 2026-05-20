@@ -525,6 +525,13 @@
     "mtime": "2026-03-05T18:32:03-03:00"
   },
   {
+    "title": "GD euclidiano vs RSGD en la bola de Poincaré · Versión 2.1",
+    "path": "/src/classroom/graphs/recursos/Hiperbólica_GD euclidiano vs RSGD cómo se optimiza dentro de la bola de Poincaré.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-05-20T15:06:04-03:00"
+  },
+  {
     "title": "Genetic Maze Solver + Index",
     "path": "/src/classroom/graphs/recursos/Algoritmo_Genético_Simulación.html",
     "tag": "Demo",
