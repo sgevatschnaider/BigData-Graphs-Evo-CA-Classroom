@@ -229,6 +229,139 @@ El recorrido está organizado como una secuencia pedagógica: primero se introdu
 | **Mundo pequeño: glosario de teoría de redes (HTML)** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este glosario organiza el vocabulario central del small world y de la teoría de redes en un formato editorial e interactivo. Reúne definiciones desarrolladas sobre grafos, caminos, clustering, comunidades, difusión, robustez, hubs, modelos nulos, redes aleatorias, redes libres de escala y muchos otros conceptos asociados al fenómeno. El material está estructurado con portada, guía de lectura, navegación alfabética, buscador, selector de temas visuales y tarjetas expandibles para cada término, donde se combinan definición, idea clave y ejemplo o lectura aplicada. Técnicamente, es un HTML autocontenido con <code>CSS</code> y <code>JavaScript</code>, diseñado para ofrecer una consulta rápida pero también una lectura profunda y ordenada. Su aporte principal es convertir un conjunto amplio de definiciones en una herramienta de estudio clara, visual y reutilizable.</p></details> | [![Ver HTML](https://img.shields.io/badge/Ver%20HTML-Glosario-orange?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Mundo_peque%C3%B1o_Glosario.html) |
 | **Mundo pequeño: cuestionario sobre teoría de redes (HTML)** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este cuestionario presenta una secuencia desarrollada de preguntas y respuestas sobre el fenómeno de mundo pequeño, desde su definición general hasta su vigencia contemporánea. A lo largo de 20 preguntas aborda la distancia geodésica, la longitud media de camino, el coeficiente de agrupamiento, la diferencia entre redes regulares y aleatorias, el modelo de Watts–Strogatz, los atajos, la intuición de los seis grados de separación, la difusión, las epidemias en red, la sincronización, los límites del small world y la ampliación de la discusión a partir de Barabási. El archivo está diseñado como una pieza interactiva con portada, progreso de lectura, buscador, tarjetas expandibles, temas visuales y bloques destacados para fórmulas e ideas clave. Más que un simple listado de respuestas, funciona como una guía de estudio estructurada, en prosa continua y con organización pedagógica progresiva.</p></details> | [![Ver HTML](https://img.shields.io/badge/Ver%20HTML-Cuestionario-orange?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Mundo_Peque%C3%B1o_cuestionario.html) |
 
+## 📘 Guías de ejercicios resueltos — Teoría de Grafos, Cayley, Embeddings y Geometría Hiperbólica
+
+Esta sección reúne una colección de **guías en PDF con ejercicios resueltos** orientadas al estudio progresivo de la teoría de grafos, desde conceptos fundamentales hasta aplicaciones avanzadas en geometría hiperbólica, embeddings y machine learning.
+
+El objetivo de estas guías es complementar los recursos HTML interactivos, notebooks y simulaciones del repositorio con materiales de estudio en formato PDF, pensados para:
+
+- repaso conceptual,
+- resolución paso a paso,
+- preparación de clases,
+- actividades integradoras,
+- autoevaluación,
+- uso como material de apoyo para estudiantes.
+
+Las guías están organizadas alrededor de cuatro ejes principales:
+
+1. **Grafos completamente irregulares, grados y principio del palomar**  
+2. **Grafos de Cayley, grupos, generadores y simetrías**  
+3. **Grafos, embeddings y geometría hiperbólica**  
+4. **Geometría hiperbólica aplicada a machine learning y representaciones jerárquicas**
+
+---
+
+### 📂 Carpeta general de guías en Google Drive
+
+| Recurso | Acceso |
+|---|---|
+| **Carpeta completa de guías PDF** <br><br> Reúne las guías de ejercicios resueltos utilizadas como material complementario para los módulos de teoría de grafos, grafos de Cayley, grafos irregulares, embeddings y geometría hiperbólica. | [![Abrir carpeta en Google Drive](https://img.shields.io/badge/Google%20Drive-Abrir%20carpeta-34A853?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1e34O_llYzUz8aIkEx9Rwzi39p5LS8eWX?usp=sharing) |
+
+---
+
+## 🧩 Guías disponibles
+
+| 📄 Guía | Tema central | Descripción | Acceso |
+|---|---|---|---|
+| **Grafos completamente irregulares** | Grados, secuencias de grados, complemento y principio del palomar | Guía de ejercicios resueltos sobre la imposibilidad de que un grafo simple de orden `n >= 2` tenga todos sus vértices con grados distintos. Desarrolla paso a paso la incompatibilidad entre un vértice aislado de grado `0` y un vértice universal de grado `n - 1`, utilizando ejemplos pequeños, demostraciones por contradicción, principio del palomar, complemento de grafos y lema del apretón de manos. | [![Ver en Drive](https://img.shields.io/badge/PDF-Grafos%20Irregulares-red?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://drive.google.com/drive/folders/1e34O_llYzUz8aIkEx9Rwzi39p5LS8eWX?usp=sharing) |
+| **Grafos de Cayley** | Grupos, generadores, simetrías, conectividad, matrices y espectro | Guía completa de ejercicios resueltos sobre grafos de Cayley. Conecta álgebra abstracta y teoría de grafos: los elementos del grupo funcionan como vértices, los generadores como movimientos permitidos y las aristas como transiciones inducidas por esos generadores. Incluye construcción básica, grupos cíclicos, conectividad, regularidad, productos directos, hipercubos, distancia de palabra, matrices, laplaciano, espectro y ejemplos no conmutativos. | [![Ver en Drive](https://img.shields.io/badge/PDF-Grafos%20de%20Cayley-blue?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://drive.google.com/drive/folders/1e34O_llYzUz8aIkEx9Rwzi39p5LS8eWX?usp=sharing) |
+| **Grafos, embeddings y geometría hiperbólica — Versión 2.0** | Métrica de grafos, distorsión, laplaciano, espectro y embeddings | Guía revisada y reorganizada para clase. Desarrolla una progresión desde la métrica de grafos y las bolas métricas hasta el crecimiento jerárquico, la comparación entre geometría euclídea e hiperbólica, la distorsión de embeddings, el disco de Poincaré, la optimización con GD y RSGD, matrices de adyacencia, matrices de distancia, laplaciano, autovalores, autovectores y energía del laplaciano. | [![Ver en Drive](https://img.shields.io/badge/PDF-Embeddings%20y%20Geometría%20Hiperbólica-purple?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://drive.google.com/drive/folders/1e34O_llYzUz8aIkEx9Rwzi39p5LS8eWX?usp=sharing) |
+| **Geometría hiperbólica, grafos y embeddings en machine learning** | Jerarquías, taxonomías, ontologías, Poincaré embeddings y RSGD | Guía completa de ejercicios desde nivel conceptual hasta avanzado. Explica por qué la geometría hiperbólica permite representar con menor distorsión grafos jerárquicos, árboles, taxonomías, ontologías y redes complejas. Incluye ejercicios sobre radio, borde, jerarquía, distorsión, embeddings aprendidos, funciones de pérdida, optimización riemanniana, aplicaciones en redes sociales, grafos de conocimiento y simulaciones visuales. | [![Ver en Drive](https://img.shields.io/badge/PDF-Hiperbólica%20y%20Machine%20Learning-6f42c1?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://drive.google.com/drive/folders/1e34O_llYzUz8aIkEx9Rwzi39p5LS8eWX?usp=sharing) |
+
+---
+
+## 🎯 Objetivos de aprendizaje de las guías
+
+Al trabajar con estas guías, el estudiante podrá:
+
+- distinguir entre grafos regulares, irregulares y completamente irregulares;
+- comprender por qué no existen grafos simples completamente irregulares para `n >= 2`;
+- aplicar el principio del palomar a demostraciones de teoría de grafos;
+- analizar secuencias de grados y su compatibilidad con grafos simples;
+- construir grafos de Cayley a partir de grupos y generadores;
+- relacionar conectividad de grafos de Cayley con generación algebraica;
+- interpretar la regularidad y simetría de los grafos de Cayley;
+- comprender la distancia de palabra y la métrica inducida por generadores;
+- conectar matrices de adyacencia, distancia y laplaciano con propiedades estructurales;
+- explicar la relación entre grafos jerárquicos y geometría hiperbólica;
+- comparar embeddings euclídeos e hiperbólicos;
+- interpretar el disco de Poincaré como modelo para representar jerarquías;
+- analizar distorsión en embeddings de grafos;
+- comprender por qué RSGD es más adecuado que GD tradicional en espacios curvos;
+- vincular grafos, embeddings, machine learning y representación geométrica de datos.
+
+---
+
+## 🧠 Secuencia sugerida de estudio
+
+| Orden | Guía | Motivo pedagógico |
+|---|---|---|
+| 1 | **Grafos completamente irregulares** | Introduce nociones fundamentales de grado, secuencia de grados, regularidad, irregularidad, complemento y demostración matemática. |
+| 2 | **Grafos de Cayley** | Conecta teoría de grafos con álgebra abstracta, generadores, simetrías, conectividad y estructuras regulares. |
+| 3 | **Grafos, embeddings y geometría hiperbólica — Versión 2.0** | Introduce la transición desde grafos como estructuras discretas hacia representaciones geométricas mediante métricas, distancias, laplaciano y embeddings. |
+| 4 | **Geometría hiperbólica, grafos y embeddings en machine learning** | Profundiza en aplicaciones avanzadas: jerarquías, taxonomías, Poincaré embeddings, funciones de pérdida, optimización riemanniana y machine learning. |
+
+---
+
+## 🔗 Relación con los recursos interactivos del repositorio
+
+Estas guías PDF complementan los recursos HTML y notebooks ya disponibles en el repositorio:
+
+| Tema | Recursos relacionados |
+|---|---|
+| Grafos irregulares | `3.Grafos_ Irregulares.html`, `Grafos_cuasiirregulares.html`, `El Complemento de un Grafo-irregular.html`, `Palomar.html` |
+| Secuencias de grados | `Realización de secuencias de grados y “casi irregularidad”.html` |
+| Grafos de Cayley | `Grafos de Cayley`, exploradores de grupos, generadores, ciclos e hipercubos |
+| Hipercubos y Hamming | `Grafos Regulares_hipercubos.html`, recursos sobre distancia de Hamming |
+| Geometría hiperbólica | `arbol_hiperbolico.html`, recursos sobre disco de Poincaré, teselaciones y embeddings |
+| Embeddings de grafos | Recursos sobre grafos jerárquicos, distorsión, Poincaré embeddings y comparación euclídea/hiperbólica |
+| Laplaciano y espectro | Materiales sobre matrices, energía del laplaciano, autovalores y conectividad |
+
+---
+
+## 🧭 Cómo usar estas guías en clase
+
+Una posible dinámica de trabajo es:
+
+1. **Presentación teórica breve**  
+   Introducir el concepto central: grado, generador, distancia, embedding o curvatura.
+
+2. **Exploración visual**  
+   Abrir el recurso HTML interactivo correspondiente desde el repositorio.
+
+3. **Resolución guiada**  
+   Trabajar uno o dos ejercicios de la guía PDF en pizarra o en clase sincrónica.
+
+4. **Discusión conceptual**  
+   Preguntar qué propiedad estructural aparece detrás del ejercicio: simetría, conectividad, distorsión, crecimiento, regularidad o jerarquía.
+
+5. **Autoevaluación**  
+   Dejar ejercicios seleccionados de la guía como práctica individual.
+
+6. **Integración final**  
+   Relacionar el resultado con aplicaciones en redes, machine learning, grafos de conocimiento o sistemas complejos.
+
+---
+
+## 📌 Idea integradora
+
+La colección muestra una progresión conceptual:
+
+> Un grafo puede estudiarse por sus grados, por sus simetrías, por sus distancias, por sus matrices y también por la geometría del espacio donde intentamos representarlo.
+
+Desde esta perspectiva, la teoría de grafos deja de ser solo una colección de vértices y aristas para convertirse en un puente entre:
+
+- combinatoria,
+- álgebra,
+- geometría,
+- optimización,
+- machine learning,
+- ciencia de datos,
+- redes complejas,
+- inteligencia artificial.
+
+---
+
 # 📚 Introducción a los grafos irregulares y grafo de Cayley
 
 Esta es una colección de lecciones y simulaciones interactivas diseñadas para explorar los conceptos fundamentales y avanzados de la teoría de grafos, desde los preliminares hasta aplicaciones en computación de alto rendimiento. Cada recurso es una página web autocontenida con visualizaciones dinámicas construidas con HTML, CSS y JavaScript.
