@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Índice · Simetría, grafos y Big Data</title>
+<style>
+:root{
+  --bg:#f4f7fb; --card:#ffffff; --card2:#f9fbff; --text:#142033; --muted:#64748b;
+  --line:#d9e4f2; --accent:#2563eb; --accent2:#7c3aed; --accent3:#06b6d4;
+  --good:#059669; --warn:#d97706; --bad:#dc2626;
+  --shadow:0 22px 54px rgba(23,37,84,.14); --soft:0 8px 22px rgba(15,23,42,.08);
+  --radius:28px;
+}
+[data-theme="dark"]{
+  --bg:#07111f; --card:#111c31; --card2:#0d1729; --text:#eef6ff; --muted:#afbdd2;
+  --line:#263956; --accent:#60a5fa; --accent2:#a78bfa; --accent3:#22d3ee;
+  --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  --shadow:0 22px 54px rgba(0,0,0,.38); --soft:0 8px 22px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top left,color-mix(in srgb,var(--accent) 18%,transparent),transparent 34%),radial-gradient(circle at top right,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 30%),linear-gradient(135deg,var(--bg),color-mix(in srgb,var(--bg),var(--accent3) 8%));color:var(--text);line-height:1.66}
+a{color:var(--accent);font-weight:850;text-decoration:none} a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav{max-width:1240px;margin:auto;padding:13px 20px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand{font-weight:950;letter-spacing:-.025em}.controls{display:flex;gap:10px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 14px;border-radius:15px;cursor:pointer;font-weight:850;box-shadow:var(--soft);transition:.18s transform,.18s opacity;display:inline-flex;align-items:center;gap:8px}
+button.primary,.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none}
+button:hover,.btn:hover{transform:translateY(-1px)}
+main{max-width:1240px;margin:auto;padding:28px 20px 64px}
+.card{background:color-mix(in srgb,var(--card) 96%,transparent);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin:18px 0}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:22px;align-items:stretch;margin:18px 0 28px}
+h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:10px 0 14px;letter-spacing:-.05em} h2{font-size:clamp(25px,3vw,38px);line-height:1.1;margin:34px 0 16px;letter-spacing:-.035em} h3{font-size:22px;margin:8px 0 10px}
+.lead{font-size:18px;color:var(--muted);max-width:84ch}.muted{color:var(--muted)}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--accent) 5%);font-size:13px;font-weight:900;color:var(--muted)}
+.notice{border-left:5px solid var(--accent);padding:15px 17px;border-radius:18px;background:color-mix(in srgb,var(--accent) 8%,var(--card));margin:14px 0}
+.moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.moduleCard{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);display:flex;flex-direction:column;min-height:310px}
+.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}.moduleNum{font-size:28px;font-weight:950;letter-spacing:-.04em;color:var(--accent)}.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}
+.moduleCard p{color:var(--muted);font-size:15px;flex:1}.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}
+.moduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.searchBox{display:grid;gap:8px;margin-top:14px} input{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:750;box-shadow:var(--soft)}
+.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.path a{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.mini{padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{color:var(--muted)}
+.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}
+@media(max-width:980px){.hero,.moduleGrid,.grid2{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1;justify-content:center}}
+@media print{header,.controls,button,.btn,.searchBox{display:none!important}body{background:white}.card,.moduleCard,.mini{box-shadow:none}main{max-width:100%;padding:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand">00 · Índice · Simetría, grafos y Big Data</div>
+    <div class="controls">
+      <button id="themeBtn">🌙 Tema oscuro</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+      <a class="btn primary" href="09_guia_docente_actividades.html">Guía docente</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="card">
+    <span class="tag">Simetría</span><span class="tag">D₃</span><span class="tag">Grafos</span><span class="tag">MapReduce</span><span class="tag">Spark</span>
+    <h1>Simetría, grupos, grafos y Big Data</h1>
+    <p class="lead">Índice general del material interactivo. El recorrido conecta una idea matemática pequeña —la simetría del triángulo— con estructuras computacionales reales: particiones, recorridos en grafos, hash, shuffle, reducción distribuida, RDD, memoria y tolerancia a fallos.</p>
+    <div class="notice"><strong>Uso recomendado:</strong> avanzar del módulo 01 al 09. Las simulaciones pueden abrirse de forma independiente, pero el valor didáctico aumenta cuando se observa la continuidad entre estructura matemática y arquitectura Big Data.</div>
+    <div class="path"><a href="01_teoria_d3_bigdata_grafos.html">01</a><a href="02_simulacion_d3_cayley.html">02</a><a href="03_simulacion_lagrange_sharding.html">03</a><a href="04_simulacion_mapreduce_asociatividad.html">04</a><a href="05_simulacion_grafos_traversal_no_conmutatividad.html">05</a><a href="06_simulacion_invariancias_ia_datos.html">06</a><a href="07_simulacion_arquitectura_bigdata_mapreduce.html">07</a><a href="08_simulacion_arquitectura_bigdata_spark_rdd.html">08</a><a href="09_guia_docente_actividades.html">09</a></div>
+  </div>
+  <div class="card">
+    <h3>Buscar módulo</h3>
+    <p class="muted">Filtrá por número, tema o tecnología: D₃, Cayley, sharding, MapReduce, hash, Spark, RDD, guía.</p>
+    <div class="searchBox"><input id="moduleSearch" placeholder="Buscar en el índice..." aria-label="Buscar módulo"></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="mini"><strong>9</strong><small>archivos principales más el índice</small></div>
+      <div class="mini"><strong>7</strong><small>módulos con simulación o actividad interactiva</small></div>
+    </div>
+  </div>
+</section>
+<section class="card">
+  <h2>Recorrido completo</h2>
+  <div class="moduleGrid" id="moduleGrid">
+      <article class="moduleCard" data-title="01 D₃, grafos y Big Data Teoría D₃ grupos grafos Big Data">
+        <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Teoría</span></div>
+        <h3>D₃, grafos y Big Data</h3>
+        <p>Puente conceptual desde simetrías del triángulo hacia estructuras de datos distribuidas.</p>
+        <div class="tagline"><span>D₃</span><span>grupos</span><span>grafos</span><span>Big Data</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="01_teoria_d3_bigdata_grafos.html">Abrir</a>
+          <a class="btn" href="01_teoria_d3_bigdata_grafos.html#simetria">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="02 D₃ y grafo de Cayley Simulación Cayley generadores composición no conmutatividad">
+        <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Simulación</span></div>
+        <h3>D₃ y grafo de Cayley</h3>
+        <p>Recorrido interactivo por estados, generadores, composición y estructura no conmutativa.</p>
+        <div class="tagline"><span>Cayley</span><span>generadores</span><span>composición</span><span>no conmutatividad</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="02_simulacion_d3_cayley.html">Abrir</a>
+          <a class="btn" href="02_simulacion_d3_cayley.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="03 Lagrange, clases laterales y sharding Simulación Lagrange cosets sharding particiones">
+        <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Simulación</span></div>
+        <h3>Lagrange, clases laterales y sharding</h3>
+        <p>Analogía entre particiones matemáticas y distribución coherente de registros en shards.</p>
+        <div class="tagline"><span>Lagrange</span><span>cosets</span><span>sharding</span><span>particiones</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="03_simulacion_lagrange_sharding.html">Abrir</a>
+          <a class="btn" href="03_simulacion_lagrange_sharding.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="04 MapReduce y asociatividad Simulación MapReduce asociatividad reduce agregación">
+        <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Simulación</span></div>
+        <h3>MapReduce y asociatividad</h3>
+        <p>Demostración de por qué una operación asociativa puede dividirse, paralelizarse y recomponerse.</p>
+        <div class="tagline"><span>MapReduce</span><span>asociatividad</span><span>reduce</span><span>agregación</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="04_simulacion_mapreduce_asociatividad.html">Abrir</a>
+          <a class="btn" href="04_simulacion_mapreduce_asociatividad.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="05 Traversal y no conmutatividad Simulación grafos traversal orden no conmutatividad">
+        <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Simulación</span></div>
+        <h3>Traversal y no conmutatividad</h3>
+        <p>Comparación de caminos en grafos para mostrar que el orden de operaciones importa.</p>
+        <div class="tagline"><span>grafos</span><span>traversal</span><span>orden</span><span>no conmutatividad</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="05_simulacion_grafos_traversal_no_conmutatividad.html">Abrir</a>
+          <a class="btn" href="05_simulacion_grafos_traversal_no_conmutatividad.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="06 Invariancias en IA y datos Simulación IA invariancia identidad datos">
+        <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Simulación</span></div>
+        <h3>Invariancias en IA y datos</h3>
+        <p>Pruebas visuales sobre identidad, inversos e invariancias en modelos y representaciones de datos.</p>
+        <div class="tagline"><span>IA</span><span>invariancia</span><span>identidad</span><span>datos</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="06_simulacion_invariancias_ia_datos.html">Abrir</a>
+          <a class="btn" href="06_simulacion_invariancias_ia_datos.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="07 Arquitectura Big Data con MapReduce Simulación MapReduce hash shuffle HDFS">
+        <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Simulación</span></div>
+        <h3>Arquitectura Big Data con MapReduce</h3>
+        <p>Pipeline completo: entrada distribuida, map, partición por hash, shuffle, agrupación, reduce y salida.</p>
+        <div class="tagline"><span>MapReduce</span><span>hash</span><span>shuffle</span><span>HDFS</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="07_simulacion_arquitectura_bigdata_mapreduce.html">Abrir</a>
+          <a class="btn" href="07_simulacion_arquitectura_bigdata_mapreduce.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="08 Spark, RDD, particiones y linaje Simulación Spark RDD linaje memoria">
+        <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Simulación</span></div>
+        <h3>Spark, RDD, particiones y linaje</h3>
+        <p>Procesamiento distribuido en memoria, transformaciones, acciones, reducción y tolerancia a fallos.</p>
+        <div class="tagline"><span>Spark</span><span>RDD</span><span>linaje</span><span>memoria</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="08_simulacion_arquitectura_bigdata_spark_rdd.html">Abrir</a>
+          <a class="btn" href="08_simulacion_arquitectura_bigdata_spark_rdd.html#simulacion">Ir al punto clave</a>
+        </div>
+      </article>
+
+      <article class="moduleCard" data-title="09 Guía docente y actividades Guía docencia actividades evaluación síntesis">
+        <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Guía</span></div>
+        <h3>Guía docente y actividades</h3>
+        <p>Secuencia de clase, preguntas, actividades, evaluación y formas de integración conceptual.</p>
+        <div class="tagline"><span>docencia</span><span>actividades</span><span>evaluación</span><span>síntesis</span></div>
+        <div class="moduleActions">
+          <a class="btn primary" href="09_guia_docente_actividades.html">Abrir</a>
+          <a class="btn" href="09_guia_docente_actividades.html#objetivos">Ir al punto clave</a>
+        </div>
+      </article>
+  </div>
+</section>
+<section class="card">
+  <h2>Lectura integradora</h2>
+  <div class="grid2">
+    <div class="mini"><strong>De la estructura al sistema</strong><small>La clase comienza con simetrías y termina en arquitecturas distribuidas. La continuidad conceptual está en conservar estructura mientras se transforman datos.</small></div>
+    <div class="mini"><strong>De la operación al pipeline</strong><small>Map, reduce, hash, shuffle y linaje pueden leerse como operaciones organizadas sobre estados, claves, particiones y grafos de ejecución.</small></div>
+  </div>
+</section>
+<div class="footer"><strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br>Índice HTML autónomo · Simetría, grafos y Big Data</div>
+</main>
+<script>
+(function(){
+  const root=document.documentElement;
+  const btn=document.getElementById('themeBtn');
+  function setTheme(theme){
+    root.setAttribute('data-theme',theme);
+    localStorage.setItem('curso-simetria-bigdata-theme',theme);
+    btn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';
+  }
+  setTheme(localStorage.getItem('curso-simetria-bigdata-theme') || 'light');
+  btn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+  const search=document.getElementById('moduleSearch');
+  const cards=[...document.querySelectorAll('.moduleCard')];
+  search.addEventListener('input',()=>{
+    const q=search.value.trim().toLowerCase();
+    cards.forEach(card=>{
+      const haystack=(card.dataset.title+' '+card.innerText).toLowerCase();
+      card.style.display=haystack.includes(q)?'flex':'none';
+    });
+  });
+})();
+</script>
+</body>
+</html>
