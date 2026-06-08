@@ -597,13 +597,57 @@ Para consolidar la intuición geométrica y conectar las visualizaciones interac
 | **HTML: Cuestionario Experto (Grafos)** <br><br><details><summary><strong>Resumen:</strong> <em>(clic para expandir/colapsar)</em></summary><p>Cuestionario interactivo con 20 preguntas de nivel experto sobre la construcción de redes P2P con Havel-Hakimi, la estructura de Grafos de Cayley, las propiedades de los hipercubos y los protocolos Gossip. Incluye respuestas detalladas para el estudio.</p></details> | [![Abrir HTML](https://img.shields.io/badge/Abrir-HTML5-blue?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/Cuestionario_Cayley.html) |
 | **HTML: Glosario Interactivo (Grafos)** <br><br><details><summary><strong>Resumen:</strong> <em>(clic para expandir/colapsar)</em></summary><p>Glosario completo con definiciones detalladas sobre Teoría de Grupos, Grafos de Cayley, Hipercubos y Redes P2P. Incluye un filtro de búsqueda en tiempo real y navegación alfabética para facilitar la consulta de términos clave.</p></details> | [![Abrir HTML](https://img.shields.io/badge/Abrir-HTML5-blue?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/Glosario_Cayley.html) |
 
-### 11. Teorema de Erdős–Gallai y Aplicaciones
+
+## Simetría, Grupos, Grafos y Big Data
+
+<div align="center">
+
+<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html">
+  <img src="https://img.shields.io/badge/Simetría-D₃%20%7C%20Grafos%20%7C%20Big%20Data-2563eb?style=for-the-badge&logo=apache-spark&logoColor=white" alt="Simetría, D3, grafos y Big Data">
+</a>
+
+</div>
+
+<br>
+
+### 11. Simetría, Grupo D₃ y Arquitecturas Distribuidas
+
+Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la **simetría del triángulo equilátero**— con conceptos centrales de **teoría de grafos**, **álgebra abstracta** y **Big Data**. A partir del grupo diedral **D₃**, el material permite estudiar cómo las operaciones de rotación, reflexión, composición y no conmutatividad pueden interpretarse como estructuras discretas, recorridos en grafos y modelos de procesamiento distribuido.
+
+El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley hasta su conexión con problemas computacionales reales: particiones de datos, sharding, operaciones asociativas, MapReduce, hash, shuffle, Spark, RDD, linaje, memoria distribuida y tolerancia a fallos. De este modo, la simetría deja de ser solamente una noción geométrica y se transforma en una herramienta conceptual para comprender arquitecturas de datos, invariancias en inteligencia artificial y estructuras computacionales escalables.
+
+| 📄 Recurso | 📥 Acceso |
+|---|---|
+| **Simetría, Grupos, Grafos y Big Data** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Índice interactivo compuesto por 9 módulos que articulan simetría, grupo D₃, grafos y Big Data. El recorrido comienza con la teoría del grupo diedral del triángulo equilátero y continúa con simulaciones sobre grafos de Cayley, clases laterales, teorema de Lagrange, sharding, MapReduce, asociatividad, traversal, no conmutatividad, invariancias en IA, arquitectura distribuida, Spark, RDD y linaje computacional. El objetivo es mostrar cómo una estructura matemática pequeña puede servir como modelo para comprender procesos distribuidos, particiones de datos, transformaciones, agregaciones y tolerancia a fallos en sistemas modernos de procesamiento masivo.</p></details> | [![Ver Índice Interactivo](https://img.shields.io/badge/Ver%20Índice-Interactivo-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html) <br><br> [![Ver en GitHub](https://img.shields.io/badge/Ver%20Archivo-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html) |
+
+## Mapa general del recorrido
+
+| Etapa | Eje conceptual | Objetivo de aprendizaje |
+|---|---|---|
+| **1** | Simetría del triángulo y grupo D₃ | Comprender cómo rotaciones y reflexiones forman una estructura algebraica cerrada. |
+| **2** | Grafos de Cayley y generadores | Visualizar operaciones de grupo como movimientos entre estados conectados por aristas. |
+| **3** | Teorema de Lagrange, clases laterales y particiones | Relacionar subgrupos, cosets y particiones matemáticas con estrategias de sharding. |
+| **4** | Asociatividad y MapReduce | Entender por qué ciertas operaciones pueden dividirse, paralelizarse y recomponerse correctamente. |
+| **5** | Traversal, caminos y no conmutatividad | Analizar cómo el orden de las operaciones modifica el resultado en grafos y sistemas computacionales. |
+| **6** | Invariancias en IA y datos | Conectar identidad, inversos y simetrías con representaciones robustas en inteligencia artificial. |
+| **7** | Arquitectura Big Data con MapReduce | Estudiar el flujo completo de entrada distribuida, map, hash, shuffle, reduce y salida. |
+| **8** | Spark, RDD, memoria y linaje | Comprender transformaciones, acciones, persistencia, recomputación y tolerancia a fallos. |
+| **9** | Guía docente y actividades | Integrar teoría, simulación y evaluación en una secuencia didáctica para clase. |
+
+## Lectura conceptual integradora
+
+El valor central de este material está en mostrar que la simetría no es únicamente una propiedad geométrica, sino una forma profunda de organización estructural. En el grupo **D₃**, cada movimiento conserva la identidad del triángulo, aunque modifique su orientación. De manera análoga, en Big Data y en inteligencia artificial, muchas operaciones buscan transformar, distribuir o reducir información sin destruir la estructura que hace interpretable al sistema.
+
+Desde esta perspectiva, los grafos permiten representar estados y transiciones; los grupos permiten formalizar operaciones y composiciones; y las arquitecturas distribuidas permiten escalar estas ideas a sistemas reales de procesamiento masivo. Así, conceptos como **asociatividad**, **no conmutatividad**, **partición**, **recorrido**, **invariancia** y **linaje** se convierten en puentes entre matemática abstracta, ciencia de datos e infraestructura computacional moderna.
+
+
+### 12. Teorema de Erdős–Gallai y Aplicaciones
 | 📄 Recurso | 📥 Acceso |
 | ---------- | --------- |
 | **Teorema de Erdős–Gallai (EG).html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta lección interactiva se centra en el Teorema de Erdős–Gallai, el criterio definitivo para saber si una secuencia de grados es gráfica. Los usuarios pueden introducir una secuencia para ver una validación paso a paso: el chequeo de paridad y la verificación de cada una de las desigualdades del teorema, explicadas con una intuitiva analogía de "demanda vs. oferta". Si la secuencia es válida, la herramienta construye y visualiza un grafo resultante usando el algoritmo de Havel-Hakimi, ofreciendo una experiencia de aprendizaje completa.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/6328cafaba326aa1bbc825590f3eedfc97d6d0fc/src/classroom/graphs/recursos/Teorema%20de%20Erd%C5%91s%E2%80%93Gallai%20(EG).html) |
 | **Aplicaciones prácticas.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta página demuestra el valor práctico del Teorema de Erdős–Gallai como una herramienta de "verificación de factibilidad". Explora aplicaciones concretas en el diseño de redes de telecomunicaciones, la generación de redes sintéticas para simulaciones, la validación de estructuras en química combinatoria y la anonimización de datos en grafos. La lección incluye un estudio de caso interactivo sobre planificación de redes, permitiendo al usuario aplicar el teorema a un problema del mundo real.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/6328cafaba326aa1bbc825590f3eedfc97d6d0fc/src/classroom/graphs/recursos/Aplicaciones%20pr%C3%A1cticas.html) |
 
-### 12.Algoritmo_de_Dijkstra
+### 13.Algoritmo_de_Dijkstra
 | 📄 Recurso | 📥 Acceso |
 | ---------- | --------- |
 | **Big_Data_Algoritmo_de_Dijkstra_y_el_BiG_Data_Teoría y aplicaciones.ipynb** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este notebook de Colab es un material de estudio detallado sobre la optimización de grafos en Big Data. Explica los fundamentos del algoritmo de Dijkstra, sus limitaciones de escalabilidad en entornos masivos, y cómo se adapta utilizando frameworks de procesamiento distribuido como Pregel y Apache Giraph. El contenido, presentado en secciones interactivas, cubre desde el modelo 'vertex-centric' y los 'superpasos' hasta aplicaciones prácticas en logística, redes sociales y transporte.</p></details> | [![Abrir en Colab](https://img.shields.io/badge/Abrir%20en-Colab-blue?style=for-the-badge&logo=googlecolab)](https://colab.research.google.com/drive/1szmP01igAa6P6C1eFd4Wf_VelqlYbDIw?usp=sharing) |
