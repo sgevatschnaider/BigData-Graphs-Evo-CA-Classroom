@@ -292,7 +292,7 @@ Al trabajar con estas guías, el estudiante podrá:
 
 ---
 
-## 🧠 Secuencia sugerida de estudio
+##  Secuencia sugerida de estudio
 
 | Orden | Guía | Motivo pedagógico |
 |---|---|---|
@@ -319,7 +319,7 @@ Estas guías PDF complementan los recursos HTML y notebooks ya disponibles en el
 
 ---
 
-## 🧭 Cómo usar estas guías en clase
+##  Cómo usar estas guías en clase
 
 Una posible dinámica de trabajo es:
 
@@ -362,13 +362,13 @@ Desde esta perspectiva, la teoría de grafos deja de ser solo una colección de 
 
 ---
 
-# 📚 Introducción a los grafos irregulares y grafo de Cayley
+#  Introducción a los grafos irregulares y grafo de Cayley
 
 Esta es una colección de lecciones y simulaciones interactivas diseñadas para explorar los conceptos fundamentales y avanzados de la teoría de grafos, desde los preliminares hasta aplicaciones en computación de alto rendimiento. Cada recurso es una página web autocontenida con visualizaciones dinámicas construidas con HTML, CSS y JavaScript.
 
 ---
 
-## 🧭Indice y Cuestionario
+## Indice y Cuestionario
 
 | 📄 Recurso | 📥 Acceso |
 |---|---|
@@ -377,7 +377,7 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 ---
 
 ### 1. Preliminares y Conceptos Fundamentales
-| 📄 Recurso | 📥 Acceso |
+|  Recurso | 📥 Acceso |
 |---|---|
 | **Preliminares.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Esta lección interactiva introduce los pilares de la teoría de grafos. Diferencia visualmente entre grafos simples, multigrafos y grafos ponderados. A través de un lienzo dinámico, los usuarios pueden generar grafos aleatorios para comprender el concepto de grado y secuencia de grados. La página culmina con una demostración interactiva del Lema del Apretón de Manos, permitiendo verificar la suma de grados y la paridad de vértices de grado impar en tiempo real. Es el punto de partida esencial para cualquier estudiante del área.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/Preliminares.html) |
 
@@ -398,7 +398,7 @@ Esta es una colección de lecciones y simulaciones interactivas diseñadas para 
 | **Grafos_cuasiirregulares.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Tras demostrar que la irregularidad total es imposible, esta lección explora lo más cerca que se puede llegar: los grafos casi irregulares. Presenta el elegante teorema que afirma que para cada orden n, existen exactamente dos de estos grafos y son complementarios entre sí. El recurso incluye un constructor interactivo que, al seleccionar un orden n, genera y visualiza automáticamente la única pareja de grafos casi irregulares existente, resaltando los vértices con el grado repetido y demostrando visualmente la relación de complementariedad.</p></details> | [![Construir Grafos Únicos](https://img.shields.io/badge/Construir-Grafos%20Únicos-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/Grafos_cuasiirregulares.html) |
 
 ### 5. El Complemento de un Grafo
-| 📄 Recurso | 📥 Acceso |
+| Recurso | 📥 Acceso |
 |---|---|
 | **El Complemento de un Grafo-irregular.html** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Este recurso didáctico se centra en una de las transformaciones más fundamentales: el complemento. Explica la definición, la fórmula de relación de grados (deg_G̅(v) = (n-1) - deg_G(v)) y la relación de aristas. Su componente principal es un "laboratorio interactivo" donde los usuarios pueden dibujar un grafo G añadiendo o quitando aristas, y ver cómo su grafo complemento G̅ se actualiza en tiempo real. Esto permite una comprensión intuitiva y visual de cómo la operación de complemento "invierte" la estructura de conectividad y preserva propiedades como la casi irregularidad.</p></details> | [![Ver Laboratorio Interactivo](https://img.shields.io/badge/Ver%20Laboratorio-Interactivo-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/9127ad4a5fcc319a99faed0a61031a68a0f277ab/src/classroom/graphs/recursos/El%20Complemento%20de%20un%20Grafo-irregular.html) |
 
@@ -602,8 +602,18 @@ Para consolidar la intuición geométrica y conectar las visualizaciones interac
 
 <div align="center">
 
-<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html">
-  <img src="https://img.shields.io/badge/Simetría-D₃%20%7C%20Grafos%20%7C%20Big%20Data-2563eb?style=for-the-badge&logo=apache-spark&logoColor=white" alt="Simetría, D3, grafos y Big Data">
+<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
+  <img src="https://img.shields.io/badge/Simetría-D3%20%7C%20Grafos%20%7C%20Big%20Data-2563eb?style=for-the-badge&logo=apache-spark&logoColor=white" alt="Simetría, grupo D3, grafos y Big Data">
+</a>
+
+<br><br>
+
+<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
+  <img src="https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white" alt="Abrir HTML interactivo">
+</a>
+
+<a href="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
+  <img src="https://img.shields.io/badge/Ver-Código%20en%20GitHub-181717?style=for-the-badge&logo=github" alt="Ver código en GitHub">
 </a>
 
 </div>
@@ -612,33 +622,88 @@ Para consolidar la intuición geométrica y conectar las visualizaciones interac
 
 ### 11. Simetría, Grupo D₃ y Arquitecturas Distribuidas
 
-Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la **simetría del triángulo equilátero**— con conceptos centrales de **teoría de grafos**, **álgebra abstracta** y **Big Data**. A partir del grupo diedral **D₃**, el material permite estudiar cómo las operaciones de rotación, reflexión, composición y no conmutatividad pueden interpretarse como estructuras discretas, recorridos en grafos y modelos de procesamiento distribuido.
+Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la **simetría del triángulo equilátero**— con conceptos centrales de **teoría de grafos**, **álgebra abstracta**, **ciencia de datos** y **arquitecturas Big Data**.
 
-El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley hasta su conexión con problemas computacionales reales: particiones de datos, sharding, operaciones asociativas, MapReduce, hash, shuffle, Spark, RDD, linaje, memoria distribuida y tolerancia a fallos. De este modo, la simetría deja de ser solamente una noción geométrica y se transforma en una herramienta conceptual para comprender arquitecturas de datos, invariancias en inteligencia artificial y estructuras computacionales escalables.
+A partir del grupo diedral **D₃**, el material permite estudiar cómo las operaciones de **rotación**, **reflexión**, **composición**, **identidad**, **inversos** y **no conmutatividad** pueden interpretarse como estructuras discretas, recorridos en grafos y modelos de procesamiento distribuido.
 
-| 📄 Recurso | 📥 Acceso |
-|---|---|
-| **Simetría, Grupos, Grafos y Big Data** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Índice interactivo compuesto por 9 módulos que articulan simetría, grupo D₃, grafos y Big Data. El recorrido comienza con la teoría del grupo diedral del triángulo equilátero y continúa con simulaciones sobre grafos de Cayley, clases laterales, teorema de Lagrange, sharding, MapReduce, asociatividad, traversal, no conmutatividad, invariancias en IA, arquitectura distribuida, Spark, RDD y linaje computacional. El objetivo es mostrar cómo una estructura matemática pequeña puede servir como modelo para comprender procesos distribuidos, particiones de datos, transformaciones, agregaciones y tolerancia a fallos en sistemas modernos de procesamiento masivo.</p></details> | [![Ver Índice Interactivo](https://img.shields.io/badge/Ver%20Índice-Interactivo-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html) <br><br> [![Ver en GitHub](https://img.shields.io/badge/Ver%20Archivo-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/51505be2d1c3a0119e5a6aa0c232e65508e2f8c9/src/classroom/graphs/recursos/Simetria.html) |
+El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley hasta su conexión con problemas computacionales reales: **particiones de datos**, **sharding**, **operaciones asociativas**, **MapReduce**, **hash**, **shuffle**, **Spark**, **RDD**, **linaje**, **memoria distribuida** y **tolerancia a fallos**. De este modo, la simetría deja de ser solamente una noción geométrica y se transforma en una herramienta conceptual para comprender arquitecturas de datos, invariancias en inteligencia artificial y estructuras computacionales escalables.
+
+---
+
+## Recurso interactivo principal
+
+| 📄 Recurso                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 📥 Acceso                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Simetría, Grupos, Grafos y Big Data** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Material interactivo en una sola página HTML compuesto por 9 módulos que articulan simetría, grupo D₃, grafos y Big Data. El recorrido comienza con la teoría del grupo diedral del triángulo equilátero y continúa con simulaciones sobre grafos de Cayley, clases laterales, teorema de Lagrange, sharding, MapReduce, asociatividad, traversal, no conmutatividad, invariancias en IA, arquitectura distribuida, Spark, RDD y linaje computacional.</p><p>El objetivo es mostrar cómo una estructura matemática pequeña puede servir como modelo para comprender procesos distribuidos, particiones de datos, transformaciones, agregaciones, recomputación y tolerancia a fallos en sistemas modernos de procesamiento masivo.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge\&logo=html5\&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html) <br><br> [![Ver Archivo en GitHub](https://img.shields.io/badge/Ver%20Archivo-GitHub-181717?style=for-the-badge\&logo=github)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html) |
+
+---
 
 ## Mapa general del recorrido
 
-| Etapa | Eje conceptual | Objetivo de aprendizaje |
-|---|---|---|
-| **1** | Simetría del triángulo y grupo D₃ | Comprender cómo rotaciones y reflexiones forman una estructura algebraica cerrada. |
-| **2** | Grafos de Cayley y generadores | Visualizar operaciones de grupo como movimientos entre estados conectados por aristas. |
-| **3** | Teorema de Lagrange, clases laterales y particiones | Relacionar subgrupos, cosets y particiones matemáticas con estrategias de sharding. |
-| **4** | Asociatividad y MapReduce | Entender por qué ciertas operaciones pueden dividirse, paralelizarse y recomponerse correctamente. |
-| **5** | Traversal, caminos y no conmutatividad | Analizar cómo el orden de las operaciones modifica el resultado en grafos y sistemas computacionales. |
-| **6** | Invariancias en IA y datos | Conectar identidad, inversos y simetrías con representaciones robustas en inteligencia artificial. |
-| **7** | Arquitectura Big Data con MapReduce | Estudiar el flujo completo de entrada distribuida, map, hash, shuffle, reduce y salida. |
-| **8** | Spark, RDD, memoria y linaje | Comprender transformaciones, acciones, persistencia, recomputación y tolerancia a fallos. |
-| **9** | Guía docente y actividades | Integrar teoría, simulación y evaluación en una secuencia didáctica para clase. |
+| Etapa | Eje conceptual                                      | Objetivo de aprendizaje                                                                               |
+| ----- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **1** | Simetría del triángulo y grupo D₃                   | Comprender cómo rotaciones y reflexiones forman una estructura algebraica cerrada.                    |
+| **2** | Grafos de Cayley y generadores                      | Visualizar operaciones de grupo como movimientos entre estados conectados por aristas.                |
+| **3** | Teorema de Lagrange, clases laterales y particiones | Relacionar subgrupos, cosets y particiones matemáticas con estrategias de sharding.                   |
+| **4** | Asociatividad y MapReduce                           | Entender por qué ciertas operaciones pueden dividirse, paralelizarse y recomponerse correctamente.    |
+| **5** | Traversal, caminos y no conmutatividad              | Analizar cómo el orden de las operaciones modifica el resultado en grafos y sistemas computacionales. |
+| **6** | Invariancias en IA y datos                          | Conectar identidad, inversos y simetrías con representaciones robustas en inteligencia artificial.    |
+| **7** | Arquitectura Big Data con MapReduce                 | Estudiar el flujo completo de entrada distribuida, map, hash, shuffle, agrupación, reduce y salida.   |
+| **8** | Spark, RDD, memoria y linaje                        | Comprender transformaciones, acciones, persistencia, recomputación y tolerancia a fallos.             |
+| **9** | Guía docente y actividades                          | Integrar teoría, simulación y evaluación en una secuencia didáctica para clase.                       |
+
+---
+
+## Conceptos clave trabajados
+
+| Concepto              | Interpretación matemática                                             | Interpretación computacional                                                |
+| --------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Simetría**          | Transformación que conserva la estructura de un objeto.               | Transformación de datos que mantiene propiedades relevantes.                |
+| **Grupo D₃**          | Conjunto de rotaciones y reflexiones del triángulo equilátero.        | Modelo discreto de estados, operaciones y composiciones.                    |
+| **Grafo de Cayley**   | Representación de un grupo mediante nodos y generadores.              | Modelo de navegación, transición y recorrido entre estados.                 |
+| **Clases laterales**  | Partición ordenada inducida por subgrupos.                            | Analogía con particiones, shards y distribución de registros.               |
+| **Asociatividad**     | Propiedad que permite reagrupar operaciones sin alterar el resultado. | Base conceptual de agregaciones paralelas y reducción distribuida.          |
+| **No conmutatividad** | El orden de las operaciones cambia el resultado.                      | Importancia del orden en pipelines, transformaciones y grafos de ejecución. |
+| **MapReduce**         | División, transformación y recomposición de información.              | Pipeline distribuido basado en map, shuffle, hash, reduce y salida.         |
+| **Spark y RDD**       | Estructura de transformaciones encadenadas.                           | Cómputo en memoria, linaje, particiones y tolerancia a fallos.              |
+
+---
 
 ## Lectura conceptual integradora
 
 El valor central de este material está en mostrar que la simetría no es únicamente una propiedad geométrica, sino una forma profunda de organización estructural. En el grupo **D₃**, cada movimiento conserva la identidad del triángulo, aunque modifique su orientación. De manera análoga, en Big Data y en inteligencia artificial, muchas operaciones buscan transformar, distribuir o reducir información sin destruir la estructura que hace interpretable al sistema.
 
 Desde esta perspectiva, los grafos permiten representar estados y transiciones; los grupos permiten formalizar operaciones y composiciones; y las arquitecturas distribuidas permiten escalar estas ideas a sistemas reales de procesamiento masivo. Así, conceptos como **asociatividad**, **no conmutatividad**, **partición**, **recorrido**, **invariancia** y **linaje** se convierten en puentes entre matemática abstracta, ciencia de datos e infraestructura computacional moderna.
+
+---
+
+## Uso recomendado en clase
+
+1. Comenzar con la idea intuitiva de simetría del triángulo equilátero.
+2. Formalizar las operaciones mediante el grupo **D₃**.
+3. Representar las operaciones como recorridos en un grafo de Cayley.
+4. Introducir particiones, clases laterales y analogías con sharding.
+5. Mostrar por qué la asociatividad permite paralelizar cálculos.
+6. Relacionar MapReduce con división, transformación, shuffle y reducción.
+7. Comparar MapReduce con Spark, RDD, memoria y linaje.
+8. Cerrar con preguntas integradoras sobre grafos, invariancias y arquitecturas distribuidas.
+
+---
+
+## Contenido del HTML interactivo
+
+| Módulo | Contenido                                                                |
+| ------ | ------------------------------------------------------------------------ |
+| **01** | D₃, simetría, grupos, grafos y Big Data.                                 |
+| **02** | Simulación del grafo de Cayley y composición de operaciones.             |
+| **03** | Lagrange, clases laterales, particiones y sharding.                      |
+| **04** | MapReduce, asociatividad y reducción distribuida.                        |
+| **05** | Traversal, caminos, orden y no conmutatividad.                           |
+| **06** | Invariancias en IA, identidad, inversos y robustez de representaciones.  |
+| **07** | Arquitectura Big Data con MapReduce, hash, shuffle y salida distribuida. |
+| **08** | Spark, RDD, memoria, linaje y tolerancia a fallos.                       |
+| **09** | Guía docente, actividades, preguntas y evaluación.                       |
+
 
 
 ### 12. Teorema de Erdős–Gallai y Aplicaciones
