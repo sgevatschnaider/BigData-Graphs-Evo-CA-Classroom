@@ -826,13 +826,6 @@
     "mtime": "2025-11-10T17:51:49-03:00"
   },
   {
-    "title": "Índice · Simetría, grafos y Big Data",
-    "path": "/src/classroom/graphs/recursos/Simetria.html",
-    "tag": "Demo",
-    "desc": "",
-    "mtime": "2026-06-13T16:35:51-03:00"
-  },
-  {
     "title": "Índice Interactivo de Temas de Grafos",
     "path": "/src/classroom/graphs/recursos/Indice.html",
     "tag": "Demo",
@@ -1097,6 +1090,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2026-05-16T19:09:16-03:00"
+  },
+  {
+    "title": "Simetría, grupos, grafos y Big Data · Página única",
+    "path": "/src/classroom/graphs/recursos/Simetria.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-06-13T16:59:58-03:00"
   },
   {
     "title": "Simulador ZKP: SNARK vs STARK",
