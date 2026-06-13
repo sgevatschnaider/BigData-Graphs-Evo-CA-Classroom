@@ -598,22 +598,19 @@ Para consolidar la intuición geométrica y conectar las visualizaciones interac
 | **HTML: Glosario Interactivo (Grafos)** <br><br><details><summary><strong>Resumen:</strong> <em>(clic para expandir/colapsar)</em></summary><p>Glosario completo con definiciones detalladas sobre Teoría de Grupos, Grafos de Cayley, Hipercubos y Redes P2P. Incluye un filtro de búsqueda en tiempo real y navegación alfabética para facilitar la consulta de términos clave.</p></details> | [![Abrir HTML](https://img.shields.io/badge/Abrir-HTML5-blue?style=for-the-badge&logo=html5)](https://clinquant-meringue-3930c2.netlify.app/src/classroom/graphs/recursos/Glosario_Cayley.html) |
 
 
-## Simetría, Grupos, Grafos y Big Data
+### 11. Simetría, Grupo D₃ y Arquitecturas Distribuidas
 
-<div align="center">
+<p align="justify">
+Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la <strong>simetría del triángulo equilátero</strong>— con conceptos centrales de <strong>teoría de grafos</strong>, <strong>álgebra abstracta</strong>, <strong>ciencia de datos</strong> y <strong>arquitecturas Big Data</strong>.
+</p>
 
-<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
-  <img src="https://img.shields.io/badge/Simetría-D3%20%7C%20Grafos%20%7C%20Big%20Data-2563eb?style=for-the-badge&logo=apache-spark&logoColor=white" alt="Simetría, grupo D3, grafos y Big Data">
-</a>
+<p align="justify">
+A partir del grupo diedral <strong>D₃</strong>, el material permite estudiar cómo las operaciones de <strong>rotación</strong>, <strong>reflexión</strong>, <strong>composición</strong>, <strong>identidad</strong>, <strong>inversos</strong> y <strong>no conmutatividad</strong> pueden interpretarse como estructuras discretas, recorridos en grafos y modelos de procesamiento distribuido.
+</p>
 
-
-Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la **simetría del triángulo equilátero**— con conceptos centrales de **teoría de grafos**, **álgebra abstracta**, **ciencia de datos** y **arquitecturas Big Data**.
-
-A partir del grupo diedral **D₃**, el material permite estudiar cómo las operaciones de **rotación**, **reflexión**, **composición**, **identidad**, **inversos** y **no conmutatividad** pueden interpretarse como estructuras discretas, recorridos en grafos y modelos de procesamiento distribuido.
-
-El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley hasta su conexión con problemas computacionales reales: **particiones de datos**, **sharding**, **operaciones asociativas**, **MapReduce**, **hash**, **shuffle**, **Spark**, **RDD**, **linaje**, **memoria distribuida** y **tolerancia a fallos**. De este modo, la simetría deja de ser solamente una noción geométrica y se transforma en una herramienta conceptual para comprender arquitecturas de datos, invariancias en inteligencia artificial y estructuras computacionales escalables.
-
----
+<p align="justify">
+El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley hasta su conexión con problemas computacionales reales: <strong>particiones de datos</strong>, <strong>sharding</strong>, <strong>operaciones asociativas</strong>, <strong>MapReduce</strong>, <strong>hash</strong>, <strong>shuffle</strong>, <strong>Spark</strong>, <strong>RDD</strong>, <strong>linaje</strong>, <strong>memoria distribuida</strong> y <strong>tolerancia a fallos</strong>. De este modo, la simetría deja de ser solamente una noción geométrica y se transforma en una herramienta conceptual para comprender arquitecturas de datos, invariancias en inteligencia artificial y estructuras computacionales escalables.
+</p>
 
 ## Recurso interactivo principal
 
@@ -625,71 +622,196 @@ El recorrido avanza desde los fundamentos de la simetría y los grafos de Cayley
 
 ## Mapa general del recorrido
 
-| Etapa | Eje conceptual                                      | Objetivo de aprendizaje                                                                               |
-| ----- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **1** | Simetría del triángulo y grupo D₃                   | Comprender cómo rotaciones y reflexiones forman una estructura algebraica cerrada.                    |
-| **2** | Grafos de Cayley y generadores                      | Visualizar operaciones de grupo como movimientos entre estados conectados por aristas.                |
-| **3** | Teorema de Lagrange, clases laterales y particiones | Relacionar subgrupos, cosets y particiones matemáticas con estrategias de sharding.                   |
-| **4** | Asociatividad y MapReduce                           | Entender por qué ciertas operaciones pueden dividirse, paralelizarse y recomponerse correctamente.    |
-| **5** | Traversal, caminos y no conmutatividad              | Analizar cómo el orden de las operaciones modifica el resultado en grafos y sistemas computacionales. |
-| **6** | Invariancias en IA y datos                          | Conectar identidad, inversos y simetrías con representaciones robustas en inteligencia artificial.    |
-| **7** | Arquitectura Big Data con MapReduce                 | Estudiar el flujo completo de entrada distribuida, map, hash, shuffle, agrupación, reduce y salida.   |
-| **8** | Spark, RDD, memoria y linaje                        | Comprender transformaciones, acciones, persistencia, recomputación y tolerancia a fallos.             |
-| **9** | Guía docente y actividades                          | Integrar teoría, simulación y evaluación en una secuencia didáctica para clase.                       |
+<table>
+  <thead>
+    <tr>
+      <th align="center">Etapa</th>
+      <th align="left">Eje conceptual</th>
+      <th align="left">Objetivo de aprendizaje</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><strong>1</strong></td>
+      <td><strong>Simetría del triángulo y grupo D₃</strong></td>
+      <td><p align="justify">Comprender cómo las rotaciones y las reflexiones del triángulo equilátero forman una estructura algebraica cerrada, con identidad, inversos y composición de operaciones.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>2</strong></td>
+      <td><strong>Grafos de Cayley y generadores</strong></td>
+      <td><p align="justify">Visualizar las operaciones de grupo como movimientos entre estados conectados por aristas, mostrando cómo una estructura algebraica puede representarse como un grafo.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>3</strong></td>
+      <td><strong>Teorema de Lagrange, clases laterales y particiones</strong></td>
+      <td><p align="justify">Relacionar subgrupos, clases laterales y particiones matemáticas con estrategias computacionales de distribución de datos, como sharding y asignación por hash.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>4</strong></td>
+      <td><strong>Asociatividad y MapReduce</strong></td>
+      <td><p align="justify">Entender por qué ciertas operaciones pueden dividirse, calcularse en paralelo y recomponerse correctamente sin alterar el resultado final.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>5</strong></td>
+      <td><strong>Traversal, caminos y no conmutatividad</strong></td>
+      <td><p align="justify">Analizar cómo el orden de las operaciones modifica el resultado, tanto en grupos no conmutativos como en recorridos de grafos y pipelines computacionales.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>6</strong></td>
+      <td><strong>Invariancias en IA y datos</strong></td>
+      <td><p align="justify">Conectar identidad, inversos y simetrías con representaciones robustas en inteligencia artificial, donde ciertas propiedades deben conservarse frente a transformaciones.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>7</strong></td>
+      <td><strong>Arquitectura Big Data con MapReduce</strong></td>
+      <td><p align="justify">Estudiar el flujo completo de procesamiento distribuido: entrada de datos, map, partición por hash, shuffle, agrupación, reduce y salida final.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>8</strong></td>
+      <td><strong>Spark, RDD, memoria y linaje</strong></td>
+      <td><p align="justify">Comprender cómo Spark organiza transformaciones, acciones, persistencia en memoria, recomputación y tolerancia a fallos mediante el concepto de linaje.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>9</strong></td>
+      <td><strong>Guía docente y actividades</strong></td>
+      <td><p align="justify">Integrar teoría, simulación y evaluación en una secuencia didáctica clara para clase, con actividades de exploración, preguntas guía y cierre conceptual.</p></td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
 ## Conceptos clave trabajados
 
-| Concepto              | Interpretación matemática                                             | Interpretación computacional                                                |
-| --------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **Simetría**          | Transformación que conserva la estructura de un objeto.               | Transformación de datos que mantiene propiedades relevantes.                |
-| **Grupo D₃**          | Conjunto de rotaciones y reflexiones del triángulo equilátero.        | Modelo discreto de estados, operaciones y composiciones.                    |
-| **Grafo de Cayley**   | Representación de un grupo mediante nodos y generadores.              | Modelo de navegación, transición y recorrido entre estados.                 |
-| **Clases laterales**  | Partición ordenada inducida por subgrupos.                            | Analogía con particiones, shards y distribución de registros.               |
-| **Asociatividad**     | Propiedad que permite reagrupar operaciones sin alterar el resultado. | Base conceptual de agregaciones paralelas y reducción distribuida.          |
-| **No conmutatividad** | El orden de las operaciones cambia el resultado.                      | Importancia del orden en pipelines, transformaciones y grafos de ejecución. |
-| **MapReduce**         | División, transformación y recomposición de información.              | Pipeline distribuido basado en map, shuffle, hash, reduce y salida.         |
-| **Spark y RDD**       | Estructura de transformaciones encadenadas.                           | Cómputo en memoria, linaje, particiones y tolerancia a fallos.              |
+<table>
+  <thead>
+    <tr>
+      <th align="left">Concepto</th>
+      <th align="left">Interpretación matemática</th>
+      <th align="left">Interpretación computacional</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Simetría</strong></td>
+      <td><p align="justify">Transformación que conserva la estructura esencial de un objeto, aunque cambie su posición, orientación o representación.</p></td>
+      <td><p align="justify">Transformación de datos que mantiene propiedades relevantes para el análisis, la clasificación o la interpretación del sistema.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Grupo D₃</strong></td>
+      <td><p align="justify">Conjunto de rotaciones y reflexiones del triángulo equilátero, organizado mediante una operación de composición.</p></td>
+      <td><p align="justify">Modelo discreto de estados, operaciones y composiciones que permite pensar procesos computacionales como transiciones estructuradas.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Grafo de Cayley</strong></td>
+      <td><p align="justify">Representación de un grupo mediante nodos y generadores, donde cada arista muestra el resultado de aplicar una operación.</p></td>
+      <td><p align="justify">Modelo de navegación, transición y recorrido entre estados, útil para comprender grafos de ejecución y flujos de procesamiento.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Clases laterales</strong></td>
+      <td><p align="justify">Particiones inducidas por subgrupos, donde los elementos quedan organizados en bloques sin solapamiento.</p></td>
+      <td><p align="justify">Analogía con particiones, shards y distribución de registros mediante reglas estables de asignación.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Asociatividad</strong></td>
+      <td><p align="justify">Propiedad que permite reagrupar operaciones sin alterar el resultado final.</p></td>
+      <td><p align="justify">Base conceptual de las agregaciones paralelas, donde los resultados parciales pueden combinarse de manera consistente.</p></td>
+    </tr>
+    <tr>
+      <td><strong>No conmutatividad</strong></td>
+      <td><p align="justify">Propiedad según la cual cambiar el orden de las operaciones puede modificar el resultado.</p></td>
+      <td><p align="justify">Importancia del orden en pipelines, transformaciones, recorridos de grafos y dependencias entre tareas computacionales.</p></td>
+    </tr>
+    <tr>
+      <td><strong>MapReduce</strong></td>
+      <td><p align="justify">Esquema de división, transformación, agrupación y recomposición de información.</p></td>
+      <td><p align="justify">Pipeline distribuido basado en entrada de datos, map, partición, shuffle, reduce y salida final.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Spark y RDD</strong></td>
+      <td><p align="justify">Estructura de transformaciones encadenadas que conserva una historia de construcción.</p></td>
+      <td><p align="justify">Modelo de cómputo en memoria con particiones, linaje y recomputación para tolerancia a fallos.</p></td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
 ## Lectura conceptual integradora
 
-El valor central de este material está en mostrar que la simetría no es únicamente una propiedad geométrica, sino una forma profunda de organización estructural. En el grupo **D₃**, cada movimiento conserva la identidad del triángulo, aunque modifique su orientación. De manera análoga, en Big Data y en inteligencia artificial, muchas operaciones buscan transformar, distribuir o reducir información sin destruir la estructura que hace interpretable al sistema.
+<p align="justify">
+El valor central de este material está en mostrar que la simetría no es únicamente una propiedad geométrica, sino una forma profunda de organización estructural. En el grupo <strong>D₃</strong>, cada movimiento conserva la identidad del triángulo, aunque modifique su orientación. De manera análoga, en Big Data y en inteligencia artificial, muchas operaciones buscan transformar, distribuir o reducir información sin destruir la estructura que hace interpretable al sistema.
+</p>
 
-Desde esta perspectiva, los grafos permiten representar estados y transiciones; los grupos permiten formalizar operaciones y composiciones; y las arquitecturas distribuidas permiten escalar estas ideas a sistemas reales de procesamiento masivo. Así, conceptos como **asociatividad**, **no conmutatividad**, **partición**, **recorrido**, **invariancia** y **linaje** se convierten en puentes entre matemática abstracta, ciencia de datos e infraestructura computacional moderna.
+<p align="justify">
+Desde esta perspectiva, los grafos permiten representar estados y transiciones; los grupos permiten formalizar operaciones y composiciones; y las arquitecturas distribuidas permiten escalar estas ideas a sistemas reales de procesamiento masivo. Así, conceptos como <strong>asociatividad</strong>, <strong>no conmutatividad</strong>, <strong>partición</strong>, <strong>recorrido</strong>, <strong>invariancia</strong> y <strong>linaje</strong> se convierten en puentes entre matemática abstracta, ciencia de datos e infraestructura computacional moderna.
+</p>
 
 ---
 
 ## Uso recomendado en clase
 
-1. Comenzar con la idea intuitiva de simetría del triángulo equilátero.
-2. Formalizar las operaciones mediante el grupo **D₃**.
-3. Representar las operaciones como recorridos en un grafo de Cayley.
-4. Introducir particiones, clases laterales y analogías con sharding.
-5. Mostrar por qué la asociatividad permite paralelizar cálculos.
-6. Relacionar MapReduce con división, transformación, shuffle y reducción.
-7. Comparar MapReduce con Spark, RDD, memoria y linaje.
-8. Cerrar con preguntas integradoras sobre grafos, invariancias y arquitecturas distribuidas.
+<ol>
+  <li><p align="justify">Comenzar con la idea intuitiva de simetría del triángulo equilátero, mostrando qué transformaciones conservan su estructura.</p></li>
+  <li><p align="justify">Formalizar las operaciones mediante el grupo <strong>D₃</strong>, incorporando identidad, rotaciones, reflexiones, composición e inversos.</p></li>
+  <li><p align="justify">Representar las operaciones como recorridos en un grafo de Cayley, destacando la relación entre estados, generadores y aristas.</p></li>
+  <li><p align="justify">Introducir particiones, clases laterales y analogías con sharding, mostrando cómo una regla permite distribuir elementos de manera consistente.</p></li>
+  <li><p align="justify">Mostrar por qué la asociatividad permite paralelizar cálculos y recomponer resultados parciales sin perder coherencia.</p></li>
+  <li><p align="justify">Relacionar MapReduce con división de datos, transformación, shuffle, agrupación y reducción distribuida.</p></li>
+  <li><p align="justify">Comparar MapReduce con Spark, RDD, memoria, linaje y tolerancia a fallos.</p></li>
+  <li><p align="justify">Cerrar con preguntas integradoras sobre grafos, invariancias, orden de operaciones y arquitecturas distribuidas.</p></li>
+</ol>
 
 ---
 
 ## Contenido del HTML interactivo
 
-| Módulo | Contenido                                                                |
-| ------ | ------------------------------------------------------------------------ |
-| **01** | D₃, simetría, grupos, grafos y Big Data.                                 |
-| **02** | Simulación del grafo de Cayley y composición de operaciones.             |
-| **03** | Lagrange, clases laterales, particiones y sharding.                      |
-| **04** | MapReduce, asociatividad y reducción distribuida.                        |
-| **05** | Traversal, caminos, orden y no conmutatividad.                           |
-| **06** | Invariancias en IA, identidad, inversos y robustez de representaciones.  |
-| **07** | Arquitectura Big Data con MapReduce, hash, shuffle y salida distribuida. |
-| **08** | Spark, RDD, memoria, linaje y tolerancia a fallos.                       |
-| **09** | Guía docente, actividades, preguntas y evaluación.                       |
-
-
+<table>
+  <thead>
+    <tr>
+      <th align="center">Módulo</th>
+      <th align="left">Contenido</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><strong>01</strong></td>
+      <td><p align="justify">D₃, simetría, grupos, grafos y Big Data.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>02</strong></td>
+      <td><p align="justify">Simulación del grafo de Cayley y composición de operaciones.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>03</strong></td>
+      <td><p align="justify">Lagrange, clases laterales, particiones y sharding.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>04</strong></td>
+      <td><p align="justify">MapReduce, asociatividad y reducción distribuida.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>05</strong></td>
+      <td><p align="justify">Traversal, caminos, orden de operaciones y no conmutatividad.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>06</strong></td>
+      <td><p align="justify">Invariancias en IA, identidad, inversos y robustez de representaciones.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>07</strong></td>
+      <td><p align="justify">Arquitectura Big Data con MapReduce, hash, shuffle y salida distribuida.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>08</strong></td>
+      <td><p align="justify">Spark, RDD, memoria, linaje y tolerancia a fallos.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>09</strong></td>
+      <td><p align="justify">Guía docente, actividades, preguntas de cierre y evaluación.</p></td>
+    </tr>
+  </tbody>
+</table>
 
 ### 12. Teorema de Erdős–Gallai y Aplicaciones
 | 📄 Recurso | 📥 Acceso |
