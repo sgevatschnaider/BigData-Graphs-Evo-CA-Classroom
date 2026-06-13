@@ -606,21 +606,6 @@ Para consolidar la intuición geométrica y conectar las visualizaciones interac
   <img src="https://img.shields.io/badge/Simetría-D3%20%7C%20Grafos%20%7C%20Big%20Data-2563eb?style=for-the-badge&logo=apache-spark&logoColor=white" alt="Simetría, grupo D3, grafos y Big Data">
 </a>
 
-<br><br>
-
-<a href="https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
-  <img src="https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white" alt="Abrir HTML interactivo">
-</a>
-
-<a href="https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Simetria.html">
-  <img src="https://img.shields.io/badge/Ver-Código%20en%20GitHub-181717?style=for-the-badge&logo=github" alt="Ver código en GitHub">
-</a>
-
-</div>
-
-<br>
-
-### 11. Simetría, Grupo D₃ y Arquitecturas Distribuidas
 
 Esta sección presenta un recorrido interactivo que conecta una idea matemática fundamental —la **simetría del triángulo equilátero**— con conceptos centrales de **teoría de grafos**, **álgebra abstracta**, **ciencia de datos** y **arquitecturas Big Data**.
 
