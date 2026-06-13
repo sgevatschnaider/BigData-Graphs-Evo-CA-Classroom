@@ -3,183 +3,533 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Índice · Simetría, grafos y Big Data</title>
+<title>Simetría, grupos, grafos y Big Data · Página única</title>
 <style>
 :root{
   --bg:#f4f7fb; --card:#ffffff; --card2:#f9fbff; --text:#142033; --muted:#64748b;
   --line:#d9e4f2; --accent:#2563eb; --accent2:#7c3aed; --accent3:#06b6d4;
-  --good:#059669; --warn:#d97706; --bad:#dc2626;
+  --good:#059669; --warn:#d97706; --bad:#dc2626; --ink:#0f172a;
   --shadow:0 22px 54px rgba(23,37,84,.14); --soft:0 8px 22px rgba(15,23,42,.08);
   --radius:28px;
 }
 [data-theme="dark"]{
   --bg:#07111f; --card:#111c31; --card2:#0d1729; --text:#eef6ff; --muted:#afbdd2;
   --line:#263956; --accent:#60a5fa; --accent2:#a78bfa; --accent3:#22d3ee;
-  --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  --good:#34d399; --warn:#fbbf24; --bad:#fb7185; --ink:#f8fafc;
   --shadow:0 22px 54px rgba(0,0,0,.38); --soft:0 8px 22px rgba(0,0,0,.25);
 }
-*{box-sizing:border-box} html{scroll-behavior:smooth}
-body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top left,color-mix(in srgb,var(--accent) 18%,transparent),transparent 34%),radial-gradient(circle at top right,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 30%),linear-gradient(135deg,var(--bg),color-mix(in srgb,var(--bg),var(--accent3) 8%));color:var(--text);line-height:1.66}
-a{color:var(--accent);font-weight:850;text-decoration:none} a:hover{text-decoration:underline}
-header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,color-mix(in srgb,var(--accent) 18%,transparent),transparent 34%),
+    radial-gradient(circle at top right,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 30%),
+    linear-gradient(135deg,var(--bg),color-mix(in srgb,var(--bg),var(--accent3) 8%));
+  color:var(--text);line-height:1.66;
+}
+a{color:var(--accent);font-weight:850;text-decoration:none}
+a:hover{text-decoration:underline}
+header{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--card) 88%,transparent);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
 .nav{max-width:1240px;margin:auto;padding:13px 20px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-.brand{font-weight:950;letter-spacing:-.025em}.controls{display:flex;gap:10px;flex-wrap:wrap}
-button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 14px;border-radius:15px;cursor:pointer;font-weight:850;box-shadow:var(--soft);transition:.18s transform,.18s opacity;display:inline-flex;align-items:center;gap:8px}
+.brand{font-weight:950;letter-spacing:-.025em}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+button,.btn{
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:15px;
+  cursor:pointer;
+  font-weight:850;
+  box-shadow:var(--soft);
+  transition:.18s transform,.18s opacity,.18s background;
+  display:inline-flex;align-items:center;gap:8px;
+}
 button.primary,.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none}
+button.good{background:color-mix(in srgb,var(--good) 15%,var(--card));border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
+button.warn{background:color-mix(in srgb,var(--warn) 14%,var(--card));border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
 button:hover,.btn:hover{transform:translateY(-1px)}
+button:active,.btn:active{transform:translateY(0)}
 main{max-width:1240px;margin:auto;padding:28px 20px 64px}
-.card{background:color-mix(in srgb,var(--card) 96%,transparent);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin:18px 0}
+.card{
+  background:color-mix(in srgb,var(--card) 96%,transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin:18px 0;
+}
 .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:22px;align-items:stretch;margin:18px 0 28px}
-h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:10px 0 14px;letter-spacing:-.05em} h2{font-size:clamp(25px,3vw,38px);line-height:1.1;margin:34px 0 16px;letter-spacing:-.035em} h3{font-size:22px;margin:8px 0 10px}
-.lead{font-size:18px;color:var(--muted);max-width:84ch}.muted{color:var(--muted)}
-.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--accent) 5%);font-size:13px;font-weight:900;color:var(--muted)}
+h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:10px 0 14px;letter-spacing:-.05em}
+h2{font-size:clamp(25px,3vw,38px);line-height:1.1;margin:34px 0 16px;letter-spacing:-.035em}
+h3{font-size:22px;margin:8px 0 10px}
+h4{font-size:18px;margin:15px 0 8px}
+.lead{font-size:18px;color:var(--muted);max-width:84ch}
+.muted{color:var(--muted)}
+.tag{
+  display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;
+  background:color-mix(in srgb,var(--card),var(--accent) 5%);font-size:13px;font-weight:900;color:var(--muted)
+}
 .notice{border-left:5px solid var(--accent);padding:15px 17px;border-radius:18px;background:color-mix(in srgb,var(--accent) 8%,var(--card));margin:14px 0}
+.notice.good{border-left-color:var(--good);background:color-mix(in srgb,var(--good) 9%,var(--card))}
+.notice.warn{border-left-color:var(--warn);background:color-mix(in srgb,var(--warn) 9%,var(--card))}
 .moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.moduleCard{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);display:flex;flex-direction:column;min-height:310px}
-.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}.moduleNum{font-size:28px;font-weight:950;letter-spacing:-.04em;color:var(--accent)}.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}
-.moduleCard p{color:var(--muted);font-size:15px;flex:1}.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}
+.moduleCard{
+  border:1px solid var(--line);border-radius:24px;padding:18px;
+  background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);
+  display:flex;flex-direction:column;min-height:310px
+}
+.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.moduleNum{font-size:28px;font-weight:950;letter-spacing:-.04em;color:var(--accent)}
+.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}
+.moduleCard p{color:var(--muted);font-size:15px;flex:1}
+.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}
 .moduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
-.searchBox{display:grid;gap:8px;margin-top:14px} input{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:750;box-shadow:var(--soft)}
-.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.path a{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.mini{padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{color:var(--muted)}
+.searchBox{display:grid;gap:8px;margin-top:14px}
+input,select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);
+  font-size:16px;font-weight:750;box-shadow:var(--soft);
+}
+.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.path a{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mini{padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}
+.mini strong{display:block;font-size:20px;letter-spacing:-.02em}
+.mini small{color:var(--muted)}
+.moduleSection{
+  scroll-margin-top:92px;
+  padding-top:8px;
+}
+.kicker{font-weight:950;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;font-size:12px}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft)}
+table{width:100%;border-collapse:collapse;min-width:740px}
+th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--accent) 8%,var(--card));font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+tr:last-child td{border-bottom:none}
+.code{
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  background:color-mix(in srgb,var(--ink) 6%,var(--card));
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  overflow:auto;
+  color:var(--text);
+}
+.sim{
+  margin-top:14px;padding:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card2),var(--card));
+  box-shadow:var(--soft);
+}
+.simTitle{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.simTitle strong{font-size:19px}
+.svgBox{width:100%;min-height:280px;border:1px solid var(--line);border-radius:20px;background:color-mix(in srgb,var(--card),var(--accent3) 4%);display:flex;align-items:center;justify-content:center;overflow:hidden}
+svg{max-width:100%;height:auto}
+.stateBadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:8px 11px;border-radius:999px;background:color-mix(in srgb,var(--accent) 10%,var(--card));
+  border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));
+  font-weight:950;
+}
+.log{
+  min-height:68px;
+  background:color-mix(in srgb,var(--ink) 5%,var(--card));
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:12px;
+  color:var(--muted);
+}
+.pillRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pill{
+  border:1px solid var(--line);background:var(--card);padding:8px 10px;border-radius:999px;font-weight:850;color:var(--muted)
+}
+.pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none}
+.splitView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.bigNumber{font-size:44px;font-weight:950;letter-spacing:-.06em;color:var(--accent);line-height:1}
+.barWrap{height:12px;background:color-mix(in srgb,var(--ink) 8%,var(--card));border-radius:999px;overflow:hidden;margin:8px 0 14px}
+.bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .35s}
+.timeline{display:grid;gap:12px;margin-top:12px}
+.step{
+  display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--card)
+}
+.stepNum{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:950}
+.quiz{display:grid;gap:12px}
+.quiz button{text-align:left;justify-content:flex-start}
+.feedback{font-weight:850}
 .footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}
-@media(max-width:980px){.hero,.moduleGrid,.grid2{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1;justify-content:center}}
-@media print{header,.controls,button,.btn,.searchBox{display:none!important}body{background:white}.card,.moduleCard,.mini{box-shadow:none}main{max-width:100%;padding:0}}
+.toTop{position:fixed;right:18px;bottom:18px;z-index:40}
+@media(max-width:980px){
+  .hero,.moduleGrid,.grid2,.grid3,.splitView{grid-template-columns:1fr}
+  .nav{align-items:flex-start;flex-direction:column}
+  .controls{width:100%}
+  .controls button,.controls .btn{flex:1;justify-content:center}
+  table{min-width:640px}
+}
+@media print{
+  header,.controls,button,.btn,.searchBox,.toTop{display:none!important}
+  body{background:white}.card,.moduleCard,.mini,.sim{box-shadow:none}
+  main{max-width:100%;padding:0}.moduleSection{break-inside:avoid}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="nav">
-    <div class="brand">00 · Índice · Simetría, grafos y Big Data</div>
+    <div class="brand">00 · Página única · Simetría, grafos y Big Data</div>
     <div class="controls">
       <button id="themeBtn">🌙 Tema oscuro</button>
+      <button id="expandBtn">▾ Expandir todo</button>
       <button onclick="window.print()">🖨️ Imprimir</button>
-      <a class="btn primary" href="09_guia_docente_actividades.html">Guía docente</a>
+      <a class="btn primary" href="#guia">Guía docente</a>
     </div>
   </div>
 </header>
+
 <main>
-<section class="hero">
+<section class="hero" id="inicio">
   <div class="card">
     <span class="tag">Simetría</span><span class="tag">D₃</span><span class="tag">Grafos</span><span class="tag">MapReduce</span><span class="tag">Spark</span>
     <h1>Simetría, grupos, grafos y Big Data</h1>
-    <p class="lead">Índice general del material interactivo. El recorrido conecta una idea matemática pequeña —la simetría del triángulo— con estructuras computacionales reales: particiones, recorridos en grafos, hash, shuffle, reducción distribuida, RDD, memoria y tolerancia a fallos.</p>
-    <div class="notice"><strong>Uso recomendado:</strong> avanzar del módulo 01 al 09. Las simulaciones pueden abrirse de forma independiente, pero el valor didáctico aumenta cuando se observa la continuidad entre estructura matemática y arquitectura Big Data.</div>
-    <div class="path"><a href="01_teoria_d3_bigdata_grafos.html">01</a><a href="02_simulacion_d3_cayley.html">02</a><a href="03_simulacion_lagrange_sharding.html">03</a><a href="04_simulacion_mapreduce_asociatividad.html">04</a><a href="05_simulacion_grafos_traversal_no_conmutatividad.html">05</a><a href="06_simulacion_invariancias_ia_datos.html">06</a><a href="07_simulacion_arquitectura_bigdata_mapreduce.html">07</a><a href="08_simulacion_arquitectura_bigdata_spark_rdd.html">08</a><a href="09_guia_docente_actividades.html">09</a></div>
+    <p class="lead">Recorrido interactivo en una sola página. La clase conecta una idea matemática pequeña —la simetría del triángulo equilátero— con estructuras computacionales reales: particiones, recorridos en grafos, hash, shuffle, reducción distribuida, RDD, memoria y tolerancia a fallos.</p>
+    <div class="notice good"><strong>Archivo autónomo:</strong> esta versión no llama a otros HTML. Todos los módulos, simulaciones, actividades y la guía docente están integrados dentro de esta misma página.</div>
+    <div class="path">
+      <a href="#modulo01">01</a><a href="#modulo02">02</a><a href="#modulo03">03</a><a href="#modulo04">04</a><a href="#modulo05">05</a><a href="#modulo06">06</a><a href="#modulo07">07</a><a href="#modulo08">08</a><a href="#guia">09</a>
+    </div>
   </div>
   <div class="card">
     <h3>Buscar módulo</h3>
     <p class="muted">Filtrá por número, tema o tecnología: D₃, Cayley, sharding, MapReduce, hash, Spark, RDD, guía.</p>
     <div class="searchBox"><input id="moduleSearch" placeholder="Buscar en el índice..." aria-label="Buscar módulo"></div>
     <div class="grid2" style="margin-top:16px">
-      <div class="mini"><strong>9</strong><small>archivos principales más el índice</small></div>
-      <div class="mini"><strong>7</strong><small>módulos con simulación o actividad interactiva</small></div>
+      <div class="mini"><strong>9</strong><small>módulos integrados</small></div>
+      <div class="mini"><strong>8</strong><small>bloques con simulación o actividad</small></div>
     </div>
+    <div class="notice warn"><strong>Uso recomendado:</strong> avanzar del módulo 01 al 09. También podés abrir cada sección de forma independiente desde las tarjetas.</div>
   </div>
 </section>
+
 <section class="card">
   <h2>Recorrido completo</h2>
   <div class="moduleGrid" id="moduleGrid">
-      <article class="moduleCard" data-title="01 D₃, grafos y Big Data Teoría D₃ grupos grafos Big Data">
-        <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Teoría</span></div>
-        <h3>D₃, grafos y Big Data</h3>
-        <p>Puente conceptual desde simetrías del triángulo hacia estructuras de datos distribuidas.</p>
-        <div class="tagline"><span>D₃</span><span>grupos</span><span>grafos</span><span>Big Data</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="01_teoria_d3_bigdata_grafos.html">Abrir</a>
-          <a class="btn" href="01_teoria_d3_bigdata_grafos.html#simetria">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="02 D₃ y grafo de Cayley Simulación Cayley generadores composición no conmutatividad">
-        <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Simulación</span></div>
-        <h3>D₃ y grafo de Cayley</h3>
-        <p>Recorrido interactivo por estados, generadores, composición y estructura no conmutativa.</p>
-        <div class="tagline"><span>Cayley</span><span>generadores</span><span>composición</span><span>no conmutatividad</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="02_simulacion_d3_cayley.html">Abrir</a>
-          <a class="btn" href="02_simulacion_d3_cayley.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="03 Lagrange, clases laterales y sharding Simulación Lagrange cosets sharding particiones">
-        <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Simulación</span></div>
-        <h3>Lagrange, clases laterales y sharding</h3>
-        <p>Analogía entre particiones matemáticas y distribución coherente de registros en shards.</p>
-        <div class="tagline"><span>Lagrange</span><span>cosets</span><span>sharding</span><span>particiones</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="03_simulacion_lagrange_sharding.html">Abrir</a>
-          <a class="btn" href="03_simulacion_lagrange_sharding.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="04 MapReduce y asociatividad Simulación MapReduce asociatividad reduce agregación">
-        <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Simulación</span></div>
-        <h3>MapReduce y asociatividad</h3>
-        <p>Demostración de por qué una operación asociativa puede dividirse, paralelizarse y recomponerse.</p>
-        <div class="tagline"><span>MapReduce</span><span>asociatividad</span><span>reduce</span><span>agregación</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="04_simulacion_mapreduce_asociatividad.html">Abrir</a>
-          <a class="btn" href="04_simulacion_mapreduce_asociatividad.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="05 Traversal y no conmutatividad Simulación grafos traversal orden no conmutatividad">
-        <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Simulación</span></div>
-        <h3>Traversal y no conmutatividad</h3>
-        <p>Comparación de caminos en grafos para mostrar que el orden de operaciones importa.</p>
-        <div class="tagline"><span>grafos</span><span>traversal</span><span>orden</span><span>no conmutatividad</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="05_simulacion_grafos_traversal_no_conmutatividad.html">Abrir</a>
-          <a class="btn" href="05_simulacion_grafos_traversal_no_conmutatividad.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="06 Invariancias en IA y datos Simulación IA invariancia identidad datos">
-        <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Simulación</span></div>
-        <h3>Invariancias en IA y datos</h3>
-        <p>Pruebas visuales sobre identidad, inversos e invariancias en modelos y representaciones de datos.</p>
-        <div class="tagline"><span>IA</span><span>invariancia</span><span>identidad</span><span>datos</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="06_simulacion_invariancias_ia_datos.html">Abrir</a>
-          <a class="btn" href="06_simulacion_invariancias_ia_datos.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="07 Arquitectura Big Data con MapReduce Simulación MapReduce hash shuffle HDFS">
-        <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Simulación</span></div>
-        <h3>Arquitectura Big Data con MapReduce</h3>
-        <p>Pipeline completo: entrada distribuida, map, partición por hash, shuffle, agrupación, reduce y salida.</p>
-        <div class="tagline"><span>MapReduce</span><span>hash</span><span>shuffle</span><span>HDFS</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="07_simulacion_arquitectura_bigdata_mapreduce.html">Abrir</a>
-          <a class="btn" href="07_simulacion_arquitectura_bigdata_mapreduce.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="08 Spark, RDD, particiones y linaje Simulación Spark RDD linaje memoria">
-        <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Simulación</span></div>
-        <h3>Spark, RDD, particiones y linaje</h3>
-        <p>Procesamiento distribuido en memoria, transformaciones, acciones, reducción y tolerancia a fallos.</p>
-        <div class="tagline"><span>Spark</span><span>RDD</span><span>linaje</span><span>memoria</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="08_simulacion_arquitectura_bigdata_spark_rdd.html">Abrir</a>
-          <a class="btn" href="08_simulacion_arquitectura_bigdata_spark_rdd.html#simulacion">Ir al punto clave</a>
-        </div>
-      </article>
-
-      <article class="moduleCard" data-title="09 Guía docente y actividades Guía docencia actividades evaluación síntesis">
-        <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Guía</span></div>
-        <h3>Guía docente y actividades</h3>
-        <p>Secuencia de clase, preguntas, actividades, evaluación y formas de integración conceptual.</p>
-        <div class="tagline"><span>docencia</span><span>actividades</span><span>evaluación</span><span>síntesis</span></div>
-        <div class="moduleActions">
-          <a class="btn primary" href="09_guia_docente_actividades.html">Abrir</a>
-          <a class="btn" href="09_guia_docente_actividades.html#objetivos">Ir al punto clave</a>
-        </div>
-      </article>
+    <article class="moduleCard" data-title="01 D3 grafos Big Data teoría simetría grupo">
+      <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Teoría</span></div>
+      <h3>D₃, grafos y Big Data</h3>
+      <p>Puente conceptual desde simetrías del triángulo hacia estructuras de datos distribuidas.</p>
+      <div class="tagline"><span>D₃</span><span>grupos</span><span>grafos</span><span>Big Data</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo01">Abrir</a><a class="btn" href="#tabla-d3">Tabla D₃</a></div>
+    </article>
+    <article class="moduleCard" data-title="02 Cayley generadores composición no conmutatividad simulación">
+      <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Simulación</span></div>
+      <h3>D₃ y grafo de Cayley</h3>
+      <p>Recorrido interactivo por estados, generadores, composición y estructura no conmutativa.</p>
+      <div class="tagline"><span>Cayley</span><span>generadores</span><span>composición</span><span>no conmutatividad</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo02">Abrir</a><a class="btn" href="#cayley-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="03 Lagrange cosets clases laterales sharding particiones">
+      <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Simulación</span></div>
+      <h3>Lagrange, clases laterales y sharding</h3>
+      <p>Analogía entre particiones matemáticas y distribución coherente de registros en shards.</p>
+      <div class="tagline"><span>Lagrange</span><span>cosets</span><span>sharding</span><span>particiones</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo03">Abrir</a><a class="btn" href="#sharding-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="04 MapReduce asociatividad reduce agregación">
+      <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Simulación</span></div>
+      <h3>MapReduce y asociatividad</h3>
+      <p>Demostración de por qué una operación asociativa puede dividirse, paralelizarse y recomponerse.</p>
+      <div class="tagline"><span>MapReduce</span><span>asociatividad</span><span>reduce</span><span>agregación</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo04">Abrir</a><a class="btn" href="#mapreduce-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="05 traversal caminos no conmutatividad orden grafos">
+      <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Simulación</span></div>
+      <h3>Traversal y no conmutatividad</h3>
+      <p>Comparación de caminos en grafos para mostrar que el orden de operaciones importa.</p>
+      <div class="tagline"><span>grafos</span><span>traversal</span><span>orden</span><span>no conmutatividad</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo05">Abrir</a><a class="btn" href="#orden-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="06 IA invariancia identidad inversos datos representación">
+      <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Simulación</span></div>
+      <h3>Invariancias en IA y datos</h3>
+      <p>Pruebas visuales sobre identidad, inversos e invariancias en modelos y representaciones de datos.</p>
+      <div class="tagline"><span>IA</span><span>invariancia</span><span>identidad</span><span>datos</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo06">Abrir</a><a class="btn" href="#invariancia-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="07 arquitectura Big Data MapReduce hash shuffle HDFS pipeline">
+      <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Arquitectura</span></div>
+      <h3>Arquitectura Big Data con MapReduce</h3>
+      <p>Pipeline completo: entrada distribuida, map, partición por hash, shuffle, agrupación, reduce y salida.</p>
+      <div class="tagline"><span>MapReduce</span><span>hash</span><span>shuffle</span><span>HDFS</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo07">Abrir</a><a class="btn" href="#pipeline-mr">Pipeline</a></div>
+    </article>
+    <article class="moduleCard" data-title="08 Spark RDD particiones linaje memoria tolerancia fallos">
+      <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Arquitectura</span></div>
+      <h3>Spark, RDD, particiones y linaje</h3>
+      <p>Procesamiento distribuido en memoria, transformaciones, acciones, reducción y tolerancia a fallos.</p>
+      <div class="tagline"><span>Spark</span><span>RDD</span><span>linaje</span><span>memoria</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#modulo08">Abrir</a><a class="btn" href="#spark-sim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="09 guía docente actividades evaluación síntesis clase">
+      <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Guía</span></div>
+      <h3>Guía docente y actividades</h3>
+      <p>Secuencia de clase, preguntas, actividades, evaluación y formas de integración conceptual.</p>
+      <div class="tagline"><span>docencia</span><span>actividades</span><span>evaluación</span><span>síntesis</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#guia">Abrir</a><a class="btn" href="#quiz-final">Quiz</a></div>
+    </article>
   </div>
 </section>
+
+<section class="card moduleSection" id="modulo01" data-section-title="01 teoría D3 grupos grafos big data">
+  <span class="kicker">Módulo 01 · Fundamentos</span>
+  <h2>D₃, grafos y Big Data</h2>
+  <p>El grupo diedral <strong>D₃</strong> describe las simetrías de un triángulo equilátero: tres rotaciones y tres reflexiones. Es un objeto pequeño, pero conceptualmente potente: permite estudiar operaciones cerradas, identidad, inversos, composición y no conmutatividad.</p>
+  <div class="grid3">
+    <div class="mini"><strong>Estados</strong><small>Cada simetría puede verse como un estado del sistema: e, r, r², s, sr, sr².</small></div>
+    <div class="mini"><strong>Operaciones</strong><small>Aplicar una rotación o una reflexión equivale a moverse entre estados.</small></div>
+    <div class="mini"><strong>Grafo</strong><small>El grafo de Cayley convierte operaciones algebraicas en aristas navegables.</small></div>
+  </div>
+  <div class="notice">
+    <strong>Idea central:</strong> en Big Data también trabajamos con estados y transformaciones. Un pipeline conserva ciertas propiedades aunque distribuya, ordene, agrupe o reduzca datos.
+  </div>
+  <div class="tableWrap" id="tabla-d3">
+    <table>
+      <thead><tr><th>Elemento</th><th>Interpretación geométrica</th><th>Interpretación computacional</th></tr></thead>
+      <tbody>
+        <tr><td><strong>e</strong></td><td>Identidad: no cambia el triángulo.</td><td>Estado inicial, dato sin transformar o transformación neutra.</td></tr>
+        <tr><td><strong>r</strong></td><td>Rotación de 120°.</td><td>Transformación ordenada que avanza a otro estado.</td></tr>
+        <tr><td><strong>r²</strong></td><td>Rotación de 240°.</td><td>Segunda aplicación de una transformación.</td></tr>
+        <tr><td><strong>s</strong></td><td>Reflexión.</td><td>Cambio estructural que conserva una propiedad clave.</td></tr>
+        <tr><td><strong>sr</strong></td><td>Reflexión compuesta con rotación.</td><td>Pipeline de dos pasos: orden y composición importan.</td></tr>
+        <tr><td><strong>sr²</strong></td><td>Reflexión compuesta con dos rotaciones.</td><td>Estado alcanzado por otra secuencia de transformaciones.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card moduleSection" id="modulo02" data-section-title="02 cayley generadores composición no conmutatividad">
+  <span class="kicker">Módulo 02 · Simulación</span>
+  <h2>D₃ y grafo de Cayley</h2>
+  <p>Un grafo de Cayley representa cada elemento del grupo como un nodo. Las aristas indican qué ocurre al aplicar generadores. Para D₃ podemos usar dos generadores: <strong>r</strong>, rotación, y <strong>s</strong>, reflexión.</p>
+  <div class="sim" id="cayley-sim">
+    <div class="simTitle">
+      <strong>Simulador de composición en D₃</strong>
+      <span>Estado actual: <span class="stateBadge" id="d3State">e</span></span>
+    </div>
+    <div class="splitView">
+      <div>
+        <div class="svgBox">
+          <svg viewBox="0 0 560 360" role="img" aria-label="Grafo de Cayley de D3">
+            <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="currentColor"/></marker></defs>
+            <g id="cayleyEdges" stroke="currentColor" stroke-width="2" opacity=".45" fill="none" marker-end="url(#arrow)">
+              <path d="M280 52 C390 70 458 132 476 188"/>
+              <path d="M476 188 C430 282 340 318 280 308"/>
+              <path d="M280 308 C170 290 102 228 84 172"/>
+              <path d="M84 172 C130 78 220 42 280 52"/>
+              <path d="M280 52 L280 308"/>
+              <path d="M476 188 L84 172"/>
+              <path d="M390 95 L170 265"/>
+            </g>
+            <g font-size="18" text-anchor="middle" font-weight="900">
+              <circle class="d3Node" data-node="e" cx="280" cy="52" r="31" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="280" y="58">e</text>
+              <circle class="d3Node" data-node="r" cx="476" cy="188" r="31" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="476" y="194">r</text>
+              <circle class="d3Node" data-node="r2" cx="280" cy="308" r="31" fill="var(--card)" stroke="var(--accent)" stroke-width="3"/><text x="280" y="314">r²</text>
+              <circle class="d3Node" data-node="s" cx="84" cy="172" r="31" fill="var(--card)" stroke="var(--accent2)" stroke-width="3"/><text x="84" y="178">s</text>
+              <circle class="d3Node" data-node="sr" cx="390" cy="95" r="31" fill="var(--card)" stroke="var(--accent2)" stroke-width="3"/><text x="390" y="101">sr</text>
+              <circle class="d3Node" data-node="sr2" cx="170" cy="265" r="31" fill="var(--card)" stroke="var(--accent2)" stroke-width="3"/><text x="170" y="271">sr²</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="pillRow">
+          <button class="primary" onclick="applyD3('r')">Aplicar r</button>
+          <button class="primary" onclick="applyD3('s')">Aplicar s</button>
+          <button onclick="resetD3()">Reiniciar</button>
+        </div>
+        <p class="muted">Probá aplicar <strong>r</strong> varias veces: r³ = e. Luego mezclá con <strong>s</strong> para observar que el orden de aplicación cambia el resultado.</p>
+        <div class="log" id="d3Log">Secuencia: e</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="modulo03" data-section-title="03 lagrange cosets sharding particiones hash">
+  <span class="kicker">Módulo 03 · Particiones</span>
+  <h2>Lagrange, clases laterales y sharding</h2>
+  <p>El teorema de Lagrange muestra que el tamaño de un subgrupo divide al tamaño del grupo. En términos didácticos, esto permite hablar de particiones limpias. En sistemas distribuidos, el sharding busca algo análogo: repartir datos en grupos coherentes, balanceados y recuperables.</p>
+  <div class="grid2">
+    <div class="mini"><strong>Clases laterales</strong><small>Si H es un subgrupo, sus clases laterales organizan el grupo en bloques sin solapamiento.</small></div>
+    <div class="mini"><strong>Sharding</strong><small>Una función hash asigna registros a particiones. La regla debe ser estable y reproducible.</small></div>
+  </div>
+  <div class="sim" id="sharding-sim">
+    <div class="simTitle"><strong>Simulador de sharding por hash mod 3</strong><button onclick="shuffleRecords()">Generar registros</button></div>
+    <p class="muted">Cada clave se envía a un shard según una regla simple: suma de códigos de caracteres módulo 3. Es una simplificación didáctica de un mecanismo de partición.</p>
+    <div class="grid3" id="shardGrid"></div>
+  </div>
+  <div class="notice"><strong>Conexión:</strong> las particiones matemáticas ayudan a pensar por qué un sistema distribuido necesita reglas claras de pertenencia, recuperación y consistencia.</div>
+</section>
+
+<section class="card moduleSection" id="modulo04" data-section-title="04 mapreduce asociatividad reduce agregación paralela">
+  <span class="kicker">Módulo 04 · Paralelización</span>
+  <h2>MapReduce y asociatividad</h2>
+  <p>MapReduce funciona bien cuando la operación de reducción puede dividirse en partes y recomponerse sin cambiar el resultado final. La suma es asociativa: podemos sumar por bloques y luego sumar los resultados parciales.</p>
+  <div class="sim" id="mapreduce-sim">
+    <div class="simTitle"><strong>Simulador Map → Reduce</strong><button onclick="newMRData()">Nuevo conjunto</button></div>
+    <div class="splitView">
+      <div>
+        <h4>Datos de entrada</h4>
+        <div class="pillRow" id="mrData"></div>
+        <h4>Particiones</h4>
+        <div id="mrParts"></div>
+      </div>
+      <div>
+        <h4>Reducción local y global</h4>
+        <div class="grid2">
+          <div class="mini"><strong id="mrLocal">—</strong><small>sumas parciales</small></div>
+          <div class="mini"><strong id="mrGlobal">—</strong><small>suma final</small></div>
+        </div>
+        <div class="log" id="mrLog" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Fase</th><th>Qué hace</th><th>Analogía con estructura</th></tr></thead>
+      <tbody>
+        <tr><td>Map</td><td>Transforma registros individuales.</td><td>Aplicación de una operación a cada elemento.</td></tr>
+        <tr><td>Shuffle</td><td>Agrupa por clave o partición.</td><td>Reordenamiento estructurado.</td></tr>
+        <tr><td>Reduce</td><td>Agrega valores por grupo.</td><td>Composición de resultados parciales.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card moduleSection" id="modulo05" data-section-title="05 traversal caminos no conmutatividad orden operaciones">
+  <span class="kicker">Módulo 05 · Orden</span>
+  <h2>Traversal y no conmutatividad</h2>
+  <p>En muchos sistemas, aplicar A y luego B no produce el mismo resultado que aplicar B y luego A. Esta propiedad aparece en grupos no conmutativos, en recorridos de grafos y en pipelines de datos donde el orden de transformación afecta el resultado.</p>
+  <div class="sim" id="orden-sim">
+    <div class="simTitle"><strong>Comparador de orden de operaciones</strong><button onclick="resetOrder()">Reiniciar</button></div>
+    <div class="grid2">
+      <div class="mini">
+        <strong>Camino A: r → s</strong>
+        <small>Primero rotar, luego reflejar.</small>
+        <div class="pillRow"><button class="primary" onclick="runOrder('rs')">Ejecutar r → s</button></div>
+        <div class="bigNumber" id="resultRS">—</div>
+      </div>
+      <div class="mini">
+        <strong>Camino B: s → r</strong>
+        <small>Primero reflejar, luego rotar.</small>
+        <div class="pillRow"><button class="primary" onclick="runOrder('sr')">Ejecutar s → r</button></div>
+        <div class="bigNumber" id="resultSR">—</div>
+      </div>
+    </div>
+    <div class="log" id="orderLog" style="margin-top:12px">Ejecutá ambos caminos para comparar los resultados.</div>
+  </div>
+  <div class="notice warn"><strong>Idea didáctica:</strong> en un pipeline real, filtrar antes de agrupar no siempre equivale a agrupar antes de filtrar. El orden puede cambiar resultados, costos y errores.</div>
+</section>
+
+<section class="card moduleSection" id="modulo06" data-section-title="06 invariancias IA datos identidad inversos robustez">
+  <span class="kicker">Módulo 06 · IA y datos</span>
+  <h2>Invariancias en IA y datos</h2>
+  <p>Una invariancia es una propiedad que permanece estable frente a ciertas transformaciones. En visión computacional, NLP o análisis de redes, buscamos representaciones que conserven lo importante y sean robustas a cambios irrelevantes.</p>
+  <div class="sim" id="invariancia-sim">
+    <div class="simTitle"><strong>Simulador de invariancia</strong><button onclick="resetInv()">Reiniciar figura</button></div>
+    <div class="splitView">
+      <div class="svgBox">
+        <svg viewBox="0 0 420 300" aria-label="Triángulo transformable">
+          <g id="triGroup" transform="translate(210 150) rotate(0) scale(1,1)">
+            <polygon points="0,-80 78,55 -78,55" fill="color-mix(in srgb,var(--accent) 18%,transparent)" stroke="var(--accent)" stroke-width="6" />
+            <circle cx="0" cy="-80" r="12" fill="var(--accent2)"/><text x="0" y="-102" text-anchor="middle" font-weight="900" fill="var(--text)">A</text>
+            <circle cx="78" cy="55" r="12" fill="var(--accent3)"/><text x="95" y="72" font-weight="900" fill="var(--text)">B</text>
+            <circle cx="-78" cy="55" r="12" fill="var(--good)"/><text x="-115" y="72" font-weight="900" fill="var(--text)">C</text>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div class="pillRow">
+          <button class="primary" onclick="rotateInv()">Rotar</button>
+          <button class="primary" onclick="reflectInv()">Reflejar</button>
+          <button onclick="noiseInv()">Agregar ruido visual</button>
+        </div>
+        <div class="grid2">
+          <div class="mini"><strong id="invLabel">Triángulo</strong><small>Clase semántica</small></div>
+          <div class="mini"><strong id="invScore">100%</strong><small>estructura conservada</small></div>
+        </div>
+        <div class="log" id="invLog" style="margin-top:12px">La figura puede cambiar de orientación, pero sigue siendo reconocible como triángulo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="modulo07" data-section-title="07 arquitectura big data mapreduce hash shuffle hdfs">
+  <span class="kicker">Módulo 07 · Arquitectura distribuida</span>
+  <h2>Arquitectura Big Data con MapReduce</h2>
+  <p>MapReduce organiza el procesamiento en una secuencia distribuida. Los datos se leen en bloques, se transforman con funciones map, se redistribuyen por clave y se agregan mediante reduce.</p>
+  <div class="sim" id="pipeline-mr">
+    <div class="simTitle"><strong>Pipeline visual</strong><button onclick="nextPipeline()">Siguiente paso</button></div>
+    <div class="timeline" id="pipelineSteps"></div>
+  </div>
+  <div class="grid3">
+    <div class="mini"><strong>HDFS / entrada</strong><small>El dato se fragmenta en bloques distribuidos.</small></div>
+    <div class="mini"><strong>Hash / shuffle</strong><small>Las claves iguales deben llegar al mismo reductor.</small></div>
+    <div class="mini"><strong>Salida</strong><small>El resultado agregado queda persistido para análisis posterior.</small></div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="modulo08" data-section-title="08 spark rdd memoria linaje tolerancia fallos">
+  <span class="kicker">Módulo 08 · Spark</span>
+  <h2>Spark, RDD, particiones y linaje</h2>
+  <p>Spark introduce una lógica de transformación en memoria. Un RDD registra su linaje: sabe de qué operaciones proviene. Si una partición falla, puede recomputarse desde el historial de transformaciones.</p>
+  <div class="sim" id="spark-sim">
+    <div class="simTitle"><strong>Simulador de linaje RDD</strong><button onclick="sparkStep()">Avanzar transformación</button></div>
+    <div class="grid2">
+      <div>
+        <div class="timeline" id="sparkLineage"></div>
+      </div>
+      <div>
+        <div class="mini">
+          <strong id="sparkStatus">RDD base</strong>
+          <small id="sparkDesc">Datos iniciales distribuidos en particiones.</small>
+          <div class="barWrap"><div class="bar" id="sparkBar"></div></div>
+          <button class="warn" onclick="sparkFail()">Simular falla de partición</button>
+        </div>
+        <div class="log" id="sparkLog" style="margin-top:12px">El linaje permite reconstruir resultados sin repetir todo manualmente.</div>
+      </div>
+    </div>
+  </div>
+  <div class="notice"><strong>Diferencia conceptual:</strong> MapReduce escribe resultados intermedios de forma más pesada; Spark favorece operaciones en memoria y linaje para recomputación.</div>
+</section>
+
+<section class="card moduleSection" id="guia" data-section-title="09 guía docente actividades evaluación síntesis">
+  <span class="kicker">Módulo 09 · Guía docente</span>
+  <h2>Guía docente y actividades</h2>
+  <p>La secuencia está pensada para una clase donde los estudiantes pasen de una intuición geométrica a un modelo computacional distribuido. El objetivo no es memorizar D₃, sino usarlo como puente para entender estados, operaciones, grafos, particiones, orden y tolerancia a fallos.</p>
+  <div class="timeline">
+    <div class="step"><div class="stepNum">1</div><div><strong>Activación inicial.</strong><br><span class="muted">Dibujar un triángulo equilátero y preguntar qué transformaciones lo dejan “igual” en estructura.</span></div></div>
+    <div class="step"><div class="stepNum">2</div><div><strong>Formalización.</strong><br><span class="muted">Nombrar identidad, rotaciones, reflexiones y composición.</span></div></div>
+    <div class="step"><div class="stepNum">3</div><div><strong>Grafo de Cayley.</strong><br><span class="muted">Convertir operaciones en recorridos entre nodos.</span></div></div>
+    <div class="step"><div class="stepNum">4</div><div><strong>Big Data.</strong><br><span class="muted">Vincular particiones, hash, shuffle, reduce, RDD y linaje.</span></div></div>
+    <div class="step"><div class="stepNum">5</div><div><strong>Cierre.</strong><br><span class="muted">Responder: ¿qué conserva la estructura cuando los datos se transforman?</span></div></div>
+  </div>
+
+  <h3 id="quiz-final">Actividad de cierre</h3>
+  <div class="sim">
+    <div class="quiz">
+      <p><strong>Pregunta:</strong> ¿Por qué la asociatividad es importante para MapReduce?</p>
+      <button onclick="quizAnswer(false)">Porque hace que todas las operaciones sean conmutativas.</button>
+      <button onclick="quizAnswer(true)">Porque permite dividir una agregación en partes y recomponer el resultado.</button>
+      <button onclick="quizAnswer(false)">Porque evita por completo el shuffle.</button>
+      <div class="feedback" id="quizFeedback"></div>
+    </div>
+  </div>
+</section>
+
 <section class="card">
   <h2>Lectura integradora</h2>
   <div class="grid2">
@@ -187,12 +537,19 @@ h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:10px 0 14px;letter-spa
     <div class="mini"><strong>De la operación al pipeline</strong><small>Map, reduce, hash, shuffle y linaje pueden leerse como operaciones organizadas sobre estados, claves, particiones y grafos de ejecución.</small></div>
   </div>
 </section>
-<div class="footer"><strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br>Índice HTML autónomo · Simetría, grafos y Big Data</div>
+
+<div class="footer">
+  <strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br>
+  Página HTML autónoma · Simetría, grafos y Big Data
+</div>
 </main>
+<a class="btn primary toTop" href="#inicio">↑</a>
+
 <script>
 (function(){
   const root=document.documentElement;
   const btn=document.getElementById('themeBtn');
+  const expandBtn=document.getElementById('expandBtn');
   function setTheme(theme){
     root.setAttribute('data-theme',theme);
     localStorage.setItem('curso-simetria-bigdata-theme',theme);
@@ -200,16 +557,160 @@ h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:10px 0 14px;letter-spa
   }
   setTheme(localStorage.getItem('curso-simetria-bigdata-theme') || 'light');
   btn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
   const search=document.getElementById('moduleSearch');
   const cards=[...document.querySelectorAll('.moduleCard')];
+  const sections=[...document.querySelectorAll('.moduleSection')];
   search.addEventListener('input',()=>{
     const q=search.value.trim().toLowerCase();
     cards.forEach(card=>{
       const haystack=(card.dataset.title+' '+card.innerText).toLowerCase();
       card.style.display=haystack.includes(q)?'flex':'none';
     });
+    sections.forEach(sec=>{
+      const haystack=(sec.dataset.sectionTitle+' '+sec.innerText).toLowerCase();
+      sec.style.display=q==='' || haystack.includes(q)?'block':'none';
+    });
+  });
+
+  expandBtn.addEventListener('click',()=>{
+    search.value='';
+    cards.forEach(card=>card.style.display='flex');
+    sections.forEach(sec=>sec.style.display='block');
+    window.scrollTo({top:0,behavior:'smooth'});
   });
 })();
+
+const d3Elements=['e','r','r2','s','sr','sr2'];
+let d3State='e';
+let d3Seq=['e'];
+const mult = {
+  e:{r:'r',s:'s'}, r:{r:'r2',s:'sr2'}, r2:{r:'e',s:'sr'},
+  s:{r:'sr',s:'e'}, sr:{r:'sr2',s:'r2'}, sr2:{r:'s',s:'r'}
+};
+function labelD3(x){return x.replace('r2','r²').replace('sr2','sr²');}
+function updateD3(){
+  document.getElementById('d3State').textContent=labelD3(d3State);
+  document.getElementById('d3Log').innerHTML='Secuencia: '+d3Seq.map(labelD3).join(' → ');
+  document.querySelectorAll('.d3Node').forEach(n=>{
+    const active=n.dataset.node===d3State;
+    n.setAttribute('fill', active ? 'var(--accent)' : 'var(--card)');
+    n.setAttribute('stroke-width', active ? '7' : '3');
+  });
+}
+function applyD3(op){ d3State=mult[d3State][op]; d3Seq.push(op+' = '+d3State); updateD3(); }
+function resetD3(){ d3State='e'; d3Seq=['e']; updateD3(); }
+
+function simpleHash(str){return [...str].reduce((a,c)=>a+c.charCodeAt(0),0)%3;}
+let recordSeed=0;
+function shuffleRecords(){
+  recordSeed++;
+  const base=['alfa','beta','gamma','delta','epsilon','zeta','lambda','sigma','omega','kappa','nodo','grafo'];
+  const records=base.slice().sort((a,b)=>((a.charCodeAt(0)+recordSeed)%7)-((b.charCodeAt(0)+recordSeed)%7)).slice(0,9);
+  const shards=[[],[],[]];
+  records.forEach(r=>shards[simpleHash(r)].push(r));
+  const grid=document.getElementById('shardGrid');
+  grid.innerHTML=shards.map((items,i)=>`
+    <div class="mini">
+      <strong>Shard ${i}</strong>
+      <small>Registros: ${items.length}</small>
+      <div class="pillRow">${items.map(x=>`<span class="pill">${x}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+let mrValues=[];
+function newMRData(){
+  mrValues=Array.from({length:12},()=>1+Math.floor(Math.random()*9));
+  const parts=[mrValues.slice(0,4),mrValues.slice(4,8),mrValues.slice(8,12)];
+  const local=parts.map(p=>p.reduce((a,b)=>a+b,0));
+  const total=local.reduce((a,b)=>a+b,0);
+  document.getElementById('mrData').innerHTML=mrValues.map(v=>`<span class="pill">${v}</span>`).join('');
+  document.getElementById('mrParts').innerHTML=parts.map((p,i)=>`<div class="mini"><strong>Partición ${i+1}</strong><small>${p.join(' + ')} = ${local[i]}</small></div>`).join('');
+  document.getElementById('mrLocal').textContent=local.join(' + ');
+  document.getElementById('mrGlobal').textContent=total;
+  document.getElementById('mrLog').textContent=`Resultado por partes: (${local.join(') + (')}) = ${total}. Resultado directo: ${mrValues.reduce((a,b)=>a+b,0)}.`;
+}
+
+function runOrder(kind){
+  if(kind==='rs'){
+    document.getElementById('resultRS').textContent='sr²';
+  }else{
+    document.getElementById('resultSR').textContent='sr';
+  }
+  const rs=document.getElementById('resultRS').textContent;
+  const sr=document.getElementById('resultSR').textContent;
+  if(rs!=='—' && sr!=='—'){
+    document.getElementById('orderLog').innerHTML='<strong>Conclusión:</strong> r → s y s → r llegan a estados distintos. En D₃, el orden importa.';
+  }
+}
+function resetOrder(){
+  document.getElementById('resultRS').textContent='—';
+  document.getElementById('resultSR').textContent='—';
+  document.getElementById('orderLog').textContent='Ejecutá ambos caminos para comparar los resultados.';
+}
+
+let invRot=0, invRef=1, invNoise=0;
+function renderInv(){
+  const g=document.getElementById('triGroup');
+  g.setAttribute('transform',`translate(210 150) rotate(${invRot}) scale(${invRef},1)`);
+  const score=Math.max(82,100-invNoise*6);
+  document.getElementById('invScore').textContent=score+'%';
+  document.getElementById('invLog').textContent=`Transformación actual: rotación ${invRot}°, reflexión ${invRef===-1?'sí':'no'}, ruido ${invNoise}. La clase semántica se conserva.`;
+}
+function rotateInv(){invRot=(invRot+120)%360;renderInv();}
+function reflectInv(){invRef*=-1;renderInv();}
+function noiseInv(){invNoise=Math.min(invNoise+1,3);renderInv();}
+function resetInv(){invRot=0;invRef=1;invNoise=0;renderInv();}
+
+const pipe = [
+  ['Entrada distribuida','Los archivos se dividen en bloques y se ubican en nodos.'],
+  ['Map','Cada nodo transforma registros locales en pares clave-valor.'],
+  ['Partición por hash','La clave decide a qué reductor se enviará cada par.'],
+  ['Shuffle y sort','Los pares se mueven por la red y se agrupan por clave.'],
+  ['Reduce','Cada reductor agrega valores de una clave o grupo.'],
+  ['Salida','El resultado se persiste para consulta, BI o modelos analíticos.']
+];
+let pipeStep=0;
+function renderPipeline(){
+  const el=document.getElementById('pipelineSteps');
+  el.innerHTML=pipe.map((p,i)=>`
+    <div class="step" style="opacity:${i<=pipeStep?1:.42}">
+      <div class="stepNum">${i+1}</div>
+      <div><strong>${p[0]}</strong><br><span class="muted">${p[1]}</span></div>
+    </div>`).join('');
+}
+function nextPipeline(){pipeStep=(pipeStep+1)%pipe.length;renderPipeline();}
+
+const spark = [
+  ['RDD base','Datos iniciales distribuidos en particiones.'],
+  ['map()','Transformación elemento a elemento.'],
+  ['filter()','Se conservan solo registros que cumplen una condición.'],
+  ['reduceByKey()','Agregación distribuida por clave.'],
+  ['cache()','Persistencia en memoria para reutilización.'],
+  ['action: collect()','Se materializa el resultado final.']
+];
+let sparkIdx=0;
+function renderSpark(){
+  document.getElementById('sparkLineage').innerHTML=spark.map((s,i)=>`
+    <div class="step" style="opacity:${i<=sparkIdx?1:.38}">
+      <div class="stepNum">${i+1}</div>
+      <div><strong>${s[0]}</strong><br><span class="muted">${s[1]}</span></div>
+    </div>`).join('');
+  document.getElementById('sparkStatus').textContent=spark[sparkIdx][0];
+  document.getElementById('sparkDesc').textContent=spark[sparkIdx][1];
+  document.getElementById('sparkBar').style.width=((sparkIdx+1)/spark.length*100)+'%';
+}
+function sparkStep(){sparkIdx=(sparkIdx+1)%spark.length;renderSpark();}
+function sparkFail(){
+  document.getElementById('sparkLog').innerHTML='<strong>Falla simulada:</strong> una partición se perdió, pero Spark puede recomputarla desde el linaje de transformaciones.';
+}
+function quizAnswer(ok){
+  const fb=document.getElementById('quizFeedback');
+  fb.textContent=ok?'Correcto: la asociatividad permite calcular reducciones parciales y combinar resultados sin alterar la agregación final.':'No exactamente. La clave es que la operación pueda dividirse en reducciones parciales y recomponerse correctamente.';
+  fb.style.color=ok?'var(--good)':'var(--bad)';
+}
+
+resetD3(); shuffleRecords(); newMRData(); renderInv(); renderPipeline(); renderSpark();
 </script>
 </body>
 </html>
