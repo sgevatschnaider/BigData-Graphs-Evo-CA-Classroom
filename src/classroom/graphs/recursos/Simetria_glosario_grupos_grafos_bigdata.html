@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Glosario interactivo sobre simetría, grupo D3, grafos, MapReduce, Spark, RDD, linaje y Big Data." />
+<title>Glosario · Simetría, Grafos y Big Data</title>
+<style>
+:root{
+  --bg:#f4f7fb; --bg2:#fbfdff; --card:#ffffff; --card2:#f9fbff; --text:#142033; --muted:#64748b;
+  --line:#d9e4f2; --accent:#2563eb; --accent2:#7c3aed; --accent3:#06b6d4;
+  --good:#059669; --warn:#d97706; --bad:#dc2626;
+  --shadow:0 24px 70px rgba(37,99,235,.15); --soft:0 10px 30px rgba(15,23,42,.10);
+  --radius:28px; --ring:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+[data-theme="dark"]{
+  --bg:#07111f; --bg2:#0b1628; --card:#111c31; --card2:#0d1729; --text:#eef6ff; --muted:#afbdd2;
+  --line:#263956; --accent:#60a5fa; --accent2:#a78bfa; --accent3:#22d3ee;
+  --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  --shadow:0 24px 70px rgba(0,0,0,.38); --soft:0 10px 30px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  line-height:1.68;
+  background:
+    radial-gradient(circle at 5% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 30%),
+    radial-gradient(circle at 92% 4%,color-mix(in srgb,var(--accent2) 18%,transparent),transparent 34%),
+    radial-gradient(circle at 65% 58%,color-mix(in srgb,var(--accent3) 10%,transparent),transparent 38%),
+    linear-gradient(135deg,var(--bg),var(--bg2));
+}
+a{color:var(--accent);font-weight:900;text-decoration:none}
+a:hover{text-decoration:underline}
+.progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));z-index:120;width:0%}
+header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(18px)}
+.nav{max-width:1320px;margin:auto;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.brand{display:flex;gap:11px;align-items:center;font-weight:950;letter-spacing:-.03em}
+.brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 17%,transparent)}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 14px;border-radius:16px;cursor:pointer;font-weight:900;box-shadow:var(--soft);transition:.18s transform,.18s box-shadow,.18s background;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 13px 32px rgba(15,23,42,.14);text-decoration:none}
+button:focus-visible,.btn:focus-visible,input:focus-visible{outline:none;box-shadow:var(--ring)}
+button.primary,.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none}
+main{max-width:1320px;margin:auto;padding:28px 20px 72px}
+.card{background:color-mix(in srgb,var(--card) 96%,transparent);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin:18px 0}
+.hero{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:22px;align-items:stretch;margin:18px 0 26px}
+h1{font-size:clamp(38px,5.5vw,76px);line-height:1.0;margin:12px 0 16px;letter-spacing:-.065em}
+h2{font-size:clamp(27px,3.2vw,43px);line-height:1.08;margin:18px 0 16px;letter-spacing:-.045em}
+h3{font-size:22px;margin:10px 0 10px;letter-spacing:-.025em}
+p{margin:10px 0}
+.lead{font-size:18.5px;color:var(--muted);max-width:90ch}
+.muted{color:var(--muted)}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--accent) 6%);font-size:13px;font-weight:920;color:var(--muted)}
+.tag.hot{color:white;background:linear-gradient(135deg,var(--accent),var(--accent2));border:0}
+.notice{border-left:5px solid var(--accent);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--accent) 8%,var(--card));margin:14px 0}
+.notice.good{border-left-color:var(--good);background:color-mix(in srgb,var(--good) 9%,var(--card))}
+.notice.warn{border-left-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--card))}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}
+.mini strong{display:block;font-size:22px;letter-spacing:-.02em;color:var(--accent)}
+.mini small{display:block;color:var(--muted)}
+.bigNumber{font-size:46px;font-weight:950;letter-spacing:-.06em;color:var(--accent);line-height:1}
+.toolbar{display:grid;gap:12px;margin-top:14px}
+input{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:760;box-shadow:var(--soft)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{box-shadow:none;border-radius:999px;padding:8px 12px;color:var(--muted);background:var(--card)}
+.chip span{font-size:12px;opacity:.85}
+.chip.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none}
+.term-list{display:grid;gap:13px;margin-top:18px}
+.term-card{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);overflow:hidden}
+.term-card.hide{display:none}
+.term-head{width:100%;border:none;border-radius:0;box-shadow:none;background:transparent;display:grid;grid-template-columns:58px 1fr 36px;align-items:center;text-align:left;padding:17px 18px;gap:12px}
+.term-head:hover{transform:none;box-shadow:none;background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.term-num{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:950}
+.term-title-wrap{display:flex;flex-direction:column;gap:2px}
+.term-title{font-size:20px;font-weight:950;letter-spacing:-.02em}
+.term-cat{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.11em}
+.chev{font-size:24px;color:var(--accent);transition:transform .25s ease}
+.term-body{max-height:0;overflow:hidden;transition:max-height .34s ease, padding .34s ease;border-top:1px solid transparent;padding:0 18px}
+.term-card.open .term-body{max-height:680px;border-top-color:var(--line);padding:16px 18px 18px}
+.term-card.open .chev{transform:rotate(180deg)}
+.empty{display:none;text-align:center;padding:28px;color:var(--muted);font-weight:900}
+.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}
+.toTop{position:fixed;right:18px;bottom:18px;z-index:70}
+@media(max-width:1080px){.hero,.grid2{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}}
+@media(max-width:640px){main{padding:18px 12px 80px}.card{padding:18px;border-radius:23px}.controls button,.controls .btn{width:100%}h1{font-size:42px}.term-head{grid-template-columns:48px 1fr 28px;padding:14px}.term-title{font-size:18px}}
+@media print{header,.controls,button,.btn,.toolbar,.toTop,.progress{display:none!important}body{background:white}.card,.mini,.term-card{box-shadow:none}main{max-width:100%;padding:0}.hero,.grid2{grid-template-columns:1fr}.term-card{break-inside:avoid}.term-body{max-height:none!important;padding:12px 18px!important;border-top:1px solid #ddd!important}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Glosario · Simetría, grafos y Big Data</span></div>
+    <div class="controls">
+      <button id="themeBtn" type="button">🌙 Tema oscuro</button>
+      <button id="expandBtn" type="button">▾ Mostrar todo</button>
+      <button id="collapseBtn" type="button">▴ Contraer</button>
+      <button onclick="window.print()" type="button">🖨️ Imprimir</button>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero" id="inicio">
+  <div class="card">
+    <span class="tag hot">Glosario desarrollado</span><span class="tag">Simetría</span><span class="tag">D₃</span><span class="tag">Grafos</span><span class="tag">MapReduce</span><span class="tag">Spark</span>
+    <h1>Glosario integrado</h1>
+    <p class="lead">Términos fundamentales para estudiar el recorrido de simetría, grupos, grafos y Big Data: desde el triángulo equilátero y el grupo D₃ hasta sharding, MapReduce, Spark, RDD, linaje, invariancias y arquitectura distribuida.</p>
+    <div class="notice good"><strong>Idea guía:</strong> la simetría permite pensar transformaciones que conservan estructura; los grupos formalizan operaciones; los grafos representan estados y transiciones; y Big Data lleva esas ideas a particiones, flujos distribuidos y tolerancia a fallos.</div>
+  </div>
+  <div class="card">
+    <h3>Panel de estudio</h3>
+    <div class="grid2">
+      <div class="mini"><strong class="bigNumber">69</strong><small>conceptos desarrollados</small></div>
+      <div class="mini"><strong class="bigNumber">D₃</strong><small>eje algebraico del recorrido</small></div>
+      <div class="mini"><strong class="bigNumber">⟶</strong><small>estados, operaciones y transiciones</small></div>
+      <div class="mini"><strong class="bigNumber">RDD</strong><small>linaje y tolerancia a fallos</small></div>
+    </div>
+    <div class="notice warn"><strong>Uso recomendado:</strong> comenzá por Fundamentos y Teoría de grupos; luego Grafos y Lagrange; finalmente MapReduce, Spark, IA y Arquitectura Big Data.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Explorar conceptos</h2>
+  <div class="toolbar">
+    <input id="search" placeholder="Buscar término, categoría o palabra clave: D₃, Cayley, sharding, shuffle, RDD, linaje..." />
+    <div class="chips" id="chips"><button class="chip active" data-filter="Todo" type="button">Todo <span>69</span></button><button class="chip" data-filter="Arquitectura Big Data" type="button">Arquitectura Big Data <span>10</span></button><button class="chip" data-filter="Docencia" type="button">Docencia <span>5</span></button><button class="chip" data-filter="Fundamentos" type="button">Fundamentos <span>5</span></button><button class="chip" data-filter="Grafos" type="button">Grafos <span>9</span></button><button class="chip" data-filter="IA e invariancias" type="button">IA e invariancias <span>4</span></button><button class="chip" data-filter="Lagrange y particiones" type="button">Lagrange y particiones <span>6</span></button><button class="chip" data-filter="MapReduce" type="button">MapReduce <span>9</span></button><button class="chip" data-filter="Spark y RDD" type="button">Spark y RDD <span>8</span></button><button class="chip" data-filter="Teoría de grupos" type="button">Teoría de grupos <span>13</span></button></div>
+  </div>
+  <div class="term-list" id="termList">
+    
+    <article class="term-card" data-category="Fundamentos" data-search="simetría fundamentos transformación que conserva la estructura esencial de un objeto. en el caso del triángulo equilátero, una simetría puede cambiar la posición de los vértices, pero deja la figura indistinguible de sí misma. didácticamente, la simetría permite pasar de una intuición geométrica a una noción formal de operación: rotar o reflejar una figura sin destruir su identidad. en ciencia de datos y big data, la idea se proyecta hacia transformaciones que cambian la representación de los datos, pero conservan propiedades relevantes para el análisis.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">01</span>
+        <span class="term-title-wrap"><span class="term-title">Simetría</span><span class="term-cat">Fundamentos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Transformación que conserva la estructura esencial de un objeto. En el caso del triángulo equilátero, una simetría puede cambiar la posición de los vértices, pero deja la figura indistinguible de sí misma. Didácticamente, la simetría permite pasar de una intuición geométrica a una noción formal de operación: rotar o reflejar una figura sin destruir su identidad. En ciencia de datos y Big Data, la idea se proyecta hacia transformaciones que cambian la representación de los datos, pero conservan propiedades relevantes para el análisis.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Fundamentos" data-search="triángulo equilátero fundamentos figura geométrica con tres lados iguales y tres ángulos iguales. su importancia en el material está en que posee seis simetrías: tres rotaciones y tres reflexiones. por su regularidad, funciona como un ejemplo visual y accesible para introducir grupos, composición de operaciones, grafos de cayley, generadores y no conmutatividad.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">02</span>
+        <span class="term-title-wrap"><span class="term-title">Triángulo equilátero</span><span class="term-cat">Fundamentos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Figura geométrica con tres lados iguales y tres ángulos iguales. Su importancia en el material está en que posee seis simetrías: tres rotaciones y tres reflexiones. Por su regularidad, funciona como un ejemplo visual y accesible para introducir grupos, composición de operaciones, grafos de Cayley, generadores y no conmutatividad.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Fundamentos" data-search="transformación fundamentos operación que toma un objeto o estado y lo convierte en otro. en geometría puede ser una rotación o una reflexión; en datos puede ser una limpieza, una agregación, una partición o una reducción. el material usa la idea de transformación como puente entre simetría matemática y procesamiento computacional.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">03</span>
+        <span class="term-title-wrap"><span class="term-title">Transformación</span><span class="term-cat">Fundamentos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Operación que toma un objeto o estado y lo convierte en otro. En geometría puede ser una rotación o una reflexión; en datos puede ser una limpieza, una agregación, una partición o una reducción. El material usa la idea de transformación como puente entre simetría matemática y procesamiento computacional.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Fundamentos" data-search="conservación de estructura fundamentos principio según el cual una transformación puede modificar una representación sin destruir aquello que define al objeto o sistema. en simetría, el triángulo sigue siendo el mismo después de una rotación o reflexión. en big data, una transformación correcta debe preservar la coherencia de la información necesaria para producir un resultado confiable.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">04</span>
+        <span class="term-title-wrap"><span class="term-title">Conservación de estructura</span><span class="term-cat">Fundamentos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Principio según el cual una transformación puede modificar una representación sin destruir aquello que define al objeto o sistema. En simetría, el triángulo sigue siendo el mismo después de una rotación o reflexión. En Big Data, una transformación correcta debe preservar la coherencia de la información necesaria para producir un resultado confiable.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Fundamentos" data-search="estado fundamentos configuración posible de un sistema. en el grupo d₃, cada estado puede entenderse como una posición del triángulo después de aplicar una simetría. en grafos, los estados se representan como nodos. en arquitecturas de datos, un estado puede ser una etapa del pipeline, una partición, un rdd o un conjunto intermedio de resultados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">05</span>
+        <span class="term-title-wrap"><span class="term-title">Estado</span><span class="term-cat">Fundamentos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Configuración posible de un sistema. En el grupo D₃, cada estado puede entenderse como una posición del triángulo después de aplicar una simetría. En grafos, los estados se representan como nodos. En arquitecturas de datos, un estado puede ser una etapa del pipeline, una partición, un RDD o un conjunto intermedio de resultados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="composición teoría de grupos operación que consiste en aplicar una transformación después de otra. en el grupo d₃, componer una rotación con una reflexión produce otra simetría del triángulo. la composición es central porque permite construir recorridos, analizar secuencias de operaciones y mostrar que el orden puede modificar el resultado.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">06</span>
+        <span class="term-title-wrap"><span class="term-title">Composición</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Operación que consiste en aplicar una transformación después de otra. En el grupo D₃, componer una rotación con una reflexión produce otra simetría del triángulo. La composición es central porque permite construir recorridos, analizar secuencias de operaciones y mostrar que el orden puede modificar el resultado.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="grupo teoría de grupos estructura algebraica formada por un conjunto y una operación que cumple cerradura, asociatividad, existencia de identidad y existencia de inversos. el material presenta los grupos como una forma de organizar operaciones y estados. el grupo d₃ muestra cómo una figura geométrica puede convertirse en una estructura algebraica.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">07</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Estructura algebraica formada por un conjunto y una operación que cumple cerradura, asociatividad, existencia de identidad y existencia de inversos. El material presenta los grupos como una forma de organizar operaciones y estados. El grupo D₃ muestra cómo una figura geométrica puede convertirse en una estructura algebraica.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="grupo diedral d₃ teoría de grupos grupo de simetrías del triángulo equilátero. está formado por seis elementos: la identidad, dos rotaciones no triviales y tres reflexiones. es un ejemplo pequeño, visual y potente de grupo no abeliano. permite estudiar composición, identidad, inversos, generadores, grafos de cayley y no conmutatividad.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">08</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo diedral D₃</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Grupo de simetrías del triángulo equilátero. Está formado por seis elementos: la identidad, dos rotaciones no triviales y tres reflexiones. Es un ejemplo pequeño, visual y potente de grupo no abeliano. Permite estudiar composición, identidad, inversos, generadores, grafos de Cayley y no conmutatividad.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="identidad teoría de grupos elemento del grupo que no modifica ningún estado cuando se compone con él. en el triángulo equivale a no mover la figura. en computación, la identidad ayuda a pensar operaciones neutras, transformaciones que no alteran datos y puntos de referencia dentro de un pipeline.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">09</span>
+        <span class="term-title-wrap"><span class="term-title">Identidad</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Elemento del grupo que no modifica ningún estado cuando se compone con él. En el triángulo equivale a no mover la figura. En computación, la identidad ayuda a pensar operaciones neutras, transformaciones que no alteran datos y puntos de referencia dentro de un pipeline.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="inverso teoría de grupos operación que deshace el efecto de otra. si una rotación mueve el triángulo, su inversa lo devuelve a la posición inicial. en el caso de una reflexión, aplicar la misma reflexión dos veces devuelve la identidad. el concepto permite discutir reversibilidad, recuperación de estados y reconstrucción de procesos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">10</span>
+        <span class="term-title-wrap"><span class="term-title">Inverso</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Operación que deshace el efecto de otra. Si una rotación mueve el triángulo, su inversa lo devuelve a la posición inicial. En el caso de una reflexión, aplicar la misma reflexión dos veces devuelve la identidad. El concepto permite discutir reversibilidad, recuperación de estados y reconstrucción de procesos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="cerradura teoría de grupos propiedad según la cual al componer dos elementos del grupo se obtiene otro elemento del mismo grupo. en d₃, la composición de dos simetrías del triángulo siempre es otra simetría del triángulo. esta propiedad permite que el sistema sea autónomo y formalmente consistente.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">11</span>
+        <span class="term-title-wrap"><span class="term-title">Cerradura</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Propiedad según la cual al componer dos elementos del grupo se obtiene otro elemento del mismo grupo. En D₃, la composición de dos simetrías del triángulo siempre es otra simetría del triángulo. Esta propiedad permite que el sistema sea autónomo y formalmente consistente.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="asociatividad teoría de grupos propiedad según la cual la forma de agrupar operaciones no modifica el resultado final: (a·b)·c = a·(b·c). es una propiedad de los grupos y también una idea fundamental para la computación distribuida, porque permite dividir cálculos en partes, resolverlos en paralelo y recomponerlos sin alterar el resultado.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">12</span>
+        <span class="term-title-wrap"><span class="term-title">Asociatividad</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Propiedad según la cual la forma de agrupar operaciones no modifica el resultado final: (a·b)·c = a·(b·c). Es una propiedad de los grupos y también una idea fundamental para la computación distribuida, porque permite dividir cálculos en partes, resolverlos en paralelo y recomponerlos sin alterar el resultado.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="no conmutatividad teoría de grupos propiedad según la cual cambiar el orden de las operaciones puede cambiar el resultado. en d₃, rotar y luego reflejar puede no producir el mismo estado que reflejar y luego rotar. esta idea es clave para comprender recorridos en grafos, secuencias de transformaciones y pipelines donde el orden de ejecución importa.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">13</span>
+        <span class="term-title-wrap"><span class="term-title">No conmutatividad</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Propiedad según la cual cambiar el orden de las operaciones puede cambiar el resultado. En D₃, rotar y luego reflejar puede no producir el mismo estado que reflejar y luego rotar. Esta idea es clave para comprender recorridos en grafos, secuencias de transformaciones y pipelines donde el orden de ejecución importa.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="rotación teoría de grupos simetría que gira el triángulo alrededor de su centro. en el triángulo equilátero hay rotaciones de 0°, 120° y 240° que conservan la figura. las rotaciones permiten introducir ciclos, potencias de un elemento y composición repetida.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">14</span>
+        <span class="term-title-wrap"><span class="term-title">Rotación</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Simetría que gira el triángulo alrededor de su centro. En el triángulo equilátero hay rotaciones de 0°, 120° y 240° que conservan la figura. Las rotaciones permiten introducir ciclos, potencias de un elemento y composición repetida.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="reflexión teoría de grupos simetría que invierte el triángulo respecto de un eje. en el triángulo equilátero existen tres ejes de reflexión. cada reflexión es su propio inverso: reflejar dos veces respecto del mismo eje devuelve el estado original. las reflexiones son esenciales para mostrar la no conmutatividad de d₃.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">15</span>
+        <span class="term-title-wrap"><span class="term-title">Reflexión</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Simetría que invierte el triángulo respecto de un eje. En el triángulo equilátero existen tres ejes de reflexión. Cada reflexión es su propio inverso: reflejar dos veces respecto del mismo eje devuelve el estado original. Las reflexiones son esenciales para mostrar la no conmutatividad de D₃.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="generador teoría de grupos elemento o conjunto de elementos a partir de los cuales se puede obtener todo el grupo mediante composición. en d₃, una rotación y una reflexión pueden generar todas las simetrías del triángulo. en un grafo de cayley, los generadores determinan las aristas y, por tanto, los recorridos posibles.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">16</span>
+        <span class="term-title-wrap"><span class="term-title">Generador</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Elemento o conjunto de elementos a partir de los cuales se puede obtener todo el grupo mediante composición. En D₃, una rotación y una reflexión pueden generar todas las simetrías del triángulo. En un grafo de Cayley, los generadores determinan las aristas y, por tanto, los recorridos posibles.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="orden de un grupo teoría de grupos cantidad de elementos que tiene un grupo. el grupo d₃ tiene orden 6 porque contiene seis simetrías. el orden permite discutir subgrupos, divisibilidad, teorema de lagrange y estructura global del sistema algebraico.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">17</span>
+        <span class="term-title-wrap"><span class="term-title">Orden de un grupo</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Cantidad de elementos que tiene un grupo. El grupo D₃ tiene orden 6 porque contiene seis simetrías. El orden permite discutir subgrupos, divisibilidad, teorema de Lagrange y estructura global del sistema algebraico.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Teoría de grupos" data-search="orden de un elemento teoría de grupos cantidad mínima de veces que debe componerse un elemento consigo mismo para obtener la identidad. una rotación de 120° tiene orden 3, porque aplicada tres veces vuelve al estado inicial. una reflexión tiene orden 2, porque aplicada dos veces devuelve la identidad.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">18</span>
+        <span class="term-title-wrap"><span class="term-title">Orden de un elemento</span><span class="term-cat">Teoría de grupos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Cantidad mínima de veces que debe componerse un elemento consigo mismo para obtener la identidad. Una rotación de 120° tiene orden 3, porque aplicada tres veces vuelve al estado inicial. Una reflexión tiene orden 2, porque aplicada dos veces devuelve la identidad.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="subgrupo lagrange y particiones subconjunto de un grupo que también forma un grupo con la misma operación. en d₃, ciertos conjuntos de simetrías forman subgrupos. los subgrupos permiten estudiar partes internas de una estructura y son la base para comprender clases laterales y particiones.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">19</span>
+        <span class="term-title-wrap"><span class="term-title">Subgrupo</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Subconjunto de un grupo que también forma un grupo con la misma operación. En D₃, ciertos conjuntos de simetrías forman subgrupos. Los subgrupos permiten estudiar partes internas de una estructura y son la base para comprender clases laterales y particiones.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="teorema de lagrange lagrange y particiones resultado que afirma que, en un grupo finito, el orden de cualquier subgrupo divide al orden del grupo. en el material se usa para mostrar que las estructuras algebraicas pueden dividirse en bloques regulares. esta idea luego se conecta con particiones de datos y sharding.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">20</span>
+        <span class="term-title-wrap"><span class="term-title">Teorema de Lagrange</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Resultado que afirma que, en un grupo finito, el orden de cualquier subgrupo divide al orden del grupo. En el material se usa para mostrar que las estructuras algebraicas pueden dividirse en bloques regulares. Esta idea luego se conecta con particiones de datos y sharding.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="clase lateral lagrange y particiones bloque de elementos que se obtiene al combinar un elemento fijo del grupo con todos los elementos de un subgrupo. las clases laterales particionan el grupo sin solapamientos. la analogía computacional aparece en la distribución de registros en particiones o shards mediante una regla estable.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">21</span>
+        <span class="term-title-wrap"><span class="term-title">Clase lateral</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Bloque de elementos que se obtiene al combinar un elemento fijo del grupo con todos los elementos de un subgrupo. Las clases laterales particionan el grupo sin solapamientos. La analogía computacional aparece en la distribución de registros en particiones o shards mediante una regla estable.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="partición lagrange y particiones división de un conjunto en subconjuntos disjuntos cuya unión recupera el conjunto completo. en álgebra aparece en clases laterales; en grafos, en comunidades o componentes; en big data, en la distribución de datos entre nodos. una buena partición permite organizar, paralelizar y recomponer procesos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">22</span>
+        <span class="term-title-wrap"><span class="term-title">Partición</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">División de un conjunto en subconjuntos disjuntos cuya unión recupera el conjunto completo. En álgebra aparece en clases laterales; en grafos, en comunidades o componentes; en Big Data, en la distribución de datos entre nodos. Una buena partición permite organizar, paralelizar y recomponer procesos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="sharding lagrange y particiones técnica de distribución de datos en fragmentos o shards. cada registro se asigna a una partición según una regla, muchas veces basada en hash. la conexión con lagrange y clases laterales es conceptual: ambos casos organizan elementos en bloques coherentes y no superpuestos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">23</span>
+        <span class="term-title-wrap"><span class="term-title">Sharding</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Técnica de distribución de datos en fragmentos o shards. Cada registro se asigna a una partición según una regla, muchas veces basada en hash. La conexión con Lagrange y clases laterales es conceptual: ambos casos organizan elementos en bloques coherentes y no superpuestos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Lagrange y particiones" data-search="hash lagrange y particiones función que transforma una clave en un valor usado para asignar datos a particiones. en arquitecturas distribuidas, el hash ayuda a decidir dónde se almacena o procesa cada registro. su valor conceptual en el material está en mostrar cómo una regla estable puede convertir un conjunto de datos en bloques procesables.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">24</span>
+        <span class="term-title-wrap"><span class="term-title">Hash</span><span class="term-cat">Lagrange y particiones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Función que transforma una clave en un valor usado para asignar datos a particiones. En arquitecturas distribuidas, el hash ayuda a decidir dónde se almacena o procesa cada registro. Su valor conceptual en el material está en mostrar cómo una regla estable puede convertir un conjunto de datos en bloques procesables.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="grafo grafos estructura formada por nodos y aristas. en el material, los grafos permiten representar estados y transiciones. un grupo puede visualizarse como un grafo de cayley, y un pipeline de procesamiento puede interpretarse como un grafo de dependencias o ejecución.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">25</span>
+        <span class="term-title-wrap"><span class="term-title">Grafo</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Estructura formada por nodos y aristas. En el material, los grafos permiten representar estados y transiciones. Un grupo puede visualizarse como un grafo de Cayley, y un pipeline de procesamiento puede interpretarse como un grafo de dependencias o ejecución.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="nodo grafos unidad básica de un grafo. puede representar un estado algebraico, una etapa del procesamiento, un dato, una partición o una tarea. en un grafo de cayley de d₃, cada nodo representa una simetría del triángulo.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">26</span>
+        <span class="term-title-wrap"><span class="term-title">Nodo</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Unidad básica de un grafo. Puede representar un estado algebraico, una etapa del procesamiento, un dato, una partición o una tarea. En un grafo de Cayley de D₃, cada nodo representa una simetría del triángulo.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="arista grafos conexión entre nodos. en un grafo de cayley, una arista representa la aplicación de un generador. en grafos computacionales, puede representar dependencia, flujo de datos o transición entre etapas de procesamiento.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">27</span>
+        <span class="term-title-wrap"><span class="term-title">Arista</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Conexión entre nodos. En un grafo de Cayley, una arista representa la aplicación de un generador. En grafos computacionales, puede representar dependencia, flujo de datos o transición entre etapas de procesamiento.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="grafo de cayley grafos representación gráfica de un grupo. cada nodo es un elemento del grupo y cada arista indica el resultado de aplicar un generador. permite visualizar composición, recorridos, ciclos, estados alcanzables y estructura algebraica de manera intuitiva.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">28</span>
+        <span class="term-title-wrap"><span class="term-title">Grafo de Cayley</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Representación gráfica de un grupo. Cada nodo es un elemento del grupo y cada arista indica el resultado de aplicar un generador. Permite visualizar composición, recorridos, ciclos, estados alcanzables y estructura algebraica de manera intuitiva.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="recorrido grafos secuencia de pasos a través de nodos y aristas. en grafos de cayley, un recorrido equivale a aplicar sucesivamente operaciones del grupo. en big data, puede asociarse al paso de los datos por un pipeline de transformación.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">29</span>
+        <span class="term-title-wrap"><span class="term-title">Recorrido</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Secuencia de pasos a través de nodos y aristas. En grafos de Cayley, un recorrido equivale a aplicar sucesivamente operaciones del grupo. En Big Data, puede asociarse al paso de los datos por un pipeline de transformación.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="traversal grafos recorrido sistemático de un grafo siguiendo una regla. puede interpretarse como exploración de estados, búsqueda de caminos o ejecución ordenada de operaciones. en el material se usa para mostrar que el orden de las transiciones puede cambiar el resultado, especialmente en estructuras no conmutativas.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">30</span>
+        <span class="term-title-wrap"><span class="term-title">Traversal</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Recorrido sistemático de un grafo siguiendo una regla. Puede interpretarse como exploración de estados, búsqueda de caminos o ejecución ordenada de operaciones. En el material se usa para mostrar que el orden de las transiciones puede cambiar el resultado, especialmente en estructuras no conmutativas.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="camino grafos secuencia de aristas que conecta nodos. en el contexto de d₃, un camino representa una composición de simetrías. en computación, un camino puede representar una ruta de ejecución o una cadena de transformaciones sobre datos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">31</span>
+        <span class="term-title-wrap"><span class="term-title">Camino</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Secuencia de aristas que conecta nodos. En el contexto de D₃, un camino representa una composición de simetrías. En computación, un camino puede representar una ruta de ejecución o una cadena de transformaciones sobre datos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="ciclo grafos camino que regresa al nodo de origen. en grupos, los ciclos aparecen al aplicar repetidamente una operación hasta volver a la identidad o al estado inicial. en grafos computacionales, los ciclos ayudan a pensar procesos iterativos y dependencias recurrentes.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">32</span>
+        <span class="term-title-wrap"><span class="term-title">Ciclo</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Camino que regresa al nodo de origen. En grupos, los ciclos aparecen al aplicar repetidamente una operación hasta volver a la identidad o al estado inicial. En grafos computacionales, los ciclos ayudan a pensar procesos iterativos y dependencias recurrentes.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Grafos" data-search="estado alcanzable grafos estado al que se puede llegar desde otro mediante una secuencia de operaciones. en un grafo de cayley conectado, todos los elementos del grupo son alcanzables mediante generadores. esta idea permite estudiar accesibilidad y cobertura del espacio de estados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">33</span>
+        <span class="term-title-wrap"><span class="term-title">Estado alcanzable</span><span class="term-cat">Grafos</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Estado al que se puede llegar desde otro mediante una secuencia de operaciones. En un grafo de Cayley conectado, todos los elementos del grupo son alcanzables mediante generadores. Esta idea permite estudiar accesibilidad y cobertura del espacio de estados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="mapreduce mapreduce modelo de procesamiento distribuido basado en dividir datos, aplicar una transformación map, reorganizar por clave mediante shuffle y reducir valores asociados. su importancia didáctica está en que permite conectar asociatividad, partición, paralelización, claves, hash y agregación.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">34</span>
+        <span class="term-title-wrap"><span class="term-title">MapReduce</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Modelo de procesamiento distribuido basado en dividir datos, aplicar una transformación map, reorganizar por clave mediante shuffle y reducir valores asociados. Su importancia didáctica está en que permite conectar asociatividad, partición, paralelización, claves, hash y agregación.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="map mapreduce etapa que transforma registros de entrada en pares clave-valor. su función es preparar los datos para ser agrupados y procesados posteriormente. es una operación local, porque puede aplicarse a fragmentos independientes de datos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">35</span>
+        <span class="term-title-wrap"><span class="term-title">Map</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Etapa que transforma registros de entrada en pares clave-valor. Su función es preparar los datos para ser agrupados y procesados posteriormente. Es una operación local, porque puede aplicarse a fragmentos independientes de datos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="clave-valor mapreduce formato de representación donde cada dato procesado se expresa como una clave y un valor asociado. las claves permiten agrupar información relacionada; los valores son los datos que luego serán reducidos o agregados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">36</span>
+        <span class="term-title-wrap"><span class="term-title">Clave-valor</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Formato de representación donde cada dato procesado se expresa como una clave y un valor asociado. Las claves permiten agrupar información relacionada; los valores son los datos que luego serán reducidos o agregados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="shuffle mapreduce fase de redistribución de datos entre nodos para reunir valores con la misma clave. es una de las etapas más importantes y costosas de mapreduce, porque implica mover información a través de la red. permite que cada reducer reciba los datos que necesita para producir una salida coherente.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">37</span>
+        <span class="term-title-wrap"><span class="term-title">Shuffle</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Fase de redistribución de datos entre nodos para reunir valores con la misma clave. Es una de las etapas más importantes y costosas de MapReduce, porque implica mover información a través de la red. Permite que cada reducer reciba los datos que necesita para producir una salida coherente.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="reduce mapreduce etapa que combina o agrega los valores asociados a una misma clave. puede calcular sumas, conteos, máximos, promedios u otras agregaciones. su corrección suele depender de propiedades como asociatividad y, en algunos casos, conmutatividad.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">38</span>
+        <span class="term-title-wrap"><span class="term-title">Reduce</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Etapa que combina o agrega los valores asociados a una misma clave. Puede calcular sumas, conteos, máximos, promedios u otras agregaciones. Su corrección suele depender de propiedades como asociatividad y, en algunos casos, conmutatividad.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="agregación mapreduce proceso de combinar múltiples valores en un resultado resumido. en sistemas distribuidos, la agregación puede hacerse en partes y luego recomponerse. la asociatividad permite que los resultados parciales se combinen correctamente.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">39</span>
+        <span class="term-title-wrap"><span class="term-title">Agregación</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Proceso de combinar múltiples valores en un resultado resumido. En sistemas distribuidos, la agregación puede hacerse en partes y luego recomponerse. La asociatividad permite que los resultados parciales se combinen correctamente.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="paralelización mapreduce estrategia que divide un trabajo en tareas independientes o parcialmente independientes para ejecutarlas al mismo tiempo en distintos nodos. la paralelización es posible cuando el problema puede separarse en partes y luego recomponerse de manera consistente.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">40</span>
+        <span class="term-title-wrap"><span class="term-title">Paralelización</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Estrategia que divide un trabajo en tareas independientes o parcialmente independientes para ejecutarlas al mismo tiempo en distintos nodos. La paralelización es posible cuando el problema puede separarse en partes y luego recomponerse de manera consistente.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="resultado parcial mapreduce salida intermedia producida por una parte del sistema. en una reducción distribuida, cada nodo puede calcular un resultado parcial y luego combinarlo con otros. la validez de esta estrategia depende de que la operación permita una recomposición coherente.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">41</span>
+        <span class="term-title-wrap"><span class="term-title">Resultado parcial</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Salida intermedia producida por una parte del sistema. En una reducción distribuida, cada nodo puede calcular un resultado parcial y luego combinarlo con otros. La validez de esta estrategia depende de que la operación permita una recomposición coherente.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="hdfs arquitectura big data sistema de archivos distribuido utilizado en ecosistemas hadoop. permite almacenar grandes volúmenes de datos repartidos en múltiples nodos. en el material aparece como parte del contexto de arquitecturas mapreduce, entrada distribuida y procesamiento por bloques.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">42</span>
+        <span class="term-title-wrap"><span class="term-title">HDFS</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Sistema de archivos distribuido utilizado en ecosistemas Hadoop. Permite almacenar grandes volúmenes de datos repartidos en múltiples nodos. En el material aparece como parte del contexto de arquitecturas MapReduce, entrada distribuida y procesamiento por bloques.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="arquitectura distribuida arquitectura big data diseño computacional en el que datos y tareas se reparten entre varios nodos. su objetivo es escalar procesamiento, almacenamiento y tolerancia a fallos. conceptualmente, se relaciona con particiones, grafos de ejecución, flujos de datos y recomposición de resultados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">43</span>
+        <span class="term-title-wrap"><span class="term-title">Arquitectura distribuida</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Diseño computacional en el que datos y tareas se reparten entre varios nodos. Su objetivo es escalar procesamiento, almacenamiento y tolerancia a fallos. Conceptualmente, se relaciona con particiones, grafos de ejecución, flujos de datos y recomposición de resultados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="nodo de cómputo arquitectura big data máquina o instancia que ejecuta una parte del procesamiento distribuido. puede almacenar bloques, ejecutar tareas map, realizar reducciones o mantener particiones en memoria. en una arquitectura distribuida, el trabajo colectivo de los nodos permite procesar datos masivos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">44</span>
+        <span class="term-title-wrap"><span class="term-title">Nodo de cómputo</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Máquina o instancia que ejecuta una parte del procesamiento distribuido. Puede almacenar bloques, ejecutar tareas map, realizar reducciones o mantener particiones en memoria. En una arquitectura distribuida, el trabajo colectivo de los nodos permite procesar datos masivos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="escalabilidad arquitectura big data capacidad de un sistema para crecer en volumen de datos o carga de trabajo sin perder funcionalidad. en big data, la escalabilidad suele lograrse distribuyendo datos y tareas entre múltiples nodos. la partición y la paralelización son mecanismos centrales para lograrla.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">45</span>
+        <span class="term-title-wrap"><span class="term-title">Escalabilidad</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Capacidad de un sistema para crecer en volumen de datos o carga de trabajo sin perder funcionalidad. En Big Data, la escalabilidad suele lograrse distribuyendo datos y tareas entre múltiples nodos. La partición y la paralelización son mecanismos centrales para lograrla.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="tolerancia a fallos arquitectura big data capacidad de un sistema para seguir funcionando o recuperarse cuando una parte falla. en spark, el linaje permite recomputar particiones perdidas. en sistemas distribuidos, la tolerancia a fallos es fundamental porque siempre existe riesgo de pérdida de nodos, datos intermedios o tareas.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">46</span>
+        <span class="term-title-wrap"><span class="term-title">Tolerancia a fallos</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Capacidad de un sistema para seguir funcionando o recuperarse cuando una parte falla. En Spark, el linaje permite recomputar particiones perdidas. En sistemas distribuidos, la tolerancia a fallos es fundamental porque siempre existe riesgo de pérdida de nodos, datos intermedios o tareas.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="spark spark y rdd motor de procesamiento distribuido que permite trabajar con datos en memoria y organizar transformaciones sobre colecciones distribuidas. a diferencia del modelo clásico de mapreduce, spark facilita flujos más flexibles, iterativos e interactivos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">47</span>
+        <span class="term-title-wrap"><span class="term-title">Spark</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Motor de procesamiento distribuido que permite trabajar con datos en memoria y organizar transformaciones sobre colecciones distribuidas. A diferencia del modelo clásico de MapReduce, Spark facilita flujos más flexibles, iterativos e interactivos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="rdd spark y rdd resilient distributed dataset. es una colección distribuida y tolerante a fallos que puede dividirse en particiones y procesarse en paralelo. su importancia está en que conserva un linaje de transformaciones, lo que permite recomputar datos perdidos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">48</span>
+        <span class="term-title-wrap"><span class="term-title">RDD</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Resilient Distributed Dataset. Es una colección distribuida y tolerante a fallos que puede dividirse en particiones y procesarse en paralelo. Su importancia está en que conserva un linaje de transformaciones, lo que permite recomputar datos perdidos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="linaje spark y rdd registro lógico de las transformaciones que dieron origen a un rdd o conjunto de datos. permite reconstruir particiones perdidas sin reiniciar todo el proceso. conceptualmente, el linaje funciona como un grafo de dependencias entre etapas de cálculo.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">49</span>
+        <span class="term-title-wrap"><span class="term-title">Linaje</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Registro lógico de las transformaciones que dieron origen a un RDD o conjunto de datos. Permite reconstruir particiones perdidas sin reiniciar todo el proceso. Conceptualmente, el linaje funciona como un grafo de dependencias entre etapas de cálculo.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="memoria distribuida spark y rdd uso coordinado de la memoria de múltiples nodos para acelerar procesamiento. spark aprovecha la memoria distribuida para evitar escribir constantemente en disco y mejorar tareas iterativas o repetitivas.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">50</span>
+        <span class="term-title-wrap"><span class="term-title">Memoria distribuida</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Uso coordinado de la memoria de múltiples nodos para acelerar procesamiento. Spark aprovecha la memoria distribuida para evitar escribir constantemente en disco y mejorar tareas iterativas o repetitivas.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="transformación en spark spark y rdd operación que produce un nuevo rdd a partir de otro, como map, filter o flatmap. las transformaciones suelen ser perezosas: no se ejecutan inmediatamente, sino que se registran en el linaje hasta que una acción requiere un resultado.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">51</span>
+        <span class="term-title-wrap"><span class="term-title">Transformación en Spark</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Operación que produce un nuevo RDD a partir de otro, como map, filter o flatMap. Las transformaciones suelen ser perezosas: no se ejecutan inmediatamente, sino que se registran en el linaje hasta que una acción requiere un resultado.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="acción en spark spark y rdd operación que dispara la ejecución de las transformaciones pendientes y devuelve un resultado o escribe una salida. ejemplos típicos son count, collect o save. las acciones convierten el grafo lógico de transformaciones en trabajo efectivo.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">52</span>
+        <span class="term-title-wrap"><span class="term-title">Acción en Spark</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Operación que dispara la ejecución de las transformaciones pendientes y devuelve un resultado o escribe una salida. Ejemplos típicos son count, collect o save. Las acciones convierten el grafo lógico de transformaciones en trabajo efectivo.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="evaluación perezosa spark y rdd estrategia según la cual spark no ejecuta inmediatamente cada transformación, sino que construye un plan lógico. la ejecución se activa cuando aparece una acción. esto permite optimizar el procesamiento y evitar cálculos innecesarios.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">53</span>
+        <span class="term-title-wrap"><span class="term-title">Evaluación perezosa</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Estrategia según la cual Spark no ejecuta inmediatamente cada transformación, sino que construye un plan lógico. La ejecución se activa cuando aparece una acción. Esto permite optimizar el procesamiento y evitar cálculos innecesarios.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Spark y RDD" data-search="persistencia spark y rdd decisión de mantener un rdd o conjunto de datos en memoria o en almacenamiento para reutilizarlo. es útil cuando una misma estructura se usa varias veces. mejora el rendimiento, aunque implica administrar recursos limitados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">54</span>
+        <span class="term-title-wrap"><span class="term-title">Persistencia</span><span class="term-cat">Spark y RDD</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Decisión de mantener un RDD o conjunto de datos en memoria o en almacenamiento para reutilizarlo. Es útil cuando una misma estructura se usa varias veces. Mejora el rendimiento, aunque implica administrar recursos limitados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="IA e invariancias" data-search="invariancia ia e invariancias propiedad que se mantiene estable frente a determinadas transformaciones. en ia, un modelo puede buscar invariancia ante desplazamientos, rotaciones o cambios menores. la relación con simetría es directa: se transforma la representación, pero se conserva una propiedad esencial.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">55</span>
+        <span class="term-title-wrap"><span class="term-title">Invariancia</span><span class="term-cat">IA e invariancias</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Propiedad que se mantiene estable frente a determinadas transformaciones. En IA, un modelo puede buscar invariancia ante desplazamientos, rotaciones o cambios menores. La relación con simetría es directa: se transforma la representación, pero se conserva una propiedad esencial.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="IA e invariancias" data-search="representación ia e invariancias forma en que un objeto, dato o estado se codifica para ser procesado. una buena representación conserva información relevante y elimina variaciones irrelevantes. las invariancias ayudan a construir representaciones más robustas.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">56</span>
+        <span class="term-title-wrap"><span class="term-title">Representación</span><span class="term-cat">IA e invariancias</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Forma en que un objeto, dato o estado se codifica para ser procesado. Una buena representación conserva información relevante y elimina variaciones irrelevantes. Las invariancias ayudan a construir representaciones más robustas.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="IA e invariancias" data-search="robustez ia e invariancias capacidad de un modelo o sistema para conservar su desempeño frente a cambios, ruido o transformaciones. en el material se relaciona con la idea de conservar estructura: una transformación no debería destruir aquello que el sistema necesita reconocer o calcular.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">57</span>
+        <span class="term-title-wrap"><span class="term-title">Robustez</span><span class="term-cat">IA e invariancias</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Capacidad de un modelo o sistema para conservar su desempeño frente a cambios, ruido o transformaciones. En el material se relaciona con la idea de conservar estructura: una transformación no debería destruir aquello que el sistema necesita reconocer o calcular.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="IA e invariancias" data-search="equivalencia ia e invariancias relación entre estados o representaciones que pueden considerarse iguales para un propósito determinado. dos imágenes rotadas pueden ser equivalentes para una tarea de clasificación. dos particiones pueden ser equivalentes si preservan la información necesaria para la agregación final.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">58</span>
+        <span class="term-title-wrap"><span class="term-title">Equivalencia</span><span class="term-cat">IA e invariancias</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Relación entre estados o representaciones que pueden considerarse iguales para un propósito determinado. Dos imágenes rotadas pueden ser equivalentes para una tarea de clasificación. Dos particiones pueden ser equivalentes si preservan la información necesaria para la agregación final.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="pipeline arquitectura big data secuencia organizada de pasos de procesamiento. un pipeline puede incluir limpieza, mapeo, partición, shuffle, reducción, persistencia y salida. la idea se conecta con composición de operaciones: el resultado depende tanto de las operaciones como del orden en que se aplican.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">59</span>
+        <span class="term-title-wrap"><span class="term-title">Pipeline</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Secuencia organizada de pasos de procesamiento. Un pipeline puede incluir limpieza, mapeo, partición, shuffle, reducción, persistencia y salida. La idea se conecta con composición de operaciones: el resultado depende tanto de las operaciones como del orden en que se aplican.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="dependencia arquitectura big data relación por la cual una etapa necesita resultados de una etapa anterior. en grafos de ejecución, las dependencias determinan qué tareas pueden paralelizarse y cuáles deben esperar. en spark, el linaje registra estas dependencias.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">60</span>
+        <span class="term-title-wrap"><span class="term-title">Dependencia</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Relación por la cual una etapa necesita resultados de una etapa anterior. En grafos de ejecución, las dependencias determinan qué tareas pueden paralelizarse y cuáles deben esperar. En Spark, el linaje registra estas dependencias.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="grafo de ejecución arquitectura big data representación de un proceso computacional como nodos y aristas. los nodos pueden ser tareas o transformaciones; las aristas indican dependencias. permite visualizar pipelines, optimizar ejecución y comprender recomputación ante fallos.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">61</span>
+        <span class="term-title-wrap"><span class="term-title">Grafo de ejecución</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Representación de un proceso computacional como nodos y aristas. Los nodos pueden ser tareas o transformaciones; las aristas indican dependencias. Permite visualizar pipelines, optimizar ejecución y comprender recomputación ante fallos.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="MapReduce" data-search="shuffle costoso mapreduce expresión que indica que la fase shuffle suele ser cara en tiempo y recursos porque implica mover datos entre nodos. su costo depende del volumen de datos, la red, la cantidad de claves y la distribución de las particiones.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">62</span>
+        <span class="term-title-wrap"><span class="term-title">Shuffle costoso</span><span class="term-cat">MapReduce</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Expresión que indica que la fase shuffle suele ser cara en tiempo y recursos porque implica mover datos entre nodos. Su costo depende del volumen de datos, la red, la cantidad de claves y la distribución de las particiones.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="balance de carga arquitectura big data distribución equilibrada del trabajo entre nodos. si una partición recibe demasiados datos y otra muy pocos, el sistema se vuelve ineficiente. las funciones de hash, partición y diseño de claves influyen en el balance de carga.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">63</span>
+        <span class="term-title-wrap"><span class="term-title">Balance de carga</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Distribución equilibrada del trabajo entre nodos. Si una partición recibe demasiados datos y otra muy pocos, el sistema se vuelve ineficiente. Las funciones de hash, partición y diseño de claves influyen en el balance de carga.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Arquitectura Big Data" data-search="skew de datos arquitectura big data desbalance causado por una distribución desigual de claves o registros. algunas claves pueden concentrar demasiados valores y saturar un nodo. es un problema frecuente en sistemas distribuidos y afecta el rendimiento de shuffle y reduce.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">64</span>
+        <span class="term-title-wrap"><span class="term-title">Skew de datos</span><span class="term-cat">Arquitectura Big Data</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Desbalance causado por una distribución desigual de claves o registros. Algunas claves pueden concentrar demasiados valores y saturar un nodo. Es un problema frecuente en sistemas distribuidos y afecta el rendimiento de shuffle y reduce.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Docencia" data-search="secuencia didáctica docencia orden pedagógico en el que se presentan conceptos para facilitar el aprendizaje. en este material, la secuencia va de la simetría geométrica al grupo d₃, luego al grafo de cayley, después a particiones y finalmente a mapreduce, spark e invariancias.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">65</span>
+        <span class="term-title-wrap"><span class="term-title">Secuencia didáctica</span><span class="term-cat">Docencia</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Orden pedagógico en el que se presentan conceptos para facilitar el aprendizaje. En este material, la secuencia va de la simetría geométrica al grupo D₃, luego al grafo de Cayley, después a particiones y finalmente a MapReduce, Spark e invariancias.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Docencia" data-search="analogía estructural docencia relación conceptual entre dos dominios que comparten una forma de organización. el material no afirma que un sistema big data sea literalmente un grupo, sino que usa grupos y grafos como modelos para razonar sobre operaciones, estados, particiones y transformaciones.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">66</span>
+        <span class="term-title-wrap"><span class="term-title">Analogía estructural</span><span class="term-cat">Docencia</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Relación conceptual entre dos dominios que comparten una forma de organización. El material no afirma que un sistema Big Data sea literalmente un grupo, sino que usa grupos y grafos como modelos para razonar sobre operaciones, estados, particiones y transformaciones.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Docencia" data-search="puente conceptual docencia conexión entre ideas de distintos campos. en el recorrido, la simetría funciona como puente hacia teoría de grupos; los grupos hacia grafos; los grafos hacia pipelines; y los pipelines hacia arquitecturas distribuidas.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">67</span>
+        <span class="term-title-wrap"><span class="term-title">Puente conceptual</span><span class="term-cat">Docencia</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Conexión entre ideas de distintos campos. En el recorrido, la simetría funciona como puente hacia teoría de grupos; los grupos hacia grafos; los grafos hacia pipelines; y los pipelines hacia arquitecturas distribuidas.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Docencia" data-search="actividad interactiva docencia recurso en el que el estudiante explora conceptos mediante simulaciones, botones, recorridos o visualizaciones. su valor está en convertir definiciones abstractas en experiencias observables: aplicar operaciones, cambiar estados y ver resultados.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">68</span>
+        <span class="term-title-wrap"><span class="term-title">Actividad interactiva</span><span class="term-cat">Docencia</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Recurso en el que el estudiante explora conceptos mediante simulaciones, botones, recorridos o visualizaciones. Su valor está en convertir definiciones abstractas en experiencias observables: aplicar operaciones, cambiar estados y ver resultados.</p>
+      </div>
+    </article>
+    <article class="term-card" data-category="Docencia" data-search="evaluación conceptual docencia forma de evaluación centrada en explicar relaciones, justificar procesos y transferir ideas entre contextos. en este recorrido, evaluar no significa solo recordar definiciones, sino conectar simetría, grupos, grafos y big data de manera argumentada.">
+      <button class="term-head" type="button" aria-expanded="false">
+        <span class="term-num">69</span>
+        <span class="term-title-wrap"><span class="term-title">Evaluación conceptual</span><span class="term-cat">Docencia</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body">
+        <p align="justify">Forma de evaluación centrada en explicar relaciones, justificar procesos y transferir ideas entre contextos. En este recorrido, evaluar no significa solo recordar definiciones, sino conectar simetría, grupos, grafos y Big Data de manera argumentada.</p>
+      </div>
+    </article>
+  </div>
+  <div class="empty" id="empty">No se encontraron conceptos con ese criterio.</div>
+</section>
+
+<div class="footer"><strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br>Glosario HTML autónomo · Simetría, grafos y Big Data</div>
+</main>
+<a class="btn primary toTop" href="#inicio">↑</a>
+<script>
+(function(){
+  const root=document.documentElement;
+  const themeBtn=document.getElementById('themeBtn');
+  const expandBtn=document.getElementById('expandBtn');
+  const collapseBtn=document.getElementById('collapseBtn');
+  const progress=document.getElementById('progress');
+  const search=document.getElementById('search');
+  const empty=document.getElementById('empty');
+  const cards=[...document.querySelectorAll('.term-card')];
+  const chipBtns=[...document.querySelectorAll('.chip')];
+  let activeFilter='Todo';
+
+  function setTheme(theme){
+    root.setAttribute('data-theme',theme);
+    localStorage.setItem('simetria-glosario-theme',theme);
+    themeBtn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';
+  }
+  setTheme(localStorage.getItem('simetria-glosario-theme') || 'light');
+  themeBtn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+  function toggleCard(card, force){
+    const open = force !== undefined ? force : !card.classList.contains('open');
+    card.classList.toggle('open', open);
+    const btn=card.querySelector('.term-head');
+    btn.setAttribute('aria-expanded', String(open));
+  }
+  cards.forEach(card=>card.querySelector('.term-head').addEventListener('click',()=>toggleCard(card)));
+
+  expandBtn.addEventListener('click',()=>cards.filter(c=>!c.classList.contains('hide')).forEach(c=>toggleCard(c,true)));
+  collapseBtn.addEventListener('click',()=>cards.forEach(c=>toggleCard(c,false)));
+
+  function applyFilters(){
+    const q=search.value.trim().toLowerCase();
+    let visible=0;
+    cards.forEach(card=>{
+      const inFilter=activeFilter==='Todo' || card.dataset.category===activeFilter;
+      const inSearch=!q || card.dataset.search.includes(q);
+      const show=inFilter && inSearch;
+      card.classList.toggle('hide', !show);
+      if(show) visible++;
+    });
+    empty.style.display=visible?'none':'block';
+  }
+
+  chipBtns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      chipBtns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter=btn.dataset.filter;
+      applyFilters();
+    });
+  });
+  search.addEventListener('input',applyFilters);
+
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement;
+    const pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    progress.style.width=Math.max(0,Math.min(100,pct))+'%';
+  });
+})();
+</script>
+</body>
+</html>
