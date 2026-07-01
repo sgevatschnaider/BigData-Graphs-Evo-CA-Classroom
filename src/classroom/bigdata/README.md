@@ -106,6 +106,80 @@ DataGraphX/
 | **Arquitectura de BBDD como un Sistema de Grafos (completo)** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Lección interactiva que parte de una base monolítica y la transforma paso a paso: estado inicial, sharding horizontal, partición vertical y replicación. Cada transición se visualiza como topologías de grafos para explicar eliminación del punto único de fallo, aumento de disponibilidad y escalabilidad. Ideal como mapa conceptual antes de profundizar en estrategias de distribución de claves.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/bbfdc4e5ebe0b5e0ca7b337f4466ba4cb7224844/src/classroom/bigdata/recursos/Arquitectura%20de%20BBDD%20como%20un%20Sistema%20de%20Grafos.completo.html) |
 | **De la Rigidez a la Elasticidad — Sharding vs Hashing Consistente y Gossip** <br><br> <details><summary><strong>Resumen:</strong> <em>(haz clic para expandir/colapsar)</em></summary><p>Demo comparativa en anillo que asigna claves a nodos para contrastar sharding modular, simple pero con muchos movimientos al cambiar N, frente a hashing consistente, anillo con posiciones estables que mueve ≈1/N. Las líneas continuas indican dueños y réplicas, las punteadas representan el gossip sobre el overlay. A la izquierda se controlan N, claves, RF, VNodes y la reproducción automática; en la parte inferior se muestran métricas de rebalanceo y una explicación del modo activo.</p></details> | [![Ver Lección Interactiva](https://img.shields.io/badge/Ver%20Lección-Interactiva-9cf?style=for-the-badge&logo=html5)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/bbfdc4e5ebe0b5e0ca7b337f4466ba4cb7224844/src/classroom/bigdata/recursos/De%20la%20Rigidez%20a%20la%20Elasticidad.html) |
 
+## Clase 2 · Sharding, Teorema CAP y Cassandra
+
+Esta clase trabaja los fundamentos de los sistemas distribuidos a partir de tres ejes centrales: **sharding**, **funciones hash** y **Teorema CAP**. El recorrido parte de la necesidad de distribuir datos cuando una base o aplicación crece, muestra cómo se asignan registros a distintos nodos o shards, y luego conecta esa lógica con arquitecturas reales como **Apache Cassandra**, **MongoDB**, **Redis**, blockchain y sistemas de procesamiento distribuido.
+
+El notebook combina explicación conceptual, ejemplos en Python, visualizaciones, simulaciones de asignación de datos, análisis de consistencia y disponibilidad, y una sección final de preguntas para repasar los conceptos principales.
+
+### Abrir notebook en Google Colab
+
+[![Abrir Colab](https://img.shields.io/badge/Abrir%20Colab-Notebook%20ejecutable-f9ab00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1wIIj1X6gWXwyR_-xRffPqG61U1bNyaBp#scrollTo=te9aTLLybJKV)
+
+---
+
+## Índice del Colab
+
+| Orden | Tema | Contenido principal |
+| :---: | :--- | :--- |
+| **1** | **Introducción a sharding y sistemas distribuidos** | Presenta la idea general de distribuir datos y procesamiento para mejorar escalabilidad, disponibilidad y rendimiento. |
+| **2** | **Sharding físico vs. sharding lógico** | Diferencia entre dividir físicamente los datos en nodos y organizar lógicamente la distribución mediante reglas, claves o particiones. |
+| **3** | **Ejemplo de particionamiento de datos** | Simula con Python la asignación de registros a shards según rangos de letras y particiones internas. |
+| **4** | **Funciones hash** | Explica qué es una función hash, cómo transforma una clave o número y por qué permite asignar datos de forma determinística. |
+| **5** | **MD5 y SHA-256 en Python** | Muestra cómo convertir un identificador en hash hexadecimal y luego en número entero para usarlo en distribución de datos. |
+| **6** | **Asignación de datos a shards con hash** | Usa la regla `hash(key) % número_de_shards` para decidir en qué shard debe ubicarse cada registro. |
+| **7** | **Distribución de carga entre shards** | Genera datos aleatorios y analiza si la función hash distribuye los registros de manera razonablemente equilibrada. |
+| **8** | **Problema del hashing tradicional** | Muestra que al cambiar la cantidad de shards muchos registros deben moverse, lo que genera costos de redistribución. |
+| **9** | **Sharding consistente** | Introduce la idea de consistent hashing para reducir la cantidad de datos que deben moverse cuando se agregan o eliminan nodos. |
+| **10** | **Ethereum, Bitcoin y escalabilidad** | Relaciona sharding y blockchain, comparando enfoques de escalabilidad en redes descentralizadas. |
+| **11** | **Apache Cassandra** | Presenta Cassandra como base de datos distribuida, orientada a alta disponibilidad, escalabilidad horizontal y tolerancia a fallos. |
+| **12** | **Token ring en Cassandra** | Explica cómo Cassandra organiza los nodos en un anillo de tokens para asignar rangos de datos. |
+| **13** | **Asignación y replicación de datos** | Muestra cómo los datos se ubican en nodos del anillo y cómo se replican para mejorar disponibilidad y tolerancia a fallos. |
+| **14** | **Alta y baja de nodos en el anillo** | Simula qué ocurre cuando se agrega o elimina un nodo dentro de una arquitectura distribuida basada en hashing consistente. |
+| **15** | **Protocolo Gossip** | Explica cómo los nodos de Cassandra intercambian información de estado de forma descentralizada para detectar cambios o fallos. |
+| **16** | **Teorema CAP** | Desarrolla las tres propiedades centrales: consistencia, disponibilidad y tolerancia a particiones. |
+| **17** | **Modelos CA, CP y AP** | Compara las combinaciones posibles del Teorema CAP y explica qué se sacrifica en cada tipo de arquitectura. |
+| **18** | **Ejemplos CAP: bancos, redes sociales y Bitcoin** | Aplica CAP a casos reales: bancos como sistemas orientados a consistencia, redes sociales como sistemas orientados a disponibilidad y blockchain como sistema distribuido con tiempos de confirmación. |
+| **19** | **Google Spanner** | Presenta un ejemplo de base distribuida con consistencia global y analiza cómo se ubica dentro de las tensiones del Teorema CAP. |
+| **20** | **ACID y bases de datos** | Explica las propiedades atomicidad, consistencia, aislamiento y durabilidad, y su relación con bases de datos transaccionales. |
+| **21** | **Relación entre CAP y ACID** | Compara ambos marcos conceptuales: CAP como problema de sistemas distribuidos y ACID como garantía transaccional. |
+| **22** | **MapReduce vs. enfoque tradicional** | Contrasta mover los datos hacia el procesamiento con mover el procesamiento hacia los datos. |
+| **23** | **MongoDB en sistemas distribuidos** | Resume características de MongoDB y su diferencia frente a bases relacionales y otros modelos distribuidos. |
+| **24** | **Redis en sistemas distribuidos** | Explica Redis como base en memoria, sus usos principales y diferencias con otras bases de datos. |
+| **25** | **Cuestionario final** | Incluye preguntas y respuestas sobre sharding, hash, Cassandra, CAP, consistencia, disponibilidad y arquitectura distribuida. |
+
+---
+
+## Conceptos clave trabajados
+
+| Concepto | Idea central |
+| :--- | :--- |
+| **Sharding** | División de datos en fragmentos o particiones distribuidas entre distintos nodos. |
+| **Shard** | Cada una de las partes en las que se divide el conjunto de datos. |
+| **Función hash** | Transformación determinística que convierte una clave en un valor numérico útil para asignar datos. |
+| **Hashing tradicional** | Asignación mediante módulo, por ejemplo `hash(key) % N`, sensible a cambios en el número de shards. |
+| **Consistent hashing** | Técnica que reduce la redistribución de datos cuando cambian los nodos disponibles. |
+| **Token ring** | Estructura circular usada para asignar rangos de claves a nodos, especialmente en Cassandra. |
+| **Replicación** | Copia de datos en varios nodos para mejorar disponibilidad y tolerancia a fallos. |
+| **Gossip** | Protocolo de comunicación entre nodos para compartir información de estado de manera descentralizada. |
+| **Teorema CAP** | Plantea la tensión entre consistencia, disponibilidad y tolerancia a particiones en sistemas distribuidos. |
+| **CP** | Prioriza consistencia y tolerancia a particiones, sacrificando disponibilidad en ciertos escenarios. |
+| **AP** | Prioriza disponibilidad y tolerancia a particiones, aceptando consistencia eventual. |
+| **CA** | Prioriza consistencia y disponibilidad, pero no resuelve adecuadamente particiones de red. |
+| **ACID** | Conjunto de propiedades transaccionales: atomicidad, consistencia, aislamiento y durabilidad. |
+| **MapReduce** | Modelo de procesamiento distribuido que lleva el cálculo hacia donde están los datos. |
+
+---
+
+## Síntesis conceptual
+
+El Colab muestra que el diseño de sistemas distribuidos exige tomar decisiones de arquitectura. Distribuir datos permite escalar, pero introduce problemas nuevos: cómo asignar registros, cómo equilibrar carga, cómo responder ante fallos, cómo mantener consistencia y qué hacer cuando la red se particiona.
+
+La clase conecta la teoría con ejemplos prácticos: funciones hash para distribuir datos, consistent hashing para reducir movimientos, Cassandra como arquitectura peer-to-peer, Gossip como mecanismo de coordinación, CAP como marco de decisión y ACID como referencia para entender garantías transaccionales.
+
+En conjunto, el recorrido permite comprender que las bases de datos modernas no se diferencian solo por su sintaxis o modelo de datos, sino por las decisiones que toman frente a escalabilidad, consistencia, disponibilidad, latencia y tolerancia a fallos.
+
+
 ## 📜 Instalación Rápida
 
 **Requisitos**: Python ≥ 3.10, Java 8+ (para Spark), opcional Docker.
