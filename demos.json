@@ -266,6 +266,13 @@
     "mtime": "2026-07-01T13:23:02-03:00"
   },
   {
+    "title": "Cuestionario · Simetría, Grafos y Big Data",
+    "path": "/src/classroom/graphs/recursos/Simetria_cuestionario_grupos_grafos_bigdata.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T14:36:28-03:00"
+  },
+  {
     "title": "Cuestionario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
     "path": "/src/classroom/graphs/recursos/Hiperbolica_cuestionario_geometria_hiperbolica.html",
     "tag": "Demo",
@@ -579,6 +586,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2026-07-01T13:23:02-03:00"
+  },
+  {
+    "title": "Glosario · Simetría, Grafos y Big Data",
+    "path": "/src/classroom/graphs/recursos/Simetria_glosario_grupos_grafos_bigdata.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T14:36:28-03:00"
   },
   {
     "title": "Glosario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
