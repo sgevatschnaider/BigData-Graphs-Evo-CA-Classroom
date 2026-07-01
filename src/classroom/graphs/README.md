@@ -986,6 +986,7 @@ El valor didáctico de estos recursos está en que permiten pasar de una estruct
   <li><p align="justify">Utilizar el material sobre Heider y Harary para trasladar la idea de paridad a grafos firmados y redes sociales.</p></li>
   <li><p align="justify">Cerrar con el cuestionario interactivo y el glosario como herramientas de repaso, evaluación y consolidación conceptual.</p></li>
 </ol>
+
 ### 12. Teorema de Erdős–Gallai y Aplicaciones
 | 📄 Recurso | 📥 Acceso |
 | ---------- | --------- |
