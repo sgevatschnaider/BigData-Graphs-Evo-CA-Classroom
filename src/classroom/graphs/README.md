@@ -813,6 +813,179 @@ Desde esta perspectiva, los grafos permiten representar estados y transiciones; 
   </tbody>
 </table>
 
+---
+
+## Recursos complementarios sobre Grupo de Klein, Criptografía y Redes Sociales
+
+<p align="justify">
+Como ampliación del recorrido anterior sobre simetría, grupos, grafos y arquitecturas distribuidas, se incorporan recursos interactivos dedicados al <strong>Grupo de Klein V₄</strong>, una estructura algebraica fundamental que permite conectar teoría de grupos, operaciones binarias, criptografía, grafos firmados y modelos de redes sociales.
+</p>
+
+<p align="justify">
+El eje central de estos materiales es mostrar cómo una estructura matemática pequeña —el grupo de Klein— puede funcionar como puente entre distintos lenguajes: la tabla de Cayley, la suma módulo 2, la operación <strong>XOR</strong>, el cifrado de Vernam, el one-time pad, las simetrías geométricas, las permutaciones, los grafos firmados y el balance estructural en redes sociales.
+</p>
+
+<p align="justify">
+De este modo, el bloque permite continuar el estudio iniciado con el grupo <strong>D₃</strong>, pero ahora desde una estructura abeliana de cuatro elementos. Mientras D₃ permite trabajar rotaciones, reflexiones y no conmutatividad, el grupo de Klein permite estudiar con especial claridad la lógica de la paridad, la composición conmutativa, las involuciones, el álgebra binaria y las aplicaciones de XOR en criptografía y redes.
+</p>
+
+## Recursos interactivos complementarios
+
+| 📄 Recurso | 📥 Acceso |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Grupo de Klein V₄ · Presentación interactiva** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Material interactivo dedicado al estudio del grupo de Klein como estructura algebraica de cuatro elementos. El recorrido desarrolla su definición, sus axiomas, su tabla de Cayley, su comparación con el grupo cíclico C₄, su representación como ℤ₂ × ℤ₂, su interpretación mediante XOR, sus simetrías geométricas, sus modelos por permutaciones, sus subgrupos, sus automorfismos, su relación con representaciones y sus conexiones con teoría de Galois.</p><p>El objetivo es comprender por qué V₄ es el grupo abeliano no cíclico más pequeño y cómo una estructura aparentemente simple puede aparecer en múltiples contextos matemáticos y computacionales.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Klein_grupo_klein_v4_presentacion.html) |
+| **Aplicaciones en Criptografía · Vernam, XOR y Grupo de Klein** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Material interactivo que conecta el grupo de Klein con la criptografía clásica, en particular con el cifrado de Vernam y el one-time pad. El recorrido muestra cómo los elementos de V₄ pueden interpretarse como pares de bits y cómo la operación del grupo coincide con XOR bit a bit.</p><p>El material permite estudiar el cifrado y descifrado mediante la misma operación, la idea de confidencialidad perfecta, el rol de la clave aleatoria, uniforme, secreta y de un solo uso, y los riesgos derivados de reutilizar claves en esquemas tipo two-time pad.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Klein_aplicaciones_criptografia_klein_vernam.html) |
+| **Heider, Harary y Grupo de Klein · Balance estructural en redes sociales** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Material interactivo que vincula la teoría del balance de Fritz Heider, la formalización de Frank Harary mediante grafos firmados y el grupo de Klein como lenguaje algebraico para representar signos, paridad, tensión y equilibrio social.</p><p>El recorrido permite estudiar tríadas balanceadas y no balanceadas, relaciones positivas y negativas, polarización, bipartición, cámaras de eco, comunidades, grafos firmados y el uso de XOR como herramienta conceptual para medir paridad en ciclos sociales.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Klein_heider_harary_klein_redes_sociales.html) |
+| **Cuestionario · Grupo de Klein, Criptografía y Redes Sociales** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Cuestionario interactivo compuesto por 20 preguntas con respuestas completas y desarrolladas. El material integra teoría del grupo de Klein, tabla de Cayley, XOR, one-time pad, cifrado de Vernam, confidencialidad perfecta, grafos firmados, balance estructural, tríadas sociales y aplicaciones conceptuales en redes.</p><p>Está pensado como recurso de evaluación, autoevaluación o repaso guiado, con respuestas desplegables para facilitar el estudio progresivo y la discusión en clase.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Klein_cuestionario_grupo_klein_criptografia_redes.html) |
+| **Glosario · Grupo de Klein, Criptografía y Redes Sociales** <br><br> <details><summary><strong>Resumen:</strong> <em>haz clic para expandir o colapsar</em></summary><p>Glosario interactivo con conceptos desarrollados sobre teoría de grupos, grupo de Klein, álgebra binaria, XOR, criptografía, probabilidad, confidencialidad perfecta, grafos firmados, balance estructural y redes sociales.</p><p>El recurso funciona como material de consulta rápida y como apoyo conceptual para acompañar las presentaciones y el cuestionario. Incluye buscador, categorías temáticas y definiciones desplegables.</p></details> | [![Abrir HTML Interactivo](https://img.shields.io/badge/Abrir-HTML%20Interactivo-9cf?style=for-the-badge&logo=html5&logoColor=white)](https://htmlpreview.github.io/?https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/blob/main/src/classroom/graphs/recursos/Klein_glosario_grupo_klein_criptografia_redes.html) |
+
+---
+
+## Mapa conceptual de los recursos complementarios
+
+<table>
+  <thead>
+    <tr>
+      <th align="center">Etapa</th>
+      <th align="left">Eje conceptual</th>
+      <th align="left">Objetivo de aprendizaje</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><strong>1</strong></td>
+      <td><strong>Grupo de Klein V₄</strong></td>
+      <td><p align="justify">Comprender la estructura de V₄ como grupo de cuatro elementos, con un neutro y tres elementos no triviales de orden 2.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>2</strong></td>
+      <td><strong>Tabla de Cayley</strong></td>
+      <td><p align="justify">Visualizar la operación interna del grupo y reconocer que el producto de dos elementos no triviales distintos produce el tercero.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>3</strong></td>
+      <td><strong>V₄ como ℤ₂ × ℤ₂</strong></td>
+      <td><p align="justify">Interpretar el grupo de Klein como suma binaria de pares de bits, conectando teoría de grupos con álgebra lineal sobre el cuerpo F₂.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>4</strong></td>
+      <td><strong>XOR y paridad</strong></td>
+      <td><p align="justify">Comprender que la operación XOR permite modelar cambios, inversión de estados, composición binaria y conservación de paridad.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>5</strong></td>
+      <td><strong>Vernam y one-time pad</strong></td>
+      <td><p align="justify">Estudiar cómo el cifrado y el descifrado pueden realizarse mediante la misma operación XOR cuando mensaje, clave y texto cifrado se representan como bits.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>6</strong></td>
+      <td><strong>Confidencialidad perfecta</strong></td>
+      <td><p align="justify">Analizar por qué el one-time pad puede alcanzar seguridad informacional cuando la clave es aleatoria, uniforme, secreta, tan larga como el mensaje y usada una sola vez.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>7</strong></td>
+      <td><strong>Grafos firmados</strong></td>
+      <td><p align="justify">Representar relaciones positivas y negativas en redes mediante aristas con signo y estudiar ciclos, tríadas y estructuras de balance.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>8</strong></td>
+      <td><strong>Heider y Harary</strong></td>
+      <td><p align="justify">Conectar la intuición psicológica del equilibrio social con la formalización matemática de los grafos firmados y la bipartición estructural.</p></td>
+    </tr>
+    <tr>
+      <td align="center"><strong>9</strong></td>
+      <td><strong>Cuestionario y glosario</strong></td>
+      <td><p align="justify">Consolidar el aprendizaje mediante preguntas desarrolladas y definiciones conceptuales organizadas por tema.</p></td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Conceptos clave incorporados
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Concepto</th>
+      <th align="left">Interpretación matemática</th>
+      <th align="left">Aplicación o lectura conceptual</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Grupo de Klein V₄</strong></td>
+      <td><p align="justify">Grupo abeliano de cuatro elementos, no cíclico, donde todo elemento no trivial tiene orden 2.</p></td>
+      <td><p align="justify">Modelo mínimo para estudiar composición, paridad, simetrías, XOR y estructuras binarias.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Involución</strong></td>
+      <td><p align="justify">Elemento que aplicado dos veces devuelve la identidad.</p></td>
+      <td><p align="justify">Permite interpretar operaciones reversibles, cambios de estado y transformaciones que se cancelan al repetirse.</p></td>
+    </tr>
+    <tr>
+      <td><strong>XOR</strong></td>
+      <td><p align="justify">Operación binaria que devuelve 1 cuando los bits son distintos y 0 cuando son iguales.</p></td>
+      <td><p align="justify">Base del modelo binario de V₄, del cifrado de Vernam y de la medición de paridad en estructuras discretas.</p></td>
+    </tr>
+    <tr>
+      <td><strong>One-time pad</strong></td>
+      <td><p align="justify">Esquema de cifrado donde el mensaje se combina con una clave aleatoria de igual longitud mediante XOR.</p></td>
+      <td><p align="justify">Ejemplo clásico de seguridad informacional cuando se cumplen estrictamente las condiciones de uso de la clave.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Confidencialidad perfecta</strong></td>
+      <td><p align="justify">Propiedad según la cual el texto cifrado no aporta información sobre el mensaje original.</p></td>
+      <td><p align="justify">Permite distinguir seguridad matemática de seguridad meramente computacional.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Grafo firmado</strong></td>
+      <td><p align="justify">Grafo cuyas aristas tienen signo positivo o negativo.</p></td>
+      <td><p align="justify">Modelo para estudiar amistad, enemistad, cooperación, conflicto, polarización y balance social.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Balance estructural</strong></td>
+      <td><p align="justify">Condición según la cual los ciclos o tríadas de una red poseen una composición coherente de signos.</p></td>
+      <td><p align="justify">Herramienta para interpretar estabilidad, tensión, alianzas, divisiones y comunidades en redes sociales.</p></td>
+    </tr>
+    <tr>
+      <td><strong>Paridad</strong></td>
+      <td><p align="justify">Propiedad que distingue entre una cantidad par o impar de cambios, signos negativos o inversiones.</p></td>
+      <td><p align="justify">Eje común entre XOR, V₄, criptografía y balance en grafos firmados.</p></td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Lectura conceptual integradora
+
+<p align="justify">
+La incorporación del grupo de Klein permite ampliar el estudio de los grupos y grafos desde una nueva perspectiva. Mientras el grupo <strong>D₃</strong> muestra cómo las simetrías del triángulo generan una estructura no conmutativa rica en rotaciones y reflexiones, el grupo <strong>V₄</strong> permite estudiar una estructura más pequeña, abeliana y profundamente conectada con la lógica binaria.
+</p>
+
+<p align="justify">
+En el plano algebraico, V₄ muestra cómo una operación cerrada puede organizar cuatro estados elementales. En el plano computacional, esa misma estructura aparece como XOR bit a bit. En criptografía, XOR permite formular el cifrado de Vernam y el one-time pad. En redes sociales, la lógica de la paridad permite estudiar signos, tensiones, ciclos y balance estructural. Por eso, el grupo de Klein funciona como un puente entre matemática abstracta, computación, seguridad de la información y análisis de redes.
+</p>
+
+<p align="justify">
+El valor didáctico de estos recursos está en que permiten pasar de una estructura algebraica simple a aplicaciones conceptualmente profundas. El estudiante puede observar una tabla de Cayley, reconocer una operación XOR, comprender por qué una clave reutilizada compromete un cifrado, analizar una tríada social y conectar todos esos fenómenos mediante una misma idea: la composición de estados discretos.
+</p>
+
+---
+
+## Uso recomendado en clase
+
+<ol>
+  <li><p align="justify">Presentar el grupo de Klein como contraste con el grupo D₃: ambos son grupos pequeños, pero D₃ es no abeliano y V₄ es abeliano.</p></li>
+  <li><p align="justify">Trabajar la tabla de Cayley de V₄ y mostrar que cada elemento no trivial es su propio inverso.</p></li>
+  <li><p align="justify">Introducir la representación de V₄ como pares de bits: 00, 01, 10 y 11.</p></li>
+  <li><p align="justify">Relacionar la operación del grupo con XOR bit a bit y mostrar ejemplos simples de composición.</p></li>
+  <li><p align="justify">Usar el material de criptografía para explicar el cifrado de Vernam, el descifrado y la condición de clave de un solo uso.</p></li>
+  <li><p align="justify">Comparar seguridad computacional y seguridad informacional mediante el concepto de confidencialidad perfecta.</p></li>
+  <li><p align="justify">Utilizar el material sobre Heider y Harary para trasladar la idea de paridad a grafos firmados y redes sociales.</p></li>
+  <li><p align="justify">Cerrar con el cuestionario interactivo y el glosario como herramientas de repaso, evaluación y consolidación conceptual.</p></li>
+</ol>
 ### 12. Teorema de Erdős–Gallai y Aplicaciones
 | 📄 Recurso | 📥 Acceso |
 | ---------- | --------- |
