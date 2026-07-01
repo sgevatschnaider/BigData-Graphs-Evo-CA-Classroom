@@ -63,6 +63,13 @@
     "mtime": "2025-11-13T15:24:24-03:00"
   },
   {
+    "title": "Aplicaciones en Criptografía · One-Time Pad, Vernam y Grupo de Klein",
+    "path": "/src/classroom/graphs/recursos/Klein_aplicaciones_criptografia_klein_vernam.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T13:23:02-03:00"
+  },
+  {
     "title": "Árbol Fractal: Nodos que Abarcan Subnodos (SVG)",
     "path": "/src/classroom/graphs/recursos/PG_Arbolfractalanidado.html",
     "tag": "Demo",
@@ -250,6 +257,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-11-16T08:49:34-03:00"
+  },
+  {
+    "title": "Cuestionario · Grupo de Klein, Criptografía y Redes Sociales",
+    "path": "/src/classroom/graphs/recursos/Klein_cuestionario_grupo_klein_criptografia_redes.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T13:23:02-03:00"
   },
   {
     "title": "Cuestionario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
@@ -560,6 +574,13 @@
     "mtime": "2026-03-14T21:28:41-03:00"
   },
   {
+    "title": "Glosario · Grupo de Klein, Criptografía y Redes Sociales",
+    "path": "/src/classroom/graphs/recursos/Klein_glosario_grupo_klein_criptografia_redes.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T13:23:02-03:00"
+  },
+  {
     "title": "Glosario 2.0 · Geometría Hiperbólica, Grafos y Embeddings",
     "path": "/src/classroom/graphs/recursos/Hiperbolico_glosario.html",
     "tag": "Demo",
@@ -693,6 +714,13 @@
     "mtime": "2026-05-16T19:09:16-03:00"
   },
   {
+    "title": "Grupo de Klein V₄ · Presentación ampliada e interactiva",
+    "path": "/src/classroom/graphs/recursos/Klein_grupo_klein_v4_presentacion.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T13:23:02-03:00"
+  },
+  {
     "title": "Guía de Estudio: Arquitectura Modular de Blockchain",
     "path": "/src/classroom/graphs/recursos/ZPK-Un Análisis de Capa 1, Capa 2 y ZK-Rollups.html",
     "tag": "Demo",
@@ -775,6 +803,13 @@
     "tag": "Demo",
     "desc": "",
     "mtime": "2025-10-11T23:49:53-03:00"
+  },
+  {
+    "title": "Heider, Harary y Grupo de Klein · Balance estructural en redes sociales",
+    "path": "/src/classroom/graphs/recursos/Klein_heider_harary_klein_redes_sociales.html",
+    "tag": "Demo",
+    "desc": "",
+    "mtime": "2026-07-01T13:23:02-03:00"
   },
   {
     "title": "Hipercubo Q_d = Cay(ℤ₂ᵈ, {e₁,…,e_d})",
