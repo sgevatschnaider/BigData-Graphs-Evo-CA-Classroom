@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heider, Harary y Grupo de Klein · Balance estructural en redes sociales</title>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --bg2:#fbfdff;
+      --card:#ffffff;
+      --card2:#f7fbff;
+      --text:#102033;
+      --muted:#64748b;
+      --line:#d9e6f7;
+      --primary:#2563eb;
+      --secondary:#7c3aed;
+      --cyan:#0891b2;
+      --green:#059669;
+      --amber:#d97706;
+      --red:#dc2626;
+      --purple:#6d28d9;
+      --ink:#0f172a;
+      --shadow:0 24px 64px rgba(37,99,235,.15);
+      --soft:0 10px 30px rgba(15,23,42,.10);
+      --radius:28px;
+      --ring:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent);
+      --goodBg:color-mix(in srgb,var(--green) 10%,var(--card));
+      --warnBg:color-mix(in srgb,var(--amber) 12%,var(--card));
+      --badBg:color-mix(in srgb,var(--red) 9%,var(--card));
+    }
+    [data-theme="dark"]{
+      --bg:#071121;
+      --bg2:#0c1729;
+      --card:#111c31;
+      --card2:#0d182c;
+      --text:#edf5ff;
+      --muted:#b5c4dc;
+      --line:#2b3e5d;
+      --primary:#60a5fa;
+      --secondary:#a78bfa;
+      --cyan:#22d3ee;
+      --green:#34d399;
+      --amber:#fbbf24;
+      --red:#fb7185;
+      --purple:#c084fc;
+      --ink:#f8fafc;
+      --shadow:0 24px 70px rgba(0,0,0,.42);
+      --soft:0 10px 30px rgba(0,0,0,.26);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      line-height:1.68;
+      background:
+        radial-gradient(circle at 8% -6%, color-mix(in srgb,var(--primary) 23%, transparent), transparent 32%),
+        radial-gradient(circle at 92% 3%, color-mix(in srgb,var(--secondary) 20%, transparent), transparent 35%),
+        radial-gradient(circle at 50% 55%, color-mix(in srgb,var(--cyan) 10%, transparent), transparent 44%),
+        linear-gradient(135deg,var(--bg),var(--bg2));
+    }
+    a{color:var(--primary);font-weight:850;text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{
+      position:sticky;top:0;z-index:90;
+      border-bottom:1px solid var(--line);
+      background:color-mix(in srgb,var(--card) 88%,transparent);
+      backdrop-filter:blur(18px);
+    }
+    .progress{height:4px;background:transparent;position:relative;overflow:hidden}
+    .progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:width .08s linear}
+    .nav{max-width:1280px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.025em}
+    .brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));box-shadow:0 0 0 5px color-mix(in srgb,var(--primary) 18%,transparent)}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button,.btn{
+      border:1px solid var(--line);background:var(--card);color:var(--text);
+      padding:10px 14px;border-radius:16px;cursor:pointer;font-weight:900;
+      box-shadow:var(--soft);transition:.18s transform,.18s box-shadow,.18s background;
+      display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    }
+    button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,23,42,.14);text-decoration:none}
+    button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--ring)}
+    button.primary,.btn.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}
+    button.good{background:var(--goodBg);border-color:color-mix(in srgb,var(--green) 44%,var(--line))}
+    button.warn{background:var(--warnBg);border-color:color-mix(in srgb,var(--amber) 44%,var(--line))}
+    button.danger{background:var(--badBg);border-color:color-mix(in srgb,var(--red) 44%,var(--line))}
+    main{max-width:1280px;margin:auto;padding:28px 20px 72px}
+    .card{
+      background:color-mix(in srgb,var(--card) 96%,transparent);
+      border:1px solid var(--line);border-radius:var(--radius);padding:24px;
+      box-shadow:var(--shadow);margin:18px 0;
+    }
+    .hero{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:22px;align-items:stretch;margin:18px 0 26px}
+    h1{font-size:clamp(38px,5.4vw,76px);line-height:1.0;margin:10px 0 16px;letter-spacing:-.06em}
+    h2{font-size:clamp(28px,3.2vw,44px);line-height:1.08;margin:36px 0 16px;letter-spacing:-.045em}
+    h3{font-size:22px;line-height:1.2;margin:10px 0 10px;letter-spacing:-.025em}
+    h4{font-size:18px;margin:18px 0 8px}
+    p{margin:10px 0}.lead{font-size:18.5px;color:var(--muted);max-width:90ch}.muted{color:var(--muted)}
+    .kicker{font-weight:950;color:var(--primary);text-transform:uppercase;letter-spacing:.13em;font-size:12px}
+    .tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--primary) 6%);font-size:13px;font-weight:920;color:var(--muted)}
+    .notice{border-left:5px solid var(--primary);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--primary) 8%,var(--card));margin:14px 0}
+    .notice.good{border-left-color:var(--green);background:var(--goodBg)}
+    .notice.warn{border-left-color:var(--amber);background:var(--warnBg)}
+    .notice.danger{border-left-color:var(--red);background:var(--badBg)}
+    .path{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.path a{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}.path a:hover{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:13px 15px;background:var(--card);color:var(--text);font-size:16px;font-weight:750;box-shadow:var(--soft)}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}
+    .mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{display:block;color:var(--muted)}
+    .metric{display:flex;align-items:flex-start;gap:12px}.metric .num{font-size:44px;font-weight:950;letter-spacing:-.06em;color:var(--primary);line-height:1}.metric small{color:var(--muted)}
+    .formula{font-family:Cambria,Georgia,serif;font-size:22px;font-weight:800;letter-spacing:.01em}.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 6%,var(--card));border:1px solid var(--line);border-radius:18px;padding:14px;overflow:auto;color:var(--text);white-space:pre-wrap}.inlineCode{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 7%,var(--card));padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
+    .moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.moduleCard{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);display:flex;flex-direction:column;min-height:295px}.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}.moduleNum{font-size:30px;font-weight:950;letter-spacing:-.05em;color:var(--primary)}.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}.moduleCard p{color:var(--muted);font-size:15px;flex:1}.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}.moduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+    .moduleSection{scroll-margin-top:96px;padding-top:8px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft);margin-top:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;vertical-align:top}th{background:color-mix(in srgb,var(--primary) 9%,var(--card));font-size:13px;text-transform:uppercase;letter-spacing:.08em}tr:last-child td{border-bottom:none}.center{text-align:center}.cayley td,.cayley th{text-align:center}.cayley td{font-weight:950}.hit{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 21%,var(--card)),color-mix(in srgb,var(--secondary) 15%,var(--card)))!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--primary) 44%,transparent)}
+    .sim{margin-top:15px;padding:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:var(--soft)}.simTitle{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:13px}.simTitle strong{font-size:19px}.splitView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.svgBox{width:100%;min-height:315px;border:1px solid var(--line);border-radius:22px;background:color-mix(in srgb,var(--card),var(--cyan) 5%);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px}svg{max-width:100%;height:auto}.stateBadge{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--primary) 11%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 35%,var(--line));font-weight:950}.stateBadge.good{background:var(--goodBg);border-color:color-mix(in srgb,var(--green) 40%,var(--line));color:var(--green)}.stateBadge.bad{background:var(--badBg);border-color:color-mix(in srgb,var(--red) 40%,var(--line));color:var(--red)}.log{min-height:76px;background:color-mix(in srgb,var(--ink) 5%,var(--card));border:1px solid var(--line);border-radius:18px;padding:12px;color:var(--muted)}.pillRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.pill{border:1px solid var(--line);background:var(--card);padding:8px 10px;border-radius:999px;font-weight:850;color:var(--muted)}.pill.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}.barWrap{height:12px;background:color-mix(in srgb,var(--ink) 8%,var(--card));border-radius:999px;overflow:hidden;margin:8px 0 14px}.bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));width:0%;transition:width .35s}
+    .timeline{display:grid;gap:12px;margin-top:12px}.step{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.stepNum{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;font-weight:950}.quiz{display:grid;gap:12px}.quiz button{text-align:left;justify-content:flex-start}.feedback{font-weight:900}.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}.toTop{position:fixed;right:18px;bottom:18px;z-index:70}.smallCaps{text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--muted);font-weight:950}.sourceList li{margin:9px 0}.edgeLabel{font-weight:950;paint-order:stroke;stroke:var(--card);stroke-width:4px}.nodeText{font-weight:950;fill:var(--text)}.matrixBlock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.statusGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.statusCard{padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft)}.statusCard.ok{border-color:color-mix(in srgb,var(--green) 40%,var(--line));background:var(--goodBg)}.statusCard.tense{border-color:color-mix(in srgb,var(--red) 40%,var(--line));background:var(--badBg)}
+    @media(max-width:1040px){.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView,.matrixBlock,.statusGrid{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}.moduleCard{min-height:auto}table{min-width:640px}}
+    @media print{header,.controls,button,.btn,.searchBox,.toTop{display:none!important}body{background:white}.card,.moduleCard,.mini,.sim,.tableWrap{box-shadow:none}main{max-width:100%;padding:0}.moduleSection{break-inside:avoid}.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="progress" aria-hidden="true"><span id="readProgress"></span></div>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Heider · Harary · Grupo de Klein</span></div>
+    <div class="controls">
+      <button id="themeBtn">🌙 Tema oscuro</button>
+      <button id="showAllBtn">▾ Mostrar todo</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+      <a class="btn primary" href="#simuladores">Simuladores</a>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="hero" id="inicio">
+    <div class="card">
+      <span class="tag">Psicología social</span><span class="tag">Grafos firmados</span><span class="tag">Balance estructural</span><span class="tag">V₄</span><span class="tag">XOR</span>
+      <h1>Balance estructural en redes sociales</h1>
+      <p class="lead">Una página interactiva sobre la relación entre la teoría del balance de <strong>Fritz Heider</strong>, el teorema de balance estructural de <strong>Frank Harary</strong> y el <strong>grupo de Klein</strong> como modelo algebraico de signos, bloques, paridad y tensión social.</p>
+      <div class="notice good"><strong>Corrección conceptual inicial:</strong> se toma “Herder” como <strong>Heider</strong> y “Harari” como <strong>Harary</strong>. En redes sociales, esa es la relación matemática adecuada: Heider aporta la intuición psicológica; Harary la formaliza con grafos firmados; Klein permite algebraizar la lógica binaria mediante \(V_4\) y XOR.</div>
+      <div class="path" aria-label="Navegación rápida">
+        <a href="#mod01">01</a><a href="#mod02">02</a><a href="#mod03">03</a><a href="#mod04">04</a><a href="#mod05">05</a><a href="#mod06">06</a><a href="#mod07">07</a><a href="#mod08">08</a><a href="#mod09">09</a><a href="#mod10">10</a><a href="#mod11">11</a><a href="#mod12">12</a><a href="#mod13">13</a>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Mapa conceptual</h3>
+      <p class="muted">Buscá por tema: Heider, Harary, balance, triada, grafo firmado, polarización, cámaras de eco, XOR, grupo de Klein, \(V_4\), tensión o comunidades.</p>
+      <div class="searchBox"><input id="moduleSearch" placeholder="Buscar en la página..." aria-label="Buscar en la página" /></div>
+      <div class="grid2" style="margin-top:16px">
+        <div class="mini metric"><div class="num">3</div><small>niveles: psicología, grafos y álgebra.</small></div>
+        <div class="mini metric"><div class="num">2</div><small>bloques ideales en el teorema de Harary.</small></div>
+        <div class="mini metric"><div class="num">4</div><small>estados sociales elementales codificados por \(V_4\).</small></div>
+        <div class="mini metric"><div class="num">⊕</div><small>XOR mide paridad y tensión.</small></div>
+      </div>
+      <div class="notice warn"><strong>Uso recomendado:</strong> leé primero los módulos 1 a 5 y después probá los simuladores. La parte interactiva muestra por qué una tríada balanceada tiene XOR igual a cero.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Índice de la presentación</h2>
+    <div class="moduleGrid" id="moduleGrid">
+      <article class="moduleCard" data-title="relación Heider Harary grupo Klein psicología social grafos firmados XOR">
+        <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Síntesis</span></div>
+        <h3>Relación general</h3>
+        <p>De la coherencia psicológica al teorema de grafos firmados y a la codificación algebraica en \(V_4\).</p>
+        <div class="tagline"><span>Heider</span><span>Harary</span><span>Klein</span></div><div class="moduleActions"><a class="btn primary" href="#mod01">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="Heider equilibrio psicológico triadas amistad enemistad producto signos">
+        <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Psicología</span></div>
+        <h3>Heider y las tríadas</h3>
+        <p>Reglas de balance: amigo, enemigo y coherencia afectiva en triángulos sociales.</p>
+        <div class="tagline"><span>tríadas</span><span>signos</span><span>equilibrio</span></div><div class="moduleActions"><a class="btn primary" href="#mod02">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="Harary grafo firmado teorema bipartición ciclos positivos polarización">
+        <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Grafos</span></div>
+        <h3>Harary y grafos firmados</h3>
+        <p>Formalización de la polarización: dos grupos internamente positivos y externamente negativos.</p>
+        <div class="tagline"><span>grafos</span><span>bipartición</span><span>ciclos</span></div><div class="moduleActions"><a class="btn primary" href="#mod03">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="forma matemática balance producto de signos XOR paridad ciclos">
+        <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Formalización</span></div>
+        <h3>Balance como paridad</h3>
+        <p>Un ciclo es balanceado cuando el producto de signos es positivo o, en bits, cuando el XOR es cero.</p>
+        <div class="tagline"><span>producto</span><span>paridad</span><span>XOR</span></div><div class="moduleActions"><a class="btn primary" href="#mod04">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="grupo de Klein V4 Z2xZ2 XOR tabla Cayley signos bloques">
+        <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Álgebra</span></div>
+        <h3>Entrada del grupo de Klein</h3>
+        <p>\(V_4\cong \mathbb Z_2\times\mathbb Z_2\) como lenguaje de dos bits para signo y distancia comunitaria.</p>
+        <div class="tagline"><span>V₄</span><span>bits</span><span>Cayley</span></div><div class="moduleActions"><a class="btn primary" href="#mod05">Abrir</a><a class="btn" href="#v4Sim">Simular</a></div>
+      </article>
+      <article class="moduleCard" data-title="por qué no basta Z2 dos dimensiones binarias signo pertenencia facción">
+        <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Modelo social</span></div>
+        <h3>Por qué no basta \(\mathbb Z_2\)</h3>
+        <p>Un signo solo mide afinidad; dos bits permiten separar signo real y pertenencia de bloque.</p>
+        <div class="tagline"><span>signo</span><span>bloque</span><span>facción</span></div><div class="moduleActions"><a class="btn primary" href="#mod06">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="tabla social V4 cohesión polarización puentes fracturas internas">
+        <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Interpretación</span></div>
+        <h3>Tabla social de \(V_4\)</h3>
+        <p>Cuatro estados: alianza coherente, puente, fractura interna y oposición coherente.</p>
+        <div class="tagline"><span>00</span><span>01</span><span>10</span><span>11</span></div><div class="moduleActions"><a class="btn primary" href="#mod07">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="Harary polarización cámaras de eco comunidades redes sociales">
+        <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Polarización</span></div>
+        <h3>Polarización y cámaras de eco</h3>
+        <p>El balance perfecto produce dos bloques: cohesión interna y frontera negativa externa.</p>
+        <div class="tagline"><span>comunidades</span><span>cámaras de eco</span></div><div class="moduleActions"><a class="btn primary" href="#mod08">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="redes sociales digitales X Instagram TikTok LinkedIn Telegram interacciones positivas negativas">
+        <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Plataformas</span></div>
+        <h3>Redes sociales digitales</h3>
+        <p>Cómo transformar likes, ataques, menciones, alianzas y bloqueos en un grafo firmado.</p>
+        <div class="tagline"><span>X</span><span>TikTok</span><span>LinkedIn</span></div><div class="moduleActions"><a class="btn primary" href="#mod09">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="detector conceptual de tensión Tij signo bloque XOR coherencia">
+        <div class="moduleTop"><span class="moduleNum">10</span><span class="moduleType">Indicador</span></div>
+        <h3>Detector de tensión</h3>
+        <p>\(T_{ij}=s_{ij}\oplus b_{ij}\): una arista es coherente si el signo coincide con la estructura de bloques.</p>
+        <div class="tagline"><span>tensión</span><span>coherencia</span><span>indicador</span></div><div class="moduleActions"><a class="btn primary" href="#mod10">Abrir</a><a class="btn" href="#tensionSim">Simular</a></div>
+      </article>
+      <article class="moduleCard" data-title="ejemplo tres cuentas triada política influencer medio opositor">
+        <div class="moduleTop"><span class="moduleNum">11</span><span class="moduleType">Ejemplo</span></div>
+        <h3>Ejemplo con tres cuentas</h3>
+        <p>Dos tríadas: una balanceada y otra en tensión, con lectura comunicacional.</p>
+        <div class="tagline"><span>A</span><span>B</span><span>C</span><span>triada</span></div><div class="moduleActions"><a class="btn primary" href="#mod11">Abrir</a><a class="btn" href="#triadSim">Simular</a></div>
+      </article>
+      <article class="moduleCard" data-title="marketing comunicación campañas políticas puentes alianzas narrativas tribus digitales">
+        <div class="moduleTop"><span class="moduleNum">12</span><span class="moduleType">Aplicación</span></div>
+        <h3>Marketing y comunicación</h3>
+        <p>Uso del modelo para audiencias polarizadas, puentes comunicacionales y rupturas internas.</p>
+        <div class="tagline"><span>marketing</span><span>campañas</span><span>puentes</span></div><div class="moduleActions"><a class="btn primary" href="#mod12">Abrir</a></div>
+      </article>
+      <article class="moduleCard" data-title="traducción matemática formulación completa GVE sigma phi bloques gi tensión">
+        <div class="moduleTop"><span class="moduleNum">13</span><span class="moduleType">Modelo computable</span></div>
+        <h3>Formulación completa</h3>
+        <p>Definición formal para implementar el análisis en datos de redes sociales.</p>
+        <div class="tagline"><span>G=(V,E,σ)</span><span>φ</span><span>gᵢ</span></div><div class="moduleActions"><a class="btn primary" href="#mod13">Abrir</a></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod01" data-section-title="relación Heider Harary grupo Klein psicología grafos algebra XOR">
+    <span class="kicker">Módulo 01 · Relación general</span>
+    <h2>1. Relación entre Heider, Harary y el grupo de Klein</h2>
+    <p>La conexión profunda puede resumirse como una cadena de traducción entre tres lenguajes:</p>
+    <div class="grid3">
+      <div class="mini"><strong>Heider</strong><small>Psicología social del equilibrio. Las personas buscan coherencia entre amistad, enemistad y creencias.</small></div>
+      <div class="mini"><strong>Harary</strong><small>Formalización matemática en grafos firmados. El equilibrio se expresa como ciclos positivos y bipartición.</small></div>
+      <div class="mini"><strong>\(V_4\)</strong><small>Modelo algebraico binario. Signo, bloque, paridad y tensión pueden codificarse con XOR.</small></div>
+    </div>
+    <div class="notice"><strong>Idea central:</strong> Heider explica la tensión; Harary explica la estructura; Klein permite algebraizarla con dos bits.</div>
+    <div class="svgBox" aria-label="Diagrama conceptual Heider Harary Klein">
+      <svg viewBox="0 0 920 250" role="img">
+        <defs>
+          <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="var(--primary)"/></marker>
+        </defs>
+        <g font-weight="950" text-anchor="middle">
+          <rect x="35" y="62" width="220" height="112" rx="28" fill="var(--card)" stroke="var(--primary)" stroke-width="4"/>
+          <text x="145" y="105" fill="var(--text)" font-size="28">Heider</text>
+          <text x="145" y="140" fill="var(--muted)" font-size="16">intuición psicológica</text>
+          <rect x="350" y="62" width="220" height="112" rx="28" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/>
+          <text x="460" y="105" fill="var(--text)" font-size="28">Harary</text>
+          <text x="460" y="140" fill="var(--muted)" font-size="16">grafos firmados</text>
+          <rect x="665" y="62" width="220" height="112" rx="28" fill="var(--card)" stroke="var(--green)" stroke-width="4"/>
+          <text x="775" y="105" fill="var(--text)" font-size="28">Klein \(V_4\)</text>
+          <text x="775" y="140" fill="var(--muted)" font-size="16">bits, XOR y paridad</text>
+        </g>
+        <line x1="255" y1="118" x2="340" y2="118" stroke="var(--primary)" stroke-width="5" marker-end="url(#arrow)"/>
+        <line x1="570" y1="118" x2="655" y2="118" stroke="var(--primary)" stroke-width="5" marker-end="url(#arrow)"/>
+        <text x="297" y="92" text-anchor="middle" fill="var(--muted)" font-weight="900">formaliza</text>
+        <text x="612" y="92" text-anchor="middle" fill="var(--muted)" font-weight="900">algebraiza</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod02" data-section-title="Heider equilibrio psicológico tríadas amistad enemistad producto signos">
+    <span class="kicker">Módulo 02 · Heider</span>
+    <h2>2. Heider: equilibrio psicológico en tríadas sociales</h2>
+    <p>La teoría del balance de Heider parte de una idea intuitiva: las personas tienden a buscar coherencia en sus relaciones afectivas. Una relación puede ser positiva o negativa:</p>
+    \[
+      + = \text{amistad, aprobación, afinidad}, \qquad
+      - = \text{enemistad, rechazo, conflicto}.
+    \]
+    <p>En una tríada de actores \(A,B,C\), ciertas configuraciones son psicológicamente estables y otras producen tensión. La tríada con tres vínculos positivos es estable:</p>
+    \[
+      A \text{ amigo de } B, \quad B \text{ amigo de } C, \quad A \text{ amigo de } C.
+    \]
+    <p>También es estable la configuración conocida como “el enemigo de mi enemigo es mi amigo”:</p>
+    \[
+      A \text{ enemigo de } B, \quad B \text{ enemigo de } C, \quad A \text{ amigo de } C.
+    \]
+    <p>Matemáticamente, una tríada está balanceada si el producto de los signos de sus tres relaciones es positivo:</p>
+    \[
+      s_{AB}s_{BC}s_{CA}=+1.
+    \]
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>Configuración</th><th>Producto</th><th>Resultado</th><th>Lectura social</th></tr></thead>
+        <tbody>
+          <tr><td>\((+)(+)(+)\)</td><td>\(+\)</td><td>Balanceada</td><td>Todos se apoyan.</td></tr>
+          <tr><td>\((+)(-)(-)\)</td><td>\(+\)</td><td>Balanceada</td><td>Dos conflictos producen una alianza coherente.</td></tr>
+          <tr><td>\((+)(+)(-)\)</td><td>\(-\)</td><td>No balanceada</td><td>Hay una contradicción entre aliados.</td></tr>
+          <tr><td>\((-)(-)(-)\)</td><td>\(-\)</td><td>No balanceada</td><td>Todos se oponen: la tensión no se resuelve en dos bloques coherentes.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod03" data-section-title="Harary grafo firmado teorema bipartición ciclos positivos polarización">
+    <span class="kicker">Módulo 03 · Harary</span>
+    <h2>3. Harary: del triángulo psicológico al grafo firmado</h2>
+    <p>Frank Harary toma la intuición de Heider y la convierte en una estructura matemática: un <strong>grafo firmado</strong>.</p>
+    \[
+      G=(V,E,\sigma)
+    \]
+    <p>donde:</p>
+    \[
+      V = \text{conjunto de nodos}, \qquad E = \text{conjunto de relaciones}, \qquad \sigma:E\to\{+1,-1\}.
+    \]
+    <div class="grid2">
+      <div class="mini"><strong>Nodo</strong><small>Persona, grupo, cuenta, comunidad, hashtag, medio o actor político.</small></div>
+      <div class="mini"><strong>Arista firmada</strong><small>Apoyo, alianza, like o colaboración como signo positivo; bloqueo, ataque o conflicto como signo negativo.</small></div>
+    </div>
+    <p>El teorema de Harary afirma, en su formulación clásica, que un grafo firmado está balanceado si y solo si sus vértices pueden dividirse en dos grupos tales que las relaciones dentro de cada grupo sean positivas y las relaciones entre grupos distintos sean negativas.</p>
+    <div class="notice good"><strong>Lectura sociológica:</strong> una red balanceada tiende a ordenarse en dos bloques internamente cohesionados y externamente enfrentados. Esta es una formalización matemática de la polarización.</div>
+    <p>Otra formulación equivalente: todo ciclo del grafo debe tener signo positivo, es decir, debe contener un número par de aristas negativas.</p>
+  </section>
+
+  <section class="card moduleSection" id="mod04" data-section-title="forma matemática balance producto signos XOR paridad ciclos">
+    <span class="kicker">Módulo 04 · Forma matemática</span>
+    <h2>4. Balance como producto de signos y como XOR</h2>
+    <p>Sea un ciclo:</p>
+    \[
+      v_1\to v_2\to \cdots \to v_k\to v_1
+    \]
+    <p>con signos en sus aristas:</p>
+    \[
+      \sigma(v_1v_2),\sigma(v_2v_3),\dots,\sigma(v_kv_1).
+    \]
+    <p>El ciclo es balanceado si:</p>
+    \[
+      \prod_{i=1}^{k}\sigma(v_iv_{i+1})=+1.
+    \]
+    <p>Esto equivale a decir que el ciclo tiene una cantidad par de relaciones negativas.</p>
+    <div class="grid2">
+      <div class="mini"><strong>Producto positivo</strong><small>Hay 0, 2, 4, ... aristas negativas. El ciclo está balanceado.</small></div>
+      <div class="mini"><strong>Producto negativo</strong><small>Hay 1, 3, 5, ... aristas negativas. El ciclo está desbalanceado.</small></div>
+    </div>
+    <p>Si codificamos \(+\leftrightarrow0\) y \(-\leftrightarrow1\), la condición se transforma en:</p>
+    \[
+      \text{ciclo balanceado} \iff \text{XOR de signos}=0.
+    \]
+    <div class="notice"><strong>Clave algebraica:</strong> el balance estructural es una condición de paridad. Por eso XOR aparece de manera natural.</div>
+  </section>
+
+  <section class="card moduleSection" id="mod05" data-section-title="grupo Klein V4 Z2xZ2 XOR tabla Cayley signos bloques">
+    <span class="kicker">Módulo 05 · Grupo de Klein</span>
+    <h2>5. Entrada del grupo de Klein</h2>
+    <p>El grupo de Klein es:</p>
+    \[
+      V_4\cong \mathbb{Z}_2\times \mathbb{Z}_2.
+    \]
+    <p>Sus elementos pueden representarse como:</p>
+    \[
+      V_4=\{00,01,10,11\}
+    \]
+    <p>con operación XOR bit a bit:</p>
+    \[
+      \oplus
+    \]
+    <p>La propiedad clave es que todo elemento es su propio inverso:</p>
+    \[
+      x\oplus x=00.
+    \]
+    <div class="tableWrap">
+      <table class="cayley" id="v4Table" aria-label="Tabla de Cayley del grupo de Klein con XOR">
+        <thead><tr><th>\(\oplus\)</th><th>00</th><th>01</th><th>10</th><th>11</th></tr></thead>
+        <tbody>
+          <tr><th>00</th><td data-row="00" data-col="00">00</td><td data-row="00" data-col="01">01</td><td data-row="00" data-col="10">10</td><td data-row="00" data-col="11">11</td></tr>
+          <tr><th>01</th><td data-row="01" data-col="00">01</td><td data-row="01" data-col="01">00</td><td data-row="01" data-col="10">11</td><td data-row="01" data-col="11">10</td></tr>
+          <tr><th>10</th><td data-row="10" data-col="00">10</td><td data-row="10" data-col="01">11</td><td data-row="10" data-col="10">00</td><td data-row="10" data-col="11">01</td></tr>
+          <tr><th>11</th><td data-row="11" data-col="00">11</td><td data-row="11" data-col="01">10</td><td data-row="11" data-col="10">01</td><td data-row="11" data-col="11">00</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sim" id="v4Sim">
+      <div class="simTitle"><strong>Simulador de operación en \(V_4\)</strong><span>Resultado: <span class="stateBadge" id="v4Result">00</span></span></div>
+      <div class="grid3">
+        <div class="mini"><strong>Primer estado</strong><select id="v4A" onchange="updateV4()"><option value="00">00 · alianza coherente</option><option value="01">01 · puente/contradicción</option><option value="10">10 · fractura interna</option><option value="11">11 · oposición coherente</option></select></div>
+        <div class="mini"><strong>Segundo estado</strong><select id="v4B" onchange="updateV4()"><option value="00">00 · alianza coherente</option><option value="01">01 · puente/contradicción</option><option value="10">10 · fractura interna</option><option value="11">11 · oposición coherente</option></select></div>
+        <div class="mini"><strong>Lectura</strong><small id="v4Text">00 ⊕ 00 = 00</small></div>
+      </div>
+      <div class="pillRow"><button class="primary" onclick="quickV4('01','10')">01 ⊕ 10</button><button class="primary" onclick="quickV4('11','11')">11 ⊕ 11</button><button onclick="quickV4('10','11')">10 ⊕ 11</button><button onclick="quickV4('01','01')">01 ⊕ 01</button></div>
+      <div class="log" id="v4Log">00 es el neutro: no modifica el estado al aplicar XOR.</div>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod06" data-section-title="por qué no basta Z2 dos dimensiones binarias signo pertenencia facción">
+    <span class="kicker">Módulo 06 · Dos dimensiones binarias</span>
+    <h2>6. ¿Por qué no basta con \(\mathbb Z_2\)?</h2>
+    <p>La teoría básica de balance usa una sola variable binaria:</p>
+    \[
+      +/- \quad \cong \quad \mathbb Z_2.
+    \]
+    <p>Eso alcanza para decir si una relación es positiva o negativa. Pero en redes sociales reales suele interesar distinguir dos dimensiones simultáneas:</p>
+    \[
+      \text{primer bit} = \text{signo de la relación}
+    \]
+    \[
+      \text{segundo bit} = \text{pertenencia o distancia de facción}.
+    \]
+    <p>Entonces cada relación puede codificarse como un elemento de \(V_4\):</p>
+    <div class="grid4">
+      <div class="mini"><strong>00</strong><small>Amistad dentro del mismo bloque.</small></div>
+      <div class="mini"><strong>01</strong><small>Amistad entre bloques distintos.</small></div>
+      <div class="mini"><strong>10</strong><small>Enemistad dentro del mismo bloque.</small></div>
+      <div class="mini"><strong>11</strong><small>Enemistad entre bloques distintos.</small></div>
+    </div>
+    <div class="notice warn"><strong>Interpretación:</strong> Harary espera coherencia en \(00\) y \(11\). Los estados \(01\) y \(10\) indican puentes, contradicciones, fracturas internas o realineamientos.</div>
+  </section>
+
+  <section class="card moduleSection" id="mod07" data-section-title="tabla social V4 cohesión polarización puentes fracturas internas">
+    <span class="kicker">Módulo 07 · Tabla social</span>
+    <h2>7. Tabla social de \(V_4\)</h2>
+    <p>La tabla social permite distinguir cohesión, polarización, puentes entre comunidades y conflictos internos.</p>
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>Elemento</th><th>Signo</th><th>Bloque</th><th>Lectura social</th><th>Ejemplo en red política</th></tr></thead>
+        <tbody>
+          <tr><td><strong>00</strong></td><td>+</td><td>Mismo bloque</td><td>Alianza coherente</td><td>Dos cuentas del mismo espacio se apoyan.</td></tr>
+          <tr><td><strong>01</strong></td><td>+</td><td>Bloque distinto</td><td>Puente o contradicción</td><td>Dos espacios opuestos colaboran o dialogan.</td></tr>
+          <tr><td><strong>10</strong></td><td>-</td><td>Mismo bloque</td><td>Fractura interna</td><td>Dos cuentas del mismo espacio se atacan.</td></tr>
+          <tr><td><strong>11</strong></td><td>-</td><td>Bloque distinto</td><td>Oposición coherente</td><td>Dos cuentas de espacios opuestos se enfrentan.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusGrid" style="margin-top:16px">
+      <div class="statusCard ok"><h3>00</h3><p><strong>Cohesión interna.</strong> Estabilidad dentro del bloque.</p></div>
+      <div class="statusCard tense"><h3>01</h3><p><strong>Puente externo.</strong> Puede ser diálogo, alianza táctica o anomalía.</p></div>
+      <div class="statusCard tense"><h3>10</h3><p><strong>Fractura interna.</strong> Señal de disputa, crisis narrativa o ruptura.</p></div>
+      <div class="statusCard ok"><h3>11</h3><p><strong>Polarización coherente.</strong> Frontera externa nítida.</p></div>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod08" data-section-title="Harary polarización cámaras de eco comunidades balance estructural">
+    <span class="kicker">Módulo 08 · Polarización</span>
+    <h2>8. Harary como modelo matemático de polarización</h2>
+    <p>El teorema de Harary explica por qué una red balanceada tiende a dividirse en dos comunidades:</p>
+    \[
+      A \quad \text{y} \quad B
+    \]
+    <p>con relaciones positivas dentro de \(A\), positivas dentro de \(B\), y negativas entre \(A\) y \(B\).</p>
+    <div class="grid3">
+      <div class="mini"><strong>Balance estructural</strong><small>La red minimiza contradicciones internas.</small></div>
+      <div class="mini"><strong>Bipartición</strong><small>Los nodos se organizan en dos campos.</small></div>
+      <div class="mini"><strong>Polarización</strong><small>Cohesión interna más antagonismo externo.</small></div>
+    </div>
+    <div class="notice"><strong>Lectura comunicacional:</strong> una red muy balanceada puede ser estable, pero también puede indicar fuerte polarización y baja capacidad de persuasión entre comunidades.</div>
+  </section>
+
+  <section class="card moduleSection" id="mod09" data-section-title="redes sociales digitales X Instagram TikTok LinkedIn Telegram interacciones positivas negativas">
+    <span class="kicker">Módulo 09 · Redes digitales</span>
+    <h2>9. Relación con redes sociales digitales</h2>
+    <p>En plataformas como X, Instagram, TikTok, LinkedIn o Telegram, las relaciones no son solamente “amistad” o “enemistad”. Pero pueden aproximarse mediante señales observables:</p>
+    <div class="grid2">
+      <div class="mini"><strong>Señales positivas</strong><small>Seguir, compartir, citar favorablemente, comentar a favor, colaborar, recomendar, invitar.</small></div>
+      <div class="mini"><strong>Señales negativas</strong><small>Bloquear, atacar, denunciar, citar negativamente, confrontar, ridiculizar, coordinar críticas.</small></div>
+    </div>
+    <p>Con esas señales se construye un grafo firmado:</p>
+    \[
+      G=(V,E,+/-)
+    \]
+    <p>donde los nodos son usuarios, comunidades, hashtags o medios, y las aristas representan interacciones.</p>
+    <div class="notice warn"><strong>Advertencia metodológica:</strong> las redes reales tienen ruido, vínculos débiles, ironía, bots, cuentas puente, comunidades superpuestas, relaciones asimétricas y cambios temporales. El modelo de Heider-Harary-Klein no reemplaza el análisis empírico: ofrece una estructura ideal para medir tensiones.</div>
+  </section>
+
+  <section class="card moduleSection" id="mod10" data-section-title="detector conceptual tensión Tij signo bloque XOR coherencia social">
+    <span class="kicker">Módulo 10 · Detector de tensión</span>
+    <h2>10. Grupo de Klein como detector conceptual de tensión</h2>
+    <p>Podemos usar \(V_4\) como detector algebraico de coherencia social. Cada vínculo tiene dos bits:</p>
+    \[
+      r_{ij}=(s_{ij},b_{ij})
+    \]
+    <p>donde:</p>
+    \[
+      s_{ij}=0 \text{ si la relación es positiva}, \quad s_{ij}=1 \text{ si la relación es negativa}
+    \]
+    \[
+      b_{ij}=0 \text{ si los nodos están en el mismo bloque}, \quad b_{ij}=1 \text{ si están en bloques distintos}.
+    \]
+    <p>La coherencia ideal de Harary se da cuando:</p>
+    \[
+      s_{ij}=b_{ij}.
+    \]
+    <p>El indicador de tensión es:</p>
+    \[
+      T_{ij}=s_{ij}\oplus b_{ij}.
+    \]
+    <div class="grid2">
+      <div class="mini"><strong>\(T_{ij}=0\)</strong><small>La relación es coherente: positivo dentro del grupo o negativo entre grupos.</small></div>
+      <div class="mini"><strong>\(T_{ij}=1\)</strong><small>La relación es tensa: positivo entre rivales o negativo dentro del propio grupo.</small></div>
+    </div>
+    <div class="sim" id="tensionSim">
+      <div class="simTitle"><strong>Simulador de tensión de una arista</strong><span>Estado: <span class="stateBadge" id="tensionState">00</span></span></div>
+      <div class="grid3">
+        <div class="mini"><strong>Signo real</strong><select id="edgeSign" onchange="updateTension()"><option value="0">Positiva (+)</option><option value="1">Negativa (-)</option></select></div>
+        <div class="mini"><strong>Distancia de bloque</strong><select id="edgeBlock" onchange="updateTension()"><option value="0">Mismo bloque</option><option value="1">Bloques distintos</option></select></div>
+        <div class="mini"><strong>Tensión</strong><small id="tensionFormula">T = 0 ⊕ 0 = 0</small></div>
+      </div>
+      <div class="log" id="tensionLog">Relación coherente: apoyo dentro del mismo bloque.</div>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod11" data-section-title="ejemplo tres cuentas triada política influencer medio opositor balance tensión">
+    <span class="kicker">Módulo 11 · Ejemplo con tres cuentas</span>
+    <h2>11. Ejemplo con tres cuentas</h2>
+    <p>Supongamos tres cuentas:</p>
+    \[
+      A=\text{cuenta de un partido}, \quad B=\text{influencer afín}, \quad C=\text{medio opositor}.
+    \]
+    <p>Si:</p>
+    \[
+      A\to B=+, \qquad B\to C=-, \qquad A\to C=-,
+    \]
+    <p>entonces:</p>
+    \[
+      (+)(-)(-)=+.
+    \]
+    <p>Codificado como bits:</p>
+    \[
+      0\oplus1\oplus1=0.
+    \]
+    <p>La tríada está balanceada. Ahora, si:</p>
+    \[
+      A\to B=+, \qquad B\to C=+, \qquad A\to C=-,
+    \]
+    <p>entonces:</p>
+    \[
+      0\oplus0\oplus1=1.
+    \]
+    <p>La red tiene una contradicción: si \(A\) apoya a \(B\), y \(B\) apoya a \(C\), ¿por qué \(A\) ataca a \(C\)?</p>
+    <div class="sim" id="simuladores">
+      <div class="simTitle" id="triadSim"><strong>Simulador de tríada firmada</strong><span>Resultado: <span class="stateBadge" id="triadState">Balanceada</span></span></div>
+      <div class="splitView">
+        <div class="svgBox">
+          <svg viewBox="0 0 560 420" role="img" aria-label="Triada con tres nodos y signos">
+            <defs>
+              <marker id="arrowTriad" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 Z" fill="var(--muted)"/></marker>
+            </defs>
+            <line id="edgeAB" x1="165" y1="118" x2="395" y2="118" stroke="var(--green)" stroke-width="7" stroke-linecap="round" marker-end="url(#arrowTriad)"/>
+            <line id="edgeBC" x1="410" y1="140" x2="304" y2="314" stroke="var(--red)" stroke-width="7" stroke-linecap="round" marker-end="url(#arrowTriad)"/>
+            <line id="edgeCA" x1="256" y1="314" x2="150" y2="140" stroke="var(--red)" stroke-width="7" stroke-linecap="round" marker-end="url(#arrowTriad)"/>
+            <circle cx="130" cy="112" r="48" fill="var(--card)" stroke="var(--primary)" stroke-width="5"/><text x="130" y="124" text-anchor="middle" class="nodeText" font-size="34">A</text>
+            <circle cx="430" cy="112" r="48" fill="var(--card)" stroke="var(--secondary)" stroke-width="5"/><text x="430" y="124" text-anchor="middle" class="nodeText" font-size="34">B</text>
+            <circle cx="280" cy="340" r="48" fill="var(--card)" stroke="var(--cyan)" stroke-width="5"/><text x="280" y="352" text-anchor="middle" class="nodeText" font-size="34">C</text>
+            <text id="labelAB" x="280" y="94" text-anchor="middle" class="edgeLabel" fill="var(--green)" font-size="30">+</text>
+            <text id="labelBC" x="374" y="246" text-anchor="middle" class="edgeLabel" fill="var(--red)" font-size="30">−</text>
+            <text id="labelCA" x="186" y="246" text-anchor="middle" class="edgeLabel" fill="var(--red)" font-size="30">−</text>
+          </svg>
+        </div>
+        <div>
+          <div class="grid3">
+            <div class="mini"><strong>A → B</strong><select id="signAB" onchange="updateTriad()"><option value="0">+</option><option value="1">−</option></select></div>
+            <div class="mini"><strong>B → C</strong><select id="signBC" onchange="updateTriad()"><option value="0">+</option><option value="1" selected>−</option></select></div>
+            <div class="mini"><strong>C → A</strong><select id="signCA" onchange="updateTriad()"><option value="0">+</option><option value="1" selected>−</option></select></div>
+          </div>
+          <div class="pillRow"><button class="primary" onclick="setTriad(0,1,1)">(+)(−)(−)</button><button class="primary" onclick="setTriad(0,0,1)">(+)(+)(−)</button><button onclick="setTriad(0,0,0)">(+)(+)(+)</button><button onclick="setTriad(1,1,1)">(−)(−)(−)</button><button class="warn" onclick="autoTriad()">▶ Simulación automática</button></div>
+          <div class="log" id="triadLog">0 ⊕ 1 ⊕ 1 = 0. La tríada está balanceada porque hay una cantidad par de vínculos negativos.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card moduleSection" id="mod12" data-section-title="marketing comunicación campañas políticas puentes alianzas narrativas tribus digitales">
+    <span class="kicker">Módulo 12 · Marketing y comunicación</span>
+    <h2>12. Lectura desde marketing, comunicación y redes sociales</h2>
+    <p>Desde una mirada de redes sociales, el modelo Heider-Harary-Klein sirve para analizar:</p>
+    <div class="grid3">
+      <div class="mini"><strong>Polarización de audiencias</strong><small>Detecta bloques con apoyo interno y rechazo externo.</small></div>
+      <div class="mini"><strong>Cámaras de eco</strong><small>Identifica comunidades densas con baja conexión positiva hacia afuera.</small></div>
+      <div class="mini"><strong>Conflictos entre comunidades</strong><small>Modela antagonismos y ciclos de ataque.</small></div>
+      <div class="mini"><strong>Alianzas narrativas</strong><small>Observa cuándo dos actores comienzan a coordinar mensajes.</small></div>
+      <div class="mini"><strong>Puentes entre grupos</strong><small>Los estados \(01\) pueden señalar nodos valiosos para diálogo o persuasión.</small></div>
+      <div class="mini"><strong>Rupturas internas</strong><small>Los estados \(10\) muestran disputas dentro de una misma facción.</small></div>
+    </div>
+    <div class="notice good"><strong>Aplicación estratégica:</strong> una red extremadamente balanceada puede parecer ordenada, pero puede ser difícil de persuadir. En cambio, los vínculos positivos entre bloques distintos pueden indicar oportunidades de comunicación transversal.</div>
+  </section>
+
+  <section class="card moduleSection" id="mod13" data-section-title="traducción matemática formulación completa GVE sigma phi bloques gi tensión implementacion">
+    <span class="kicker">Módulo 13 · Modelo computable</span>
+    <h2>13. Traducción matemática para redes sociales</h2>
+    <p>Sea una red social firmada:</p>
+    \[
+      G=(V,E,\sigma)
+    \]
+    <p>con:</p>
+    \[
+      \sigma:E\to\{+1,-1\}.
+    \]
+    <p>Codificamos:</p>
+    \[
+      \phi(+1)=0, \qquad \phi(-1)=1.
+    \]
+    <p>Para una tríada \((i,j,k)\), definimos:</p>
+    \[
+      B_{ijk}=\phi(\sigma_{ij})\oplus \phi(\sigma_{jk})\oplus \phi(\sigma_{ki}).
+    \]
+    <div class="grid2">
+      <div class="mini"><strong>\(B_{ijk}=0\)</strong><small>La tríada está balanceada.</small></div>
+      <div class="mini"><strong>\(B_{ijk}=1\)</strong><small>La tríada está desbalanceada.</small></div>
+    </div>
+    <p>Ahora agregamos pertenencia comunitaria:</p>
+    \[
+      g_i\in\{0,1\}
+    \]
+    <p>donde \(g_i\) indica el bloque del nodo \(i\). El signo esperado entre \(i\) y \(j\) es:</p>
+    \[
+      g_i\oplus g_j.
+    \]
+    <p>Si están en el mismo grupo, esperamos relación positiva; si están en grupos distintos, esperamos relación negativa. La tensión de una arista es:</p>
+    \[
+      T_{ij}=\phi(\sigma_{ij})\oplus g_i\oplus g_j.
+    \]
+    <p>Aquí aparece naturalmente:</p>
+    \[
+      (\phi(\sigma_{ij}),g_i\oplus g_j)\in V_4.
+    \]
+    <h3>Algoritmo conceptual</h3>
+    <div class="code">Entrada: red social con interacciones positivas y negativas
+1. Construir un grafo firmado G=(V,E,σ).
+2. Codificar σ=+1 como 0 y σ=-1 como 1.
+3. Detectar comunidades o bloques gᵢ ∈ {0,1}.
+4. Para cada arista (i,j), calcular Tᵢⱼ = φ(σᵢⱼ) ⊕ gᵢ ⊕ gⱼ.
+5. Para cada triada (i,j,k), calcular Bᵢⱼₖ = φ(σᵢⱼ) ⊕ φ(σⱼₖ) ⊕ φ(σₖᵢ).
+6. Clasificar tensiones: coherencia, puente, fractura interna, oposición coherente.
+7. Interpretar resultados en términos de polarización, alianzas y rupturas.</div>
+    <div class="notice"><strong>Frase final:</strong> Heider da la intuición psicológica; Harary da la estructura de grafos; Klein da el álgebra binaria. En redes sociales digitales, esto convierte amistades, antagonismos y comunidades en un modelo computable de paridad, tensión y polarización.</div>
+  </section>
+
+  <section class="card">
+    <h2>Quiz de comprensión</h2>
+    <div class="sim">
+      <div class="quiz">
+        <p><strong>Pregunta 1:</strong> ¿Cuándo está balanceada una tríada en el modelo de Heider-Harary?</p>
+        <button onclick="quiz(1,false)">Cuando tiene exactamente una relación negativa.</button>
+        <button onclick="quiz(1,true)">Cuando el producto de sus signos es positivo.</button>
+        <button onclick="quiz(1,false)">Cuando todos los nodos pertenecen a comunidades distintas.</button>
+        <div class="feedback" id="quiz1"></div>
+        <p><strong>Pregunta 2:</strong> ¿Qué expresa el teorema de Harary en una red balanceada?</p>
+        <button onclick="quiz(2,false)">Que todos los vínculos son positivos.</button>
+        <button onclick="quiz(2,true)">Que la red puede dividirse en dos grupos con vínculos positivos internos y negativos externos.</button>
+        <button onclick="quiz(2,false)">Que no existen ciclos en la red.</button>
+        <div class="feedback" id="quiz2"></div>
+        <p><strong>Pregunta 3:</strong> ¿Qué aporta \(V_4\) respecto de \(\mathbb Z_2\)?</p>
+        <button onclick="quiz(3,false)">Elimina la necesidad de signos.</button>
+        <button onclick="quiz(3,true)">Permite codificar dos dimensiones binarias: signo y distancia de bloque.</button>
+        <button onclick="quiz(3,false)">Convierte toda red en una red no polarizada.</button>
+        <div class="feedback" id="quiz3"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Referencias y lecturas sugeridas</h2>
+    <p>Estas fuentes se incluyen como punto de partida para ampliar la teoría de balance, grafos firmados y balance estructural en redes grandes.</p>
+    <ol class="sourceList">
+      <li><a href="https://en.wikipedia.org/wiki/Balance_theory" target="_blank" rel="noopener">Balance theory</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Signed_graph" target="_blank" rel="noopener">Signed graph</a>.</li>
+      <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3248482/" target="_blank" rel="noopener">Computing global structural balance in large-scale signed social networks</a>.</li>
+    </ol>
+    <div class="notice warn"><strong>Nota editorial:</strong> para una publicación académica conviene reemplazar referencias generales por citas primarias: Heider, Cartwright-Harary y bibliografía reciente sobre signed networks, structural balance y polarization.</div>
+  </section>
+
+  <div class="footer">
+    <strong>Material elaborado por Sergio Gevatschnaider</strong><br />
+    Página HTML autónoma · Heider, Harary, Grupo de Klein y redes sociales · Balance estructural, grafos firmados, XOR y polarización
+  </div>
+</main>
+<a class="btn primary toTop" href="#inicio" aria-label="Volver arriba">↑</a>
+<script>
+(function(){
+  const root=document.documentElement;
+  const themeBtn=document.getElementById('themeBtn');
+  function setTheme(theme){
+    root.setAttribute('data-theme',theme);
+    localStorage.setItem('hhk-theme',theme);
+    themeBtn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';
+  }
+  setTheme(localStorage.getItem('hhk-theme') || 'light');
+  themeBtn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+  const progress=document.getElementById('readProgress');
+  function updateProgress(){
+    const h=document.documentElement;
+    const scrolled=h.scrollTop;
+    const max=h.scrollHeight-h.clientHeight;
+    progress.style.width=(max>0? scrolled/max*100 : 0)+'%';
+  }
+  document.addEventListener('scroll',updateProgress,{passive:true});
+  updateProgress();
+
+  const search=document.getElementById('moduleSearch');
+  const cards=[...document.querySelectorAll('.moduleCard')];
+  const sections=[...document.querySelectorAll('.moduleSection')];
+  search.addEventListener('input',()=>{
+    const q=search.value.trim().toLowerCase();
+    cards.forEach(card=>{
+      const hay=(card.dataset.title+' '+card.innerText).toLowerCase();
+      card.style.display=hay.includes(q)?'flex':'none';
+    });
+    sections.forEach(sec=>{
+      const hay=(sec.dataset.sectionTitle+' '+sec.innerText).toLowerCase();
+      sec.style.display=q==='' || hay.includes(q)?'block':'none';
+    });
+  });
+  document.getElementById('showAllBtn').addEventListener('click',()=>{
+    search.value='';
+    cards.forEach(card=>card.style.display='flex');
+    sections.forEach(sec=>sec.style.display='block');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+})();
+
+const socialLabel={
+  '00':'alianza coherente: positivo dentro del mismo bloque',
+  '01':'puente o contradicción: positivo entre bloques distintos',
+  '10':'fractura interna: negativo dentro del mismo bloque',
+  '11':'oposición coherente: negativo entre bloques distintos'
+};
+function xorBits(a,b){return ''+(Number(a[0])^Number(b[0]))+(Number(a[1])^Number(b[1]));}
+function updateV4(){
+  const a=document.getElementById('v4A').value;
+  const b=document.getElementById('v4B').value;
+  const r=xorBits(a,b);
+  document.getElementById('v4Result').textContent=r;
+  document.getElementById('v4Text').textContent=`${a} ⊕ ${b} = ${r}`;
+  document.getElementById('v4Log').innerHTML=`<strong>${a} ⊕ ${b} = ${r}</strong>. Lectura social del resultado: <strong>${socialLabel[r]}</strong>.`;
+  document.querySelectorAll('#v4Table td').forEach(td=>td.classList.toggle('hit',td.dataset.row===a && td.dataset.col===b));
+}
+function quickV4(a,b){document.getElementById('v4A').value=a;document.getElementById('v4B').value=b;updateV4();}
+
+function updateTension(){
+  const s=document.getElementById('edgeSign').value;
+  const b=document.getElementById('edgeBlock').value;
+  const state=s+b;
+  const t=Number(s)^Number(b);
+  const badge=document.getElementById('tensionState');
+  badge.textContent=state;
+  badge.classList.toggle('good',t===0);
+  badge.classList.toggle('bad',t===1);
+  document.getElementById('tensionFormula').textContent=`T = ${s} ⊕ ${b} = ${t}`;
+  let msg='';
+  if(state==='00') msg='Relación coherente: apoyo dentro del mismo bloque.';
+  if(state==='11') msg='Relación coherente: oposición entre bloques distintos.';
+  if(state==='01') msg='Relación tensa o puente: vínculo positivo entre bloques distintos. Puede indicar diálogo, alianza táctica o contradicción del modelo polarizado.';
+  if(state==='10') msg='Relación tensa: vínculo negativo dentro del mismo bloque. Puede indicar fractura interna, competencia o ruptura narrativa.';
+  document.getElementById('tensionLog').textContent=msg;
+}
+
+function signColor(bit){return bit===0?'var(--green)':'var(--red)';}
+function signText(bit){return bit===0?'+':'−';}
+function updateTriad(){
+  const ab=Number(document.getElementById('signAB').value);
+  const bc=Number(document.getElementById('signBC').value);
+  const ca=Number(document.getElementById('signCA').value);
+  const x=ab^bc^ca;
+  const neg=ab+bc+ca;
+  const balanced=x===0;
+  const state=document.getElementById('triadState');
+  state.textContent=balanced?'Balanceada':'En tensión';
+  state.classList.toggle('good',balanced);
+  state.classList.toggle('bad',!balanced);
+  const items=[['AB',ab],['BC',bc],['CA',ca]];
+  items.forEach(([name,bit])=>{
+    document.getElementById('edge'+name).style.stroke=signColor(bit);
+    const label=document.getElementById('label'+name);
+    label.textContent=signText(bit);
+    label.setAttribute('fill',signColor(bit));
+  });
+  const product=balanced?'+':'−';
+  document.getElementById('triadLog').innerHTML=`${ab} ⊕ ${bc} ⊕ ${ca} = <strong>${x}</strong>. Producto de signos: <strong>${product}</strong>. Hay <strong>${neg}</strong> vínculo(s) negativo(s). ${balanced?'La tríada está balanceada porque la cantidad de vínculos negativos es par.':'La tríada está desbalanceada porque la cantidad de vínculos negativos es impar.'}`;
+}
+function setTriad(ab,bc,ca){
+  document.getElementById('signAB').value=String(ab);
+  document.getElementById('signBC').value=String(bc);
+  document.getElementById('signCA').value=String(ca);
+  updateTriad();
+}
+let triadTimer=null;
+function autoTriad(){
+  const presets=[[0,0,0],[0,1,1],[1,0,1],[1,1,0],[0,0,1],[0,1,0],[1,0,0],[1,1,1]];
+  let i=0;
+  clearInterval(triadTimer);
+  setTriad(...presets[i]);
+  triadTimer=setInterval(()=>{
+    i++;
+    if(i>=presets.length){clearInterval(triadTimer);return;}
+    setTriad(...presets[i]);
+  },1300);
+}
+
+function quiz(n,ok){
+  const el=document.getElementById('quiz'+n);
+  const correct={
+    1:'Correcto: el criterio es producto positivo; en bits, XOR igual a 0.',
+    2:'Correcto: Harary muestra la bipartición con vínculos positivos internos y negativos externos.',
+    3:'Correcto: V₄ permite trabajar con dos bits, por ejemplo signo real y distancia comunitaria.'
+  };
+  el.textContent=ok?correct[n]:'No exactamente. Revisá el módulo correspondiente y compará producto de signos, XOR y bloques.';
+  el.style.color=ok?'var(--green)':'var(--red)';
+}
+updateV4();updateTension();updateTriad();
+</script>
+</body>
+</html>

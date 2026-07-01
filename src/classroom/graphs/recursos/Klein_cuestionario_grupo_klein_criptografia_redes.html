@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Cuestionario interactivo sobre el Grupo de Klein V4, one-time pad de Vernam y balance estructural de Heider-Harary." />
+<title>Cuestionario · Grupo de Klein, Criptografía y Redes Sociales</title>
+<style>
+:root{
+  --bg:#eef6ff;
+  --bg2:#fbfdff;
+  --card:#ffffff;
+  --card2:#f6faff;
+  --text:#102033;
+  --muted:#5f718a;
+  --line:#d8e5f6;
+  --ink:#0f172a;
+  --primary:#2563eb;
+  --secondary:#7c3aed;
+  --cyan:#0891b2;
+  --green:#059669;
+  --amber:#d97706;
+  --red:#dc2626;
+  --radius:28px;
+  --shadow:0 24px 70px rgba(37,99,235,.15);
+  --soft:0 10px 30px rgba(15,23,42,.10);
+  --ring:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+[data-theme="dark"]{
+  --bg:#07111f;
+  --bg2:#0b1628;
+  --card:#111d32;
+  --card2:#0c172a;
+  --text:#edf5ff;
+  --muted:#b5c5dd;
+  --line:#2a3d5c;
+  --ink:#f8fafc;
+  --primary:#60a5fa;
+  --secondary:#a78bfa;
+  --cyan:#22d3ee;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#fb7185;
+  --shadow:0 24px 70px rgba(0,0,0,.38);
+  --soft:0 10px 30px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  line-height:1.68;
+  background:
+    radial-gradient(circle at 5% 0%,color-mix(in srgb,var(--primary) 24%,transparent),transparent 28%),
+    radial-gradient(circle at 92% 4%,color-mix(in srgb,var(--secondary) 20%,transparent),transparent 34%),
+    radial-gradient(circle at 65% 58%,color-mix(in srgb,var(--cyan) 11%,transparent),transparent 38%),
+    linear-gradient(135deg,var(--bg),var(--bg2));
+}
+a{color:var(--primary);font-weight:900;text-decoration:none}
+a:hover{text-decoration:underline}
+.progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--cyan));z-index:120;width:0%}
+header{
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb,var(--card) 88%,transparent);
+  backdrop-filter:blur(18px);
+}
+.nav{max-width:1280px;margin:auto;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.brand{display:flex;gap:11px;align-items:center;font-weight:950;letter-spacing:-.03em}
+.brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));box-shadow:0 0 0 6px color-mix(in srgb,var(--primary) 17%,transparent)}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+button,.btn{
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:16px;
+  cursor:pointer;
+  font-weight:900;
+  box-shadow:var(--soft);
+  transition:.18s transform,.18s box-shadow,.18s background;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 13px 32px rgba(15,23,42,.14);text-decoration:none}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--ring)}
+button.primary,.btn.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}
+button.good{background:color-mix(in srgb,var(--green) 13%,var(--card));border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+button.warn{background:color-mix(in srgb,var(--amber) 13%,var(--card));border-color:color-mix(in srgb,var(--amber) 42%,var(--line))}
+main{max-width:1280px;margin:auto;padding:28px 20px 72px}
+.card,.qcard{
+  background:color-mix(in srgb,var(--card) 96%,transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin:18px 0;
+}
+.hero{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(330px,.88fr);gap:22px;align-items:stretch;margin:18px 0 26px}
+h1{font-size:clamp(38px,5.5vw,76px);line-height:1.0;margin:12px 0 16px;letter-spacing:-.065em}
+h2{font-size:clamp(27px,3.2vw,43px);line-height:1.08;margin:34px 0 16px;letter-spacing:-.045em}
+h3{font-size:22px;margin:10px 0 10px;letter-spacing:-.025em}
+p{margin:10px 0}
+.lead{font-size:18.5px;color:var(--muted);max-width:90ch}
+.muted{color:var(--muted)}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--primary) 6%);font-size:13px;font-weight:920;color:var(--muted)}
+.notice{border-left:5px solid var(--primary);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--primary) 8%,var(--card));margin:14px 0}
+.notice.good{border-left-color:var(--green);background:color-mix(in srgb,var(--green) 9%,var(--card))}
+.notice.warn{border-left-color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,var(--card))}
+.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
+.path a{width:43px;height:43px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}
+.path a:hover{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none}
+.searchBox{display:grid;gap:8px;margin-top:14px}
+input,select{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:760;box-shadow:var(--soft)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}
+.mini strong{display:block;font-size:22px;letter-spacing:-.02em;color:var(--primary)}
+.mini small{display:block;color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.filterBtn.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none}
+.qgrid{display:grid;gap:16px}
+.qcard{scroll-margin-top:96px;margin:0;transition:.2s transform,.2s opacity}
+.qcard.hide{display:none}
+.qcard:hover{transform:translateY(-1px)}
+.qtop{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.qnum{font-size:30px;font-weight:950;letter-spacing:-.05em;color:var(--primary);margin-right:8px}
+.category{border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-weight:900;font-size:13px;background:var(--card)}
+.slideBtn::after{content:"▾";font-size:13px;transition:transform .25s ease}
+.qcard.open .slideBtn::after{transform:rotate(180deg)}
+.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}
+.answer{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.qcard.open .answer{max-height:2800px}
+.answerInner{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:var(--soft)}
+.answerLabel{display:inline-flex;margin-bottom:8px;color:var(--primary);font-size:13px;text-transform:uppercase;letter-spacing:.12em}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft);margin-top:12px}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--primary) 9%,var(--card));font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+tr:last-child td{border-bottom:none}
+.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}
+.toTop{position:fixed;right:18px;bottom:18px;z-index:70}
+.countBadge{display:inline-flex;min-width:34px;height:34px;border-radius:999px;background:color-mix(in srgb,var(--primary) 12%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 35%,var(--line));align-items:center;justify-content:center;font-weight:950;color:var(--primary)}
+@media(max-width:1040px){.hero,.grid3{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}}
+@media(max-width:640px){main{padding:18px 12px 80px}.card,.qcard{padding:18px;border-radius:23px}.controls button,.controls .btn,.toolbar button{width:100%}h1{font-size:43px}}
+@media print{
+  header,.controls,button,.btn,.searchBox,.toTop,.progress,.toolbar{display:none!important}
+  body{background:white}
+  .card,.qcard,.mini,.answerInner{box-shadow:none}
+  main{max-width:100%;padding:0}
+  .qcard{break-inside:avoid;margin-bottom:18px}
+  .answer{max-height:none!important;overflow:visible!important}
+  .hero,.grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Cuestionario · Grupo de Klein, Criptografía y Redes Sociales</span></div>
+    <div class="controls">
+      <button id="themeBtn" type="button">🌙 Tema oscuro</button>
+      <button id="expandBtn" type="button">▾ Mostrar respuestas</button>
+      <button onclick="window.print()" type="button">🖨️ Imprimir</button>
+      <a class="btn primary" href="#cuestionario">Preguntas</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="inicio">
+    <div class="card">
+      <span class="tag">Teoría de grupos</span><span class="tag">V₄</span><span class="tag">XOR</span><span class="tag">Vernam</span><span class="tag">Heider-Harary</span>
+      <h1>Cuestionario de 20 preguntas</h1>
+      <p class="lead">Material de estudio con respuestas desarrolladas sobre el grupo de Klein, sus modelos algebraicos y geométricos, su aplicación al cifrado de Vernam y su uso conceptual en grafos firmados y redes sociales.</p>
+      <div class="notice good"><strong>Objetivo:</strong> pasar de la definición abstracta de V₄ a aplicaciones concretas: simetrías, permutaciones, XOR, confidencialidad perfecta, balance estructural y tensión en redes.</div>
+      <div class="path" aria-label="Navegación rápida">
+        <a href="#p01">01</a><a href="#p02">02</a><a href="#p03">03</a><a href="#p04">04</a><a href="#p05">05</a><a href="#p06">06</a><a href="#p07">07</a><a href="#p08">08</a><a href="#p09">09</a><a href="#p10">10</a><a href="#p11">11</a><a href="#p12">12</a><a href="#p13">13</a><a href="#p14">14</a><a href="#p15">15</a><a href="#p16">16</a><a href="#p17">17</a><a href="#p18">18</a><a href="#p19">19</a><a href="#p20">20</a>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Panel de estudio</h3>
+      <p class="muted">Usá el buscador, filtrá por tema o abrí las respuestas con los botones deslizantes. En impresión, las respuestas quedan visibles automáticamente.</p>
+      <div class="searchBox">
+        <input id="searchInput" placeholder="Buscar: automorfismos, Bayes, Harary, XOR, two-time pad..." aria-label="Buscar en el cuestionario" />
+      </div>
+      <div class="grid3" style="margin-top:16px">
+        <div class="mini"><strong>10</strong><small>preguntas de teoría de grupos.</small></div>
+        <div class="mini"><strong>6</strong><small>preguntas de criptografía.</small></div>
+        <div class="mini"><strong>4</strong><small>preguntas de grafos y redes.</small></div>
+      </div>
+      <div class="notice warn"><strong>Modo sugerido:</strong> primero respondé sin abrir la solución; después deslizá la respuesta y compará la precisión conceptual.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Mapa de cobertura</h2>
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>Bloque</th><th>Preguntas</th><th>Conceptos principales</th></tr></thead>
+        <tbody>
+          <tr><td>Teoría de grupos</td><td>1 a 10</td><td>Definición de V₄, axiomas, tabla de Cayley, C₄, XOR, rectángulo, S₄/A₄, subgrupos, automorfismos, caracteres y Galois.</td></tr>
+          <tr><td>Criptografía</td><td>11 a 16</td><td>One-time pad, Vernam, confidencialidad perfecta, Bayes, atacante, mensajes largos y reutilización de clave.</td></tr>
+          <tr><td>Redes sociales y grafos</td><td>17 a 20</td><td>Heider, Harary, grafos firmados, paridad, V₄ social, polarización y detector de tensión.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="cuestionario">
+    <h2>Preguntas y respuestas desarrolladas</h2>
+    <div class="toolbar" aria-label="Filtros">
+      <button class="filterBtn active" data-filter="Todas" type="button">Todas <span class="countBadge">20</span></button>
+      <button class="filterBtn" data-filter="Teoría de grupos" type="button">Teoría de grupos <span class="countBadge">10</span></button>
+      <button class="filterBtn" data-filter="Criptografía" type="button">Criptografía <span class="countBadge">6</span></button>
+      <button class="filterBtn" data-filter="Redes sociales y grafos" type="button">Redes sociales <span class="countBadge">4</span></button>
+    </div>
+    <div class="qgrid" id="qgrid">
+      
+      <article class="qcard" data-category="Teoría de grupos" data-text="1. ¿qué es el grupo de klein v₄ y cuáles son sus rasgos estructurales principales? el grupo de klein, denotado v₄, es un grupo finito de orden cuatro. puede presentarse como v₄ = {e, a, b, c}, donde e es el elemento neutro y los otros tres elementos son involuciones: a² = e, b² = e y c² = e. la regla esencial es que el producto de dos elementos no triviales distintos da el tercero: ab = c, ac = b y bc = a, con la misma igualdad si se invierte el orden porque el grupo es abeliano.
+
+su rasgo más importante es que es el grupo abeliano no cíclico más pequeño. es abeliano porque todos sus elementos conmutan, es decir, xy = yx para todo x,y ∈ v₄. no es cíclico porque ningún elemento genera por sí solo los cuatro elementos: e tiene orden 1 y a, b, c tienen orden 2. por eso v₄ no se parece a una “rueda” de cuatro posiciones, sino a dos interruptores binarios independientes. formalmente, es isomorfo a c₂ × c₂, a ℤ₂ × ℤ₂ y al grupo aditivo del espacio vectorial f₂². definición v₄ c₂×c₂ involuciones">
+        <div class="qtop">
+          <div>
+            <span class="qnum">01</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>1. ¿Qué es el grupo de Klein V₄ y cuáles son sus rasgos estructurales principales?</h3>
+        <div class="tagline"><span>definición</span><span>V₄</span><span>C₂×C₂</span><span>involuciones</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El grupo de Klein, denotado V₄, es un grupo finito de orden cuatro. Puede presentarse como V₄ = {e, a, b, c}, donde e es el elemento neutro y los otros tres elementos son involuciones: a² = e, b² = e y c² = e. La regla esencial es que el producto de dos elementos no triviales distintos da el tercero: ab = c, ac = b y bc = a, con la misma igualdad si se invierte el orden porque el grupo es abeliano.</p><p>Su rasgo más importante es que es el grupo abeliano no cíclico más pequeño. Es abeliano porque todos sus elementos conmutan, es decir, xy = yx para todo x,y ∈ V₄. No es cíclico porque ningún elemento genera por sí solo los cuatro elementos: e tiene orden 1 y a, b, c tienen orden 2. Por eso V₄ no se parece a una “rueda” de cuatro posiciones, sino a dos interruptores binarios independientes. Formalmente, es isomorfo a C₂ × C₂, a ℤ₂ × ℤ₂ y al grupo aditivo del espacio vectorial F₂².</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="2. ¿cómo se verifican los axiomas de grupo en v₄? para demostrar que v₄ es un grupo hay que verificar cerradura, asociatividad, existencia de neutro e inversos. la cerradura se observa en la tabla de cayley: al multiplicar dos elementos de {e,a,b,c}, el resultado siempre vuelve a estar dentro del mismo conjunto. el neutro es e, porque ex = xe = x para cualquier elemento x. los inversos existen porque cada elemento es su propio inverso: e⁻¹ = e, a⁻¹ = a, b⁻¹ = b y c⁻¹ = c.
+
+la asociatividad puede justificarse de manera elegante usando un modelo concreto. si identificamos v₄ con ℤ₂ × ℤ₂, la operación es suma componente a componente módulo 2, y esa suma es asociativa. también puede verificarse con el modelo de permutaciones o con matrices diagonales. además, v₄ es conmutativo porque su tabla de cayley es simétrica respecto de la diagonal principal: el resultado de xy coincide con el de yx. axiomas cerradura asociatividad neutro inversos">
+        <div class="qtop">
+          <div>
+            <span class="qnum">02</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>2. ¿Cómo se verifican los axiomas de grupo en V₄?</h3>
+        <div class="tagline"><span>axiomas</span><span>cerradura</span><span>asociatividad</span><span>neutro</span><span>inversos</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Para demostrar que V₄ es un grupo hay que verificar cerradura, asociatividad, existencia de neutro e inversos. La cerradura se observa en la tabla de Cayley: al multiplicar dos elementos de {e,a,b,c}, el resultado siempre vuelve a estar dentro del mismo conjunto. El neutro es e, porque ex = xe = x para cualquier elemento x. Los inversos existen porque cada elemento es su propio inverso: e⁻¹ = e, a⁻¹ = a, b⁻¹ = b y c⁻¹ = c.</p><p>La asociatividad puede justificarse de manera elegante usando un modelo concreto. Si identificamos V₄ con ℤ₂ × ℤ₂, la operación es suma componente a componente módulo 2, y esa suma es asociativa. También puede verificarse con el modelo de permutaciones o con matrices diagonales. Además, V₄ es conmutativo porque su tabla de Cayley es simétrica respecto de la diagonal principal: el resultado de xy coincide con el de yx.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="3. ¿qué información contiene la tabla de cayley de v₄ y cómo se interpreta? la tabla de cayley contiene toda la operación interna del grupo. en v₄ la tabla puede escribirse así:
+
+      ·   e   a   b   c
+      e   e   a   b   c
+      a   a   e   c   b
+      b   b   c   e   a
+      c   c   b   a   e
+
+la fila indica el primer factor y la columna el segundo factor. por ejemplo, en la fila a y la columna b aparece c, por lo tanto ab = c. en la fila b y columna a también aparece c, por lo tanto ba = c. esta simetría expresa la conmutatividad del grupo.
+
+la diagonal principal muestra que cada elemento multiplicado por sí mismo da e: e² = e, a² = e, b² = e, c² = e. por eso a, b y c son involuciones. la tabla permite ver de un vistazo la cerradura, los inversos, el neutro y la regla de que dos elementos no triviales distintos producen el tercero. cayley producto tabla operación">
+        <div class="qtop">
+          <div>
+            <span class="qnum">03</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>3. ¿Qué información contiene la tabla de Cayley de V₄ y cómo se interpreta?</h3>
+        <div class="tagline"><span>Cayley</span><span>producto</span><span>tabla</span><span>operación</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>La tabla de Cayley contiene toda la operación interna del grupo. En V₄ la tabla puede escribirse así:</p><p>      ·   e   a   b   c
+      e   e   a   b   c
+      a   a   e   c   b
+      b   b   c   e   a
+      c   c   b   a   e</p><p>La fila indica el primer factor y la columna el segundo factor. Por ejemplo, en la fila a y la columna b aparece c, por lo tanto ab = c. En la fila b y columna a también aparece c, por lo tanto ba = c. Esta simetría expresa la conmutatividad del grupo.</p><p>La diagonal principal muestra que cada elemento multiplicado por sí mismo da e: e² = e, a² = e, b² = e, c² = e. Por eso a, b y c son involuciones. La tabla permite ver de un vistazo la cerradura, los inversos, el neutro y la regla de que dos elementos no triviales distintos producen el tercero.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="4. ¿por qué v₄ no es isomorfo a c₄ aunque ambos tengan cuatro elementos? el orden del grupo no alcanza para determinar su estructura. v₄ y c₄ tienen ambos cuatro elementos, pero no son isomorfos porque sus órdenes internos son distintos. en c₄ existe un elemento de orden 4, es decir, un elemento x cuyas potencias x, x², x³ y x⁴ = e recorren todo el grupo. por eso c₄ es cíclico.
+
+en v₄ no existe ningún elemento de orden 4. el neutro tiene orden 1 y los tres elementos no triviales tienen orden 2. ninguno puede generar el grupo completo, porque el subgrupo generado por a es solo {e,a}; el generado por b es {e,b}; y el generado por c es {e,c}. esta diferencia es estructural y se conserva bajo isomorfismos. por lo tanto, v₄ y c₄ no pueden ser el mismo grupo en sentido algebraico. v₄ c₄ isomorfismo orden">
+        <div class="qtop">
+          <div>
+            <span class="qnum">04</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>4. ¿Por qué V₄ no es isomorfo a C₄ aunque ambos tengan cuatro elementos?</h3>
+        <div class="tagline"><span>V₄</span><span>C₄</span><span>isomorfismo</span><span>orden</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El orden del grupo no alcanza para determinar su estructura. V₄ y C₄ tienen ambos cuatro elementos, pero no son isomorfos porque sus órdenes internos son distintos. En C₄ existe un elemento de orden 4, es decir, un elemento x cuyas potencias x, x², x³ y x⁴ = e recorren todo el grupo. Por eso C₄ es cíclico.</p><p>En V₄ no existe ningún elemento de orden 4. El neutro tiene orden 1 y los tres elementos no triviales tienen orden 2. Ninguno puede generar el grupo completo, porque el subgrupo generado por a es solo {e,a}; el generado por b es {e,b}; y el generado por c es {e,c}. Esta diferencia es estructural y se conserva bajo isomorfismos. Por lo tanto, V₄ y C₄ no pueden ser el mismo grupo en sentido algebraico.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="5. ¿cómo se interpreta v₄ como ℤ₂ × ℤ₂, como f₂² y como operación xor? una de las representaciones más claras de v₄ es como el conjunto de pares binarios:
+
+v₄ ≅ ℤ₂ × ℤ₂ = {(0,0), (1,0), (0,1), (1,1)}.
+
+la operación consiste en sumar componente a componente módulo 2. en informática, esa suma coincide con xor bit a bit. por ejemplo, (1,0) ⊕ (0,1) = (1,1), y (1,1) ⊕ (1,1) = (0,0). esto explica por qué todo elemento no nulo es su propio inverso: en f₂ se cumple 1 + 1 = 0.
+
+como f₂², v₄ puede verse también como un espacio vectorial de dimensión 2 sobre el cuerpo f₂. el neutro es el vector cero, y los tres elementos no triviales son los tres vectores no nulos. esta lectura conecta la teoría de grupos con álgebra lineal, codificación binaria, paridad, criptografía y modelos discretos. xor f₂² bits producto directo">
+        <div class="qtop">
+          <div>
+            <span class="qnum">05</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>5. ¿Cómo se interpreta V₄ como ℤ₂ × ℤ₂, como F₂² y como operación XOR?</h3>
+        <div class="tagline"><span>XOR</span><span>F₂²</span><span>bits</span><span>producto directo</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Una de las representaciones más claras de V₄ es como el conjunto de pares binarios:</p><p>V₄ ≅ ℤ₂ × ℤ₂ = {(0,0), (1,0), (0,1), (1,1)}.</p><p>La operación consiste en sumar componente a componente módulo 2. En informática, esa suma coincide con XOR bit a bit. Por ejemplo, (1,0) ⊕ (0,1) = (1,1), y (1,1) ⊕ (1,1) = (0,0). Esto explica por qué todo elemento no nulo es su propio inverso: en F₂ se cumple 1 + 1 = 0.</p><p>Como F₂², V₄ puede verse también como un espacio vectorial de dimensión 2 sobre el cuerpo F₂. El neutro es el vector cero, y los tres elementos no triviales son los tres vectores no nulos. Esta lectura conecta la teoría de grupos con álgebra lineal, codificación binaria, paridad, criptografía y modelos discretos.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="6. ¿cómo aparece v₄ como grupo de simetrías de un rectángulo no cuadrado? el grupo de simetrías de un rectángulo no cuadrado tiene exactamente cuatro movimientos que preservan la figura: la identidad e, la reflexión horizontal h, la reflexión vertical v y la rotación r de 180°. cada uno de h, v y r aplicado dos veces devuelve la figura original, por lo tanto todos tienen orden 2.
+
+la composición de dos movimientos no triviales distintos da el tercero. por ejemplo, hacer una reflexión horizontal y luego una reflexión vertical equivale a una rotación de 180°, de modo que hv = r. del mismo modo, hr = v y vr = h. además, estas composiciones conmutan en este caso: hv = vh, hr = rh y vr = rv.
+
+este modelo geométrico es isomorfo a v₄: e corresponde al neutro, h, v y r corresponden a a, b y c. es importante que el rectángulo no sea un cuadrado, porque un cuadrado tiene más simetrías y su grupo de simetrías es más grande. geometría rectángulo simetrías isomorfismo">
+        <div class="qtop">
+          <div>
+            <span class="qnum">06</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>6. ¿Cómo aparece V₄ como grupo de simetrías de un rectángulo no cuadrado?</h3>
+        <div class="tagline"><span>geometría</span><span>rectángulo</span><span>simetrías</span><span>isomorfismo</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El grupo de simetrías de un rectángulo no cuadrado tiene exactamente cuatro movimientos que preservan la figura: la identidad e, la reflexión horizontal h, la reflexión vertical v y la rotación r de 180°. Cada uno de h, v y r aplicado dos veces devuelve la figura original, por lo tanto todos tienen orden 2.</p><p>La composición de dos movimientos no triviales distintos da el tercero. Por ejemplo, hacer una reflexión horizontal y luego una reflexión vertical equivale a una rotación de 180°, de modo que hv = r. Del mismo modo, hr = v y vr = h. Además, estas composiciones conmutan en este caso: hv = vh, hr = rh y vr = rv.</p><p>Este modelo geométrico es isomorfo a V₄: e corresponde al neutro, h, v y r corresponden a a, b y c. Es importante que el rectángulo no sea un cuadrado, porque un cuadrado tiene más simetrías y su grupo de simetrías es más grande.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="7. ¿dónde aparece v₄ dentro de los grupos de permutaciones s₄ y a₄? dentro de s₄, el grupo v₄ aparece como el conjunto formado por la identidad y las tres dobles transposiciones:
+
+v = {(), (12)(34), (13)(24), (14)(23)}.
+
+cada doble transposición intercambia dos pares de elementos al mismo tiempo. por ejemplo, (12)(34) cambia 1 con 2 y 3 con 4. todas estas permutaciones son pares, por lo tanto pertenecen a a₄. además, forman un subgrupo: al componer dos dobles transposiciones distintas se obtiene la tercera, y al componer una doble transposición consigo misma se obtiene la identidad.
+
+este v₄ es especialmente importante porque es un subgrupo normal de a₄. la normalidad significa que al conjugar sus elementos por elementos de a₄ se permanece dentro del mismo conjunto. una consecuencia clásica es que el cociente a₄/v₄ es isomorfo a c₃. este ejemplo muestra cómo un grupo pequeño puede ocupar una posición estructural importante dentro de grupos más grandes. permutaciones s₄ a₄ normalidad">
+        <div class="qtop">
+          <div>
+            <span class="qnum">07</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>7. ¿Dónde aparece V₄ dentro de los grupos de permutaciones S₄ y A₄?</h3>
+        <div class="tagline"><span>permutaciones</span><span>S₄</span><span>A₄</span><span>normalidad</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Dentro de S₄, el grupo V₄ aparece como el conjunto formado por la identidad y las tres dobles transposiciones:</p><p>V = {(), (12)(34), (13)(24), (14)(23)}.</p><p>Cada doble transposición intercambia dos pares de elementos al mismo tiempo. Por ejemplo, (12)(34) cambia 1 con 2 y 3 con 4. Todas estas permutaciones son pares, por lo tanto pertenecen a A₄. Además, forman un subgrupo: al componer dos dobles transposiciones distintas se obtiene la tercera, y al componer una doble transposición consigo misma se obtiene la identidad.</p><p>Este V₄ es especialmente importante porque es un subgrupo normal de A₄. La normalidad significa que al conjugar sus elementos por elementos de A₄ se permanece dentro del mismo conjunto. Una consecuencia clásica es que el cociente A₄/V₄ es isomorfo a C₃. Este ejemplo muestra cómo un grupo pequeño puede ocupar una posición estructural importante dentro de grupos más grandes.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="8. ¿cuáles son los subgrupos de v₄ y qué cocientes se obtienen? los subgrupos de v₄ son exactamente cinco: el subgrupo trivial {e}, los tres subgrupos de orden 2, {e,a}, {e,b} y {e,c}, y el grupo completo v₄. no hay otros subgrupos porque cualquier subgrupo debe contener al neutro y, si contiene un elemento no trivial, también contiene el subgrupo generado por ese elemento, que tiene dos elementos.
+
+como v₄ es abeliano, todos sus subgrupos son normales. por eso se pueden formar cocientes con cualquiera de ellos. si se toma un subgrupo de orden 2, por ejemplo {e,a}, el cociente v₄/{e,a} tiene dos clases laterales y es isomorfo a c₂. lo mismo sucede con v₄/{e,b} y v₄/{e,c}.
+
+desde la perspectiva vectorial f₂², los tres subgrupos de orden 2 son las tres rectas que pasan por el origen. esta lectura conecta el retículo de subgrupos con una geometría finita mínima. subgrupos normalidad cocientes retículo">
+        <div class="qtop">
+          <div>
+            <span class="qnum">08</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>8. ¿Cuáles son los subgrupos de V₄ y qué cocientes se obtienen?</h3>
+        <div class="tagline"><span>subgrupos</span><span>normalidad</span><span>cocientes</span><span>retículo</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Los subgrupos de V₄ son exactamente cinco: el subgrupo trivial {e}, los tres subgrupos de orden 2, {e,a}, {e,b} y {e,c}, y el grupo completo V₄. No hay otros subgrupos porque cualquier subgrupo debe contener al neutro y, si contiene un elemento no trivial, también contiene el subgrupo generado por ese elemento, que tiene dos elementos.</p><p>Como V₄ es abeliano, todos sus subgrupos son normales. Por eso se pueden formar cocientes con cualquiera de ellos. Si se toma un subgrupo de orden 2, por ejemplo {e,a}, el cociente V₄/{e,a} tiene dos clases laterales y es isomorfo a C₂. Lo mismo sucede con V₄/{e,b} y V₄/{e,c}.</p><p>Desde la perspectiva vectorial F₂², los tres subgrupos de orden 2 son las tres rectas que pasan por el origen. Esta lectura conecta el retículo de subgrupos con una geometría finita mínima.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="9. ¿cuál es el grupo de automorfismos de v₄ y por qué es isomorfo a s₃? un automorfismo de v₄ es una biyección de v₄ en sí mismo que conserva la operación. el elemento neutro debe quedar fijo, porque todo homomorfismo de grupos envía el neutro al neutro. en cambio, los tres elementos no triviales a, b y c pueden permutarse libremente.
+
+cualquier permutación de a, b y c define un automorfismo porque la regla estructural del grupo se conserva: el producto de dos elementos no triviales distintos da el tercero. si una aplicación intercambia los nombres de a, b y c, la relación ab = c se transforma en una relación equivalente entre sus imágenes. por eso hay 3! = 6 automorfismos.
+
+así, aut(v₄) ≅ s₃. si se usa el modelo v₄ ≅ f₂², el mismo grupo de automorfismos se identifica con gl(2,f₂), el grupo de matrices invertibles 2×2 sobre f₂. esta coincidencia muestra que las simetrías internas de v₄ son las simetrías de los tres vectores no nulos del plano binario. automorfismos s₃ gl(2,f₂) simetría interna">
+        <div class="qtop">
+          <div>
+            <span class="qnum">09</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>9. ¿Cuál es el grupo de automorfismos de V₄ y por qué es isomorfo a S₃?</h3>
+        <div class="tagline"><span>automorfismos</span><span>S₃</span><span>GL(2,F₂)</span><span>simetría interna</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Un automorfismo de V₄ es una biyección de V₄ en sí mismo que conserva la operación. El elemento neutro debe quedar fijo, porque todo homomorfismo de grupos envía el neutro al neutro. En cambio, los tres elementos no triviales a, b y c pueden permutarse libremente.</p><p>Cualquier permutación de a, b y c define un automorfismo porque la regla estructural del grupo se conserva: el producto de dos elementos no triviales distintos da el tercero. Si una aplicación intercambia los nombres de a, b y c, la relación ab = c se transforma en una relación equivalente entre sus imágenes. Por eso hay 3! = 6 automorfismos.</p><p>Así, Aut(V₄) ≅ S₃. Si se usa el modelo V₄ ≅ F₂², el mismo grupo de automorfismos se identifica con GL(2,F₂), el grupo de matrices invertibles 2×2 sobre F₂. Esta coincidencia muestra que las simetrías internas de V₄ son las simetrías de los tres vectores no nulos del plano binario.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Teoría de grupos" data-text="10. ¿qué aportan los modelos matricial, de caracteres y de galois para comprender v₄? el modelo matricial permite representar v₄ mediante matrices diagonales 2×2 con entradas ±1. por ejemplo, e puede representarse por la matriz identidad, a por la matriz que cambia el signo de la primera coordenada, b por la que cambia el signo de la segunda, y c por la que cambia ambos signos. al multiplicar estas matrices se reproduce la tabla de v₄.
+
+como v₄ es abeliano, todas sus representaciones irreducibles complejas son de dimensión 1. su tabla de caracteres tiene cuatro caracteres irreducibles, que transforman los elementos del grupo en signos ±1. esta tabla revela nuevamente la naturaleza binaria del grupo: las representaciones distinguen patrones de cambio de signo.
+
+en teoría de galois, v₄ aparece como grupo de galois de extensiones bicuadráticas, por ejemplo q(√m, √n) sobre q bajo condiciones adecuadas. en ese caso aparecen tres subextensiones cuadráticas intermedias: q(√m), q(√n) y q(√mn). el retículo de subgrupos de v₄ se refleja en el retículo de cuerpos intermedios. así, un grupo de cuatro elementos organiza información algebraica profunda. representaciones caracteres galois matrices">
+        <div class="qtop">
+          <div>
+            <span class="qnum">10</span>
+            <span class="category">Teoría de grupos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>10. ¿Qué aportan los modelos matricial, de caracteres y de Galois para comprender V₄?</h3>
+        <div class="tagline"><span>representaciones</span><span>caracteres</span><span>Galois</span><span>matrices</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El modelo matricial permite representar V₄ mediante matrices diagonales 2×2 con entradas ±1. Por ejemplo, e puede representarse por la matriz identidad, a por la matriz que cambia el signo de la primera coordenada, b por la que cambia el signo de la segunda, y c por la que cambia ambos signos. Al multiplicar estas matrices se reproduce la tabla de V₄.</p><p>Como V₄ es abeliano, todas sus representaciones irreducibles complejas son de dimensión 1. Su tabla de caracteres tiene cuatro caracteres irreducibles, que transforman los elementos del grupo en signos ±1. Esta tabla revela nuevamente la naturaleza binaria del grupo: las representaciones distinguen patrones de cambio de signo.</p><p>En teoría de Galois, V₄ aparece como grupo de Galois de extensiones bicuadráticas, por ejemplo Q(√m, √n) sobre Q bajo condiciones adecuadas. En ese caso aparecen tres subextensiones cuadráticas intermedias: Q(√m), Q(√n) y Q(√mn). El retículo de subgrupos de V₄ se refleja en el retículo de cuerpos intermedios. Así, un grupo de cuatro elementos organiza información algebraica profunda.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="11. ¿qué es el one-time pad o cifrado de vernam y qué significa que tenga confidencialidad perfecta? el one-time pad, también llamado cifrado de vernam, es un sistema de cifrado en el que el mensaje se combina con una clave aleatoria del mismo tamaño mediante una operación reversible, típicamente xor. su relevancia teórica proviene de que, bajo condiciones estrictas, alcanza confidencialidad perfecta en el sentido de shannon.
+
+confidencialidad perfecta significa que observar el criptograma no cambia la distribución de probabilidad del mensaje. en símbolos, para todo mensaje m y todo criptograma c con probabilidad positiva, se cumple:
+
+p(m = m | c = c) = p(m = m).
+
+esto implica que el texto cifrado no aporta información estadística sobre el mensaje. en lenguaje de teoría de la información, puede expresarse como i(m;c) = 0, es decir, la información mutua entre mensaje y criptograma es cero. la seguridad no depende de que el atacante tenga poca capacidad de cálculo: incluso un atacante con poder computacional ilimitado no aprende nada del mensaje si la clave es verdaderamente aleatoria, uniforme, secreta, tan larga como el mensaje y usada una sola vez. one-time pad vernam shannon confidencialidad perfecta">
+        <div class="qtop">
+          <div>
+            <span class="qnum">11</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>11. ¿Qué es el one-time pad o cifrado de Vernam y qué significa que tenga confidencialidad perfecta?</h3>
+        <div class="tagline"><span>one-time pad</span><span>Vernam</span><span>Shannon</span><span>confidencialidad perfecta</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El one-time pad, también llamado cifrado de Vernam, es un sistema de cifrado en el que el mensaje se combina con una clave aleatoria del mismo tamaño mediante una operación reversible, típicamente XOR. Su relevancia teórica proviene de que, bajo condiciones estrictas, alcanza confidencialidad perfecta en el sentido de Shannon.</p><p>Confidencialidad perfecta significa que observar el criptograma no cambia la distribución de probabilidad del mensaje. En símbolos, para todo mensaje m y todo criptograma c con probabilidad positiva, se cumple:</p><p>P(M = m | C = c) = P(M = m).</p><p>Esto implica que el texto cifrado no aporta información estadística sobre el mensaje. En lenguaje de teoría de la información, puede expresarse como I(M;C) = 0, es decir, la información mutua entre mensaje y criptograma es cero. La seguridad no depende de que el atacante tenga poca capacidad de cálculo: incluso un atacante con poder computacional ilimitado no aprende nada del mensaje si la clave es verdaderamente aleatoria, uniforme, secreta, tan larga como el mensaje y usada una sola vez.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="12. ¿cómo se cifran y descifran mensajes usando v₄ como alfabeto criptográfico? si se toma v₄ = {00, 01, 10, 11} como alfabeto de bloques de dos bits, el cifrado se define con xor bit a bit. sea m el mensaje, k la clave y c el criptograma. entonces:
+
+c = m ⊕ k.
+
+para descifrar se aplica la misma clave:
+
+m = c ⊕ k.
+
+la misma operación sirve para cifrar y descifrar porque en v₄ cada elemento es su propio inverso: k ⊕ k = 00. entonces:
+
+(c ⊕ k) = (m ⊕ k) ⊕ k = m ⊕ (k ⊕ k) = m ⊕ 00 = m.
+
+por ejemplo, si m = 10 y k = 01, entonces c = 10 ⊕ 01 = 11. para recuperar el mensaje, se calcula 11 ⊕ 01 = 10. la corrección del descifrado depende de tres propiedades algebraicas: asociatividad, existencia del neutro 00 y auto-inversión de cada clave. cifrado descifrado xor v₄">
+        <div class="qtop">
+          <div>
+            <span class="qnum">12</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>12. ¿Cómo se cifran y descifran mensajes usando V₄ como alfabeto criptográfico?</h3>
+        <div class="tagline"><span>cifrado</span><span>descifrado</span><span>XOR</span><span>V₄</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Si se toma V₄ = {00, 01, 10, 11} como alfabeto de bloques de dos bits, el cifrado se define con XOR bit a bit. Sea M el mensaje, K la clave y C el criptograma. Entonces:</p><p>C = M ⊕ K.</p><p>Para descifrar se aplica la misma clave:</p><p>M = C ⊕ K.</p><p>La misma operación sirve para cifrar y descifrar porque en V₄ cada elemento es su propio inverso: K ⊕ K = 00. Entonces:</p><p>(C ⊕ K) = (M ⊕ K) ⊕ K = M ⊕ (K ⊕ K) = M ⊕ 00 = M.</p><p>Por ejemplo, si M = 10 y K = 01, entonces C = 10 ⊕ 01 = 11. Para recuperar el mensaje, se calcula 11 ⊕ 01 = 10. La corrección del descifrado depende de tres propiedades algebraicas: asociatividad, existencia del neutro 00 y auto-inversión de cada clave.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="13. ¿cómo se demuestra con bayes la confidencialidad perfecta del one-time pad sobre v₄? la demostración se basa en que, para cada mensaje m y cada criptograma c, existe una única clave k que transforma m en c: k = m ⊕ c. si la clave se elige uniformemente en v₄, entonces cada clave tiene probabilidad 1/4. por lo tanto:
+
+p(c = c | m = m) = p(k = m ⊕ c) = 1/4.
+
+lo decisivo es que esta probabilidad no depende de m. ahora aplicamos bayes:
+
+p(m = m | c = c) = [p(c = c | m = m) p(m = m)] / p(c = c).
+
+como p(c = c | m = m) = 1/4 para todo m, la probabilidad total del criptograma es:
+
+p(c = c) = σ p(c = c | m = m')p(m = m') = σ (1/4)p(m = m') = 1/4.
+
+sustituyendo en bayes queda:
+
+p(m = m | c = c) = [(1/4)p(m = m)]/(1/4) = p(m = m).
+
+así se prueba que observar c no cambia la probabilidad de m. el criptograma es independiente del mensaje siempre que la clave sea uniforme y de un solo uso. bayes prueba clave uniforme probabilidad">
+        <div class="qtop">
+          <div>
+            <span class="qnum">13</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>13. ¿Cómo se demuestra con Bayes la confidencialidad perfecta del one-time pad sobre V₄?</h3>
+        <div class="tagline"><span>Bayes</span><span>prueba</span><span>clave uniforme</span><span>probabilidad</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>La demostración se basa en que, para cada mensaje m y cada criptograma c, existe una única clave k que transforma m en c: k = m ⊕ c. Si la clave se elige uniformemente en V₄, entonces cada clave tiene probabilidad 1/4. Por lo tanto:</p><p>P(C = c | M = m) = P(K = m ⊕ c) = 1/4.</p><p>Lo decisivo es que esta probabilidad no depende de m. Ahora aplicamos Bayes:</p><p>P(M = m | C = c) = [P(C = c | M = m) P(M = m)] / P(C = c).</p><p>Como P(C = c | M = m) = 1/4 para todo m, la probabilidad total del criptograma es:</p><p>P(C = c) = Σ P(C = c | M = m')P(M = m') = Σ (1/4)P(M = m') = 1/4.</p><p>Sustituyendo en Bayes queda:</p><p>P(M = m | C = c) = [(1/4)P(M = m)]/(1/4) = P(M = m).</p><p>Así se prueba que observar C no cambia la probabilidad de M. El criptograma es independiente del mensaje siempre que la clave sea uniforme y de un solo uso.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="14. ¿qué ve realmente un atacante cuando observa un criptograma producido por un one-time pad perfecto? un atacante que observa un criptograma sabe que se produjo algún mensaje combinado con alguna clave, pero no puede favorecer estadísticamente un mensaje sobre otro si la clave fue uniforme. por ejemplo, si el criptograma observado es c = 11, entonces todos los mensajes posibles siguen siendo compatibles:
+
+m = 00 con k = 11,
+m = 01 con k = 10,
+m = 10 con k = 01,
+m = 11 con k = 00.
+
+cada mensaje posible tiene una clave única que lo transforma en el mismo criptograma. si las claves son igualmente probables, ninguna hipótesis sobre el mensaje queda favorecida. esa es la intuición operacional de la confidencialidad perfecta.
+
+sin embargo, esto no significa que el sistema resuelva todos los problemas criptográficos. el one-time pad protege la confidencialidad, pero por sí solo no garantiza autenticidad, integridad, gestión segura de claves ni protección frente a errores de implementación. la seguridad perfecta del contenido depende de condiciones muy exigentes. atacante compatibilidad incertidumbre shannon">
+        <div class="qtop">
+          <div>
+            <span class="qnum">14</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>14. ¿Qué ve realmente un atacante cuando observa un criptograma producido por un one-time pad perfecto?</h3>
+        <div class="tagline"><span>atacante</span><span>compatibilidad</span><span>incertidumbre</span><span>Shannon</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Un atacante que observa un criptograma sabe que se produjo algún mensaje combinado con alguna clave, pero no puede favorecer estadísticamente un mensaje sobre otro si la clave fue uniforme. Por ejemplo, si el criptograma observado es C = 11, entonces todos los mensajes posibles siguen siendo compatibles:</p><p>M = 00 con K = 11,
+M = 01 con K = 10,
+M = 10 con K = 01,
+M = 11 con K = 00.</p><p>Cada mensaje posible tiene una clave única que lo transforma en el mismo criptograma. Si las claves son igualmente probables, ninguna hipótesis sobre el mensaje queda favorecida. Esa es la intuición operacional de la confidencialidad perfecta.</p><p>Sin embargo, esto no significa que el sistema resuelva todos los problemas criptográficos. El one-time pad protege la confidencialidad, pero por sí solo no garantiza autenticidad, integridad, gestión segura de claves ni protección frente a errores de implementación. La seguridad perfecta del contenido depende de condiciones muy exigentes.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="15. ¿cómo se extiende el cifrado sobre v₄ a mensajes largos? v₄ cifra naturalmente bloques de dos bits. para mensajes más largos se usa un producto directo de muchas copias del grupo:
+
+v₄ⁿ ≅ (ℤ₂ × ℤ₂)ⁿ ≅ ℤ₂²ⁿ.
+
+un mensaje largo se escribe como una sucesión de bloques m = (m₁, m₂, ..., mₙ), y la clave como k = (k₁, k₂, ..., kₙ). el cifrado se hace bloque por bloque:
+
+c = (m₁ ⊕ k₁, m₂ ⊕ k₂, ..., mₙ ⊕ kₙ).
+
+la confidencialidad perfecta se conserva si la clave completa k es uniforme en v₄ⁿ, tiene la misma longitud que el mensaje, permanece secreta y se usa una sola vez. en términos de entropía, la clave debe tener suficiente incertidumbre para cubrir todo el mensaje. si se acorta, repite o genera con patrones previsibles, el sistema deja de ser un one-time pad en sentido estricto. mensajes largos producto directo v₄ⁿ clave">
+        <div class="qtop">
+          <div>
+            <span class="qnum">15</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>15. ¿Cómo se extiende el cifrado sobre V₄ a mensajes largos?</h3>
+        <div class="tagline"><span>mensajes largos</span><span>producto directo</span><span>V₄ⁿ</span><span>clave</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>V₄ cifra naturalmente bloques de dos bits. Para mensajes más largos se usa un producto directo de muchas copias del grupo:</p><p>V₄ⁿ ≅ (ℤ₂ × ℤ₂)ⁿ ≅ ℤ₂²ⁿ.</p><p>Un mensaje largo se escribe como una sucesión de bloques M = (m₁, m₂, ..., mₙ), y la clave como K = (k₁, k₂, ..., kₙ). El cifrado se hace bloque por bloque:</p><p>C = (m₁ ⊕ k₁, m₂ ⊕ k₂, ..., mₙ ⊕ kₙ).</p><p>La confidencialidad perfecta se conserva si la clave completa K es uniforme en V₄ⁿ, tiene la misma longitud que el mensaje, permanece secreta y se usa una sola vez. En términos de entropía, la clave debe tener suficiente incertidumbre para cubrir todo el mensaje. Si se acorta, repite o genera con patrones previsibles, el sistema deja de ser un one-time pad en sentido estricto.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Criptografía" data-text="16. ¿por qué reutilizar la clave destruye la seguridad del one-time pad? la reutilización de clave produce el problema conocido como two-time pad. supongamos que dos mensajes m₁ y m₂ se cifran con la misma clave k:
+
+c₁ = m₁ ⊕ k,
+c₂ = m₂ ⊕ k.
+
+si un atacante calcula c₁ ⊕ c₂, obtiene:
+
+c₁ ⊕ c₂ = (m₁ ⊕ k) ⊕ (m₂ ⊕ k).
+
+por asociatividad y conmutatividad:
+
+c₁ ⊕ c₂ = m₁ ⊕ m₂ ⊕ k ⊕ k.
+
+como k ⊕ k = 00, la clave se cancela:
+
+c₁ ⊕ c₂ = m₁ ⊕ m₂.
+
+esto no revela automáticamente ambos mensajes, pero revela una relación entre ellos. en lenguajes naturales, archivos estructurados o mensajes con encabezados conocidos, esa relación puede explotarse mediante redundancias, patrones, palabras probables o ataques de cribado. por eso el requisito de uso único no es un detalle operativo: es una condición matemática de la seguridad. two-time pad reutilización clave ataque">
+        <div class="qtop">
+          <div>
+            <span class="qnum">16</span>
+            <span class="category">Criptografía</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>16. ¿Por qué reutilizar la clave destruye la seguridad del one-time pad?</h3>
+        <div class="tagline"><span>two-time pad</span><span>reutilización</span><span>clave</span><span>ataque</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>La reutilización de clave produce el problema conocido como two-time pad. Supongamos que dos mensajes M₁ y M₂ se cifran con la misma clave K:</p><p>C₁ = M₁ ⊕ K,
+C₂ = M₂ ⊕ K.</p><p>Si un atacante calcula C₁ ⊕ C₂, obtiene:</p><p>C₁ ⊕ C₂ = (M₁ ⊕ K) ⊕ (M₂ ⊕ K).</p><p>Por asociatividad y conmutatividad:</p><p>C₁ ⊕ C₂ = M₁ ⊕ M₂ ⊕ K ⊕ K.</p><p>Como K ⊕ K = 00, la clave se cancela:</p><p>C₁ ⊕ C₂ = M₁ ⊕ M₂.</p><p>Esto no revela automáticamente ambos mensajes, pero revela una relación entre ellos. En lenguajes naturales, archivos estructurados o mensajes con encabezados conocidos, esa relación puede explotarse mediante redundancias, patrones, palabras probables o ataques de cribado. Por eso el requisito de uso único no es un detalle operativo: es una condición matemática de la seguridad.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Redes sociales y grafos" data-text="17. ¿cuál es la idea central de la teoría del balance de heider y cómo se expresa en tríadas? la teoría del balance de heider parte de una intuición psicológica: las personas tienden a buscar coherencia en sus relaciones afectivas y cognitivas. en una tríada de actores a, b y c, cada vínculo puede ser positivo, como amistad o apoyo, o negativo, como conflicto o rechazo. algunas configuraciones se perciben como estables y otras como tensas.
+
+matemáticamente, una tríada está balanceada cuando el producto de los signos de sus tres aristas es positivo. esto equivale a decir que hay una cantidad par de vínculos negativos. las configuraciones balanceadas clásicas son +++ y +--. la primera representa apoyo generalizado; la segunda representa la regla “el enemigo de mi enemigo es mi amigo”. en cambio, ++- y --- tienen producto negativo y se consideran desbalanceadas porque producen contradicción o tensión estructural.
+
+la teoría de heider no nació como teoría algebraica, sino como explicación de coherencia social. pero su lógica de signos permite una traducción directa a grafos firmados, paridad y xor. heider tríadas balance psicología social">
+        <div class="qtop">
+          <div>
+            <span class="qnum">17</span>
+            <span class="category">Redes sociales y grafos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>17. ¿Cuál es la idea central de la teoría del balance de Heider y cómo se expresa en tríadas?</h3>
+        <div class="tagline"><span>Heider</span><span>tríadas</span><span>balance</span><span>psicología social</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>La teoría del balance de Heider parte de una intuición psicológica: las personas tienden a buscar coherencia en sus relaciones afectivas y cognitivas. En una tríada de actores A, B y C, cada vínculo puede ser positivo, como amistad o apoyo, o negativo, como conflicto o rechazo. Algunas configuraciones se perciben como estables y otras como tensas.</p><p>Matemáticamente, una tríada está balanceada cuando el producto de los signos de sus tres aristas es positivo. Esto equivale a decir que hay una cantidad par de vínculos negativos. Las configuraciones balanceadas clásicas son +++ y +--. La primera representa apoyo generalizado; la segunda representa la regla “el enemigo de mi enemigo es mi amigo”. En cambio, ++- y --- tienen producto negativo y se consideran desbalanceadas porque producen contradicción o tensión estructural.</p><p>La teoría de Heider no nació como teoría algebraica, sino como explicación de coherencia social. Pero su lógica de signos permite una traducción directa a grafos firmados, paridad y XOR.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Redes sociales y grafos" data-text="18. ¿qué aporta el teorema de harary al estudio del balance estructural? harary formaliza la intuición de heider mediante grafos firmados. en un grafo firmado, los nodos pueden representar personas, grupos, cuentas, comunidades o instituciones, y las aristas llevan un signo positivo o negativo según expresen apoyo, cooperación, conflicto o rechazo.
+
+el teorema clásico de harary afirma que un grafo firmado está balanceado si y solo si sus vértices pueden dividirse en dos bloques de modo que las relaciones dentro de cada bloque sean positivas y las relaciones entre bloques sean negativas. una formulación equivalente dice que todos los ciclos del grafo deben tener producto de signos positivo, o lo que es lo mismo, una cantidad par de aristas negativas.
+
+este resultado convierte una intuición psicológica en una propiedad estructural de redes. también permite leer matemáticamente la polarización: una red perfectamente balanceada puede organizarse en dos comunidades internamente cohesionadas y externamente enfrentadas. esa estructura puede ser estable, pero también indicar cierre, antagonismo y baja circulación de confianza entre bloques. harary grafos firmados bipartición polarización">
+        <div class="qtop">
+          <div>
+            <span class="qnum">18</span>
+            <span class="category">Redes sociales y grafos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>18. ¿Qué aporta el teorema de Harary al estudio del balance estructural?</h3>
+        <div class="tagline"><span>Harary</span><span>grafos firmados</span><span>bipartición</span><span>polarización</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Harary formaliza la intuición de Heider mediante grafos firmados. En un grafo firmado, los nodos pueden representar personas, grupos, cuentas, comunidades o instituciones, y las aristas llevan un signo positivo o negativo según expresen apoyo, cooperación, conflicto o rechazo.</p><p>El teorema clásico de Harary afirma que un grafo firmado está balanceado si y solo si sus vértices pueden dividirse en dos bloques de modo que las relaciones dentro de cada bloque sean positivas y las relaciones entre bloques sean negativas. Una formulación equivalente dice que todos los ciclos del grafo deben tener producto de signos positivo, o lo que es lo mismo, una cantidad par de aristas negativas.</p><p>Este resultado convierte una intuición psicológica en una propiedad estructural de redes. También permite leer matemáticamente la polarización: una red perfectamente balanceada puede organizarse en dos comunidades internamente cohesionadas y externamente enfrentadas. Esa estructura puede ser estable, pero también indicar cierre, antagonismo y baja circulación de confianza entre bloques.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Redes sociales y grafos" data-text="19. ¿por qué el grupo de klein permite enriquecer el modelo básico de signos en redes sociales? el modelo básico de balance puede codificar una relación con un solo bit: positiva como 0 y negativa como 1. eso basta para medir paridad en ciclos, pero no distingue si los actores pertenecen al mismo bloque o a bloques distintos. en redes sociales reales suele ser importante analizar dos dimensiones simultáneas: el signo de la relación y la distancia comunitaria.
+
+v₄ permite codificar esas dos dimensiones con dos bits. por ejemplo:
+
+00: relación positiva dentro del mismo bloque, es decir, alianza coherente.
+01: relación positiva entre bloques distintos, que puede interpretarse como puente, diálogo o anomalía.
+10: relación negativa dentro del mismo bloque, señal de fractura interna.
+11: relación negativa entre bloques distintos, oposición coherente.
+
+la operación xor combina estados y mide paridad. por eso v₄ resulta más expresivo que ℤ₂ cuando se quiere representar no solo amistad/enemistad, sino también pertenencia comunitaria, frontera, puente, contradicción y tensión. en este sentido, klein no reemplaza a harary: lo algebraiza con una estructura de dos bits. v₄ z₂ signo bloque xor">
+        <div class="qtop">
+          <div>
+            <span class="qnum">19</span>
+            <span class="category">Redes sociales y grafos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>19. ¿Por qué el grupo de Klein permite enriquecer el modelo básico de signos en redes sociales?</h3>
+        <div class="tagline"><span>V₄</span><span>Z₂</span><span>signo</span><span>bloque</span><span>XOR</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>El modelo básico de balance puede codificar una relación con un solo bit: positiva como 0 y negativa como 1. Eso basta para medir paridad en ciclos, pero no distingue si los actores pertenecen al mismo bloque o a bloques distintos. En redes sociales reales suele ser importante analizar dos dimensiones simultáneas: el signo de la relación y la distancia comunitaria.</p><p>V₄ permite codificar esas dos dimensiones con dos bits. Por ejemplo:</p><p>00: relación positiva dentro del mismo bloque, es decir, alianza coherente.
+01: relación positiva entre bloques distintos, que puede interpretarse como puente, diálogo o anomalía.
+10: relación negativa dentro del mismo bloque, señal de fractura interna.
+11: relación negativa entre bloques distintos, oposición coherente.</p><p>La operación XOR combina estados y mide paridad. Por eso V₄ resulta más expresivo que ℤ₂ cuando se quiere representar no solo amistad/enemistad, sino también pertenencia comunitaria, frontera, puente, contradicción y tensión. En este sentido, Klein no reemplaza a Harary: lo algebraiza con una estructura de dos bits.</p>
+          </div>
+        </div>
+      </article>
+    
+
+      <article class="qcard" data-category="Redes sociales y grafos" data-text="20. ¿cómo puede usarse v₄ como detector conceptual de tensión en redes sociales? una forma práctica de usar la estructura de v₄ es asignar dos bits a cada relación: un bit para el signo observado y otro para la distancia de bloque. si codificamos una relación positiva como 0 y negativa como 1, y además codificamos si dos actores pertenecen al mismo bloque o a bloques distintos, podemos definir un indicador de tensión:
+
+tᵢⱼ = signoᵢⱼ ⊕ gᵢ ⊕ gⱼ.
+
+la relación es coherente cuando tᵢⱼ = 0: apoyo dentro del mismo bloque o conflicto entre bloques distintos. es tensa cuando tᵢⱼ = 1: apoyo entre bloques rivales o conflicto dentro del propio bloque. esta lectura permite detectar puentes, realineamientos, rupturas internas y antagonismos estables.
+
+en marketing, comunicación política o análisis de comunidades digitales, el modelo ayuda a distinguir cohesión interna, cámaras de eco, oportunidades de diálogo y conflictos narrativos. sin embargo, debe usarse con cautela: las redes reales tienen ironía, bots, relaciones asimétricas, cambios temporales, vínculos débiles y comunidades superpuestas. v₄ ofrece un detector conceptual y algebraico, no un sustituto del análisis empírico. tensión marketing comunicación algoritmo">
+        <div class="qtop">
+          <div>
+            <span class="qnum">20</span>
+            <span class="category">Redes sociales y grafos</span>
+          </div>
+          <button class="slideBtn" type="button" aria-expanded="false">Deslizar respuesta</button>
+        </div>
+        <h3>20. ¿Cómo puede usarse V₄ como detector conceptual de tensión en redes sociales?</h3>
+        <div class="tagline"><span>tensión</span><span>marketing</span><span>comunicación</span><span>algoritmo</span></div>
+        <div class="answer">
+          <div class="answerInner">
+            <strong class="answerLabel">Respuesta desarrollada</strong>
+            <p>Una forma práctica de usar la estructura de V₄ es asignar dos bits a cada relación: un bit para el signo observado y otro para la distancia de bloque. Si codificamos una relación positiva como 0 y negativa como 1, y además codificamos si dos actores pertenecen al mismo bloque o a bloques distintos, podemos definir un indicador de tensión:</p><p>Tᵢⱼ = signoᵢⱼ ⊕ gᵢ ⊕ gⱼ.</p><p>La relación es coherente cuando Tᵢⱼ = 0: apoyo dentro del mismo bloque o conflicto entre bloques distintos. Es tensa cuando Tᵢⱼ = 1: apoyo entre bloques rivales o conflicto dentro del propio bloque. Esta lectura permite detectar puentes, realineamientos, rupturas internas y antagonismos estables.</p><p>En marketing, comunicación política o análisis de comunidades digitales, el modelo ayuda a distinguir cohesión interna, cámaras de eco, oportunidades de diálogo y conflictos narrativos. Sin embargo, debe usarse con cautela: las redes reales tienen ironía, bots, relaciones asimétricas, cambios temporales, vínculos débiles y comunidades superpuestas. V₄ ofrece un detector conceptual y algebraico, no un sustituto del análisis empírico.</p>
+          </div>
+        </div>
+      </article>
+    
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Síntesis de estudio</h2>
+    <div class="notice">
+      <strong>Idea integradora:</strong> V₄ es un grupo mínimo pero muy fértil. Como estructura algebraica, muestra una forma no cíclica de orden cuatro; como XOR, modela bits y paridad; como cifrado, explica el mecanismo del one-time pad; y como herramienta conceptual para redes, permite combinar signo y pertenencia comunitaria en un mismo estado binario de dos dimensiones.
+    </div>
+  </section>
+
+  <div class="footer">Cuestionario interactivo autónomo para estudio, repaso e impresión.</div>
+</main>
+
+<a class="btn primary toTop" href="#inicio">↑</a>
+
+<script>
+const root = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+const savedTheme = localStorage.getItem('kleinQuizTheme');
+if(savedTheme) {
+  root.setAttribute('data-theme', savedTheme);
+  themeBtn.textContent = savedTheme === 'dark' ? '☀️ Tema claro' : '🌙 Tema oscuro';
+}
+themeBtn.addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('kleinQuizTheme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️ Tema claro' : '🌙 Tema oscuro';
+});
+
+const cards = Array.from(document.querySelectorAll('.qcard'));
+cards.forEach((card, idx) => {
+  card.id = 'p' + String(idx+1).padStart(2,'0');
+  const btn = card.querySelector('.slideBtn');
+  btn.addEventListener('click', () => {
+    card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
+    btn.textContent = card.classList.contains('open') ? 'Ocultar respuesta' : 'Deslizar respuesta';
+  });
+});
+
+const expandBtn = document.getElementById('expandBtn');
+let expanded = false;
+expandBtn.addEventListener('click', () => {
+  expanded = !expanded;
+  cards.forEach(card => {
+    card.classList.toggle('open', expanded);
+    const btn = card.querySelector('.slideBtn');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    btn.textContent = expanded ? 'Ocultar respuesta' : 'Deslizar respuesta';
+  });
+  expandBtn.textContent = expanded ? '▴ Ocultar respuestas' : '▾ Mostrar respuestas';
+});
+
+let activeFilter = 'Todas';
+const searchInput = document.getElementById('searchInput');
+const filterBtns = Array.from(document.querySelectorAll('.filterBtn'));
+
+function applyFilters() {
+  const q = searchInput.value.trim().toLowerCase();
+  cards.forEach(card => {
+    const matchFilter = activeFilter === 'Todas' || card.dataset.category === activeFilter;
+    const matchSearch = !q || card.dataset.text.includes(q);
+    card.classList.toggle('hide', !(matchFilter && matchSearch));
+  });
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener('input', applyFilters);
+
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+  progress.style.width = pct + '%';
+});
+</script>
+</body>
+</html>

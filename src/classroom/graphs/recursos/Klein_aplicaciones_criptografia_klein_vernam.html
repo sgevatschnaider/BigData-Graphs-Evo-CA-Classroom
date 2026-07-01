@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aplicaciones en Criptografía · One-Time Pad, Vernam y Grupo de Klein</title>
+<style>
+:root{
+  --bg:#eef6ff;
+  --bg2:#f8fbff;
+  --card:#ffffff;
+  --card2:#f6faff;
+  --text:#102033;
+  --muted:#607089;
+  --line:#d8e5f6;
+  --ink:#0f172a;
+  --primary:#2563eb;
+  --secondary:#7c3aed;
+  --cyan:#0891b2;
+  --green:#059669;
+  --amber:#d97706;
+  --red:#dc2626;
+  --pink:#db2777;
+  --radius:28px;
+  --shadow:0 24px 70px rgba(37,99,235,.15);
+  --soft:0 10px 30px rgba(15,23,42,.10);
+  --ring:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+[data-theme="dark"]{
+  --bg:#07111f;
+  --bg2:#0b1628;
+  --card:#111d32;
+  --card2:#0c172a;
+  --text:#edf5ff;
+  --muted:#b5c5dd;
+  --line:#2a3d5c;
+  --ink:#f8fafc;
+  --primary:#60a5fa;
+  --secondary:#a78bfa;
+  --cyan:#22d3ee;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#fb7185;
+  --pink:#f472b6;
+  --shadow:0 24px 70px rgba(0,0,0,.38);
+  --soft:0 10px 30px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  line-height:1.68;
+  background:
+    radial-gradient(circle at 5% 0%,color-mix(in srgb,var(--primary) 24%,transparent),transparent 28%),
+    radial-gradient(circle at 92% 4%,color-mix(in srgb,var(--secondary) 20%,transparent),transparent 34%),
+    radial-gradient(circle at 65% 58%,color-mix(in srgb,var(--cyan) 11%,transparent),transparent 38%),
+    linear-gradient(135deg,var(--bg),var(--bg2));
+}
+a{color:var(--primary);font-weight:900;text-decoration:none}
+a:hover{text-decoration:underline}
+.progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--cyan));z-index:120;width:0%}
+header{
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb,var(--card) 88%,transparent);
+  backdrop-filter:blur(18px);
+}
+.nav{max-width:1280px;margin:auto;padding:13px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.brand{display:flex;gap:11px;align-items:center;font-weight:950;letter-spacing:-.03em}
+.brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));box-shadow:0 0 0 6px color-mix(in srgb,var(--primary) 17%,transparent)}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+button,.btn{
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:16px;
+  cursor:pointer;
+  font-weight:900;
+  box-shadow:var(--soft);
+  transition:.18s transform,.18s box-shadow,.18s background;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 13px 32px rgba(15,23,42,.14);text-decoration:none}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--ring)}
+button.primary,.btn.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}
+button.good{background:color-mix(in srgb,var(--green) 13%,var(--card));border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+button.warn{background:color-mix(in srgb,var(--amber) 13%,var(--card));border-color:color-mix(in srgb,var(--amber) 42%,var(--line))}
+button.danger{background:color-mix(in srgb,var(--red) 12%,var(--card));border-color:color-mix(in srgb,var(--red) 42%,var(--line))}
+main{max-width:1280px;margin:auto;padding:28px 20px 72px}
+.card{
+  background:color-mix(in srgb,var(--card) 96%,transparent);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+  margin:18px 0;
+}
+.hero{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:22px;align-items:stretch;margin:18px 0 26px}
+h1{font-size:clamp(38px,5.5vw,76px);line-height:1.0;margin:12px 0 16px;letter-spacing:-.065em}
+h2{font-size:clamp(27px,3.2vw,43px);line-height:1.08;margin:34px 0 16px;letter-spacing:-.045em}
+h3{font-size:22px;margin:10px 0 10px;letter-spacing:-.025em}
+h4{font-size:18px;margin:18px 0 8px}
+p{margin:10px 0}.lead{font-size:18.5px;color:var(--muted);max-width:90ch}.muted{color:var(--muted)}
+.kicker{font-weight:950;color:var(--primary);text-transform:uppercase;letter-spacing:.13em;font-size:12px}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--primary) 6%);font-size:13px;font-weight:920;color:var(--muted)}
+.notice{border-left:5px solid var(--primary);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--primary) 8%,var(--card));margin:14px 0}
+.notice.good{border-left-color:var(--green);background:color-mix(in srgb,var(--green) 9%,var(--card))}.notice.warn{border-left-color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,var(--card))}.notice.danger{border-left-color:var(--red);background:color-mix(in srgb,var(--red) 8%,var(--card))}.notice.pink{border-left-color:var(--pink);background:color-mix(in srgb,var(--pink) 8%,var(--card))}
+.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.path a{width:43px;height:43px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}.path a:hover{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none}
+.searchBox{display:grid;gap:8px;margin-top:14px}input,select{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:760;box-shadow:var(--soft)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{display:block;color:var(--muted)}
+.bigNumber{font-size:48px;font-weight:950;letter-spacing:-.06em;color:var(--primary);line-height:1.05}
+.formula{font-family:Cambria,Georgia,serif;font-size:22px;font-weight:850;letter-spacing:.01em;background:color-mix(in srgb,var(--primary) 6%,var(--card));border:1px solid var(--line);border-radius:18px;padding:14px 16px;overflow:auto;margin:12px 0;color:var(--text)}
+.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 6%,var(--card));border:1px solid var(--line);border-radius:18px;padding:14px;overflow:auto;color:var(--text);white-space:pre-wrap}
+.inlineCode{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 7%,var(--card));padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
+.moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.moduleCard{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);display:flex;flex-direction:column;min-height:286px}.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}.moduleNum{font-size:30px;font-weight:950;letter-spacing:-.05em;color:var(--primary)}.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}.moduleCard p{color:var(--muted);font-size:15px;flex:1}.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}.moduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.moduleSection{scroll-margin-top:92px;padding-top:8px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft);margin-top:12px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;vertical-align:top}th{background:color-mix(in srgb,var(--primary) 9%,var(--card));font-size:13px;text-transform:uppercase;letter-spacing:.08em}tr:last-child td{border-bottom:none}.center{text-align:center}.cayley td,.cayley th{text-align:center}.cayley td{font-weight:900}.hit{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 22%,var(--card)),color-mix(in srgb,var(--secondary) 15%,var(--card)))!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--primary) 45%,transparent)}
+.sim{margin-top:15px;padding:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:var(--soft)}.simTitle{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:13px}.simTitle strong{font-size:19px}.splitView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.stateBadge{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--primary) 11%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 35%,var(--line));font-weight:950}.log{min-height:78px;background:color-mix(in srgb,var(--ink) 5%,var(--card));border:1px solid var(--line);border-radius:18px;padding:12px;color:var(--muted)}.pillRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.pill{border:1px solid var(--line);background:var(--card);padding:8px 10px;border-radius:999px;font-weight:850;color:var(--muted)}.pill.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}.barWrap{height:12px;background:color-mix(in srgb,var(--ink) 8%,var(--card));border-radius:999px;overflow:hidden;margin:8px 0 14px}.bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));width:0%;transition:width .35s}.timeline{display:grid;gap:12px;margin-top:12px}.step{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.stepNum{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;font-weight:950}.quiz{display:grid;gap:12px}.quiz button{text-align:left;justify-content:flex-start}.feedback{font-weight:900}.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}.toTop{position:fixed;right:18px;bottom:18px;z-index:70}.blockSet{display:grid;gap:8px}.cipherStrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.cipherCell{border:1px solid var(--line);border-radius:18px;background:var(--card);padding:12px;text-align:center;font-weight:950;box-shadow:var(--soft)}.svgBox{width:100%;min-height:280px;border:1px solid var(--line);border-radius:22px;background:color-mix(in srgb,var(--card),var(--cyan) 5%);display:flex;align-items:center;justify-content:center;overflow:hidden}svg{max-width:100%;height:auto}.warningText{font-weight:950;color:var(--red)}
+@media(max-width:1040px){.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}.moduleCard{min-height:auto}table{min-width:660px}.cipherStrip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{header,.controls,button,.btn,.searchBox,.toTop,.progress{display:none!important}body{background:white}.card,.moduleCard,.mini,.sim{box-shadow:none}main{max-width:100%;padding:0}.moduleSection{break-inside:avoid}.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Aplicaciones en Criptografía · Vernam, XOR y Grupo de Klein</span></div>
+    <div class="controls">
+      <button id="themeBtn">🌙 Tema oscuro</button>
+      <button id="showAllBtn">▾ Mostrar todo</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+      <a class="btn primary" href="#simuladores">Simuladores</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero" id="inicio">
+  <div class="card">
+    <span class="tag">Criptografía</span><span class="tag">One-time pad</span><span class="tag">Vernam</span><span class="tag">V₄</span><span class="tag">XOR</span><span class="tag">Shannon</span>
+    <h1>Aplicaciones en Criptografía</h1>
+    <p class="lead">El one-time pad, también llamado cifrado de Vernam, es el ejemplo clásico de cifrado con confidencialidad perfecta. Su interés matemático está en que la seguridad no depende de la potencia computacional del atacante, sino de una propiedad probabilística: la clave debe ser verdaderamente aleatoria, uniforme, secreta, tan larga como el mensaje y usada una sola vez.</p>
+    <div class="notice good"><strong>Idea central:</strong> el grupo de Klein puede interpretarse como un alfabeto de cuatro símbolos binarios: 00, 01, 10 y 11. La operación del grupo es XOR bit a bit, exactamente la operación que cifra y descifra en Vernam.</div>
+    <div class="path" aria-label="Navegación rápida">
+      <a href="#mod01">01</a><a href="#mod02">02</a><a href="#mod03">03</a><a href="#mod04">04</a><a href="#mod05">05</a><a href="#mod06">06</a><a href="#mod07">07</a><a href="#mod08">08</a><a href="#mod09">09</a><a href="#mod10">10</a><a href="#simuladores">▶</a>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Mapa conceptual</h3>
+    <p class="muted">Buscá por tema: Shannon, Vernam, XOR, Bayes, confidencialidad perfecta, reutilización de clave, two-time pad, V₄, tabla de Cayley o mensajes largos.</p>
+    <div class="searchBox"><input id="moduleSearch" placeholder="Buscar en la presentación..." aria-label="Buscar módulo" /></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="mini"><strong>V₄</strong><small>{00, 01, 10, 11}</small></div>
+      <div class="mini"><strong>⊕</strong><small>XOR bit a bit</small></div>
+      <div class="mini"><strong>1/4</strong><small>probabilidad de cada clave uniforme</small></div>
+      <div class="mini"><strong>I(M;C)=0</strong><small>independencia informacional</small></div>
+    </div>
+    <div class="notice warn"><strong>Recorrido recomendado:</strong> primero la estructura algebraica, luego el cifrado, después la demostración probabilística y finalmente las condiciones prácticas.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Índice de la presentación</h2>
+  <div class="moduleGrid" id="moduleGrid">
+    <article class="moduleCard" data-title="01 one-time pad Vernam Shannon confidencialidad perfecta">
+      <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Contexto</span></div>
+      <h3>Vernam y Shannon</h3>
+      <p>Qué significa confidencialidad perfecta y por qué el one-time pad ocupa un lugar central en criptografía.</p>
+      <div class="tagline"><span>perfect secrecy</span><span>Shannon</span><span>clave aleatoria</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod01">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="02 grupo de Klein V4 alfabeto binario XOR cuatro símbolos">
+      <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Álgebra</span></div>
+      <h3>V₄ como alfabeto binario</h3>
+      <p>Interpretación del grupo de Klein como pares de bits con suma XOR.</p>
+      <div class="tagline"><span>V₄</span><span>Z₂×Z₂</span><span>XOR</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod02">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="03 formulación cifrado descifrado C=M xor K D=C xor K">
+      <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Cifrado</span></div>
+      <h3>Formulación sobre V₄</h3>
+      <p>Definición formal del cifrado, descifrado y prueba algebraica de corrección.</p>
+      <div class="tagline"><span>Eₖ(M)</span><span>Dₖ(C)</span><span>auto-inverso</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod03">Abrir</a><a class="btn" href="#cipherSim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="04 tabla de cifrado Cayley tabla V4">
+      <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Tabla</span></div>
+      <h3>Tabla de cifrado</h3>
+      <p>La tabla de cifrado coincide con la tabla de Cayley del grupo de Klein.</p>
+      <div class="tagline"><span>Cayley</span><span>tabla</span><span>producto</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod04">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="05 confidencialidad perfecta probabilidad independencia información mutua">
+      <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Probabilidad</span></div>
+      <h3>Confidencialidad perfecta</h3>
+      <p>Por qué observar el criptograma no cambia la distribución del mensaje.</p>
+      <div class="tagline"><span>P(M|C)</span><span>I(M;C)</span><span>H(M|C)</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod05">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="06 demostración con Bayes perfect secrecy paso a paso">
+      <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Demostración</span></div>
+      <h3>Demostración con Bayes</h3>
+      <p>Prueba completa de P(M=m | C=c) = P(M=m), con simulación paso a paso.</p>
+      <div class="tagline"><span>Bayes</span><span>prueba</span><span>uniformidad</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod06">Abrir</a><a class="btn" href="#bayesSim">Paso a paso</a></div>
+    </article>
+    <article class="moduleCard" data-title="07 interpretación atacante criptograma mensajes compatibles">
+      <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Ataque</span></div>
+      <h3>Mirada del atacante</h3>
+      <p>Para un mismo criptograma, todos los mensajes son compatibles con alguna clave.</p>
+      <div class="tagline"><span>incertidumbre</span><span>compatibilidad</span><span>claves</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod07">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="08 mensajes largos producto directo V4 elevado a n Z2 2n">
+      <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Extensión</span></div>
+      <h3>Mensajes largos</h3>
+      <p>Generalización del cifrado a V₄ⁿ y equivalencia con Z₂²ⁿ.</p>
+      <div class="tagline"><span>V₄ⁿ</span><span>bloques</span><span>Z₂²ⁿ</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod08">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="09 condiciones one-time pad clave aleatoria uniforme longitud uso único">
+      <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Condiciones</span></div>
+      <h3>Condiciones necesarias</h3>
+      <p>Los cuatro requisitos que hacen que Vernam sea realmente un one-time pad.</p>
+      <div class="tagline"><span>aleatoria</span><span>uniforme</span><span>uso único</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod09">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="10 reutilización clave two-time pad C1 xor C2 relación mensajes">
+      <div class="moduleTop"><span class="moduleNum">10</span><span class="moduleType">Riesgo</span></div>
+      <h3>Reutilización de clave</h3>
+      <p>El problema del two-time pad: al comparar criptogramas, la clave desaparece.</p>
+      <div class="tagline"><span>two-time pad</span><span>cribado</span><span>redundancia</span></div>
+      <div class="moduleActions"><a class="btn primary" href="#mod10">Abrir</a><a class="btn" href="#reuseSim">Simular</a></div>
+    </article>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod01" data-section-title="one-time pad Vernam Shannon confidencialidad perfecta clave aleatoria">
+  <span class="kicker">Módulo 01 · Contexto criptográfico</span>
+  <h2>1. One-time pad, Vernam y confidencialidad perfecta</h2>
+  <p>El <strong>one-time pad</strong>, también llamado <strong>cifrado de Vernam</strong>, es el ejemplo clásico de cifrado con <strong>confidencialidad perfecta</strong> en el sentido de Shannon. Su importancia matemática es enorme porque muestra que puede existir un cifrado cuya seguridad no dependa de la capacidad computacional del atacante, sino de una propiedad puramente probabilística.</p>
+  <div class="grid2">
+    <div class="mini"><strong>Seguridad computacional</strong><small>El sistema es seguro porque romperlo exige recursos inalcanzables en la práctica.</small></div>
+    <div class="mini"><strong>Seguridad perfecta</strong><small>El criptograma no aporta información estadística sobre el mensaje, aun ante un atacante ilimitado.</small></div>
+  </div>
+  <div class="notice good"><strong>Definición intuitiva:</strong> después de observar el criptograma, el atacante conserva exactamente las mismas probabilidades sobre el mensaje que tenía antes de observarlo.</div>
+  <div class="formula">P(M=m ∣ C=c) = P(M=m)</div>
+  <p>Esta igualdad afirma que el texto cifrado <strong>C</strong> no altera la distribución de probabilidad del mensaje <strong>M</strong>. En términos de teoría de la información, esto se expresa como independencia informacional:</p>
+  <div class="grid2">
+    <div class="formula">I(M;C)=0</div>
+    <div class="formula">H(M∣C)=H(M)</div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod02" data-section-title="grupo Klein V4 Z2 x Z2 pares binarios XOR alfabeto cuatro símbolos">
+  <span class="kicker">Módulo 02 · Grupo de Klein como alfabeto criptográfico</span>
+  <h2>2. V₄ como alfabeto de cuatro símbolos</h2>
+  <p>La conexión con el grupo de Klein aparece porque el grupo</p>
+  <div class="formula">V₄ ≅ ℤ₂ × ℤ₂</div>
+  <p>puede interpretarse como el conjunto de pares binarios:</p>
+  <div class="formula">V₄ = {00, 01, 10, 11}</div>
+  <p>La operación del grupo es XOR bit a bit, indicada por el símbolo <strong>⊕</strong>. Por eso V₄ funciona como un pequeño alfabeto criptográfico de cuatro símbolos, donde cada símbolo representa dos bits.</p>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Elemento</th><th>Lectura binaria</th><th>Propiedad principal</th><th>Interpretación criptográfica</th></tr></thead>
+      <tbody>
+        <tr><td>00</td><td>neutro</td><td>00 ⊕ x = x</td><td>No modifica el mensaje.</td></tr>
+        <tr><td>01</td><td>primer cambio</td><td>01 ⊕ 01 = 00</td><td>Aplicado dos veces se cancela.</td></tr>
+        <tr><td>10</td><td>segundo cambio</td><td>10 ⊕ 10 = 00</td><td>También es su propio inverso.</td></tr>
+        <tr><td>11</td><td>doble cambio</td><td>11 ⊕ 11 = 00</td><td>Cambia ambos bits y se cancela al repetirse.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid3">
+    <div class="mini"><strong>01 ⊕ 10 = 11</strong><small>Se activan ambos bits.</small></div>
+    <div class="mini"><strong>10 ⊕ 11 = 01</strong><small>El primer bit se cancela.</small></div>
+    <div class="mini"><strong>01 ⊕ 11 = 10</strong><small>El segundo bit se cancela.</small></div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod03" data-section-title="formulación cifrado sobre V4 M K C E_K D_K descifrado">
+  <span class="kicker">Módulo 03 · Formulación del cifrado sobre V₄</span>
+  <h2>3. Cifrado y descifrado</h2>
+  <p>Sea <strong>M ∈ V₄</strong> el mensaje en claro, <strong>K ∈ V₄</strong> la clave secreta y <strong>C ∈ V₄</strong> el texto cifrado.</p>
+  <div class="grid2">
+    <div class="formula">C = Eₖ(M) = M ⊕ K</div>
+    <div class="formula">M = Dₖ(C) = C ⊕ K</div>
+  </div>
+  <p>La misma operación sirve para cifrar y descifrar porque en el grupo de Klein todo elemento es su propio inverso:</p>
+  <div class="formula">K ⊕ K = 00</div>
+  <div class="timeline">
+    <div class="step"><div class="stepNum">1</div><div><strong>Se cifra:</strong><br><span class="formula">Eₖ(M)=M⊕K</span></div></div>
+    <div class="step"><div class="stepNum">2</div><div><strong>Se descifra aplicando la misma clave:</strong><br><span class="formula">Dₖ(Eₖ(M))=(M⊕K)⊕K</span></div></div>
+    <div class="step"><div class="stepNum">3</div><div><strong>Por asociatividad:</strong><br><span class="formula">(M⊕K)⊕K = M⊕(K⊕K)</span></div></div>
+    <div class="step"><div class="stepNum">4</div><div><strong>Como K⊕K=00:</strong><br><span class="formula">M⊕00=M</span></div></div>
+  </div>
+  <div class="notice"><strong>Propiedades usadas:</strong> la corrección del descifrado usa asociatividad y auto-inversión de todos los elementos. En V₄, cada elemento no trivial tiene orden 2.</div>
+</section>
+
+<section class="card moduleSection" id="mod04" data-section-title="tabla cifrado Cayley V4 XOR mensaje clave criptograma">
+  <span class="kicker">Módulo 04 · Tabla de cifrado</span>
+  <h2>4. Tabla de cifrado en V₄</h2>
+  <p>La tabla del cifrado coincide con la tabla de Cayley del grupo de Klein. La fila indica el mensaje y la columna indica la clave.</p>
+  <div class="tableWrap">
+    <table class="cayley" id="v4Table" aria-label="Tabla XOR del grupo de Klein">
+      <thead><tr><th>⊕</th><th>00</th><th>01</th><th>10</th><th>11</th></tr></thead>
+      <tbody>
+        <tr><th>00</th><td data-m="00" data-k="00">00</td><td data-m="00" data-k="01">01</td><td data-m="00" data-k="10">10</td><td data-m="00" data-k="11">11</td></tr>
+        <tr><th>01</th><td data-m="01" data-k="00">01</td><td data-m="01" data-k="01">00</td><td data-m="01" data-k="10">11</td><td data-m="01" data-k="11">10</td></tr>
+        <tr><th>10</th><td data-m="10" data-k="00">10</td><td data-m="10" data-k="01">11</td><td data-m="10" data-k="10">00</td><td data-m="10" data-k="11">01</td></tr>
+        <tr><th>11</th><td data-m="11" data-k="00">11</td><td data-m="11" data-k="01">10</td><td data-m="11" data-k="10">01</td><td data-m="11" data-k="11">00</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notice good"><strong>Ejemplo:</strong> si M=10 y K=01, entonces C=10⊕01=11. Para descifrar, M=11⊕01=10.</div>
+</section>
+
+<section class="card moduleSection" id="mod05" data-section-title="confidencialidad perfecta Shannon probabilidad independiente criptograma mensaje información mutua entropía">
+  <span class="kicker">Módulo 05 · Confidencialidad perfecta</span>
+  <h2>5. El criptograma no cambia las probabilidades del mensaje</h2>
+  <p>La confidencialidad perfecta exige que observar el texto cifrado no modifique la probabilidad del mensaje:</p>
+  <div class="formula">P(M=m ∣ C=c)=P(M=m)</div>
+  <p>Si la clave K se elige uniformemente en V₄, entonces:</p>
+  <div class="formula">P(K=00)=P(K=01)=P(K=10)=P(K=11)=1/4</div>
+  <p>Para cualquier mensaje <strong>m</strong> y cualquier criptograma <strong>c</strong>, existe una única clave que transforma m en c:</p>
+  <div class="formula">k = m ⊕ c</div>
+  <p>Por eso:</p>
+  <div class="formula">P(C=c ∣ M=m)=P(K=m⊕c)=1/4</div>
+  <div class="notice"><strong>Clave de la demostración:</strong> esa probabilidad no depende del mensaje m. Por lo tanto, el criptograma no permite distinguir qué mensaje fue enviado.</div>
+</section>
+
+<section class="card moduleSection" id="mod06" data-section-title="Bayes demostración confidencialidad perfecta paso a paso">
+  <span class="kicker">Módulo 06 · Demostración con Bayes</span>
+  <h2>6. Prueba probabilística paso a paso</h2>
+  <p>Queremos probar que observar C no cambia la probabilidad de M:</p>
+  <div class="formula">P(M=m ∣ C=c)=P(M=m)</div>
+  <div class="timeline">
+    <div class="step"><div class="stepNum">1</div><div><strong>Aplicamos Bayes:</strong><br><span class="formula">P(M=m∣C=c)=P(C=c∣M=m)P(M=m)/P(C=c)</span></div></div>
+    <div class="step"><div class="stepNum">2</div><div><strong>Por clave uniforme:</strong><br><span class="formula">P(C=c∣M=m)=1/4</span></div></div>
+    <div class="step"><div class="stepNum">3</div><div><strong>Calculamos la probabilidad total:</strong><br><span class="formula">P(C=c)=Σₘ′ P(C=c∣M=m′)P(M=m′)</span></div></div>
+    <div class="step"><div class="stepNum">4</div><div><strong>Sustituimos 1/4:</strong><br><span class="formula">P(C=c)=Σₘ′ (1/4)P(M=m′)</span></div></div>
+    <div class="step"><div class="stepNum">5</div><div><strong>Como las probabilidades suman 1:</strong><br><span class="formula">P(C=c)=1/4</span></div></div>
+    <div class="step"><div class="stepNum">6</div><div><strong>Volvemos a Bayes:</strong><br><span class="formula">P(M=m∣C=c)=((1/4)P(M=m))/(1/4)=P(M=m)</span></div></div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod07" data-section-title="interpretación criptográfica atacante observa C mensajes posibles claves compatibles">
+  <span class="kicker">Módulo 07 · Interpretación criptográfica</span>
+  <h2>7. Qué ve el atacante</h2>
+  <p>La razón profunda de la seguridad es que, para un mismo criptograma <strong>c</strong>, todos los mensajes posibles siguen siendo compatibles con alguna clave.</p>
+  <p>Si el atacante observa:</p>
+  <div class="formula">C=11</div>
+  <p>entonces podrían haber ocurrido las siguientes combinaciones:</p>
+  <div class="tableWrap">
+    <table class="center">
+      <thead><tr><th>M</th><th>K</th><th>C=M⊕K</th><th>Lectura</th></tr></thead>
+      <tbody>
+        <tr><td>00</td><td>11</td><td>11</td><td>Mensaje 00 posible.</td></tr>
+        <tr><td>01</td><td>10</td><td>11</td><td>Mensaje 01 posible.</td></tr>
+        <tr><td>10</td><td>01</td><td>11</td><td>Mensaje 10 posible.</td></tr>
+        <tr><td>11</td><td>00</td><td>11</td><td>Mensaje 11 posible.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notice good"><strong>Conclusión:</strong> todos los mensajes son compatibles con el criptograma observado. Si la clave fue uniforme, ningún mensaje queda estadísticamente favorecido.</div>
+</section>
+
+<section class="card moduleSection" id="mod08" data-section-title="generalización mensajes largos V4 n producto directo Z2 2n bloques dos bits">
+  <span class="kicker">Módulo 08 · Generalización a mensajes largos</span>
+  <h2>8. De un bloque a muchos bloques</h2>
+  <p>El grupo de Klein cifra bloques de dos bits. Para mensajes más largos se usa el producto directo:</p>
+  <div class="grid3">
+    <div class="formula">V₄ⁿ</div>
+    <div class="formula">(ℤ₂×ℤ₂)ⁿ</div>
+    <div class="formula">ℤ₂²ⁿ</div>
+  </div>
+  <p>Para un mensaje de n bloques:</p>
+  <div class="formula">M=(m₁,m₂,…,mₙ)</div>
+  <p>y una clave:</p>
+  <div class="formula">K=(k₁,k₂,…,kₙ)</div>
+  <p>el cifrado es:</p>
+  <div class="formula">C=(m₁⊕k₁, m₂⊕k₂, …, mₙ⊕kₙ)</div>
+  <div class="notice"><strong>Condición de seguridad:</strong> la confidencialidad perfecta se mantiene si K es uniforme en V₄ⁿ y se usa una sola vez.</div>
+  <div class="sim">
+    <div class="simTitle"><strong>Mini visualización de bloques</strong><span class="stateBadge">4 bloques</span></div>
+    <div class="cipherStrip" id="blockStrip"></div>
+    <div class="pillRow">
+      <button class="primary" onclick="randomBlocks()">🎲 Generar ejemplo</button>
+      <button onclick="showBlockStep()">Paso a paso</button>
+    </div>
+    <div class="log" id="blockLog">Cada bloque se cifra dentro de una copia de V₄.</div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod09" data-section-title="condiciones necesarias one-time pad clave aleatoria uniforme longitud igual mensaje uso único secreta">
+  <span class="kicker">Módulo 09 · Condiciones necesarias</span>
+  <h2>9. Cuándo es realmente un one-time pad</h2>
+  <p>Para que el sistema sea verdaderamente un one-time pad, deben cumplirse cuatro condiciones estrictas.</p>
+  <div class="grid4">
+    <div class="mini"><strong>1. Aleatoria</strong><small>La clave no debe ser predecible ni generada con patrones débiles.</small></div>
+    <div class="mini"><strong>2. Uniforme</strong><small>Cada clave posible debe tener la misma probabilidad.</small></div>
+    <div class="mini"><strong>3. Misma longitud</strong><small>La clave debe cubrir todo el mensaje.</small></div>
+    <div class="mini"><strong>4. Uso único</strong><small>La clave no debe reutilizarse nunca.</small></div>
+  </div>
+  <div class="notice danger"><strong>Error crítico:</strong> si se reutiliza la clave, la garantía teórica se destruye. El sistema deja de comportarse como one-time pad y aparece el problema del two-time pad.</div>
+</section>
+
+<section class="card moduleSection" id="mod10" data-section-title="reutilización clave two-time pad C1 xor C2 M1 xor M2 clave desaparece ataque cribado">
+  <span class="kicker">Módulo 10 · Reutilización de clave</span>
+  <h2>10. El problema del two-time pad</h2>
+  <p>Supongamos dos mensajes M₁ y M₂ cifrados con la misma clave K:</p>
+  <div class="grid2">
+    <div class="formula">C₁=M₁⊕K</div>
+    <div class="formula">C₂=M₂⊕K</div>
+  </div>
+  <p>Si el atacante calcula C₁⊕C₂, obtiene:</p>
+  <div class="formula">C₁⊕C₂=(M₁⊕K)⊕(M₂⊕K)</div>
+  <p>Por asociatividad y conmutatividad:</p>
+  <div class="formula">C₁⊕C₂=M₁⊕M₂⊕K⊕K</div>
+  <p>Como K⊕K=00, queda:</p>
+  <div class="formula">C₁⊕C₂=M₁⊕M₂</div>
+  <div class="notice danger"><strong>Consecuencia:</strong> la clave desaparece. Esto no revela inmediatamente los mensajes, pero revela una relación explotable entre ellos mediante redundancias lingüísticas, formatos conocidos, encabezados, patrones o ataques de cribado.</div>
+</section>
+
+<section class="card moduleSection" id="simuladores" data-section-title="simuladores cifrado descifrado Bayes reutilización clave paso a paso automático">
+  <span class="kicker">Simuladores interactivos</span>
+  <h2>Simuladores de cifrado, prueba y ataque</h2>
+  <div class="grid2">
+    <div class="sim" id="cipherSim">
+      <div class="simTitle"><strong>Simulador de cifrado sobre V₄</strong><span>Resultado: <span class="stateBadge" id="cipherResult">00</span></span></div>
+      <div class="grid2">
+        <div class="mini"><strong>Mensaje M</strong><select id="msgSel" onchange="updateCipher()"><option>00</option><option>01</option><option selected>10</option><option>11</option></select></div>
+        <div class="mini"><strong>Clave K</strong><select id="keySel" onchange="updateCipher()"><option>00</option><option selected>01</option><option>10</option><option>11</option></select></div>
+      </div>
+      <div class="pillRow">
+        <button class="primary" onclick="cipherStep()">Paso a paso</button>
+        <button class="good" onclick="cipherAuto()">Simulación automática</button>
+        <button onclick="updateCipher()">Recalcular</button>
+      </div>
+      <div class="barWrap"><div class="bar" id="cipherBar"></div></div>
+      <div class="log" id="cipherLog">Elegí mensaje y clave para ver el cifrado y el descifrado.</div>
+    </div>
+    <div class="sim" id="bayesSim">
+      <div class="simTitle"><strong>Demostración de Bayes</strong><span class="stateBadge" id="bayesState">Paso 0</span></div>
+      <div class="pillRow">
+        <button class="primary" onclick="bayesStep()">Paso a paso</button>
+        <button class="good" onclick="bayesAuto()">Simulación automática</button>
+        <button onclick="resetBayes()">Reiniciar</button>
+      </div>
+      <div class="barWrap"><div class="bar" id="bayesBar"></div></div>
+      <div class="log" id="bayesLog">Objetivo: probar que P(M=m ∣ C=c)=P(M=m).</div>
+    </div>
+  </div>
+  <div class="sim" id="reuseSim">
+    <div class="simTitle"><strong>Simulador de reutilización de clave</strong><span>Filtración: <span class="stateBadge" id="reuseLeak">00</span></span></div>
+    <div class="grid3">
+      <div class="mini"><strong>Mensaje M₁</strong><select id="m1Sel" onchange="updateReuse()"><option>00</option><option selected>01</option><option>10</option><option>11</option></select></div>
+      <div class="mini"><strong>Mensaje M₂</strong><select id="m2Sel" onchange="updateReuse()"><option>00</option><option>01</option><option selected>10</option><option>11</option></select></div>
+      <div class="mini"><strong>Clave reutilizada K</strong><select id="reuseKeySel" onchange="updateReuse()"><option>00</option><option>01</option><option>10</option><option selected>11</option></select></div>
+    </div>
+    <div class="pillRow">
+      <button class="primary" onclick="reuseStep()">Paso a paso</button>
+      <button class="good" onclick="reuseAuto()">Simulación automática</button>
+      <button class="danger" onclick="randomReuse()">🎲 Nuevo caso</button>
+    </div>
+    <div class="barWrap"><div class="bar" id="reuseBar"></div></div>
+    <div class="log" id="reuseLog">Cuando la clave se reutiliza, C₁⊕C₂ elimina K y revela M₁⊕M₂.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Síntesis final</h2>
+  <div class="grid2">
+    <div class="mini"><strong>Idea algebraica</strong><small>El one-time pad sobre V₄ es cifrado por suma XOR en el grupo de Klein.</small></div>
+    <div class="mini"><strong>Idea probabilística</strong><small>La clave uniforme hace que cada criptograma sea igualmente probable para cualquier mensaje.</small></div>
+    <div class="mini"><strong>Idea criptográfica</strong><small>El atacante no aprende nada de M al observar C si la clave es aleatoria, uniforme, secreta y usada una sola vez.</small></div>
+    <div class="mini"><strong>Riesgo principal</strong><small>Reutilizar la clave cancela K al comparar criptogramas y expone relaciones entre mensajes.</small></div>
+  </div>
+  <div class="notice good"><strong>Frase final:</strong> el grupo de Klein, aunque pequeño, captura la esencia algebraica del one-time pad: identidad, inversos, operación XOR, estructura abeliana y claves uniformes que vuelven independiente al criptograma respecto del mensaje.</div>
+</section>
+
+<section class="card">
+  <h2>Quiz de comprensión</h2>
+  <div class="sim">
+    <div class="quiz">
+      <p><strong>Pregunta 1:</strong> ¿Por qué la misma operación XOR sirve para cifrar y descifrar?</p>
+      <button onclick="quiz(1,false)">Porque XOR no tiene elemento neutro.</button>
+      <button onclick="quiz(1,true)">Porque en V₄ cada elemento es su propio inverso.</button>
+      <button onclick="quiz(1,false)">Porque la clave no se usa en el descifrado.</button>
+      <div class="feedback" id="quiz1"></div>
+      <p><strong>Pregunta 2:</strong> ¿Qué condición probabilística permite la confidencialidad perfecta?</p>
+      <button onclick="quiz(2,true)">La clave debe ser uniforme sobre todo el espacio de claves.</button>
+      <button onclick="quiz(2,false)">El mensaje debe ser siempre 00.</button>
+      <button onclick="quiz(2,false)">El atacante debe tener poca capacidad computacional.</button>
+      <div class="feedback" id="quiz2"></div>
+      <p><strong>Pregunta 3:</strong> ¿Qué ocurre si se reutiliza la clave?</p>
+      <button onclick="quiz(3,false)">La seguridad perfecta se duplica.</button>
+      <button onclick="quiz(3,true)">C₁⊕C₂ elimina K y revela M₁⊕M₂.</button>
+      <button onclick="quiz(3,false)">La tabla de Cayley deja de existir.</button>
+      <div class="feedback" id="quiz3"></div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <strong>Material elaborado por Sergio Gevatschnaider</strong><br />
+  Página HTML autónoma · Aplicaciones criptográficas del grupo de Klein · One-time pad, Vernam, XOR y confidencialidad perfecta
+</div>
+</main>
+<a class="btn primary toTop" href="#inicio" aria-label="Volver arriba">↑</a>
+<script>
+const symbols=['00','01','10','11'];
+function xorBits(a,b){return ''+(Number(a[0])^Number(b[0]))+(Number(a[1])^Number(b[1]));}
+function pct(i,total){return Math.min(100,Math.round((i/total)*100));}
+function setBar(id,value){document.getElementById(id).style.width=value+'%';}
+(function(){
+  const root=document.documentElement;
+  const btn=document.getElementById('themeBtn');
+  const showAll=document.getElementById('showAllBtn');
+  function setTheme(theme){
+    root.setAttribute('data-theme',theme);
+    localStorage.setItem('crypto-v4-theme',theme);
+    btn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';
+  }
+  setTheme(localStorage.getItem('crypto-v4-theme') || 'light');
+  btn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+  const search=document.getElementById('moduleSearch');
+  const cards=[...document.querySelectorAll('.moduleCard')];
+  const sections=[...document.querySelectorAll('.moduleSection')];
+  search.addEventListener('input',()=>{
+    const q=search.value.trim().toLowerCase();
+    cards.forEach(card=>{
+      const haystack=(card.dataset.title+' '+card.innerText).toLowerCase();
+      card.style.display=haystack.includes(q)?'flex':'none';
+    });
+    sections.forEach(sec=>{
+      const haystack=(sec.dataset.sectionTitle+' '+sec.innerText).toLowerCase();
+      sec.style.display=q==='' || haystack.includes(q)?'block':'none';
+    });
+  });
+  showAll.addEventListener('click',()=>{
+    search.value='';
+    cards.forEach(card=>card.style.display='flex');
+    sections.forEach(sec=>sec.style.display='block');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  window.addEventListener('scroll',()=>{
+    const scrollTop=document.documentElement.scrollTop || document.body.scrollTop;
+    const height=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+    document.getElementById('progress').style.width=(height?scrollTop/height*100:0)+'%';
+  });
+})();
+function highlightCell(m,k){
+  document.querySelectorAll('#v4Table td').forEach(td=>td.classList.toggle('hit',td.dataset.m===m && td.dataset.k===k));
+}
+let cipherIndex=0;
+const cipherSteps=[];
+function buildCipherSteps(){
+  const m=document.getElementById('msgSel').value;
+  const k=document.getElementById('keySel').value;
+  const c=xorBits(m,k);
+  cipherSteps.length=0;
+  cipherSteps.push(`Mensaje seleccionado: M=${m}. Clave seleccionada: K=${k}.`);
+  cipherSteps.push(`Cifrado: C=M⊕K=${m}⊕${k}=${c}.`);
+  cipherSteps.push(`Descifrado: C⊕K=${c}⊕${k}=${xorBits(c,k)}.`);
+  cipherSteps.push(`Como K⊕K=${k}⊕${k}=00, queda M⊕00=M.`);
+  cipherSteps.push(`Resultado final: Dₖ(Eₖ(M))=${m}. La operación es correcta.`);
+  document.getElementById('cipherResult').textContent=c;
+  highlightCell(m,k);
+}
+function updateCipher(){
+  buildCipherSteps();
+  cipherIndex=0;
+  setBar('cipherBar',0);
+  document.getElementById('cipherLog').innerHTML=cipherSteps[1];
+}
+function cipherStep(){
+  buildCipherSteps();
+  cipherIndex=(cipherIndex+1)%cipherSteps.length;
+  setBar('cipherBar',pct(cipherIndex+1,cipherSteps.length));
+  document.getElementById('cipherLog').innerHTML='<strong>Paso '+(cipherIndex+1)+':</strong> '+cipherSteps[cipherIndex];
+}
+function cipherAuto(){
+  buildCipherSteps();
+  cipherIndex=0;
+  let i=0;
+  const timer=setInterval(()=>{
+    document.getElementById('cipherLog').innerHTML='<strong>Paso '+(i+1)+':</strong> '+cipherSteps[i];
+    setBar('cipherBar',pct(i+1,cipherSteps.length));
+    i++;
+    if(i>=cipherSteps.length) clearInterval(timer);
+  },850);
+}
+let bayesIndex=0;
+const bayesSteps=[
+  'Objetivo: probar que P(M=m ∣ C=c)=P(M=m).',
+  'Por Bayes: P(M=m∣C=c)=P(C=c∣M=m)P(M=m)/P(C=c).',
+  'Para cada m y c hay una única clave k=m⊕c.',
+  'Como K es uniforme en V₄, P(C=c∣M=m)=P(K=m⊕c)=1/4.',
+  'Por probabilidad total: P(C=c)=Σₘ′ P(C=c∣M=m′)P(M=m′).',
+  'Sustituyendo: P(C=c)=Σₘ′ (1/4)P(M=m′)=(1/4)Σₘ′P(M=m′)=1/4.',
+  'Volvemos a Bayes: ((1/4)P(M=m))/(1/4)=P(M=m).',
+  'Conclusión: el criptograma no modifica las probabilidades del mensaje.'
+];
+function resetBayes(){bayesIndex=0;setBar('bayesBar',0);document.getElementById('bayesState').textContent='Paso 0';document.getElementById('bayesLog').textContent=bayesSteps[0];}
+function bayesStep(){
+  bayesIndex=(bayesIndex+1)%bayesSteps.length;
+  document.getElementById('bayesState').textContent='Paso '+bayesIndex;
+  document.getElementById('bayesLog').innerHTML='<strong>'+bayesSteps[bayesIndex]+'</strong>';
+  setBar('bayesBar',pct(bayesIndex,bayesSteps.length-1));
+}
+function bayesAuto(){
+  bayesIndex=0;let i=0;
+  const timer=setInterval(()=>{
+    document.getElementById('bayesState').textContent='Paso '+i;
+    document.getElementById('bayesLog').innerHTML='<strong>'+bayesSteps[i]+'</strong>';
+    setBar('bayesBar',pct(i,bayesSteps.length-1));
+    i++;
+    if(i>=bayesSteps.length) clearInterval(timer);
+  },950);
+}
+let reuseIndex=0;
+const reuseSteps=[];
+function buildReuseSteps(){
+  const m1=document.getElementById('m1Sel').value;
+  const m2=document.getElementById('m2Sel').value;
+  const k=document.getElementById('reuseKeySel').value;
+  const c1=xorBits(m1,k), c2=xorBits(m2,k), leak=xorBits(c1,c2), rel=xorBits(m1,m2);
+  document.getElementById('reuseLeak').textContent=leak;
+  reuseSteps.length=0;
+  reuseSteps.push(`Se cifran dos mensajes con la misma clave: M₁=${m1}, M₂=${m2}, K=${k}.`);
+  reuseSteps.push(`Primer cifrado: C₁=M₁⊕K=${m1}⊕${k}=${c1}.`);
+  reuseSteps.push(`Segundo cifrado: C₂=M₂⊕K=${m2}⊕${k}=${c2}.`);
+  reuseSteps.push(`El atacante calcula C₁⊕C₂=${c1}⊕${c2}=${leak}.`);
+  reuseSteps.push(`Pero M₁⊕M₂=${m1}⊕${m2}=${rel}. Coinciden: la clave desapareció.`);
+  reuseSteps.push(`Lectura criptográfica: no se revelan necesariamente M₁ y M₂, pero sí una relación explotable.`);
+}
+function updateReuse(){buildReuseSteps();reuseIndex=0;setBar('reuseBar',0);document.getElementById('reuseLog').innerHTML=reuseSteps[0];}
+function reuseStep(){
+  buildReuseSteps();
+  reuseIndex=(reuseIndex+1)%reuseSteps.length;
+  setBar('reuseBar',pct(reuseIndex+1,reuseSteps.length));
+  document.getElementById('reuseLog').innerHTML='<strong>Paso '+(reuseIndex+1)+':</strong> '+reuseSteps[reuseIndex];
+}
+function reuseAuto(){
+  buildReuseSteps();reuseIndex=0;let i=0;
+  const timer=setInterval(()=>{
+    document.getElementById('reuseLog').innerHTML='<strong>Paso '+(i+1)+':</strong> '+reuseSteps[i];
+    setBar('reuseBar',pct(i+1,reuseSteps.length));
+    i++;
+    if(i>=reuseSteps.length) clearInterval(timer);
+  },900);
+}
+function randomChoice(){return symbols[Math.floor(Math.random()*symbols.length)];}
+function randomReuse(){
+  document.getElementById('m1Sel').value=randomChoice();
+  document.getElementById('m2Sel').value=randomChoice();
+  document.getElementById('reuseKeySel').value=randomChoice();
+  updateReuse();
+}
+let blockData=[];
+function randomBlocks(){
+  blockData=[];
+  for(let i=0;i<4;i++) blockData.push({m:randomChoice(),k:randomChoice()});
+  renderBlocks();
+  document.getElementById('blockLog').textContent='Cada bloque mᵢ se cifra con su propia clave kᵢ dentro de V₄.';
+}
+function renderBlocks(){
+  const box=document.getElementById('blockStrip');
+  box.innerHTML='';
+  blockData.forEach((b,i)=>{
+    const c=xorBits(b.m,b.k);
+    const div=document.createElement('div');
+    div.className='cipherCell';
+    div.innerHTML=`Bloque ${i+1}<br><span class="muted">${b.m} ⊕ ${b.k}</span><br>${c}`;
+    box.appendChild(div);
+  });
+}
+let blockStep=0;
+function showBlockStep(){
+  if(!blockData.length) randomBlocks();
+  const b=blockData[blockStep%blockData.length];
+  const c=xorBits(b.m,b.k);
+  document.getElementById('blockLog').innerHTML=`<strong>Bloque ${blockStep%blockData.length+1}:</strong> m=${b.m}, k=${b.k}, c=m⊕k=${c}. Para descifrar: c⊕k=${c}⊕${b.k}=${xorBits(c,b.k)}.`;
+  blockStep++;
+}
+function quiz(n,ok){
+  const el=document.getElementById('quiz'+n);
+  const correct={
+    1:'Correcto: en V₄ todo elemento es auto-inverso, por eso aplicar dos veces la misma clave cancela la clave.',
+    2:'Correcto: la uniformidad de la clave hace que cada criptograma tenga probabilidad 1/4 para cualquier mensaje.',
+    3:'Correcto: al reutilizar K, C₁⊕C₂ elimina la clave y deja M₁⊕M₂.'
+  };
+  el.textContent=ok?correct[n]:'No exactamente. Revisá el módulo correspondiente y observá el papel de XOR, uniformidad o reutilización de clave.';
+  el.style.color=ok?'var(--green)':'var(--red)';
+}
+updateCipher();resetBayes();updateReuse();randomBlocks();
+</script>
+</body>
+</html>

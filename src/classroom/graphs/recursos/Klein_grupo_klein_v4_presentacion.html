@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Presentación interactiva ampliada sobre el Grupo de Klein V4: teoría de grupos, geometría, permutaciones, XOR, subgrupos, automorfismos, representaciones y Galois." />
+<title>Grupo de Klein V₄ · Presentación ampliada e interactiva</title>
+<style>
+:root{
+  --bg:#eef6ff; --bg2:#fbfdff; --card:#ffffff; --card2:#f7fbff; --text:#102033; --muted:#607089;
+  --line:#d7e5f7; --ink:#0f172a; --primary:#2563eb; --secondary:#7c3aed; --cyan:#0891b2;
+  --green:#059669; --amber:#d97706; --red:#dc2626; --pink:#db2777; --radius:28px;
+  --shadow:0 24px 70px rgba(37,99,235,.14); --soft:0 10px 28px rgba(15,23,42,.10);
+  --ring:0 0 0 4px color-mix(in srgb,var(--primary) 19%,transparent);
+}
+[data-theme="dark"]{
+  --bg:#07111f; --bg2:#0b1628; --card:#101b2f; --card2:#0b1526; --text:#eff6ff; --muted:#aec2dc;
+  --line:#263b59; --ink:#f8fafc; --primary:#60a5fa; --secondary:#a78bfa; --cyan:#22d3ee;
+  --green:#34d399; --amber:#fbbf24; --red:#fb7185; --pink:#f472b6;
+  --shadow:0 26px 70px rgba(0,0,0,.38); --soft:0 10px 28px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);line-height:1.67;background:radial-gradient(circle at 3% 0%,color-mix(in srgb,var(--primary) 24%,transparent),transparent 27%),radial-gradient(circle at 88% 8%,color-mix(in srgb,var(--secondary) 20%,transparent),transparent 31%),radial-gradient(circle at 48% 57%,color-mix(in srgb,var(--cyan) 10%,transparent),transparent 38%),linear-gradient(135deg,var(--bg),var(--bg2));}
+a{color:var(--primary);font-weight:850;text-decoration:none} a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:90;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(18px)}
+.nav{max-width:1320px;margin:auto;padding:12px 20px;display:flex;gap:14px;justify-content:space-between;align-items:center}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.03em}.brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));box-shadow:0 0 0 6px color-mix(in srgb,var(--primary) 17%,transparent)}.controls{display:flex;gap:9px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 14px;border-radius:16px;cursor:pointer;font-weight:880;box-shadow:var(--soft);transition:.18s transform,.18s box-shadow,.18s background;display:inline-flex;align-items:center;gap:8px;justify-content:center}button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,23,42,.14);text-decoration:none}button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--ring)}button.primary,.btn.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:white}button.good{background:color-mix(in srgb,var(--green) 13%,var(--card));border-color:color-mix(in srgb,var(--green) 42%,var(--line))}button.warn{background:color-mix(in srgb,var(--amber) 14%,var(--card));border-color:color-mix(in srgb,var(--amber) 42%,var(--line))}button.danger{background:color-mix(in srgb,var(--red) 12%,var(--card));border-color:color-mix(in srgb,var(--red) 42%,var(--line))}
+.progress{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--cyan));width:0;z-index:110}
+main{max-width:1320px;margin:auto;padding:28px 20px 76px}.card{background:color-mix(in srgb,var(--card) 96%,transparent);border:1px solid var(--line);border-radius:var(--radius);padding:25px;box-shadow:var(--shadow);margin:18px 0}.hero{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(340px,.87fr);gap:22px;align-items:stretch;margin:18px 0 26px}h1{font-size:clamp(42px,5.7vw,80px);line-height:.98;margin:10px 0 16px;letter-spacing:-.065em}h2{font-size:clamp(27px,3.1vw,44px);line-height:1.07;margin:34px 0 15px;letter-spacing:-.045em}h3{font-size:22px;margin:8px 0 10px;letter-spacing:-.02em}h4{font-size:18px;margin:18px 0 8px}.lead{font-size:18.5px;color:var(--muted);max-width:90ch}.muted{color:var(--muted)}.kicker{font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.14em;color:var(--primary)}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--primary) 6%);font-size:13px;font-weight:920;color:var(--muted)}.tag.hot{color:white;background:linear-gradient(135deg,var(--primary),var(--secondary));border:0}.notice{border-left:5px solid var(--primary);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--primary) 8%,var(--card));margin:14px 0}.notice.good{border-left-color:var(--green);background:color-mix(in srgb,var(--green) 9%,var(--card))}.notice.warn{border-left-color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,var(--card))}.notice.danger{border-left-color:var(--red);background:color-mix(in srgb,var(--red) 8%,var(--card))}
+.path{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.path a{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);box-shadow:var(--soft);font-weight:950}.path a:hover{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;text-decoration:none}.searchBox{display:grid;gap:8px;margin-top:14px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:740;box-shadow:var(--soft)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{display:block;color:var(--muted)}.bigNumber{font-size:46px;font-weight:950;letter-spacing:-.06em;color:var(--primary);line-height:1}.formula{font-family:Cambria,Georgia,serif;font-size:22px;font-weight:850}.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 6%,var(--card));border:1px solid var(--line);border-radius:18px;padding:14px;overflow:auto;color:var(--text);white-space:pre-wrap}.inlineCode{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:color-mix(in srgb,var(--ink) 7%,var(--card));padding:2px 7px;border-radius:8px;border:1px solid var(--line)}
+.moduleGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.moduleCard{border:1px solid var(--line);border-radius:24px;padding:18px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);display:flex;flex-direction:column;min-height:292px}.moduleTop{display:flex;justify-content:space-between;gap:12px;align-items:center}.moduleNum{font-size:30px;font-weight:950;letter-spacing:-.05em;color:var(--primary)}.moduleType{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-weight:900;font-size:12px;background:var(--card)}.moduleCard p{color:var(--muted);font-size:15px;flex:1}.tagline{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}.tagline span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--card);color:var(--muted);font-weight:850;font-size:12px}.moduleActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.moduleSection{scroll-margin-top:92px;padding-top:8px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--soft);margin-top:12px}table{width:100%;border-collapse:collapse;min-width:730px}th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;vertical-align:top}th{background:color-mix(in srgb,var(--primary) 9%,var(--card));font-size:13px;text-transform:uppercase;letter-spacing:.08em}tr:last-child td{border-bottom:none}.center{text-align:center}.cayley td,.cayley th{text-align:center}.cayley td{font-weight:950}.cayley .hit{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 22%,var(--card)),color-mix(in srgb,var(--secondary) 16%,var(--card)));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--primary) 48%,transparent)}
+.sim{margin-top:15px;padding:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:var(--soft)}.simTitle{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:13px}.simTitle strong{font-size:19px}.splitView{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.svgBox{width:100%;min-height:300px;border:1px solid var(--line);border-radius:22px;background:color-mix(in srgb,var(--card),var(--cyan) 5%);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}svg{max-width:100%;height:auto}.stateBadge{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--primary) 11%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 35%,var(--line));font-weight:950}.log{min-height:76px;background:color-mix(in srgb,var(--ink) 5%,var(--card));border:1px solid var(--line);border-radius:18px;padding:12px;color:var(--muted)}.pillRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.pill{border:1px solid var(--line);background:var(--card);padding:8px 10px;border-radius:999px;font-weight:850;color:var(--muted)}.pill.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:none}.barWrap{height:12px;background:color-mix(in srgb,var(--ink) 8%,var(--card));border-radius:999px;overflow:hidden;margin:8px 0 14px}.bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));width:0;transition:width .35s}.timeline{display:grid;gap:12px;margin-top:12px}.step{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.stepNum{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;font-weight:950}.quiz{display:grid;gap:12px}.quiz button{text-align:left;justify-content:flex-start}.feedback{font-weight:900}.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}.toTop{position:fixed;right:18px;bottom:18px;z-index:70}.matrix{font-family:Cambria,Georgia,serif;font-size:20px;line-height:1.4}.matrixBlock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--primary) 9%,var(--card));border:1px solid var(--line);font-weight:900;color:var(--muted)}.compareStrip{display:grid;grid-template-columns:1fr 1fr;gap:16px}.axiomGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.axiomCard{padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.axiomCard b{color:var(--primary)}.permDots circle{transition:transform .35s}.score{font-size:38px;font-weight:950;color:var(--primary);letter-spacing:-.05em}.diagramLabel{font-weight:950;fill:var(--text)}
+@media(max-width:1080px){.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView,.matrixBlock,.compareStrip,.axiomGrid{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}.moduleCard{min-height:auto}table{min-width:640px}}
+@media(max-width:640px){main{padding:18px 12px 80px}.card{padding:18px;border-radius:23px}.controls button,.controls .btn{width:100%;}.path a{width:38px;height:38px}h1{font-size:44px}}
+@media print{header,.controls,button,.btn,.searchBox,.toTop,.progress{display:none!important}body{background:white}.card,.moduleCard,.mini,.sim{box-shadow:none}main{max-width:100%;padding:0}.moduleSection{break-inside:avoid}.hero,.moduleGrid,.grid2,.grid3,.grid4,.splitView,.matrixBlock,.compareStrip,.axiomGrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Grupo de Klein V₄ · Presentación ampliada e interactiva</span></div>
+    <div class="controls">
+      <button id="themeBtn">🌙 Tema oscuro</button>
+      <button id="showAllBtn">▾ Mostrar todo</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+      <a class="btn primary" href="#guia">Guía docente</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero" id="inicio">
+  <div class="card">
+    <span class="tag hot">Teoría de grupos</span><span class="tag">V₄</span><span class="tag">C₂ × C₂</span><span class="tag">ℤ₂ × ℤ₂</span><span class="tag">F₂²</span><span class="tag">Galois</span>
+    <h1>Grupo de Klein</h1>
+    <p class="lead">Material visual, autónomo e interactivo sobre el grupo de Klein, también llamado <strong>grupo cuatro de Klein</strong>, <strong>Vierergruppe</strong> o <strong>V₄</strong>. El objetivo es comprenderlo como estructura algebraica mínima, como simetría geométrica, como sistema binario, como subgrupo de permutaciones y como modelo que aparece en Galois, representaciones y códigos.</p>
+    <div class="notice good"><strong>Idea central:</strong> V₄ tiene cuatro elementos. El neutro tiene orden 1 y los otros tres elementos tienen orden 2. Es abeliano, pero no es cíclico.</div>
+    <div class="path" aria-label="Navegación rápida">
+      <a href="#mod01">01</a><a href="#mod02">02</a><a href="#mod03">03</a><a href="#mod04">04</a><a href="#mod05">05</a><a href="#mod06">06</a><a href="#mod07">07</a><a href="#mod08">08</a><a href="#mod09">09</a><a href="#mod10">10</a><a href="#mod11">11</a><a href="#mod12">12</a><a href="#guia">13</a>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Panel de exploración</h3>
+    <p class="muted">Buscá por concepto: Cayley, XOR, rectángulo, permutaciones, A₄, normalidad, cocientes, automorfismos, caracteres, Galois o errores comunes.</p>
+    <div class="searchBox"><input id="moduleSearch" placeholder="Buscar en todo el material..." aria-label="Buscar módulo" /></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="mini"><strong>4</strong><small>elementos: e, a, b, c</small></div>
+      <div class="mini"><strong>3</strong><small>involuciones no triviales</small></div>
+      <div class="mini"><strong>5</strong><small>subgrupos en total</small></div>
+      <div class="mini"><strong>6</strong><small>automorfismos</small></div>
+    </div>
+    <div class="notice warn"><strong>Modo sugerido:</strong> empezá por la tabla de Cayley, luego pasá al modelo XOR y finalmente conectá con geometría, permutaciones y Galois.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Índice expandido</h2>
+  <div class="moduleGrid" id="moduleGrid">
+    <article class="moduleCard" data-title="definición estructura orden involuciones V4 Klein">
+      <div class="moduleTop"><span class="moduleNum">01</span><span class="moduleType">Fundamento</span></div><h3>Definición y lectura conceptual</h3><p>Qué es V₄, por qué es el grupo abeliano no cíclico más pequeño y cómo se nombran sus elementos.</p><div class="tagline"><span>definición</span><span>orden</span><span>involuciones</span></div><div class="moduleActions"><a class="btn primary" href="#mod01">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="axiomas grupo cerradura asociatividad identidad inversos conmutatividad">
+      <div class="moduleTop"><span class="moduleNum">02</span><span class="moduleType">Axiomas</span></div><h3>Axiomas verificados</h3><p>Verificación pedagógica de cerradura, asociatividad, neutro, inversos y conmutatividad.</p><div class="tagline"><span>axiomas</span><span>grupo</span><span>abeliano</span></div><div class="moduleActions"><a class="btn primary" href="#mod02">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="tabla Cayley simulador producto paso automático">
+      <div class="moduleTop"><span class="moduleNum">03</span><span class="moduleType">Simulación</span></div><h3>Tabla de Cayley</h3><p>Calculadora de productos con modo manual, paso a paso y recorrido automático.</p><div class="tagline"><span>Cayley</span><span>producto</span><span>simulador</span></div><div class="moduleActions"><a class="btn primary" href="#mod03">Abrir</a><a class="btn" href="#cayleySim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="V4 C4 cíclico no cíclico grupos de orden cuatro">
+      <div class="moduleTop"><span class="moduleNum">04</span><span class="moduleType">Comparación</span></div><h3>V₄ frente a C₄</h3><p>Clasificación de los grupos de orden cuatro y diferencia estructural entre ℤ₄ y ℤ₂×ℤ₂.</p><div class="tagline"><span>C₄</span><span>cíclico</span><span>clasificación</span></div><div class="moduleActions"><a class="btn primary" href="#mod04">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="Z2 producto directo XOR F2 espacio vectorial bits">
+      <div class="moduleTop"><span class="moduleNum">05</span><span class="moduleType">Álgebra lineal</span></div><h3>ℤ₂ × ℤ₂, XOR y F₂²</h3><p>V₄ como suma binaria, espacio vectorial de dimensión dos y estructura de paridad.</p><div class="tagline"><span>XOR</span><span>F₂²</span><span>bits</span></div><div class="moduleActions"><a class="btn primary" href="#mod05">Abrir</a><a class="btn" href="#xorSim">XOR</a></div>
+    </article>
+    <article class="moduleCard" data-title="rectángulo simetrías geometría reflexión rotación 180 composición">
+      <div class="moduleTop"><span class="moduleNum">06</span><span class="moduleType">Geometría</span></div><h3>Simetrías del rectángulo</h3><p>Identidad, reflexión horizontal, reflexión vertical y rotación de 180° como modelo geométrico.</p><div class="tagline"><span>rectángulo</span><span>reflexión</span><span>rotación</span></div><div class="moduleActions"><a class="btn primary" href="#mod06">Abrir</a><a class="btn" href="#rectSim">Simular</a></div>
+    </article>
+    <article class="moduleCard" data-title="permutaciones S4 A4 dobles transposiciones normalidad">
+      <div class="moduleTop"><span class="moduleNum">07</span><span class="moduleType">Permutaciones</span></div><h3>V₄ dentro de S₄ y A₄</h3><p>Dobles transposiciones, composición y normalidad dentro del grupo alternante A₄.</p><div class="tagline"><span>S₄</span><span>A₄</span><span>normal</span></div><div class="moduleActions"><a class="btn primary" href="#mod07">Abrir</a><a class="btn" href="#permSim">Permutar</a></div>
+    </article>
+    <article class="moduleCard" data-title="subgrupos cocientes retículo Lagrange normalidad">
+      <div class="moduleTop"><span class="moduleNum">08</span><span class="moduleType">Estructura</span></div><h3>Subgrupos y cocientes</h3><p>Retículo completo, cocientes isomorfos a C₂ y lectura mediante Lagrange.</p><div class="tagline"><span>subgrupos</span><span>cocientes</span><span>lattice</span></div><div class="moduleActions"><a class="btn primary" href="#mod08">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="automorfismos Aut V4 S3 GL2 F2 matrices invertibles">
+      <div class="moduleTop"><span class="moduleNum">09</span><span class="moduleType">Simetría interna</span></div><h3>Automorfismos</h3><p>Por qué Aut(V₄) ≅ S₃ y por qué también coincide con GL(2,F₂).</p><div class="tagline"><span>Aut(V₄)</span><span>S₃</span><span>GL(2,F₂)</span></div><div class="moduleActions"><a class="btn primary" href="#mod09">Abrir</a><a class="btn" href="#autoSim">Explorar</a></div>
+    </article>
+    <article class="moduleCard" data-title="matrices representaciones caracteres irreducibles tabla signos">
+      <div class="moduleTop"><span class="moduleNum">10</span><span class="moduleType">Representación</span></div><h3>Matrices y caracteres</h3><p>Modelo diagonal, representaciones irreducibles complejas y tabla de caracteres.</p><div class="tagline"><span>matrices</span><span>caracteres</span><span>signos</span></div><div class="moduleActions"><a class="btn primary" href="#mod10">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="Galois extensión bicuadrática subcampos correspondencia">
+      <div class="moduleTop"><span class="moduleNum">11</span><span class="moduleType">Galois</span></div><h3>Teoría de Galois</h3><p>Cómo el retículo de subgrupos de V₄ modela extensiones bicuadráticas.</p><div class="tagline"><span>Galois</span><span>subcampos</span><span>bicuadrática</span></div><div class="moduleActions"><a class="btn primary" href="#mod11">Abrir</a></div>
+    </article>
+    <article class="moduleCard" data-title="aplicaciones códigos lógica binaria criptografía errores comunes kleinianos">
+      <div class="moduleTop"><span class="moduleNum">12</span><span class="moduleType">Aplicaciones</span></div><h3>Aplicaciones y aclaraciones</h3><p>Conexiones con códigos, paridad, lógica, criptografía elemental y diferencia con grupos kleinianos.</p><div class="tagline"><span>códigos</span><span>lógica</span><span>errores</span></div><div class="moduleActions"><a class="btn primary" href="#mod12">Abrir</a></div>
+    </article>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod01" data-section-title="definición grupo klein V4 orden cuatro abeliano no cíclico involuciones">
+  <span class="kicker">Módulo 01 · Definición</span>
+  <h2>1. Qué es el grupo de Klein</h2>
+  <p>El <strong>grupo de Klein</strong> es un grupo finito de orden cuatro. Se denota como <strong>V₄</strong>, y es isomorfo a <strong>C₂ × C₂</strong> o a <strong>ℤ₂ × ℤ₂</strong>. Sus elementos pueden escribirse como:</p>
+  <div class="code">V₄ = { e, a, b, c }</div>
+  <p>El elemento <strong>e</strong> es el neutro. Los otros tres elementos son <strong>involuciones</strong>: cada uno aplicado dos veces vuelve al neutro.</p>
+  <div class="grid3">
+    <div class="mini"><strong>a² = e</strong><small>a es su propio inverso.</small></div>
+    <div class="mini"><strong>b² = e</strong><small>b es su propio inverso.</small></div>
+    <div class="mini"><strong>c² = e</strong><small>c es su propio inverso.</small></div>
+  </div>
+  <p>La regla que completa al grupo es simple: el producto de dos elementos no triviales distintos da el tercero.</p>
+  <div class="grid3">
+    <div class="mini"><strong>ab = c</strong><small>También ba = c.</small></div>
+    <div class="mini"><strong>ac = b</strong><small>También ca = b.</small></div>
+    <div class="mini"><strong>bc = a</strong><small>También cb = a.</small></div>
+  </div>
+  <div class="notice"><strong>Rasgo esencial:</strong> V₄ es el grupo abeliano no cíclico más pequeño. Es pequeño, pero concentra ideas centrales de la teoría de grupos.</div>
+</section>
+
+<section class="card moduleSection" id="mod02" data-section-title="axiomas grupo cerradura asociatividad identidad inversos conmutatividad V4">
+  <span class="kicker">Módulo 02 · Axiomas</span>
+  <h2>2. Verificación de los axiomas de grupo</h2>
+  <p>Para que una estructura sea grupo no alcanza con tener una tabla. Debe cumplir cerradura, asociatividad, existencia de neutro e inversos. En V₄, además, se cumple conmutatividad.</p>
+  <div class="axiomGrid">
+    <div class="axiomCard"><b>Cerradura</b><br><span class="muted">El producto de dos elementos de V₄ siempre queda dentro de V₄.</span></div>
+    <div class="axiomCard"><b>Asociatividad</b><br><span class="muted">(xy)z = x(yz). Se hereda en modelos concretos como XOR, matrices o permutaciones.</span></div>
+    <div class="axiomCard"><b>Neutro</b><br><span class="muted">e no altera ningún elemento: ex = xe = x.</span></div>
+    <div class="axiomCard"><b>Inversos</b><br><span class="muted">Cada elemento no trivial es su propio inverso: x⁻¹ = x.</span></div>
+  </div>
+  <div class="notice good"><strong>Por qué es abeliano:</strong> la tabla de Cayley es simétrica respecto de la diagonal principal. Esto expresa que xy = yx para todo par de elementos.</div>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Elemento</th><th>Orden</th><th>Inverso</th><th>Subgrupo generado</th></tr></thead>
+      <tbody>
+        <tr><td>e</td><td>1</td><td>e</td><td>{e}</td></tr>
+        <tr><td>a</td><td>2</td><td>a</td><td>{e,a}</td></tr>
+        <tr><td>b</td><td>2</td><td>b</td><td>{e,b}</td></tr>
+        <tr><td>c</td><td>2</td><td>c</td><td>{e,c}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod03" data-section-title="tabla Cayley operación composición simulador producto V4">
+  <span class="kicker">Módulo 03 · Tabla de Cayley</span>
+  <h2>3. Tabla de Cayley y operación interna</h2>
+  <p>La tabla de Cayley contiene toda la estructura algebraica del grupo. La celda ubicada en la fila x y la columna y representa el producto x·y.</p>
+  <div class="tableWrap">
+    <table class="cayley" id="cayleyTable" aria-label="Tabla de Cayley del grupo de Klein">
+      <thead><tr><th>·</th><th>e</th><th>a</th><th>b</th><th>c</th></tr></thead>
+      <tbody>
+        <tr><th>e</th><td data-row="e" data-col="e">e</td><td data-row="e" data-col="a">a</td><td data-row="e" data-col="b">b</td><td data-row="e" data-col="c">c</td></tr>
+        <tr><th>a</th><td data-row="a" data-col="e">a</td><td data-row="a" data-col="a">e</td><td data-row="a" data-col="b">c</td><td data-row="a" data-col="c">b</td></tr>
+        <tr><th>b</th><td data-row="b" data-col="e">b</td><td data-row="b" data-col="a">c</td><td data-row="b" data-col="b">e</td><td data-row="b" data-col="c">a</td></tr>
+        <tr><th>c</th><td data-row="c" data-col="e">c</td><td data-row="c" data-col="a">b</td><td data-row="c" data-col="b">a</td><td data-row="c" data-col="c">e</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sim" id="cayleySim">
+    <div class="simTitle"><strong>Calculadora de producto en V₄</strong><span>Resultado: <span class="stateBadge" id="prodResult">e</span></span></div>
+    <div class="grid3">
+      <div class="mini"><strong>Primer elemento</strong><select id="leftEl" onchange="updateProduct()"><option>e</option><option>a</option><option>b</option><option>c</option></select></div>
+      <div class="mini"><strong>Segundo elemento</strong><select id="rightEl" onchange="updateProduct()"><option>e</option><option>a</option><option>b</option><option>c</option></select></div>
+      <div class="mini"><strong>Lectura</strong><small id="prodText">e · e = e</small></div>
+    </div>
+    <div class="pillRow">
+      <button class="primary" onclick="quickProd('a','b')">a · b</button>
+      <button class="primary" onclick="quickProd('a','a')">a · a</button>
+      <button class="primary" onclick="quickProd('b','c')">b · c</button>
+      <button onclick="quickProd('c','a')">c · a</button>
+      <button class="good" onclick="stepCayley()">▶ Paso a paso</button>
+      <button class="warn" onclick="autoCayley()">⏯ Simulación automática</button>
+      <button class="danger" onclick="resetCayley()">↺ Reiniciar</button>
+    </div>
+    <div class="barWrap"><div class="bar" id="cayleyBar"></div></div>
+    <div class="log" id="prodLog">La tabla es simétrica respecto de la diagonal principal, por eso el grupo es abeliano.</div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod04" data-section-title="comparación V4 C4 grupos orden cuatro cíclico no cíclico">
+  <span class="kicker">Módulo 04 · Comparación estructural</span>
+  <h2>4. V₄ frente a C₄</h2>
+  <p>Salvo isomorfismo, hay dos grupos de orden cuatro: el grupo cíclico <strong>C₄</strong> y el grupo de Klein <strong>V₄</strong>. Ambos tienen cuatro elementos, pero no son iguales como estructura.</p>
+  <div class="compareStrip">
+    <div class="mini"><span class="bigNumber">C₄</span><strong>{e, x, x², x³}</strong><small>Existe un elemento x de orden 4. Sus potencias generan todo el grupo.</small></div>
+    <div class="mini"><span class="bigNumber">V₄</span><strong>{e, a, b, c}</strong><small>No existe ningún elemento de orden 4. Todo elemento no trivial tiene orden 2.</small></div>
+  </div>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>C₄</th><th>V₄</th></tr></thead>
+      <tbody>
+        <tr><td>Es cíclico</td><td>Sí</td><td>No</td></tr>
+        <tr><td>Órdenes de elementos</td><td>1, 2, 4, 4</td><td>1, 2, 2, 2</td></tr>
+        <tr><td>Generador global</td><td>x o x³</td><td>No existe</td></tr>
+        <tr><td>Modelo usual</td><td>ℤ₄</td><td>ℤ₂ × ℤ₂</td></tr>
+        <tr><td>Intuición</td><td>Una vuelta de cuatro estados</td><td>Dos interruptores binarios independientes</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notice warn"><strong>Conclusión:</strong> el orden del grupo no determina por sí solo su estructura. El dato decisivo es el orden de sus elementos.</div>
+</section>
+
+<section class="card moduleSection" id="mod05" data-section-title="Z2 x Z2 XOR espacio vectorial F2 bits producto directo">
+  <span class="kicker">Módulo 05 · Producto directo y espacio vectorial</span>
+  <h2>5. V₄ como ℤ₂ × ℤ₂, XOR y F₂²</h2>
+  <p>El modelo más claro de V₄ es el producto directo de dos copias de ℤ₂:</p>
+  <div class="code">V₄ ≅ ℤ₂ × ℤ₂ = { (0,0), (1,0), (0,1), (1,1) }</div>
+  <p>La operación es suma componente a componente módulo 2. En informática, esta suma coincide con <strong>XOR bit a bit</strong>.</p>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Elemento abstracto</th><th>Par binario</th><th>Lectura vectorial</th><th>Interpretación</th></tr></thead>
+      <tbody>
+        <tr><td>e</td><td>(0,0)</td><td>Vector cero</td><td>No cambia nada</td></tr>
+        <tr><td>a</td><td>(1,0)</td><td>Primer vector base</td><td>Activa el primer bit</td></tr>
+        <tr><td>b</td><td>(0,1)</td><td>Segundo vector base</td><td>Activa el segundo bit</td></tr>
+        <tr><td>c</td><td>(1,1)</td><td>Suma de la base</td><td>Activa ambos bits</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sim" id="xorSim">
+    <div class="simTitle"><strong>Simulador XOR en V₄</strong><span>Resultado: <span class="stateBadge" id="xorResult">(0,0)</span></span></div>
+    <div class="grid3">
+      <div class="mini"><strong>Vector u</strong><select id="xorA" onchange="updateXor()"><option value="00">(0,0)</option><option value="10">(1,0)</option><option value="01">(0,1)</option><option value="11">(1,1)</option></select></div>
+      <div class="mini"><strong>Vector v</strong><select id="xorB" onchange="updateXor()"><option value="00">(0,0)</option><option value="10">(1,0)</option><option value="01">(0,1)</option><option value="11">(1,1)</option></select></div>
+      <div class="mini"><strong>Correspondencia</strong><small id="xorName">e + e = e</small></div>
+    </div>
+    <div class="pillRow">
+      <button class="good" onclick="stepXor()">▶ Paso a paso</button>
+      <button class="warn" onclick="autoXor()">⏯ Simulación automática</button>
+      <button class="danger" onclick="resetXor()">↺ Reiniciar</button>
+    </div>
+    <div class="barWrap"><div class="bar" id="xorBar"></div></div>
+    <div class="log" id="xorLog">En F₂ se cumple 1 + 1 = 0. Por eso todo vector no nulo sumado consigo mismo vuelve al cero.</div>
+  </div>
+  <div class="notice"><strong>Lectura avanzada:</strong> V₄ es un espacio vectorial de dimensión 2 sobre F₂. Sus subgrupos son sus subespacios.</div>
+</section>
+
+<section class="card moduleSection" id="mod06" data-section-title="simetrías rectángulo reflexión horizontal vertical rotación 180 composición V4">
+  <span class="kicker">Módulo 06 · Geometría</span>
+  <h2>6. Simetrías de un rectángulo no cuadrado</h2>
+  <p>El grupo de Klein aparece como el grupo de simetrías de un rectángulo no cuadrado. Sus cuatro movimientos son identidad, reflexión horizontal, reflexión vertical y rotación de 180°.</p>
+  <div class="sim" id="rectSim">
+    <div class="simTitle"><strong>Simulador geométrico</strong><span>Transformación: <span class="stateBadge" id="rectState">e</span></span></div>
+    <div class="splitView">
+      <div class="svgBox">
+        <svg viewBox="0 0 560 360" role="img" aria-label="Rectángulo con vértices etiquetados">
+          <defs><linearGradient id="rectGrad" x1="0" x2="1"><stop offset="0" stop-color="var(--primary)" stop-opacity=".24"/><stop offset="1" stop-color="var(--secondary)" stop-opacity=".24"/></linearGradient></defs>
+          <g transform="translate(280 180)">
+            <line x1="-220" y1="0" x2="220" y2="0" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 6"/><line x1="0" y1="-140" x2="0" y2="140" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 6"/>
+            <g id="rectGroup" transform="scale(1,1) rotate(0)">
+              <rect x="-160" y="-88" width="320" height="176" rx="18" fill="url(#rectGrad)" stroke="var(--primary)" stroke-width="6"/>
+              <circle cx="-160" cy="-88" r="14" fill="var(--primary)"/><text x="-194" y="-108" fill="var(--text)" font-weight="950">A</text>
+              <circle cx="160" cy="-88" r="14" fill="var(--secondary)"/><text x="178" y="-108" fill="var(--text)" font-weight="950">B</text>
+              <circle cx="160" cy="88" r="14" fill="var(--cyan)"/><text x="178" y="118" fill="var(--text)" font-weight="950">C</text>
+              <circle cx="-160" cy="88" r="14" fill="var(--green)"/><text x="-194" y="118" fill="var(--text)" font-weight="950">D</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div class="pillRow">
+          <button class="primary" onclick="setRect('e')">Identidad e</button><button class="primary" onclick="setRect('h')">Reflexión h</button><button class="primary" onclick="setRect('v')">Reflexión v</button><button class="primary" onclick="setRect('r')">Rotación r</button>
+          <button class="good" onclick="stepRect()">▶ Paso a paso</button><button class="warn" onclick="autoRect()">⏯ Simulación automática</button><button class="danger" onclick="resetRect()">↺ Reiniciar</button>
+        </div>
+        <div class="barWrap"><div class="bar" id="rectBar"></div></div>
+        <div class="log" id="rectLog">e: no cambia el rectángulo. Es el elemento neutro.</div>
+        <div class="tableWrap"><table><thead><tr><th>Movimiento</th><th>Acción</th><th>Cuadrado</th></tr></thead><tbody><tr><td>h</td><td>Reflexión horizontal</td><td>h² = e</td></tr><tr><td>v</td><td>Reflexión vertical</td><td>v² = e</td></tr><tr><td>r</td><td>Rotación de 180°</td><td>r² = e</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <div class="notice good"><strong>Isomorfismo geométrico:</strong> {e,h,v,r}, con composición de movimientos, tiene la misma tabla que V₄.</div>
+</section>
+
+<section class="card moduleSection" id="mod07" data-section-title="permutaciones S4 A4 dobles transposiciones normalidad composición">
+  <span class="kicker">Módulo 07 · Permutaciones</span>
+  <h2>7. V₄ dentro de S₄ y A₄</h2>
+  <p>Dentro de S₄, V₄ aparece como la identidad junto con las tres dobles transposiciones:</p>
+  <div class="code">V = { (), (12)(34), (13)(24), (14)(23) }</div>
+  <p>Estas permutaciones son pares y pertenecen a A₄. Forman un subgrupo normal de A₄.</p>
+  <div class="grid4">
+    <div class="mini"><strong>e = ()</strong><small>Identidad.</small></div>
+    <div class="mini"><strong>a = (12)(34)</strong><small>Intercambia 1↔2 y 3↔4.</small></div>
+    <div class="mini"><strong>b = (13)(24)</strong><small>Intercambia 1↔3 y 2↔4.</small></div>
+    <div class="mini"><strong>c = (14)(23)</strong><small>Intercambia 1↔4 y 2↔3.</small></div>
+  </div>
+  <div class="sim" id="permSim">
+    <div class="simTitle"><strong>Simulador de dobles transposiciones</strong><span>Permutación: <span class="stateBadge" id="permState">()</span></span></div>
+    <div class="splitView">
+      <div class="svgBox">
+        <svg viewBox="0 0 520 320" aria-label="Cuatro puntos permutados">
+          <g id="permLines" stroke="var(--line)" stroke-width="4" stroke-dasharray="8 8"></g>
+          <g class="permDots" font-weight="950" text-anchor="middle">
+            <circle id="p1" cx="150" cy="90" r="26" fill="var(--primary)"/><text x="150" y="98" fill="white">1</text>
+            <circle id="p2" cx="370" cy="90" r="26" fill="var(--secondary)"/><text x="370" y="98" fill="white">2</text>
+            <circle id="p3" cx="370" cy="230" r="26" fill="var(--cyan)"/><text x="370" y="238" fill="white">3</text>
+            <circle id="p4" cx="150" cy="230" r="26" fill="var(--green)"/><text x="150" y="238" fill="white">4</text>
+          </g>
+        </svg>
+      </div>
+      <div>
+        <div class="pillRow"><button class="primary" onclick="setPerm('e')">()</button><button class="primary" onclick="setPerm('a')">(12)(34)</button><button class="primary" onclick="setPerm('b')">(13)(24)</button><button class="primary" onclick="setPerm('c')">(14)(23)</button><button class="good" onclick="stepPerm()">▶ Paso a paso</button><button class="warn" onclick="autoPerm()">⏯ Simulación automática</button><button class="danger" onclick="resetPerm()">↺ Reiniciar</button></div>
+        <div class="barWrap"><div class="bar" id="permBar"></div></div>
+        <div class="log" id="permLog">La identidad no mueve los puntos. Las dobles transposiciones intercambian dos pares al mismo tiempo.</div>
+        <div class="notice"><strong>Resultado:</strong> A₄ / V₄ ≅ C₃. Esta es una de las razones por las que V₄ es estructuralmente importante dentro de A₄.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card moduleSection" id="mod08" data-section-title="subgrupos cocientes normalidad retículo Lagrange V4">
+  <span class="kicker">Módulo 08 · Subgrupos y cocientes</span>
+  <h2>8. Subgrupos, normalidad y cocientes</h2>
+  <p>Los subgrupos de V₄ son exactamente cinco. Como V₄ es abeliano, todos sus subgrupos son normales.</p>
+  <div class="grid3">
+    <div class="mini"><strong>{e}</strong><small>Subgrupo trivial.</small></div><div class="mini"><strong>{e,a}</strong><small>Generado por a.</small></div><div class="mini"><strong>{e,b}</strong><small>Generado por b.</small></div><div class="mini"><strong>{e,c}</strong><small>Generado por c.</small></div><div class="mini"><strong>V₄</strong><small>Grupo total.</small></div>
+  </div>
+  <div class="code">V₄ / {e,a} ≅ C₂
+V₄ / {e,b} ≅ C₂
+V₄ / {e,c} ≅ C₂</div>
+  <div class="sim">
+    <div class="simTitle"><strong>Retículo de subgrupos</strong><span class="stateBadge">5 subgrupos</span></div>
+    <div class="svgBox"><svg viewBox="0 0 650 430" role="img" aria-label="Retículo de subgrupos del grupo de Klein"><g stroke="var(--line)" stroke-width="4"><line x1="325" y1="70" x2="160" y2="215"/><line x1="325" y1="70" x2="325" y2="215"/><line x1="325" y1="70" x2="490" y2="215"/><line x1="160" y1="215" x2="325" y2="360"/><line x1="325" y1="215" x2="325" y2="360"/><line x1="490" y1="215" x2="325" y2="360"/></g><g font-weight="950" text-anchor="middle"><rect x="260" y="35" width="130" height="70" rx="18" fill="var(--card)" stroke="var(--primary)" stroke-width="4"/><text x="325" y="78" fill="var(--text)">V₄</text><rect x="98" y="180" width="124" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="160" y="222" fill="var(--text)">{e,a}</text><rect x="263" y="180" width="124" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="325" y="222" fill="var(--text)">{e,b}</text><rect x="428" y="180" width="124" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="490" y="222" fill="var(--text)">{e,c}</text><rect x="260" y="325" width="130" height="70" rx="18" fill="var(--card)" stroke="var(--green)" stroke-width="4"/><text x="325" y="368" fill="var(--text)">{e}</text></g></svg></div>
+  </div>
+  <div class="notice warn"><strong>Interpretación vectorial:</strong> si V₄ se ve como F₂², los tres subgrupos de orden 2 son las tres rectas de ese espacio vectorial.</div>
+</section>
+
+<section class="card moduleSection" id="mod09" data-section-title="automorfismos Aut V4 S3 GL2 F2 permutaciones elementos no triviales">
+  <span class="kicker">Módulo 09 · Automorfismos</span>
+  <h2>9. Automorfismos de V₄</h2>
+  <p>Un automorfismo es una simetría interna que conserva la operación. En V₄, el neutro debe quedar fijo y los tres elementos no triviales pueden permutarse libremente.</p>
+  <div class="grid2"><div class="mini"><strong>Aut(V₄) ≅ S₃</strong><small>Hay 3! = 6 formas de permutar a, b y c.</small></div><div class="mini"><strong>Aut(V₄) ≅ GL(2,F₂)</strong><small>Visto como F₂², son las matrices invertibles 2×2 sobre F₂.</small></div></div>
+  <div class="sim" id="autoSim">
+    <div class="simTitle"><strong>Explorador de automorfismos</strong><span>Imagen de c: <span class="stateBadge" id="autoC">c</span></span></div>
+    <div class="grid3"><div class="mini"><strong>Imagen de a</strong><select id="autoA" onchange="setAutoFromSelect()"><option>a</option><option>b</option><option>c</option></select></div><div class="mini"><strong>Imagen de b</strong><select id="autoB" onchange="setAutoFromSelect()"><option>b</option><option>a</option><option>c</option></select></div><div class="mini"><strong>Regla</strong><small id="autoRule">c = ab, entonces φ(c)=φ(a)φ(b)</small></div></div>
+    <div class="pillRow"><button class="good" onclick="stepAuto()">▶ Paso a paso</button><button class="warn" onclick="autoAuto()">⏯ Simulación automática</button><button class="danger" onclick="resetAuto()">↺ Reiniciar</button></div>
+    <div class="barWrap"><div class="bar" id="autoBar"></div></div><div class="log" id="autoLog">La identidad fija a, b y c. Cualquier permutación de los tres elementos no triviales define un automorfismo.</div>
+  </div>
+  <div class="tableWrap"><table><thead><tr><th>Automorfismo</th><th>φ(a)</th><th>φ(b)</th><th>φ(c)</th></tr></thead><tbody><tr><td>Identidad</td><td>a</td><td>b</td><td>c</td></tr><tr><td>Intercambio a,b</td><td>b</td><td>a</td><td>c</td></tr><tr><td>Intercambio a,c</td><td>c</td><td>b</td><td>a</td></tr><tr><td>Intercambio b,c</td><td>a</td><td>c</td><td>b</td></tr><tr><td>Ciclo a→b→c</td><td>b</td><td>c</td><td>a</td></tr><tr><td>Ciclo a→c→b</td><td>c</td><td>a</td><td>b</td></tr></tbody></table></div>
+</section>
+
+<section class="card moduleSection" id="mod10" data-section-title="matrices representaciones caracteres irreducibles tabla diagonal signos V4">
+  <span class="kicker">Módulo 10 · Matrices y representación</span>
+  <h2>10. Modelo matricial y tabla de caracteres</h2>
+  <p>Una representación matricial concreta de V₄ se obtiene con matrices diagonales 2×2:</p>
+  <div class="matrixBlock"><div class="mini matrix"><strong>e</strong><small>[[1,0],[0,1]]</small></div><div class="mini matrix"><strong>a</strong><small>[[-1,0],[0,1]]</small></div><div class="mini matrix"><strong>b</strong><small>[[1,0],[0,-1]]</small></div><div class="mini matrix"><strong>c</strong><small>[[-1,0],[0,-1]]</small></div></div>
+  <p>Multiplicar estas matrices reproduce la tabla de Klein. Por ejemplo, a·b = c porque cambiar el signo de la primera coordenada y luego el de la segunda equivale a cambiar ambos signos.</p>
+  <h3>Tabla de caracteres</h3>
+  <p>Como V₄ es abeliano, todas sus representaciones irreducibles complejas tienen dimensión 1. Hay cuatro caracteres irreducibles.</p>
+  <div class="tableWrap"><table class="center"><thead><tr><th>Caracter</th><th>e</th><th>a</th><th>b</th><th>c</th><th>Lectura</th></tr></thead><tbody><tr><td>χ₁</td><td>1</td><td>1</td><td>1</td><td>1</td><td>Representación trivial</td></tr><tr><td>χ₂</td><td>1</td><td>1</td><td>-1</td><td>-1</td><td>Distingue b y c</td></tr><tr><td>χ₃</td><td>1</td><td>-1</td><td>1</td><td>-1</td><td>Distingue a y c</td></tr><tr><td>χ₄</td><td>1</td><td>-1</td><td>-1</td><td>1</td><td>Distingue a y b</td></tr></tbody></table></div>
+  <div class="notice"><strong>Lectura:</strong> los caracteres convierten la operación del grupo en multiplicación de signos. Es otra forma de observar la estructura binaria de V₄.</div>
+</section>
+
+<section class="card moduleSection" id="mod11" data-section-title="Galois extensión bicuadrática subcampos subgrupos correspondencia V4">
+  <span class="kicker">Módulo 11 · Galois</span>
+  <h2>11. V₄ en teoría de Galois</h2>
+  <p>En teoría de Galois, si una extensión tiene grupo de Galois isomorfo a V₄, aparecen tres subextensiones cuadráticas intermedias. Esto refleja los tres subgrupos de orden 2.</p>
+  <div class="code">Ejemplo típico: K = ℚ(√m, √n)
+Gal(K/ℚ) ≅ V₄
+Subcampos intermedios: ℚ(√m), ℚ(√n), ℚ(√mn)</div>
+  <div class="sim"><div class="simTitle"><strong>Diagrama conceptual de correspondencia de Galois</strong><span class="stateBadge">subgrupos ↔ subcampos</span></div><div class="svgBox"><svg viewBox="0 0 760 430" role="img" aria-label="Diagrama de subcampos y subgrupos para V4"><g stroke="var(--line)" stroke-width="4"><line x1="380" y1="55" x2="170" y2="185"/><line x1="380" y1="55" x2="380" y2="185"/><line x1="380" y1="55" x2="590" y2="185"/><line x1="170" y1="185" x2="380" y2="335"/><line x1="380" y1="185" x2="380" y2="335"/><line x1="590" y1="185" x2="380" y2="335"/></g><g text-anchor="middle" font-weight="950"><rect x="300" y="20" width="160" height="70" rx="18" fill="var(--card)" stroke="var(--primary)" stroke-width="4"/><text x="380" y="63" fill="var(--text)">K</text><rect x="70" y="150" width="200" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="170" y="193" fill="var(--text)">ℚ(√m)</text><rect x="280" y="150" width="200" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="380" y="193" fill="var(--text)">ℚ(√n)</text><rect x="490" y="150" width="200" height="70" rx="18" fill="var(--card)" stroke="var(--secondary)" stroke-width="4"/><text x="590" y="193" fill="var(--text)">ℚ(√mn)</text><rect x="300" y="300" width="160" height="70" rx="18" fill="var(--card)" stroke="var(--green)" stroke-width="4"/><text x="380" y="343" fill="var(--text)">ℚ</text></g></svg></div></div>
+  <div class="notice good"><strong>Correspondencia:</strong> en Galois, más subgrupos significan más cuerpos intermedios. La forma del retículo de V₄ se traduce en la forma del retículo de subcampos.</div>
+</section>
+
+<section class="card moduleSection" id="mod12" data-section-title="aplicaciones códigos lógica binaria criptografía elemental grupos kleinianos errores comunes">
+  <span class="kicker">Módulo 12 · Aplicaciones y aclaraciones</span>
+  <h2>12. Aplicaciones, conexiones y errores comunes</h2>
+  <div class="grid3"><div class="mini"><strong>Códigos y paridad</strong><small>La suma módulo 2 modela paridad, bits y corrección elemental.</small></div><div class="mini"><strong>Lógica binaria</strong><small>XOR expresa diferencia, alternancia y suma sin acarreo.</small></div><div class="mini"><strong>Modelos discretos</strong><small>V₄ sirve para representar dos decisiones binarias independientes.</small></div></div>
+  <h3>Diferencia con grupos kleinianos</h3>
+  <p>No debe confundirse el <strong>grupo de Klein V₄</strong> con los <strong>grupos kleinianos</strong>. V₄ es un grupo finito de cuatro elementos. Los grupos kleinianos, en cambio, son grupos discretos de transformaciones de Möbius vinculados con geometría hiperbólica, superficies de Riemann y dinámica compleja.</p>
+  <div class="tableWrap"><table><thead><tr><th>Concepto</th><th>Grupo de Klein V₄</th><th>Grupos kleinianos</th></tr></thead><tbody><tr><td>Naturaleza</td><td>Grupo finito</td><td>Grupo discreto de transformaciones</td></tr><tr><td>Tamaño</td><td>4 elementos</td><td>Generalmente infinitos</td></tr><tr><td>Área principal</td><td>Teoría de grupos finitos</td><td>Geometría hiperbólica y análisis complejo</td></tr><tr><td>Objeto típico</td><td>ℤ₂ × ℤ₂</td><td>Subgrupos discretos de PSL(2,C)</td></tr></tbody></table></div>
+  <h3>Errores frecuentes</h3>
+  <div class="grid3"><div class="notice danger"><strong>Error 1:</strong> creer que todo grupo de orden 4 es C₄.</div><div class="notice danger"><strong>Error 2:</strong> pensar que abeliano implica cíclico.</div><div class="notice danger"><strong>Error 3:</strong> confundir V₄ con los grupos kleinianos infinitos.</div></div>
+</section>
+
+<section class="card moduleSection" id="guia" data-section-title="guía docente estudio actividades evaluación quiz resumen final">
+  <span class="kicker">Módulo 13 · Guía docente</span>
+  <h2>13. Guía de estudio, actividades y evaluación</h2>
+  <div class="timeline">
+    <div class="step"><div class="stepNum">1</div><div><strong>Definir.</strong><br><span class="muted">Identificar elementos, operación, neutro e inversos.</span></div></div>
+    <div class="step"><div class="stepNum">2</div><div><strong>Calcular.</strong><br><span class="muted">Usar la tabla de Cayley para resolver productos y verificar conmutatividad.</span></div></div>
+    <div class="step"><div class="stepNum">3</div><div><strong>Comparar.</strong><br><span class="muted">Distinguir V₄ de C₄ por los órdenes de sus elementos.</span></div></div>
+    <div class="step"><div class="stepNum">4</div><div><strong>Modelar.</strong><br><span class="muted">Traducir V₄ a bits, rectángulo, permutaciones y matrices.</span></div></div>
+    <div class="step"><div class="stepNum">5</div><div><strong>Extender.</strong><br><span class="muted">Conectar subgrupos, cocientes, automorfismos, representaciones y Galois.</span></div></div>
+  </div>
+  <h3 id="quizFinal">Quiz de comprensión</h3>
+  <div class="sim"><div class="quiz">
+    <p><strong>Pregunta 1:</strong> ¿Cuál es la razón principal por la que V₄ no es cíclico?</p><button onclick="quiz(1,false)">Porque no tiene elemento neutro.</button><button onclick="quiz(1,true)">Porque ningún elemento tiene orden 4.</button><button onclick="quiz(1,false)">Porque no es abeliano.</button><div class="feedback" id="quiz1"></div>
+    <p><strong>Pregunta 2:</strong> ¿A qué producto directo es isomorfo V₄?</p><button onclick="quiz(2,false)">ℤ₄</button><button onclick="quiz(2,true)">ℤ₂ × ℤ₂</button><button onclick="quiz(2,false)">S₃</button><div class="feedback" id="quiz2"></div>
+    <p><strong>Pregunta 3:</strong> ¿Cuál es el grupo de automorfismos de V₄?</p><button onclick="quiz(3,false)">C₄</button><button onclick="quiz(3,false)">V₄</button><button onclick="quiz(3,true)">S₃</button><div class="feedback" id="quiz3"></div>
+    <p><strong>Pregunta 4:</strong> En el modelo geométrico, ¿qué transformación equivale a componer reflexión horizontal y vertical?</p><button onclick="quiz(4,true)">La rotación de 180°.</button><button onclick="quiz(4,false)">La identidad necesariamente.</button><button onclick="quiz(4,false)">Una rotación de 90°.</button><div class="feedback" id="quiz4"></div>
+    <p><strong>Pregunta 5:</strong> En teoría de Galois, ¿qué refleja la existencia de tres subgrupos de orden 2?</p><button onclick="quiz(5,true)">Tres subextensiones cuadráticas intermedias en el caso bicuadrático.</button><button onclick="quiz(5,false)">Que el grupo es infinito.</button><button onclick="quiz(5,false)">Que V₄ es igual a C₄.</button><div class="feedback" id="quiz5"></div>
+    <div class="notice good"><strong>Puntaje:</strong> <span class="score" id="score">0</span> respuestas correctas registradas.</div>
+  </div></div>
+  <div class="notice good"><strong>Frase final:</strong> V₄ es pequeño en cantidad de elementos, pero grande en conexiones: une simetría, álgebra, geometría, lógica binaria, Galois y teoría de representaciones.</div>
+</section>
+
+<section class="card">
+  <h2>Resumen ejecutivo</h2>
+  <div class="grid2"><div class="mini"><strong>Definición corta</strong><small>V₄ = {e,a,b,c}, con a² = b² = c² = e y ab = c, ac = b, bc = a.</small></div><div class="mini"><strong>Identidad estructural</strong><small>V₄ ≅ C₂ × C₂ ≅ ℤ₂ × ℤ₂ ≅ F₂² como grupo aditivo.</small></div><div class="mini"><strong>Rasgo distintivo</strong><small>Es abeliano pero no cíclico. No hay elemento de orden 4.</small></div><div class="mini"><strong>Aplicación conceptual</strong><small>Sirve como modelo mínimo de simetría, partición, paridad, doble transposición y extensión bicuadrática.</small></div></div>
+</section>
+
+<div class="footer"><strong>Material elaborado por Sergio Gevatschnaider</strong><br />Página HTML autónoma · Grupo de Klein V₄ · Teoría de grupos, geometría y aplicaciones</div>
+</main>
+<a class="btn primary toTop" href="#inicio" aria-label="Volver arriba">↑</a>
+<script>
+(function(){
+  const root=document.documentElement, btn=document.getElementById('themeBtn'), showAll=document.getElementById('showAllBtn');
+  function setTheme(theme){root.setAttribute('data-theme',theme);localStorage.setItem('klein-v4-theme-plus',theme);btn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';}
+  setTheme(localStorage.getItem('klein-v4-theme-plus') || 'light'); btn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+  const search=document.getElementById('moduleSearch'), cards=[...document.querySelectorAll('.moduleCard')], sections=[...document.querySelectorAll('.moduleSection')];
+  search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();cards.forEach(card=>{const h=(card.dataset.title+' '+card.innerText).toLowerCase();card.style.display=h.includes(q)?'flex':'none';});sections.forEach(sec=>{const h=(sec.dataset.sectionTitle+' '+sec.innerText).toLowerCase();sec.style.display=q===''||h.includes(q)?'block':'none';});});
+  showAll.addEventListener('click',()=>{search.value='';cards.forEach(c=>c.style.display='flex');sections.forEach(s=>s.style.display='block');window.scrollTo({top:0,behavior:'smooth'});});
+  window.addEventListener('scroll',()=>{const h=document.documentElement;const pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;document.getElementById('progress').style.width=pct+'%';});
+})();
+const V=['e','a','b','c'];
+const prod={e:{e:'e',a:'a',b:'b',c:'c'},a:{e:'a',a:'e',b:'c',c:'b'},b:{e:'b',a:'c',b:'e',c:'a'},c:{e:'c',a:'b',b:'a',c:'e'}};
+let timers={}, quizState={}, cayleyIndex=0, xorIndex=0, rectIndex=0, permIndex=0, autoIndex=0;
+const allPairs=V.flatMap(x=>V.map(y=>[x,y]));
+function clearTimer(name){if(timers[name]){clearInterval(timers[name]);timers[name]=null;}}
+function updateBar(id,index,total){document.getElementById(id).style.width=Math.round((index%total)/Math.max(1,total-1)*100)+'%';}
+function updateProduct(){const l=document.getElementById('leftEl').value,r=document.getElementById('rightEl').value,res=prod[l][r];document.getElementById('prodResult').textContent=res;document.getElementById('prodText').textContent=`${l} · ${r} = ${res}`;document.getElementById('prodLog').innerHTML=`<strong>${l} · ${r} = ${res}</strong>. ${l===r&&l!=='e'?'Como el elemento no trivial se multiplica por sí mismo, vuelve al neutro.':'El resultado se lee en la fila del primer elemento y la columna del segundo.'}`;document.querySelectorAll('#cayleyTable td').forEach(td=>td.classList.toggle('hit',td.dataset.row===l&&td.dataset.col===r));}
+function quickProd(l,r){document.getElementById('leftEl').value=l;document.getElementById('rightEl').value=r;updateProduct();}
+function stepCayley(){clearTimer('cayley');const [l,r]=allPairs[cayleyIndex%allPairs.length];quickProd(l,r);updateBar('cayleyBar',cayleyIndex,allPairs.length);cayleyIndex++;}
+function autoCayley(){if(timers.cayley){clearTimer('cayley');return;}timers.cayley=setInterval(stepCayley,850);}
+function resetCayley(){clearTimer('cayley');cayleyIndex=0;quickProd('e','e');document.getElementById('cayleyBar').style.width='0%';}
+const bitName={"00":"e","10":"a","01":"b","11":"c"}, bitList=['00','10','01','11'];
+function bitsPretty(x){return `(${x[0]},${x[1]})`;}
+function updateXor(){const a=document.getElementById('xorA').value,b=document.getElementById('xorB').value,r=''+(Number(a[0])^Number(b[0]))+(Number(a[1])^Number(b[1]));document.getElementById('xorResult').textContent=bitsPretty(r);document.getElementById('xorName').textContent=`${bitName[a]} + ${bitName[b]} = ${bitName[r]}`;document.getElementById('xorLog').innerHTML=`${bitsPretty(a)} XOR ${bitsPretty(b)} = <strong>${bitsPretty(r)}</strong>. En nombres de V₄: <strong>${bitName[a]} · ${bitName[b]} = ${bitName[r]}</strong>.`;}
+const allBitPairs=bitList.flatMap(x=>bitList.map(y=>[x,y]));
+function stepXor(){clearTimer('xor');const [a,b]=allBitPairs[xorIndex%allBitPairs.length];document.getElementById('xorA').value=a;document.getElementById('xorB').value=b;updateXor();updateBar('xorBar',xorIndex,allBitPairs.length);xorIndex++;}
+function autoXor(){if(timers.xor){clearTimer('xor');return;}timers.xor=setInterval(stepXor,900);}
+function resetXor(){clearTimer('xor');xorIndex=0;document.getElementById('xorA').value='00';document.getElementById('xorB').value='00';updateXor();document.getElementById('xorBar').style.width='0%';}
+function setRect(kind){const g=document.getElementById('rectGroup'),state=document.getElementById('rectState'),log=document.getElementById('rectLog');const config={e:{t:'scale(1,1) rotate(0)',name:'e',txt:'e: identidad. No cambia el rectángulo.'},h:{t:'scale(1,-1) rotate(0)',name:'h',txt:'h: reflexión horizontal. Intercambia la parte superior con la inferior y cumple h² = e.'},v:{t:'scale(-1,1) rotate(0)',name:'v',txt:'v: reflexión vertical. Intercambia izquierda y derecha y cumple v² = e.'},r:{t:'scale(1,1) rotate(180)',name:'r',txt:'r: rotación de 180°. Equivale a componer h y v. Cumple r² = e.'}}[kind];g.setAttribute('transform',config.t);state.textContent=config.name;log.textContent=config.txt;}
+function stepRect(){clearTimer('rect');const seq=['e','h','v','r'];setRect(seq[rectIndex%seq.length]);updateBar('rectBar',rectIndex,seq.length);rectIndex++;}
+function autoRect(){if(timers.rect){clearTimer('rect');return;}timers.rect=setInterval(stepRect,1000);}
+function resetRect(){clearTimer('rect');rectIndex=0;setRect('e');document.getElementById('rectBar').style.width='0%';}
+const permData={e:{label:'()',map:{1:1,2:2,3:3,4:4},txt:'La identidad no mueve los puntos.'},a:{label:'(12)(34)',map:{1:2,2:1,3:4,4:3},txt:'a intercambia 1↔2 y 3↔4.'},b:{label:'(13)(24)',map:{1:3,3:1,2:4,4:2},txt:'b intercambia 1↔3 y 2↔4.'},c:{label:'(14)(23)',map:{1:4,4:1,2:3,3:2},txt:'c intercambia 1↔4 y 2↔3.'}};
+const pos={1:[150,90],2:[370,90],3:[370,230],4:[150,230]};
+function setPerm(kind){const data=permData[kind];document.getElementById('permState').textContent=data.label;document.getElementById('permLog').textContent=data.txt+' Aplicarla dos veces vuelve a la identidad.';['1','2','3','4'].forEach(i=>{const [x0,y0]=pos[i], [x1,y1]=pos[data.map[i]];document.getElementById('p'+i).setAttribute('transform',`translate(${x1-x0},${y1-y0})`);});const lines=document.getElementById('permLines');lines.innerHTML='';Object.keys(data.map).forEach(i=>{if(Number(i)<data.map[i]){const [x1,y1]=pos[i], [x2,y2]=pos[data.map[i]];const line=document.createElementNS('http://www.w3.org/2000/svg','line');line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);lines.appendChild(line);}});}
+function stepPerm(){clearTimer('perm');const seq=['e','a','b','c'];setPerm(seq[permIndex%seq.length]);updateBar('permBar',permIndex,seq.length);permIndex++;}
+function autoPerm(){if(timers.perm){clearTimer('perm');return;}timers.perm=setInterval(stepPerm,1050);}
+function resetPerm(){clearTimer('perm');permIndex=0;setPerm('e');document.getElementById('permBar').style.width='0%';}
+const autos=[['a','b','c','Identidad'],['b','a','c','Intercambio a,b'],['c','b','a','Intercambio a,c'],['a','c','b','Intercambio b,c'],['b','c','a','Ciclo a→b→c'],['c','a','b','Ciclo a→c→b']];
+function setAuto(a,b,c,label='Automorfismo'){document.getElementById('autoA').value=a;document.getElementById('autoB').value=b;document.getElementById('autoC').textContent=c;document.getElementById('autoRule').textContent=`φ(a)=${a}, φ(b)=${b}, φ(c)=${c}`;document.getElementById('autoLog').innerHTML=`<strong>${label}.</strong> El neutro queda fijo y los tres elementos no triviales se permutan conservando la regla c=ab.`;}
+function setAutoFromSelect(){const a=document.getElementById('autoA').value,b=document.getElementById('autoB').value;if(a===b){document.getElementById('autoLog').innerHTML='<strong>No es automorfismo:</strong> a y b no pueden tener la misma imagen porque la aplicación debe ser biyectiva.';return;}const c=prod[a][b];setAuto(a,b,c,'Automorfismo válido');}
+function stepAuto(){clearTimer('auto');const x=autos[autoIndex%autos.length];setAuto(x[0],x[1],x[2],x[3]);updateBar('autoBar',autoIndex,autos.length);autoIndex++;}
+function autoAuto(){if(timers.auto){clearTimer('auto');return;}timers.auto=setInterval(stepAuto,1050);}
+function resetAuto(){clearTimer('auto');autoIndex=0;setAuto('a','b','c','Identidad');document.getElementById('autoBar').style.width='0%';}
+function quiz(n,ok){const el=document.getElementById('quiz'+n);const correct={1:'Correcto: en V₄ todos los elementos no triviales tienen orden 2, por eso ninguno genera el grupo completo.',2:'Correcto: V₄ es isomorfo a ℤ₂ × ℤ₂.',3:'Correcto: Aut(V₄) permuta los tres elementos no triviales y por eso es isomorfo a S₃.',4:'Correcto: componer reflexión horizontal y vertical produce la rotación de 180°.',5:'Correcto: el caso bicuadrático tiene tres subcampos cuadráticos intermedios.'};el.textContent=ok?correct[n]:'No exactamente. Revisá el módulo correspondiente y compará con la estructura de V₄.';el.style.color=ok?'var(--green)':'var(--red)';quizState[n]=ok;document.getElementById('score').textContent=Object.values(quizState).filter(Boolean).length;}
+updateProduct();updateXor();setRect('e');setPerm('e');setAuto('a','b','c','Identidad');
+</script>
+</body>
+</html>

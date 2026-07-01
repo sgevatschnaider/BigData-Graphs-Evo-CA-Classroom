@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Glosario interactivo sobre Grupo de Klein V4, criptografía Vernam/XOR y balance estructural en redes sociales." />
+<title>Glosario · Grupo de Klein, Criptografía y Redes Sociales</title>
+<style>
+:root{
+  --bg:#eef6ff; --bg2:#fbfdff; --card:#ffffff; --card2:#f7fbff; --text:#102033; --muted:#607089;
+  --line:#d7e5f7; --ink:#0f172a; --primary:#2563eb; --secondary:#7c3aed; --cyan:#0891b2;
+  --green:#059669; --amber:#d97706; --red:#dc2626; --pink:#db2777; --radius:28px;
+  --shadow:0 24px 70px rgba(37,99,235,.14); --soft:0 10px 28px rgba(15,23,42,.10);
+  --ring:0 0 0 4px color-mix(in srgb,var(--primary) 19%,transparent);
+}
+[data-theme="dark"]{
+  --bg:#07111f; --bg2:#0b1628; --card:#101b2f; --card2:#0b1526; --text:#eff6ff; --muted:#aec2dc;
+  --line:#263b59; --ink:#f8fafc; --primary:#60a5fa; --secondary:#a78bfa; --cyan:#22d3ee;
+  --green:#34d399; --amber:#fbbf24; --red:#fb7185; --pink:#f472b6;
+  --shadow:0 26px 70px rgba(0,0,0,.38); --soft:0 10px 28px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-family:Inter,Segoe UI,Roboto,Arial,sans-serif; color:var(--text); line-height:1.68;
+  background:
+    radial-gradient(circle at 3% 0%,color-mix(in srgb,var(--primary) 24%,transparent),transparent 27%),
+    radial-gradient(circle at 88% 8%,color-mix(in srgb,var(--secondary) 20%,transparent),transparent 31%),
+    radial-gradient(circle at 48% 57%,color-mix(in srgb,var(--cyan) 10%,transparent),transparent 38%),
+    linear-gradient(135deg,var(--bg),var(--bg2));
+}
+a{color:var(--primary);font-weight:850;text-decoration:none} a:hover{text-decoration:underline}
+.progress{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--cyan));width:0;z-index:110}
+header{position:sticky;top:0;z-index:90;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(18px)}
+.nav{max-width:1320px;margin:auto;padding:12px 20px;display:flex;gap:14px;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.03em}.brandDot{width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));box-shadow:0 0 0 6px color-mix(in srgb,var(--primary) 17%,transparent)}
+.controls{display:flex;gap:9px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 14px;border-radius:16px;cursor:pointer;font-weight:880;box-shadow:var(--soft);transition:.18s transform,.18s box-shadow,.18s background;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,23,42,.14);text-decoration:none}button:focus-visible,.btn:focus-visible,input:focus-visible{outline:none;box-shadow:var(--ring)}button.primary,.btn.primary{background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:white}
+main{max-width:1320px;margin:auto;padding:28px 20px 76px}
+.card{background:color-mix(in srgb,var(--card) 96%,transparent);border:1px solid var(--line);border-radius:var(--radius);padding:25px;box-shadow:var(--shadow);margin:18px 0}
+.hero{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(340px,.87fr);gap:22px;align-items:stretch;margin:18px 0 26px}
+h1{font-size:clamp(40px,5.7vw,78px);line-height:.98;margin:10px 0 16px;letter-spacing:-.065em}h2{font-size:clamp(27px,3.1vw,44px);line-height:1.07;margin:18px 0 15px;letter-spacing:-.045em}h3{font-size:22px;margin:8px 0 10px;letter-spacing:-.02em}p{margin:10px 0}
+.lead{font-size:18.5px;color:var(--muted);max-width:90ch}.muted{color:var(--muted)}.kicker{font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.14em;color:var(--primary)}
+.tag{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:4px 6px 4px 0;background:color-mix(in srgb,var(--card),var(--primary) 6%);font-size:13px;font-weight:920;color:var(--muted)}.tag.hot{color:white;background:linear-gradient(135deg,var(--primary),var(--secondary));border:0}
+.notice{border-left:5px solid var(--primary);padding:15px 17px;border-radius:19px;background:color-mix(in srgb,var(--primary) 8%,var(--card));margin:14px 0}.notice.good{border-left-color:var(--green);background:color-mix(in srgb,var(--green) 9%,var(--card))}.notice.warn{border-left-color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,var(--card))}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.mini{padding:17px;border:1px solid var(--line);border-radius:23px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft)}.mini strong{display:block;font-size:20px;letter-spacing:-.02em}.mini small{display:block;color:var(--muted)}.bigNumber{font-size:44px;font-weight:950;letter-spacing:-.06em;color:var(--primary);line-height:1}
+.toolbar{display:grid;gap:12px;margin-top:14px}input{width:100%;border:1px solid var(--line);border-radius:18px;padding:14px 16px;background:var(--card);color:var(--text);font-size:16px;font-weight:740;box-shadow:var(--soft)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{box-shadow:none;border-radius:999px;padding:8px 12px;color:var(--muted);background:var(--card)}.chip span{font-size:12px;opacity:.85}.chip.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:none}
+.term-list{display:grid;gap:13px;margin-top:18px}.term-card{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,var(--card),var(--card2));box-shadow:var(--soft);overflow:hidden}
+.term-head{width:100%;border:none;border-radius:0;box-shadow:none;background:transparent;display:grid;grid-template-columns:58px 1fr 36px;align-items:center;text-align:left;padding:17px 18px;gap:12px}
+.term-head:hover{transform:none;box-shadow:none;background:color-mix(in srgb,var(--primary) 5%,transparent)}.term-num{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;font-weight:950}
+.term-title-wrap{display:flex;flex-direction:column;gap:2px}.term-title{font-size:20px;font-weight:950;letter-spacing:-.02em}.term-cat{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.11em}.chev{font-size:24px;color:var(--primary);transition:transform .25s ease}
+.term-body{max-height:0;overflow:hidden;transition:max-height .34s ease, padding .34s ease;border-top:1px solid transparent;padding:0 18px}.term-card.open .term-body{max-height:520px;border-top-color:var(--line);padding:16px 18px 18px}.term-card.open .chev{transform:rotate(180deg)}
+.formula{font-family:Cambria,Georgia,serif;font-size:18px;font-weight:850;letter-spacing:.01em;background:color-mix(in srgb,var(--primary) 7%,var(--card));border:1px solid var(--line);border-radius:18px;padding:12px 14px;overflow:auto;color:var(--text);margin-top:12px}
+.empty{display:none;text-align:center;padding:28px;color:var(--muted);font-weight:900}
+.footer{margin-top:42px;color:var(--muted);font-size:14px;text-align:center}.toTop{position:fixed;right:18px;bottom:18px;z-index:70}
+@media(max-width:1080px){.hero,.grid2,.grid4{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls button,.controls .btn{flex:1}}
+@media(max-width:640px){main{padding:18px 12px 80px}.card{padding:18px;border-radius:23px}.controls button,.controls .btn{width:100%}h1{font-size:42px}.term-head{grid-template-columns:48px 1fr 28px;padding:14px}.term-title{font-size:18px}}
+@media print{header,.controls,button,.btn,.toolbar,.toTop,.progress{display:none!important}body{background:white}.card,.mini,.term-card{box-shadow:none}main{max-width:100%;padding:0}.hero,.grid2,.grid4{grid-template-columns:1fr}.term-body{max-height:none!important;padding:12px 18px!important;border-top:1px solid #ddd!important}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header>
+  <div class="nav">
+    <div class="brand"><span class="brandDot"></span><span>Glosario · Grupo de Klein, Criptografía y Redes Sociales</span></div>
+    <div class="controls">
+      <button id="themeBtn">🌙 Tema oscuro</button>
+      <button id="expandBtn">▾ Mostrar todo</button>
+      <button id="collapseBtn">▴ Contraer</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero" id="inicio">
+  <div class="card">
+    <span class="tag hot">Glosario desarrollado</span><span class="tag">V₄</span><span class="tag">XOR</span><span class="tag">Vernam</span><span class="tag">Heider-Harary</span><span class="tag">Grafos firmados</span>
+    <h1>Glosario integrado</h1>
+    <p class="lead">Términos fundamentales para estudiar el grupo de Klein desde la teoría de grupos, su lectura binaria como XOR, su aplicación al one-time pad/Vernam y su uso como lenguaje algebraico para balance estructural en redes sociales.</p>
+    <div class="notice good"><strong>Idea guía:</strong> V₄ permite unir cuatro lenguajes: estructura algebraica, bits, cifrado perfecto y signos sociales. La misma lógica de paridad aparece en la tabla de Cayley, en XOR, en Vernam y en las tríadas balanceadas.</div>
+  </div>
+  <div class="card">
+    <h3>Panel de estudio</h3>
+    <div class="grid2">
+      <div class="mini"><strong class="bigNumber">65</strong><small>conceptos desarrollados</small></div>
+      <div class="mini"><strong class="bigNumber">⊕</strong><small>eje transversal: paridad/XOR</small></div>
+      <div class="mini"><strong class="bigNumber">4</strong><small>estados elementales de V₄</small></div>
+      <div class="mini"><strong class="bigNumber">3</strong><small>bloques: álgebra, criptografía y redes</small></div>
+    </div>
+    <div class="notice warn"><strong>Uso recomendado:</strong> abrí primero los términos de Álgebra, luego Criptografía y finalmente Redes sociales. También podés buscar “XOR”, “balance”, “Vernam”, “Galois”, “automorfismo” o “polarización”.</div>
+  </div>
+</section>
+
+<section class="card">
+  <span class="kicker">Búsqueda y filtros</span>
+  <h2>Explorar conceptos</h2>
+  <div class="toolbar">
+    <input id="search" placeholder="Buscar término, categoría, fórmula o palabra clave..." />
+    <div class="chips" id="chips"><button class="chip active" data-filter="all">Todo</button><button class="chip" data-filter="Álgebra">Álgebra <span>18</span></button><button class="chip" data-filter="Álgebra lineal">Álgebra lineal <span>2</span></button><button class="chip" data-filter="Álgebra y computación">Álgebra y computación <span>1</span></button><button class="chip" data-filter="Geometría">Geometría <span>1</span></button><button class="chip" data-filter="Representaciones">Representaciones <span>2</span></button><button class="chip" data-filter="Galois">Galois <span>2</span></button><button class="chip" data-filter="Computación">Computación <span>1</span></button><button class="chip" data-filter="Criptografía">Criptografía <span>11</span></button><button class="chip" data-filter="Criptografía y probabilidad">Criptografía y probabilidad <span>2</span></button><button class="chip" data-filter="Probabilidad">Probabilidad <span>3</span></button><button class="chip" data-filter="Criptografía y álgebra">Criptografía y álgebra <span>1</span></button><button class="chip" data-filter="Redes sociales">Redes sociales <span>15</span></button><button class="chip" data-filter="Redes y álgebra">Redes y álgebra <span>3</span></button><button class="chip" data-filter="Redes y computación">Redes y computación <span>1</span></button></div>
+  </div>
+  <div class="term-list" id="termList">
+    
+    <article class="term-card" data-category="Álgebra" data-search="grupo de klein v₄ álgebra grupo finito orden cuatro abeliano no ciclico c2 z2 el grupo de klein, denotado v₄, es un grupo finito de cuatro elementos que suele escribirse como v₄ = {e, a, b, c}. el elemento e es el neutro y los otros tres elementos son involuciones: a² = b² = c² = e. la regla estructural central es que el producto de dos elementos no triviales distintos da el tercero: ab = c, ac = b y bc = a. es el grupo abeliano no cíclico más pequeño. su importancia no está en el tamaño, sino en que aparece bajo muchas formas equivalentes: como c₂ × c₂, como ℤ₂ × ℤ₂, como f₂² con suma binaria, como simetrías del rectángulo y como subgrupo de permutaciones.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-1">
+        <span class="term-num">01</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo de Klein V₄</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-1">
+        <p>El grupo de Klein, denotado V₄, es un grupo finito de cuatro elementos que suele escribirse como V₄ = {e, a, b, c}. El elemento e es el neutro y los otros tres elementos son involuciones: a² = b² = c² = e. La regla estructural central es que el producto de dos elementos no triviales distintos da el tercero: ab = c, ac = b y bc = a. Es el grupo abeliano no cíclico más pequeño. Su importancia no está en el tamaño, sino en que aparece bajo muchas formas equivalentes: como C₂ × C₂, como ℤ₂ × ℤ₂, como F₂² con suma binaria, como simetrías del rectángulo y como subgrupo de permutaciones.</p>
+        <div class="formula"><strong>Clave:</strong> V₄ = {e, a, b, c};  a² = b² = c² = e;  ab = c, ac = b, bc = a</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="elemento neutro álgebra identidad grupo neutro e operación el elemento neutro de un grupo es aquel que no cambia a los demás elementos cuando se opera con ellos. en v₄ se representa por e. para cualquier x ∈ v₄, se cumple ex = xe = x. en el modelo binario ℤ₂ × ℤ₂, el neutro corresponde al par 00, porque 00 ⊕ x = x. en el modelo geométrico de las simetrías del rectángulo, el neutro es la transformación identidad: dejar la figura exactamente como estaba. el neutro permite distinguir entre realizar una transformación real y no modificar nada, y es indispensable para que la estructura cumpla los axiomas de grupo.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-2">
+        <span class="term-num">02</span>
+        <span class="term-title-wrap"><span class="term-title">Elemento neutro</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-2">
+        <p>El elemento neutro de un grupo es aquel que no cambia a los demás elementos cuando se opera con ellos. En V₄ se representa por e. Para cualquier x ∈ V₄, se cumple ex = xe = x. En el modelo binario ℤ₂ × ℤ₂, el neutro corresponde al par 00, porque 00 ⊕ x = x. En el modelo geométrico de las simetrías del rectángulo, el neutro es la transformación identidad: dejar la figura exactamente como estaba. El neutro permite distinguir entre realizar una transformación real y no modificar nada, y es indispensable para que la estructura cumpla los axiomas de grupo.</p>
+        <div class="formula"><strong>Clave:</strong> ex = xe = x;  en bits: 00 ⊕ x = x</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="involución álgebra orden dos inverso propio a cuadrado e una involución es un elemento que, aplicado dos veces, produce el elemento neutro. en lenguaje de grupos, x es involución si x² = e y x ≠ e. en el grupo de klein, los tres elementos no triviales a, b y c son involuciones. esto significa que cada uno es su propio inverso. la propiedad es clave para entender por qué xor sirve tanto para cifrar como para descifrar en el cifrado de vernam: si se combina un mensaje con una clave y luego se vuelve a combinar con la misma clave, la clave se cancela. en geometría, una reflexión o una rotación de 180° también son involuciones.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-3">
+        <span class="term-num">03</span>
+        <span class="term-title-wrap"><span class="term-title">Involución</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-3">
+        <p>Una involución es un elemento que, aplicado dos veces, produce el elemento neutro. En lenguaje de grupos, x es involución si x² = e y x ≠ e. En el grupo de Klein, los tres elementos no triviales a, b y c son involuciones. Esto significa que cada uno es su propio inverso. La propiedad es clave para entender por qué XOR sirve tanto para cifrar como para descifrar en el cifrado de Vernam: si se combina un mensaje con una clave y luego se vuelve a combinar con la misma clave, la clave se cancela. En geometría, una reflexión o una rotación de 180° también son involuciones.</p>
+        <div class="formula"><strong>Clave:</strong> x² = e;  x⁻¹ = x</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="grupo abeliano álgebra conmutativo xy yx tabla simetrica un grupo es abeliano cuando el orden de los factores no altera el resultado: xy = yx para todo par de elementos. v₄ es abeliano porque su tabla de cayley es simétrica respecto de la diagonal principal. por ejemplo, ab = ba = c. en el modelo xor, la conmutatividad es evidente: 01 ⊕ 10 = 10 ⊕ 01 = 11. esta propiedad simplifica los cálculos y permite interpretar a v₄ como grupo aditivo de un espacio vectorial sobre f₂. en aplicaciones, la conmutatividad ayuda a leer operaciones como composición de paridades, combinación de signos o suma binaria sin preocuparse por el orden.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-4">
+        <span class="term-num">04</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo abeliano</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-4">
+        <p>Un grupo es abeliano cuando el orden de los factores no altera el resultado: xy = yx para todo par de elementos. V₄ es abeliano porque su tabla de Cayley es simétrica respecto de la diagonal principal. Por ejemplo, ab = ba = c. En el modelo XOR, la conmutatividad es evidente: 01 ⊕ 10 = 10 ⊕ 01 = 11. Esta propiedad simplifica los cálculos y permite interpretar a V₄ como grupo aditivo de un espacio vectorial sobre F₂. En aplicaciones, la conmutatividad ayuda a leer operaciones como composición de paridades, combinación de signos o suma binaria sin preocuparse por el orden.</p>
+        <div class="formula"><strong>Clave:</strong> xy = yx para todo x,y ∈ V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="grupo no cíclico álgebra no ciclico generador orden cuatro c4 v4 un grupo cíclico es aquel que puede generarse a partir de un solo elemento. v₄ no es cíclico porque ningún elemento tiene orden 4. el neutro e tiene orden 1 y los otros tres elementos tienen orden 2. por lo tanto, si se toma cualquier elemento no trivial, el subgrupo que genera es solamente {e, x}; nunca se obtienen los cuatro elementos. esta diferencia separa a v₄ del grupo cíclico c₄, que también tiene cuatro elementos pero sí posee un generador de orden 4. la comparación entre v₄ y c₄ es un ejemplo básico de que dos grupos pueden tener la misma cantidad de elementos y, sin embargo, estructuras completamente distintas.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-5">
+        <span class="term-num">05</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo no cíclico</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-5">
+        <p>Un grupo cíclico es aquel que puede generarse a partir de un solo elemento. V₄ no es cíclico porque ningún elemento tiene orden 4. El neutro e tiene orden 1 y los otros tres elementos tienen orden 2. Por lo tanto, si se toma cualquier elemento no trivial, el subgrupo que genera es solamente {e, x}; nunca se obtienen los cuatro elementos. Esta diferencia separa a V₄ del grupo cíclico C₄, que también tiene cuatro elementos pero sí posee un generador de orden 4. La comparación entre V₄ y C₄ es un ejemplo básico de que dos grupos pueden tener la misma cantidad de elementos y, sin embargo, estructuras completamente distintas.</p>
+        <div class="formula"><strong>Clave:</strong> ⟨a⟩ = {e,a},  ⟨b⟩ = {e,b},  ⟨c⟩ = {e,c};  ningún ⟨x⟩ = V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="c₂ × c₂ álgebra producto directo grupos ciclicos orden dos c₂ × c₂ es el producto directo de dos grupos cíclicos de orden 2. cada componente puede tomar dos valores, de modo que el producto tiene cuatro elementos. esta estructura es isomorfa al grupo de klein. si c₂ se interpreta como {0,1} con suma módulo 2, entonces c₂ × c₂ se interpreta como pares binarios: 00, 01, 10 y 11. la operación se realiza componente a componente. esta descripción muestra que v₄ no es una rareza aislada, sino una construcción natural: combinar dos decisiones binarias independientes. por eso sirve para representar paridad, signos, bloques, estados lógicos y claves binarias de dos bits.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-6">
+        <span class="term-num">06</span>
+        <span class="term-title-wrap"><span class="term-title">C₂ × C₂</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-6">
+        <p>C₂ × C₂ es el producto directo de dos grupos cíclicos de orden 2. Cada componente puede tomar dos valores, de modo que el producto tiene cuatro elementos. Esta estructura es isomorfa al grupo de Klein. Si C₂ se interpreta como {0,1} con suma módulo 2, entonces C₂ × C₂ se interpreta como pares binarios: 00, 01, 10 y 11. La operación se realiza componente a componente. Esta descripción muestra que V₄ no es una rareza aislada, sino una construcción natural: combinar dos decisiones binarias independientes. Por eso sirve para representar paridad, signos, bloques, estados lógicos y claves binarias de dos bits.</p>
+        <div class="formula"><strong>Clave:</strong> V₄ ≅ C₂ × C₂</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="ℤ₂ × ℤ₂ álgebra enteros modulo dos suma componente a componente ℤ₂ × ℤ₂ es otra forma de escribir el grupo de klein. ℤ₂ contiene dos clases: 0 y 1, con suma módulo 2. al tomar el producto cartesiano se obtienen cuatro pares: (0,0), (0,1), (1,0) y (1,1). la operación se hace sumando cada coordenada módulo 2. esta versión conecta inmediatamente v₄ con xor, porque sumar módulo 2 equivale a aplicar xor entre bits. en criptografía, esto permite ver el cifrado de vernam como una operación del grupo de klein cuando el alfabeto se compone de bloques binarios de dos bits.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-7">
+        <span class="term-num">07</span>
+        <span class="term-title-wrap"><span class="term-title">ℤ₂ × ℤ₂</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-7">
+        <p>ℤ₂ × ℤ₂ es otra forma de escribir el grupo de Klein. ℤ₂ contiene dos clases: 0 y 1, con suma módulo 2. Al tomar el producto cartesiano se obtienen cuatro pares: (0,0), (0,1), (1,0) y (1,1). La operación se hace sumando cada coordenada módulo 2. Esta versión conecta inmediatamente V₄ con XOR, porque sumar módulo 2 equivale a aplicar XOR entre bits. En criptografía, esto permite ver el cifrado de Vernam como una operación del grupo de Klein cuando el alfabeto se compone de bloques binarios de dos bits.</p>
+        <div class="formula"><strong>Clave:</strong> (x₁,x₂) + (y₁,y₂) = (x₁+y₁ mod 2, x₂+y₂ mod 2)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra lineal" data-search="f₂² álgebra lineal espacio vectorial campo finito dimension dos f₂² es el espacio vectorial de dimensión 2 sobre el campo f₂, donde f₂ = {0,1}. como conjunto y como grupo aditivo, f₂² coincide con ℤ₂ × ℤ₂ y, por lo tanto, con v₄. esta mirada es útil porque permite tratar los elementos de v₄ como vectores binarios. la suma vectorial es xor bit a bit, el vector cero es 00 y todo vector no nulo se cancela consigo mismo. además, al mirarlo como espacio vectorial se entiende por qué el grupo de automorfismos de v₄ está relacionado con gl(2,f₂): los automorfismos son cambios de base invertibles sobre dos bits.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-8">
+        <span class="term-num">08</span>
+        <span class="term-title-wrap"><span class="term-title">F₂²</span><span class="term-cat">Álgebra lineal</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-8">
+        <p>F₂² es el espacio vectorial de dimensión 2 sobre el campo F₂, donde F₂ = {0,1}. Como conjunto y como grupo aditivo, F₂² coincide con ℤ₂ × ℤ₂ y, por lo tanto, con V₄. Esta mirada es útil porque permite tratar los elementos de V₄ como vectores binarios. La suma vectorial es XOR bit a bit, el vector cero es 00 y todo vector no nulo se cancela consigo mismo. Además, al mirarlo como espacio vectorial se entiende por qué el grupo de automorfismos de V₄ está relacionado con GL(2,F₂): los automorfismos son cambios de base invertibles sobre dos bits.</p>
+        <div class="formula"><strong>Clave:</strong> F₂² = {(0,0),(0,1),(1,0),(1,1)}</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra y computación" data-search="xor álgebra y computación or exclusivo suma modulo dos bits paridad xor, u or exclusivo, es la operación lógica que devuelve 1 cuando los bits comparados son distintos y devuelve 0 cuando son iguales. algebraicamente, xor equivale a la suma módulo 2. en el contexto de v₄, se aplica bit a bit: 01 ⊕ 10 = 11. es la operación que permite identificar al grupo de klein con pares binarios. también es la operación central del cifrado de vernam: c = m ⊕ k y m = c ⊕ k. su propiedad más importante para este tema es que cada elemento se cancela consigo mismo: x ⊕ x = 0.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-9">
+        <span class="term-num">09</span>
+        <span class="term-title-wrap"><span class="term-title">XOR</span><span class="term-cat">Álgebra y computación</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-9">
+        <p>XOR, u OR exclusivo, es la operación lógica que devuelve 1 cuando los bits comparados son distintos y devuelve 0 cuando son iguales. Algebraicamente, XOR equivale a la suma módulo 2. En el contexto de V₄, se aplica bit a bit: 01 ⊕ 10 = 11. Es la operación que permite identificar al grupo de Klein con pares binarios. También es la operación central del cifrado de Vernam: C = M ⊕ K y M = C ⊕ K. Su propiedad más importante para este tema es que cada elemento se cancela consigo mismo: x ⊕ x = 0.</p>
+        <div class="formula"><strong>Clave:</strong> 0⊕0=0; 0⊕1=1; 1⊕0=1; 1⊕1=0</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="tabla de cayley álgebra tabla operación grupo productos estructura la tabla de cayley es una tabla que muestra el resultado de operar cada par de elementos de un grupo. para v₄, la tabla contiene todos los productos entre e, a, b y c. permite ver de manera directa la cerradura, la existencia del neutro, los inversos y la conmutatividad. también muestra la regla característica: cada elemento no trivial multiplicado por sí mismo da e, y dos elementos no triviales distintos producen el tercero. en la aplicación criptográfica, la tabla de cayley puede leerse como una tabla de cifrado: fila mensaje, columna clave y celda criptograma.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-10">
+        <span class="term-num">10</span>
+        <span class="term-title-wrap"><span class="term-title">Tabla de Cayley</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-10">
+        <p>La tabla de Cayley es una tabla que muestra el resultado de operar cada par de elementos de un grupo. Para V₄, la tabla contiene todos los productos entre e, a, b y c. Permite ver de manera directa la cerradura, la existencia del neutro, los inversos y la conmutatividad. También muestra la regla característica: cada elemento no trivial multiplicado por sí mismo da e, y dos elementos no triviales distintos producen el tercero. En la aplicación criptográfica, la tabla de Cayley puede leerse como una tabla de cifrado: fila mensaje, columna clave y celda criptograma.</p>
+        <div class="formula"><strong>Clave:</strong> fila x, columna y → x·y</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="isomorfismo álgebra misma estructura correspondencia preserva operación un isomorfismo es una correspondencia biyectiva entre dos estructuras algebraicas que conserva la operación. decir que v₄ es isomorfo a ℤ₂ × ℤ₂ significa que no importa si sus elementos se escriben como e,a,b,c o como 00,01,10,11: la estructura de operación es la misma. los nombres cambian, pero las relaciones internas permanecen. este concepto es fundamental porque permite trasladar intuiciones entre modelos: lo que se demuestra con bits puede interpretarse en simetrías, lo que se calcula con tablas puede interpretarse en criptografía y lo que aparece en grafos puede algebraizarse mediante paridad.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-11">
+        <span class="term-num">11</span>
+        <span class="term-title-wrap"><span class="term-title">Isomorfismo</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-11">
+        <p>Un isomorfismo es una correspondencia biyectiva entre dos estructuras algebraicas que conserva la operación. Decir que V₄ es isomorfo a ℤ₂ × ℤ₂ significa que no importa si sus elementos se escriben como e,a,b,c o como 00,01,10,11: la estructura de operación es la misma. Los nombres cambian, pero las relaciones internas permanecen. Este concepto es fundamental porque permite trasladar intuiciones entre modelos: lo que se demuestra con bits puede interpretarse en simetrías, lo que se calcula con tablas puede interpretarse en criptografía y lo que aparece en grafos puede algebraizarse mediante paridad.</p>
+        <div class="formula"><strong>Clave:</strong> φ(xy) = φ(x)φ(y)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="subgrupo álgebra subconjunto grupo cerrado neutro inversos un subgrupo es un subconjunto de un grupo que también es grupo bajo la misma operación. en v₄ hay cinco subgrupos: el trivial {e}, los tres subgrupos de orden 2 dados por {e,a}, {e,b} y {e,c}, y el grupo completo v₄. cada subgrupo de orden 2 está generado por una involución. esta estructura de subgrupos es muy simple pero muy informativa. en teoría de galois, por ejemplo, el retículo de subgrupos de v₄ se corresponde con subcampos de una extensión bicuadrática. en términos pedagógicos, v₄ muestra de manera clara cómo un grupo pequeño puede tener una organización interna rica.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-12">
+        <span class="term-num">12</span>
+        <span class="term-title-wrap"><span class="term-title">Subgrupo</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-12">
+        <p>Un subgrupo es un subconjunto de un grupo que también es grupo bajo la misma operación. En V₄ hay cinco subgrupos: el trivial {e}, los tres subgrupos de orden 2 dados por {e,a}, {e,b} y {e,c}, y el grupo completo V₄. Cada subgrupo de orden 2 está generado por una involución. Esta estructura de subgrupos es muy simple pero muy informativa. En teoría de Galois, por ejemplo, el retículo de subgrupos de V₄ se corresponde con subcampos de una extensión bicuadrática. En términos pedagógicos, V₄ muestra de manera clara cómo un grupo pequeño puede tener una organización interna rica.</p>
+        <div class="formula"><strong>Clave:</strong> Subgrupos: {e}, {e,a}, {e,b}, {e,c}, V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="subgrupo normal álgebra normalidad cocientes abeliano conjugación un subgrupo normal es un subgrupo compatible con la operación de formar cocientes. en un grupo abeliano, todos los subgrupos son normales porque xy = yx elimina las diferencias entre conjugación por izquierda y por derecha. como v₄ es abeliano, sus cinco subgrupos son normales. esta propiedad resulta importante cuando se construyen grupos cociente y cuando v₄ aparece dentro de grupos más grandes, como a₄. dentro de a₄, el conjunto formado por la identidad y las tres dobles transposiciones constituye un subgrupo normal isomorfo a v₄.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-13">
+        <span class="term-num">13</span>
+        <span class="term-title-wrap"><span class="term-title">Subgrupo normal</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-13">
+        <p>Un subgrupo normal es un subgrupo compatible con la operación de formar cocientes. En un grupo abeliano, todos los subgrupos son normales porque xy = yx elimina las diferencias entre conjugación por izquierda y por derecha. Como V₄ es abeliano, sus cinco subgrupos son normales. Esta propiedad resulta importante cuando se construyen grupos cociente y cuando V₄ aparece dentro de grupos más grandes, como A₄. Dentro de A₄, el conjunto formado por la identidad y las tres dobles transposiciones constituye un subgrupo normal isomorfo a V₄.</p>
+        <div class="formula"><strong>Clave:</strong> Si G es abeliano, entonces todo H ≤ G es normal: H ◁ G</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="grupo cociente álgebra cociente clases laterales normal un grupo cociente se forma agrupando elementos de un grupo según un subgrupo normal. en v₄, como todos los subgrupos son normales, se pueden construir cocientes de manera directa. si se toma, por ejemplo, h = {e,a}, entonces v₄/h tiene dos clases: h y bh = {b,c}. el resultado es un grupo de orden 2. la noción de cociente permite mirar la estructura a otro nivel de resolución: en lugar de distinguir los cuatro elementos, se distinguen bloques de elementos. esta idea conecta con particiones, simetrías, subcampos en galois y clasificación de estados.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-14">
+        <span class="term-num">14</span>
+        <span class="term-title-wrap"><span class="term-title">Grupo cociente</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-14">
+        <p>Un grupo cociente se forma agrupando elementos de un grupo según un subgrupo normal. En V₄, como todos los subgrupos son normales, se pueden construir cocientes de manera directa. Si se toma, por ejemplo, H = {e,a}, entonces V₄/H tiene dos clases: H y bH = {b,c}. El resultado es un grupo de orden 2. La noción de cociente permite mirar la estructura a otro nivel de resolución: en lugar de distinguir los cuatro elementos, se distinguen bloques de elementos. Esta idea conecta con particiones, simetrías, subcampos en Galois y clasificación de estados.</p>
+        <div class="formula"><strong>Clave:</strong> V₄/{e,a} ≅ C₂</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="automorfismo de v₄ álgebra simetría interna permutación no triviales aut v4 un automorfismo es un isomorfismo de un grupo consigo mismo. en v₄, cualquier automorfismo debe fijar el neutro e y puede permutar los tres elementos no triviales a, b y c, siempre preservando la operación. como cualquier permutación de esos tres elementos conserva la regla “el producto de dos distintos da el tercero”, el grupo de automorfismos tiene 6 elementos y es isomorfo a s₃. en el modelo vectorial, estos automorfismos coinciden con las transformaciones lineales invertibles de f₂², es decir, con gl(2,f₂).">
+      <button class="term-head" aria-expanded="false" aria-controls="term-15">
+        <span class="term-num">15</span>
+        <span class="term-title-wrap"><span class="term-title">Automorfismo de V₄</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-15">
+        <p>Un automorfismo es un isomorfismo de un grupo consigo mismo. En V₄, cualquier automorfismo debe fijar el neutro e y puede permutar los tres elementos no triviales a, b y c, siempre preservando la operación. Como cualquier permutación de esos tres elementos conserva la regla “el producto de dos distintos da el tercero”, el grupo de automorfismos tiene 6 elementos y es isomorfo a S₃. En el modelo vectorial, estos automorfismos coinciden con las transformaciones lineales invertibles de F₂², es decir, con GL(2,F₂).</p>
+        <div class="formula"><strong>Clave:</strong> Aut(V₄) ≅ S₃ ≅ GL(2,F₂)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra lineal" data-search="gl(2,f₂) álgebra lineal matrices invertibles campo dos automorfismos gl(2,f₂) es el grupo de matrices invertibles de 2×2 con entradas en el campo f₂. tiene 6 elementos y es isomorfo al grupo de automorfismos de v₄. esta conexión aparece al interpretar v₄ como f₂². un automorfismo de v₄ debe enviar vectores no nulos a vectores no nulos y preservar la suma xor. eso es exactamente lo que hace una transformación lineal invertible. esta equivalencia muestra que el grupo de klein no solo es un grupo abstracto: también puede leerse como un espacio vectorial binario con simetrías lineales propias.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-16">
+        <span class="term-num">16</span>
+        <span class="term-title-wrap"><span class="term-title">GL(2,F₂)</span><span class="term-cat">Álgebra lineal</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-16">
+        <p>GL(2,F₂) es el grupo de matrices invertibles de 2×2 con entradas en el campo F₂. Tiene 6 elementos y es isomorfo al grupo de automorfismos de V₄. Esta conexión aparece al interpretar V₄ como F₂². Un automorfismo de V₄ debe enviar vectores no nulos a vectores no nulos y preservar la suma XOR. Eso es exactamente lo que hace una transformación lineal invertible. Esta equivalencia muestra que el grupo de Klein no solo es un grupo abstracto: también puede leerse como un espacio vectorial binario con simetrías lineales propias.</p>
+        <div class="formula"><strong>Clave:</strong> Aut(F₂²,+) = GL(2,F₂)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="s₃ álgebra grupo simétrico tres elementos automorfismos s₃ es el grupo de todas las permutaciones de tres objetos. tiene 6 elementos. aparece en el estudio de v₄ porque los tres elementos no triviales a, b y c pueden ser permutados libremente por automorfismos. como el neutro debe permanecer fijo, la acción interesante de aut(v₄) ocurre sobre {a,b,c}. por eso aut(v₄) ≅ s₃. esta relación es una buena muestra de cómo un grupo abeliano pequeño puede tener un grupo de simetrías internas no abeliano: v₄ es conmutativo, pero sus automorfismos se organizan como s₃.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-17">
+        <span class="term-num">17</span>
+        <span class="term-title-wrap"><span class="term-title">S₃</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-17">
+        <p>S₃ es el grupo de todas las permutaciones de tres objetos. Tiene 6 elementos. Aparece en el estudio de V₄ porque los tres elementos no triviales a, b y c pueden ser permutados libremente por automorfismos. Como el neutro debe permanecer fijo, la acción interesante de Aut(V₄) ocurre sobre {a,b,c}. Por eso Aut(V₄) ≅ S₃. Esta relación es una buena muestra de cómo un grupo abeliano pequeño puede tener un grupo de simetrías internas no abeliano: V₄ es conmutativo, pero sus automorfismos se organizan como S₃.</p>
+        <div class="formula"><strong>Clave:</strong> Aut(V₄) actúa sobre {a,b,c} como S₃</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Geometría" data-search="simetrías del rectángulo geometría rectángulo identidad reflexiones rotación 180 el grupo de simetrías de un rectángulo no cuadrado es un modelo geométrico de v₄. sus cuatro elementos son: la identidad, la reflexión horizontal, la reflexión vertical y la rotación de 180°. cada simetría no trivial tiene orden 2: si se aplica dos veces, se vuelve al punto de partida. además, componer dos simetrías no triviales distintas produce la tercera. por ejemplo, reflexión horizontal seguida de reflexión vertical equivale a rotación de 180°. este modelo es didácticamente valioso porque convierte una estructura algebraica abstracta en transformaciones visuales fáciles de imaginar.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-18">
+        <span class="term-num">18</span>
+        <span class="term-title-wrap"><span class="term-title">Simetrías del rectángulo</span><span class="term-cat">Geometría</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-18">
+        <p>El grupo de simetrías de un rectángulo no cuadrado es un modelo geométrico de V₄. Sus cuatro elementos son: la identidad, la reflexión horizontal, la reflexión vertical y la rotación de 180°. Cada simetría no trivial tiene orden 2: si se aplica dos veces, se vuelve al punto de partida. Además, componer dos simetrías no triviales distintas produce la tercera. Por ejemplo, reflexión horizontal seguida de reflexión vertical equivale a rotación de 180°. Este modelo es didácticamente valioso porque convierte una estructura algebraica abstracta en transformaciones visuales fáciles de imaginar.</p>
+        <div class="formula"><strong>Clave:</strong> {id, H, V, R₁₈₀} ≅ V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="permutación álgebra s4 a4 reordenamiento elementos composición una permutación es una reordenación de un conjunto. en teoría de grupos, las permutaciones se componen: aplicar una y luego otra produce una nueva permutación. v₄ puede representarse dentro de s₄ mediante la identidad y las tres dobles transposiciones. esta representación permite conectar el grupo de klein con grupos simétricos y alternantes. la ventaja de este modelo es que muestra a v₄ como un subgrupo concreto de un grupo mayor: no solo es una tabla abstracta, sino un conjunto de reordenamientos con una estructura de composición precisa.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-19">
+        <span class="term-num">19</span>
+        <span class="term-title-wrap"><span class="term-title">Permutación</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-19">
+        <p>Una permutación es una reordenación de un conjunto. En teoría de grupos, las permutaciones se componen: aplicar una y luego otra produce una nueva permutación. V₄ puede representarse dentro de S₄ mediante la identidad y las tres dobles transposiciones. Esta representación permite conectar el grupo de Klein con grupos simétricos y alternantes. La ventaja de este modelo es que muestra a V₄ como un subgrupo concreto de un grupo mayor: no solo es una tabla abstracta, sino un conjunto de reordenamientos con una estructura de composición precisa.</p>
+        <div class="formula"><strong>Clave:</strong> S₄ contiene {(), (12)(34), (13)(24), (14)(23)} ≅ V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="doble transposición álgebra permutaciones a4 s4 producto transposiciones disjuntas una doble transposición es una permutación que intercambia dos pares de elementos de manera simultánea, por ejemplo (12)(34). en s₄ hay tres dobles transposiciones de este tipo: (12)(34), (13)(24) y (14)(23). junto con la identidad forman un subgrupo isomorfo a v₄. cada doble transposición tiene orden 2 y el producto de dos dobles transposiciones distintas da la tercera. además, estas permutaciones pertenecen a a₄ porque son pares. por eso v₄ aparece de manera natural como subgrupo normal de a₄.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-20">
+        <span class="term-num">20</span>
+        <span class="term-title-wrap"><span class="term-title">Doble transposición</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-20">
+        <p>Una doble transposición es una permutación que intercambia dos pares de elementos de manera simultánea, por ejemplo (12)(34). En S₄ hay tres dobles transposiciones de este tipo: (12)(34), (13)(24) y (14)(23). Junto con la identidad forman un subgrupo isomorfo a V₄. Cada doble transposición tiene orden 2 y el producto de dos dobles transposiciones distintas da la tercera. Además, estas permutaciones pertenecen a A₄ porque son pares. Por eso V₄ aparece de manera natural como subgrupo normal de A₄.</p>
+        <div class="formula"><strong>Clave:</strong> V = {(), (12)(34), (13)(24), (14)(23)}</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="a₄ álgebra grupo alternante permutaciones pares tetraedro normalidad a₄ es el grupo alternante de grado 4: contiene las permutaciones pares de cuatro elementos. tiene 12 elementos. dentro de a₄ aparece un subgrupo normal isomorfo a v₄, formado por la identidad y las tres dobles transposiciones. este hecho es importante porque muestra cómo v₄ puede funcionar como una pieza estructural dentro de grupos más grandes. en geometría, a₄ también se relaciona con las simetrías rotacionales del tetraedro, y el subgrupo v₄ organiza ciertas transformaciones de orden 2 dentro de esa estructura.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-21">
+        <span class="term-num">21</span>
+        <span class="term-title-wrap"><span class="term-title">A₄</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-21">
+        <p>A₄ es el grupo alternante de grado 4: contiene las permutaciones pares de cuatro elementos. Tiene 12 elementos. Dentro de A₄ aparece un subgrupo normal isomorfo a V₄, formado por la identidad y las tres dobles transposiciones. Este hecho es importante porque muestra cómo V₄ puede funcionar como una pieza estructural dentro de grupos más grandes. En geometría, A₄ también se relaciona con las simetrías rotacionales del tetraedro, y el subgrupo V₄ organiza ciertas transformaciones de orden 2 dentro de esa estructura.</p>
+        <div class="formula"><strong>Clave:</strong> V₄ ◁ A₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Representaciones" data-search="representación de un grupo representaciones matrices acción lineal caracteres diagonal una representación de un grupo traduce sus elementos en matrices de modo que la operación del grupo se corresponda con la multiplicación de matrices. para v₄, las representaciones son especialmente simples porque el grupo es abeliano y todos sus elementos tienen orden 1 o 2. sobre los complejos, sus representaciones irreducibles son unidimensionales y toman valores ±1. esto permite construir una tabla de caracteres muy clara. las representaciones muestran cómo una estructura abstracta puede actuar sobre espacios vectoriales y ayudan a conectar teoría de grupos con álgebra lineal, simetría y análisis de señales.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-22">
+        <span class="term-num">22</span>
+        <span class="term-title-wrap"><span class="term-title">Representación de un grupo</span><span class="term-cat">Representaciones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-22">
+        <p>Una representación de un grupo traduce sus elementos en matrices de modo que la operación del grupo se corresponda con la multiplicación de matrices. Para V₄, las representaciones son especialmente simples porque el grupo es abeliano y todos sus elementos tienen orden 1 o 2. Sobre los complejos, sus representaciones irreducibles son unidimensionales y toman valores ±1. Esto permite construir una tabla de caracteres muy clara. Las representaciones muestran cómo una estructura abstracta puede actuar sobre espacios vectoriales y ayudan a conectar teoría de grupos con álgebra lineal, simetría y análisis de señales.</p>
+        <div class="formula"><strong>Clave:</strong> ρ(xy) = ρ(x)ρ(y)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Representaciones" data-search="carácter representaciones traza representación tabla caracteres signos el carácter de una representación es la función que asigna a cada elemento del grupo la traza de la matriz que lo representa. en grupos abelianos finitos como v₄, los caracteres irreducibles son particularmente simples: son homomorfismos hacia {1,−1}. la tabla de caracteres de v₄ refleja su estructura de paridad y signos. cada carácter puede interpretarse como una manera de observar el grupo desde una coordenada binaria. esta noción permite relacionar v₄ con análisis armónico finito, transformadas discretas, codificación de signos y modelos donde importan combinaciones de paridad.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-23">
+        <span class="term-num">23</span>
+        <span class="term-title-wrap"><span class="term-title">Carácter</span><span class="term-cat">Representaciones</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-23">
+        <p>El carácter de una representación es la función que asigna a cada elemento del grupo la traza de la matriz que lo representa. En grupos abelianos finitos como V₄, los caracteres irreducibles son particularmente simples: son homomorfismos hacia {1,−1}. La tabla de caracteres de V₄ refleja su estructura de paridad y signos. Cada carácter puede interpretarse como una manera de observar el grupo desde una coordenada binaria. Esta noción permite relacionar V₄ con análisis armónico finito, transformadas discretas, codificación de signos y modelos donde importan combinaciones de paridad.</p>
+        <div class="formula"><strong>Clave:</strong> χ(g) = tr(ρ(g))</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Galois" data-search="teoría de galois galois extensiones campos subgrupos subcampos bicuadratica la teoría de galois estudia la relación entre extensiones de cuerpos y grupos de automorfismos. v₄ aparece naturalmente como grupo de galois de una extensión bicuadrática, por ejemplo q(√m,√n) sobre q bajo condiciones adecuadas. la estructura de subgrupos de v₄ se corresponde con subcampos intermedios. como v₄ tiene tres subgrupos de orden 2, aparecen tres subcampos cuadráticos intermedios. este ejemplo es muy útil para enseñar la correspondencia de galois porque el grupo es pequeño, visualizable y su retículo de subgrupos tiene una forma clara.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-24">
+        <span class="term-num">24</span>
+        <span class="term-title-wrap"><span class="term-title">Teoría de Galois</span><span class="term-cat">Galois</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-24">
+        <p>La teoría de Galois estudia la relación entre extensiones de cuerpos y grupos de automorfismos. V₄ aparece naturalmente como grupo de Galois de una extensión bicuadrática, por ejemplo Q(√m,√n) sobre Q bajo condiciones adecuadas. La estructura de subgrupos de V₄ se corresponde con subcampos intermedios. Como V₄ tiene tres subgrupos de orden 2, aparecen tres subcampos cuadráticos intermedios. Este ejemplo es muy útil para enseñar la correspondencia de Galois porque el grupo es pequeño, visualizable y su retículo de subgrupos tiene una forma clara.</p>
+        <div class="formula"><strong>Clave:</strong> Gal(Q(√m,√n)/Q) ≅ V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Galois" data-search="extensión bicuadrática galois raices cuadradas campos q sqrt m sqrt n una extensión bicuadrática se obtiene al adjuntar dos raíces cuadradas independientes a un cuerpo base, como q(√m,√n). cuando las raíces son independientes en el sentido adecuado, la extensión tiene grado 4 y su grupo de galois es isomorfo a v₄. cada automorfismo puede cambiar el signo de una o de ambas raíces cuadradas. como cambiar dos veces el signo vuelve al estado original, cada automorfismo no trivial tiene orden 2. la estructura resultante reproduce exactamente la lógica del grupo de klein: dos decisiones binarias independientes generan cuatro transformaciones posibles.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-25">
+        <span class="term-num">25</span>
+        <span class="term-title-wrap"><span class="term-title">Extensión bicuadrática</span><span class="term-cat">Galois</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-25">
+        <p>Una extensión bicuadrática se obtiene al adjuntar dos raíces cuadradas independientes a un cuerpo base, como Q(√m,√n). Cuando las raíces son independientes en el sentido adecuado, la extensión tiene grado 4 y su grupo de Galois es isomorfo a V₄. Cada automorfismo puede cambiar el signo de una o de ambas raíces cuadradas. Como cambiar dos veces el signo vuelve al estado original, cada automorfismo no trivial tiene orden 2. La estructura resultante reproduce exactamente la lógica del grupo de Klein: dos decisiones binarias independientes generan cuatro transformaciones posibles.</p>
+        <div class="formula"><strong>Clave:</strong> √m ↦ ±√m,  √n ↦ ±√n</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra" data-search="retículo de subgrupos álgebra lattice subgrupos inclusion galois el retículo de subgrupos organiza los subgrupos de un grupo según la inclusión. en v₄, el retículo tiene al subgrupo trivial {e} abajo, los tres subgrupos de orden 2 en el nivel medio y el grupo completo arriba. esta figura se vuelve especialmente importante en teoría de galois, porque se corresponde de manera inversa con el retículo de subcampos intermedios. en enseñanza, el retículo de v₄ es uno de los ejemplos más claros para mostrar que una estructura pequeña puede contener varias direcciones internas independientes.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-26">
+        <span class="term-num">26</span>
+        <span class="term-title-wrap"><span class="term-title">Retículo de subgrupos</span><span class="term-cat">Álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-26">
+        <p>El retículo de subgrupos organiza los subgrupos de un grupo según la inclusión. En V₄, el retículo tiene al subgrupo trivial {e} abajo, los tres subgrupos de orden 2 en el nivel medio y el grupo completo arriba. Esta figura se vuelve especialmente importante en teoría de Galois, porque se corresponde de manera inversa con el retículo de subcampos intermedios. En enseñanza, el retículo de V₄ es uno de los ejemplos más claros para mostrar que una estructura pequeña puede contener varias direcciones internas independientes.</p>
+        <div class="formula"><strong>Clave:</strong> {e} &lt; {e,a},{e,b},{e,c} &lt; V₄</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Álgebra y redes" data-search="paridad álgebra y redes modulo dos xor numero impar tensión la paridad indica si una cantidad es par o impar. en los temas trabajados, la paridad aparece como suma módulo 2 o xor. en v₄, cada coordenada binaria puede interpretarse como una paridad. en criptografía, xor combina mensaje y clave por paridad bit a bit. en grafos firmados, la paridad puede contar la cantidad de relaciones negativas en un ciclo: si el número de negativas es par, el ciclo resulta balanceado; si es impar, aparece tensión. la paridad es el puente conceptual que une álgebra, bits, signos y balance estructural.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-27">
+        <span class="term-num">27</span>
+        <span class="term-title-wrap"><span class="term-title">Paridad</span><span class="term-cat">Álgebra y redes</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-27">
+        <p>La paridad indica si una cantidad es par o impar. En los temas trabajados, la paridad aparece como suma módulo 2 o XOR. En V₄, cada coordenada binaria puede interpretarse como una paridad. En criptografía, XOR combina mensaje y clave por paridad bit a bit. En grafos firmados, la paridad puede contar la cantidad de relaciones negativas en un ciclo: si el número de negativas es par, el ciclo resulta balanceado; si es impar, aparece tensión. La paridad es el puente conceptual que une álgebra, bits, signos y balance estructural.</p>
+        <div class="formula"><strong>Clave:</strong> paridad = suma módulo 2</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Computación" data-search="bit computación 0 1 información binaria un bit es la unidad mínima de información binaria y puede tomar los valores 0 o 1. el grupo de klein puede interpretarse como pares de bits: 00, 01, 10 y 11. esta lectura permite conectar v₄ con computación, lógica, codificación y criptografía. un solo bit permite representar una oposición binaria; dos bits permiten representar cuatro estados. por ejemplo, en redes sociales un bit puede indicar el signo de una relación y otro bit puede indicar pertenencia al mismo bloque o a bloques distintos. en criptografía, bloques de bits se combinan con claves mediante xor.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-28">
+        <span class="term-num">28</span>
+        <span class="term-title-wrap"><span class="term-title">Bit</span><span class="term-cat">Computación</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-28">
+        <p>Un bit es la unidad mínima de información binaria y puede tomar los valores 0 o 1. El grupo de Klein puede interpretarse como pares de bits: 00, 01, 10 y 11. Esta lectura permite conectar V₄ con computación, lógica, codificación y criptografía. Un solo bit permite representar una oposición binaria; dos bits permiten representar cuatro estados. Por ejemplo, en redes sociales un bit puede indicar el signo de una relación y otro bit puede indicar pertenencia al mismo bloque o a bloques distintos. En criptografía, bloques de bits se combinan con claves mediante XOR.</p>
+        <div class="formula"><strong>Clave:</strong> dos bits → 2² = 4 estados</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="one-time pad criptografía cifrado vernam clave aleatoria una sola vez perfecta el one-time pad es un esquema de cifrado con confidencialidad perfecta cuando cumple condiciones estrictas: la clave debe ser verdaderamente aleatoria, uniforme, secreta, de la misma longitud que el mensaje y usada una sola vez. en su forma binaria, el cifrado se realiza con xor: c = m ⊕ k. para descifrar, se vuelve a aplicar la misma clave: m = c ⊕ k. su seguridad no depende de que el atacante tenga recursos limitados; incluso un atacante con capacidad computacional ilimitada no aprende información sobre el mensaje si las condiciones se cumplen. su debilidad práctica es la gestión segura de claves largas y únicas.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-29">
+        <span class="term-num">29</span>
+        <span class="term-title-wrap"><span class="term-title">One-time pad</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-29">
+        <p>El one-time pad es un esquema de cifrado con confidencialidad perfecta cuando cumple condiciones estrictas: la clave debe ser verdaderamente aleatoria, uniforme, secreta, de la misma longitud que el mensaje y usada una sola vez. En su forma binaria, el cifrado se realiza con XOR: C = M ⊕ K. Para descifrar, se vuelve a aplicar la misma clave: M = C ⊕ K. Su seguridad no depende de que el atacante tenga recursos limitados; incluso un atacante con capacidad computacional ilimitada no aprende información sobre el mensaje si las condiciones se cumplen. Su debilidad práctica es la gestión segura de claves largas y únicas.</p>
+        <div class="formula"><strong>Clave:</strong> C = M ⊕ K;  M = C ⊕ K</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="cifrado de vernam criptografía vernam xor stream cipher clave mensaje criptograma el cifrado de vernam es la forma clásica del one-time pad basada en combinar el mensaje con una clave mediante xor. históricamente se asocia con la idea de cifrar cada símbolo del mensaje con un símbolo de clave. matemáticamente, si el mensaje y la clave son cadenas binarias de igual longitud, cada bit del criptograma se obtiene aplicando xor al bit del mensaje y al bit de la clave. en el caso de bloques de dos bits, la operación puede modelarse con v₄. vernam es seguro en sentido perfecto solo cuando la clave es aleatoria, uniforme, secreta y no se reutiliza.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-30">
+        <span class="term-num">30</span>
+        <span class="term-title-wrap"><span class="term-title">Cifrado de Vernam</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-30">
+        <p>El cifrado de Vernam es la forma clásica del one-time pad basada en combinar el mensaje con una clave mediante XOR. Históricamente se asocia con la idea de cifrar cada símbolo del mensaje con un símbolo de clave. Matemáticamente, si el mensaje y la clave son cadenas binarias de igual longitud, cada bit del criptograma se obtiene aplicando XOR al bit del mensaje y al bit de la clave. En el caso de bloques de dos bits, la operación puede modelarse con V₄. Vernam es seguro en sentido perfecto solo cuando la clave es aleatoria, uniforme, secreta y no se reutiliza.</p>
+        <div class="formula"><strong>Clave:</strong> Cᵢ = Mᵢ ⊕ Kᵢ</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="clave criptográfica criptografía key secreto aleatoria uniforme longitud la clave criptográfica es el dato secreto que permite transformar el mensaje en criptograma y luego recuperar el mensaje. en el one-time pad, la clave tiene un papel absoluto: debe ser tan larga como el mensaje, aleatoria, uniformemente distribuida, conocida solo por emisor y receptor, y usada una sola vez. si cualquiera de estas condiciones falla, la confidencialidad perfecta puede perderse. en el modelo de v₄, la clave pertenece al mismo conjunto que el mensaje y el criptograma: {00,01,10,11}. cada clave actúa como una traslación xor sobre el espacio de mensajes.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-31">
+        <span class="term-num">31</span>
+        <span class="term-title-wrap"><span class="term-title">Clave criptográfica</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-31">
+        <p>La clave criptográfica es el dato secreto que permite transformar el mensaje en criptograma y luego recuperar el mensaje. En el one-time pad, la clave tiene un papel absoluto: debe ser tan larga como el mensaje, aleatoria, uniformemente distribuida, conocida solo por emisor y receptor, y usada una sola vez. Si cualquiera de estas condiciones falla, la confidencialidad perfecta puede perderse. En el modelo de V₄, la clave pertenece al mismo conjunto que el mensaje y el criptograma: {00,01,10,11}. Cada clave actúa como una traslación XOR sobre el espacio de mensajes.</p>
+        <div class="formula"><strong>Clave:</strong> K ∈ V₄ o K ∈ V₄ⁿ</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="criptograma criptografía ciphertext c mensaje cifrado salida el criptograma es el resultado visible del cifrado. se denota habitualmente como c. en vernam, se obtiene combinando el mensaje m con la clave k mediante xor: c = m ⊕ k. la propiedad notable del one-time pad bien implementado es que el criptograma no revela información estadística sobre el mensaje. para cualquier criptograma observado, todos los mensajes posibles siguen siendo compatibles con alguna clave. esto no significa que el criptograma carezca de estructura como objeto, sino que no reduce la incertidumbre del atacante acerca de m cuando k es uniforme y secreta.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-32">
+        <span class="term-num">32</span>
+        <span class="term-title-wrap"><span class="term-title">Criptograma</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-32">
+        <p>El criptograma es el resultado visible del cifrado. Se denota habitualmente como C. En Vernam, se obtiene combinando el mensaje M con la clave K mediante XOR: C = M ⊕ K. La propiedad notable del one-time pad bien implementado es que el criptograma no revela información estadística sobre el mensaje. Para cualquier criptograma observado, todos los mensajes posibles siguen siendo compatibles con alguna clave. Esto no significa que el criptograma carezca de estructura como objeto, sino que no reduce la incertidumbre del atacante acerca de M cuando K es uniforme y secreta.</p>
+        <div class="formula"><strong>Clave:</strong> C = M ⊕ K</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="cifrado y descifrado criptografía e_k d_k corrección auto inverso cifrar es transformar un mensaje legible en un criptograma; descifrar es recuperar el mensaje original. en vernam, ambos procesos usan la misma operación xor. la corrección se debe a que xor es autoinversa: si c = m ⊕ k, entonces c ⊕ k = m ⊕ k ⊕ k = m ⊕ 0 = m. en el lenguaje de v₄, esta propiedad deriva de que cada elemento del grupo es su propio inverso. por eso el mismo mecanismo algebraico permite ocultar y recuperar la información.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-33">
+        <span class="term-num">33</span>
+        <span class="term-title-wrap"><span class="term-title">Cifrado y descifrado</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-33">
+        <p>Cifrar es transformar un mensaje legible en un criptograma; descifrar es recuperar el mensaje original. En Vernam, ambos procesos usan la misma operación XOR. La corrección se debe a que XOR es autoinversa: si C = M ⊕ K, entonces C ⊕ K = M ⊕ K ⊕ K = M ⊕ 0 = M. En el lenguaje de V₄, esta propiedad deriva de que cada elemento del grupo es su propio inverso. Por eso el mismo mecanismo algebraico permite ocultar y recuperar la información.</p>
+        <div class="formula"><strong>Clave:</strong> D_K(E_K(M)) = (M ⊕ K) ⊕ K = M</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía y probabilidad" data-search="confidencialidad perfecta criptografía y probabilidad shannon perfect secrecy independencia p m c la confidencialidad perfecta, definida por shannon, significa que observar el criptograma no cambia las probabilidades asignadas al mensaje. formalmente, p(m=m | c=c) = p(m=m). es una noción más fuerte que la seguridad computacional, porque no depende de que el atacante tenga límites de tiempo o de cómputo. en el one-time pad, esta propiedad se alcanza cuando la clave es uniforme, independiente del mensaje, secreta y usada una sola vez. la intuición es que para cualquier criptograma observado, cada mensaje posible tiene una clave compatible, y todas esas claves son igualmente probables.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-34">
+        <span class="term-num">34</span>
+        <span class="term-title-wrap"><span class="term-title">Confidencialidad perfecta</span><span class="term-cat">Criptografía y probabilidad</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-34">
+        <p>La confidencialidad perfecta, definida por Shannon, significa que observar el criptograma no cambia las probabilidades asignadas al mensaje. Formalmente, P(M=m | C=c) = P(M=m). Es una noción más fuerte que la seguridad computacional, porque no depende de que el atacante tenga límites de tiempo o de cómputo. En el one-time pad, esta propiedad se alcanza cuando la clave es uniforme, independiente del mensaje, secreta y usada una sola vez. La intuición es que para cualquier criptograma observado, cada mensaje posible tiene una clave compatible, y todas esas claves son igualmente probables.</p>
+        <div class="formula"><strong>Clave:</strong> P(M=m | C=c) = P(M=m)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía y teoría de la información" data-search="claude shannon criptografía y teoría de la información shannon información entropía secreto perfecto claude shannon formuló las bases modernas de la teoría de la información y dio una definición matemática de secreto perfecto en criptografía. su enfoque permitió expresar la seguridad de un cifrado no como una intuición, sino como una relación probabilística entre mensaje, clave y criptograma. en el contexto del one-time pad, shannon mostró que es posible lograr confidencialidad perfecta si la clave cumple condiciones estrictas. conceptos como entropía, información mutua e independencia informacional son parte del lenguaje que permite entender por qué un criptograma puede no revelar nada sobre el mensaje.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-35">
+        <span class="term-num">35</span>
+        <span class="term-title-wrap"><span class="term-title">Claude Shannon</span><span class="term-cat">Criptografía y teoría de la información</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-35">
+        <p>Claude Shannon formuló las bases modernas de la teoría de la información y dio una definición matemática de secreto perfecto en criptografía. Su enfoque permitió expresar la seguridad de un cifrado no como una intuición, sino como una relación probabilística entre mensaje, clave y criptograma. En el contexto del one-time pad, Shannon mostró que es posible lograr confidencialidad perfecta si la clave cumple condiciones estrictas. Conceptos como entropía, información mutua e independencia informacional son parte del lenguaje que permite entender por qué un criptograma puede no revelar nada sobre el mensaje.</p>
+        <div class="formula"><strong>Clave:</strong> secreto perfecto ⇔ M y C son independientes</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Probabilidad" data-search="independencia informacional probabilidad independencia m c información cero la independencia informacional entre mensaje y criptograma significa que conocer c no aporta información sobre m. en términos probabilísticos, m y c son independientes si p(m=m | c=c) = p(m=m). en términos de teoría de la información, esto se expresa como i(m;c)=0. en el one-time pad, la clave uniforme produce esta independencia porque cualquier criptograma puede provenir de cualquier mensaje mediante una clave adecuada, y todas las claves son igualmente probables. la independencia informacional es el corazón matemático de la confidencialidad perfecta.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-36">
+        <span class="term-num">36</span>
+        <span class="term-title-wrap"><span class="term-title">Independencia informacional</span><span class="term-cat">Probabilidad</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-36">
+        <p>La independencia informacional entre mensaje y criptograma significa que conocer C no aporta información sobre M. En términos probabilísticos, M y C son independientes si P(M=m | C=c) = P(M=m). En términos de teoría de la información, esto se expresa como I(M;C)=0. En el one-time pad, la clave uniforme produce esta independencia porque cualquier criptograma puede provenir de cualquier mensaje mediante una clave adecuada, y todas las claves son igualmente probables. La independencia informacional es el corazón matemático de la confidencialidad perfecta.</p>
+        <div class="formula"><strong>Clave:</strong> I(M;C)=0</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Probabilidad" data-search="entropía condicional probabilidad h m dado c incertidumbre información la entropía condicional h(m|c) mide cuánta incertidumbre queda sobre el mensaje m después de observar el criptograma c. en un cifrado con confidencialidad perfecta, observar c no reduce la incertidumbre sobre m, por lo que h(m|c)=h(m). esto expresa la misma idea que la independencia informacional, pero desde la perspectiva de la incertidumbre. si el cifrado filtra información, entonces h(m|c) sería menor que h(m). en vernam correctamente implementado, la entropía del mensaje permanece intacta desde el punto de vista del atacante.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-37">
+        <span class="term-num">37</span>
+        <span class="term-title-wrap"><span class="term-title">Entropía condicional</span><span class="term-cat">Probabilidad</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-37">
+        <p>La entropía condicional H(M|C) mide cuánta incertidumbre queda sobre el mensaje M después de observar el criptograma C. En un cifrado con confidencialidad perfecta, observar C no reduce la incertidumbre sobre M, por lo que H(M|C)=H(M). Esto expresa la misma idea que la independencia informacional, pero desde la perspectiva de la incertidumbre. Si el cifrado filtra información, entonces H(M|C) sería menor que H(M). En Vernam correctamente implementado, la entropía del mensaje permanece intacta desde el punto de vista del atacante.</p>
+        <div class="formula"><strong>Clave:</strong> H(M|C)=H(M)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Probabilidad" data-search="información mutua probabilidad i m c entropía reducción incertidumbre la información mutua i(m;c) mide cuánta información comparte el mensaje m con el criptograma c. si i(m;c)=0, conocer c no permite aprender nada sobre m. en la confidencialidad perfecta del one-time pad, este valor es cero. la información mutua es útil porque cuantifica la filtración: cuanto mayor sea i(m;c), mayor es la dependencia entre el mensaje y el criptograma. en sistemas de seguridad computacional puede haber filtraciones pequeñas o difíciles de explotar; en secreto perfecto, la filtración informacional es nula bajo las condiciones del modelo.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-38">
+        <span class="term-num">38</span>
+        <span class="term-title-wrap"><span class="term-title">Información mutua</span><span class="term-cat">Probabilidad</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-38">
+        <p>La información mutua I(M;C) mide cuánta información comparte el mensaje M con el criptograma C. Si I(M;C)=0, conocer C no permite aprender nada sobre M. En la confidencialidad perfecta del one-time pad, este valor es cero. La información mutua es útil porque cuantifica la filtración: cuanto mayor sea I(M;C), mayor es la dependencia entre el mensaje y el criptograma. En sistemas de seguridad computacional puede haber filtraciones pequeñas o difíciles de explotar; en secreto perfecto, la filtración informacional es nula bajo las condiciones del modelo.</p>
+        <div class="formula"><strong>Clave:</strong> I(M;C)=H(M)-H(M|C)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía y probabilidad" data-search="clave uniforme criptografía y probabilidad distribución uniforme claves equiprobables una clave uniforme es aquella que asigna la misma probabilidad a cada valor posible del espacio de claves. en el modelo v₄, esto significa que 00, 01, 10 y 11 tienen probabilidad 1/4 cada uno. la uniformidad es indispensable para la confidencialidad perfecta: si algunas claves son más probables que otras, ciertos mensajes pueden volverse más plausibles después de observar el criptograma. la clave no solo debe ser secreta; también debe estar distribuida correctamente. en el one-time pad, la aleatoriedad verdadera y uniforme es una condición matemática, no un detalle operativo secundario.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-39">
+        <span class="term-num">39</span>
+        <span class="term-title-wrap"><span class="term-title">Clave uniforme</span><span class="term-cat">Criptografía y probabilidad</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-39">
+        <p>Una clave uniforme es aquella que asigna la misma probabilidad a cada valor posible del espacio de claves. En el modelo V₄, esto significa que 00, 01, 10 y 11 tienen probabilidad 1/4 cada uno. La uniformidad es indispensable para la confidencialidad perfecta: si algunas claves son más probables que otras, ciertos mensajes pueden volverse más plausibles después de observar el criptograma. La clave no solo debe ser secreta; también debe estar distribuida correctamente. En el one-time pad, la aleatoriedad verdadera y uniforme es una condición matemática, no un detalle operativo secundario.</p>
+        <div class="formula"><strong>Clave:</strong> P(K=k)=1/|K|</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="espacio de claves criptografía keyspace conjunto claves v4 n el espacio de claves es el conjunto de todas las claves posibles. para un solo bloque de dos bits modelado por v₄, el espacio de claves tiene cuatro elementos: {00,01,10,11}. para mensajes largos de n bloques, el espacio de claves es v₄ⁿ y tiene 4ⁿ claves posibles. en el one-time pad, el espacio de claves debe ser tan grande como el espacio de mensajes y las claves deben elegirse uniformemente. esta igualdad de tamaños es una de las razones por las cuales el sistema puede alcanzar secreto perfecto: cada mensaje posible queda asociado a una clave compatible para cada criptograma observado.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-40">
+        <span class="term-num">40</span>
+        <span class="term-title-wrap"><span class="term-title">Espacio de claves</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-40">
+        <p>El espacio de claves es el conjunto de todas las claves posibles. Para un solo bloque de dos bits modelado por V₄, el espacio de claves tiene cuatro elementos: {00,01,10,11}. Para mensajes largos de n bloques, el espacio de claves es V₄ⁿ y tiene 4ⁿ claves posibles. En el one-time pad, el espacio de claves debe ser tan grande como el espacio de mensajes y las claves deben elegirse uniformemente. Esta igualdad de tamaños es una de las razones por las cuales el sistema puede alcanzar secreto perfecto: cada mensaje posible queda asociado a una clave compatible para cada criptograma observado.</p>
+        <div class="formula"><strong>Clave:</strong> |V₄ⁿ| = 4ⁿ = 2²ⁿ</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="uso único de clave criptografía one time no reutilizar clave seguridad perfecta el uso único de clave significa que una clave del one-time pad debe emplearse para cifrar un solo mensaje y luego descartarse. esta condición es tan importante como la aleatoriedad y el secreto. si la misma clave se reutiliza, la estructura xor permite cancelar la clave al comparar criptogramas. la consecuencia es que el atacante puede obtener relaciones entre los mensajes originales. por eso el nombre one-time pad no es decorativo: “one-time” indica una restricción esencial. la seguridad perfecta desaparece cuando el sistema se transforma en un two-time pad.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-41">
+        <span class="term-num">41</span>
+        <span class="term-title-wrap"><span class="term-title">Uso único de clave</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-41">
+        <p>El uso único de clave significa que una clave del one-time pad debe emplearse para cifrar un solo mensaje y luego descartarse. Esta condición es tan importante como la aleatoriedad y el secreto. Si la misma clave se reutiliza, la estructura XOR permite cancelar la clave al comparar criptogramas. La consecuencia es que el atacante puede obtener relaciones entre los mensajes originales. Por eso el nombre one-time pad no es decorativo: “one-time” indica una restricción esencial. La seguridad perfecta desaparece cuando el sistema se transforma en un two-time pad.</p>
+        <div class="formula"><strong>Clave:</strong> una clave K → un único mensaje M</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="two-time pad criptografía reutilización clave c1 c2 elimina k el two-time pad es el error de reutilizar la misma clave del one-time pad para cifrar dos mensajes distintos. si c₁ = m₁ ⊕ k y c₂ = m₂ ⊕ k, entonces c₁ ⊕ c₂ = m₁ ⊕ m₂, porque k ⊕ k = 0. la clave desaparece de la ecuación y queda expuesta una relación directa entre los mensajes. aunque el atacante no obtenga inmediatamente ambos textos, puede explotar redundancias del lenguaje natural, formatos conocidos o fragmentos probables. este es uno de los ejemplos más claros de cómo una falla operacional destruye una garantía matemática perfecta.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-42">
+        <span class="term-num">42</span>
+        <span class="term-title-wrap"><span class="term-title">Two-time pad</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-42">
+        <p>El two-time pad es el error de reutilizar la misma clave del one-time pad para cifrar dos mensajes distintos. Si C₁ = M₁ ⊕ K y C₂ = M₂ ⊕ K, entonces C₁ ⊕ C₂ = M₁ ⊕ M₂, porque K ⊕ K = 0. La clave desaparece de la ecuación y queda expuesta una relación directa entre los mensajes. Aunque el atacante no obtenga inmediatamente ambos textos, puede explotar redundancias del lenguaje natural, formatos conocidos o fragmentos probables. Este es uno de los ejemplos más claros de cómo una falla operacional destruye una garantía matemática perfecta.</p>
+        <div class="formula"><strong>Clave:</strong> C₁ ⊕ C₂ = M₁ ⊕ M₂</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="crib-dragging criptografía crib dragging ataque redundancia texto probable el crib-dragging es una técnica usada para explotar reutilización de clave en cifrados tipo vernam. consiste en probar palabras, encabezados, formatos o fragmentos probables contra la relación m₁ ⊕ m₂ obtenida al combinar dos criptogramas cifrados con la misma clave. si una conjetura produce texto plausible en el otro mensaje, el atacante gana información. la técnica se apoya en la redundancia del lenguaje natural: los mensajes reales no son cadenas aleatorias puras. por eso el two-time pad es tan peligroso: no revela solo una ecuación abstracta, sino una puerta práctica para reconstruir contenido.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-43">
+        <span class="term-num">43</span>
+        <span class="term-title-wrap"><span class="term-title">Crib-dragging</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-43">
+        <p>El crib-dragging es una técnica usada para explotar reutilización de clave en cifrados tipo Vernam. Consiste en probar palabras, encabezados, formatos o fragmentos probables contra la relación M₁ ⊕ M₂ obtenida al combinar dos criptogramas cifrados con la misma clave. Si una conjetura produce texto plausible en el otro mensaje, el atacante gana información. La técnica se apoya en la redundancia del lenguaje natural: los mensajes reales no son cadenas aleatorias puras. Por eso el two-time pad es tan peligroso: no revela solo una ecuación abstracta, sino una puerta práctica para reconstruir contenido.</p>
+        <div class="formula"><strong>Clave:</strong> hipótesis sobre M₁ → inferencia sobre M₂</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="redundancia del lenguaje criptografía lenguaje natural patrones ataque estadístico la redundancia del lenguaje es la presencia de patrones previsibles en textos reales: frecuencias de letras, palabras comunes, espacios, saludos, formatos, estructuras gramaticales y encabezados. en criptografía, la redundancia puede ser explotada si el sistema filtra relaciones entre mensajes. en un one-time pad correctamente usado, esa redundancia queda oculta porque el criptograma es independiente del mensaje. pero si se reutiliza la clave, c₁⊕c₂ revela m₁⊕m₂, y los patrones lingüísticos ayudan a separar o reconstruir partes de los textos. esta diferencia explica por qué una garantía matemática puede fallar por una mala implementación.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-44">
+        <span class="term-num">44</span>
+        <span class="term-title-wrap"><span class="term-title">Redundancia del lenguaje</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-44">
+        <p>La redundancia del lenguaje es la presencia de patrones previsibles en textos reales: frecuencias de letras, palabras comunes, espacios, saludos, formatos, estructuras gramaticales y encabezados. En criptografía, la redundancia puede ser explotada si el sistema filtra relaciones entre mensajes. En un one-time pad correctamente usado, esa redundancia queda oculta porque el criptograma es independiente del mensaje. Pero si se reutiliza la clave, C₁⊕C₂ revela M₁⊕M₂, y los patrones lingüísticos ayudan a separar o reconstruir partes de los textos. Esta diferencia explica por qué una garantía matemática puede fallar por una mala implementación.</p>
+        <div class="formula"><strong>Clave:</strong> texto real ≠ ruido uniforme</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía y álgebra" data-search="mensajes largos y v₄ⁿ criptografía y álgebra producto directo bloques longitud n z2 2n para mensajes de más de un bloque, el modelo v₄ se extiende a v₄ⁿ. cada posición del mensaje es un elemento de v₄, es decir, un bloque de dos bits. la operación de cifrado se realiza componente a componente: cada bloque del mensaje se combina con el bloque correspondiente de la clave. algebraicamente, v₄ⁿ es equivalente a ℤ₂²ⁿ como grupo aditivo. esta extensión muestra que el one-time pad no depende de un bloque aislado: la misma lógica de xor, autoinversión y uniformidad se replica en cadenas largas, siempre que la clave tenga la misma longitud y no se reutilice.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-45">
+        <span class="term-num">45</span>
+        <span class="term-title-wrap"><span class="term-title">Mensajes largos y V₄ⁿ</span><span class="term-cat">Criptografía y álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-45">
+        <p>Para mensajes de más de un bloque, el modelo V₄ se extiende a V₄ⁿ. Cada posición del mensaje es un elemento de V₄, es decir, un bloque de dos bits. La operación de cifrado se realiza componente a componente: cada bloque del mensaje se combina con el bloque correspondiente de la clave. Algebraicamente, V₄ⁿ es equivalente a ℤ₂²ⁿ como grupo aditivo. Esta extensión muestra que el one-time pad no depende de un bloque aislado: la misma lógica de XOR, autoinversión y uniformidad se replica en cadenas largas, siempre que la clave tenga la misma longitud y no se reutilice.</p>
+        <div class="formula"><strong>Clave:</strong> C = (M₁⊕K₁, …, Mₙ⊕Kₙ)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Criptografía" data-search="seguridad perfecta vs. seguridad computacional criptografía perfecta computacional atacante ilimitado recursos la seguridad computacional afirma que un sistema es seguro porque romperlo requeriría recursos de cómputo inalcanzables en la práctica. la seguridad perfecta es más fuerte: afirma que el criptograma no contiene información sobre el mensaje, incluso para un atacante con poder computacional ilimitado. el one-time pad es el ejemplo clásico de seguridad perfecta, pero solo bajo condiciones estrictas. muchos sistemas modernos no buscan secreto perfecto, sino seguridad computacional basada en problemas difíciles. la comparación permite entender por qué vernam es teóricamente extraordinario pero operativamente exigente.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-46">
+        <span class="term-num">46</span>
+        <span class="term-title-wrap"><span class="term-title">Seguridad perfecta vs. seguridad computacional</span><span class="term-cat">Criptografía</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-46">
+        <p>La seguridad computacional afirma que un sistema es seguro porque romperlo requeriría recursos de cómputo inalcanzables en la práctica. La seguridad perfecta es más fuerte: afirma que el criptograma no contiene información sobre el mensaje, incluso para un atacante con poder computacional ilimitado. El one-time pad es el ejemplo clásico de seguridad perfecta, pero solo bajo condiciones estrictas. Muchos sistemas modernos no buscan secreto perfecto, sino seguridad computacional basada en problemas difíciles. La comparación permite entender por qué Vernam es teóricamente extraordinario pero operativamente exigente.</p>
+        <div class="formula"><strong>Clave:</strong> seguridad perfecta: P(M|C)=P(M)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="grafo firmado redes sociales signed graph aristas positivas negativas sigma un grafo firmado es un grafo cuyas aristas tienen signo positivo o negativo. en redes sociales, un signo positivo puede representar amistad, apoyo, confianza o afinidad; un signo negativo puede representar conflicto, enemistad, rechazo o desconfianza. los grafos firmados permiten formalizar relaciones sociales ambivalentes y estudiar cuándo una red está balanceada o en tensión. harary desarrolló esta formalización a partir de intuiciones psicológicas de heider. algebraicamente, los signos pueden codificarse como bits: positivo = 0 y negativo = 1, de modo que el balance se expresa mediante paridad o xor.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-47">
+        <span class="term-num">47</span>
+        <span class="term-title-wrap"><span class="term-title">Grafo firmado</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-47">
+        <p>Un grafo firmado es un grafo cuyas aristas tienen signo positivo o negativo. En redes sociales, un signo positivo puede representar amistad, apoyo, confianza o afinidad; un signo negativo puede representar conflicto, enemistad, rechazo o desconfianza. Los grafos firmados permiten formalizar relaciones sociales ambivalentes y estudiar cuándo una red está balanceada o en tensión. Harary desarrolló esta formalización a partir de intuiciones psicológicas de Heider. Algebraicamente, los signos pueden codificarse como bits: positivo = 0 y negativo = 1, de modo que el balance se expresa mediante paridad o XOR.</p>
+        <div class="formula"><strong>Clave:</strong> G = (V,E,σ), con σ(e) ∈ {+1,−1}</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="fritz heider redes sociales heider psicología social equilibrio triadas fritz heider propuso una teoría psicológica del equilibrio basada en la idea de que las personas buscan coherencia en sus relaciones afectivas y cognitivas. en una tríada social, ciertas configuraciones de amistad y enemistad resultan estables o balanceadas, mientras que otras generan tensión. por ejemplo, “el amigo de mi amigo es mi amigo” expresa una tríada balanceada; “mi amigo es amigo de mi enemigo” expresa tensión. la importancia de heider en este material es que aporta la intuición psicológica que luego puede formalizarse con grafos firmados y algebraizarse con paridad, xor y v₄.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-48">
+        <span class="term-num">48</span>
+        <span class="term-title-wrap"><span class="term-title">Fritz Heider</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-48">
+        <p>Fritz Heider propuso una teoría psicológica del equilibrio basada en la idea de que las personas buscan coherencia en sus relaciones afectivas y cognitivas. En una tríada social, ciertas configuraciones de amistad y enemistad resultan estables o balanceadas, mientras que otras generan tensión. Por ejemplo, “el amigo de mi amigo es mi amigo” expresa una tríada balanceada; “mi amigo es amigo de mi enemigo” expresa tensión. La importancia de Heider en este material es que aporta la intuición psicológica que luego puede formalizarse con grafos firmados y algebraizarse con paridad, XOR y V₄.</p>
+        <div class="formula"><strong>Clave:</strong> balance psicológico → coherencia de signos en tríadas</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="frank harary redes sociales harary grafos firmados balance estructural bipartición frank harary formalizó matemáticamente la teoría del balance estructural mediante grafos firmados. su resultado central establece que una red firmada balanceada puede dividirse en dos grupos de modo que las relaciones dentro de cada grupo sean positivas y las relaciones entre grupos sean negativas. esta formulación traduce intuiciones psicológicas de heider a una estructura matemática verificable. harary permite pasar de tríadas individuales a redes completas: el balance deja de ser solo una regla local y se convierte en una propiedad global de la red.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-49">
+        <span class="term-num">49</span>
+        <span class="term-title-wrap"><span class="term-title">Frank Harary</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-49">
+        <p>Frank Harary formalizó matemáticamente la teoría del balance estructural mediante grafos firmados. Su resultado central establece que una red firmada balanceada puede dividirse en dos grupos de modo que las relaciones dentro de cada grupo sean positivas y las relaciones entre grupos sean negativas. Esta formulación traduce intuiciones psicológicas de Heider a una estructura matemática verificable. Harary permite pasar de tríadas individuales a redes completas: el balance deja de ser solo una regla local y se convierte en una propiedad global de la red.</p>
+        <div class="formula"><strong>Clave:</strong> red balanceada ⇔ bipartición con signos positivos internos y negativos externos</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="balance estructural redes sociales structural balance equilibrio red ciclos positivos el balance estructural es una propiedad de redes firmadas que indica ausencia de contradicciones globales en la distribución de relaciones positivas y negativas. una red está balanceada si todos sus ciclos tienen producto de signos positivo. equivalentemente, puede dividirse en dos bloques: vínculos positivos dentro de cada bloque y vínculos negativos entre bloques. esta idea explica fenómenos de coalición, polarización y formación de grupos enfrentados. en términos binarios, el balance puede leerse como una condición de paridad: un ciclo es balanceado cuando tiene un número par de aristas negativas, es decir, cuando el xor de sus signos es cero.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-50">
+        <span class="term-num">50</span>
+        <span class="term-title-wrap"><span class="term-title">Balance estructural</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-50">
+        <p>El balance estructural es una propiedad de redes firmadas que indica ausencia de contradicciones globales en la distribución de relaciones positivas y negativas. Una red está balanceada si todos sus ciclos tienen producto de signos positivo. Equivalentemente, puede dividirse en dos bloques: vínculos positivos dentro de cada bloque y vínculos negativos entre bloques. Esta idea explica fenómenos de coalición, polarización y formación de grupos enfrentados. En términos binarios, el balance puede leerse como una condición de paridad: un ciclo es balanceado cuando tiene un número par de aristas negativas, es decir, cuando el XOR de sus signos es cero.</p>
+        <div class="formula"><strong>Clave:</strong> ciclo balanceado ⇔ producto de signos = +1 ⇔ XOR = 0</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="tríada balanceada redes sociales triángulo signos heider amigo enemigo xor una tríada balanceada es un triángulo de tres actores cuyas relaciones firmadas no generan tensión estructural. en la versión clásica, una tríada está balanceada si el producto de sus tres signos es positivo. esto ocurre cuando hay cero o dos relaciones negativas. en lenguaje cotidiano: tres amistades son coherentes; dos enemistades y una amistad también pueden ser coherentes porque dos actores enfrentados comparten una oposición. en bits, si positivo se codifica como 0 y negativo como 1, la tríada está balanceada cuando el xor de los tres signos es 0.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-51">
+        <span class="term-num">51</span>
+        <span class="term-title-wrap"><span class="term-title">Tríada balanceada</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-51">
+        <p>Una tríada balanceada es un triángulo de tres actores cuyas relaciones firmadas no generan tensión estructural. En la versión clásica, una tríada está balanceada si el producto de sus tres signos es positivo. Esto ocurre cuando hay cero o dos relaciones negativas. En lenguaje cotidiano: tres amistades son coherentes; dos enemistades y una amistad también pueden ser coherentes porque dos actores enfrentados comparten una oposición. En bits, si positivo se codifica como 0 y negativo como 1, la tríada está balanceada cuando el XOR de los tres signos es 0.</p>
+        <div class="formula"><strong>Clave:</strong> s₁ ⊕ s₂ ⊕ s₃ = 0</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="ciclo positivo redes sociales ciclo producto signos positivo balance un ciclo positivo en un grafo firmado es un ciclo cuyo producto de signos es positivo. si los signos se codifican como +1 y −1, el producto es positivo cuando hay un número par de aristas negativas. en la teoría de harary, una red firmada es balanceada si todos sus ciclos son positivos. esta condición generaliza la regla de heider para triadas a ciclos de cualquier longitud. desde el punto de vista binario, un ciclo positivo equivale a un xor igual a 0 sobre los bits que representan relaciones negativas.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-52">
+        <span class="term-num">52</span>
+        <span class="term-title-wrap"><span class="term-title">Ciclo positivo</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-52">
+        <p>Un ciclo positivo en un grafo firmado es un ciclo cuyo producto de signos es positivo. Si los signos se codifican como +1 y −1, el producto es positivo cuando hay un número par de aristas negativas. En la teoría de Harary, una red firmada es balanceada si todos sus ciclos son positivos. Esta condición generaliza la regla de Heider para triadas a ciclos de cualquier longitud. Desde el punto de vista binario, un ciclo positivo equivale a un XOR igual a 0 sobre los bits que representan relaciones negativas.</p>
+        <div class="formula"><strong>Clave:</strong> ∏ σ(e) = +1</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="bipartición balanceada redes sociales dos bloques comunidades internos positivos externos negativos una bipartición balanceada divide una red en dos bloques de actores. dentro de cada bloque, los vínculos tienden a ser positivos; entre bloques, los vínculos tienden a ser negativos. según el teorema de balance estructural, una red firmada completa está balanceada si admite una partición de este tipo. la bipartición permite interpretar matemáticamente la polarización: no se trata solo de muchos conflictos, sino de conflictos organizados entre dos campos con cohesión interna. en términos de v₄, un bit puede representar el bloque y otro el signo de la relación.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-53">
+        <span class="term-num">53</span>
+        <span class="term-title-wrap"><span class="term-title">Bipartición balanceada</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-53">
+        <p>Una bipartición balanceada divide una red en dos bloques de actores. Dentro de cada bloque, los vínculos tienden a ser positivos; entre bloques, los vínculos tienden a ser negativos. Según el teorema de balance estructural, una red firmada completa está balanceada si admite una partición de este tipo. La bipartición permite interpretar matemáticamente la polarización: no se trata solo de muchos conflictos, sino de conflictos organizados entre dos campos con cohesión interna. En términos de V₄, un bit puede representar el bloque y otro el signo de la relación.</p>
+        <div class="formula"><strong>Clave:</strong> mismo bloque → +; bloques distintos → −</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="polarización redes sociales grupos enfrentados cámaras eco conflictividad la polarización es un patrón social en el que los actores se organizan en campos o bloques enfrentados. desde el balance estructural, la polarización aparece cuando hay vínculos positivos dentro de cada grupo y vínculos negativos entre grupos. este patrón puede ser estable porque reduce contradicciones internas: cada actor sabe quiénes son “los propios” y quiénes son “los otros”. sin embargo, también puede intensificar el conflicto y dificultar puentes entre comunidades. el enfoque de heider-harary-klein permite representar la polarización como una estructura de signos, bloques y paridad.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-54">
+        <span class="term-num">54</span>
+        <span class="term-title-wrap"><span class="term-title">Polarización</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-54">
+        <p>La polarización es un patrón social en el que los actores se organizan en campos o bloques enfrentados. Desde el balance estructural, la polarización aparece cuando hay vínculos positivos dentro de cada grupo y vínculos negativos entre grupos. Este patrón puede ser estable porque reduce contradicciones internas: cada actor sabe quiénes son “los propios” y quiénes son “los otros”. Sin embargo, también puede intensificar el conflicto y dificultar puentes entre comunidades. El enfoque de Heider-Harary-Klein permite representar la polarización como una estructura de signos, bloques y paridad.</p>
+        <div class="formula"><strong>Clave:</strong> cohesión interna + antagonismo externo</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="cámara de eco redes sociales echo chamber comunidades refuerzo interno una cámara de eco es una configuración social o informacional en la que los actores interactúan principalmente con quienes refuerzan sus creencias, preferencias o identidades. en grafos firmados, puede asociarse con vínculos positivos densos dentro de un bloque y vínculos negativos o débiles hacia otros bloques. aunque no toda cámara de eco es necesariamente una red balanceada en sentido estricto, el balance estructural ayuda a entender por qué ciertas comunidades se vuelven internamente cohesionadas y externamente hostiles. algebraicamente, la pertenencia al bloque puede codificarse con un bit y combinarse con signos mediante xor.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-55">
+        <span class="term-num">55</span>
+        <span class="term-title-wrap"><span class="term-title">Cámara de eco</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-55">
+        <p>Una cámara de eco es una configuración social o informacional en la que los actores interactúan principalmente con quienes refuerzan sus creencias, preferencias o identidades. En grafos firmados, puede asociarse con vínculos positivos densos dentro de un bloque y vínculos negativos o débiles hacia otros bloques. Aunque no toda cámara de eco es necesariamente una red balanceada en sentido estricto, el balance estructural ayuda a entender por qué ciertas comunidades se vuelven internamente cohesionadas y externamente hostiles. Algebraicamente, la pertenencia al bloque puede codificarse con un bit y combinarse con signos mediante XOR.</p>
+        <div class="formula"><strong>Clave:</strong> alta positividad interna; baja o negativa conectividad externa</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="tensión social redes sociales inconsistencia triadas ciclos imbalance la tensión social aparece cuando una configuración de relaciones contiene contradicciones afectivas o estructurales. en una tríada, por ejemplo, puede surgir tensión si dos amigos mantienen relaciones opuestas con un tercero de manera incoherente. en grafos firmados, la tensión se detecta cuando un ciclo tiene producto de signos negativo o, en codificación binaria, xor igual a 1. la teoría de heider interpreta esa tensión como presión psicológica hacia el cambio; harary la formaliza como desbalance; v₄ permite codificarla con paridad y operar sobre estados sociales elementales.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-56">
+        <span class="term-num">56</span>
+        <span class="term-title-wrap"><span class="term-title">Tensión social</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-56">
+        <p>La tensión social aparece cuando una configuración de relaciones contiene contradicciones afectivas o estructurales. En una tríada, por ejemplo, puede surgir tensión si dos amigos mantienen relaciones opuestas con un tercero de manera incoherente. En grafos firmados, la tensión se detecta cuando un ciclo tiene producto de signos negativo o, en codificación binaria, XOR igual a 1. La teoría de Heider interpreta esa tensión como presión psicológica hacia el cambio; Harary la formaliza como desbalance; V₄ permite codificarla con paridad y operar sobre estados sociales elementales.</p>
+        <div class="formula"><strong>Clave:</strong> ciclo tenso ⇔ XOR = 1</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="bloques o comunidades redes sociales comunidades clusters grupos bloques partición los bloques o comunidades son conjuntos de actores con vínculos relativamente más fuertes, positivos o frecuentes entre sí que con el resto de la red. en balance estructural, los bloques adquieren un sentido particular: dentro de un bloque predominan relaciones positivas y entre bloques predominan relaciones negativas. esta estructura permite representar coaliciones, bandos, facciones o segmentos de opinión. en el modelo algebraico con v₄, un bit puede indicar si dos actores pertenecen al mismo bloque o a bloques distintos, y otro bit puede indicar si la relación es positiva o negativa.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-57">
+        <span class="term-num">57</span>
+        <span class="term-title-wrap"><span class="term-title">Bloques o comunidades</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-57">
+        <p>Los bloques o comunidades son conjuntos de actores con vínculos relativamente más fuertes, positivos o frecuentes entre sí que con el resto de la red. En balance estructural, los bloques adquieren un sentido particular: dentro de un bloque predominan relaciones positivas y entre bloques predominan relaciones negativas. Esta estructura permite representar coaliciones, bandos, facciones o segmentos de opinión. En el modelo algebraico con V₄, un bit puede indicar si dos actores pertenecen al mismo bloque o a bloques distintos, y otro bit puede indicar si la relación es positiva o negativa.</p>
+        <div class="formula"><strong>Clave:</strong> bloque = clase de una partición de actores</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes y álgebra" data-search="codificación signo-bloque con v₄ redes y álgebra dos bits signo bloque v4 redes sociales la codificación signo-bloque usa dos bits para representar estados sociales elementales. un bit puede indicar el signo de la relación: positivo o negativo. otro bit puede indicar si los actores pertenecen al mismo bloque o a bloques distintos. así se obtienen cuatro estados, que pueden organizarse como v₄. por ejemplo, 00 puede representar relación positiva dentro del mismo bloque; 11 puede representar relación negativa entre bloques; 01 y 10 representan situaciones de puente o tensión. esta codificación permite usar xor para combinar estados, medir paridad y detectar coherencias o contradicciones en la red.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-58">
+        <span class="term-num">58</span>
+        <span class="term-title-wrap"><span class="term-title">Codificación signo-bloque con V₄</span><span class="term-cat">Redes y álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-58">
+        <p>La codificación signo-bloque usa dos bits para representar estados sociales elementales. Un bit puede indicar el signo de la relación: positivo o negativo. Otro bit puede indicar si los actores pertenecen al mismo bloque o a bloques distintos. Así se obtienen cuatro estados, que pueden organizarse como V₄. Por ejemplo, 00 puede representar relación positiva dentro del mismo bloque; 11 puede representar relación negativa entre bloques; 01 y 10 representan situaciones de puente o tensión. Esta codificación permite usar XOR para combinar estados, medir paridad y detectar coherencias o contradicciones en la red.</p>
+        <div class="formula"><strong>Clave:</strong> estado = (signo, distancia de bloque) ∈ ℤ₂ × ℤ₂</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes y álgebra" data-search="xor de una tríada redes y álgebra triada xor balance signo cero uno el xor de una tríada es la suma módulo 2 de los bits que representan los signos de sus tres aristas. si positivo se codifica como 0 y negativo como 1, entonces una tríada está balanceada cuando el xor total es 0. esto equivale a decir que hay un número par de relaciones negativas. si el xor da 1, hay un número impar de relaciones negativas y la tríada está desbalanceada. esta formulación es útil porque convierte una regla sociológica en una operación algebraica simple, compatible con la estructura de v₄ y con cálculos computacionales sobre redes.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-59">
+        <span class="term-num">59</span>
+        <span class="term-title-wrap"><span class="term-title">XOR de una tríada</span><span class="term-cat">Redes y álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-59">
+        <p>El XOR de una tríada es la suma módulo 2 de los bits que representan los signos de sus tres aristas. Si positivo se codifica como 0 y negativo como 1, entonces una tríada está balanceada cuando el XOR total es 0. Esto equivale a decir que hay un número par de relaciones negativas. Si el XOR da 1, hay un número impar de relaciones negativas y la tríada está desbalanceada. Esta formulación es útil porque convierte una regla sociológica en una operación algebraica simple, compatible con la estructura de V₄ y con cálculos computacionales sobre redes.</p>
+        <div class="formula"><strong>Clave:</strong> balance ⇔ s₁⊕s₂⊕s₃=0</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="función de signo σ redes sociales sigma aristas signos g v e en un grafo firmado g=(v,e,σ), la función σ asigna un signo a cada arista. si e es una relación entre dos actores, σ(e) puede valer +1 o −1. esta función concentra la información afectiva o relacional de la red: amistad/enemistad, confianza/desconfianza, apoyo/rechazo. para operar con paridad, también puede recodificarse como bit: +1 → 0 y −1 → 1. la función σ es el punto de partida formal para estudiar ciclos positivos, balance estructural, tensión y particiones en comunidades.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-60">
+        <span class="term-num">60</span>
+        <span class="term-title-wrap"><span class="term-title">Función de signo σ</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-60">
+        <p>En un grafo firmado G=(V,E,σ), la función σ asigna un signo a cada arista. Si e es una relación entre dos actores, σ(e) puede valer +1 o −1. Esta función concentra la información afectiva o relacional de la red: amistad/enemistad, confianza/desconfianza, apoyo/rechazo. Para operar con paridad, también puede recodificarse como bit: +1 → 0 y −1 → 1. La función σ es el punto de partida formal para estudiar ciclos positivos, balance estructural, tensión y particiones en comunidades.</p>
+        <div class="formula"><strong>Clave:</strong> σ: E → {+1,−1}</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="asignación de bloques φ redes sociales phi partición bloques actores comunidades la asignación de bloques φ es una función que asigna cada actor de la red a un bloque o comunidad. en el caso ideal de balance estructural con dos grupos, φ puede tomar valores binarios, por ejemplo 0 y 1. dos actores están en el mismo bloque si tienen el mismo valor de φ, y en bloques distintos si sus valores difieren. esta idea permite traducir relaciones sociales a álgebra binaria: la distancia de bloque entre dos actores puede calcularse como φ(i)⊕φ(j). en una red perfectamente balanceada, esa distancia se alinea con el signo de la relación.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-61">
+        <span class="term-num">61</span>
+        <span class="term-title-wrap"><span class="term-title">Asignación de bloques φ</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-61">
+        <p>La asignación de bloques φ es una función que asigna cada actor de la red a un bloque o comunidad. En el caso ideal de balance estructural con dos grupos, φ puede tomar valores binarios, por ejemplo 0 y 1. Dos actores están en el mismo bloque si tienen el mismo valor de φ, y en bloques distintos si sus valores difieren. Esta idea permite traducir relaciones sociales a álgebra binaria: la distancia de bloque entre dos actores puede calcularse como φ(i)⊕φ(j). En una red perfectamente balanceada, esa distancia se alinea con el signo de la relación.</p>
+        <div class="formula"><strong>Clave:</strong> φ: V → {0,1};  distancia = φ(i)⊕φ(j)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes y álgebra" data-search="distancia comunitaria binaria redes y álgebra bloques diferencia xor mismo distinto la distancia comunitaria binaria indica si dos actores pertenecen al mismo bloque o a bloques distintos. si cada actor tiene una etiqueta φ(i) ∈ {0,1}, la distancia se calcula como φ(i)⊕φ(j). el resultado es 0 cuando están en el mismo bloque y 1 cuando están en bloques diferentes. en una red balanceada ideal, esta distancia coincide con el signo recodificado: relaciones positivas dentro del mismo bloque y negativas entre bloques. esta noción permite conectar partición social, signo relacional y operación xor en un mismo lenguaje.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-62">
+        <span class="term-num">62</span>
+        <span class="term-title-wrap"><span class="term-title">Distancia comunitaria binaria</span><span class="term-cat">Redes y álgebra</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-62">
+        <p>La distancia comunitaria binaria indica si dos actores pertenecen al mismo bloque o a bloques distintos. Si cada actor tiene una etiqueta φ(i) ∈ {0,1}, la distancia se calcula como φ(i)⊕φ(j). El resultado es 0 cuando están en el mismo bloque y 1 cuando están en bloques diferentes. En una red balanceada ideal, esta distancia coincide con el signo recodificado: relaciones positivas dentro del mismo bloque y negativas entre bloques. Esta noción permite conectar partición social, signo relacional y operación XOR en un mismo lenguaje.</p>
+        <div class="formula"><strong>Clave:</strong> d(i,j)=φ(i)⊕φ(j)</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="puente comunicacional redes sociales puente bloques relación positiva entre grupos un puente comunicacional es una relación que conecta actores o comunidades distintas de manera positiva o cooperativa. en un modelo fuertemente polarizado, los vínculos entre bloques suelen ser negativos; por eso una relación positiva entre bloques puede funcionar como puente, pero también puede aparecer como una anomalía respecto de la estructura balanceada estricta. en la codificación signo-bloque, un puente puede representarse como una combinación donde el signo es positivo pero la distancia de bloque es distinta. estos casos son relevantes para analizar negociación, mediación, campañas, difusión de información y reducción de conflicto.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-63">
+        <span class="term-num">63</span>
+        <span class="term-title-wrap"><span class="term-title">Puente comunicacional</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-63">
+        <p>Un puente comunicacional es una relación que conecta actores o comunidades distintas de manera positiva o cooperativa. En un modelo fuertemente polarizado, los vínculos entre bloques suelen ser negativos; por eso una relación positiva entre bloques puede funcionar como puente, pero también puede aparecer como una anomalía respecto de la estructura balanceada estricta. En la codificación signo-bloque, un puente puede representarse como una combinación donde el signo es positivo pero la distancia de bloque es distinta. Estos casos son relevantes para analizar negociación, mediación, campañas, difusión de información y reducción de conflicto.</p>
+        <div class="formula"><strong>Clave:</strong> positivo entre bloques distintos → posible puente</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes sociales" data-search="ruptura interna redes sociales conflicto dentro bloque negativo tensión una ruptura interna ocurre cuando dos actores del mismo bloque mantienen una relación negativa. en una red balanceada ideal, los vínculos dentro de cada bloque deberían ser positivos; por lo tanto, una relación negativa interna indica tensión, fractura o conflicto dentro de la comunidad. en la codificación con dos bits, corresponde a un caso donde la distancia de bloque es 0 pero el signo es negativo. las rupturas internas son importantes porque anticipan realineamientos, divisiones, pérdida de cohesión o surgimiento de subgrupos.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-64">
+        <span class="term-num">64</span>
+        <span class="term-title-wrap"><span class="term-title">Ruptura interna</span><span class="term-cat">Redes sociales</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-64">
+        <p>Una ruptura interna ocurre cuando dos actores del mismo bloque mantienen una relación negativa. En una red balanceada ideal, los vínculos dentro de cada bloque deberían ser positivos; por lo tanto, una relación negativa interna indica tensión, fractura o conflicto dentro de la comunidad. En la codificación con dos bits, corresponde a un caso donde la distancia de bloque es 0 pero el signo es negativo. Las rupturas internas son importantes porque anticipan realineamientos, divisiones, pérdida de cohesión o surgimiento de subgrupos.</p>
+        <div class="formula"><strong>Clave:</strong> mismo bloque + relación negativa → tensión interna</div>
+      </div>
+    </article>
+    <article class="term-card" data-category="Redes y computación" data-search="modelo computable de balance redes y computación implementación datos redes sociales balance algoritmos un modelo computable de balance traduce los conceptos de heider y harary a objetos que pueden calcularse con datos: nodos, aristas, signos, ciclos, particiones y medidas de tensión. la función σ registra signos; la asignación φ propone bloques; xor mide paridad y coherencia. con esta estructura se pueden detectar tríadas desbalanceadas, estimar polarización, buscar particiones que minimicen conflictos y analizar cambios en el tiempo. la utilidad del grupo de klein está en ofrecer un lenguaje compacto de estados binarios que combina signo y pertenencia comunitaria.">
+      <button class="term-head" aria-expanded="false" aria-controls="term-65">
+        <span class="term-num">65</span>
+        <span class="term-title-wrap"><span class="term-title">Modelo computable de balance</span><span class="term-cat">Redes y computación</span></span>
+        <span class="chev">⌄</span>
+      </button>
+      <div class="term-body" id="term-65">
+        <p>Un modelo computable de balance traduce los conceptos de Heider y Harary a objetos que pueden calcularse con datos: nodos, aristas, signos, ciclos, particiones y medidas de tensión. La función σ registra signos; la asignación φ propone bloques; XOR mide paridad y coherencia. Con esta estructura se pueden detectar tríadas desbalanceadas, estimar polarización, buscar particiones que minimicen conflictos y analizar cambios en el tiempo. La utilidad del grupo de Klein está en ofrecer un lenguaje compacto de estados binarios que combina signo y pertenencia comunitaria.</p>
+        <div class="formula"><strong>Clave:</strong> datos → G=(V,E,σ) → ciclos, bloques, tensión</div>
+      </div>
+    </article>
+  </div>
+  <div class="empty" id="empty">No se encontraron términos con ese criterio.</div>
+</section>
+
+<section class="card">
+  <span class="kicker">Síntesis final</span>
+  <h2>Mapa de relaciones</h2>
+  <div class="grid2">
+    <div class="mini"><strong>V₄ como estructura</strong><small>Grupo finito de orden cuatro, abeliano, no cíclico, con tres involuciones y una tabla de Cayley mínima pero muy expresiva.</small></div>
+    <div class="mini"><strong>V₄ como bits</strong><small>Equivale a ℤ₂×ℤ₂ o F₂²: cuatro pares binarios operados con XOR componente a componente.</small></div>
+    <div class="mini"><strong>V₄ como cifrado</strong><small>Modela bloques de dos bits en Vernam: mensaje, clave y criptograma viven en el mismo grupo.</small></div>
+    <div class="mini"><strong>V₄ como red social</strong><small>Permite codificar signo y pertenencia a bloque para estudiar balance, tensión, polarización y puentes.</small></div>
+  </div>
+</section>
+
+<div class="footer"><strong>Material elaborado por el profesor Sergio Gevatschnaider</strong><br />Página HTML autónoma · Glosario de Grupo de Klein V₄, Vernam/XOR y balance estructural</div>
+</main>
+<a class="btn primary toTop" href="#inicio" aria-label="Volver arriba">↑</a>
+<script>
+(function(){
+  const root=document.documentElement;
+  const themeBtn=document.getElementById('themeBtn');
+  function setTheme(theme){
+    root.setAttribute('data-theme',theme);
+    localStorage.setItem('klein-glossary-theme',theme);
+    themeBtn.textContent=theme==='dark'?'☀️ Tema claro':'🌙 Tema oscuro';
+  }
+  setTheme(localStorage.getItem('klein-glossary-theme') || 'light');
+  themeBtn.addEventListener('click',()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+  const cards=[...document.querySelectorAll('.term-card')];
+  const heads=[...document.querySelectorAll('.term-head')];
+  const search=document.getElementById('search');
+  const chips=[...document.querySelectorAll('.chip')];
+  const empty=document.getElementById('empty');
+  let active='all';
+
+  heads.forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.term-card');
+    const open=card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }));
+
+  function filter(){
+    const q=search.value.trim().toLowerCase();
+    let visible=0;
+    cards.forEach(card=>{
+      const okCat=active==='all'||card.dataset.category===active;
+      const okSearch=!q||card.dataset.search.includes(q);
+      const show=okCat&&okSearch;
+      card.style.display=show?'block':'none';
+      if(show) visible++;
+    });
+    empty.style.display=visible?'none':'block';
+  }
+
+  chips.forEach(chip=>chip.addEventListener('click',()=>{
+    chips.forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    active=chip.dataset.filter;
+    filter();
+  }));
+  search.addEventListener('input',filter);
+
+  document.getElementById('expandBtn').addEventListener('click',()=>cards.forEach(card=>{
+    if(card.style.display!=='none'){card.classList.add('open'); card.querySelector('.term-head').setAttribute('aria-expanded','true');}
+  }));
+  document.getElementById('collapseBtn').addEventListener('click',()=>cards.forEach(card=>{
+    card.classList.remove('open'); card.querySelector('.term-head').setAttribute('aria-expanded','false');
+  }));
+
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement;
+    const pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    document.getElementById('progress').style.width=(isFinite(pct)?pct:0)+'%';
+  },{passive:true});
+})();
+</script>
+</body>
+</html>
