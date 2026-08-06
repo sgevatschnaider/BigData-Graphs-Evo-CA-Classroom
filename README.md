@@ -58,6 +58,7 @@ Este repositorio se complementa con [GraphAI-Data-Science-ML](https://github.com
 * [🎯 Público Objetivo y Requisitos](#-público-objetivo-y-requisitos)
 * [🛠️ Uso y Ejecución](#️-uso-y-ejecución)
 * [📚 Módulos y Notebooks](#-módulos-y-notebooks)
+* [🐦 Laboratorio destacado: BOIDS multigrupo](#-laboratorio-destacado-boids-multigrupo)
 * [🗺️ Roadmap del Proyecto](#️-roadmap-del-proyecto)
 * [📂 Estructura del Repositorio](#-estructura-del-repositorio)
 * [🤝 Cómo Contribuir](#-cómo-contribuir)
@@ -135,6 +136,48 @@ BigData-Graphs-Evo-CA-Classroom/
 </details>
 
 ---
+
+## 🐦 Laboratorio destacado: BOIDS multigrupo
+
+<div align="center">
+  <h3>BOIDS multigrupo: reglas locales, segregación y diagramas de fases</h3>
+  <p><strong>Align to alike, avoid aliens.</strong></p>
+  <p><em>Reglas locales. Dinámicas complejas. Fronteras persistentes.</em></p>
+  <p>
+    Laboratorio reproducible en Python para explorar cómo la separación, el alineamiento,
+    la cohesión y la evitación intergrupal producen comportamiento colectivo emergente.
+  </p>
+  <p>
+    <a href="https://colab.research.google.com/drive/1QyioTMdCgWpoQrnnEi7vpHqTJ_7eB2Td?usp=sharing">
+      <img alt="Abrir laboratorio en Google Colab" src="https://img.shields.io/badge/Abrir%20laboratorio-Google%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white" />
+    </a>
+    &nbsp;
+    <a href="./src/classroom/graphs/notebooks/boids-multigrupo-diagrama-fases.ipynb">
+      <img alt="Ver notebook en GitHub" src="https://img.shields.io/badge/Ver%20notebook-GitHub-181717?style=for-the-badge&logo=github" />
+    </a>
+  </p>
+</div>
+
+| 🔍 Explora | 📊 Mide | 🧪 Experimenta |
+|:---:|:---:|:---:|
+| Tres grupos de agentes y reglas locales | Orden, segregación y exposición a fronteras | Escenarios, semillas e intervenciones |
+| Bandadas, cardúmenes, drones o agentes de IA | Series temporales y diagramas de fases | Persistencia e histéresis espacial |
+
+<details>
+<summary><strong>¿Qué encontrarás en el laboratorio?</strong></summary>
+
+- Desarrollo teórico del modelo BOIDS y su extensión multigrupo.
+- Simulación vectorizada con NumPy y visualizaciones con Matplotlib.
+- Animación y controles interactivos para Google Colab.
+- Comparación de regímenes colectivos y barrido de parámetros.
+- Análisis de sensibilidad, reproducibilidad y límites de las analogías sociales.
+
+</details>
+
+> Material elaborado por el profesor **Sergio Gevatschnaider** para el estudio de grafos, simulación basada en agentes y sistemas complejos.
+
+---
+
 # Notebooks Interactivos  
 Puedes abrir y ejecutar los notebooks en Google Colab directamente desde aquí:  
 
