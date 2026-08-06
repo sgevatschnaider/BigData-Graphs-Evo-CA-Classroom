@@ -79,6 +79,11 @@
 - Notebook/script: `notebooks/06_hyperbolic_embeddings_poincare.(ipynb|py)`
 - Referencias: `references/README.md`
 
+### H) Sistemas complejos y comportamiento emergente
+- BOIDS multigrupo: separación, alineamiento, cohesión y evitación intergrupal.
+- Orden colectivo, segregación espacial, fronteras persistentes y diagramas de fases.
+- Notebook Colab reproducible con animación, controles, métricas y análisis de sensibilidad.
+
 ---
 
 ## Estructura local
@@ -134,6 +139,7 @@ Abre los cuadernos en `notebooks/` para la ruta guiada.
 
 ## Tabla de contenidos
 
+* [🐦 Laboratorio BOIDS multigrupo](#-laboratorio-boids-multigrupo)
 * [1) Fundamentos teóricos](#1-fundamentos-teóricos)
 * [2) Algoritmos esenciales (y complejidad)](#2-algoritmos-esenciales-y-complejidad)
 * [3) Métricas y análisis de redes](#3-métricas-y-análisis-de-redes)
@@ -151,6 +157,52 @@ Abre los cuadernos en `notebooks/` para la ruta guiada.
 * [Apéndice B — Plantilla mínima de notebook](#apéndice-b--plantilla-mínima-de-notebook)
 
 
+
+## 🐦 Laboratorio BOIDS multigrupo
+
+<div align="center">
+  <h3>Reglas locales, segregación y diagramas de fases</h3>
+  <p><strong>Align to alike, avoid aliens.</strong></p>
+  <p>
+    Un laboratorio de sistemas complejos donde tres poblaciones de agentes responden únicamente
+    a sus vecinos y, sin líder central, producen orden colectivo, agrupamiento y fronteras emergentes.
+  </p>
+  <p>
+    <a href="https://colab.research.google.com/drive/1QyioTMdCgWpoQrnnEi7vpHqTJ_7eB2Td?usp=sharing">
+      <img alt="Abrir laboratorio en Google Colab" src="https://img.shields.io/badge/Abrir%20laboratorio-Google%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white" />
+    </a>
+    &nbsp;
+    <a href="./notebooks/boids-multigrupo-diagrama-fases.ipynb">
+      <img alt="Ver notebook en GitHub" src="https://img.shields.io/badge/Ver%20notebook-GitHub-181717?style=for-the-badge&logo=github" />
+    </a>
+  </p>
+</div>
+
+### Pregunta central
+
+> ¿Cómo pueden reglas microscópicas sencillas generar estructuras macroscópicas complejas y persistentes?
+
+El notebook parte del modelo BOIDS clásico —**separación, alineamiento y cohesión**— y añade interacción multigrupo. La simulación permite estudiar por separado tres propiedades que suelen confundirse:
+
+| Propiedad | Pregunta | Métrica |
+|---|---|---:|
+| **Orden direccional** | ¿Los agentes se desplazan en una dirección común? | Polarización `P` |
+| **Segregación espacial** | ¿Los vecinos pertenecen predominantemente al mismo grupo? | Índice `S` |
+| **Frontera intergrupal** | ¿Cuántos agentes permanecen expuestos a otros grupos? | Exposición `B` |
+
+### Recorrido del laboratorio
+
+1. Formulación matemática y condiciones periódicas sobre un toro.
+2. Implementación vectorizada y pruebas básicas del simulador.
+3. Animación de tres grupos y panel de parámetros interactivos.
+4. Comparación controlada de cuatro regímenes colectivos.
+5. Construcción de un diagrama de fases mediante múltiples simulaciones.
+6. Intervención para medir persistencia de fronteras y memoria estructural.
+7. Sensibilidad a semillas y discusión sobre aves, peces, drones, redes y agentes de IA.
+
+> **Nota metodológica:** es un modelo generativo mínimo. Mostrar que una regla puede producir segregación no demuestra que esa regla explique por sí sola un fenómeno social real.
+
+---
 
 ## 📝 Fundamentos de la Teoría de Grafos
 
