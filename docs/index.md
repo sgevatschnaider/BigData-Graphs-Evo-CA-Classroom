@@ -7,7 +7,7 @@
 
 <div class="home-grid">
   <div class="home-card">
-    <h3>🤖 Grafos, Sistemas Complejos y Agentes de IA</h3>
+    <h3>Grafos, Sistemas Complejos y Agentes de IA</h3>
     <p>Nueva unidad basada en el caso OpenAI–Hugging Face 2026: comunicación emergente, memoria compartida, capacidad colectiva y caminos de ataque.</p>
     <a class="md-button md-button--primary" href="ai-agents/">Abrir módulo</a>
   </div>
