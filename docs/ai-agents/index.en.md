@@ -1,4 +1,4 @@
-# 🤖 Graphs, Complex Systems & AI Agents
+# Graphs, Complex Systems & AI Agents
 
 <div class="ai-hero">
   <div>
