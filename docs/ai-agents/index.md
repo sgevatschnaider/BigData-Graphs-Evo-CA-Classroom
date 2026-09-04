@@ -1,4 +1,4 @@
-# 🤖 Grafos, Sistemas Complejos y Agentes de IA
+# Grafos, Sistemas Complejos y Agentes de IA
 
 <div class="ai-hero">
   <div>
