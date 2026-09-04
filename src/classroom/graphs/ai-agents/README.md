@@ -39,7 +39,7 @@ La unidad usa un grafo dirigido dinámico `G_t = (V_t, E_t)` como lenguaje comú
 
 - [Portada del módulo — Español](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/ai-agents/)
 - [Module landing page — English](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/ai-agents/index.en/)
-- [Fuentes y trazabilidad](../../../docs/ai-agents/references.md)
+- [Fuentes y trazabilidad](../../../../docs/ai-agents/references.md)
 
 ## Base documental
 
