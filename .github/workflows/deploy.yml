@@ -22,17 +22,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install deps
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Materialize and verify AI-agent simulations
+        run: python scripts/materialize_ai_agent_assets.py
+      - name: Sanity check published assets
         run: |
-          pip install -r requirements.txt
-      - name: Sanity check: asset exists
-        run: |
-          test -f docs/assets/modelo-erdos-renyi.html || { echo "Falta docs/assets/modelo-erdos-renyi.html"; exit 1; }
-      - name: Build MkDocs
+          test -f docs/assets/modelo-erdos-renyi.html || { echo "Missing docs/assets/modelo-erdos-renyi.html"; exit 1; }
+          for file in \
+            01-emergent-protocol-en.html \
+            01-emergent-protocol-es.html \
+            02-collective-capability-en.html \
+            02-collective-capability-es.html \
+            03-attack-path-en.html \
+            03-attack-path-es.html; do
+            test -s "docs/assets/ai-agents/$file" || { echo "Missing AI-agent asset: $file"; exit 1; }
+          done
+      - name: Build MkDocs (strict)
         run: mkdocs build --strict --site-dir site
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
