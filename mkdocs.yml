@@ -1,6 +1,7 @@
 site_name: Big Data · Graphs · Evo · CA — Classroom
 site_url: https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/
 repo_url: https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom
+
 theme:
   name: material
   language: es
@@ -8,18 +9,25 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.sections
+    - navigation.indexes
     - content.code.copy
     - toc.follow
   palette:
     - scheme: default
       primary: indigo
       accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Modo oscuro
     - scheme: slate
       primary: indigo
       accent: lime
       toggle:
-        icon: material/weather-night
-        name: Modo oscuro
+        icon: material/weather-sunny
+        name: Modo claro
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search
@@ -41,4 +49,9 @@ markdown_extensions:
 
 nav:
   - Inicio: index.md
-  - Demos HTML: gallery/index.md
+  - Grafos:
+      - Sistemas complejos y agentes de IA:
+          - Introducción · Español: ai-agents/index.md
+          - Introduction · English: ai-agents/index.en.md
+          - Fuentes y trazabilidad: ai-agents/references.md
+      - Galería de demos: gallery/index.md
