@@ -1,5 +1,9 @@
 # Big Data - Graphs - Evolutionary - Cellular Automata - Classroom
 
+[![WERC 2026 — Unidad especial](https://img.shields.io/badge/WERC%202026-Unidad%20especial-0d9488?style=for-the-badge)](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/werc-2026/) · [Aula visual · 8 laboratorios](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/werc-2026/werc-laboratorio.html)
+
+**Nuevo, sin cambios a los módulos anteriores:** unidad autónoma de redes multinivel, competencia tecnológica, Reina Roja y coevolución de la IA, con resultados WERC 2026 y ocho laboratorios.
+
 [![src/classroom/bigdata](https://img.shields.io/badge/src-bigdata-0366d6)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/tree/main/src/classroom/bigdata)
 [![src/classroom/graphs](https://img.shields.io/badge/src-graphs-0366d6)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/tree/main/src/classroom/graphs)
 [![src/classroom/evo](https://img.shields.io/badge/src-evo-0366d6)](https://github.com/sgevatschnaider/BigData-Graphs-Evo-CA-Classroom/tree/main/src/classroom/evo)
