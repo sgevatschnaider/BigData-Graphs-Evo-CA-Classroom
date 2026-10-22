@@ -86,6 +86,14 @@
 
 ---
 
+### I) WERC 2026: redes multinivel, Reina Roja y competencia en la IA
+- Unidad avanzada **independiente**, basada en la ponencia del Dr. Sergio Gevatschnaider en WERC 2026.
+- [Abrir el aula visual con ocho laboratorios](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/assets/werc-2026/werc-laboratorio.html).
+- [Acceder a su README y código propios](werc_2026/README.md) · [Guía y estudio MkDocs](https://sgevatschnaider.github.io/BigData-Graphs-Evo-CA-Classroom/werc-2026/).
+- Incluye Reina Roja, juegos de inversión sobre grafos, precio sombra, coordinación y estudio complementario Red Queen Gödel Machine; sin modificar los capítulos A–H.
+
+---
+
 ## Estructura local
 
 ```text
