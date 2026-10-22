@@ -7,6 +7,11 @@
 
 <div class="home-grid">
   <div class="home-card">
+    <h3>WERC 2026 · La Reina Roja y las redes multinivel</h3>
+    <p>Unidad especial independiente: ponencia, matemáticas, ocho laboratorios en vivo, coevolución de agentes y aplicaciones económicas.</p>
+    <a class="md-button md-button--primary" href="werc-2026/">Explorar nueva unidad</a>
+  </div>
+  <div class="home-card">
     <h3>Grafos, Sistemas Complejos y Agentes de IA</h3>
     <p>Nueva unidad basada en el caso OpenAI–Hugging Face 2026: comunicación emergente, memoria compartida, capacidad colectiva y caminos de ataque.</p>
     <a class="md-button md-button--primary" href="ai-agents/">Abrir módulo</a>
