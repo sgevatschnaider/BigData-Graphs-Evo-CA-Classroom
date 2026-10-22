@@ -44,6 +44,8 @@ jobs:
         run: |
           pip install -e .
           python -m pytest tests/test_werc_2026.py -q
+      - name: Verify WERC 2026 interactive mathematics in Node
+        run: node tests/test_werc_frontend.cjs
       - name: Check WERC 2026 independent assets
         run: |
           for file in werc-laboratorio.html werc.css werc-labs.js presentacion.html cuestionario.html; do
