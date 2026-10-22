@@ -55,3 +55,11 @@ nav:
           - Introduction · English: ai-agents/index.en.md
           - Fuentes y trazabilidad: ai-agents/references.md
       - Galería de demos: gallery/index.md
+      - WERC 2026 · Redes multinivel:
+          - Unidad especial · Inicio: werc-2026/index.md
+          - Modelo matemático: werc-2026/modelo.md
+          - Ponencia y resultados: werc-2026/ponencia.md
+          - Casos y finanzas de IA: werc-2026/aplicaciones.md
+          - Red Queen Gödel Machine: werc-2026/coevolucion.md
+          - Glosario y evaluación: werc-2026/evaluacion.md
+          - Bibliografía y trazabilidad: werc-2026/referencias.md
